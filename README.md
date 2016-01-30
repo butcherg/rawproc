@@ -49,7 +49,7 @@ on Ubuntu x86_64 and Windows 7, 8, and 10.
 
 To compile in a Linux OS,  you need to have wxWidgets and FreeImage installed, with the associated development headers.  
 Basically the same thing applies to compiling in Windows, except you'll probably have to spend more time figuring where 
-you put wxWidgets and FreeImage.  The wx-config utility that comew with wxWidgets helps substantially; I ran:
+you put wxWidgets and FreeImage.  The wx-config utility that comes with wxWidgets helps substantially; I ran:
 
 wx-config --libs --cxxflags
 
