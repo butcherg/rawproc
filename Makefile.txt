@@ -4,9 +4,11 @@ UNAME := $(shell g++ -dumpmachine)
 
 ifeq ($(UNAME), mingw32)
 	#WXLIBS=$(shell wx-config --prefix=c:\wxWidgets-3.0.2 --wxcfg=gcc_lib\mswu --libs --cxxflags)
+	FILIBS=-Lc:\FreeImage-3.17.0
 	WXLIBS= -mthreads -L. -Lc:\wxWidgets-3.0.2\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
 	#WXFLAGS=$(shell wx-config --prefix=c:\wxWidgets-3.0.2 --wxcfg=gcc_lib\mswu --cxxflags)
-	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -Ic:\wxWidgets-3.0.2\lib\gcc_lib\mswu -Ic:\wxWidgets-3.0.2\include -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
+	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -Ic:\wxWidgets-3.0.2\lib\gcc_lib\mswu -Ic:\wxWidgets-3.0.2\include -Ic:\FreeImage-3.17.0 -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
+	FIFLAGS=-Ic:\FreeImage-3.17.0
 	OBJDIR=win
 endif
 
@@ -33,70 +35,70 @@ all: rawproc
 
 rawproc: $(OBJECTS)
 ifeq ($(OBJDIR),win)
-	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -o $(OBJDIR)/rawproc 
+	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -o $(OBJDIR)/rawproc 
 else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -o $(OBJDIR)/rawproc
 endif
 
 $(OBJDIR)/util.o: util.cpp
-	$(CXX) $(WXFLAGS) -c util.cpp -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -o$@
 
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
-	$(CXX) -w -c FreeImage16.cpp -o$@
+	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
 
 $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 	$(CXX) $(WXFLAGS) -c myFileSelector.cpp  -o$@
 
 $(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
-	$(CXX) $(WXFLAGS) -c myHistogramPane.cpp  -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@
 
 $(OBJDIR)/wxTouchSlider.o: wxTouchSlider.cpp
 	$(CXX) $(WXFLAGS) -c wxTouchSlider.cpp  -o$@
 
 $(OBJDIR)/CurvePane.o: CurvePane.cpp Curve.h
-	$(CXX) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
 
 $(OBJDIR)/PicProcPanel.o: PicProcPanel.cpp
-	$(CXX)  $(WXFLAGS) -c PicProcPanel.cpp  -o$@
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -c PicProcPanel.cpp  -o$@
 
 $(OBJDIR)/PicPanel.o: PicPanel.cpp
-	$(CXX)  $(WXFLAGS) -c PicPanel.cpp  -o$@
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -c PicPanel.cpp  -o$@
 
 $(OBJDIR)/PicProcessorHighlight.o: PicProcessorHighlight.cpp
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorHighlight.cpp    -o$@
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorHighlight.cpp    -o$@
 
 $(OBJDIR)/PicProcessorShadow.o: PicProcessorShadow.cpp
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorShadow.cpp    -o$@
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorShadow.cpp    -o$@
 
 $(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorCurve.cpp    -o$@
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorCurve.cpp    -o$@
 
 $(OBJDIR)/PicProcessorGamma.o: PicProcessorGamma.cpp
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorGamma.cpp    -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorGamma.cpp    -o$@
 
 $(OBJDIR)/PicProcessorBright.o: PicProcessorBright.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorBright.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorBright.cpp   -o$@
 
 $(OBJDIR)/PicProcessorContrast.o: PicProcessorContrast.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorContrast.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorContrast.cpp   -o$@
 
 $(OBJDIR)/PicProcessorSaturation.o: PicProcessorSaturation.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorSaturation.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorSaturation.cpp   -o$@
 
 $(OBJDIR)/PicProcessorGray.o: PicProcessorGray.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorGray.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorGray.cpp   -o$@
 
 $(OBJDIR)/PicProcessorCrop.o: PicProcessorCrop.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorCrop.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorCrop.cpp   -o$@
 
 $(OBJDIR)/PicProcessorResize.o: PicProcessorResize.cpp 
-	$(CXX)  $(WXFLAGS) -w -c PicProcessorResize.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorResize.cpp   -o$@
 
 $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
-	$(CXX)  $(WXFLAGS) -c PicProcessor.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -c PicProcessor.cpp   -o$@
 
 $(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
-	$(CXX)  $(WXFLAGS) -w -c rawprocFrm.cpp    -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c rawprocFrm.cpp    -o$@
 
 $(OBJDIR)/rawprocApp.o: rawprocApp.cpp 
 	$(CXX)  $(WXFLAGS)  -c rawprocApp.cpp    -o$@
