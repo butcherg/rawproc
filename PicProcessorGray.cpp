@@ -21,6 +21,10 @@ class GrayPanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			wxArrayString p = split(params,",");
 
+			rd = atof(p[0]);
+			gr = atof(p[1]);
+			bl = atof(p[2]);
+
 			//wxScrolledWindow *sw = new wxScrolledWindow(this);
 			//sw->SetScrollRate( 5, 5 );
 			//b->Add(sw, flags);
@@ -59,7 +63,16 @@ class GrayPanel: public PicProcPanel
 			double r = redslide->GetDoubleValue();
 			double g = greenslide->GetDoubleValue();
 			double b = blueslide->GetDoubleValue();
-			q->setParams(wxString::Format("%0.2f,%0.2f,%0.2f",r,g,b));
+	 		double dr = rd-r; double dg = gr-g; double db = bl - b;
+			if (dr != 0.0) { greenslide->SetValue(gr+(dr/2)); blueslide->SetValue(bl+(dr/2)); }
+			else if (dg != 0.0) { redslide->SetValue(rd+(dg/2)); blueslide->SetValue(bl+(dg/2)); }
+			else if (db != 0.0) { redslide->SetValue(rd+(db/2)); greenslide->SetValue(gr+(db/2)); }
+			rd = redslide->GetDoubleValue();
+			gr = greenslide->GetDoubleValue();
+			bl = blueslide->GetDoubleValue();
+			q->setParams(wxString::Format("%0.2f,%0.2f,%0.2f",rd,gr,bl));
+			Refresh();
+			Update();
 			event.Skip();
 		}
 
@@ -67,6 +80,7 @@ class GrayPanel: public PicProcPanel
 	private:
 		//wxPanel *panel;
 		myTouchSlider *redslide, *greenslide, *blueslide;
+		double rd, gr, bl;
 
 };
 

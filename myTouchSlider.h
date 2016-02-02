@@ -30,6 +30,7 @@ public:
 
 	double GetDoubleValue();
 	int GetIntValue();
+	void SetValue(double value);
  
 	void mouseMoved(wxMouseEvent& event);
 	void mouseDown(wxMouseEvent& event);

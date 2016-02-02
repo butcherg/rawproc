@@ -46,6 +46,13 @@ int myTouchSlider::GetIntValue()
 	return (int) val;
 }
 
+void myTouchSlider::SetValue(double value)
+{
+	val = value;
+	Refresh();
+	Update();
+}
+
 void myTouchSlider::paintEvent(wxPaintEvent & evt)
 {
 	wxPaintDC dc(this);
