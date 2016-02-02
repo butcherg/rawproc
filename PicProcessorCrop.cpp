@@ -12,12 +12,14 @@ class CropPanel: public PicProcPanel
 	public:
 		CropPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			panel = new wxPanel(this);
-			b->Add(panel, 1, wxALIGN_LEFT, 10);
+			b->Add(panel, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
+			SetFocus();
 		}
 
 		~CropPanel()

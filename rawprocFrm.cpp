@@ -170,8 +170,11 @@ void rawprocFrm::CreateGUIControls()
 	mgr.SetManagedWindow(this);
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
 	pic = new PicPanel(this);
-	//pic = new wxPanel(this);
-	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280));
+
+	//wxPanel parms = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280),wxVSCROLL);
+	//parameters = new wxScrolled<wxPanel>(parms);
+	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280),wxVSCROLL);
+
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(1));
@@ -453,6 +456,7 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	Update();
 	Refresh();
 	event.Skip();
+	wxSafeYield(this);
 }
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
@@ -492,7 +496,8 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
         case 317: //Down Arrow
         	MoveAfter(commandtree->GetSelection());
         	break;
-	case 70: //f - fit image to window
+	case 102: //f
+	case 70: //F - fit image to window
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
 		SetStatusText("scale: fit",1);
@@ -505,7 +510,8 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->processPic();
 		WxStatusBar1->SetStatusText("");
 		break;
-	case 84: //t - toggle display thumbnail
+	case 116: //t
+	case 84: //T - toggle display thumbnail
 		pic->ToggleThumb();
 		break;
     	}
@@ -613,7 +619,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorSaturation *c = new PicProcessorSaturation("saturation","10", commandtree, pic, parameters);
+	PicProcessorSaturation *c = new PicProcessorSaturation("saturation","1.0", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
@@ -649,7 +655,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorGray *gr = new PicProcessorGray("gray","0", commandtree, pic, parameters);
+	PicProcessorGray *gr = new PicProcessorGray("gray","0.21,0.72,0.07", commandtree, pic, parameters);
 	gr->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
@@ -667,7 +673,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorResize *c = new PicProcessorResize("resize", "640,480", commandtree, pic, parameters);
+	PicProcessorResize *c = new PicProcessorResize("resize", "640,0,bicubic", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());

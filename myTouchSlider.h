@@ -1,6 +1,6 @@
 
-#ifndef __WXTOUCHSLIDER_h__
-#define __WXTOUCHSLIDER_h__
+#ifndef __myTouchSlider_h__
+#define __myTouchSlider_h__
 
 #ifndef WX_PRECOMP
 	#include <wx/wx.h>
@@ -9,21 +9,27 @@
 	#include <wx/wxprec.h>
 #endif
 
-class wxTouchSlider : public wxWindow
+class myTouchSlider : public wxWindow
 {
  
 	bool pressedDown;
-	wxString text;
-	int value, px, py;
-	int mx, mn;
+	wxString lbl;
+	double initval, val, inc;
+	double mn, mx;
+	wxString fmt;
+	int px, py;
+	int vsize;
  
 public:
-	wxTouchSlider(wxFrame* parent, wxString text, int val, int min, int max);
+	myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format="%3.0f");
  
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
  
 	void render(wxDC& dc);
+
+	double GetDoubleValue();
+	int GetIntValue();
  
 	void mouseMoved(wxMouseEvent& event);
 	void mouseDown(wxMouseEvent& event);

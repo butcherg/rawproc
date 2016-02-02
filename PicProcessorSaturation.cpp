@@ -3,36 +3,40 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "wxTouchSlider.h"
+#include "myTouchSlider.h"
 
 class SaturationPanel: public PicProcPanel
 {
 	public:
 		SaturationPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), 0, 30);
-			b->Add(slide, 1, wxALIGN_LEFT |wxALIGN_TOP |wxEXPAND, 10);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			//slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), 0, 30);
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "Saturation", atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
+			b->Add(slide, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
+			SetFocus();
 			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(SaturationPanel::paramChanged));
 		}
 
 		~SaturationPanel()
 		{
-			slide->~wxTouchSlider();
+			slide->~myTouchSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",event.GetInt()));
+			//q->setParams(wxString::Format("%d",event.GetInt()));
+			q->setParams(event.GetString());
 			event.Skip();
 		}
 
 
 	private:
-		wxTouchSlider *slide;
+		myTouchSlider *slide;
 
 };
 
@@ -55,7 +59,7 @@ void PicProcessorSaturation::showParams()
 bool PicProcessorSaturation::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("saturation...");
 	m_tree->SetItemBold(GetId(), true);
-	double saturation = atof(c.c_str())/10.0;
+	double saturation = atof(c.c_str());
 	bool result = true;
 	FIBITMAP *prev = dib;
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());

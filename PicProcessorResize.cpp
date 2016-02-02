@@ -11,29 +11,55 @@ class ResizePanel: public PicProcPanel
 	public:
 		ResizePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), -100, 100);
-			//b->Add(slide, 1, wxALIGN_LEFT |wxALIGN_TOP |wxEXPAND, 10);
-			//SetSizerAndFit(b);
-			//b->Layout();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxArrayString algos;
+			algos.Add("box");
+			algos.Add("bilinear");
+			algos.Add("bspline");
+			algos.Add("bicubic");
+			algos.Add("catmullrom");
+			algos.Add("lanczos3");
+			wxArrayString p = split(params,",");
+			b->Add(new wxStaticText(this,-1, "width (0 for original aspect)", wxDefaultPosition, wxSize(200,20)),  flags);
+			widthedit = new wxTextCtrl(this, wxID_ANY, p[0], wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
+			b->Add(widthedit, flags);
+			b->Add(new wxStaticText(this,-1, "height (0 for original aspect)", wxDefaultPosition, wxSize(200,20)), flags);
+			heightedit = new wxTextCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
+			b->Add(heightedit, flags);		
+			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxSize(100,200),  algos, 1, wxRA_SPECIFY_COLS);
+			if (p.size() >=3) {
+				for (int i=0; i<algos.size(); i++) {
+					if (p[2] == algos[i]) algoselect->SetSelection(i);
+				}
+			}
+			b->Add(algoselect, flags);	
+			b->Add(new wxButton(this,-1, "Apply", wxDefaultPosition, wxSize(200,30)), flags);
+			SetSizerAndFit(b);
+			b->Layout();
 			Refresh();
 			Update();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(ResizePanel::paramChanged));
+			SetFocus();
+			Bind(wxEVT_BUTTON,&ResizePanel::paramChanged, this);
+	
 		}
 
 		~ResizePanel()
 		{
-			slide->~wxTouchSlider();
+			widthedit->~wxTextCtrl();
+			heightedit->~wxTextCtrl();
+			algoselect->~wxRadioBox();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",event.GetInt()));
+			q->setParams(wxString::Format("%s,%s,%s",widthedit->GetValue(),heightedit->GetValue(),algoselect->GetString(algoselect->GetSelection())));
 			event.Skip();
 		}
 
 
 	private:
-		wxTouchSlider *slide;
+		wxTextCtrl *widthedit, *heightedit;
+		wxRadioBox *algoselect;
 
 };
 

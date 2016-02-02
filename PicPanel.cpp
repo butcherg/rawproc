@@ -101,7 +101,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
     EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
-    //EVT_CHAR(PicPanel::OnKey)
+    EVT_CHAR(PicPanel::OnKey)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
@@ -174,6 +174,7 @@ END_EVENT_TABLE()
 			toggleThumb++;
 			if (toggleThumb>3) toggleThumb = 1;
 			Refresh();
+			Update();
 		}
 		//parentframe->SetStatusText(wxString::Format("thumbmode: %d", toggleThumb));
 	}
@@ -220,9 +221,10 @@ END_EVENT_TABLE()
 		//hsgram = wxBitmap();
 
 		//scale =  (double) w/ (double) FreeImage_GetWidth(dib);
+		parentframe->SetStatusText("");
                 Refresh();
 		Update();
-		parentframe->SetStatusText("");
+		
 	}
 
 	wxString PicPanel::getHistogramString()
@@ -412,6 +414,7 @@ END_EVENT_TABLE()
         
 	void PicPanel::OnLeftDown(wxMouseEvent& event)
 	{
+		SetFocus();
 		int radius = 5;
 		MouseX = event.m_x;
 		MouseY = event.m_y;
@@ -563,26 +566,8 @@ END_EVENT_TABLE()
         
         void PicPanel::OnMouseWheel(wxMouseEvent& event)
         {
-	    double increment = 0.05;
-            /*
-            if (event.ShiftDown()) {
-                if (event.GetWheelRotation() > 0) {
-                    if (currentimage < IMGARRAYSIZE-1 && imgarray[currentimage+1])
-                        currentimage++;
-                    else
-                        currentimage=0;
-                }
-                else {
-                    if (currentimage == 0) {
-                        currentimage = IMGARRAYSIZE-1;
-                        while (!imgarray[currentimage]) currentimage--;
-                    }
-                    else
-                        currentimage--;
-                }
-            }
-            else {
-            */
+		double increment = 0.05;
+ 
 		fitmode=false;
                 wxImage scaledimg;
                 if (event.GetWheelRotation() > 0)
@@ -604,14 +589,21 @@ END_EVENT_TABLE()
                     }
                 }
 		parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),1);
-            //}
-            //int iw = img->GetWidth()*scale;
-            //int ih = img->GetHeight()*scale;
-            ////if (scaledimg) scaledimg->~wxImage();
-            //scaledimg = img->Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
-            //if (scaledpic) scaledpic->~wxBitmap();
-            //scaledpic = new wxBitmap(scaledimg);
-            PaintNow();
+
+		Refresh();
+		Update();
         }
+
+void PicPanel::OnKey(wxKeyEvent& event)
+{
+	//parentframe->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
+	switch (event.GetKeyCode()) {
+		case 116: //t
+		case 84: //T - toggle display thumbnail
+			ToggleThumb();
+			break;
+	}
+	event.Skip();
+}
         
         

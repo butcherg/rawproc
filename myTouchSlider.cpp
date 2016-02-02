@@ -1,133 +1,148 @@
 
-#include "wxTouchSlider.h"
+#include "myTouchSlider.h"
 
-BEGIN_EVENT_TABLE(wxTouchSlider, wxWindow)
+BEGIN_EVENT_TABLE(myTouchSlider, wxWindow)
  
-    EVT_MOTION(wxTouchSlider::mouseMoved)
-    EVT_LEFT_DOWN(wxTouchSlider::mouseDown)
-    EVT_LEFT_UP(wxTouchSlider::mouseReleased)
-    EVT_LEFT_DCLICK(wxTouchSlider::mouseDoubleClicked)
-    EVT_RIGHT_DOWN(wxTouchSlider::rightClick)
-    EVT_LEAVE_WINDOW(wxTouchSlider::mouseLeftWindow)
-    EVT_KEY_DOWN(wxTouchSlider::keyPressed)
-    EVT_KEY_UP(wxTouchSlider::keyReleased)
-    EVT_MOUSEWHEEL(wxTouchSlider::mouseWheelMoved)
+    EVT_MOTION(myTouchSlider::mouseMoved)
+    EVT_LEFT_DOWN(myTouchSlider::mouseDown)
+    EVT_LEFT_UP(myTouchSlider::mouseReleased)
+    EVT_LEFT_DCLICK(myTouchSlider::mouseDoubleClicked)
+    EVT_RIGHT_DOWN(myTouchSlider::rightClick)
+    EVT_LEAVE_WINDOW(myTouchSlider::mouseLeftWindow)
+    EVT_KEY_DOWN(myTouchSlider::keyPressed)
+    EVT_KEY_UP(myTouchSlider::keyReleased)
+    EVT_MOUSEWHEEL(myTouchSlider::mouseWheelMoved)
  
     // catch paint events
-    EVT_PAINT(wxTouchSlider::paintEvent)
+    EVT_PAINT(myTouchSlider::paintEvent)
  
 END_EVENT_TABLE()
- 
 
-wxTouchSlider::wxTouchSlider(wxFrame* parent, wxString text, int val, int min, int max) :
- wxWindow(parent, wxID_ANY, wxPoint(0,0), wxSize(-1, max-min+44))
+ 
+myTouchSlider::myTouchSlider(wxFrame* parent,  wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format):
+wxWindow(parent, id, wxPoint(0,0), wxSize(-1, int(((max-min)/increment)+44.0)))
 {
-	SetMinSize( wxSize(280, max - min + 44) );
+	vsize = int((max-min)/increment);
+	SetMinSize( wxSize(250, vsize+44.0) );
 	SetSize(parent->GetSize());
-	this->text = text;
-	pressedDown = false;
-	value=val;
+	lbl = label;
+	initval = initialvalue;
+	val = initialvalue;
+	inc = increment;
 	mn = min;
-	mx = max;
+	mx = max; 
+	fmt = format;
+	pressedDown = false;
 	paintNow();
 }
- 
-void wxTouchSlider::paintEvent(wxPaintEvent & evt)
+
+double myTouchSlider::GetDoubleValue()
+{
+	return val;
+}
+
+int myTouchSlider::GetIntValue()
+{
+	return (int) val;
+}
+
+void myTouchSlider::paintEvent(wxPaintEvent & evt)
 {
 	wxPaintDC dc(this);
 	render(dc);
 }
  
-void wxTouchSlider::paintNow()
+void myTouchSlider::paintNow()
 {
 	wxClientDC dc(this);
 	render(dc);
 }
  
-void wxTouchSlider::render(wxDC&  dc)
+void myTouchSlider::render(wxDC&  dc)
 {
 	int w, h;
 	GetSize(&w, &h);
 	dc.Clear();
-	wxString v = wxString::Format("%d",value);
+	wxString v = wxString::Format(fmt,val);
+	int dcval = mn + (val/inc);
 	wxSize t = dc.GetTextExtent(v);
-	//dc.DrawRoundedRectangle(0,(h/2)-((mx-mn)/2)-22, w, (mx-mn)+44, 10);
-	dc.DrawRoundedRectangle( 2, (h/2)-value-20, w-4, 40, 10 );
-	dc.DrawText(v, w/2-t.GetWidth()/2, (h/2)-value-8 );
+	dc.DrawRoundedRectangle( 2, h-dcval-40, w-4, 40, 10 );
+//dc.GradientFillLinear (wxRect(2, h-dcval-40, w-4, 40), *wxBLACK, *wxLIGHT_GREY, wxDOWN);
+	dc.DrawText(v, w/2-t.GetWidth()/2, h-dcval+8-40 );
 }
  
-void wxTouchSlider::mouseDown(wxMouseEvent& event)
+void myTouchSlider::mouseDown(wxMouseEvent& event)
 {
 	px = event.GetX();
 	py = event.GetY();
 	pressedDown = true;
 	paintNow();
-	event.Skip();
+	//event.Skip();
 }
 
-void wxTouchSlider::mouseMoved(wxMouseEvent& event) 
+void myTouchSlider::mouseMoved(wxMouseEvent& event) 
 {
 	if (pressedDown) {
-		value += py - event.GetY();
-		if (value<mn) value=mn;
-		if (value>mx) value=mx;
+		val += inc * (py - event.GetY());
+		if (val<mn) val=mn;
+		if (val>mx) val=mx;
 		py = event.GetY();
 		paintNow();
 	}
-	event.Skip();
+	//event.Skip();
 }
 
-void wxTouchSlider::mouseReleased(wxMouseEvent& event)
+void myTouchSlider::mouseReleased(wxMouseEvent& event)
 {
 	pressedDown = false;
 	paintNow();
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-	e->SetInt(value);
+	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	event.Skip();
+	//event.Skip();
 }
 
-void wxTouchSlider::mouseLeftWindow(wxMouseEvent& event)
+void myTouchSlider::mouseLeftWindow(wxMouseEvent& event)
 {
 	if (pressedDown)
 	{
 		pressedDown = false;
 		paintNow();
 	}
-	event.Skip();
+	//event.Skip();
 }
  
 
-void wxTouchSlider::mouseDoubleClicked(wxMouseEvent& event)
+void myTouchSlider::mouseDoubleClicked(wxMouseEvent& event)
 {
 	pressedDown = false;
-	value = 0;
+	val = initval;
 	paintNow();
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-	e->SetInt(value);
+	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	event.Skip();
+	//event.Skip();
 }
 
-void wxTouchSlider::mouseWheelMoved(wxMouseEvent& event) 
+void myTouchSlider::mouseWheelMoved(wxMouseEvent& event) 
 {
 	if (event.GetWheelRotation() > 0)
-		value++;
+		val+=inc;
 	else
-		value--;
-	if (value<mn) value=mn;
-	if (value>mx) value=mx;
+		val-=inc;
+	if (val<mn) val=mn;
+	if (val>mx) val=mx;
 	py = event.GetY();
 	paintNow();
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-	e->SetInt(value);
+	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	event.Skip();
+	//event.Skip();
 }
 
-void wxTouchSlider::rightClick(wxMouseEvent& event) {}
-void wxTouchSlider::keyPressed(wxKeyEvent& event) {}
-void wxTouchSlider::keyReleased(wxKeyEvent& event) {}
+void myTouchSlider::rightClick(wxMouseEvent& event) {}
+void myTouchSlider::keyPressed(wxKeyEvent& event) {}
+void myTouchSlider::keyReleased(wxKeyEvent& event) {}
  
  
 

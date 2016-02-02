@@ -22,7 +22,7 @@ END_EVENT_TABLE()
 wxTouchSlider::wxTouchSlider(wxFrame* parent, wxString text, int val, int min, int max) :
  wxWindow(parent, wxID_ANY, wxPoint(0,0), wxSize(-1, max-min+44))
 {
-	SetMinSize( wxSize(280, max - min + 44) );
+	SetMinSize( wxSize(250, max - min + 44) );
 	SetSize(parent->GetSize());
 	this->text = text;
 	pressedDown = false;

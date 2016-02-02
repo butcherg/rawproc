@@ -12,6 +12,9 @@ class PicProcessorGray: public PicProcessor
 		void showParams();
 		bool processPic();
 
+	private:
+		double rp, bp, gp;
+
 };
 
 #endif

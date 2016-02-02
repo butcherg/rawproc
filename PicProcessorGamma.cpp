@@ -10,13 +10,15 @@ class GammaPanel: public PicProcPanel
 	public:
 		GammaPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			b->Add(new wxStaticText(this,-1, "gamma", wxDefaultPosition, wxSize(100,20)),   1, wxALIGN_LEFT, 10);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			b->Add(new wxStaticText(this,-1, "gamma", wxDefaultPosition, wxSize(100,20)), flags);
 			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
-			b->Add(edit,   1, wxALIGN_LEFT, 10);
+			b->Add(edit, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
+			SetFocus();
 			Connect(wxID_ANY,wxEVT_TEXT_ENTER,wxCommandEventHandler(GammaPanel::paramChanged));
 		}
 

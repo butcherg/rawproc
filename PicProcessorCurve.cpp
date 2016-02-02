@@ -13,12 +13,14 @@ class CurvePanel: public PicProcPanel
 	public:
 		CurvePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			curve = new CurvePane(this, params);
-			b->Add(curve, 1, wxALIGN_LEFT, 10);
+			b->Add(curve, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
+			SetFocus();
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
 		}
 

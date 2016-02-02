@@ -18,7 +18,7 @@ ifeq ($(UNAME), x86_64-linux-gnu)
 	OBJDIR=linux
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o myHistogramPane.o myFileSelector.o wxTouchSlider.o CurvePane.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -54,6 +54,9 @@ $(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 
 $(OBJDIR)/wxTouchSlider.o: wxTouchSlider.cpp
 	$(CXX) $(WXFLAGS) -c wxTouchSlider.cpp  -o$@
+
+$(OBJDIR)/myTouchSlider.o: myTouchSlider.cpp
+	$(CXX) $(WXFLAGS) -c myTouchSlider.cpp  -o$@
 
 $(OBJDIR)/CurvePane.o: CurvePane.cpp Curve.h
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@

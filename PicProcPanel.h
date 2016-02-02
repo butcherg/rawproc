@@ -16,6 +16,7 @@
 
 class PicProcessor;
 
+//class PicProcPanel: public wxScrolledWindow
 class PicProcPanel: public wxPanel
 {
 

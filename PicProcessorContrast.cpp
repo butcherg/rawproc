@@ -10,12 +10,14 @@ class ContrastPanel: public PicProcPanel
 	public:
 		ContrastPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), -100, 100);
-			b->Add(slide, 1, wxALIGN_LEFT |wxALIGN_TOP |wxEXPAND, 10);
+			b->Add(slide, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
+			SetFocus();
 			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(ContrastPanel::paramChanged));
 		}
 
