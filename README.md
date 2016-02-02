@@ -62,11 +62,11 @@ As of today (1/29/2016), rawproc does essentially everything I set out to implem
 on a few things, though:
 
 - aspect ratio lock for crop
-- RGB channel mixer for gray
-- a better touch slider
+- RGB channel mixer for gray (2/2/2016: Implemented the RGB sliders, but still needs more work...)
+- a better touch slider (2/2/2016: Now used for saturation and gray...)
 - shell command processing to make use of dcraw input and exiftool EXIF migration
 - at this time, resize is just hard-coded to 640x480 and Catmull-Rom interpolation; I'm going to add parameter tools to 
-  do more
+  do more (2/2/2016: Done.)
   
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
