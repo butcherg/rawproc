@@ -55,7 +55,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
 	EVT_MENU(ID_MNU_OPENSOURCE, rawprocFrm::Mnuopensource1004Click)
 	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
-	//EVT_MENU(ID_MNU_EXIT, rawprocFrm::OnClose)
+	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
 	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
 	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
 	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
@@ -120,8 +120,8 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPEN, _("Open..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save..."), _(""), wxITEM_NORMAL);
-	//ID_MNU_FILEMnu_Obj->AppendSeparator();
-	//ID_MNU_FILEMnu_Obj->Append(ID_MNU_EXIT, _("Exit"), _(""), wxITEM_NORMAL);
+	ID_MNU_FILEMnu_Obj->AppendSeparator();
+	ID_MNU_FILEMnu_Obj->Append(ID_MNU_EXIT, _("Exit"), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_FILEMnu_Obj, _("File"));
 
 	wxMenu *ID_MNU_EDITMnu_Obj = new wxMenu();
@@ -183,6 +183,15 @@ void rawprocFrm::CreateGUIControls()
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
+{
+	commandtree->~wxTreeCtrl();
+	pic->~PicPanel();
+	parameters->~wxPanel();
+	mgr.UnInit();
+	Destroy();
+}
+
+void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
 	commandtree->~wxTreeCtrl();
 	pic->~PicPanel();
@@ -339,6 +348,7 @@ wxString rawprocFrm::AssembleCommand()
 void rawprocFrm::OpenFile(wxString fname, int flag)
 {
 	filename.Assign(fname);
+	sourcefilename.Clear();
 	FIBITMAP *dib, *tmpdib;
 	FREE_IMAGE_FORMAT fif;
 
@@ -371,7 +381,7 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 
 void rawprocFrm::OpenFileSource(wxString fname)
 {
-	filename.Assign(fname);
+	//filename.Assign(fname);
 	FIBITMAP *srcdib, *dib;
 	FREE_IMAGE_FORMAT fif;
 	fif = FreeImage_GetFileType(fname, 0);
@@ -390,18 +400,19 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			wxArrayString token = split(script, " ");
 			//wxMessageBox(script);
 			if (token[0].Find("rawproc") == wxNOT_FOUND) {
-				SetStatusText(wxString::Format("Source script not found in %s.", filename.GetFullName().c_str()) );
+				SetStatusText(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",token[1]) );
 				commandtree->DeleteAllItems();
 				filename.Assign(token[1]);
+				sourcefilename.Assign(fname);
 				fif = FreeImage_GetFileType(token[1], 0);
 				dib = FreeImage_Load(fif, token[1]);
 				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
 				picdata->processPic();
 				CommandTreeSetDisplay(picdata->GetId());
-				SetTitle(wxString::Format("rawproc: %s",filename.GetFullName().c_str()));
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 				SetStatusText("");
 				SetStatusText("scale: fit",1);
 				pic->SetScaleToWidth();
@@ -420,11 +431,11 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 		}
 		else {
-			SetStatusText(wxString::Format("No source script found in %s.",filename.GetFullName() ));
+			SetStatusText(wxString::Format("No source script found in %s, aborting Open Source.",filename.GetFullName() ));
 		}
 	}
 	else {
-		SetStatusText(wxString::Format("Loading %s failed.",filename.GetFullName() ));
+		SetStatusText(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
 	}
 }
 

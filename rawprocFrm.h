@@ -134,6 +134,7 @@ class rawprocFrm : public wxFrame
 	void MnuCropClick(wxCommandEvent& event);
 	void MnuResizeClick(wxCommandEvent& event);
 	void Mnusave1009Click(wxCommandEvent& event);
+	void MnuexitClick(wxCommandEvent& event);
 	void MnuCut1201Click(wxCommandEvent& event);
 	void MnuCopy1202Click(wxCommandEvent& event);
 	void MnuPaste1203Click(wxCommandEvent& event);
@@ -153,7 +154,7 @@ class rawprocFrm : public wxFrame
 		wxImage *img;
 		bool deleting;
 		wxTreeItemId olditem;
-		wxFileName filename;
+		wxFileName filename, sourcefilename;
 };
 
 #endif
