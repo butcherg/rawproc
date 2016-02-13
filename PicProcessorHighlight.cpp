@@ -4,16 +4,20 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "wxTouchSlider.h"
+#include "myTouchSlider.h"
 
 class HighlightPanel: public PicProcPanel
 {
 	public:
 		HighlightPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), -50, 50);
+			SetSize(parent->GetSize());
+			b->SetOrientation(wxHORIZONTAL);
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "highlight", 60, atof(p.c_str()), 1.0, -50.0, 50.0, "%2.0f");
+			b->Add(100,100,1);
 			b->Add(slide, flags);
+			b->Add(100,100,1);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
@@ -24,18 +28,18 @@ class HighlightPanel: public PicProcPanel
 
 		~HighlightPanel()
 		{
-			slide->~wxTouchSlider();
+			slide->~myTouchSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",event.GetInt()));
+			q->setParams(wxString::Format("%d",slide->GetIntValue()));
 			event.Skip();
 		}
 
 
 	private:
-		wxTouchSlider *slide;
+		myTouchSlider *slide;
 
 };
 

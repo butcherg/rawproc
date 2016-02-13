@@ -165,19 +165,20 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
-	wxAuiPaneInfo pinfo = wxAuiPaneInfo().MinSize(280,280).Left().CloseButton(false).Dockable(false);
+	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false).Dockable(false).Floatable(false);   //.MinSize(280,200)
 	
 	mgr.SetManagedWindow(this);
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 	pic = new PicPanel(this);
 
 	//wxPanel parms = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280),wxVSCROLL);
 	//parameters = new wxScrolled<wxPanel>(parms);
-	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280),wxVSCROLL);
+	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,320));
+	//parameters->SetBackgroundColour(*wxBLUE);
 
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
-	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(1));
+	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(1).GripperTop());
 
 	mgr.Update();
 }

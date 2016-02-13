@@ -4,7 +4,6 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "wxTouchSlider.h"
 #include "util.h"
 
 class CropPanel: public PicProcPanel

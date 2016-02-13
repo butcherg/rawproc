@@ -18,31 +18,24 @@ class GrayPanel: public PicProcPanel
 	public:
 		GrayPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			int sliderwidth = 60;
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString p = split(params,",");
 
 			rd = atof(p[0]);
 			gr = atof(p[1]);
 			bl = atof(p[2]);
+			b->SetOrientation(wxHORIZONTAL);
 
-			//wxScrolledWindow *sw = new wxScrolledWindow(this);
-			//sw->SetScrollRate( 5, 5 );
-			//b->Add(sw, flags);
-
-			//wxBoxSizer *bc;
-
-			b->Add(new wxStaticText(this,-1, "Red", wxDefaultPosition, wxSize(100,20)), flags);
-			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
+			b->AddStretchSpacer(1);
+			b->Add(20,0,1,wxEXPAND);
+			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", sliderwidth, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
 			b->Add(redslide, flags);
-			b->Add(new wxStaticText(this,-1, "Green", wxDefaultPosition, wxSize(100,20)), flags);
-			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
+			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", sliderwidth, atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
 			b->Add(greenslide, flags);
-			b->Add(new wxStaticText(this,-1, "Blue", wxDefaultPosition, wxSize(100,20)), flags);
-			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
+			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", sliderwidth, atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
 			b->Add(blueslide, flags);
-			
-			//sw->SetSizerAndFit(bc);
-			//bc->Layout();
+			b->AddStretchSpacer(1);
 
 			SetSizerAndFit(b);
 			b->Layout();
@@ -54,8 +47,9 @@ class GrayPanel: public PicProcPanel
 
 		~GrayPanel()
 		{
-			//panel->~wxPanel();
 			redslide->~myTouchSlider();
+			greenslide->~myTouchSlider();
+			blueslide->~myTouchSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)

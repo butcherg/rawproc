@@ -3,16 +3,20 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "wxTouchSlider.h"
+#include "myTouchSlider.h"
 
 class ContrastPanel: public PicProcPanel
 {
 	public:
 		ContrastPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), -100, 100);
+			SetSize(parent->GetSize());
+			b->SetOrientation(wxHORIZONTAL);
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "contrast", 60, atof(p.c_str()), 1.0, -100.0, 100.0, "%2.0f");
+			b->Add(100,100,1);
 			b->Add(slide, flags);
+			b->Add(100,100,1);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
@@ -23,19 +27,18 @@ class ContrastPanel: public PicProcPanel
 
 		~ContrastPanel()
 		{
-			slide->~wxTouchSlider();
+			slide->~myTouchSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",event.GetInt()));
+			q->setParams(wxString::Format("%d",slide->GetIntValue()));
 			event.Skip();
 		}
 
 
 	private:
-		//wxSlider *slide;
-		wxTouchSlider *slide;
+		myTouchSlider *slide;
 
 };
 

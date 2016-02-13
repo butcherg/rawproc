@@ -20,11 +20,30 @@ END_EVENT_TABLE()
 
  
 myTouchSlider::myTouchSlider(wxFrame* parent,  wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format):
-wxWindow(parent, id, wxPoint(0,0), wxSize(-1, int(((max-min)/increment)+44.0)))
+wxWindow(parent, id, wxPoint(0,0), wxSize(-1, int(((max-min)/increment)+44.0+20)))
 {
 	vsize = int((max-min)/increment);
-	SetMinSize( wxSize(250, vsize+44.0) );
+	SetMinSize( wxSize(250, vsize+44.0+20) );
 	SetSize(parent->GetSize());
+	//SetBackgroundColour(*wxLIGHT_GREY);
+	lbl = label;
+	initval = initialvalue;
+	val = initialvalue;
+	inc = increment;
+	mn = min;
+	mx = max; 
+	fmt = format;
+	pressedDown = false;
+	paintNow();
+}
+
+myTouchSlider::myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, int width, double initialvalue, double increment, double min, double max, wxString format):
+wxWindow(parent, id, wxPoint(0,0), wxSize(width, int(((max-min)/increment)+44.0+20)))
+{
+	vsize = int((max-min)/increment);
+	SetMaxSize( wxSize(width, vsize+44.0+20) );
+	//SetSize(parent->GetSize());
+	//SetBackgroundColour(*wxLIGHT_GREY);
 	lbl = label;
 	initval = initialvalue;
 	val = initialvalue;
@@ -49,6 +68,8 @@ int myTouchSlider::GetIntValue()
 void myTouchSlider::SetValue(double value)
 {
 	val = value;
+	if (val<mn) val=mn;
+	if (val>mx) val=mx;
 	Refresh();
 	Update();
 }
@@ -71,11 +92,19 @@ void myTouchSlider::render(wxDC&  dc)
 	GetSize(&w, &h);
 	dc.Clear();
 	wxString v = wxString::Format(fmt,val);
-	int dcval = mn + (val/inc);
+	//int dcval = vsize - (val/inc);
 	wxSize t = dc.GetTextExtent(v);
-	dc.DrawRoundedRectangle( 2, h-dcval-40, w-4, 40, 10 );
-//dc.GradientFillLinear (wxRect(2, h-dcval-40, w-4, 40), *wxBLACK, *wxLIGHT_GREY, wxDOWN);
-	dc.DrawText(v, w/2-t.GetWidth()/2, h-dcval+8-40 );
+	wxSize lt = dc.GetTextExtent(lbl);
+
+	double valmag = (val - mn)/inc;
+
+	dc.DrawText(lbl, w/2-lt.GetWidth()/2, 0);
+	dc.DrawRoundedRectangle(0,20,w,h-20,10);
+	//dc.DrawRoundedRectangle( 2, h-dcval-40-1, w-4, 40, 10 );
+	//dc.DrawText(v, w/2-t.GetWidth()/2, h-dcval+8-40 );
+
+	dc.DrawRoundedRectangle( 2, h-int(valmag)-40-1, w-4, 40, 10 );
+	dc.DrawText(v, w/2-t.GetWidth()/2, h-int(valmag)+8-40 );
 }
  
 void myTouchSlider::mouseDown(wxMouseEvent& event)

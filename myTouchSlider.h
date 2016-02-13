@@ -21,8 +21,11 @@ class myTouchSlider : public wxWindow
 	int vsize;
  
 public:
+	//default width:
 	myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format="%3.0f");
- 
+	//explicit width:
+	myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, int width, double initialvalue, double increment, double min, double max, wxString format="%3.0f");
+
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
  

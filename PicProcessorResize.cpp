@@ -3,7 +3,6 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "wxTouchSlider.h"
 #include "util.h"
 
 class ResizePanel: public PicProcPanel
@@ -11,7 +10,7 @@ class ResizePanel: public PicProcPanel
 	public:
 		ResizePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString algos;
 			algos.Add("box");
 			algos.Add("bilinear");
@@ -26,7 +25,7 @@ class ResizePanel: public PicProcPanel
 			b->Add(new wxStaticText(this,-1, "height (0 for original aspect)", wxDefaultPosition, wxSize(200,20)), flags);
 			heightedit = new wxTextCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
 			b->Add(heightedit, flags);		
-			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxSize(100,200),  algos, 1, wxRA_SPECIFY_COLS);
+			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxSize(100,220),  algos, 1, wxRA_SPECIFY_COLS);
 			if (p.size() >=3) {
 				for (int i=0; i<algos.size(); i++) {
 					if (p[2] == algos[i]) algoselect->SetSelection(i);

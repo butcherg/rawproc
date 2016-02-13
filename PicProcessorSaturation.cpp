@@ -10,10 +10,13 @@ class SaturationPanel: public PicProcPanel
 	public:
 		SaturationPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			//slide = new wxTouchSlider((wxFrame *) this, "", atoi(p.c_str()), 0, 30);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "Saturation", atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
+			SetSize(parent->GetSize());
+			b->SetOrientation(wxHORIZONTAL);
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "saturate", 60, atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
+			b->Add(100,100,1);
 			b->Add(slide, flags);
+			b->Add(100,100,1);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
@@ -29,8 +32,8 @@ class SaturationPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			//q->setParams(wxString::Format("%d",event.GetInt()));
-			q->setParams(event.GetString());
+
+			q->setParams(wxString::Format("%d",slide->GetIntValue()));
 			event.Skip();
 		}
 
