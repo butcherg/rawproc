@@ -96,6 +96,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_PAINT(PicPanel::OnPaint)
     EVT_LEFT_DOWN(PicPanel::OnLeftDown)
     EVT_RIGHT_DOWN(PicPanel::OnRightDown)
+    EVT_LEFT_DCLICK(PicPanel::OnLeftDoubleClicked)
     EVT_LEFT_UP(PicPanel::OnLeftUp)
     EVT_MOTION(PicPanel::OnMouseMove)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
@@ -593,6 +594,29 @@ END_EVENT_TABLE()
 		Refresh();
 		Update();
         }
+
+void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
+{
+	MouseX = event.m_x;
+	MouseY = event.m_y;
+	if (MouseX < thumbW & MouseY < thumbH) {
+		ToggleThumb();
+	}
+	else {
+		if (scale != 1.0) {
+			scale = 1.0;
+			FitMode(false);
+			parentframe->SetStatusText("scale: 100%",1);
+		}
+		else {
+			SetScaleToWidth();
+			FitMode(true);
+			parentframe->SetStatusText("scale: fit",1);
+		}
+	}
+	Refresh();
+	Update();
+}
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
