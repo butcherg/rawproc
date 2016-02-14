@@ -80,6 +80,8 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 		pos = event.GetLogicalPosition(dc);
 		pos.x = pos.x-m;
 		pos.y = h-m-pos.y;
+		if (pos.x < 0) pos.x = 0; if (pos.x > 255) pos.x = 255;
+		if (pos.y < 0) pos.y = 0; if (pos.y > 255) pos.y = 255;
 		c.deletepoint(mouseCP.x, mouseCP.y);
 		if (c.isctrlpoint(pos.x,pos.y,radius) == -1) c.insertpoint((double) pos.x, (double) pos.y);
 		mouseCP.x = (double) pos.x;

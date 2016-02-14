@@ -2,8 +2,7 @@
 
 /*
 RAW_DEFAULT Load the file as linear RGB 48-bit
-RAW_PREVIEW Try to load the embedded JPEG preview with included Exif
-data or default to RGB 24-bit
+RAW_PREVIEW Try to load the embedded JPEG preview with included Exif data or default to RGB 24-bit
 RAW_DISPLAY Load the file as RGB 24-bit
 RAW_HALFSIZE Output a half-size color image
 RAW_UNPROCESSED
@@ -22,8 +21,8 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	flags.Add("Half Size");
 	flags.Add("Unprocessed");
 	rawflags = new wxRadioBox (panel, wxID_ANY, "RAW Mode",  wxPoint(20,320), wxDefaultSize, flags, 5);
-	wxButton* cancelButton = new wxButton(panel, wxID_ANY, "Cancel", wxPoint(20,430), wxDefaultSize);
-	wxButton* okButton = new wxButton(panel, wxID_ANY, "Ok", wxPoint(150,430), wxDefaultSize);
+	wxButton* cancelButton = new wxButton(panel, wxID_ANY, "Cancel", wxPoint(20,400), wxDefaultSize);
+	wxButton* okButton = new wxButton(panel, wxID_ANY, "Ok", wxPoint(150,400), wxDefaultSize);
 
 	Bind(wxEVT_COMMAND_BUTTON_CLICKED, &myFileSelector::onCancel, this, cancelButton->GetId());
 	Bind(wxEVT_COMMAND_BUTTON_CLICKED, &myFileSelector::onOk, this, okButton->GetId());
