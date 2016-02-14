@@ -144,14 +144,12 @@ END_EVENT_TABLE()
 
 	PicPanel::~PicPanel()
 	{
-/*
-		thumbimg->~wxImage();
-		scaledimg->~wxImage();
-		pic->~wxBitmap();
-		thumb->~wxBitmap();
-		scaledpic->~wxBitmap();
-		histogram->~wxBitmap();
-*/
+		if (thumbimg) thumbimg->~wxImage();
+		if (scaledimg) scaledimg->~wxImage();
+		if (pic) pic->~wxBitmap();
+		if (thumb) thumb->~wxBitmap();
+		if (scaledpic) scaledpic->~wxBitmap();
+		if (histogram) histogram->~wxBitmap();
 	}
         
         void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
@@ -217,9 +215,9 @@ END_EVENT_TABLE()
                 //if (thumb) thumb->~wxBitmap();
                 thumb = new wxBitmap(thumbimg);
 
-		hsgram = HistogramFrom(img, thumbW, thumbH);
+		//hsgram = HistogramFrom(img, thumbW, thumbH);
 		////hsgram = HistogramFromVec(histdata, hmax, thumbW, thumbH);
-		//hsgram = wxBitmap();
+		hsgram = wxBitmap();
 
 		//scale =  (double) w/ (double) FreeImage_GetWidth(dib);
 		parentframe->SetStatusText("");
@@ -386,7 +384,11 @@ END_EVENT_TABLE()
 		}
 		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
 		if (toggleThumb == 2) {
-			//if (!hsgram.IsOk()) hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+			if (!hsgram.IsOk()) {
+				parentframe->SetStatusText("histogram...");
+				hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				parentframe->SetStatusText("");
+			}
 			dc.DrawBitmap(hsgram,2,2,false);
 		}
 
@@ -486,10 +488,10 @@ END_EVENT_TABLE()
                 x=event.m_x; y=event.m_y;
 		dx = MouseX-x;
 		dy = MouseY-y;
-		//if (abs(dx) > abs(dy))
-		//	anchorx = true;  //x
-		//else 
-		//	anchory = false;  //y
+		if (abs(dx) > abs(dy))
+			anchorx = true;  //x
+		else 
+			anchorx = false;  //y
 
 		//todo: cropratio behavior (1=maintain aspect)
 		if (cropmode) {
@@ -506,11 +508,10 @@ END_EVENT_TABLE()
 					else
 						cropH += (MouseY-y)/scale;
 					if (cropratio==1) {
-						//if (anchorx) 
-						//	//CropH =
-						//else
-						//	//CropW = 
-						//;
+						if (anchorx) 
+							cropH = cropW * aspectH;
+						else
+							cropW = cropH * aspectW;
 					}
 					MouseX = x; MouseY = y;
 					Refresh();
@@ -522,6 +523,12 @@ END_EVENT_TABLE()
 					cropH -= (MouseY-y)/scale;
 					if (cropW > img.GetWidth()) cropW = img.GetWidth();
 					if (cropH > img.GetHeight()) cropH = img.GetHeight(); 
+					if (cropratio==1) {
+						if (anchorx) 
+							cropH = cropW * aspectH;
+						else
+							cropW = cropH * aspectW;
+					}
 					MouseX = x; MouseY = y;
 					Refresh();
 					Update();

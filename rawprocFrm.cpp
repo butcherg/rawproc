@@ -185,18 +185,12 @@ void rawprocFrm::CreateGUIControls()
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
-	commandtree->~wxTreeCtrl();
-	pic->~PicPanel();
-	parameters->~wxPanel();
 	mgr.UnInit();
 	Destroy();
 }
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
-	commandtree->~wxTreeCtrl();
-	pic->~PicPanel();
-	parameters->~wxPanel();
 	mgr.UnInit();
 	Destroy();
 }
@@ -677,7 +671,6 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorCrop *c = new PicProcessorCrop("crop",commandtree, pic, parameters);
-	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }

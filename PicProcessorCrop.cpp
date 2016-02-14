@@ -23,8 +23,9 @@ class CropPanel: public PicProcPanel
 
 		~CropPanel()
 		{
-			panel->~wxPanel();
+			q->processPic();
 			((PicProcessorCrop *) q)->CropMode(false);
+			panel->~wxPanel();
 		}
 
 	private:
@@ -42,8 +43,9 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, "",  tree, display, parameters)
 {
-	FIBITMAP *prev = getPreviousPicProcessor()->getProcessedPic();
-	wxString command = wxString::Format("0,0,%d,%d",FreeImage_GetWidth(prev), FreeImage_GetHeight(prev));
+	//FIBITMAP *prev
+	previous = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	wxString command = wxString::Format("0,0,%d,%d",FreeImage_GetWidth(previous), FreeImage_GetHeight(previous));
 	setParams(command);
 	showParams();
 	m_display->Bind(wxEVT_SCROLL_THUMBRELEASE,&PicProcessorCrop::paramChanged, this);
@@ -52,6 +54,7 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *di
 
 PicProcessorCrop::~PicProcessorCrop()
 {
+	if (previous) FreeImage_Unload(previous); 
 	m_display->DeletePendingEvents();
 	m_display->Unbind(wxEVT_SCROLL_THUMBRELEASE,&PicProcessorCrop::paramChanged,this);
 	m_display->CropMode(false);
@@ -63,16 +66,13 @@ void PicProcessorCrop::showParams()
 	if (!m_parameters) return;
 	m_parameters->DestroyChildren();
 	r = new CropPanel(m_parameters, this, c);
-	m_display->FitMode(false);
-	m_display->SetCropParams(getParams());
-	m_display->SetScaleToWidth(0.9);
-	m_display->CropMode(true);
+	displayProcessedPic();
 }
 
 void PicProcessorCrop::paramChanged(wxCommandEvent& event)
 {
 	setParams(event.GetString());
-	processPic();
+	//processPic();
 }
 
 void PicProcessorCrop::CropMode(bool c)
@@ -83,9 +83,13 @@ void PicProcessorCrop::CropMode(bool c)
 void PicProcessorCrop::displayProcessedPic() 
 {
 	if (m_display) {
-		m_display->SetPic(getPreviousPicProcessor()->getProcessedPic());
-		m_display->SetCropParams(getParams());
-		m_display->CropMode(true);
+		if (previous) {
+			m_display->FitMode(false);
+			m_display->SetPic(getPreviousPicProcessor()->getProcessedPic());
+			m_display->SetCropParams(getParams());
+			m_display->SetScaleToWidth(0.9);
+			m_display->CropMode(true);
+		}
 	}
 }
 
@@ -99,7 +103,8 @@ bool PicProcessorCrop::processPic() {
 	int top =  atoi(cp[1]);
 	int right = left + atoi(cp[2]);
 	int bottom = top + atoi(cp[3]);
-	previous = getPreviousPicProcessor()->getProcessedPic();
+	if (previous) FreeImage_Unload(previous);
+	previous = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 
 	if (previous) {
 		int bpp = FreeImage_GetBPP(previous);
@@ -111,7 +116,7 @@ bool PicProcessorCrop::processPic() {
 		else result = false; 
 
 		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) displayProcessedPic();
+		//if (m_tree->GetItemState(GetId()) == 1) displayProcessedPic();
 		m_tree->SetItemBold(GetId(), false);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
