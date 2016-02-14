@@ -121,6 +121,14 @@ class Curve
 			return di;
 		}
 
+		bool isendpoint(double x, double y, int radius)
+		{
+			int pt = isctrlpoint(x, y, radius);
+			if (pt == 0) return true;
+			if (pt == controlpts.size()-1) return true;
+			return false;
+		}
+
 	private:
 
 

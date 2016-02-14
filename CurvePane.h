@@ -12,19 +12,20 @@ using namespace std;
 class CurvePane : public wxPanel
 {
  
-public:
-    CurvePane(wxWindow* parent, wxString controlpoints);
+public:	
+CurvePane(wxWindow* parent, wxString controlpoints);
  
 	//bool loadData(vector v);
-
-    void paintEvent(wxPaintEvent & evt);
-    void paintNow();
+	void paintEvent(wxPaintEvent & evt);	
+	void paintNow();
 	void OnSize(wxSizeEvent & evt);
-    void render(wxDC& dc);
+	void render(wxDC& dc);
 	void mouseWheelMoved(wxMouseEvent& event);
 	void mouseMoved(wxMouseEvent& event);
-	void mouseDown(wxMouseEvent& event);
+	void mouseLeftDown(wxMouseEvent& event);
+	void mouseRightDown(wxMouseEvent& event);
 	void mouseReleased(wxMouseEvent& event);
+	void mouseDclick(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent &event);
 	wxString getControlPoints();
 	wxString getXYPoints();
@@ -36,7 +37,6 @@ public:
     // some useful events
     /*
      void mouseMoved(wxMouseEvent& event);
-     void mouseDown(wxMouseEvent& event);
      void mouseWheelMoved(wxMouseEvent& event);
      void mouseReleased(wxMouseEvent& event);
      void rightClick(wxMouseEvent& event);

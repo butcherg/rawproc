@@ -5,12 +5,12 @@
 #include <string>
 #include "util.h"
 
+#define radius 10
+
 
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
 // some useful events
 /*
- 
- EVT_RIGHT_DOWN(BasicCurvePane::rightClick)
  EVT_LEAVE_WINDOW(BasicCurvePane::mouseLeftWindow)
  
  EVT_KEY_UP(BasicCurvePane::keyReleased)
@@ -19,7 +19,9 @@ BEGIN_EVENT_TABLE(CurvePane, wxPanel)
  
 // catch paint events
 EVT_MOTION(CurvePane::mouseMoved)
-EVT_LEFT_DOWN(CurvePane::mouseDown)
+EVT_LEFT_DOWN(CurvePane::mouseLeftDown)
+//EVT_RIGHT_DOWN(CurvePane::mouseRightDown)
+EVT_LEFT_DCLICK(CurvePane::mouseDclick)
 EVT_LEFT_UP(CurvePane::mouseReleased)
 EVT_PAINT(CurvePane::paintEvent)
 EVT_SIZE(CurvePane::OnSize)
@@ -33,7 +35,6 @@ CurvePane::CurvePane(wxWindow* parent, wxString controlpoints) :
 wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(300,300) )
 {
 	p = parent;
-	//SetDropTarget(new MyDropTarget(this));
 	z=1;
 	mousemotion=false;
 	wxArrayString ctrlpts = split(controlpoints,",");
@@ -70,7 +71,6 @@ void CurvePane::OnSize(wxSizeEvent & evt)
 
 void CurvePane::mouseMoved(wxMouseEvent& event)
 {
-	int radius = 5;
 	int m=10;
 	int w, h;
 	mousemoved = true;
@@ -80,44 +80,42 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 		pos = event.GetLogicalPosition(dc);
 		pos.x = pos.x-m;
 		pos.y = h-m-pos.y;
-		if (pos.x < 0) pos.x = 0; if (pos.x > 255) pos.x = 255;
-		if (pos.y < 0) pos.y = 0; if (pos.y > 255) pos.y = 255;
-		c.deletepoint(mouseCP.x, mouseCP.y);
-		if (c.isctrlpoint(pos.x,pos.y,radius) == -1) c.insertpoint((double) pos.x, (double) pos.y);
+		if (selectedCP.x > -1.0) {
+			c.deletepoint(selectedCP.x, selectedCP.y);
+			selectedCP.x -= mouseCP.x - (double) pos.x;
+			selectedCP.y -= mouseCP.y - (double) pos.y;
+			if (selectedCP.x < 0.0) selectedCP.x = 0.0; if (selectedCP.x > 255.0) selectedCP.x = 255.0;
+			if (selectedCP.y < 0.0) selectedCP.y = 0.0; if (selectedCP.y > 255.0) selectedCP.y = 255.0;
+			c.insertpoint((double) selectedCP.x, (double) selectedCP.y);
+		}
 		mouseCP.x = (double) pos.x;
 		mouseCP.y = (double) pos.y;
-		selectedCP = mouseCP;
 		paintNow();
 		
 	}
-	event.Skip();
 }
 
-void CurvePane::mouseDown(wxMouseEvent& event)
+
+
+void CurvePane::mouseLeftDown(wxMouseEvent& event)
 {
-	int radius = 5;
 	int m=10;
 	int w, h;
 	double x, y;
 	mousemoved = false;
-	//CaptureMouse();
-//	SetFocus();
+	mousemotion=true;
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
 	pos = event.GetLogicalPosition(dc);
 	pos.x = pos.x-m;
 	pos.y = h-m-pos.y;
 
-	if (pos.x > 255) pos.x = 255; if (pos.x < 0) pos.x = 0;
-	if (pos.y > 255) pos.y = 255; if (pos.y < 0) pos.y = 0;
+	mouseCP.x = pos.x;
+	mouseCP.y = pos.y;
 
 	int pt = c.isctrlpoint(pos.x,pos.y,radius);
 	if (pt != -1) {
-		cp ctpt = c.getctrlpoint(pt);
-		mouseCP.x = ctpt.x;
-		mouseCP.y = ctpt.y;
-		selectedCP = mouseCP;
-		mousemotion=true;
+		selectedCP = c.getctrlpoint(pt);
 		paintNow();
 		return;
 	}
@@ -127,30 +125,49 @@ void CurvePane::mouseDown(wxMouseEvent& event)
 		if ((pos.x > x-radius) & (pos.x < x+radius)) {
 			if ((pos.y > y-radius) & (pos.y < y+radius)) {
 				c.insertpoint(x,y);
-				mouseCP.x = x;
-				mouseCP.y = y;
-				selectedCP = mouseCP;
-				mousemotion=true;
+				selectedCP.x = x;
+				selectedCP.y = y;
 				paintNow();
-				break;
+				return;
 			}
 		}
 	}
-	//Refresh();
-	//paintNow();
-	event.Skip();
 }
 
 void CurvePane::mouseReleased(wxMouseEvent& event)
 {
 	mousemotion=false;
 	paintNow();
-	event.Skip();
 	if (mousemoved) {
 		wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 		e->SetString("This is the data");
 		wxQueueEvent(p,e);
 	}
+}
+
+void CurvePane::mouseRightDown(wxMouseEvent& event)
+{
+	c.clearpoints();
+	c.insertpoint(0,0);
+	c.insertpoint(255.0,255.0);
+	selectedCP.x = -1.0;
+	selectedCP.y = -1.0;
+	paintNow();
+	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
+	e->SetString("This is the data");
+	wxQueueEvent(p,e);
+}
+
+void CurvePane::mouseDclick(wxMouseEvent& event)
+{
+	if (c.isendpoint(selectedCP.x, selectedCP.y, radius)) return;
+	c.deletepoint(selectedCP.x, selectedCP.y);
+	selectedCP.x = -1.0;
+	selectedCP.y = -1.0;
+	paintNow();
+	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
+	e->SetString("This is the data");
+	wxQueueEvent(p,e);
 }
 
 void CurvePane::mouseWheelMoved(wxMouseEvent& event)
@@ -160,8 +177,7 @@ void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 	else
 		z--;
 	if (z<1) z=1;
-	Refresh();
-	event.Skip();
+	//Refresh();
 }
 
 void CurvePane::keyPressed(wxKeyEvent &event)
@@ -275,11 +291,11 @@ void CurvePane::render(wxDC&  dc)
 	//if (mousemotion)dc.DrawCircle(pos,5);
 	std::vector<cp> controlpts = c.getControlPoints();
 	for (unsigned int i=0; i<controlpts.size(); i++) {
-		if ((controlpts[i].x == selectedCP.x) & (controlpts[i].y == selectedCP.y) & HasFocus()) {
+		if ((controlpts[i].x == selectedCP.x) & (controlpts[i].y == selectedCP.y)) {
 			//dc.DrawText(wxString::Format("%d,%d",selectedCP.x,selectedCP.y),selectedCP.x-20,selectedCP.y-20);
 			dc.SetPen(*wxRED_PEN);
 		}
-		dc.DrawCircle(m+controlpts[i].x,h-m-controlpts[i].y,5);
+		dc.DrawCircle(m+controlpts[i].x,h-m-controlpts[i].y,radius);
 		dc.SetPen(*wxBLACK_PEN);
 	}
 }
