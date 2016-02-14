@@ -72,6 +72,7 @@ void PicProcessorCrop::showParams()
 void PicProcessorCrop::paramChanged(wxCommandEvent& event)
 {
 	setParams(event.GetString());
+	processPic();
 }
 
 void PicProcessorCrop::CropMode(bool c)

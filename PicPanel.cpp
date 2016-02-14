@@ -416,7 +416,7 @@ END_EVENT_TABLE()
 	void PicPanel::OnLeftDown(wxMouseEvent& event)
 	{
 		SetFocus();
-		int radius = 5;
+		int radius = 20;
 		MouseX = event.m_x;
 		MouseY = event.m_y;
 		if (cropmode) {

@@ -98,7 +98,7 @@ wxString PicProcessor::getParams()
 void PicProcessor::setParams(wxString params)
 {
 	c = params;
-	processPic();
+//	processPic();
 }
 
 void PicProcessor::showParams()

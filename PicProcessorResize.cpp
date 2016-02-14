@@ -52,6 +52,7 @@ class ResizePanel: public PicProcPanel
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%s,%s,%s",widthedit->GetValue(),heightedit->GetValue(),algoselect->GetString(algoselect->GetSelection())));
+			q->processPic();
 			event.Skip();
 		}
 

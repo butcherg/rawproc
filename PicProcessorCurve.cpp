@@ -34,7 +34,7 @@ class CurvePanel: public PicProcPanel
 		{
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 			q->setParams(curve->getControlPoints());
-			//((PicProcessorCurve *) q)->setParams(curve->getPoints(), curve->getControlPoints());  //nice try, not working, should replace previous two lines...
+			q->processPic();
 			event.Skip();
 		}
 

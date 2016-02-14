@@ -264,7 +264,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "curve")      p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	else if (name == "gray")       p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
 	else if (name == "crop")       p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
-	else if (name == "resize")       p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
+	else if (name == "resize")     p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -610,7 +610,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	// insert your code here
 	SetStatusText("");
 	PicProcessorBright *g = new PicProcessorBright("bright","0", commandtree, pic, parameters);
-	g->processPic();
+	//g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
 }
@@ -623,7 +623,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	// insert your code here
 	SetStatusText("");
 	PicProcessorContrast *c = new PicProcessorContrast("contrast","0", commandtree, pic, parameters);
-	c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -632,7 +632,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorSaturation *c = new PicProcessorSaturation("saturation","1.0", commandtree, pic, parameters);
-	c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -641,7 +641,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
-	crv->processPic();
+	//crv->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
 }
@@ -650,7 +650,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0", commandtree, pic, parameters);
-	shd->processPic();
+	//shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
 }
@@ -659,7 +659,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorHighlight *s = new PicProcessorHighlight("highlight","0", commandtree, pic, parameters);
-	s->processPic();
+	//s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
 }
@@ -677,7 +677,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorCrop *c = new PicProcessorCrop("crop",commandtree, pic, parameters);
-	c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }

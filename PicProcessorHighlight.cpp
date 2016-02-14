@@ -34,6 +34,7 @@ class HighlightPanel: public PicProcPanel
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%d",slide->GetIntValue()));
+			q->processPic();
 			event.Skip();
 		}
 
