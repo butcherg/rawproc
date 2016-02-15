@@ -65,6 +65,7 @@ class GrayPanel: public PicProcPanel
 			gr = greenslide->GetDoubleValue();
 			bl = blueslide->GetDoubleValue();
 			q->setParams(wxString::Format("%0.2f,%0.2f,%0.2f",rd,gr,bl));
+			q->processPic();
 			Refresh();
 			Update();
 			event.Skip();
