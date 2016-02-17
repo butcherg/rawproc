@@ -98,13 +98,19 @@ void myTouchSlider::render(wxDC&  dc)
 
 	double valmag = (val - mn)/inc;
 
-	dc.DrawText(lbl, w/2-lt.GetWidth()/2, 0);
+	if (pressedDown)
+		dc.DrawText(v, w/2-t.GetWidth()/2, 0);
+	else
+		dc.DrawText(lbl, w/2-lt.GetWidth()/2, 0);
 	dc.DrawRoundedRectangle(0,20,w,h-20,10);
 	//dc.DrawRoundedRectangle( 2, h-dcval-40-1, w-4, 40, 10 );
 	//dc.DrawText(v, w/2-t.GetWidth()/2, h-dcval+8-40 );
 
 	dc.DrawRoundedRectangle( 2, h-int(valmag)-40-1, w-4, 40, 10 );
-	dc.DrawText(v, w/2-t.GetWidth()/2, h-int(valmag)+8-40 );
+	if (pressedDown)
+		dc.DrawText(lbl, w/2-lt.GetWidth()/2, h-int(valmag)+8-40 );
+	else
+		dc.DrawText(v, w/2-t.GetWidth()/2, h-int(valmag)+8-40 );
 }
  
 void myTouchSlider::mouseDown(wxMouseEvent& event)

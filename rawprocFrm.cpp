@@ -358,9 +358,10 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 			dib = tmpdib;
 		}
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
+		picdata->showParams();
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
-		picdata->showParams();
+		//picdata->showParams();
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 		SetStatusText("scale: fit",1);

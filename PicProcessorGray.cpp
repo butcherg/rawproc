@@ -18,7 +18,8 @@ class GrayPanel: public PicProcPanel
 	public:
 		GrayPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			int sliderwidth = 60;
+			SetSize(parent->GetSize());
+			int sliderwidth = 70;
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString p = split(params,",");
 
@@ -27,7 +28,7 @@ class GrayPanel: public PicProcPanel
 			bl = atof(p[2]);
 			b->SetOrientation(wxHORIZONTAL);
 
-			b->AddStretchSpacer(1);
+			//b->AddStretchSpacer(1);
 			b->Add(20,0,1,wxEXPAND);
 			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", sliderwidth, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
 			b->Add(redslide, flags);
