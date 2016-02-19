@@ -653,7 +653,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorHighlight *s = new PicProcessorHighlight("highlight","0", commandtree, pic, parameters);
+	PicProcessorHighlight *s = new PicProcessorHighlight("highlight","0,192", commandtree, pic, parameters);
 	//s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());

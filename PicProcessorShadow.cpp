@@ -7,20 +7,6 @@
 #include "myTouchSlider.h"
 #include "util.h"
 
-#include <vector>
-wxString getCPs(Curve ctrlpts)
-{
-	wxString s = "";
-	bool first = true;
-	std::vector<cp> pts = ctrlpts.getControlPoints();
-	for (unsigned int i=0; i<pts.size(); i++) {
-		if (!first) s.Append(",");
-		first=false;
-		s.Append(wxString::Format("%.1f,%.1f",pts[i].x,pts[i].y));
-	}
-	return s;
-}
-
 class ShadowPanel: public PicProcPanel
 {
 	public:
@@ -57,7 +43,7 @@ class ShadowPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%02f,%02f",slide->GetDoubleValue(),threshold->GetDoubleValue()));
+			q->setParams(wxString::Format("%0.2f,%0.2f",slide->GetDoubleValue(),threshold->GetDoubleValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -108,7 +94,6 @@ bool PicProcessorShadow::processPic() {
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		m_tree->SetItemBold(GetId(), false);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
