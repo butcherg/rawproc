@@ -644,7 +644,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0", commandtree, pic, parameters);
+	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0,64", commandtree, pic, parameters);
 	//shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
