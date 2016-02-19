@@ -14,10 +14,10 @@
 class GrayPanel: public PicProcPanel
 {
 
-//blank panel for now, until I implement a channel mixer...
 	public:
 		GrayPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			c = new wxBoxSizer(wxHORIZONTAL); 
 			SetSize(parent->GetSize());
 			int sliderwidth = 70;
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
@@ -26,17 +26,23 @@ class GrayPanel: public PicProcPanel
 			rd = atof(p[0]);
 			gr = atof(p[1]);
 			bl = atof(p[2]);
-			b->SetOrientation(wxHORIZONTAL);
+			//b->SetOrientation();
 
 			//b->AddStretchSpacer(1);
-			b->Add(20,0,1,wxEXPAND);
+			c->Add(15,0,1,wxEXPAND);
 			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", sliderwidth, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
-			b->Add(redslide, flags);
+			c->Add(redslide, flags);
 			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", sliderwidth, atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
-			b->Add(greenslide, flags);
+			c->Add(greenslide, flags);
 			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", sliderwidth, atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
-			b->Add(blueslide, flags);
-			b->AddStretchSpacer(1);
+			c->Add(blueslide, flags);
+			c->AddStretchSpacer(1);
+			c->Layout();
+
+			b->Add(c,flags);
+
+			t = new wxStaticText(this,-1, wxString::Format("Total: %2.2f", rd+gr+bl), wxDefaultPosition, wxSize(100,20));
+			b->Add(t, flags);
 
 			SetSizerAndFit(b);
 			b->Layout();
@@ -51,21 +57,16 @@ class GrayPanel: public PicProcPanel
 			redslide->~myTouchSlider();
 			greenslide->~myTouchSlider();
 			blueslide->~myTouchSlider();
+			t->~wxStaticText();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			double r = redslide->GetDoubleValue();
-			double g = greenslide->GetDoubleValue();
-			double b = blueslide->GetDoubleValue();
-	 		double dr = rd-r; double dg = gr-g; double db = bl - b;
-			if (dr != 0.0) { greenslide->SetValue(gr+(dr/2)); blueslide->SetValue(bl+(dr/2)); }
-			else if (dg != 0.0) { redslide->SetValue(rd+(dg/2)); blueslide->SetValue(bl+(dg/2)); }
-			else if (db != 0.0) { redslide->SetValue(rd+(db/2)); greenslide->SetValue(gr+(db/2)); }
 			rd = redslide->GetDoubleValue();
 			gr = greenslide->GetDoubleValue();
 			bl = blueslide->GetDoubleValue();
-			q->setParams(wxString::Format("%0.2f,%0.2f,%0.2f",rd,gr,bl));
+			t->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
+			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",rd,gr,bl));
 			q->processPic();
 			Refresh();
 			Update();
@@ -74,9 +75,10 @@ class GrayPanel: public PicProcPanel
 
 
 	private:
-		//wxPanel *panel;
 		myTouchSlider *redslide, *greenslide, *blueslide;
 		double rd, gr, bl;
+		wxBoxSizer *c;
+		wxStaticText *t;
 
 };
 
