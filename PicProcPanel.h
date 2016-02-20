@@ -13,6 +13,7 @@
 #endif
 
 #include "PicProcessor.h"
+#define SLIDERWIDTH 70
 
 class PicProcessor;
 

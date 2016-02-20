@@ -13,7 +13,7 @@ class SaturationPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "saturate", 60, atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "saturate", SLIDERWIDTH, atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
 			b->Add(100,100,1);
 			b->Add(slide, flags);
 			b->Add(100,100,1);

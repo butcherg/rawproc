@@ -19,7 +19,6 @@ class GrayPanel: public PicProcPanel
 		{
 			c = new wxBoxSizer(wxHORIZONTAL); 
 			SetSize(parent->GetSize());
-			int sliderwidth = 70;
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString p = split(params,",");
 
@@ -30,11 +29,11 @@ class GrayPanel: public PicProcPanel
 
 			//b->AddStretchSpacer(1);
 			c->Add(15,0,1,wxEXPAND);
-			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", sliderwidth, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
+			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", SLIDERWIDTH, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
 			c->Add(redslide, flags);
-			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", sliderwidth, atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
+			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", SLIDERWIDTH, atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
 			c->Add(greenslide, flags);
-			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", sliderwidth, atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
+			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", SLIDERWIDTH, atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
 			c->Add(blueslide, flags);
 			c->AddStretchSpacer(1);
 			c->Layout();

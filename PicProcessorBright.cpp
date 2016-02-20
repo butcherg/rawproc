@@ -13,7 +13,7 @@ class BrightPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "bright", 60, atof(p.c_str()), 1.0, -100.0, 100.0, "%2.0f");
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "bright", SLIDERWIDTH, atof(p.c_str()), 1.0, -100.0, 100.0, "%2.0f");
 			b->Add(100,100,1);
 			b->Add(slide, flags);
 			b->Add(100,100,1);
