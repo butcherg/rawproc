@@ -9,7 +9,7 @@
 class CropPanel: public PicProcPanel
 {
 	public:
-		CropPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		CropPanel(wxPanel *parent, PicProcessorCrop *proc, wxString params): PicProcPanel(parent, (PicProcessor *) proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			panel = new wxPanel(this);
@@ -27,6 +27,7 @@ class CropPanel: public PicProcPanel
 			((PicProcessorCrop *) q)->CropMode(false);
 			panel->~wxPanel();
 		}
+
 
 	private:
 		wxPanel *panel;
@@ -72,7 +73,7 @@ void PicProcessorCrop::showParams()
 void PicProcessorCrop::paramChanged(wxCommandEvent& event)
 {
 	setParams(event.GetString());
-	//processPic();
+	processPic();
 }
 
 void PicProcessorCrop::CropMode(bool c)
