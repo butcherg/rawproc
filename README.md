@@ -58,16 +58,6 @@ couldn't get it to work right in the Windows/Mingw32 environment.  Once you have
 you should be able to run 'make -f Makefile.txt' in the directory containing the rawproc source code.  Oh, make sure
 you make a 'linux' or 'win' subdirectory in the rawproc directory to hold the object and executable files.
 
-As of today (1/29/2016), rawproc does essentially everything I set out to implement for my own purposes.  I'm still working
-on a few things, though:
-
-- aspect ratio lock for crop
-- RGB channel mixer for gray (2/2/2016: Implemented the RGB sliders, but still needs more work...)
-- a better touch slider (2/2/2016: Now used for saturation and gray...)
-- shell command processing to make use of dcraw input and exiftool EXIF migration
-- at this time, resize is just hard-coded to 640x480 and Catmull-Rom interpolation; I'm going to add parameter tools to 
-  do more (2/2/2016: Done.)
-  
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
 learning.  My C++ skills are spotty, and look a lot more like C in some places.  But I learned a ton about digital imaging
