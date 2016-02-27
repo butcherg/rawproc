@@ -108,6 +108,7 @@ bool PicProcessorResize::processPic() {
 		int bpp = FreeImage_GetBPP(dib);
 		if (bpp == 8 |bpp == 24 | bpp == 32 | bpp == 48) {
 			dib = FreeImage_Rescale(dib, width, height, filter);
+			dirty = false;
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);

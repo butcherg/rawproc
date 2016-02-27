@@ -74,6 +74,7 @@ bool PicProcessorSaturation::processPic() {
 			if (!FreeImage_Saturate16(dib,saturation)) {
 				result = false;
 			}
+			else dirty = false;
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);

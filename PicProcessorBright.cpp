@@ -72,6 +72,7 @@ bool PicProcessorBright::processPic() {
 			if (!FreeImage_AdjustBrightness(dib,bright)) {
 				result = false;
 			}
+			else dirty = false;
 		}
 		else if(bpp == 48) {
 			WORD LUT[65535];
@@ -79,6 +80,7 @@ bool PicProcessorBright::processPic() {
 			if (!FreeImage_AdjustCurve16(dib, LUT, FICC_RGB)) {
 				result = false;;
 			}
+			else dirty = false;
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);

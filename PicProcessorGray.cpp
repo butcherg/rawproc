@@ -111,6 +111,7 @@ bool PicProcessorGray::processPic() {
 			if (!FreeImage_Gray16(dib, r, g, b)) {
 				result = false;
 			}
+			else dirty = false;
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);

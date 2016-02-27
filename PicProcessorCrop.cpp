@@ -9,7 +9,7 @@
 class CropPanel: public PicProcPanel
 {
 	public:
-		CropPanel(wxPanel *parent, PicProcessorCrop *proc, wxString params): PicProcPanel(parent, (PicProcessor *) proc, params)
+		CropPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, (PicProcessor *) proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			panel = new wxPanel(this);
@@ -112,7 +112,10 @@ bool PicProcessorCrop::processPic() {
 		if (bpp == 48 |bpp == 24 | bpp == 32) {
 			if (dib) FreeImage_Unload(dib);
 			dib = FreeImage_Copy(previous, left, top, right, bottom);
-			if (!dib) wxMessageBox(wxString::Format("crop failed, %s",getParams()));
+			if (!dib) 
+				wxMessageBox(wxString::Format("crop failed, %s",getParams()));
+			else
+				dirty = false;
 		}
 		else result = false; 
 

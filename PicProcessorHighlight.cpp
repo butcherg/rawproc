@@ -88,7 +88,10 @@ bool PicProcessorHighlight::processPic() {
 	if (dib) {
 		int bpp = FreeImage_GetBPP(dib);
 		m_tree->SetItemBold(GetId(), true);
-		if (!FreeImage_AdjustCurveControlPoints(dib, ctrlpts.getControlPoints(), FICC_RGB)) result = false;
+		if (!FreeImage_AdjustCurveControlPoints(dib, ctrlpts.getControlPoints(), FICC_RGB)) 
+			result = false;
+		else
+			dirty = false;
 		if (prev) FreeImage_Unload(prev);
 
 		//put in every processPic()...

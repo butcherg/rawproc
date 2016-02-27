@@ -91,6 +91,7 @@ bool PicProcessorCurve::processPic() {
 			//wxMessageBox("curve processing didn't go so well...");
 			result = false;
 		}
+		else dirty = false;
 		if (prev) FreeImage_Unload(prev);
 
 		//put in every processPic()...

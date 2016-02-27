@@ -71,6 +71,7 @@ bool PicProcessorContrast::processPic() {
 			if (!FreeImage_AdjustContrast(dib,contrast)) {
 				result = false;
 			}
+			else dirty = false;
 		}
 		else if(bpp == 48) {
 			WORD LUT[65535];
@@ -78,6 +79,7 @@ bool PicProcessorContrast::processPic() {
 			if (!FreeImage_AdjustCurve16(dib, LUT, FICC_RGB)) {
 				result = false;;
 			}
+			else dirty = false;
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);
