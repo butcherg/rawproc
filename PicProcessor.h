@@ -49,7 +49,8 @@ class PicProcessor: public wxTreeItemData
 
 		wxPanel *m_parameters;
 		PicProcPanel *r;
-		
+
+		bool dirty;
 
 };
 

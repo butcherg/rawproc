@@ -47,6 +47,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 		m_tree->SelectItem(id);
 	}
 	m_tree->ExpandAll();
+	dirty = true;
 }
 
 
@@ -65,6 +66,7 @@ bool PicProcessor::processPic() {
 		if (dib) FreeImage_Unload(dib);
 		dib = FreeImage_Clone(s);
 	}
+	dirty = false;
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) displayProcessedPic();
@@ -98,6 +100,7 @@ wxString PicProcessor::getParams()
 void PicProcessor::setParams(wxString params)
 {
 	c = params;
+	dirty = true;
 //	processPic();
 }
 
@@ -126,6 +129,7 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 
 FIBITMAP *PicProcessor::getProcessedPic() 
 {
+	if (dirty) processPic();
 	return dib;
 }
 
