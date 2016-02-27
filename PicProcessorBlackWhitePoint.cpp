@@ -68,7 +68,7 @@ void PicProcessorBlackWhitePoint::showParams()
 }
 
 bool PicProcessorBlackWhitePoint::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("highlight...");
+	((wxFrame*) m_parameters->GetParent())->SetStatusText("black/white point...");
 	m_tree->SetItemBold(GetId(), true);
 
 	wxArrayString cp = split(getParams(),",");
