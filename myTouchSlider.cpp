@@ -22,6 +22,7 @@ END_EVENT_TABLE()
 myTouchSlider::myTouchSlider(wxFrame* parent,  wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format):
 wxWindow(parent, id, wxPoint(0,0), wxSize(-1, int(((max-min)/increment)+44.0+20)))
 {
+	t = new wxTimer(this);
 	vsize = int((max-min)/increment);
 	SetMinSize( wxSize(250, vsize+44.0+20) );
 	SetSize(parent->GetSize());
@@ -34,12 +35,14 @@ wxWindow(parent, id, wxPoint(0,0), wxSize(-1, int(((max-min)/increment)+44.0+20)
 	mx = max; 
 	fmt = format;
 	pressedDown = false;
+	Bind(wxEVT_TIMER, &myTouchSlider::OnTimer,  this);
 	paintNow();
 }
 
 myTouchSlider::myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, int width, double initialvalue, double increment, double min, double max, wxString format):
 wxWindow(parent, id, wxPoint(0,0), wxSize(width, int(((max-min)/increment)+44.0+20)))
 {
+	t = new wxTimer(this);
 	vsize = int((max-min)/increment);
 	SetMaxSize( wxSize(width, vsize+44.0+20) );
 	//SetSize(parent->GetSize());
@@ -52,7 +55,13 @@ wxWindow(parent, id, wxPoint(0,0), wxSize(width, int(((max-min)/increment)+44.0+
 	mx = max; 
 	fmt = format;
 	pressedDown = false;
+	Bind(wxEVT_TIMER, &myTouchSlider::OnTimer,  this);
 	paintNow();
+}
+
+myTouchSlider::~myTouchSlider()
+{
+	t->~wxTimer();
 }
 
 double myTouchSlider::GetDoubleValue()
@@ -119,7 +128,6 @@ void myTouchSlider::mouseDown(wxMouseEvent& event)
 	py = event.GetY();
 	pressedDown = true;
 	paintNow();
-	//event.Skip();
 }
 
 void myTouchSlider::mouseMoved(wxMouseEvent& event) 
@@ -131,7 +139,6 @@ void myTouchSlider::mouseMoved(wxMouseEvent& event)
 		py = event.GetY();
 		paintNow();
 	}
-	//event.Skip();
 }
 
 void myTouchSlider::mouseReleased(wxMouseEvent& event)
@@ -141,7 +148,6 @@ void myTouchSlider::mouseReleased(wxMouseEvent& event)
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	//event.Skip();
 }
 
 void myTouchSlider::mouseLeftWindow(wxMouseEvent& event)
@@ -151,7 +157,6 @@ void myTouchSlider::mouseLeftWindow(wxMouseEvent& event)
 		pressedDown = false;
 		paintNow();
 	}
-	//event.Skip();
 }
  
 
@@ -163,7 +168,6 @@ void myTouchSlider::mouseDoubleClicked(wxMouseEvent& event)
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	//event.Skip();
 }
 
 void myTouchSlider::mouseWheelMoved(wxMouseEvent& event) 
@@ -176,10 +180,15 @@ void myTouchSlider::mouseWheelMoved(wxMouseEvent& event)
 	if (val>mx) val=mx;
 	py = event.GetY();
 	paintNow();
+
+	t->Start(500,wxTIMER_ONE_SHOT);
+}
+
+void myTouchSlider::OnTimer(wxTimerEvent& event)
+{
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 	e->SetString(wxString::Format(fmt, val));
 	wxQueueEvent(GetParent(),e);
-	//event.Skip();
 }
 
 void myTouchSlider::rightClick(wxMouseEvent& event) {}

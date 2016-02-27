@@ -19,12 +19,15 @@ class myTouchSlider : public wxWindow
 	wxString fmt;
 	int px, py;
 	int vsize;
+	wxTimer *t;
  
 public:
 	//default width:
 	myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, double initialvalue, double increment, double min, double max, wxString format="%3.0f");
 	//explicit width:
 	myTouchSlider(wxFrame* parent, wxWindowID id, wxString label, int width, double initialvalue, double increment, double min, double max, wxString format="%3.0f");
+
+	~myTouchSlider();
 
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
@@ -44,6 +47,7 @@ public:
 	void mouseLeftWindow(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent& event);
 	void keyReleased(wxKeyEvent& event);
+	void OnTimer(wxTimerEvent& event);
  
 	DECLARE_EVENT_TABLE()
 };
