@@ -14,17 +14,17 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			wxArrayString p = split(params,",");
 
-			double shd = atof(p[0]);
-			double thr = atof(p[1]);
+			double blk = atof(p[0]);
+			double wht = atof(p[1]);
 
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "shadow", SLIDERWIDTH, shd, 1.0, -50.0, 50.0, "%2.0f");
-			threshold = new myTouchSlider((wxFrame *) this, wxID_ANY, "threshold", SLIDERWIDTH, thr, 1.0, 128.0, 223.0, "%2.0f");
+			black = new myTouchSlider((wxFrame *) this, wxID_ANY, "black", SLIDERWIDTH, blk, 1.0, 0.0, 255.0, "%2.0f");
+			white = new myTouchSlider((wxFrame *) this, wxID_ANY, "white", SLIDERWIDTH, wht, 1.0, 0.0, 255.0, "%2.0f");
 			b->Add(50,100,1);
-			b->Add(slide, flags);
-			b->Add(threshold, flags);
+			b->Add(black, flags);
+			b->Add(white, flags);
 			b->Add(50,100,1);
 			SetSizerAndFit(b);
 			b->Layout();
@@ -37,20 +37,20 @@ class BlackWhitePointPanel: public PicProcPanel
 
 		~BlackWhitePointPanel()
 		{
-			slide->~myTouchSlider();
-			threshold->~myTouchSlider();
+			black->~myTouchSlider();
+			white->~myTouchSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%0.2f,%0.2f",slide->GetDoubleValue(),threshold->GetDoubleValue()));
+			q->setParams(wxString::Format("%0.2f,%0.2f",black->GetDoubleValue(),white->GetDoubleValue()));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		myTouchSlider *slide, *threshold;
+		myTouchSlider *black, *white;
 
 };
 
@@ -72,15 +72,15 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	m_tree->SetItemBold(GetId(), true);
 
 	wxArrayString cp = split(getParams(),",");
-	double shd = atof(cp[0]);
-	double thr = atof(cp[1]);
+	double blk = atof(cp[0]);
+	double wht = atof(cp[1]);
 
 	Curve ctrlpts;
-	ctrlpts.insertpoint(0,0);
-	ctrlpts.insertpoint(thr-20,thr-20);
-	ctrlpts.insertpoint(thr,thr);
-	ctrlpts.insertpoint((thr+thr/2)-shd,(thr+thr/2)+shd);
-	ctrlpts.insertpoint(255,255);
+	ctrlpts.insertpoint(blk,0);
+	//ctrlpts.insertpoint(thr-20,thr-20);
+	//ctrlpts.insertpoint(thr,thr);
+	//ctrlpts.insertpoint((thr+thr/2)-shd,(thr+thr/2)+shd);
+	ctrlpts.insertpoint(wht,255);
 	
 	bool result = true;
 	FIBITMAP *prev = dib;

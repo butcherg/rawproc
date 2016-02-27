@@ -26,6 +26,7 @@
 #include "PicProcessorGray.h"
 #include "PicProcessorCrop.h"
 #include "PicProcessorResize.h"
+#include "PicProcessorBlackWhitePoint.h"
 #include "myFileSelector.h"
 #include "util.h"
 
@@ -66,6 +67,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
 	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
 	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
+	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -133,6 +135,7 @@ void rawprocFrm::CreateGUIControls()
 	
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
@@ -680,6 +683,15 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorResize *c = new PicProcessorResize("resize", "640,0,bicubic", commandtree, pic, parameters);
+	c->processPic();
+	wxSafeYield(this);
+	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+}
+
+void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
+{
+	SetStatusText("");
+	PicProcessorBlackWhitePoint *c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());

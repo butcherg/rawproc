@@ -92,6 +92,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_SHOWCOMMAND = 1021,
 			ID_MNU_ABOUT = 1022,
 			ID_MNU_EXIT = 1023,
+			ID_MNU_BLACKWHITEPOINT = 1024,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -133,6 +134,7 @@ class rawprocFrm : public wxFrame
 	void MnuGrayClick(wxCommandEvent& event);
 	void MnuCropClick(wxCommandEvent& event);
 	void MnuResizeClick(wxCommandEvent& event);
+	void MnuBlackWhitePointClick(wxCommandEvent& event);
 	void Mnusave1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);
 	void MnuCut1201Click(wxCommandEvent& event);
