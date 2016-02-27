@@ -18,7 +18,7 @@ ifeq ($(UNAME), x86_64-linux-gnu)
 	OBJDIR=linux
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -66,6 +66,9 @@ $(OBJDIR)/PicProcPanel.o: PicProcPanel.cpp
 
 $(OBJDIR)/PicPanel.o: PicPanel.cpp
 	$(CXX)  $(FIFLAGS) $(WXFLAGS) -c PicPanel.cpp  -o$@
+
+$(OBJDIR)/PicProcessorBlackWhitePoint.o: PicProcessorBlackWhitePoint.cpp
+	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorBlackWhitePoint.cpp    -o$@
 
 $(OBJDIR)/PicProcessorHighlight.o: PicProcessorHighlight.cpp
 	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorHighlight.cpp    -o$@
