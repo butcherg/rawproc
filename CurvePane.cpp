@@ -254,7 +254,7 @@ void CurvePane::render(wxDC&  dc)
 	dc.Clear();
 	int w, h;
 	dc.GetSize(&w, &h);
-	int m=10;
+	int m=12;
 
 	
 	//x axis:

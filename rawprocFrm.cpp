@@ -174,9 +174,9 @@ void rawprocFrm::CreateGUIControls()
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 	pic = new PicPanel(this);
 
-	//wxPanel parms = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,280),wxVSCROLL);
+	//wxPanel parms = new wxPanel(this, -1, wxDefaultPosition, wxSize(285,280),wxVSCROLL);
 	//parameters = new wxScrolled<wxPanel>(parms);
-	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(280,320));
+	parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(285,320));
 	//parameters->SetBackgroundColour(*wxBLUE);
 
 	mgr.AddPane(pic, wxCENTER);
@@ -373,6 +373,7 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 		pic->FitMode(true);
 		Refresh();
 		Update();
+		//wxSafeYield(this);
 	}
 	else {
 		SetStatusText(wxString::Format("Loading %s failed.",filename.GetFullName() ));
