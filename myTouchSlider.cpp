@@ -138,6 +138,9 @@ void myTouchSlider::mouseMoved(wxMouseEvent& event)
 		if (val>mx) val=mx;
 		py = event.GetY();
 		paintNow();
+		wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBTRACK);
+		e->SetString(wxString::Format(fmt, val));
+		wxQueueEvent(GetParent(),e);
 	}
 }
 
@@ -180,7 +183,9 @@ void myTouchSlider::mouseWheelMoved(wxMouseEvent& event)
 	if (val>mx) val=mx;
 	py = event.GetY();
 	paintNow();
-
+	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBTRACK);
+	e->SetString(wxString::Format(fmt, val));
+	wxQueueEvent(GetParent(),e);
 	t->Start(500,wxTIMER_ONE_SHOT);
 }
 

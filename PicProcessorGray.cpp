@@ -49,6 +49,7 @@ class GrayPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(GrayPanel::paramChanged));
+			Connect(wxID_ANY, wxEVT_SCROLL_THUMBTRACK,wxCommandEventHandler(GrayPanel::valChanged));
 		}
 
 		~GrayPanel()
@@ -57,6 +58,17 @@ class GrayPanel: public PicProcPanel
 			greenslide->~myTouchSlider();
 			blueslide->~myTouchSlider();
 			t->~wxStaticText();
+		}
+
+		void valChanged(wxCommandEvent& event)
+		{
+			rd = redslide->GetDoubleValue();
+			gr = greenslide->GetDoubleValue();
+			bl = blueslide->GetDoubleValue();
+			t->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
+			Refresh();
+			Update();
+			event.Skip();
 		}
 
 		void paramChanged(wxCommandEvent& event)
