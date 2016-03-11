@@ -20,7 +20,7 @@ class HighlightPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "shadow", SLIDERWIDTH, shd, 1.0, -50.0, 50.0, "%2.0f");
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "highlight", SLIDERWIDTH, shd, 1.0, -50.0, 50.0, "%2.0f");
 			threshold = new myTouchSlider((wxFrame *) this, wxID_ANY, "threshold", SLIDERWIDTH, thr, 1.0, 128.0, 223.0, "%2.0f");
 			b->Add(50,100,1);
 			b->Add(slide, flags);
