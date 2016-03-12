@@ -705,11 +705,14 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
  */
 void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 {
-	const char * value = "rawproc 0.1";
+	const char * value = "rawproc 0.2";
 	// insert your code here
-	wxString fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),".tif","JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+	wxString fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
 	if ( !fname.empty() )
 	{
+		if (wxFileName::FileExists(fname)) 
+			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
+				return;
 		// first, check the output format from the file name or file extension
 		FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(fname);
 		if(out_fif != FIF_UNKNOWN) {
