@@ -33,7 +33,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.1";
+wxString version = "0.2";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
