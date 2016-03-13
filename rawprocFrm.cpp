@@ -721,9 +721,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			int flags=100;
 			FIBITMAP *dib;
 			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic();
+				dib = FreeImage_Clone(((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic());
 			else
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic();
+				dib = FreeImage_Clone(((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic());
 
 			if (out_fif == FIF_JPEG) {
 				int bpp = FreeImage_GetBPP(dib);
@@ -744,6 +744,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			WxStatusBar1->SetStatusText("Saving file...");
 			//printf("Saving file %s...",filename.c_str());
 			FreeImage_Save(out_fif, dib, fname, flags);
+			FreeImage_Unload(dib);
 		}
 		else {
 			//printf("Error: bad output file specification:\n",output_filename);
