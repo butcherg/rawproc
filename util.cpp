@@ -140,7 +140,7 @@ wxString FreeImage_Information(FIBITMAP *dib)
             info.Append("FIT_RGBAF 128-bit RGBA float image: 4 x 32-bit IEEE floating point\n");
             break;
     }
-	info.Append(wxString::Format("width: %d height %d\n", FreeImage_GetWidth(dib), FreeImage_GetHeight(dib)));
+	info.Append(wxString::Format("Width: %d\nHeight %d\nBits Per Pixel: %d\n", FreeImage_GetWidth(dib), FreeImage_GetHeight(dib), FreeImage_GetBPP(dib)));
 
 	wxString exif = "";
 	exif.Append(MetadataString("Exif-Main", dib, FIMD_EXIF_MAIN));
@@ -148,12 +148,15 @@ wxString FreeImage_Information(FIBITMAP *dib)
 	wxArrayString exifarray = split(exif, "\n");
 	for (int i=0; i<exifarray.size(); i++) {
 		wxArrayString exifline = split(exifarray[i], ":");
-		if (exifline[0] == "DateTime") info.Append(wxString::Format("Date/Time: %s\n", exifline[1]));
+		if (exifline[0] == "DateTime") info.Append(wxString::Format("Date/Time: %s-%s-%s:%s:%s\n", exifline[1],exifline[2],exifline[3],exifline[4],exifline[5]));
 		if (exifline[0] == "ExposureTime") {
 			wxArrayString foo = split(exifline[1], " ");
 			wxArrayString bar = split(foo[0], "/");
 			info.Append(wxString::Format("Shutter Speed: 1/%d\n", atoi(bar[1])/atoi(bar[0])));
 		}
+		if (exifline[0] == "FNumber") info.Append(wxString::Format("Aperture: %s\n", exifline[1]));
+		if (exifline[0] == "ISOSpeedRatings") info.Append(wxString::Format("ISO: %s\n", exifline[1]));
+		if (exifline[0] == "FocalLength") info.Append(wxString::Format("Focal Length: %s\n", exifline[1]));
 
 	}
 	return info;

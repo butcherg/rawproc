@@ -228,23 +228,37 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	FIBITMAP * dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	exif.Append(MetadataString("Comments", dib, FIMD_COMMENTS));
-	exif.Append(MetadataString("Exif-Main", dib, FIMD_EXIF_MAIN));
-	exif.Append(MetadataString("Exif-Advanced", dib, FIMD_EXIF_EXIF));
-	exif.Append(MetadataString("Exif-GPS", dib, FIMD_EXIF_GPS));
-	exif.Append(MetadataString("Exif-Interop", dib, FIMD_EXIF_INTEROP));
-	exif.Append(MetadataString("IPTC/NAA", dib, FIMD_IPTC));
-	exif.Append(MetadataString("GEOTIFF", dib, FIMD_GEOTIFF));
-	exif.Append(MetadataString("Makernote", dib, FIMD_EXIF_MAKERNOTE));
 
-	exif.Append("\n\n");
+/*
+//exif.Append("Comments:\n");
+	exif.Append(MetadataString("Comments", dib, FIMD_COMMENTS));
+//exif.Append("Exif-Main:\n");
+	exif.Append(MetadataString("Exif-Main", dib, FIMD_EXIF_MAIN));
+//exif.Append("Exif-Advanced:\n");
+	exif.Append(MetadataString("Exif-Advanced", dib, FIMD_EXIF_EXIF));
+//exif.Append("Exif-GPS:\n");
+	exif.Append(MetadataString("Exif-GPS", dib, FIMD_EXIF_GPS));
+//exif.Append("Exif-Interop:\n");
+	exif.Append(MetadataString("Exif-Interop", dib, FIMD_EXIF_INTEROP));
+//exif.Append("IPTC/NAA:\n");
+	exif.Append(MetadataString("IPTC/NAA", dib, FIMD_IPTC));
+//exif.Append("GEOTIFF:\n");
+	exif.Append(MetadataString("GEOTIFF", dib, FIMD_GEOTIFF));
+//exif.Append("Makernote:\n");
+	exif.Append(MetadataString("Makernote", dib, FIMD_EXIF_MAKERNOTE));
+*/
+
+//	exif.Append("\n\n");
 	exif.Append(FreeImage_Information(dib));
+	wxMessageBox(exif,"Image Information");
 	
-	wxDialog *exifdiag = new wxDialog(this, wxID_ANY, "EXIF");
+/*
+	wxDialog *exifdiag = new wxDialog(this, wxID_ANY, "Image Information");
 	wxTextCtrl *exiftxt = new wxTextCtrl(exifdiag, wxID_ANY, exif, wxPoint(0,0), exifdiag->GetSize(), wxTE_READONLY | wxTE_MULTILINE);
 	exifdiag->ShowModal();
 	exiftxt->~wxTextCtrl();
 	exifdiag->~wxDialog();
+*/
 }
 
 PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
@@ -813,8 +827,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
 	wxMenu mnu;
- 	mnu.Append(ID_EXIF, "EXIF...");
- 	mnu.Append(ID_HISTOGRAM, "Histogram...");
+ 	mnu.Append(ID_EXIF, "Image Information...");
+ 	mnu.Append(ID_HISTOGRAM, "Full Histogram...");
 	mnu.AppendSeparator();
 	mnu.Append(ID_DELETE, "Delete");
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
