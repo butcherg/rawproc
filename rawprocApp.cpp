@@ -10,6 +10,8 @@
 #include "rawprocApp.h"
 #include "rawprocFrm.h"
 
+#include <wx/filefn.h>
+
 IMPLEMENT_APP(rawprocFrmApp)
 
 bool rawprocFrmApp::OnInit()
@@ -18,13 +20,19 @@ bool rawprocFrmApp::OnInit()
 	SetTopWindow(frame);
 	frame->Show();
 	if (wxGetApp().argc == 2) {
-		frame->OpenFile(wxGetApp().argv[1],0);
+		wxFileName f(wxGetApp().argv[1]);
+		f.MakeAbsolute();
+		wxSetWorkingDirectory (f.GetPath());
+		frame->OpenFile(f.GetFullName(),0);
 	}
 	else if (wxGetApp().argc == 3) {
+		wxFileName f(wxGetApp().argv[2]);
+		f.MakeAbsolute();
+		wxSetWorkingDirectory (f.GetPath());
 		if (wxGetApp().argv[1] == "-s") 
-			frame->OpenFileSource(wxGetApp().argv[2]);
+			frame->OpenFileSource(f.GetFullName());
 		else
-			frame->OpenFile(wxGetApp().argv[2],0);
+			frame->OpenFile(f.GetFullName(),0);
 	}
 	return true;
 }
