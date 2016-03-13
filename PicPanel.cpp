@@ -109,6 +109,7 @@ END_EVENT_TABLE()
         PicPanel::PicPanel(wxFrame *parent): wxPanel(parent) {
 		parentframe = parent;
 		wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
+		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
 		wxInitAllImageHandlers();
 		SetDoubleBuffered(true);  //watch this one... tricksy...
 		showDebug = true;
