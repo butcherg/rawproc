@@ -15,6 +15,7 @@
 #include <wx/image.h>
 #include <wx/imaglist.h>
 #include <wx/clipbrd.h>
+#include <wx/aboutdlg.h> 
 
 #include "PicProcessorGamma.h"
 #include "PicProcessorBright.h"
@@ -719,8 +720,6 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
  */
 void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 {
-	const char * value = "rawproc 0.2";
-	// insert your code here
 	wxString fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
 	if ( !fname.empty() )
 	{
@@ -816,7 +815,13 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 {
-	wxInfoMessageBox (this);
+	wxAboutDialogInfo info;
+	info.SetName(_("rawproc"));
+	info.SetVersion(_(version));
+	info.SetDescription(_("Basic image manipulation, preserves bit-depth."));
+	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
+
+	wxAboutBox(info);
 
 }
 
