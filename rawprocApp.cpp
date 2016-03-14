@@ -23,16 +23,16 @@ bool rawprocFrmApp::OnInit()
 		wxFileName f(wxGetApp().argv[1]);
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
-		frame->OpenFile(f.GetFullName(),0);
+		frame->OpenFile(f.GetFullPath(),0);
 	}
 	else if (wxGetApp().argc == 3) {
 		wxFileName f(wxGetApp().argv[2]);
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
 		if (wxGetApp().argv[1] == "-s") 
-			frame->OpenFileSource(f.GetFullName());
+			frame->OpenFileSource(f.GetFullPath());
 		else
-			frame->OpenFile(f.GetFullName(),0);
+			frame->OpenFile(f.GetFullPath(),0);
 	}
 	return true;
 }
