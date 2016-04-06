@@ -60,29 +60,28 @@ void PicProcessorSharpen::showParams()
 
 
 bool PicProcessorSharpen::processPic() {
+	double kernel[3][3] =
+	{
+		0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0
+	};
+
 	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("sharpen...");
 	double sharp = atof(c.c_str());
+	double x = -((sharp-1)/4.0);
+	kernel[0][1] = x;
+	kernel[1][0] = x;
+	kernel[1][2] = x;
+	kernel[2][0] = x;
+	kernel[2][2] = x;
+	kernel[1][1] = sharp;
 	bool result = true;
 	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	//dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		if (bpp == 8 |bpp == 24 | bpp == 32) {
-			if (!FreeImage_AdjustBrightness(dib,sharp)) {
-				result = false;
-			}
-			else dirty = false;
-		}
-		else if(bpp == 48) {
-			WORD LUT[65535];
-			FreeImage_GetAdjustColorsLookupTable16(LUT, sharp, 0.0, 0.0, false);
-			if (!FreeImage_AdjustCurve16(dib, LUT, FICC_RGB)) {
-				result = false;;
-			}
-			else dirty = false;
-		}
-		else result = false; 
+		dib = FreeImage_3x3Convolve16(getPreviousPicProcessor()->getProcessedPic(), kernel, NULL, 0);
 		if (prev) FreeImage_Unload(prev);
 
 		//put in every processPic()...
