@@ -19,6 +19,8 @@ bool FreeImage_Saturate16(FIBITMAP *src, double percentage);
 
 bool FreeImage_Gray16(FIBITMAP *src, double Rpct, double Gpct, double Bpct);
 
+FIBITMAP * FreeImage_3x3Convolve16(FIBITMAP *src, double kernel[3][3], FIBITMAP *mask, int threshold);
+
 #endif
 
 
