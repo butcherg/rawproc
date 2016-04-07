@@ -6,6 +6,7 @@ friendly.  It doesn't do image management. With the exception of a saturation to
 the processing applied in the EXIF of the saved image because I do not like the sidecar concept.  It does 16-bit 
 manipulations to 16-bit data.  Here's a list of the implemented manipulations:
 
+- Black/White Point
 - Bright
 - Contrast
 - Crop
@@ -16,15 +17,18 @@ manipulations to 16-bit data.  Here's a list of the implemented manipulations:
 - Resize
 - Saturation
 - Shadow
+- Sharpen
 
 You open an image, add whatever manipulations you want to apply to the list, then save the result.   You determine
-the order of the manipulations; for a RAW image, I apply the default 2.2 gamma first, then a bright to bring the image 
-up to a normal range. In the display, you can toggle the upper-left thumbnail between a small repeat image for panning, 
-a 255-value histogram, and no thumbnail with the 't' key.
+the order of the manipulations; for a RAW image, I apply the default 2.2 gamma first, then add a bright to bring the image 
+up to a normal range. 
 
-So, you can open a RAW file, apply a list of manipulations, and save it as a TIFF.  Using the "Open Source..." menu item,  
+In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, 
+a 255-value histogram, and no thumbnail.
+
+So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  
 you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list 
-saved in the TIFF.  This is my take on 'non-destructive' editing.
+saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata.  This is my take on 'non-destructive' editing.
 
 rawproc also implements what I call 'incremental processing', in that each added manipulation does its thing against the 
 previous one and stores the result; adding a manipulation doesn't restart the whole processing chain, it just pulls the 
@@ -40,7 +44,7 @@ This code is licensed for widespread use under the terms of the GPL.
 
 Contributed code:
 - wxWidgets cross-platform GUI toolkit: http://wxwidgets.org (wxWindows Library Licence, Version 3.1)
-- FreeImage image processing library: http://freeimage.sourceforge.net/ (GPL2)
+- FreeImage image processing library: http://freeimage.sourceforge.net/ (FreeImage License)
 - Cubic Spline interpolation in C++: http://kluge.in-chemnitz.de/opensource/spline/ (GPL2)
 
 I offer no promise of support or enhancement, past offering the code on Github for you to fork. It is organized to compile 
