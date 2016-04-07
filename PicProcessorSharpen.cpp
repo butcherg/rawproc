@@ -79,23 +79,17 @@ bool PicProcessorSharpen::processPic() {
 	bool result = true;
 //wxMessageBox(wxString::Format("%f,%f,%f\n%f,%f,%f\n%f,%f,%f",kernel[0][0],kernel[0][1],kernel[0][2],kernel[1][0],kernel[1][1],kernel[1][2],kernel[2][0],kernel[2][1],kernel[2][2]));
 	FIBITMAP *prev = dib;
-	//dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	//if (dib) {
-		dib = FreeImage_3x3Convolve16(getPreviousPicProcessor()->getProcessedPic(), kernel, NULL, 0);
-		if (prev) FreeImage_Unload(prev);
+	dib = FreeImage_3x3Convolve16(getPreviousPicProcessor()->getProcessedPic(), kernel,  NULL, 0);
+	if (prev) FreeImage_Unload(prev);
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		m_tree->SetItemBold(GetId(), false);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
-	//}
-	//else {	
-	//	result = false;
-	//}
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	m_tree->SetItemBold(GetId(), false);
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
+	}
 	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;

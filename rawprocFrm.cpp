@@ -703,7 +703,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorResize *c = new PicProcessorResize("resize", "640,0,bicubic", commandtree, pic, parameters);
+	PicProcessorResize *c = new PicProcessorResize("resize", "640,0,catmullrom", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
