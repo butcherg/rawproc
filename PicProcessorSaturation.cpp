@@ -33,7 +33,7 @@ class SaturationPanel: public PicProcPanel
 		void paramChanged(wxCommandEvent& event)
 		{
 
-			q->setParams(wxString::Format("%d",slide->GetIntValue()));
+			q->setParams(wxString::Format("%3.1f",slide->GetDoubleValue()));
 			q->processPic();
 			event.Skip();
 		}
