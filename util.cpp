@@ -39,7 +39,7 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 			if (hdata[gray] > hmax) hmax = hdata[gray];
 		}
 	}
-	for (int i=0; i<256; i++) hstr.Append(wxString::Format("%d,",hdata[i]));
+	//for (int i=0; i<256; i++) hstr.Append(wxString::Format("%d,",hdata[i]));
 	wxMemoryDC dc;
 	dc.SelectObject(bmp);
 	dc.Clear();
