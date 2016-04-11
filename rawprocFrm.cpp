@@ -713,7 +713,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorBlackWhitePoint *c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
-	c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -722,7 +722,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", "1", commandtree, pic, parameters);
-	c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 
