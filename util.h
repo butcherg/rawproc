@@ -20,6 +20,12 @@ wxString MetadataString(const char *sectionTitle, FIBITMAP *dib, FREE_IMAGE_MDMO
 
 wxString FreeImage_Information(FIBITMAP *dib);
 
+wxImage FreeImage2wxImage(FIBITMAP* dib);
+
+//use these together:
+wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib);
+wxBitmap HistogramFromData(int width, int height);
+
 #endif
 
 

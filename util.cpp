@@ -21,39 +21,6 @@ wxArrayString split(wxString str, wxString delim)
 	return a;
 }
 
-
-wxBitmap HistogramFrom(wxImage img, int width, int height) 
-
-{
-	int hdata[256];
-	int hmax = 10000;
-	wxBitmap bmp(width, height);  //, outbmp(width, height);
-	for (int i=0; i<256; i++) hdata[i]=0;
-	int iw = img.GetWidth();
-	int ih = img.GetHeight();
-	for (int i=0; i<256; i++) hdata[i] = 0;
-	for (int x=0; x<iw; x++) {
-		for (int y=0; y<ih; y++) {
-			int gray = floor(0.21 * (double) img.GetRed(x,y) + 0.72 * (double) img.GetGreen(x,y) + 0.07 * (double) img.GetBlue(x,y))+0.5;
-			hdata[gray]++;
-			if (hdata[gray] > hmax) hmax = hdata[gray];
-		}
-	}
-	//for (int i=0; i<256; i++) hstr.Append(wxString::Format("%d,",hdata[i]));
-	wxMemoryDC dc;
-	dc.SelectObject(bmp);
-	dc.Clear();
-	dc.SetUserScale((double) width / 256.0, (double) height/ (double) hmax);
-	dc.SetPen(wxPen(wxColour(128,128,128),1));
-	for(int x=0; x<256; x++) {
-		dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
-	}
-
-	dc.SelectObject(wxNullBitmap);
-	return bmp;
-}
-
-
 wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int height) 
 {
 	wxBitmap bmp(width, height); 
@@ -69,6 +36,121 @@ wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int heigh
 	dc.SelectObject(wxNullBitmap);
 	return bmp;
 }
+
+
+
+wxBitmap HistogramFrom(wxImage img, int width, int height) 
+{
+	int hdata[256];
+	int hmax = 0;
+	wxBitmap bmp(width, height);  //, outbmp(width, height);
+	for (int i=0; i<256; i++) hdata[i]=0;
+	int iw = img.GetWidth();
+	int ih = img.GetHeight();
+	for (int i=0; i<256; i++) hdata[i] = 0;
+	int gray;
+	long pos;
+	unsigned char *data = img.GetData();
+	for (int x=0; x<iw; x++) {
+		for (int y=0; y<ih; y++) {
+			pos = (y * iw + x) * 3;
+			gray = (data[pos]+data[pos+1]+data[pos+2]) / 3;
+			hdata[gray]++;
+			if (hdata[gray] > hmax) hmax = hdata[gray];
+		}
+	}
+	wxMemoryDC dc;
+	dc.SelectObject(bmp);
+	dc.Clear();
+	dc.SetUserScale((double) width / 256.0, (double) height/ (double) hmax);
+	dc.SetPen(wxPen(wxColour(128,128,128),1));
+	for(int x=0; x<256; x++) {
+		dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
+	}
+
+	dc.SelectObject(wxNullBitmap);
+	return bmp;
+}
+
+
+
+
+wxImage FreeImage2wxImage(FIBITMAP* dib)
+{
+	unsigned x, y;
+	BYTE *bits = NULL;
+	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
+	if (db == NULL) return NULL;
+	unsigned h = FreeImage_GetHeight(db);
+	unsigned w = FreeImage_GetWidth(db);
+	wxImage img(w, h);
+	long pos;
+	unsigned char *data = img.GetData();
+	int bytespp = FreeImage_GetLine(db) / FreeImage_GetWidth(db);
+
+	for(y = 0; y < h; y++) {
+		bits =  FreeImage_GetScanLine(db, y);
+		for(x = 0; x<w; x++) {
+			pos = ((h-y-1) * w + x) * 3;
+			data[pos] = bits[FI_RGBA_RED]; data[pos+1] = bits[FI_RGBA_GREEN]; data[pos+2] = bits[FI_RGBA_BLUE];
+			bits += bytespp;
+		}
+	}
+	FreeImage_Unload(db);
+	return img;
+}
+
+unsigned hdata[256];
+unsigned hmax;
+
+wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib)
+{
+	unsigned x, y;
+	hmax = 0;
+	BYTE *bits = NULL;
+	for (int i=0; i<=255; i++) hdata[i]=0;
+	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
+	if (db == NULL) return NULL;
+	unsigned h = FreeImage_GetHeight(db);
+	unsigned w = FreeImage_GetWidth(db);
+	wxImage img(w, h);
+	long pos;
+	unsigned char *data = img.GetData();
+	int bytespp = FreeImage_GetLine(db) / FreeImage_GetWidth(db);
+	int tmp; unsigned int gray;
+	for(y = 0; y < h; y++) {
+		bits =  FreeImage_GetScanLine(db, y);
+		for(x = 0; x<w; x++) {
+			pos = ((h-y-1) * w + x) * 3;
+			data[pos] = bits[FI_RGBA_RED]; data[pos+1] = bits[FI_RGBA_GREEN]; data[pos+2] = bits[FI_RGBA_BLUE];
+			gray = (BYTE) ((bits[FI_RGBA_RED]+bits[FI_RGBA_GREEN]+bits[FI_RGBA_BLUE])/3);
+			hdata[gray]++;
+			if (hdata[gray] > hmax) hmax = hdata[gray];
+			bits += bytespp;
+		}
+	}
+	FreeImage_Unload(db);
+	return img;
+}
+
+wxBitmap HistogramFromData(int width, int height) 
+{
+	wxBitmap bmp(width, height);  //, outbmp(width, height);
+	wxMemoryDC dc;
+	dc.SelectObject(bmp);
+	dc.Clear();
+	dc.SetUserScale((double) width / 256.0, (double) height/ (double) hmax);
+	dc.SetPen(wxPen(wxColour(128,128,128),1));
+	for(int x=0; x<256; x++) {
+		dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
+	}
+
+	dc.SelectObject(wxNullBitmap);
+	return bmp;
+}
+
+
+
 
 wxString MetadataString(const char *sectionTitle, FIBITMAP *dib, FREE_IMAGE_MDMODEL model) {
 	FITAG *tag = NULL;
@@ -161,6 +243,7 @@ wxString FreeImage_Information(FIBITMAP *dib)
 	}
 	return info;
 }
+
 
 
 /*

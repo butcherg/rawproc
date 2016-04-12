@@ -1,95 +1,7 @@
 
-
 #include "PicPanel.h"
 #include "util.h"
 #include <vector>
-
-/*
-/// INPLACESWAP adopted from codeguru.com 
-template <class T> void INPLACESWAP(T& a, T& b) {
-	a ^= b; b ^= a; a ^= b;
-}
-
-BOOL SwapRedBlue32(FIBITMAP* dib) {
-	if(FreeImage_GetImageType(dib) != FIT_BITMAP) {
-		return FALSE;
-	}
-		
-	const unsigned bytesperpixel = FreeImage_GetBPP(dib) / 8;
-	if(bytesperpixel > 4 || bytesperpixel < 3) {
-		return FALSE;
-	}
-		
-	const unsigned height = FreeImage_GetHeight(dib);
-	const unsigned pitch = FreeImage_GetPitch(dib);
-	const unsigned lineSize = FreeImage_GetLine(dib);
-	
-	BYTE* line = FreeImage_GetBits(dib);
-	for(unsigned y = 0; y < height; ++y, line += pitch) {
-		for(BYTE* pixel = line; pixel < line + lineSize ; pixel += bytesperpixel) {
-			INPLACESWAP(pixel[0], pixel[2]);
-		}
-	}
-	
-	return TRUE;
-}
-
-*/
-
-wxImage FreeImage2wxImage(FIBITMAP* dib)
-{
-	unsigned x, y;
-	BYTE *bits = NULL;
-	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
-	if (db == NULL) return NULL;
-	unsigned h = FreeImage_GetHeight(db);
-	unsigned w = FreeImage_GetWidth(db);
-	wxImage img(w, h);
-	int bytespp = FreeImage_GetLine(db) / FreeImage_GetWidth(db);
-
-	for(y = 0; y < h; y++) {
-		bits =  FreeImage_GetScanLine(db, y);
-		for(x = 0; x<w; x++) {
-			img.SetRGB(x,h-y-1,bits[FI_RGBA_RED],bits[FI_RGBA_GREEN],bits[FI_RGBA_BLUE]); //invert y for mirrored wximage
-			bits += bytespp;
-		}
-	}
-	FreeImage_Unload(db);
-	return img;
-}
-
-std::vector<int> histdata;
-int hmax;
-
-wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib)
-{
-	unsigned x, y;
-	hmax = 0;
-	BYTE *bits = NULL;
-	histdata.clear();
-	histdata.resize(256);
-	for (int i=0; i<=255; i++) histdata[i]=0;
-	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
-	if (db == NULL) return NULL;
-	unsigned h = FreeImage_GetHeight(db);
-	unsigned w = FreeImage_GetWidth(db);
-	wxImage img(w, h);
-	int bytespp = FreeImage_GetLine(db) / FreeImage_GetWidth(db);
-
-	for(y = 0; y < h; y++) {
-		bits =  FreeImage_GetScanLine(db, y);
-		for(x = 0; x<w; x++) {
-			img.SetRGB(x,h-y-1,bits[FI_RGBA_RED],bits[FI_RGBA_GREEN],bits[FI_RGBA_BLUE]); //invert y for mirrored wximage
-			unsigned int gray = (BYTE) floor((bits[FI_RGBA_RED]*0.3+bits[FI_RGBA_GREEN]*0.59+bits[FI_RGBA_BLUE]*0.11) + 0.5);
-			//if (gray>255) gray=255;
-			histdata[gray]++;
-			if (histdata[gray] > hmax) hmax = histdata[gray];
-			bits += bytespp;
-		}
-	}
-	FreeImage_Unload(db);
-	return img;
-}
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -387,6 +299,7 @@ END_EVENT_TABLE()
 		if (toggleThumb == 2) {
 			if (!hsgram.IsOk()) {
 				parentframe->SetStatusText("histogram...");
+				//hsgram = HistogramFromData(thumb->GetWidth(), thumb->GetHeight());
 				hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
 				parentframe->SetStatusText("");
 			}
