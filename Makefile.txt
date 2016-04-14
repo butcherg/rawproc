@@ -104,7 +104,7 @@ $(OBJDIR)/PicProcessorSharpen.o: PicProcessorSharpen.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorSharpen.cpp   -o$@
 
 $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -c PicProcessor.cpp   -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessor.cpp   -o$@
 
 $(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c rawprocFrm.cpp    -o$@

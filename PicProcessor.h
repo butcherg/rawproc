@@ -12,6 +12,7 @@
 #include <wx/treectrl.h>
 #include <wx/sizer.h>
 #include <wx/event.h>
+#include <wx/thread.h>
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
@@ -21,7 +22,7 @@ class PicProcPanel;
 
 class PicPanel;
 
-class PicProcessor: public wxTreeItemData
+class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 {
 
 	public:
@@ -51,6 +52,26 @@ class PicProcessor: public wxTreeItemData
 		PicProcPanel *r;
 
 		bool dirty;
+
+		int threadcount;
+
+};
+
+
+class ConvolveThread : public wxThread
+{
+public:
+	ConvolveThread(FIBITMAP *src, FIBITMAP *dst, unsigned startrow, unsigned increment, double kernel[3][3]);
+	~ConvolveThread();
+protected:
+	virtual ExitCode Entry();
+
+	PicProcessor *parent;
+	FIBITMAP *src;
+	FIBITMAP *dst;
+	unsigned startrow;
+	unsigned increment;
+	double kernel[3][3];
 
 };
 

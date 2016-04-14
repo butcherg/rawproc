@@ -1,4 +1,5 @@
 #include "FreeImage.h"
+#include "FreeImage16.h"
 //#include "Utilities.h"
 #include "saturation.h"
 #include "Curve.h"
@@ -6,16 +7,7 @@
 #include <stdint.h>
 
 
-//Lifted from FreeImage's Utilities.h:
-/// Max function
-template <class T> T MAX(const T &a, const T &b) {
-	return (a > b) ? a: b;
-}
 
-/// Min function
-template <class T> T MIN(const T &a, const T &b) {
-	return (a < b) ? a: b;
-}
 
 bool FreeImage_AdjustCurve16(FIBITMAP *src, WORD *LUT, FREE_IMAGE_COLOR_CHANNEL channel) {
 	unsigned x, y;
