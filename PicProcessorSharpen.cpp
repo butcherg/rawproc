@@ -98,7 +98,7 @@ bool PicProcessorSharpen::processPic() {
 		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
 		t.pop_back();
 	}
-
+	dirty = false;
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
