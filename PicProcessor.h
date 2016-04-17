@@ -12,7 +12,7 @@
 #include <wx/treectrl.h>
 #include <wx/sizer.h>
 #include <wx/event.h>
-#include <wx/thread.h>
+//#include <wx/thread.h>
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"

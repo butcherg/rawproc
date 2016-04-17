@@ -16,7 +16,7 @@ class SharpenPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "sharpen", SLIDERWIDTH, atof(p.c_str()), 1.0, 1.0, 10.0, "%2.0f");
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "sharpen", SLIDERWIDTH, atof(p.c_str()), 1.0, 0.0, 10.0, "%2.0f");
 			b->Add(100,100,1);
 			b->Add(slide, flags);
 			b->Add(100,100,1);
@@ -76,7 +76,7 @@ bool PicProcessorSharpen::processPic() {
 
 	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("sharpen...");
-	double sharp = atof(c.c_str());
+	double sharp = atof(c.c_str())+1.0;
 	double x = -((sharp-1)/4.0);
 	kernel[0][1] = x;
 	kernel[1][0] = x;
