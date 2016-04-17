@@ -1,5 +1,6 @@
 #include "PicProcessor.h"
 #include "PicProcessorSharpen.h"
+#include "ThreadedConvolve.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
@@ -70,7 +71,8 @@ bool PicProcessorSharpen::processPic() {
 		0.0, 0.0, 0.0
 	};
 
-	std::vector<ConvolveThread *> t;
+	std::vector<ThreadedConvolve *> t;
+	int threadcount;
 
 	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("sharpen...");
@@ -84,14 +86,13 @@ bool PicProcessorSharpen::processPic() {
 	bool result = true;
 
 	threadcount = wxThread::GetCPUCount();
-	if (threadcount > 16) threadcount = 16;
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 
 	for (int i=0; i<threadcount; i++) {
 		//ConvolveThread c(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel);
 		//t.push_back(c);
-		t.push_back(new ConvolveThread(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
+		t.push_back(new ThreadedConvolve(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
 		t.back()->Run();
 	}
 	while (!t.empty()) {
