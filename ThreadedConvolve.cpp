@@ -80,7 +80,6 @@ wxThread::ExitCode ThreadedConvolve::Entry()
 						int ix=kx*3;
 						for (int ky=0; ky<3; ky++) { 
 							int i = ix+ky;
-							//BYTE *pixel = (BYTE *) srcbits + spitch*iy + 3*ix;
 							BYTE *pixel = (BYTE *) srcbits + spitch*(y-1+ky) + 3*(x-1+kx);
 							R += pixel[FI_RGBA_RED]   * kernel[kx][ky];
 							G += pixel[FI_RGBA_GREEN] * kernel[kx][ky];
