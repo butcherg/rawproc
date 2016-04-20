@@ -46,31 +46,26 @@ wxThread::ExitCode ThreadedConvolve::Entry()
 	switch(bpp) {
 		case 48:
 			for(y = startrow+1; y < FreeImage_GetHeight(src)-1; y+=increment) {
-				//bits =  FreeImage_GetScanLine(src, y);
-				FIRGB16 *srcbits = (FIRGB16 *)FreeImage_GetScanLine(src, y);
-				FIRGB16 *dstbits = (FIRGB16 *)FreeImage_GetScanLine(dst, y);
-				//BYTE * maskbits = (BYTE *)FreeImage_GetScanLine(mask,y);
 				for(x = 1; x < FreeImage_GetWidth(src)-1; x++) {
+					wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
 					R=0.0; G=0.0; B=0.0;
 					for (int kx=0; kx<3; kx++) {
+						int ix=kx*3;
 						for (int ky=0; ky<3; ky++) {
-							int ix = x-1+kx;
-							int iy = y-1+ky;
-							FreeImage_GetPixelColor16(src, ix, iy, &value);
-							//FIRGB16 *pixel = (FIRGB16 *) dibbits +(pitch*(iy))+(ix*(bytespp));
-							R += value.red   * kernel[kx][ky];
-							G += value.green * kernel[kx][ky];
-							B += value.blue  * kernel[kx][ky];
-
+							int i = ix+ky;
+							FIRGB16 *pixel = (FIRGB16 *) (srcbits + spitch*(y-1+ky) + 6*(x-1+kx));
+							R += pixel->red   * kernel[kx][ky];
+							G += pixel->green * kernel[kx][ky];
+							B += pixel->blue  * kernel[kx][ky];
 						}
+						wdstpix->red   = MIN(MAX(int(R), 0), 65535);
+						wdstpix->green = MIN(MAX(int(G), 0), 65535);
+						wdstpix->blue  = MIN(MAX(int(B), 0), 65535);
 					}
-					dstbits[x].red   = MIN(MAX(int(R), 0), 65535);
-					dstbits[x].green = MIN(MAX(int(G), 0), 65535);
-					dstbits[x].blue  = MIN(MAX(int(B), 0), 65535);
+
 				}
 			}
-			break;
-            
+			break;	            
 		case 24 :
 			for(y = startrow+1; y < FreeImage_GetHeight(src)-1; y+=increment) {
 				for(x = 1; x < FreeImage_GetWidth(src)-1; x++) {
