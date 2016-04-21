@@ -21,6 +21,20 @@ bool FreeImage_Gray16(FIBITMAP *src, double Rpct, double Gpct, double Bpct);
 
 FIBITMAP * FreeImage_3x3Convolve16(FIBITMAP *src, double kernel[3][3], FIBITMAP *mask, int threshold);
 
+bool FreeImage_GetPixelColor16(FIBITMAP *dib, unsigned x, unsigned y, FIRGB16 *value);
+
+
+//Lifted from FreeImage's Utilities.h:
+/// Max function
+template <class T> T MAX(const T &a, const T &b) {
+	return (a > b) ? a: b;
+}
+
+/// Min function
+template <class T> T MIN(const T &a, const T &b) {
+	return (a < b) ? a: b;
+}
+
 #endif
 
 

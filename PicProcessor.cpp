@@ -1,8 +1,10 @@
 
 #include "PicProcessor.h"
+#include "FreeImage16.h"
+#include "util.h"
 #include <wx/event.h>
 
-class BlankPanel: public PicProcPanel
+class BlankPanel: public PicProcPanel 
 {
 	public:
 		BlankPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
@@ -151,3 +153,4 @@ void PicProcessor::displayProcessedPic()
 		}
 	}
 }
+

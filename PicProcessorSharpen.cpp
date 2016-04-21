@@ -1,9 +1,12 @@
 #include "PicProcessor.h"
 #include "PicProcessorSharpen.h"
+#include "ThreadedConvolve.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
 #include "myTouchSlider.h"
+
+#include <vector>
 
 class SharpenPanel: public PicProcPanel
 {
@@ -13,7 +16,7 @@ class SharpenPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "sharpen", SLIDERWIDTH, atof(p.c_str()), 1.0, 1.0, 10.0, "%2.0f");
+			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "sharpen", SLIDERWIDTH, atof(p.c_str()), 1.0, 0.0, 10.0, "%2.0f");
 			b->Add(100,100,1);
 			b->Add(slide, flags);
 			b->Add(100,100,1);
@@ -49,6 +52,7 @@ PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTree
 	//p->DestroyChildren();
 	//r = new SharpenPanel(p,this,c);
 	showParams();
+	//Bind(wxEVT_THREAD, &PicProcessorSharpen::endProcessPic, this);
 }
 
 void PicProcessorSharpen::showParams()
@@ -67,9 +71,12 @@ bool PicProcessorSharpen::processPic() {
 		0.0, 0.0, 0.0
 	};
 
+	std::vector<ThreadedConvolve *> t;
+	int threadcount;
+
 	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("sharpen...");
-	double sharp = atof(c.c_str());
+	double sharp = atof(c.c_str())+1.0;
 	double x = -((sharp-1)/4.0);
 	kernel[0][1] = x;
 	kernel[1][0] = x;
@@ -77,10 +84,22 @@ bool PicProcessorSharpen::processPic() {
 	kernel[2][1] = x;
 	kernel[1][1] = sharp;
 	bool result = true;
-//wxMessageBox(wxString::Format("%f,%f,%f\n%f,%f,%f\n%f,%f,%f",kernel[0][0],kernel[0][1],kernel[0][2],kernel[1][0],kernel[1][1],kernel[1][2],kernel[2][0],kernel[2][1],kernel[2][2]));
-	FIBITMAP *prev = dib;
-	dib = FreeImage_3x3Convolve16(getPreviousPicProcessor()->getProcessedPic(), kernel,  NULL, 0);
-	if (prev) FreeImage_Unload(prev);
+
+	threadcount = wxThread::GetCPUCount();
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+
+	for (int i=0; i<threadcount; i++) {
+		//ConvolveThread c(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel);
+		//t.push_back(c);
+		t.push_back(new ThreadedConvolve(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
+		t.back()->Run();
+	}
+	while (!t.empty()) {
+		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+		t.pop_back();
+	}
+	dirty = false;
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
@@ -92,8 +111,10 @@ bool PicProcessorSharpen::processPic() {
 	}
 	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+
 	return result;
 }
+
 
 
 
