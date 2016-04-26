@@ -5,6 +5,7 @@
 #include "FreeImage.h"
 #include "FreeImage16.h"
 #include "myTouchSlider.h"
+#include "util.h"
 
 #include <vector>
 #include <wx/fileconf.h>
@@ -50,10 +51,7 @@ class SharpenPanel: public PicProcPanel
 
 PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	//p->DestroyChildren();
-	//r = new SharpenPanel(p,this,c);
 	showParams();
-	//Bind(wxEVT_THREAD, &PicProcessorSharpen::endProcessPic, this);
 }
 
 void PicProcessorSharpen::showParams()
@@ -92,15 +90,20 @@ bool PicProcessorSharpen::processPic() {
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 
-	for (int i=0; i<threadcount; i++) {
-		//ConvolveThread c(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel);
-		//t.push_back(c);
-		t.push_back(new ThreadedConvolve(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
-		t.back()->Run();
-	}
-	while (!t.empty()) {
-		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
-		t.pop_back();
+	if (sharp > 1.0) {
+		mark();
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedConvolve(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
+			t.back()->Run();
+		}
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			t.pop_back();
+		}
+		wxString d = duration();
+		if (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1")
+			log(wxString::Format("tool=sharpen,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 	}
 	dirty = false;
 

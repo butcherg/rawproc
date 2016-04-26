@@ -4,6 +4,13 @@
 	#include <wx/wxprec.h>
 #endif
 
+#ifdef WIN32
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+
+#include <wx/fileconf.h>
 #include <wx/tokenzr.h>
 #include <vector>
 #include "FreeImage.h"
@@ -242,6 +249,80 @@ wxString FreeImage_Information(FIBITMAP *dib)
 
 	}
 	return info;
+}
+
+
+//cross-platform duration:
+
+#ifdef WIN32
+timeval s,f;
+timeval diff(timeval start, timeval end)
+{
+	timeval temp;
+	if ((end.tv_usec-start.tv_usec)<0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+		temp.tv_usec = 1000000+end.tv_usec-start.tv_usec;
+	} else {
+		temp.tv_sec = end.tv_sec-start.tv_sec;
+		temp.tv_usec = end.tv_usec-start.tv_usec;
+	}
+	return temp;
+}
+
+void mark ()
+{
+	gettimeofday(&s, NULL);
+}
+
+wxString duration ()
+{
+	gettimeofday(&f, NULL);
+	timeval d = diff(s,f);
+	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_usec);
+}
+#else
+timespec s,f;
+timespec diff(timespec start, timespec end)
+{
+	timespec temp;
+	if ((end.tv_nsec-start.tv_nsec)<0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+	} else {
+		temp.tv_sec = end.tv_sec-start.tv_sec;
+		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+	}
+	return temp;
+}
+
+void mark ()
+{
+	clock_gettime(CLOCK_MONOTONIC,&s);
+}
+
+wxString duration ()
+{
+	clock_gettime(CLOCK_MONOTONIC,&f);
+	timespec d = diff(s,f);
+	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_nsec);
+}
+#endif
+
+// end of cross-platform duration
+
+//File logging:
+void log(wxString msg)
+{
+	wxString logfile = wxConfigBase::Get()->Read("log.filename","");
+	if (logfile == "") return;
+	FILE * f = fopen(logfile.c_str(), "a");
+	if (f) {
+		fputs(wxNow().c_str(), f);
+		fputs(" - ",f);
+		fputs(msg,f);
+		fputs("\n",f);
+		fclose(f);
+	}
 }
 
 
