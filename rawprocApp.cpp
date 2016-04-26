@@ -11,6 +11,8 @@
 #include "rawprocFrm.h"
 
 #include <wx/filefn.h>
+#include <wx/fileconf.h>
+#include <wx/stdpaths.h>
 
 IMPLEMENT_APP(rawprocFrmApp)
 
@@ -34,11 +36,14 @@ bool rawprocFrmApp::OnInit()
 		else
 			frame->OpenFile(f.GetFullPath(),0);
 	}
+
+	wxConfigBase::Set(new wxFileConfig("rawproc", "", wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf"));
 	return true;
 }
  
 int rawprocFrmApp::OnExit()
 {
+	delete wxConfigBase::Get();
 	return 0;
 }
 

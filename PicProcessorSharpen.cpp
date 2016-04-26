@@ -7,6 +7,7 @@
 #include "myTouchSlider.h"
 
 #include <vector>
+#include <wx/fileconf.h>
 
 class SharpenPanel: public PicProcPanel
 {
@@ -75,7 +76,7 @@ bool PicProcessorSharpen::processPic() {
 	int threadcount;
 
 	m_tree->SetItemBold(GetId(), true);
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("sharpen...");
+
 	double sharp = atof(c.c_str())+1.0;
 	double x = -((sharp-1)/4.0);
 	kernel[0][1] = x;
@@ -85,7 +86,9 @@ bool PicProcessorSharpen::processPic() {
 	kernel[1][1] = sharp;
 	bool result = true;
 
-	threadcount = wxThread::GetCPUCount();
+	wxConfigBase::Get()->Read("tool.sharpen.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	((wxFrame*) m_parameters->GetParent())->SetStatusText(wxString::Format("sharpen, %d cores...",threadcount));
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 

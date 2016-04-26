@@ -16,6 +16,7 @@
 #include <wx/imaglist.h>
 #include <wx/clipbrd.h>
 #include <wx/aboutdlg.h> 
+#include <wx/fileconf.h>
 
 #include "PicProcessorGamma.h"
 #include "PicProcessorBright.h"
@@ -614,6 +615,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
 	// insert your code here
 	SetStatusText("");
+	wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 	PicProcessorGamma *g = new PicProcessorGamma("gamma","2.2", commandtree, pic, parameters);	
 	g->processPic();
 	wxSafeYield(this);
@@ -628,8 +630,9 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
 	// insert your code here
 	SetStatusText("");
-	PicProcessorBright *g = new PicProcessorBright("bright","0", commandtree, pic, parameters);
-	//g->processPic();
+	wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
+	PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
+	if (val != "0") g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
 }
@@ -641,8 +644,9 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
 	// insert your code here
 	SetStatusText("");
-	PicProcessorContrast *c = new PicProcessorContrast("contrast","0", commandtree, pic, parameters);
-	//c->processPic();
+	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
+	PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
+	if (val != "0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -650,8 +654,9 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorSaturation *c = new PicProcessorSaturation("saturation","1.0", commandtree, pic, parameters);
-	//c->processPic();
+	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
+	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
+	if (val != "0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -668,6 +673,9 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
 	SetStatusText("");
+	wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
+	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
+	wxString cmd= wxString::Format("%s,%s",level,threshold);
 	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0,64", commandtree, pic, parameters);
 	//shd->processPic();
 	wxSafeYield(this);
@@ -677,7 +685,10 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorHighlight *s = new PicProcessorHighlight("highlight","0,192", commandtree, pic, parameters);
+	wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
+	wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
+	wxString cmd= wxString::Format("%s,%s",level,threshold);
+	PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
 	//s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
@@ -686,7 +697,11 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorGray *gr = new PicProcessorGray("gray","0.21,0.72,0.07", commandtree, pic, parameters);
+	wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
+	wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
+	wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
+	wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
+	PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
 	gr->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
@@ -703,7 +718,11 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorResize *c = new PicProcessorResize("resize", "640,0,catmullrom", commandtree, pic, parameters);
+	wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
+	wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
+	wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
+	wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
+	PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
@@ -721,8 +740,9 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", "0", commandtree, pic, parameters);
-	//c->processPic();
+	wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
+	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
+	if (defval != "0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 
@@ -745,7 +765,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 		if(out_fif != FIF_UNKNOWN) {
 			// then save the file
 			
-			int flags=100;
+			long flags=100;
+			wxConfigBase::Get()->Read("output.jpegquality",&flags,100);
 			FIBITMAP *dib;
 			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
 				dib = FreeImage_Clone(((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic());
@@ -770,7 +791,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			WxStatusBar1->SetStatusText("Saving file...");
 			//printf("Saving file %s...",filename.c_str());
-			FreeImage_Save(out_fif, dib, fname, flags);
+			FreeImage_Save(out_fif, dib, fname, (int) flags);
 			FreeImage_Unload(dib);
 		}
 		else {
