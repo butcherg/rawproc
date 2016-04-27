@@ -32,14 +32,13 @@ class ResizePanel: public PicProcPanel
 				}
 			}
 			b->Add(algoselect, flags);	
-			b->Add(new wxButton(this,-1, "Apply", wxDefaultPosition, wxSize(200,30)), flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Bind(wxEVT_BUTTON,&ResizePanel::paramChanged, this);
-	
+			Bind(wxEVT_TEXT_ENTER,&ResizePanel::paramChanged, this);
+			Bind(wxEVT_RADIOBOX,&ResizePanel::paramChanged, this);	
 		}
 
 		~ResizePanel()
