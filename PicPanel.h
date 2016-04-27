@@ -37,6 +37,7 @@ class PicPanel: public wxPanel
 	void SetCropRatio(int r);
 	wxString getHistogramString();
 	double GetScale();
+	void SetScale(double s);
 	void SetScaleToWidth();
 	void SetScaleToWidth(double percentofwidth);
 	void FitMode(bool f);

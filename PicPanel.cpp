@@ -165,6 +165,15 @@ END_EVENT_TABLE()
 		}
 	}
 
+	void PicPanel::SetScale(double s)
+	{
+		scale = s;
+		FitMode(false);
+		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),1);
+		Refresh();
+		Update();
+	}
+
 	void PicPanel::ToggleCropMode()
 	{
 		cropmode = !cropmode;

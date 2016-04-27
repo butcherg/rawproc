@@ -724,6 +724,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
 	PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
 	c->processPic();
+	pic->SetScale(1.0);
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
