@@ -422,10 +422,14 @@ END_EVENT_TABLE()
 					else
 						cropH += (MouseY-y)/scale;
 					if (cropratio==1) {
-						if (anchorx) 
+						if (anchorx) {
 							cropH = cropW * aspectH;
-						else
+						}
+						else {
 							cropW = cropH * aspectW;
+						}
+						if (cropX+cropW > img.GetWidth())  cropX = img.GetWidth()-cropW;
+						if (cropY+cropH > img.GetHeight()) cropY = img.GetHeight()-cropH;
 					}
 					MouseX = x; MouseY = y;
 					Refresh();
@@ -443,6 +447,8 @@ END_EVENT_TABLE()
 						else
 							cropW = cropH * aspectW;
 					}
+					if (cropX+cropW > img.GetWidth())  cropX = img.GetWidth()-cropW;
+					if (cropY+cropH > img.GetHeight()) cropY = img.GetHeight()-cropH;
 					MouseX = x; MouseY = y;
 					Refresh();
 					Update();
