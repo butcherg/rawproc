@@ -1,9 +1,13 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
+#include "ThreadedSaturate.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
 #include "myTouchSlider.h"
+#include "util.h"
+
+#include <wx/fileconf.h>
 
 class SaturationPanel: public PicProcPanel
 {
@@ -62,22 +66,32 @@ void PicProcessorSaturation::showParams()
 
 bool PicProcessorSaturation::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("saturation...");
-	m_tree->SetItemBold(GetId(), true);
 	double saturation = atof(c.c_str());
 	bool result = true;
-	FIBITMAP *prev = dib;
+	std::vector<ThreadedSaturate *> t;
+	int threadcount = 1;
+	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	((wxFrame*) m_parameters->GetParent())->SetStatusText(wxString::Format("saturate, %d cores...",threadcount));
+	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		m_tree->SetItemBold(GetId(), true);
-		if (bpp == 48 |bpp == 24 | bpp == 32) {
-			if (!FreeImage_Saturate16(dib,saturation)) {
-				result = false;
-			}
-			else dirty = false;
+
+	if (saturation != 1.0) {
+		mark();
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedSaturate(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, saturation));
+			t.back()->Run();
 		}
-		else result = false; 
-		if (prev) FreeImage_Unload(prev);
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			t.pop_back();
+		}
+		wxString d = duration();
+		if (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1")
+			log(wxString::Format("tool=saturate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	}
+	dirty = false;
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
@@ -87,12 +101,8 @@ bool PicProcessorSaturation::processPic() {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
 			nextitem->processPic();
 		}
-		
-	}
-	else {
-		result = false;
-	}
-	m_tree->SetItemBold(GetId(), false);
+
+
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }
