@@ -646,7 +646,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
 	PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
-	if (val != "0") c->processPic();
+	// c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -656,7 +656,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
-	if (val != "0") c->processPic();
+	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }

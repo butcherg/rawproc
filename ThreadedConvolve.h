@@ -16,7 +16,7 @@
 class ThreadedConvolve : public wxThread
 {
 public:
-	ThreadedConvolve(FIBITMAP *src, FIBITMAP *dst, unsigned startrow, unsigned increment, double kernel[3][3]);
+	ThreadedConvolve(FIBITMAP *psrc, FIBITMAP *pdst, unsigned pstartrow, unsigned pincrement, double pkernel[3][3]);
 	~ThreadedConvolve();
 
 protected:
