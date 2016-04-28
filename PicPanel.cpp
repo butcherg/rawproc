@@ -110,7 +110,8 @@ END_EVENT_TABLE()
 		if (histogram) histogram->~wxBitmap();
 
 		//img = FreeImage2wxImageAndHistogram(dib);
-		img = FreeImage2wxImage(dib);
+		//img = FreeImage2wxImage(dib);
+		img = ThreadedFreeImage2wxImage(dib);
 
 		cropX = 0;
 		cropY = 0;

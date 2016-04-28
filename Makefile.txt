@@ -18,7 +18,7 @@ ifeq ($(UNAME), x86_64-linux-gnu)
 	OBJDIR=linux
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o ThreadedWxConvert.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -46,9 +46,11 @@ $(OBJDIR)/util.o: util.cpp
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
 
+$(OBJDIR)/ThreadedWxConvert.o: ThreadedWxConvert.cpp
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedWxConvert.cpp -o$@
+
 $(OBJDIR)/ThreadedSaturate.o: ThreadedSaturate.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedSaturate.cpp -o$@
-
 
 $(OBJDIR)/ThreadedConvolve.o: ThreadedConvolve.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedConvolve.cpp -o$@

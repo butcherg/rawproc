@@ -14,6 +14,7 @@
 #include <wx/tokenzr.h>
 #include <vector>
 #include "FreeImage.h"
+#include "ThreadedWxConvert.h"
 
 wxString hstr="";
 
@@ -27,6 +28,80 @@ wxArrayString split(wxString str, wxString delim)
 	}
 	return a;
 }
+
+//cross-platform duration:
+
+#ifdef WIN32
+timeval s,f;
+timeval diff(timeval start, timeval end)
+{
+	timeval temp;
+	if ((end.tv_usec-start.tv_usec)<0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+		temp.tv_usec = 1000000+end.tv_usec-start.tv_usec;
+	} else {
+		temp.tv_sec = end.tv_sec-start.tv_sec;
+		temp.tv_usec = end.tv_usec-start.tv_usec;
+	}
+	return temp;
+}
+
+void mark ()
+{
+	gettimeofday(&s, NULL);
+}
+
+wxString duration ()
+{
+	gettimeofday(&f, NULL);
+	timeval d = diff(s,f);
+	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_usec);
+}
+#else
+timespec s,f;
+timespec diff(timespec start, timespec end)
+{
+	timespec temp;
+	if ((end.tv_nsec-start.tv_nsec)<0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+	} else {
+		temp.tv_sec = end.tv_sec-start.tv_sec;
+		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+	}
+	return temp;
+}
+
+void mark ()
+{
+	clock_gettime(CLOCK_MONOTONIC,&s);
+}
+
+wxString duration ()
+{
+	clock_gettime(CLOCK_MONOTONIC,&f);
+	timespec d = diff(s,f);
+	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_nsec);
+}
+#endif
+
+// end of cross-platform duration
+
+//File logging:
+void log(wxString msg)
+{
+	wxString logfile = wxConfigBase::Get()->Read("log.filename","");
+	if (logfile == "") return;
+	FILE * f = fopen(logfile.c_str(), "a");
+	if (f) {
+		fputs(wxNow().c_str(), f);
+		fputs(" - ",f);
+		fputs(msg,f);
+		fputs("\n",f);
+		fclose(f);
+	}
+}
+
 
 wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int height) 
 {
@@ -79,31 +154,73 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	return bmp;
 }
 
+wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
+{
+	mark();
+	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
+	if (db == NULL) return NULL;
+	wxImage img(FreeImage_GetWidth(db), FreeImage_GetHeight(db));
+	unsigned char *data = img.GetData();
 
+	std::vector<ThreadedWxConvert *> t;
+	int threadcount = 1;
+	wxConfigBase::Get()->Read("display.wxconvert.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+
+	for (int i=0; i<threadcount; i++) {
+		t.push_back(new ThreadedWxConvert(db, data, i,threadcount));
+		t.back()->Run();
+	}
+	while (!t.empty()) {
+		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+		t.pop_back();
+	}
+
+	FreeImage_Unload(db);
+	wxString d = duration();
+	if (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1")
+		log(wxString::Format("tool=wxconvert,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	return img;
+}
 
 
 wxImage FreeImage2wxImage(FIBITMAP* dib)
 {
+mark();
+int threadcount = 1;
 	unsigned x, y;
 	BYTE *bits = NULL;
+	long pos;
+
 	FIBITMAP *db = FreeImage_ConvertTo24Bits(dib);
 	if (db == NULL) return NULL;
 	unsigned h = FreeImage_GetHeight(db);
 	unsigned w = FreeImage_GetWidth(db);
 	wxImage img(w, h);
-	long pos;
 	unsigned char *data = img.GetData();
 	int bytespp = FreeImage_GetLine(db) / FreeImage_GetWidth(db);
 
+	unsigned dpitch = FreeImage_GetPitch(db);
+	void * dstbits = FreeImage_GetBits(db);
+
 	for(y = 0; y < h; y++) {
-		bits =  FreeImage_GetScanLine(db, y);
+		bits = (BYTE *) dstbits + dpitch*y;
+		pos = ((h-y-1) * w * 3);
 		for(x = 0; x<w; x++) {
-			pos = ((h-y-1) * w + x) * 3;
-			data[pos] = bits[FI_RGBA_RED]; data[pos+1] = bits[FI_RGBA_GREEN]; data[pos+2] = bits[FI_RGBA_BLUE];
+			//pos = ((h-y-1) * w + x) * 3;  //old pos computation
+			data[pos]   = bits[FI_RGBA_RED]; 
+			data[pos+1] = bits[FI_RGBA_GREEN]; 
+			data[pos+2] = bits[FI_RGBA_BLUE];
 			bits += bytespp;
+			pos += 3;
 		}
 	}
 	FreeImage_Unload(db);
+wxString d = duration();
+if (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1")
+	log(wxString::Format("tool=wxconvert(old-noscanline3),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 	return img;
 }
 
@@ -112,6 +229,8 @@ unsigned hmax;
 
 wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib)
 {
+mark();
+int threadcount = 1;
 	unsigned x, y;
 	hmax = 0;
 	BYTE *bits = NULL;
@@ -137,6 +256,10 @@ wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib)
 		}
 	}
 	FreeImage_Unload(db);
+wxString d = duration();
+if (wxConfigBase::Get()->Read("tool.wxconvert.log","0") == "1")
+	log(wxString::Format("tool=wxconvert(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 	return img;
 }
 
@@ -252,78 +375,6 @@ wxString FreeImage_Information(FIBITMAP *dib)
 }
 
 
-//cross-platform duration:
-
-#ifdef WIN32
-timeval s,f;
-timeval diff(timeval start, timeval end)
-{
-	timeval temp;
-	if ((end.tv_usec-start.tv_usec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_usec = 1000000+end.tv_usec-start.tv_usec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_usec = end.tv_usec-start.tv_usec;
-	}
-	return temp;
-}
-
-void mark ()
-{
-	gettimeofday(&s, NULL);
-}
-
-wxString duration ()
-{
-	gettimeofday(&f, NULL);
-	timeval d = diff(s,f);
-	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_usec);
-}
-#else
-timespec s,f;
-timespec diff(timespec start, timespec end)
-{
-	timespec temp;
-	if ((end.tv_nsec-start.tv_nsec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
-	}
-	return temp;
-}
-
-void mark ()
-{
-	clock_gettime(CLOCK_MONOTONIC,&s);
-}
-
-wxString duration ()
-{
-	clock_gettime(CLOCK_MONOTONIC,&f);
-	timespec d = diff(s,f);
-	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_nsec);
-}
-#endif
-
-// end of cross-platform duration
-
-//File logging:
-void log(wxString msg)
-{
-	wxString logfile = wxConfigBase::Get()->Read("log.filename","");
-	if (logfile == "") return;
-	FILE * f = fopen(logfile.c_str(), "a");
-	if (f) {
-		fputs(wxNow().c_str(), f);
-		fputs(" - ",f);
-		fputs(msg,f);
-		fputs("\n",f);
-		fclose(f);
-	}
-}
 
 
 

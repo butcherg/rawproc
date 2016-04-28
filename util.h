@@ -22,6 +22,8 @@ wxString FreeImage_Information(FIBITMAP *dib);
 
 wxImage FreeImage2wxImage(FIBITMAP* dib);
 
+wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib);
+
 //use these together:
 wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib);
 wxBitmap HistogramFromData(int width, int height);
