@@ -30,6 +30,7 @@
 #include "PicProcessorResize.h"
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcessorSharpen.h"
+#include "PicProcessorRotate.h"
 #include "myFileSelector.h"
 #include "util.h"
 
@@ -72,6 +73,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
 	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
 	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
+	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -148,6 +150,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
@@ -283,6 +286,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
 	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -747,6 +751,16 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 
+}
+
+void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
+{
+	SetStatusText("");
+	wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
+	PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
+	if (defval != "0.0") c->processPic();
+	wxSafeYield(this);
+	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
 
 
