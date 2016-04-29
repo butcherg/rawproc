@@ -3,9 +3,11 @@
 #include <wx/dnd.h> 
 #include <wx/dcbuffer.h> 
 #include <string>
+#include <wx/fileconf.h>
+
 #include "util.h"
 
-#define radius 10
+//#define radius 10
 
 
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
@@ -104,6 +106,8 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	double x, y;
 	mousemoved = false;
 	mousemotion=true;
+	int radius;
+	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
 	pos = event.GetLogicalPosition(dc);
@@ -160,6 +164,8 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 
 void CurvePane::mouseDclick(wxMouseEvent& event)
 {
+	int radius;
+	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	if (c.isendpoint(selectedCP.x, selectedCP.y, radius)) return;
 	c.deletepoint(selectedCP.x, selectedCP.y);
 	selectedCP.x = -1.0;
@@ -255,7 +261,8 @@ void CurvePane::render(wxDC&  dc)
 	int w, h;
 	dc.GetSize(&w, &h);
 	int m=12;
-
+	int radius;
+	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	
 	//x axis:
 	dc.DrawLine(m,h-m,m,h-m-255);
