@@ -7,7 +7,6 @@
 #include "FreeImage.h"
 #include "Curve.h"
 
-
 class PicProcessorCurve: public PicProcessor
 {
 	public:
