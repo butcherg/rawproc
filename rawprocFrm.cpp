@@ -539,7 +539,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		SetStatusText("scale: fit",1);
 		break;
 	case 67: //c - test cropmode
-		pic->ToggleCropMode();
+		//pic->ToggleCropMode();
 		break;
 	case 80: //p - process command
 		WxStatusBar1->SetStatusText("processing...");
@@ -620,7 +620,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
-	PicProcessorGamma *g = new PicProcessorGamma("gamma","2.2", commandtree, pic, parameters);	
+	PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
 	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
@@ -636,7 +636,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
 	PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
-	if (val != "0") g->processPic();
+	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
 }
@@ -650,7 +650,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
 	PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
-	// c->processPic();
+	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -660,7 +660,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
-	//c->processPic();
+	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
@@ -669,7 +669,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
-	//crv->processPic();
+	crv->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
 }
@@ -681,7 +681,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
 	wxString cmd= wxString::Format("%s,%s",level,threshold);
 	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0,64", commandtree, pic, parameters);
-	//shd->processPic();
+	shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
 }
@@ -693,7 +693,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 	wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
 	wxString cmd= wxString::Format("%s,%s",level,threshold);
 	PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
-	//s->processPic();
+	s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
 }
@@ -714,7 +714,8 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorCrop *c = new PicProcessorCrop("crop","",commandtree, pic, parameters);
+	PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
+	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }

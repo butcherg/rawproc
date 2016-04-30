@@ -238,7 +238,12 @@ class CropPanel: public PicProcPanel
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	if (c == "") c = wxString::Format("0,0,%d,%d",FreeImage_GetWidth(getPreviousPicProcessor()->getProcessedPic()), FreeImage_GetHeight(getPreviousPicProcessor()->getProcessedPic()));
+	showParams();
+}
+
+PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, "",  tree, display, parameters) 
+{
+	c = wxString::Format("0,0,%d,%d",FreeImage_GetWidth(getPreviousPicProcessor()->getProcessedPic()), FreeImage_GetHeight(getPreviousPicProcessor()->getProcessedPic()));
 	showParams();
 }
 

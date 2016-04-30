@@ -73,8 +73,6 @@ bool PicProcessorSharpen::processPic() {
 	std::vector<ThreadedConvolve *> t;
 	int threadcount;
 
-	m_tree->SetItemBold(GetId(), true);
-
 	double sharp = atof(c.c_str())+1.0;
 	double x = -((sharp-1)/4.0);
 	kernel[0][1] = x;
@@ -109,13 +107,11 @@ bool PicProcessorSharpen::processPic() {
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-	m_tree->SetItemBold(GetId(), false);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
 		nextitem->processPic();
 	}
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 
 	return result;

@@ -80,7 +80,6 @@ void PicProcessorResize::showParams()
 
 bool PicProcessorResize::processPic() {
 	wxString algo = "";
-	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("resize...");
 	wxArrayString cp = split(getParams(),",");
 	int width =  atoi(cp[0]);
@@ -114,17 +113,13 @@ bool PicProcessorResize::processPic() {
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		m_tree->SetItemBold(GetId(), false);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
 			nextitem->processPic();
 		}
 	}
-	//else {	
-	//	result = false;
-	//}
-	m_tree->SetItemBold(GetId(), false);
+
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

@@ -108,7 +108,6 @@ void PicProcessorGray::showParams()
 
 bool PicProcessorGray::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("gray...");
-	m_tree->SetItemBold(GetId(), true);
 	wxArrayString cp = split(getParams(),",");
 	double r = atof(cp[0]);
 	double g = atof(cp[1]);
@@ -130,7 +129,6 @@ bool PicProcessorGray::processPic() {
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		m_tree->SetItemBold(GetId(), false);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
@@ -138,7 +136,6 @@ bool PicProcessorGray::processPic() {
 		}
 	}
 	else result = false;
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

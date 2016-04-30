@@ -93,7 +93,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::SetPic(FIBITMAP *dib)
 	{
-		parentframe->SetStatusText("display...");
+		//parentframe->SetStatusText("display...");
 		int w, h;
 		GetSize(&w, &h);
 		img.Destroy();
@@ -134,7 +134,7 @@ END_EVENT_TABLE()
 		hsgram = wxBitmap();
 
 		//scale =  (double) w/ (double) FreeImage_GetWidth(dib);
-		parentframe->SetStatusText("");
+		//parentframe->SetStatusText("");
                 Refresh();
 		Update();
 		

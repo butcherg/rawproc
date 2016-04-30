@@ -60,7 +60,6 @@ void PicProcessorBright::showParams()
 
 
 bool PicProcessorBright::processPic() {
-	m_tree->SetItemBold(GetId(), true);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("bright...");
 	double bright = atof(c.c_str());
 	bool result = true;
@@ -87,7 +86,6 @@ bool PicProcessorBright::processPic() {
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		m_tree->SetItemBold(GetId(), false);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
@@ -98,7 +96,6 @@ bool PicProcessorBright::processPic() {
 		
 		result = false;
 	}
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

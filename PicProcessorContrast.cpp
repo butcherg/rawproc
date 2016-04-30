@@ -59,14 +59,12 @@ void PicProcessorContrast::showParams()
 
 bool PicProcessorContrast::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("contrast...");
-	m_tree->SetItemBold(GetId(), true);
 	double contrast = atof(c.c_str());
 	bool result = true;
 	FIBITMAP *prev = dib;
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	if (dib) {
 		int bpp = FreeImage_GetBPP(dib);
-		m_tree->SetItemBold(GetId(), true);
 		if (bpp == 8 |bpp == 24 | bpp == 32) {
 			if (!FreeImage_AdjustContrast(dib,contrast)) {
 				result = false;
@@ -91,13 +89,11 @@ bool PicProcessorContrast::processPic() {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
 			nextitem->processPic();
 		}
-		m_tree->SetItemBold(GetId(), false);
 	}
 	else {
 		
 		result =  false;
 	}
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

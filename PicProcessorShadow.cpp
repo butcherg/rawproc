@@ -1,4 +1,4 @@
-
+       
 #include "PicProcessor.h"
 #include "PicProcessorShadow.h"
 #include "PicProcPanel.h"
@@ -69,7 +69,6 @@ void PicProcessorShadow::showParams()
 
 bool PicProcessorShadow::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("shadow...");
-	m_tree->SetItemBold(GetId(), true);
 
 	wxArrayString cp = split(getParams(),",");
 	double shd = atof(cp[0]);
@@ -88,7 +87,6 @@ bool PicProcessorShadow::processPic() {
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	if (dib) {
 		int bpp = FreeImage_GetBPP(dib);
-		m_tree->SetItemBold(GetId(), true);
 		if (!FreeImage_AdjustCurveControlPoints(dib, ctrlpts.getControlPoints(), FICC_RGB)) 
 			result = false;
 		else
@@ -104,7 +102,6 @@ bool PicProcessorShadow::processPic() {
 		}
 	}
 	else result = false;
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

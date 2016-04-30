@@ -69,7 +69,6 @@ void PicProcessorHighlight::showParams()
 
 bool PicProcessorHighlight::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("highlight...");
-	m_tree->SetItemBold(GetId(), true);
 
 	wxArrayString cp = split(getParams(),",");
 	double shd = atof(cp[0]);
@@ -87,7 +86,6 @@ bool PicProcessorHighlight::processPic() {
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	if (dib) {
 		int bpp = FreeImage_GetBPP(dib);
-		m_tree->SetItemBold(GetId(), true);
 		if (!FreeImage_AdjustCurveControlPoints(dib, ctrlpts.getControlPoints(), FICC_RGB)) 
 			result = false;
 		else
@@ -103,7 +101,6 @@ bool PicProcessorHighlight::processPic() {
 		}
 	}
 	else result = false;
-	m_tree->SetItemBold(GetId(), false);
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }

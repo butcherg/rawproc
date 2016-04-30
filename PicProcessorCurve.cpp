@@ -94,7 +94,8 @@ bool PicProcessorCurve::processPic() {
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 	mark();
 
-	FIBITMAP *dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	c.setControlPoints(ctrlpts);
 	int bpp = FreeImage_GetBPP(dib);
 	if (bpp == 24) {
