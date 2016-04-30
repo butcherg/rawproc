@@ -177,7 +177,7 @@ void rawprocFrm::CreateGUIControls()
 	////GUI Items Creation End
 	
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false).Dockable(false).Floatable(false);   //.MinSize(280,200)
-	
+	//wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 	pic = new PicPanel(this);
@@ -714,7 +714,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorCrop *c = new PicProcessorCrop("crop",commandtree, pic, parameters);
+	PicProcessorCrop *c = new PicProcessorCrop("crop","",commandtree, pic, parameters);
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
