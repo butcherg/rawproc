@@ -308,11 +308,11 @@ END_EVENT_TABLE()
 		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
 		if (toggleThumb == 2) {
 			if (!hsgram.IsOk()) {
-				parentframe->SetStatusText("histogram...");
+				//parentframe->SetStatusText("histogram...");
 				//hsgram = HistogramFromData(thumb->GetWidth(), thumb->GetHeight());
 				//hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
 				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
-				parentframe->SetStatusText("");
+				//parentframe->SetStatusText("");
 			}
 			dc.DrawBitmap(hsgram,2,2,false);
 		}
