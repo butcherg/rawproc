@@ -869,7 +869,9 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxAboutDialogInfo info;
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
-	info.SetDescription(_("Basic image manipulation, preserves bit-depth."));
+#ifdef BUILD
+	info.SetDescription(_(wxString::Format("Build %d, %s",BUILD, wxNow())));
+#endif
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 
 	wxAboutBox(info);

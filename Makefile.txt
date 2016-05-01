@@ -10,12 +10,29 @@ ifeq ($(UNAME), mingw32)
 	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -Ic:\wxWidgets-3.0.2\lib\gcc_lib\mswu -Ic:\wxWidgets-3.0.2\include -Ic:\FreeImage-3.17.0 -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
 	FIFLAGS=-Ic:\FreeImage-3.17.0
 	OBJDIR=win
+
+	#RESULT := $(shell sed -e s/\([[:digit:]]\+\)/\1\+1/ $(OBJDIR)\/build.txt | bc > $(OBJDIR)/tmp)
+	#RESULT := $(shell del $(OBJDIR)/build.txt)
+	#RESULT := $(shell rename $(OBJDIR)/tmp $(OBJDIR)/build.txt)
 endif
 
 ifeq ($(UNAME), x86_64-linux-gnu)
 	WXLIBS=$(shell wx-config --libs std,aui)
 	WXFLAGS=$(shell wx-config --cxxflags)
 	OBJDIR=linux
+	RESULT := $(shell sed -e 's/\([[:digit:]]\+\)/\1\+1/' $(OBJDIR)/build.txt | bc >$(OBJDIR)/tmp; rm $(OBJDIR)/build.txt; mv $(OBJDIR)/tmp $(OBJDIR)/build.txt)
+endif
+
+ifeq ($(OBJDIR),win)
+BUILDNBR = $(shell type $(OBJDIR)\\build.txt)
+BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
+$(info build $(BUILDNUMBER))
+RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)\\build.txt)
+$(info $(RESULT))
+else
+BUILDNBR = $(shell cat $(OBJDIR)/build.txt)
+BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
+RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)/build.txt)
 endif
 
 OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o ThreadedCurve.o ThreadedWxHistogram.o ThreadedWxConvert.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
@@ -125,7 +142,7 @@ $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessor.cpp   -o$@
 
 $(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c rawprocFrm.cpp    -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -DBUILD=$(BUILDNUMBER) -w -c rawprocFrm.cpp    -o$@
 
 $(OBJDIR)/rawprocApp.o: rawprocApp.cpp 
 	$(CXX)  $(WXFLAGS)  -c rawprocApp.cpp    -o$@
