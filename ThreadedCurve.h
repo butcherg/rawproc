@@ -1,4 +1,4 @@
-#ifndef __THREADEDSCURVE_H__
+#ifndef __THREADEDCURVE_H__
 #define __THREADEDCURVE_H__
 
 #ifndef WX_PRECOMP
