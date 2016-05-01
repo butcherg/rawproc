@@ -15,6 +15,7 @@
 #include <vector>
 #include "FreeImage.h"
 #include "ThreadedWxConvert.h"
+#include "ThreadedWxHistogram.h"
 
 wxString hstr="";
 
@@ -32,30 +33,19 @@ wxArrayString split(wxString str, wxString delim)
 //cross-platform duration:
 
 #ifdef WIN32
-timeval s,f;
-timeval diff(timeval start, timeval end)
-{
-	timeval temp;
-	if ((end.tv_usec-start.tv_usec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_usec = 1000000+end.tv_usec-start.tv_usec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_usec = end.tv_usec-start.tv_usec;
-	}
-	return temp;
-}
+LARGE_INTEGER f, t1, t2;
 
 void mark ()
 {
-	gettimeofday(&s, NULL);
+	QueryPerformanceFrequency(&f);
+	QueryPerformanceCounter(&t1);
 }
 
 wxString duration ()
 {
-	gettimeofday(&f, NULL);
-	timeval d = diff(s,f);
-	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_usec);
+	QueryPerformanceCounter(&t2);
+	double elapsedTime = ((t2.QuadPart - t1.QuadPart) * 1000.0 / f.QuadPart)/1000;
+	return wxString::Format("%fsec", elapsedTime);
 }
 #else
 timespec s,f;
@@ -119,10 +109,57 @@ wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int heigh
 	return bmp;
 }
 
+wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height) 
+{
+	mark();
+	unsigned hdata[256];
+	int hmax = 0;
+	wxBitmap bmp(width, height);  //, outbmp(width, height);
+	for (int i=0; i<256; i++) hdata[i]=0;
+	int iw = img.GetWidth();
+	int ih = img.GetHeight();
+	for (int i=0; i<256; i++) hdata[i] = 0;
+	int gray;
+	long pos;
+	unsigned char *data = img.GetData();
 
+	std::vector<ThreadedWxHistogram *> t;
+	int threadcount = 1;
+	wxConfigBase::Get()->Read("display.wxhistogram.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+
+	for (int i=0; i<threadcount; i++) {
+		t.push_back(new ThreadedWxHistogram(data, i,threadcount, iw, ih));
+		t.back()->Run();
+	}
+	while (!t.empty()) {
+		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+		t.back()->addData(hdata);
+		t.pop_back();
+	}
+
+	for (int i=0; i<256; i++) if (hdata[i]>hmax) hmax = hdata[i];
+
+	wxMemoryDC dc;
+	dc.SelectObject(bmp);
+	dc.Clear();
+	dc.SetUserScale((double) width / 256.0, (double) height/ (double) hmax);
+	dc.SetPen(wxPen(wxColour(128,128,128),1));
+	for(int x=0; x<256; x++) {
+		dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
+	}
+
+	dc.SelectObject(wxNullBitmap);
+	wxString d = duration();
+	if (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1")
+		log(wxString::Format("tool=wxhistogram,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,threadcount,d));
+
+	return bmp;
+}
 
 wxBitmap HistogramFrom(wxImage img, int width, int height) 
 {
+	mark();
 	int hdata[256];
 	int hmax = 0;
 	wxBitmap bmp(width, height);  //, outbmp(width, height);
@@ -151,6 +188,10 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	}
 
 	dc.SelectObject(wxNullBitmap);
+	wxString d = duration();
+	if (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1")
+		log(wxString::Format("tool=wxhistogram(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,1,d));
+
 	return bmp;
 }
 

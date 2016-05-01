@@ -310,7 +310,8 @@ END_EVENT_TABLE()
 			if (!hsgram.IsOk()) {
 				parentframe->SetStatusText("histogram...");
 				//hsgram = HistogramFromData(thumb->GetWidth(), thumb->GetHeight());
-				hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				//hsgram = HistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
 				parentframe->SetStatusText("");
 			}
 			dc.DrawBitmap(hsgram,2,2,false);

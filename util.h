@@ -22,6 +22,7 @@ wxString FreeImage_Information(FIBITMAP *dib);
 
 wxImage FreeImage2wxImage(FIBITMAP* dib);
 
+wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height);
 wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib);
 
 //use these together:
