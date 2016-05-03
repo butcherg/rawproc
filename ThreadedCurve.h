@@ -8,8 +8,9 @@
 	#include <wx/wxprec.h>
 #endif
 
-
+#include <vector>
 #include <wx/thread.h>
+#include "Curve.h"
 #include "FreeImage.h"
 
 
@@ -18,6 +19,7 @@ class ThreadedCurve : public wxThread
 public:
 	ThreadedCurve(FIBITMAP *psrc, FIBITMAP *pdst, unsigned pstartrow, unsigned pincrement, void *pLUT);
 	~ThreadedCurve();
+	static void ApplyCurve(FIBITMAP *psrc, FIBITMAP *pdst, std::vector<cp> ctpts, int threadcount);
 
 protected:
 	virtual ExitCode Entry();

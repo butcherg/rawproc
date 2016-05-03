@@ -60,3 +60,43 @@ wxThread::ExitCode ThreadedCurve::Entry()
 
 	return (wxThread::ExitCode)0;
 }
+
+void ThreadedCurve::ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threadcount)
+{
+	//int threadcount;
+	std::vector<ThreadedCurve *> t;
+	Curve c;
+	BYTE LUT8[256];
+	WORD LUT16[65535];
+	c.setControlPoints(ctpts);
+	int bpp = FreeImage_GetBPP(src);
+	if (bpp == 24) {
+		c.clampto(0.0,255.0);
+		for (int x=0; x<256; x++) {
+			LUT8[x] = (BYTE)floor(c.getpoint(x) + 0.5);
+		}
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedCurve(src, dst, i,threadcount, LUT8));
+			t.back()->Run();
+		}
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			t.pop_back();
+		}
+	}
+	if (bpp == 48) {
+		c.scalepoints(256.0);
+		c.clampto(0.0,65535.0);
+		for (int x=0; x<65536; x++) {
+			LUT16[x] = (WORD)floor(c.getpoint(x) + 0.5);
+		}
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedCurve(src, dst, i,threadcount, LUT16));
+			t.back()->Run();
+		}
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			t.pop_back();
+		}
+	}
+}
