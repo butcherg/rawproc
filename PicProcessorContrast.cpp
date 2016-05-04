@@ -2,7 +2,6 @@
 #include "PicProcessorContrast.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
 #include "myTouchSlider.h"
 
 #include "util.h"
