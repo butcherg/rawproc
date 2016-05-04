@@ -3,9 +3,11 @@
 #include "PicProcessorHighlight.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
 #include "myTouchSlider.h"
+
 #include "util.h"
+#include "ThreadedCurve.h"
+#include <wx/fileconf.h>
 
 class HighlightPanel: public PicProcPanel
 {
@@ -68,6 +70,7 @@ void PicProcessorHighlight::showParams()
 }
 
 bool PicProcessorHighlight::processPic() {
+	bool result = true;
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("highlight...");
 
 	wxArrayString cp = split(getParams(),",");
@@ -81,27 +84,30 @@ bool PicProcessorHighlight::processPic() {
 	ctrlpts.insertpoint((thr+thr/2)-shd,(thr+thr/2)+shd);
 	ctrlpts.insertpoint(255,255);
 	
-	bool result = true;
-	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		if (!FreeImage_AdjustCurveControlPoints(dib, ctrlpts.getControlPoints(), FICC_RGB)) 
-			result = false;
-		else
-			dirty = false;
-		if (prev) FreeImage_Unload(prev);
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.highlight.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
-	}
-	else result = false;
+	mark();
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	wxString d = duration();
+
+	if (wxConfigBase::Get()->Read("tool.highlight.log","0") == "1")
+		log(wxString::Format("tool=highlight,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	dirty = false;
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
+	}
+
 	return result;
 }
 
