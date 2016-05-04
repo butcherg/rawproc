@@ -73,7 +73,7 @@ bool PicProcessorBright::processPic() {
 		ctrlpts.insertpoint(255-bright,255);
 
 	int threadcount;
-	wxConfigBase::Get()->Read("tool.blackwhitepoint.cores",&threadcount,0);
+	wxConfigBase::Get()->Read("tool.bright.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 
 	mark();
@@ -82,8 +82,8 @@ bool PicProcessorBright::processPic() {
 	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1")
-		log(wxString::Format("tool=curve,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	if (wxConfigBase::Get()->Read("tool.bright.log","0") == "1")
+		log(wxString::Format("tool=bright,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 	dirty=false;
 
 
