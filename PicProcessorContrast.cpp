@@ -5,6 +5,10 @@
 #include "FreeImage16.h"
 #include "myTouchSlider.h"
 
+#include "util.h"
+#include "ThreadedCurve.h"
+#include <wx/fileconf.h>
+
 class ContrastPanel: public PicProcPanel
 {
 	public:
@@ -61,40 +65,42 @@ bool PicProcessorContrast::processPic() {
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("contrast...");
 	double contrast = atof(c.c_str());
 	bool result = true;
-	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		if (bpp == 8 |bpp == 24 | bpp == 32) {
-			if (!FreeImage_AdjustContrast(dib,contrast)) {
-				result = false;
-			}
-			else dirty = false;
-		}
-		else if(bpp == 48) {
-			WORD LUT[65535];
-			FreeImage_GetAdjustColorsLookupTable16(LUT, 0.0, contrast, 0.0, false);
-			if (!FreeImage_AdjustCurve16(dib, LUT, FICC_RGB)) {
-				result = false;;
-			}
-			else dirty = false;
-		}
-		else result = false; 
-		if (prev) FreeImage_Unload(prev);
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
+	Curve ctrlpts;
+	//ctrlpts.insertpoint(0,0);
+	if (contrast < 0) {
+		ctrlpts.insertpoint(0,-contrast);
+		ctrlpts.insertpoint(255,255+contrast);
 	}
 	else {
-		
-		result =  false;
+		ctrlpts.insertpoint(contrast,0);
+		ctrlpts.insertpoint(255-contrast,255);
 	}
+
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+
+	mark();
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	wxString d = duration();
+
+	if (wxConfigBase::Get()->Read("tool.contrast.log","0") == "1")
+		log(wxString::Format("tool=contrast,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	dirty = false;
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
+	}
+
 	return result;
 }
 
