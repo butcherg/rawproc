@@ -680,7 +680,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 	wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
 	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
 	wxString cmd= wxString::Format("%s,%s",level,threshold);
-	PicProcessorShadow *shd = new PicProcessorShadow("shadow","0,64", commandtree, pic, parameters);
+	PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
 	shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
