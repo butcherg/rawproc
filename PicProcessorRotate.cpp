@@ -22,7 +22,8 @@ class RotatePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(RotatePanel::paramChanged));
+			Bind(wxEVT_SCROLL_THUMBTRACK,&RotatePanel::paramChanged,this);
+			Bind(wxEVT_SCROLL_THUMBRELEASE,&RotatePanel::paramChanged,this);
 		}
 
 		~RotatePanel()
