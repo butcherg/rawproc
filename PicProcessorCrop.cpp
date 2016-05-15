@@ -19,10 +19,10 @@ class CropPanel: public PicProcPanel
 			isaspect = true;
 
 			wxArrayString p = split(params,",");
-			left = atoi(p[0]);
-			top = atoi(p[1]);
-			right = atoi(p[2]);
-			bottom = atoi(p[3]);
+			left = atoi(p[0])+radius;
+			top = atoi(p[1])+radius;
+			right = atoi(p[2])-radius;
+			bottom = atoi(p[3])-radius;
 			//wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			img = ThreadedFreeImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
