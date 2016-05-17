@@ -1,11 +1,14 @@
 
 #include "PicProcessor.h"
 #include "PicProcessorGray.h"
+#include "ThreadedGray.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
 #include "myTouchSlider.h"
 #include "util.h"
+
+#include <wx/fileconf.h>
 
 #define REDSLIDER   7000
 #define GREENSLIDER 7001
@@ -113,29 +116,29 @@ bool PicProcessorGray::processPic() {
 	double g = atof(cp[1]);
 	double b = atof(cp[2]);
 	bool result = true;
-	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		if (bpp == 48 |bpp == 24 | bpp == 32) {
-			//if (!FreeImage_Gray16(dib, 0.21, 0.72, 0.07)) {
-			if (!FreeImage_Gray16(dib, r, g, b)) {
-				result = false;
-			}
-			else dirty = false;
-		}
-		else result = false; 
-		if (prev) FreeImage_Unload(prev);
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.gray.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+
+	mark();
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+	ThreadedGray::ApplyGray(getPreviousPicProcessor()->getProcessedPic(), dib, r, g, b, threadcount);
+	wxString d = duration();
+
+	if (wxConfigBase::Get()->Read("tool.gray.log","0") == "1")
+		log(wxString::Format("tool=curve,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	dirty = false;
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
 	}
-	else result = false;
+
 	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
 	return result;
 }
