@@ -101,7 +101,7 @@ bool FreeImage_AdjustCurveControlPoints(FIBITMAP *src, std::vector<cp> controlpo
 		if (FreeImage_AdjustCurve(src, LUT8, channel)) return true;
 	}
 	if (bpp == 48) {
-		WORD LUT16[65535];
+		WORD LUT16[65536];
 		c.scalepoints(256.0);
 		c.clampto(0.0,65535.0);
 		for (int x=0; x<65536; x++) {
