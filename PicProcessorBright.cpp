@@ -2,7 +2,8 @@
 #include "PicProcessorBright.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "myTouchSlider.h"
+//#include "myTouchSlider.h"
+//#include "myFloatSlider.h"
 
 #include "util.h"
 #include "ThreadedCurve.h"
@@ -14,35 +15,55 @@ class BrightPanel: public PicProcPanel
 		BrightPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
-			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "bright", SLIDERWIDTH, atof(p.c_str()), 1.0, -100.0, 100.0, "%2.0f");
-			b->Add(100,100,1);
-			b->Add(slide, flags);
-			b->Add(100,100,1);
-			SetSizerAndFit(b);
-			b->Layout();
+
+			g->Add(0,10, wxGBPosition(0,0));
+			g->Add(new wxStaticText(this,wxID_ANY, "bright: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			bright = new wxSlider(this, wxID_ANY, 0, -100, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(bright , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val = new wxStaticText(this,wxID_ANY, "  0", wxDefaultPosition, wxSize(140, -1));
+			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(BrightPanel::paramChanged));
+			t = new wxTimer(this);
+			Bind(wxEVT_SCROLL_CHANGED, &BrightPanel::OnChanged, this);
+			Bind(wxEVT_TIMER, &BrightPanel::OnTimer,  this);
 		}
 
 		~BrightPanel()
 		{
-			slide->~myTouchSlider();
+			bright->~wxSlider();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",slide->GetIntValue()));
+			q->setParams(wxString::Format("%d",bright->GetValue()));
+			q->processPic();
+			event.Skip();
+		}
+
+		void OnChanged(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%d",bright->GetValue()));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		myTouchSlider *slide;
+		wxSlider *bright;
+		wxStaticText *val;
+		wxTimer *t;
 
 };
 

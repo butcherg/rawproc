@@ -8,6 +8,66 @@
 #include "ThreadedCurve.h"
 #include <wx/fileconf.h>
 
+
+class ContrastPanel: public PicProcPanel
+{
+	public:
+		ContrastPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		{
+			SetSize(parent->GetSize());
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+
+			g->Add(0,10, wxGBPosition(0,0));
+			g->Add(new wxStaticText(this,wxID_ANY, "contrast: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			contrast = new wxSlider(this, wxID_ANY, 0, -100, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(contrast , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val = new wxStaticText(this,wxID_ANY, "  0", wxDefaultPosition, wxSize(140, -1));
+			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			SetSizerAndFit(g);
+			g->Layout();
+			Refresh();
+			Update();
+			SetFocus();
+			t = new wxTimer(this);
+			Bind(wxEVT_SCROLL_CHANGED, &ContrastPanel::OnChanged, this);
+			Bind(wxEVT_TIMER, &ContrastPanel::OnTimer,  this);
+		}
+
+		~ContrastPanel()
+		{
+			contrast->~wxSlider();
+		}
+
+		void paramChanged(wxCommandEvent& event)
+		{
+			q->setParams(wxString::Format("%d",contrast->GetValue()));
+			q->processPic();
+			event.Skip();
+		}
+
+		void OnChanged(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%4d", contrast->GetValue()));
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%d",contrast->GetValue()));
+			q->processPic();
+			event.Skip();
+		}
+
+
+	private:
+		wxSlider *contrast;
+		wxStaticText *val;
+		wxTimer *t;
+
+};
+
+/*
 class ContrastPanel: public PicProcPanel
 {
 	public:
@@ -45,7 +105,7 @@ class ContrastPanel: public PicProcPanel
 		myTouchSlider *slide;
 
 };
-
+*/
 
 PicProcessorContrast::PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {

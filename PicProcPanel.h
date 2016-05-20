@@ -12,6 +12,8 @@
 	#include <wx/wxprec.h>
 #endif
 
+#include <wx/gbsizer.h>
+
 #include "PicProcessor.h"
 #define SLIDERWIDTH 70
 
@@ -30,6 +32,7 @@ class PicProcPanel: public wxPanel
 	protected:
 		PicProcessor *q;
 		wxBoxSizer *b;
+		wxGridBagSizer *g;
 		wxString p;
 
 	//DECLARE_EVENT_TABLE()

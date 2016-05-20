@@ -14,6 +14,7 @@ PicProcPanel::PicProcPanel(wxPanel *parent, PicProcessor *proc, wxString params)
 	SetSize(parent->GetSize());
 //	SetScrollRate( 5, 5 ); 
 	b = new wxBoxSizer(wxVERTICAL); 
+	g = new wxGridBagSizer();
 }
 
 PicProcPanel::~PicProcPanel()
