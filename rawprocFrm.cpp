@@ -870,7 +870,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
 #ifdef BUILD
-	info.SetDescription(_(wxString::Format("Build %d, %s",BUILD, wxNow())));
+	info.SetDescription(_(wxString::Format("Build %d",BUILD)));
 #endif
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 

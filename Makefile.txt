@@ -35,7 +35,7 @@ BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
 RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)/build.txt)
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o ThreadedGray.o ThreadedCurve.o ThreadedWxHistogram.o ThreadedWxConvert.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o ThreadedGray.o ThreadedCurve.o ThreadedWxHistogram.o ThreadedWxConvert.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o myFloatSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -92,6 +92,9 @@ $(OBJDIR)/wxTouchSlider.o: wxTouchSlider.cpp
 
 $(OBJDIR)/myTouchSlider.o: myTouchSlider.cpp
 	$(CXX) $(WXFLAGS) -c myTouchSlider.cpp  -o$@
+
+$(OBJDIR)/myFloatSlider.o: myFloatSlider.cpp
+	$(CXX) $(WXFLAGS) -c myFloatSlider.cpp  -o$@
 
 $(OBJDIR)/CurvePane.o: CurvePane.cpp Curve.h
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
