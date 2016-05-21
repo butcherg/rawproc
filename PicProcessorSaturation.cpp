@@ -4,8 +4,8 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "myTouchSlider.h"
 #include "util.h"
+#include "undo.xpm"
 
 #include <wx/fileconf.h>
 
@@ -15,36 +15,72 @@ class SaturationPanel: public PicProcPanel
 		SaturationPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
-			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "saturate", SLIDERWIDTH, atof(p.c_str()), 0.1, 0.0, 3.0, "%3.1f");
-			b->Add(100,100,1);
-			b->Add(slide, flags);
-			b->Add(100,100,1);
-			SetSizerAndFit(b);
-			b->Layout();
+
+			double initialvalue = atof(params.c_str());
+
+			g->Add(0,10, wxGBPosition(0,0));
+			g->Add(new wxStaticText(this,wxID_ANY, "saturation:"), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			saturate = new wxSlider(this, wxID_ANY, initialvalue*10.0, 0, 30, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(saturate, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset to default");
+			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(SaturationPanel::paramChanged));
-		}
+			t = new wxTimer(this);
+			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
+			Bind(wxEVT_SCROLL_CHANGED, &SaturationPanel::OnChanged, this);
+			Bind(wxEVT_TIMER, &SaturationPanel::OnTimer,  this);		}
 
 		~SaturationPanel()
 		{
-			slide->~myTouchSlider();
+			t->~wxTimer();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
+			q->setParams(wxString::Format("%2.2f",saturate->GetValue()/10.0));
+			q->processPic();
+			event.Skip();
+		}
 
-			q->setParams(wxString::Format("%3.1f",slide->GetDoubleValue()));
+		void OnChanged(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%2.2f",saturate->GetValue()/10.0));
+			q->processPic();
+			event.Skip();
+		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			double resetval;
+			wxConfigBase::Get()->Read("tool.saturate.initialvalue",&resetval,1.0);
+			saturate->SetValue(resetval*10.0);
+			q->setParams(wxString::Format("%2.2f",resetval));
+			val->SetLabel(wxString::Format("%2.2f", resetval));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		myTouchSlider *slide;
+		wxSlider *saturate;
+		wxStaticText *val;
+		wxBitmapButton *btn;
+		wxTimer *t;
 
 };
 
@@ -72,7 +108,6 @@ bool PicProcessorSaturation::processPic() {
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
-	((wxFrame*) m_parameters->GetParent())->SetStatusText(wxString::Format("saturate, %d cores...",threadcount));
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 

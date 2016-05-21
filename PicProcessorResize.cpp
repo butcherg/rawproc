@@ -5,6 +5,8 @@
 #include "FreeImage16.h"
 #include "util.h"
 
+#include <wx/spinctrl.h>
+
 class ResizePanel: public PicProcPanel
 {
 	public:
@@ -19,45 +21,50 @@ class ResizePanel: public PicProcPanel
 			algos.Add("catmullrom");
 			algos.Add("lanczos3");
 			wxArrayString p = split(params,",");
-			b->Add(new wxStaticText(this,-1, "width (0 for original aspect)", wxDefaultPosition, wxSize(200,20)),  flags);
-			widthedit = new wxTextCtrl(this, wxID_ANY, p[0], wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
-			b->Add(widthedit, flags);
-			b->Add(new wxStaticText(this,-1, "height (0 for original aspect)", wxDefaultPosition, wxSize(200,20)), flags);
-			heightedit = new wxTextCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
-			b->Add(heightedit, flags);		
-			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxSize(100,220),  algos, 1, wxRA_SPECIFY_COLS);
+			g->Add(new wxStaticText(this,wxID_ANY, "width: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			widthedit = new wxSpinCtrl(this, wxID_ANY, p[0], wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
+			widthedit->SetToolTip("width in pixels, 0 preserves aspect.\nIf you use the spin arrows, type Enter to update the image.");
+			g->Add(widthedit, wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,-1, "height: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			heightedit = new wxSpinCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
+			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
+			g->Add(heightedit, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
+			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
 			if (p.size() >=3) {
 				for (int i=0; i<algos.size(); i++) {
 					if (p[2] == algos[i]) algoselect->SetSelection(i);
 				}
 			}
-			b->Add(algoselect, flags);	
-			SetSizerAndFit(b);
-			b->Layout();
+			g->Add(algoselect, wxGBPosition(2,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);	
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&ResizePanel::paramChanged, this);
+			//Bind(wxEVT_SPINCTRL,&ResizePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBOX,&ResizePanel::paramChanged, this);	
 		}
 
 		~ResizePanel()
 		{
+/*
 			widthedit->~wxTextCtrl();
 			heightedit->~wxTextCtrl();
 			algoselect->~wxRadioBox();
+*/
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%s,%s,%s",widthedit->GetValue(),heightedit->GetValue(),algoselect->GetString(algoselect->GetSelection())));
+			q->setParams(wxString::Format("%d,%d,%s",widthedit->GetValue(),heightedit->GetValue(),algoselect->GetString(algoselect->GetSelection())));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		wxTextCtrl *widthedit, *heightedit;
+		wxSpinCtrl *widthedit, *heightedit;
 		wxRadioBox *algoselect;
 
 };

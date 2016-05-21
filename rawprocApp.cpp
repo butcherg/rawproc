@@ -36,7 +36,6 @@ bool rawprocFrmApp::OnInit()
 		else
 			frame->OpenFile(f.GetFullPath(),0);
 	}
-
 	wxConfigBase::Set(new wxFileConfig("rawproc", "", wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf"));
 	return true;
 }

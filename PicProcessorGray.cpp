@@ -5,7 +5,8 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "myTouchSlider.h"
+#include "undo.xpm"
+
 #include "util.h"
 
 #include <wx/fileconf.h>
@@ -20,7 +21,7 @@ class GrayPanel: public PicProcPanel
 	public:
 		GrayPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			c = new wxBoxSizer(wxHORIZONTAL); 
+			//c = new wxBoxSizer(wxHORIZONTAL); 
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString p = split(params,",");
@@ -28,71 +29,104 @@ class GrayPanel: public PicProcPanel
 			rd = atof(p[0]);
 			gr = atof(p[1]);
 			bl = atof(p[2]);
-			//b->SetOrientation();
 
-			//b->AddStretchSpacer(1);
-			c->Add(15,0,1,wxEXPAND);
-			redslide = new myTouchSlider((wxFrame *) this, REDSLIDER, "Red", SLIDERWIDTH, atof(p[0]), 0.01, 0.0, 1.0, "%2.2f");
-			c->Add(redslide, flags);
-			greenslide = new myTouchSlider((wxFrame *) this, GREENSLIDER, "Green", SLIDERWIDTH, atof(p[1]), 0.01, 0.0, 1.0, "%2.2f");
-			c->Add(greenslide, flags);
-			blueslide = new myTouchSlider((wxFrame *) this, BLUESLIDER, "Blue", SLIDERWIDTH, atof(p[2]), 0.01, 0.0, 1.0, "%2.2f");
-			c->Add(blueslide, flags);
-			c->AddStretchSpacer(1);
-			c->Layout();
+			g->Add(0,10, wxGBPosition(0,0));
 
-			b->Add(c,flags);
+			g->Add(new wxStaticText(this,wxID_ANY, "red: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			red = new wxSlider(this, wxID_ANY, rd*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(red , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",rd), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			t = new wxStaticText(this,-1, wxString::Format("Total: %2.2f", rd+gr+bl), wxDefaultPosition, wxSize(100,20));
-			b->Add(t, flags);
+			g->Add(new wxStaticText(this,wxID_ANY, "green: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			green = new wxSlider(this, wxID_ANY, gr*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(green , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",gr), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			SetSizerAndFit(b);
-			b->Layout();
+
+			g->Add(new wxStaticText(this,wxID_ANY, "blue: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			blue = new wxSlider(this, wxID_ANY, bl*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(blue , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val3 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",bl), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val3 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			val4 = new wxStaticText(this,wxID_ANY, wxString::Format("Total: %2.2f", rd+gr+bl), wxDefaultPosition, wxSize(-1,-1));
+			g->Add(val4, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset RGB proportions to defaults");
+			g->Add(btn, wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(GrayPanel::paramChanged));
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBTRACK,wxCommandEventHandler(GrayPanel::valChanged));
-		}
+			t = new wxTimer(this);
+			Bind(wxEVT_BUTTON, &GrayPanel::OnButton, this);
+			Bind(wxEVT_SCROLL_CHANGED, &GrayPanel::OnChanged, this);
+			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);		}
 
 		~GrayPanel()
 		{
-			redslide->~myTouchSlider();
-			greenslide->~myTouchSlider();
-			blueslide->~myTouchSlider();
-			t->~wxStaticText();
+			t->~wxTimer();
 		}
 
-		void valChanged(wxCommandEvent& event)
+		void OnChanged(wxCommandEvent& event)
 		{
-			rd = redslide->GetDoubleValue();
-			gr = greenslide->GetDoubleValue();
-			bl = blueslide->GetDoubleValue();
-			t->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
-			Refresh();
-			Update();
-			event.Skip();
+			rd = red->GetValue()/100.0;
+			gr = green->GetValue()/100.0;
+			bl = blue->GetValue()/100.0;
+			val1->SetLabel(wxString::Format("%2.2f", rd));
+			val2->SetLabel(wxString::Format("%2.2f", gr));
+			val3->SetLabel(wxString::Format("%2.2f", bl));
+			val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
+			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
-		void paramChanged(wxCommandEvent& event)
+		void OnTimer(wxTimerEvent& event)
 		{
-			rd = redslide->GetDoubleValue();
-			gr = greenslide->GetDoubleValue();
-			bl = blueslide->GetDoubleValue();
-			t->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
-			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",rd,gr,bl));
+			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",red->GetValue()/100.0,green->GetValue()/100.0,blue->GetValue()/100.0));
 			q->processPic();
-			Refresh();
-			Update();
 			event.Skip();
 		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			double resetredval, resetgreenval, resetblueval;
+
+			wxConfigBase::Get()->Read("tool.gray.r",&resetredval,0);
+			red->SetValue(resetredval*100.0);
+			val1->SetLabel(wxString::Format("%2.2f", resetredval));
+
+			wxConfigBase::Get()->Read("tool.gray.g",&resetgreenval,255);
+			green->SetValue(resetgreenval*100.0);
+			val2->SetLabel(wxString::Format("%2.2f", resetgreenval));
+
+			wxConfigBase::Get()->Read("tool.gray.b",&resetblueval,255);
+			blue->SetValue(resetblueval*100.0);
+			val3->SetLabel(wxString::Format("%2.2f", resetblueval));
+
+			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",red->GetValue()/100.0,green->GetValue()/100.0,blue->GetValue()/100.0));
+			q->processPic();
+			event.Skip();
+
+		}
+
 
 
 	private:
-		myTouchSlider *redslide, *greenslide, *blueslide;
+//		myTouchSlider *redslide, *greenslide, *blueslide;
 		double rd, gr, bl;
-		wxBoxSizer *c;
-		wxStaticText *t;
+//		wxBoxSizer *c;
+//		wxStaticText *t;
+
+		wxSlider *red, *green, *blue;
+		wxStaticText *val1, *val2, *val3, *val4;
+		wxBitmapButton *btn;
+		wxTimer *t;
 
 };
 

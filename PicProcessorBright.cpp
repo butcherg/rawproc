@@ -2,8 +2,7 @@
 #include "PicProcessorBright.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-//#include "myTouchSlider.h"
-//#include "myFloatSlider.h"
+#include "undo.xpm"
 
 #include "util.h"
 #include "ThreadedCurve.h"
@@ -17,12 +16,17 @@ class BrightPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 
+			int initialvalue = atoi(params.c_str());
+
 			g->Add(0,10, wxGBPosition(0,0));
 			g->Add(new wxStaticText(this,wxID_ANY, "bright: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			bright = new wxSlider(this, wxID_ANY, 0, -100, 100, wxPoint(10, 30), wxSize(140, -1));
+			bright = new wxSlider(this, wxID_ANY, initialvalue, -100, 100, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(bright , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val = new wxStaticText(this,wxID_ANY, "  0", wxDefaultPosition, wxSize(140, -1));
+			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset to default");
+			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -30,13 +34,14 @@ class BrightPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			t = new wxTimer(this);
+			Bind(wxEVT_BUTTON, &BrightPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &BrightPanel::OnChanged, this);
 			Bind(wxEVT_TIMER, &BrightPanel::OnTimer,  this);
 		}
 
 		~BrightPanel()
 		{
-			bright->~wxSlider();
+			t->~wxTimer();
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -59,10 +64,22 @@ class BrightPanel: public PicProcPanel
 			event.Skip();
 		}
 
+		void OnButton(wxCommandEvent& event)
+		{
+			int resetval;
+			wxConfigBase::Get()->Read("tool.bright.initialvalue",&resetval,0);
+			bright->SetValue(resetval);
+			q->setParams(wxString::Format("%d",resetval));
+			val->SetLabel(wxString::Format("%4d", resetval));
+			q->processPic();
+			event.Skip();
+		}
+
 
 	private:
 		wxSlider *bright;
 		wxStaticText *val;
+		wxBitmapButton *btn;
 		wxTimer *t;
 
 };

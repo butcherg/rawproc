@@ -3,7 +3,7 @@
 #include "PicProcessorHighlight.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "myTouchSlider.h"
+#include "undo.xpm"
 
 #include "util.h"
 #include "ThreadedCurve.h"
@@ -16,43 +16,87 @@ class HighlightPanel: public PicProcPanel
 		{
 			wxArrayString p = split(params,",");
 
-			double shd = atof(p[0]);
-			double thr = atof(p[1]);
+			int hlt = atoi(p[0]);
+			int thr = atoi(p[1]);
 
 			SetSize(parent->GetSize());
-			b->SetOrientation(wxHORIZONTAL);
-			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "highlight", SLIDERWIDTH, shd, 1.0, -50.0, 50.0, "%2.0f");
-			threshold = new myTouchSlider((wxFrame *) this, wxID_ANY, "threshold", SLIDERWIDTH, thr, 1.0, 128.0, 223.0, "%2.0f");
-			b->Add(50,100,1);
-			b->Add(slide, flags);
-			b->Add(threshold, flags);
-			b->Add(50,100,1);
-			SetSizerAndFit(b);
-			b->Layout();
+			g->Add(0,10, wxGBPosition(0,0));
+
+			g->Add(new wxStaticText(this,wxID_ANY, "highlight: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			highlight = new wxSlider(this, wxID_ANY, hlt, -50, +50, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(highlight , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",hlt), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn1 = new wxBitmapButton(this, 1000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn1->SetToolTip("Reset highlight to default");
+			g->Add(btn1, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+
+			g->Add(new wxStaticText(this,wxID_ANY, "threshold: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			threshold = new wxSlider(this, wxID_ANY, thr, 128, 255, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(threshold , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",thr), wxDefaultPosition, wxSize(30, -1));
+			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn2 = new wxBitmapButton(this, 2000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn2->SetToolTip("Reset threshold to default");
+			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			//slide->Bind(wxEVT_SCROLL_THUMBRELEASE,&ShadowPanel::paramChanged,this);
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(HighlightPanel::paramChanged));
+			t = new wxTimer(this);
+			Bind(wxEVT_BUTTON, &HighlightPanel::OnButton, this);
+			Bind(wxEVT_SCROLL_CHANGED, &HighlightPanel::OnChanged, this);
+			Bind(wxEVT_TIMER, &HighlightPanel::OnTimer,  this);
 		}
 
 		~HighlightPanel()
 		{
-			slide->~myTouchSlider();
-			threshold->~myTouchSlider();
+			t->~wxTimer();
 		}
 
-		void paramChanged(wxCommandEvent& event)
+		void OnChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%0.2f,%0.2f",slide->GetDoubleValue(),threshold->GetDoubleValue()));
+			val1->SetLabel(wxString::Format("%4d", highlight->GetValue()));
+			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%d,%d",highlight->GetValue(),threshold->GetValue()));
+			q->processPic();
+			event.Skip();
+		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			int resethighlightval, resetthresholdval;
+			switch (event.GetId()) {
+				case 1000:
+					wxConfigBase::Get()->Read("tool.highlight.level",&resethighlightval,0);
+					highlight->SetValue(resethighlightval);
+					val1->SetLabel(wxString::Format("%4d", resethighlightval));
+					break;
+				case 2000:
+					wxConfigBase::Get()->Read("tool.highlight.threshold",&resetthresholdval,255);
+					threshold->SetValue(resetthresholdval);
+					val2->SetLabel(wxString::Format("%4d", resetthresholdval));
+					break;
+			}
+			q->setParams(wxString::Format("%d,%d", highlight->GetValue(),threshold->GetValue()));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		myTouchSlider *slide, *threshold;
+		wxSlider *highlight, *threshold;
+		wxStaticText *val1, *val2;
+		wxBitmapButton *btn1, * btn2;
+		wxTimer *t;
 
 };
 
