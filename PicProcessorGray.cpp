@@ -67,6 +67,7 @@ class GrayPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &GrayPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &GrayPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);		}
 
 		~GrayPanel()
@@ -84,6 +85,17 @@ class GrayPanel: public PicProcPanel
 			val3->SetLabel(wxString::Format("%2.2f", bl));
 			val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			rd = red->GetValue()/100.0;
+			gr = green->GetValue()/100.0;
+			bl = blue->GetValue()/100.0;
+			val1->SetLabel(wxString::Format("%2.2f", rd));
+			val2->SetLabel(wxString::Format("%2.2f", gr));
+			val3->SetLabel(wxString::Format("%2.2f", bl));
+			val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
 		}
 
 		void OnTimer(wxTimerEvent& event)
@@ -118,10 +130,7 @@ class GrayPanel: public PicProcPanel
 
 
 	private:
-//		myTouchSlider *redslide, *greenslide, *blueslide;
 		double rd, gr, bl;
-//		wxBoxSizer *c;
-//		wxStaticText *t;
 
 		wxSlider *red, *green, *blue;
 		wxStaticText *val1, *val2, *val3, *val4;

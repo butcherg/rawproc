@@ -37,24 +37,30 @@ class SaturationPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &SaturationPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &SaturationPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &SaturationPanel::OnTimer,  this);		}
 
 		~SaturationPanel()
 		{
 			t->~wxTimer();
 		}
-
+/*
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%2.2f",saturate->GetValue()/10.0));
 			q->processPic();
 			event.Skip();
 		}
-
+*/
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
 		}
 
 		void OnTimer(wxTimerEvent& event)

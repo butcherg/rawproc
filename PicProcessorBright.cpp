@@ -36,6 +36,7 @@ class BrightPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &BrightPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &BrightPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &BrightPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &BrightPanel::OnTimer,  this);
 		}
 
@@ -44,17 +45,15 @@ class BrightPanel: public PicProcPanel
 			t->~wxTimer();
 		}
 
-		void paramChanged(wxCommandEvent& event)
-		{
-			q->setParams(wxString::Format("%d",bright->GetValue()));
-			q->processPic();
-			event.Skip();
-		}
-
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)

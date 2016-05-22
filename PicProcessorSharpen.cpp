@@ -4,7 +4,7 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "FreeImage16.h"
-#include "myTouchSlider.h"
+#include "undo.xpm"
 #include "util.h"
 
 #include <vector>
@@ -16,35 +16,72 @@ class SharpenPanel: public PicProcPanel
 		SharpenPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
-			b->SetOrientation(wxHORIZONTAL);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "sharpen", SLIDERWIDTH, atof(p.c_str()), 1.0, 0.0, 10.0, "%2.0f");
-			b->Add(100,100,1);
-			b->Add(slide, flags);
-			b->Add(100,100,1);
-			SetSizerAndFit(b);
-			b->Layout();
+
+			int initialvalue = atoi(params.c_str());
+
+			g->Add(0,10, wxGBPosition(0,0));
+			g->Add(new wxStaticText(this,wxID_ANY, "sharpen: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			sharp = new wxSlider(this, wxID_ANY, initialvalue, 0, 10, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(sharp , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
+			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset to default");
+			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			SetSizerAndFit(g);
+			g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(SharpenPanel::paramChanged));
-		}
+			t = new wxTimer(this);
+			Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
+			Bind(wxEVT_SCROLL_CHANGED, &SharpenPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &SharpenPanel::OnThumbTrack, this);
+			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);		}
 
 		~SharpenPanel()
 		{
-			slide->~myTouchSlider();
+			t->~wxTimer();
 		}
 
-		void paramChanged(wxCommandEvent& event)
+		void OnChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d",slide->GetIntValue()));
+			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%d",sharp->GetValue()));
+			q->processPic();
+			event.Skip();
+		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			int resetval;
+			wxConfigBase::Get()->Read("tool.sharpen.initialvalue",&resetval,0);
+			sharp->SetValue(resetval);
+			q->setParams(wxString::Format("%d",resetval));
+			val->SetLabel(wxString::Format("%4d", resetval));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		myTouchSlider *slide;
+		wxSlider *sharp;
+		wxStaticText *val;
+		wxBitmapButton *btn;
+		wxTimer *t;
+
 
 };
 

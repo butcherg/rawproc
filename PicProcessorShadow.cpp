@@ -49,6 +49,7 @@ class ShadowPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &ShadowPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ShadowPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &ShadowPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &ShadowPanel::OnTimer,  this);
 		}
 
@@ -61,6 +62,12 @@ class ShadowPanel: public PicProcPanel
 			val1->SetLabel(wxString::Format("%4d", shadow->GetValue()));
 			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val1->SetLabel(wxString::Format("%4d", shadow->GetValue()));
+			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)

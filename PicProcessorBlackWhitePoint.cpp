@@ -4,7 +4,6 @@
 #include "PicProcPanel.h"
 #include "ThreadedCurve.h"
 #include "FreeImage.h"
-//#include "myTouchSlider.h"
 #include "undo.xpm"
 
 #include "util.h"

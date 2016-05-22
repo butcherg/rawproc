@@ -2,7 +2,6 @@
 #include "PicProcessorContrast.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-//#include "myTouchSlider.h"
 #include "undo.xpm"
 
 #include "util.h"
@@ -39,6 +38,7 @@ class ContrastPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &ContrastPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ContrastPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &ContrastPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &ContrastPanel::OnTimer,  this);
 		}
 
@@ -46,18 +46,23 @@ class ContrastPanel: public PicProcPanel
 		{
 			t->~wxTimer();
 		}
-
+/*
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%d",contrast->GetValue()));
 			q->processPic();
 			event.Skip();
 		}
-
+*/
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", contrast->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%4d", contrast->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)

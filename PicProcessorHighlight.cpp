@@ -49,6 +49,7 @@ class HighlightPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &HighlightPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &HighlightPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &HighlightPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &HighlightPanel::OnTimer,  this);
 		}
 
@@ -62,6 +63,12 @@ class HighlightPanel: public PicProcPanel
 			val1->SetLabel(wxString::Format("%4d", highlight->GetValue()));
 			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val1->SetLabel(wxString::Format("%4d", highlight->GetValue()));
+			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
