@@ -44,6 +44,30 @@
 #include "PicProcessor.h"
 
 
+class myParameters: public wxPanel
+{
+public:
+	myParameters(wxWindow *parent, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize): wxPanel(parent, id, pos, size)
+	{
+		Bind(wxEVT_SIZE,&myParameters::OnSize, this);
+	}
+
+	void OnSize(wxSizeEvent& event)
+	{
+		wxWindowList children = GetChildren();
+		wxWindowList::iterator iter;
+		for (iter = children.begin(); iter != children.end(); ++iter)
+		{
+			wxWindow *child = *iter;
+			wxSizeEvent *e = new wxSizeEvent(event.GetSize());
+			//e->SetString(wxString::Format(fmt, val));
+			wxQueueEvent(child,e);
+		}
+
+	}
+
+};
+
 class rawprocFrm : public wxFrame
 {
 	private:
@@ -155,7 +179,9 @@ class rawprocFrm : public wxFrame
 		
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
-		wxPanel *parameters;
+		//wxPanel *parameters;
+		wxPanel *preview;
+		myParameters *parameters;
 		FIBITMAP *d;
 		wxImage *img;
 		bool deleting;

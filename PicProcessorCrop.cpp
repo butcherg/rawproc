@@ -35,6 +35,7 @@ class CropPanel: public PicProcPanel
 			iwa = (double) img.GetWidth() / (double) img.GetHeight();
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
 
+			Bind(wxEVT_SIZE,&CropPanel::OnSize, this);
 			Bind(wxEVT_PAINT,&CropPanel::OnPaint, this);
 			Bind(wxEVT_LEFT_DOWN, &CropPanel::OnMouseDown, this);
 			Bind(wxEVT_MOTION , &CropPanel::OnMouseMove, this);
@@ -44,6 +45,23 @@ class CropPanel: public PicProcPanel
 
 		~CropPanel()
 		{
+		}
+
+		void OnSize(wxSizeEvent& event) 
+		{
+			wxSize s = GetParent()->GetSize();
+			SetSize(s);
+
+			GetSize(&ww, &wh);
+			iw = img.GetWidth();
+			ih = img.GetHeight();
+			wa = (double) ww/ (double) iw;
+			ha = (double) wh/ (double) ih;
+			aspect = wa > ha? ha : wa;
+
+			iwa = (double) img.GetWidth() / (double) img.GetHeight();
+			iha = (double) img.GetHeight() / (double) img.GetWidth();
+			Refresh();
 		}
 
 		void OnPaint(wxPaintEvent& event)
@@ -253,7 +271,7 @@ void PicProcessorCrop::showParams()
 
 
 bool PicProcessorCrop::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("crop...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
 	int left = atoi(p[0]);
 	int top = atoi(p[1]);
@@ -273,7 +291,7 @@ bool PicProcessorCrop::processPic() {
 		nextitem->processPic();
 	}
 
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
 

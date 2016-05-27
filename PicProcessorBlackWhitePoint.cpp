@@ -117,7 +117,7 @@ void PicProcessorBlackWhitePoint::showParams()
 }
 
 bool PicProcessorBlackWhitePoint::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("black/white point...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
 	wxArrayString cp = split(getParams(),",");
 	double blk = atof(cp[0]);
@@ -143,7 +143,7 @@ bool PicProcessorBlackWhitePoint::processPic() {
 		log(wxString::Format("tool=curve,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty=false;
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);

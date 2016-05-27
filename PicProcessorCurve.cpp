@@ -79,7 +79,7 @@ void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
 }
 
 bool PicProcessorCurve::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("curve...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("curve...");
 	bool result = true;
 
 	int threadcount;
@@ -97,7 +97,7 @@ bool PicProcessorCurve::processPic() {
 
 
 	dirty = false;
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);

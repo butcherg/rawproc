@@ -121,7 +121,7 @@ bool PicProcessorSharpen::processPic() {
 
 	wxConfigBase::Get()->Read("tool.sharpen.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
-	((wxFrame*) m_parameters->GetParent())->SetStatusText(wxString::Format("sharpen, %d cores...",threadcount));
+	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 
@@ -149,7 +149,7 @@ bool PicProcessorSharpen::processPic() {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
 		nextitem->processPic();
 	}
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	return result;
 }

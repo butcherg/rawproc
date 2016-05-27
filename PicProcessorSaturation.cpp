@@ -107,7 +107,7 @@ void PicProcessorSaturation::showParams()
 
 
 bool PicProcessorSaturation::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("saturation...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
 	bool result = true;
 	std::vector<ThreadedSaturate *> t;
@@ -143,7 +143,7 @@ bool PicProcessorSaturation::processPic() {
 		}
 
 
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
 

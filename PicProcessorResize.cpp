@@ -87,7 +87,7 @@ void PicProcessorResize::showParams()
 
 bool PicProcessorResize::processPic() {
 	wxString algo = "";
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("resize...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
 	wxArrayString cp = split(getParams(),",");
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
@@ -127,7 +127,7 @@ bool PicProcessorResize::processPic() {
 		}
 	}
 
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
 

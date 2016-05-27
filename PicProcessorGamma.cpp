@@ -55,7 +55,7 @@ void PicProcessorGamma::showParams()
 
 
 bool PicProcessorGamma::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("gamma...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
 	bool result = true;
 	FIBITMAP *prev = dib;
@@ -91,7 +91,7 @@ bool PicProcessorGamma::processPic() {
 		
 		result = false;
 	}
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
 

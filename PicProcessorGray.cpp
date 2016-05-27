@@ -153,7 +153,7 @@ void PicProcessorGray::showParams()
 }
 
 bool PicProcessorGray::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("gray...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("gray...");
 	wxArrayString cp = split(getParams(),",");
 	double r = atof(cp[0]);
 	double g = atof(cp[1]);
@@ -182,7 +182,7 @@ bool PicProcessorGray::processPic() {
 		nextitem->processPic();
 	}
 
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
 

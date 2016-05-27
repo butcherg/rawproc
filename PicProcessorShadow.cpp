@@ -121,7 +121,7 @@ void PicProcessorShadow::showParams()
 
 bool PicProcessorShadow::processPic() {
 	bool result = true;
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("shadow...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("shadow...");
 
 	wxArrayString cp = split(getParams(),",");
 	double shd = atof(cp[0]);
@@ -148,7 +148,7 @@ bool PicProcessorShadow::processPic() {
 		log(wxString::Format("tool=highlight,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty = false;
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);

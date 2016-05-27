@@ -1,0 +1,43 @@
+/* XPM */
+static const char *const run_xpm[] = {
+
+/* columns rows colors chars-per-pixel */
+
+"16 16 3 2 ",
+
+"   c None",
+"5  c #326A8F",
+
+"s  c #467291",
+
+/* pixels */
+
+"                                ",
+
+"              5                 ",
+"              5 s               ",
+
+"      5       5 s       5       ",
+"        5     5 s     5         ",
+"          5   5 s   5           ",
+
+"            5 5 5 5             ",
+
+"  5 5 5 5 5 5 5 5 s s s s s s   ",
+
+"    s s s s s 5 5 5 5 5 5 5 5   ",
+
+"            5 5 s 5             ",
+
+"          5   5 s   5           ",
+
+"        5     5 s     5         ",
+
+"      5       5 s       5       ",
+
+"              5 s               ",
+
+"                s               ",
+
+"                                "
+};

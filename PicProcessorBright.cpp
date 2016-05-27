@@ -98,7 +98,7 @@ void PicProcessorBright::showParams()
 
 
 bool PicProcessorBright::processPic() {
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("bright...");
+	((wxFrame*) m_display->GetParent())->SetStatusText("bright...");
 	double bright = atof(c.c_str());
 	bool result = true;
 
@@ -124,7 +124,7 @@ bool PicProcessorBright::processPic() {
 	dirty=false;
 
 
-	((wxFrame*) m_parameters->GetParent())->SetStatusText("");
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
