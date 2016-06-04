@@ -10,6 +10,8 @@
 #include <vector>
 #include "FreeImage.h"
 
+bool ImageContainsRawprocCommand(wxString fname);
+
 wxArrayString split(wxString str, wxString delim);
 
 wxBitmap HistogramFrom(wxImage img, int width, int height);

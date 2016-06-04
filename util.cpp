@@ -415,7 +415,26 @@ wxString FreeImage_Information(FIBITMAP *dib)
 	return info;
 }
 
-
+bool ImageContainsRawprocCommand(wxString fname)
+{
+	FIBITMAP *srcdib;
+	FREE_IMAGE_FORMAT fif;
+	fif = FreeImage_GetFileType(fname, 0);
+	if(fif != FIF_UNKNOWN) {
+		srcdib = FreeImage_Load(fif, fname, FIF_LOAD_NOPIXELS);
+		FITAG *tagSource = NULL;
+		if (fif == FIF_TIFF)
+			FreeImage_GetMetadata(FIMD_EXIF_MAIN, srcdib, "ImageDescription", &tagSource);
+		else
+			FreeImage_GetMetadata(FIMD_COMMENTS, srcdib, "Comment", &tagSource);
+		if(tagSource != NULL) {
+			wxString script = (char *) FreeImage_GetTagValue(tagSource);
+			wxArrayString token = split(script, " ");
+			if (token[0].Find("rawproc") != wxNOT_FOUND) return true;
+		}
+	}
+	return false;
+}
 
 
 
