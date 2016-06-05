@@ -91,6 +91,7 @@ void ThreadedGray::ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double
 		}
 		while (!t.empty()) {
 			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
 			t.pop_back();
 		}
 	}
@@ -101,6 +102,7 @@ void ThreadedGray::ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double
 		}
 		while (!t.empty()) {
 			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
 			t.pop_back();
 		}
 	}

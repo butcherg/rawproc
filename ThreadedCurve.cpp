@@ -81,6 +81,7 @@ void ThreadedCurve::ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctp
 		}
 		while (!t.empty()) {
 			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
 			t.pop_back();
 		}
 	}
@@ -96,6 +97,7 @@ void ThreadedCurve::ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctp
 		}
 		while (!t.empty()) {
 			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
 			t.pop_back();
 		}
 	}

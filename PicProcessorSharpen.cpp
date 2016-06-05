@@ -133,6 +133,7 @@ bool PicProcessorSharpen::processPic() {
 		}
 		while (!t.empty()) {
 			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
 			t.pop_back();
 		}
 		wxString d = duration();

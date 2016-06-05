@@ -135,6 +135,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 	while (!t.empty()) {
 		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
 		t.back()->addData(hdata);
+		delete t.back();
 		t.pop_back();
 	}
 
@@ -214,6 +215,7 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 	}
 	while (!t.empty()) {
 		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+		delete t.back();
 		t.pop_back();
 	}
 
