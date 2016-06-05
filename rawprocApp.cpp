@@ -14,18 +14,28 @@
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
+#include "util.h"
+
 IMPLEMENT_APP(rawprocFrmApp)
 
 bool rawprocFrmApp::OnInit()
 {
+	wxConfigBase::Set(new wxFileConfig("rawproc", "", wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf"));
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
+
 	if (wxGetApp().argc == 2) {
 		wxFileName f(wxGetApp().argv[1]);
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
-		frame->OpenFile(f.GetFullPath(),0);
+		if (ImageContainsRawprocCommand(wxGetApp().argv[1])) {
+			if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
+				frame->OpenFileSource(f.GetFullPath());
+			else	
+				frame->OpenFile(f.GetFullPath(),0);
+		}
+		else frame->OpenFile(f.GetFullPath(),0);
 	}
 	else if (wxGetApp().argc == 3) {
 		wxFileName f(wxGetApp().argv[2]);
@@ -36,7 +46,6 @@ bool rawprocFrmApp::OnInit()
 		else
 			frame->OpenFile(f.GetFullPath(),0);
 	}
-	wxConfigBase::Set(new wxFileConfig("rawproc", "", wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf"));
 	return true;
 }
  
