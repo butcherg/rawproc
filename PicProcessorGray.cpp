@@ -109,15 +109,15 @@ class GrayPanel: public PicProcPanel
 		{
 			double resetredval, resetgreenval, resetblueval;
 
-			wxConfigBase::Get()->Read("tool.gray.r",&resetredval,0);
+			wxConfigBase::Get()->Read("tool.gray.r",&resetredval,0.21);
 			red->SetValue(resetredval*100.0);
 			val1->SetLabel(wxString::Format("%2.2f", resetredval));
 
-			wxConfigBase::Get()->Read("tool.gray.g",&resetgreenval,255);
+			wxConfigBase::Get()->Read("tool.gray.g",&resetgreenval,0.72);
 			green->SetValue(resetgreenval*100.0);
 			val2->SetLabel(wxString::Format("%2.2f", resetgreenval));
 
-			wxConfigBase::Get()->Read("tool.gray.b",&resetblueval,255);
+			wxConfigBase::Get()->Read("tool.gray.b",&resetblueval,0.07);
 			blue->SetValue(resetblueval*100.0);
 			val3->SetLabel(wxString::Format("%2.2f", resetblueval));
 

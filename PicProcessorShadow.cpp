@@ -87,7 +87,7 @@ class ShadowPanel: public PicProcPanel
 					val1->SetLabel(wxString::Format("%4d", resetshadowval));
 					break;
 				case 2000:
-					wxConfigBase::Get()->Read("tool.shadow.threshold",&resetthresholdval,255);
+					wxConfigBase::Get()->Read("tool.shadow.threshold",&resetthresholdval,64);
 					threshold->SetValue(resetthresholdval);
 					val2->SetLabel(wxString::Format("%4d", resetthresholdval));
 					break;

@@ -88,7 +88,7 @@ class HighlightPanel: public PicProcPanel
 					val1->SetLabel(wxString::Format("%4d", resethighlightval));
 					break;
 				case 2000:
-					wxConfigBase::Get()->Read("tool.highlight.threshold",&resetthresholdval,255);
+					wxConfigBase::Get()->Read("tool.highlight.threshold",&resetthresholdval,192);
 					threshold->SetValue(resetthresholdval);
 					val2->SetLabel(wxString::Format("%4d", resetthresholdval));
 					break;

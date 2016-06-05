@@ -196,7 +196,7 @@ class RotatePanel: public PicProcPanel
 			double resetval;
 			switch(event.GetId()) {
 				case 8000:
-					wxConfigBase::Get()->Read("tool.rotate.initialvalue",&resetval,0);
+					wxConfigBase::Get()->Read("tool.rotate.initialvalue",&resetval,0.0);
 					rotate->SetValue(resetval);
 					q->setParams(wxString::Format("%2.1f",resetval));
 					val->SetLabel(wxString::Format("%2.1f", resetval));
