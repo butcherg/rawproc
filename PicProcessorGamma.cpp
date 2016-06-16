@@ -3,6 +3,10 @@
 #include "FreeImage.h"
 #include "FreeImage16.h"
 
+#include "util.h"
+#include "ThreadedCurve.h"
+#include <wx/fileconf.h>
+
 
 class GammaPanel: public PicProcPanel
 {
@@ -55,42 +59,60 @@ void PicProcessorGamma::showParams()
 
 
 bool PicProcessorGamma::processPic() {
+	BYTE LUT8[256];
+	WORD LUT16[65536];
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
 	bool result = true;
-	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
-		int bpp = FreeImage_GetBPP(dib);
-		if (bpp == 8 |bpp == 24 | bpp == 32) {
-			if (!FreeImage_AdjustGamma(dib,gamma)) {
-				result = false;
-			}
-			else dirty = false;
-		}
-		else if(bpp == 48) {
-			WORD LUT[65535];
-			FreeImage_GetAdjustColorsLookupTable16(LUT, 0.0, 0.0, gamma, false);
-			if (!FreeImage_AdjustCurve16(dib, LUT, FICC_RGB)) {
-				result = false;;
-			}
-			else dirty = false;
-		}
-		else result = false; 
-		if (prev) FreeImage_Unload(prev);
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.gamma.cores",&threadcount,0);
+	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
+	mark();
+	if (dib) FreeImage_Unload(dib);
+	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+
+	int bpp = FreeImage_GetBPP(dib);
+	if (bpp == 24) {
+		double exponent = 1 / gamma;
+		double v = 255.0 * (double)pow((double)255, -exponent);
+		for(int i = 0; i < 256; i++) {
+			double color = (double)pow((double)i, exponent) * v;
+			if(color > 255)
+				color = 255;
+			LUT8[i] = (BYTE)floor(color + 0.5);
 		}
+		ThreadedCurve::ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, LUT8, threadcount);
+
 	}
-	else {
-		
-		result = false;
+	else if(bpp == 48) {
+		double exponent = 1 / gamma;
+		double v = 65535.0 * (double)pow((double)65535, -exponent);
+		for(int i = 0; i < 65536; i++) {
+			double color = (double)pow((double)i, exponent) * v;
+			if(color > 65535)
+				color = 65535;
+			LUT16[i] = (WORD)floor(color + 0.5);
+		}
+		ThreadedCurve::ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, LUT16, threadcount);
+
 	}
+	else result = false; 
+	wxString d = duration();
+
+	if (wxConfigBase::Get()->Read("tool.gamma.log","0") == "1")
+		log(wxString::Format("tool=gamma,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
+	dirty = false;
+
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
+	}
+
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return result;
 }
