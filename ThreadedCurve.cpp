@@ -102,3 +102,39 @@ void ThreadedCurve::ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctp
 		}
 	}
 }
+
+void ThreadedCurve::ApplyLUT(FIBITMAP *src, FIBITMAP *dst, void * pLUT, int threadcount)
+{
+	std::vector<ThreadedCurve *> t;
+	BYTE LUT8[256];
+	WORD LUT16[65536];
+	int bpp = FreeImage_GetBPP(src);
+	if (bpp == 24) {
+		for (int x=0; x<256; x++) {
+			LUT8[x] = ((BYTE *) pLUT)[x];
+		}
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedCurve(src, dst, i,threadcount, LUT8));
+			t.back()->Run();
+		}
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
+			t.pop_back();
+		}
+	}
+	if (bpp == 48) {
+		for (int x=0; x<65536; x++) {
+			LUT16[x] = ((WORD *)pLUT)[x];
+		}
+		for (int i=0; i<threadcount; i++) {
+			t.push_back(new ThreadedCurve(src, dst, i,threadcount, LUT16));
+			t.back()->Run();
+		}
+		while (!t.empty()) {
+			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
+			delete t.back();
+			t.pop_back();
+		}
+	}
+}
