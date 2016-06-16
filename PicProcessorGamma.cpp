@@ -1,7 +1,7 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
+//#include "FreeImage16.h"
 
 #include "util.h"
 #include "ThreadedCurve.h"
