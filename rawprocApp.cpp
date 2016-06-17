@@ -46,6 +46,13 @@ bool rawprocFrmApp::OnInit()
 		else
 			frame->OpenFile(f.GetFullPath(),0);
 	}
+	else {
+		wxFileName picdir = wxFileName::DirName(wxStandardPaths::Get().GetDocumentsDir());
+		picdir.RemoveLastDir();
+		picdir.AppendDir("Pictures");
+		wxSetWorkingDirectory(picdir.GetPath());
+		//wxSetWorkingDirectory(wxStandardPaths::Get().GetDocumentsDir());
+	}
 	return true;
 }
  
