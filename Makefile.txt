@@ -48,7 +48,7 @@ LIBS=-lfreeimage
 
 
 
-all: rawproc
+all: rawproc img
 
 rawproc: $(OBJECTS)
 ifeq ($(OBJDIR),win)
@@ -56,6 +56,12 @@ ifeq ($(OBJDIR),win)
 else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -o $(OBJDIR)/rawproc
 endif
+
+img: $(OBJECTS) $(OBJDIR)/img.o
+	$(CXX) $(OBJDIR)/img.o $(LIBS) $(FILIBS) -o $(OBJDIR)/img
+
+$(OBJDIR)/img.o: img.cpp
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c img.cpp -o$@
 
 $(OBJDIR)/util.o: util.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -o$@
