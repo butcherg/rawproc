@@ -57,14 +57,20 @@ else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -o $(OBJDIR)/rawproc
 endif
 
-img: $(OBJECTS) $(OBJDIR)/img.o
-	$(CXX) $(OBJDIR)/img.o $(LIBS) $(FILIBS) -o $(OBJDIR)/img
+img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) -fopenmp  -o $(OBJDIR)/img
 
 $(OBJDIR)/img.o: img.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c img.cpp -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -w -c img.cpp -o$@
+
+$(OBJDIR)/elapsedtime.o: elapsedtime.cpp
+	$(CXX) -c elapsedtime.cpp  -o$@
 
 $(OBJDIR)/util.o: util.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -o$@
+
+$(OBJDIR)/FreeImage_Threaded.o: FreeImage_Threaded.cpp Curve.h saturation.h
+	$(CXX) $(FIFLAGS) -w -c FreeImage_Threaded.cpp -fopenmp -o$@
 
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@

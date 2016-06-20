@@ -1,0 +1,4 @@
+
+
+void mark ();
+double duration ();
