@@ -271,5 +271,72 @@ double ApplySaturation(FIBITMAP *src, FIBITMAP *dst, double saturate, int thread
 }
 
 
+double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double strength, int threadcount)
+{
+	mark();
 
+	int bpp = FreeImage_GetBPP(src);
+
+	unsigned spitch = FreeImage_GetPitch(src);
+	unsigned dpitch = FreeImage_GetPitch(dst);
+	BYTE * srcbits = FreeImage_GetBits(src);
+	BYTE * dstbits = FreeImage_GetBits(dst);
+
+	//unsigned hl=
+
+
+	switch(bpp) {
+		case 48:
+			#pragma omp parallel for
+			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
+				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
+					FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
+					FIRGB16 * pixel   = (FIRGB16 *) (srcbits + spitch*y + 6*x);
+
+					double R = (double) pixel->red;
+					double G = (double) pixel->green;
+					double B = (double) pixel->blue;
+
+
+					if (R>65535.0) R=65535.0;
+					if (G>65535.0) G=65535.0;
+					if (B>65535.0) B=65535.0;
+					if (R<0.0) R=0.0;
+					if (G<0.0) G=0.0;
+					if (B<0.0) B=0.0;
+					wdstpix->red = int(R);
+					wdstpix->green = int(G);
+					wdstpix->blue = int(B);
+				}
+			}
+			break;	            
+		case 24 :
+			#pragma omp parallel for
+			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
+				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
+					BYTE * bdstpix = (BYTE *) dstbits + dpitch*y + 3*x;
+					BYTE *pixel = (BYTE *) (srcbits + spitch*y + 3*x);
+
+					double R = (double) pixel[FI_RGBA_RED];
+					double G = (double) pixel[FI_RGBA_GREEN];
+					double B = (double) pixel[FI_RGBA_BLUE];
+
+
+
+					if (R>255.0) R=255.0;
+					if (G>255.0) G=255.0;
+					if (B>255.0) B=255.0;
+					if (R<0.0) R=0.0;
+					if (G<0.0) G=0.0;
+					if (B<0.0) B=0.0;
+					bdstpix[FI_RGBA_RED] = int(R);
+					bdstpix[FI_RGBA_GREEN] = int(G);
+					bdstpix[FI_RGBA_BLUE]= int(B);
+				}
+			}
+			break;
+	}
+	return duration();
+
+}
 
