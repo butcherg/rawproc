@@ -35,7 +35,7 @@ BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
 RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)/build.txt)
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o FreeImage_Threaded.o ThreadedGray.o ThreadedCurve.o ThreadedWxHistogram.o ThreadedWxConvert.o ThreadedSaturate.o ThreadedConvolve.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o FreeImage_Threaded.o myHistogramPane.o myFileSelector.o wxTouchSlider.o myTouchSlider.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -74,24 +74,6 @@ $(OBJDIR)/FreeImage_Threaded.o: FreeImage_Threaded.cpp Curve.h saturation.h
 
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
-
-$(OBJDIR)/ThreadedWxHistogram.o: ThreadedWxHistogram.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedWxHistogram.cpp -o$@
-
-$(OBJDIR)/ThreadedGray.o: ThreadedGray.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedGray.cpp -o$@
-
-$(OBJDIR)/ThreadedCurve.o: ThreadedCurve.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedCurve.cpp -o$@
-
-$(OBJDIR)/ThreadedWxConvert.o: ThreadedWxConvert.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedWxConvert.cpp -o$@
-
-$(OBJDIR)/ThreadedSaturate.o: ThreadedSaturate.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedSaturate.cpp -o$@
-
-$(OBJDIR)/ThreadedConvolve.o: ThreadedConvolve.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c ThreadedConvolve.cpp -o$@
 
 $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 	$(CXX) $(WXFLAGS) -c myFileSelector.cpp  -o$@
