@@ -1,7 +1,7 @@
 
 #include "PicProcessor.h"
 #include "PicProcessorCurve.h"
-#include "ThreadedCurve.h"
+#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "CurvePane.h"
@@ -89,7 +89,7 @@ bool PicProcessorCurve::processPic() {
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts, threadcount);
+	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts, threadcount);
 	wxString d = duration();
 
 	if (wxConfigBase::Get()->Read("tool.curve.log","0") == "1")

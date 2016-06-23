@@ -5,7 +5,7 @@
 #include "undo.xpm"
 
 #include "util.h"
-#include "ThreadedCurve.h"
+#include "FreeImage_Threaded.h"
 #include <wx/fileconf.h>
 
 
@@ -168,7 +168,7 @@ bool PicProcessorContrast::processPic() {
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if (wxConfigBase::Get()->Read("tool.contrast.log","0") == "1")

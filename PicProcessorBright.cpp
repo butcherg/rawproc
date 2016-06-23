@@ -5,7 +5,7 @@
 #include "undo.xpm"
 
 #include "util.h"
-#include "ThreadedCurve.h"
+#include "FreeImage_Threaded.h"
 #include <wx/fileconf.h>
 
 class BrightPanel: public PicProcPanel
@@ -116,11 +116,15 @@ bool PicProcessorBright::processPic() {
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if (wxConfigBase::Get()->Read("tool.bright.log","0") == "1")
-		log(wxString::Format("tool=bright,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		if (wxConfigBase::Get()->Read("tool.bright.openmp","0") == "1")
+			log(wxString::Format("tool=bright(openmp),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		else
+			log(wxString::Format("tool=bright(wxthread),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 	dirty=false;
 
 

@@ -14,8 +14,6 @@
 #include <wx/tokenzr.h>
 #include <vector>
 #include "FreeImage.h"
-#include "ThreadedWxConvert.h"
-#include "ThreadedWxHistogram.h"
 
 wxString hstr="";
 
@@ -123,21 +121,31 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 	long pos;
 	unsigned char *data = img.GetData();
 
-	std::vector<ThreadedWxHistogram *> t;
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxhistogram.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 
-	for (int i=0; i<threadcount; i++) {
-		t.push_back(new ThreadedWxHistogram(data, i,threadcount, iw, ih));
-		t.back()->Run();
+	#pragma omp parallel
+	{
+		unsigned pdata[256] = {0};
+		#pragma omp for
+		for(unsigned y = 0; y < ih; y++) {
+			for(unsigned x = 0; x < iw; x++) {
+				long pos = (y * iw + x) * 3;
+				int gray = (data[pos]+data[pos+1]+data[pos+2]) / 3;
+				pdata[gray]++;
+			}
+		}
+
+		#pragma omp critical 
+		{
+			for (unsigned i=0; i<256; i++) {
+				hdata[i] += pdata[i];
+			}
+		}
+
 	}
-	while (!t.empty()) {
-		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
-		t.back()->addData(hdata);
-		delete t.back();
-		t.pop_back();
-	}
+
 
 	for (int i=0; i<256; i++) if (hdata[i]>hmax) hmax = hdata[i];
 
@@ -204,19 +212,28 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 	wxImage img(FreeImage_GetWidth(db), FreeImage_GetHeight(db));
 	unsigned char *data = img.GetData();
 
-	std::vector<ThreadedWxConvert *> t;
+//	std::vector<ThreadedWxConvert *> t;
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxconvert.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 
-	for (int i=0; i<threadcount; i++) {
-		t.push_back(new ThreadedWxConvert(db, data, i,threadcount));
-		t.back()->Run();
-	}
-	while (!t.empty()) {
-		t.back()->Wait(wxTHREAD_WAIT_BLOCK);
-		delete t.back();
-		t.pop_back();
+	unsigned dpitch = FreeImage_GetPitch(db);
+	void * dstbits = FreeImage_GetBits(db);
+	unsigned h = FreeImage_GetHeight(db);
+	unsigned w = FreeImage_GetWidth(db);
+	int bytespp = FreeImage_GetLine(db) / w;
+
+	#pragma omp parallel for
+	for(unsigned y = 0; y < h; y++) {
+		BYTE *bits = (BYTE *) dstbits + dpitch*y;
+		long pos = ((h-y-1) * w * 3);
+		for(unsigned x = 0; x < w; x++) {
+			data[pos]   = bits[FI_RGBA_RED]; 
+			data[pos+1] = bits[FI_RGBA_GREEN]; 
+			data[pos+2] = bits[FI_RGBA_BLUE];
+			bits += bytespp;
+			pos += 3;
+		}
 	}
 
 	FreeImage_Unload(db);

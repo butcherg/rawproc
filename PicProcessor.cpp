@@ -1,6 +1,5 @@
 
 #include "PicProcessor.h"
-#include "FreeImage16.h"
 #include "util.h"
 #include <wx/event.h>
 

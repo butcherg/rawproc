@@ -1,9 +1,8 @@
 #include "PicProcessor.h"
 #include "PicProcessorSharpen.h"
-#include "ThreadedConvolve.h"
+#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
 #include "undo.xpm"
 #include "util.h"
 
@@ -107,7 +106,7 @@ bool PicProcessorSharpen::processPic() {
 		0.0, 0.0, 0.0
 	};
 
-	std::vector<ThreadedConvolve *> t;
+//	std::vector<ThreadedConvolve *> t;
 	int threadcount;
 
 	double sharp = atof(c.c_str())+1.0;
@@ -127,15 +126,7 @@ bool PicProcessorSharpen::processPic() {
 
 	if (sharp > 1.0) {
 		mark();
-		for (int i=0; i<threadcount; i++) {
-			t.push_back(new ThreadedConvolve(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, kernel));
-			t.back()->Run();
-		}
-		while (!t.empty()) {
-			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
-			delete t.back();
-			t.pop_back();
-		}
+		ApplyKernel(getPreviousPicProcessor()->getProcessedPic(), dib, kernel, threadcount);
 		wxString d = duration();
 		if (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1")
 			log(wxString::Format("tool=sharpen,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));

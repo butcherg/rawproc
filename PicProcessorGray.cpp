@@ -1,10 +1,9 @@
 
 #include "PicProcessor.h"
 #include "PicProcessorGray.h"
-#include "ThreadedGray.h"
+#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
 #include "undo.xpm"
 
 #include "util.h"
@@ -167,7 +166,7 @@ bool PicProcessorGray::processPic() {
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ThreadedGray::ApplyGray(getPreviousPicProcessor()->getProcessedPic(), dib, r, g, b, threadcount);
+	ApplyGray(getPreviousPicProcessor()->getProcessedPic(), dib, r, g, b, threadcount);
 	wxString d = duration();
 
 	if (wxConfigBase::Get()->Read("tool.gray.log","0") == "1")

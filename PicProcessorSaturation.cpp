@@ -1,9 +1,8 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
-#include "ThreadedSaturate.h"
+#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-#include "FreeImage16.h"
 #include "util.h"
 #include "undo.xpm"
 
@@ -110,8 +109,7 @@ bool PicProcessorSaturation::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
 	bool result = true;
-	std::vector<ThreadedSaturate *> t;
-	int threadcount = 1;
+	int threadcount;
 	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
 	if (dib) FreeImage_Unload(dib);
@@ -119,15 +117,7 @@ bool PicProcessorSaturation::processPic() {
 
 	if (saturation != 1.0) {
 		mark();
-		for (int i=0; i<threadcount; i++) {
-			t.push_back(new ThreadedSaturate(getPreviousPicProcessor()->getProcessedPic(), dib, i,threadcount, saturation));
-			t.back()->Run();
-		}
-		while (!t.empty()) {
-			t.back()->Wait(wxTHREAD_WAIT_BLOCK);
-			delete t.back();
-			t.pop_back();
-		}
+		ApplySaturation(getPreviousPicProcessor()->getProcessedPic(), dib, saturation, threadcount);
 		wxString d = duration();
 		if (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1")
 			log(wxString::Format("tool=saturate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));

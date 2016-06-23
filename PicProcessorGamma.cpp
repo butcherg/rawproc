@@ -1,10 +1,9 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
-//#include "FreeImage16.h"
 
 #include "util.h"
-#include "ThreadedCurve.h"
+#include "FreeImage_Threaded.h"
 #include <wx/fileconf.h>
 
 
@@ -34,6 +33,7 @@ class GammaPanel: public PicProcPanel
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(edit->GetLineText(0));
+			q->processPic();
 			event.Skip();
 		}
 
@@ -82,7 +82,7 @@ bool PicProcessorGamma::processPic() {
 				color = 255;
 			LUT8[i] = (BYTE)floor(color + 0.5);
 		}
-		ThreadedCurve::ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, LUT8, threadcount);
+		ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, (char *) LUT8, threadcount);
 
 	}
 	else if(bpp == 48) {
@@ -94,8 +94,7 @@ bool PicProcessorGamma::processPic() {
 				color = 65535;
 			LUT16[i] = (WORD)floor(color + 0.5);
 		}
-		ThreadedCurve::ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, LUT16, threadcount);
-
+		ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, (char *) LUT16, threadcount);
 	}
 	else result = false; 
 	wxString d = duration();

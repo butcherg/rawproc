@@ -2,12 +2,11 @@
 #include "PicProcessor.h"
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcPanel.h"
-#include "ThreadedCurve.h"
 #include "FreeImage.h"
 #include "undo.xpm"
 
 #include "util.h"
-#include "ThreadedCurve.h"
+#include "FreeImage_Threaded.h"
 #include <wx/fileconf.h>
 
 class BlackWhitePointPanel: public PicProcPanel
@@ -136,7 +135,7 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ThreadedCurve::ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1")
