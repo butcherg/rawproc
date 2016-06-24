@@ -2,37 +2,21 @@
 
 UNAME := $(shell g++ -dumpmachine)
 
-ifeq ($(UNAME), mingw32)
-	#WXLIBS=$(shell wx-config --prefix=c:\wxWidgets-3.0.2 --wxcfg=gcc_lib\mswu --libs --cxxflags)
-	FILIBS=-Lc:\FreeImage-3.17.0
-	WXLIBS= -mthreads -L. -Lc:\wxWidgets-3.0.2\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
-	#WXFLAGS=$(shell wx-config --prefix=c:\wxWidgets-3.0.2 --wxcfg=gcc_lib\mswu --cxxflags)
-	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -Ic:\wxWidgets-3.0.2\lib\gcc_lib\mswu -Ic:\wxWidgets-3.0.2\include -Ic:\FreeImage-3.17.0 -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
-	FIFLAGS=-Ic:\FreeImage-3.17.0
-	OBJDIR=win
+WINFREEIMAGE=c:\FreeImage-3.17.0
+WINWXWIDGETS=c:\wxWidgets-3.0.2
 
-	#RESULT := $(shell sed -e s/\([[:digit:]]\+\)/\1\+1/ $(OBJDIR)\/build.txt | bc > $(OBJDIR)/tmp)
-	#RESULT := $(shell del $(OBJDIR)/build.txt)
-	#RESULT := $(shell rename $(OBJDIR)/tmp $(OBJDIR)/build.txt)
+ifeq ($(UNAME), mingw32)
+	FILIBS=-L$(WINFREEIMAGE)
+	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
+	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
+	FIFLAGS=-I$(WINFREEIMAGE)
+	OBJDIR=win
 endif
 
 ifeq ($(UNAME), x86_64-linux-gnu)
 	WXLIBS=$(shell wx-config --libs std,aui)
 	WXFLAGS=$(shell wx-config --cxxflags)
 	OBJDIR=linux
-	RESULT := $(shell sed -e 's/\([[:digit:]]\+\)/\1\+1/' $(OBJDIR)/build.txt | bc >$(OBJDIR)/tmp; rm $(OBJDIR)/build.txt; mv $(OBJDIR)/tmp $(OBJDIR)/build.txt)
-endif
-
-ifeq ($(OBJDIR),win)
-BUILDNBR = $(shell type $(OBJDIR)\\build.txt)
-BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
-$(info build $(BUILDNUMBER))
-RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)\\build.txt)
-$(info $(RESULT))
-else
-BUILDNBR = $(shell cat $(OBJDIR)/build.txt)
-BUILDNUMBER = $(shell expr $(BUILDNBR) + 1)
-RESULT = $(shell echo "$(BUILDNUMBER)" > $(OBJDIR)/build.txt)
 endif
 
 OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o FreeImage_Threaded.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
@@ -45,8 +29,6 @@ WINDRES=windres
 
 LIBDIRS=-L.
 LIBS=-lfreeimage
-
-
 
 all: rawproc img
 
@@ -133,7 +115,7 @@ $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessor.cpp   -o$@
 
 $(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -DBUILD=$(BUILDNUMBER) -w -c rawprocFrm.cpp    -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c rawprocFrm.cpp    -o$@
 
 $(OBJDIR)/rawprocApp.o: rawprocApp.cpp 
 	$(CXX)  $(WXFLAGS)  -c rawprocApp.cpp    -o$@
