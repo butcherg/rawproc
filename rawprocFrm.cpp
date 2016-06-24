@@ -37,7 +37,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.3";
+wxString version = "0.4Dev";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -875,9 +875,6 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxAboutDialogInfo info;
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
-#ifdef BUILD
-	info.SetDescription(_(wxString::Format("Build %d",BUILD)));
-#endif
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 
 	wxAboutBox(info);
