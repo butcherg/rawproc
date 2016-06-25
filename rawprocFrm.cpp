@@ -393,6 +393,11 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 			FreeImage_Unload(dib);
 			dib = tmpdib;
 		}
+		if (FreeImage_GetBPP(dib) < 24) {
+			wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", filename.GetFullName()));
+			SetStatusText("");
+			return;
+		}
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
@@ -442,6 +447,11 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				sourcefilename.Assign(fname);
 				fif = FreeImage_GetFileType(token[1], 0);
 				dib = FreeImage_Load(fif, token[1]);
+				if (FreeImage_GetBPP(dib) < 24) {
+					wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", token[1]));
+					SetStatusText("");
+					return;
+				}
 				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
 				picdata->processPic();
 				CommandTreeSetDisplay(picdata->GetId());
