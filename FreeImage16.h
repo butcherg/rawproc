@@ -5,8 +5,6 @@
 #include <vector>
 #include "Curve.h"
 
-//#include <stdint.h>
-
 bool FreeImage_AdjustCurveControlPoints(FIBITMAP *src, std::vector<cp> controlpoints, FREE_IMAGE_COLOR_CHANNEL channel);
 
 bool FreeImage_AdjustCurve16(FIBITMAP *src, WORD *LUT, FREE_IMAGE_COLOR_CHANNEL channel);

@@ -2,7 +2,7 @@
 
 #ifdef WIN32
 #include <windows.h>
-#include <sys/time.h>
+
 LARGE_INTEGER f, t1, t2; 
 
 void mark ()
