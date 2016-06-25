@@ -4,6 +4,7 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "undo.xpm"
+#include <omp.h>
 
 #include "util.h"
 #include "FreeImage_Threaded.h"
@@ -136,7 +137,7 @@ bool PicProcessorShadow::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.highlight.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);
@@ -144,8 +145,8 @@ bool PicProcessorShadow::processPic() {
 	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if (wxConfigBase::Get()->Read("tool.highlight.log","0") == "1")
-		log(wxString::Format("tool=highlight,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.shadow.log","0") == "1"))
+		log(wxString::Format("tool=shadow,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty = false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

@@ -4,6 +4,8 @@
 	#include <wx/wxprec.h>
 #endif
 
+#include <omp.h>
+
 #ifdef WIN32
 #include <sys/time.h>
 #else
@@ -123,7 +125,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxhistogram.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	#pragma omp parallel
 	{
@@ -160,7 +162,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1")
+	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,threadcount,d));
 
 	return bmp;
@@ -198,7 +200,7 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1")
+	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,1,d));
 
 	return bmp;
@@ -215,7 +217,7 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 //	std::vector<ThreadedWxConvert *> t;
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxconvert.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	unsigned dpitch = FreeImage_GetPitch(db);
 	void * dstbits = FreeImage_GetBits(db);
@@ -238,7 +240,7 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 
 	FreeImage_Unload(db);
 	wxString d = duration();
-	if (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1")
+	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1"))
 		log(wxString::Format("tool=wxconvert,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	return img;
@@ -277,9 +279,9 @@ int threadcount = 1;
 		}
 	}
 	FreeImage_Unload(db);
-wxString d = duration();
-if (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1")
-	log(wxString::Format("tool=wxconvert(old-noscanline3),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	wxString d = duration();
+	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1"))
+		log(wxString::Format("tool=wxconvert,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),1,d));
 
 	return img;
 }
@@ -317,8 +319,8 @@ int threadcount = 1;
 	}
 	FreeImage_Unload(db);
 wxString d = duration();
-if (wxConfigBase::Get()->Read("tool.wxconvert.log","0") == "1")
-	log(wxString::Format("tool=wxconvert(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxconvert.log","0") == "1"))
+	log(wxString::Format("tool=wxconvert,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	return img;
 }

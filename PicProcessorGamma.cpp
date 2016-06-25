@@ -1,6 +1,7 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
 #include "FreeImage.h"
+#include <omp.h>
 
 #include "util.h"
 #include "FreeImage_Threaded.h"
@@ -66,7 +67,7 @@ bool PicProcessorGamma::processPic() {
 	bool result = true;
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.gamma.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);
@@ -99,7 +100,7 @@ bool PicProcessorGamma::processPic() {
 	else result = false; 
 	wxString d = duration();
 
-	if (wxConfigBase::Get()->Read("tool.gamma.log","0") == "1")
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gamma.log","0") == "1"))
 		log(wxString::Format("tool=gamma,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty = false;

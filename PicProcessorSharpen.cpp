@@ -5,6 +5,7 @@
 #include "FreeImage.h"
 #include "undo.xpm"
 #include "util.h"
+#include <omp.h>
 
 #include <vector>
 #include <wx/fileconf.h>
@@ -106,7 +107,6 @@ bool PicProcessorSharpen::processPic() {
 		0.0, 0.0, 0.0
 	};
 
-//	std::vector<ThreadedConvolve *> t;
 	int threadcount;
 
 	double sharp = atof(c.c_str())+1.0;
@@ -119,7 +119,7 @@ bool PicProcessorSharpen::processPic() {
 	bool result = true;
 
 	wxConfigBase::Get()->Read("tool.sharpen.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
@@ -128,7 +128,8 @@ bool PicProcessorSharpen::processPic() {
 		mark();
 		ApplyKernel(getPreviousPicProcessor()->getProcessedPic(), dib, kernel, threadcount);
 		wxString d = duration();
-		if (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1")
+
+		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1"))
 			log(wxString::Format("tool=sharpen,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	}

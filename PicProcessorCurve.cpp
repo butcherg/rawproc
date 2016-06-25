@@ -6,6 +6,7 @@
 #include "FreeImage.h"
 #include "CurvePane.h"
 #include "util.h"
+#include <omp.h>
 
 #include <wx/fileconf.h>
 
@@ -84,7 +85,7 @@ bool PicProcessorCurve::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.curve.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);
@@ -92,7 +93,7 @@ bool PicProcessorCurve::processPic() {
 	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts, threadcount);
 	wxString d = duration();
 
-	if (wxConfigBase::Get()->Read("tool.curve.log","0") == "1")
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.curve.log","0") == "1"))
 		log(wxString::Format("tool=curve,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 

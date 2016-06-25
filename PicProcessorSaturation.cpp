@@ -5,6 +5,7 @@
 #include "FreeImage.h"
 #include "util.h"
 #include "undo.xpm"
+#include <omp.h>
 
 #include <wx/fileconf.h>
 
@@ -111,7 +112,7 @@ bool PicProcessorSaturation::processPic() {
 	bool result = true;
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 
@@ -119,7 +120,8 @@ bool PicProcessorSaturation::processPic() {
 		mark();
 		ApplySaturation(getPreviousPicProcessor()->getProcessedPic(), dib, saturation, threadcount);
 		wxString d = duration();
-		if (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1")
+
+		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1"))
 			log(wxString::Format("tool=saturate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	}

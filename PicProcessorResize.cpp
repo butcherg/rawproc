@@ -6,6 +6,7 @@
 #include "util.h"
 
 #include <wx/spinctrl.h>
+#include <wx/fileconf.h>
 
 class ResizePanel: public PicProcPanel
 {
@@ -92,7 +93,9 @@ bool PicProcessorResize::processPic() {
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
 	if (cp.size() >2) algo  = cp[2];
+	int threadcount = 1; //hard-coded, no multithread
 
+	mark();
 	bool result = true;
 	FIBITMAP *prev = dib;
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
@@ -117,6 +120,11 @@ bool PicProcessorResize::processPic() {
 		}
 		else result = false; 
 		if (prev) FreeImage_Unload(prev);
+		wxString d = duration();
+
+		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.resize.log","0") == "1"))
+			log(wxString::Format("tool=resize,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 
 		//put in every processPic()...
 		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);

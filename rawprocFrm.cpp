@@ -109,7 +109,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
             states->Add(icons[i]);
 	commandtree->AssignStateImageList(states);
 
-	configfile = "";
+	configfile = "(none)";
 }
 
 rawprocFrm::~rawprocFrm()

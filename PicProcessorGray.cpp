@@ -5,6 +5,7 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "undo.xpm"
+#include <omp.h>
 
 #include "util.h"
 
@@ -161,7 +162,7 @@ bool PicProcessorGray::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.gray.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) wxThread::GetCPUCount();
+	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);
@@ -169,8 +170,8 @@ bool PicProcessorGray::processPic() {
 	ApplyGray(getPreviousPicProcessor()->getProcessedPic(), dib, r, g, b, threadcount);
 	wxString d = duration();
 
-	if (wxConfigBase::Get()->Read("tool.gray.log","0") == "1")
-		log(wxString::Format("tool=curve,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gray.log","0") == "1"))
+		log(wxString::Format("tool=gray,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty = false;
 	//put in every processPic()...

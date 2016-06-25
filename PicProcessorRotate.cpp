@@ -242,10 +242,17 @@ bool PicProcessorRotate::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
 	double angle = atof(c.c_str());
 	bool result = true;
+	int threadcount = 1; //hard-coded, no multithread
 
+	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Rotate(getPreviousPicProcessor()->getProcessedPic(), angle);
 	dirty = false;
+	wxString d = duration();
+
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.rotate.log","0") == "1"))
+		log(wxString::Format("tool=rotate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+
 
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
