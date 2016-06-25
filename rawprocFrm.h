@@ -142,6 +142,7 @@ class rawprocFrm : public wxFrame
 	void CommandTreePopup(wxTreeEvent& event);
 	void CommandTreeDeleteItem(wxTreeItemId item);
 
+	void SetConfigFile(wxString cfile);
 	bool MoveBefore(wxTreeItemId item);
 	bool MoveAfter(wxTreeItemId item);
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
@@ -187,6 +188,7 @@ class rawprocFrm : public wxFrame
 		bool deleting;
 		wxTreeItemId olditem;
 		wxFileName filename, sourcefilename;
+		wxString configfile;
 };
 
 #endif

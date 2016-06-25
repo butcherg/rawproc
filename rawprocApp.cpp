@@ -20,10 +20,21 @@ IMPLEMENT_APP(rawprocFrmApp)
 
 bool rawprocFrmApp::OnInit()
 {
-	wxConfigBase::Set(new wxFileConfig("rawproc", "", wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf"));
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
+
+	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
+	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
+	if (wxFileName::FileExists(conf_cwd)) {
+		wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_cwd));
+		frame->SetConfigFile(conf_cwd);
+	}
+	else if (wxFileName::FileExists(conf_configd)) {
+		wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_configd));
+		frame->SetConfigFile(conf_configd);
+	}
+
 
 	if (wxGetApp().argc == 2) {
 		wxFileName f(wxGetApp().argv[1]);

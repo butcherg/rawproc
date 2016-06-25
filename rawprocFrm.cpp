@@ -108,6 +108,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
             states->Add(icons[i]);
 	commandtree->AssignStateImageList(states);
+
+	configfile = "";
 }
 
 rawprocFrm::~rawprocFrm()
@@ -876,7 +878,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
-
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\nConfiguration file: %s",configfile));
 	wxAboutBox(info);
 
 }
@@ -903,6 +905,12 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			CommandTreeDeleteItem(event.GetItem());
 			break;
 	}
+}
+
+
+void rawprocFrm::SetConfigFile(wxString cfile)
+{
+	configfile = cfile;
 }
 
 
