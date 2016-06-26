@@ -38,6 +38,10 @@ wxString duration ();
 //Logging to file:
 void log(wxString msg);
 
+//RAW flag/command translation:
+int Command2RawFlags(wxString cmd);
+wxString RawFlags2Command(int flags);
+
 #endif
 
 

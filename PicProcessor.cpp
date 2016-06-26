@@ -81,7 +81,10 @@ bool PicProcessor::processPic() {
 
 wxString PicProcessor::getCommand()
 {
-	return wxString::Format("%s:%s ",n,c);
+	if (c.IsEmpty())
+		return n;
+	else
+		return wxString::Format("%s:%s ",n,c);
 }
 
 wxString PicProcessor::getName()

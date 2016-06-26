@@ -457,6 +457,59 @@ bool ImageContainsRawprocCommand(wxString fname)
 	return false;
 }
 
+wxString RawFlags2Command(int flags)
+{
+	wxString cmd = "";
+
+	if ((flags & RAW_DEFAULT) == RAW_DEFAULT)    cmd.Append("demosaic");
+	else if ((flags & RAW_PREVIEW) == RAW_PREVIEW)  cmd.Append("preview");
+	else if ((flags & RAW_DISPLAY) == RAW_DISPLAY) cmd.Append("display");
+	else if ((flags & RAW_HALFSIZE) == RAW_HALFSIZE) cmd.Append("half");
+	else if ((flags & RAW_UNPROCESSED) == RAW_UNPROCESSED) cmd.Append("unprocessed");
+
+	if ((flags & RAW_COLOR_RAW) == RAW_COLOR_RAW)    cmd.Append(",raw");
+	else if ((flags & RAW_COLOR_SRGB) == RAW_COLOR_SRGB)  cmd.Append(",srgb");
+	else if ((flags & RAW_COLOR_ADOBE) == RAW_COLOR_ADOBE) cmd.Append(",adobe");
+	else if ((flags & RAW_COLOR_WIDE) == RAW_COLOR_WIDE) cmd.Append(",wide");
+	else if ((flags & RAW_COLOR_PROPHOTO) == RAW_COLOR_PROPHOTO) cmd.Append(",prophoto");
+	else if ((flags & RAW_COLOR_XYZ) == RAW_COLOR_XYZ) cmd.Append(",xyz");
+
+	if ((flags & RAW_QUAL_LINEAR) == RAW_QUAL_LINEAR)    cmd.Append(",linear");
+	else if ((flags & RAW_QUAL_VNG) == RAW_QUAL_VNG)  cmd.Append(",vng");
+	else if ((flags & RAW_QUAL_PPG) == RAW_QUAL_PPG) cmd.Append(",ppg");
+	else if ((flags & RAW_QUAL_AHD) == RAW_QUAL_AHD) cmd.Append(",ahd");
+
+	return cmd;
+}
+
+int Command2RawFlags(wxString cmd)
+{
+	int flags = 0;
+	wxArrayString commands = split(cmd,",");
+
+	if (commands[0].Cmp("demosaic")==0) flags = flags | RAW_DEFAULT;
+	if (commands[0].Cmp("preview")==0) flags = flags | RAW_PREVIEW;
+	if (commands[0].Cmp("half")==0) flags = flags | RAW_HALFSIZE;
+	if (commands[0].Cmp("display")==0) flags = flags | RAW_DISPLAY;
+	if (commands[0].Cmp("unprocessed")==0) flags = flags | RAW_UNPROCESSED;
+	if (commands.GetCount() == 1) return flags;
+
+	if (commands[1].Cmp("raw")==0) flags = flags | RAW_COLOR_RAW;
+	if (commands[1].Cmp("srgb")==0) flags = flags | RAW_COLOR_SRGB;
+	if (commands[1].Cmp("adobe")==0) flags = flags | RAW_COLOR_ADOBE;
+	if (commands[1].Cmp("wide")==0) flags = flags | RAW_COLOR_WIDE;
+	if (commands[1].Cmp("prophoto")==0) flags = flags | RAW_COLOR_PROPHOTO;
+	if (commands[1].Cmp("xyz")==0) flags = flags | RAW_COLOR_XYZ;
+	if (commands.GetCount() == 2) return flags;
+
+	if (commands[2].Cmp("linear")==0) flags = flags | RAW_QUAL_LINEAR;
+	if (commands[2].Cmp("vng")==0) flags = flags | RAW_QUAL_VNG;
+	if (commands[2].Cmp("ppg")==0) flags = flags | RAW_QUAL_PPG;
+	if (commands[2].Cmp("ahd")==0) flags = flags | RAW_QUAL_AHD;
+	return flags;
+
+}
+
 
 
 /*

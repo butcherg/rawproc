@@ -37,7 +37,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.3.1";
+wxString version = "0.4Dev";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -363,7 +363,12 @@ wxString rawprocFrm::AssembleCommand()
 	cmd.Append(" ");
 	wxTreeItemIdValue cookie;
 	wxTreeItemId root = commandtree->GetRootItem();
-	cmd.Append(wxString::Format("%s ",commandtree->GetItemText(root)));
+	//cmd.Append(wxString::Format("%s",commandtree->GetItemText(root)));
+	wxString rootcmd = ((PicProcessor *)commandtree->GetItemData(root))->getCommand();
+	//if (rootcmd.IsEmpty()) 
+	//	cmd.Append(" ");
+	//else
+		cmd.Append(wxString::Format("%s ",rootcmd));
 	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
 	if (iter.IsOk()) {
 		cmd.Append(wxString::Format("%s ",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
@@ -388,6 +393,11 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 		SetStatusText("Loading file...");
 		commandtree->DeleteAllItems();
 		dib = FreeImage_Load(fif, fname, flag);
+		if (!dib) {
+			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
+			SetStatusText("");
+			return;
+		}
 		if (fif == FIF_RAW & flag == RAW_UNPROCESSED) {
 			tmpdib = FreeImage_ConvertToRGB16(dib);
 			FreeImage_Unload(dib);
@@ -398,7 +408,9 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 			SetStatusText("");
 			return;
 		}
-		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
+		wxString flagstring = "";
+		if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
+		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
@@ -421,6 +433,9 @@ void rawprocFrm::OpenFileSource(wxString fname)
 {
 	//filename.Assign(fname);
 	FIBITMAP *srcdib, *dib;
+	int fflags = 0;
+	wxString ofilename;
+	wxString oparams = "";
 	FREE_IMAGE_FORMAT fif;
 	fif = FreeImage_GetFileType(fname, 0);
 	
@@ -436,23 +451,33 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		if(tagSource != NULL) {
 			wxString script = (char *) FreeImage_GetTagValue(tagSource);
 			wxArrayString token = split(script, " ");
+			if (token[1].Contains(":")) {
+				wxArrayString fparams = split(token[1],":");
+				if (fparams.GetCount() >1) {
+					fflags = Command2RawFlags(fparams[1]);
+					oparams = fparams[1];
+				}
+				ofilename = fparams[0];
+			}
+			else ofilename = token[1];
+				
 			//wxMessageBox(script);
 			if (token[0].Find("rawproc") == wxNOT_FOUND) {
 				SetStatusText(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
 			}
 			else {
-				SetStatusText(wxString::Format("Source script found, loading source file %s...",token[1]) );
+				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
 				commandtree->DeleteAllItems();
-				filename.Assign(token[1]);
+				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
-				fif = FreeImage_GetFileType(token[1], 0);
-				dib = FreeImage_Load(fif, token[1]);
+				fif = FreeImage_GetFileType(ofilename, 0);
+				dib = FreeImage_Load(fif, ofilename);
 				if (FreeImage_GetBPP(dib) < 24) {
-					wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", token[1]));
+					wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", ofilename));
 					SetStatusText("");
 					return;
 				}
-				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), "", commandtree, pic, parameters, dib);
+				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 				picdata->processPic();
 				CommandTreeSetDisplay(picdata->GetId());
 				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
@@ -600,13 +625,16 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
-	myFileSelector filediag(NULL, wxID_ANY, filename.GetPath(), "Open File");
+	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open File");
+	//wxString filename = filediag->GetFileSelected();
+	//unsigned flags = filediag->GetFlag();
 
-	if(filediag.ShowModal() == wxID_OK)    {
-		wxFileName f(filediag.GetFileSelected());
+	if(filediag->ShowModal() == wxID_OK)    {
+		wxFileName f(filediag->GetFileSelected());
 		wxSetWorkingDirectory (f.GetPath());
-        	OpenFile(filediag.GetFileSelected(), filediag.GetFlag());
+        	OpenFile(filediag->GetFileSelected(), filediag->GetFlag());
 	}
+	filediag->~myFileSelector();
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
@@ -788,7 +816,13 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
  */
 void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 {
-	wxString fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+	wxString fname;
+
+	if (!sourcefilename.IsOk()) 
+		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+	else
+		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+
 	if ( !fname.empty() )
 	{
 		if (wxFileName::FileExists(fname)) 
@@ -888,7 +922,10 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\nConfiguration file: %s",configfile));
+
+	wxString FreeImageVersion(FreeImage_GetVersion());
+	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\n\nConfiguration file: %s",WxWidgetsVersion,FreeImageVersion,configfile));
 	wxAboutBox(info);
 
 }

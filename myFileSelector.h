@@ -23,7 +23,10 @@ public:
 private:
 	//wxTextCtrl* nameTextCtrl_;
 	wxFileCtrl* fileselector;
+	bool israw;
 	wxRadioBox* rawflags;
+	wxRadioBox* colorflags;
+	wxRadioBox* qualityflags;
 };
 
 #endif 
