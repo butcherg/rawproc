@@ -15,11 +15,16 @@
 #include <wx/stdpaths.h>
 
 #include "util.h"
+#include "FreeImage.h"
 
 IMPLEMENT_APP(rawprocFrmApp)
 
 bool rawprocFrmApp::OnInit()
 {
+#ifdef FREEIMAGE_LIB
+	//FreeImage_Initialise();
+#endif // FREEIMAGE_LIB
+
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
@@ -69,6 +74,9 @@ bool rawprocFrmApp::OnInit()
  
 int rawprocFrmApp::OnExit()
 {
+#ifdef FREEIMAGE_LIB
+	//FreeImage_DeInitialise();
+#endif // FREEIMAGE_LIB
 	delete wxConfigBase::Get();
 	return 0;
 }

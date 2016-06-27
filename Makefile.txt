@@ -9,7 +9,7 @@ ifeq ($(UNAME), mingw32)
 	FILIBS=-L$(WINFREEIMAGE)
 	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
 	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
-	FIFLAGS=-I$(WINFREEIMAGE)
+	FIFLAGS=-I$(WINFREEIMAGE) # -lFreeImage -DFREEIMAGE_LIB
 	OBJDIR=win
 endif
 
@@ -58,7 +58,7 @@ $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
 
 $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
-	$(CXX) $(WXFLAGS) -c myFileSelector.cpp  -o$@
+	$(CXX) $(WXFLAGS) $(FIFLAGS) -c myFileSelector.cpp  -o$@
 
 $(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@

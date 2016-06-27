@@ -4,6 +4,7 @@
 	#include <wx/wxprec.h>
 #endif
 
+
 #include <omp.h>
 
 #ifdef WIN32
@@ -288,6 +289,11 @@ int threadcount = 1;
 
 unsigned hdata[256];
 unsigned hmax;
+
+void FillHistogram(unsigned *histogram)
+{
+	for (int i=0; i<256; i++) histogram[i] = hdata[i];
+}
 
 wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib)
 {

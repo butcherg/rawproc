@@ -10,6 +10,8 @@
 #include <vector>
 #include "FreeImage.h"
 
+void FillHistogram(unsigned *histogram);
+
 bool ImageContainsRawprocCommand(wxString fname);
 
 wxArrayString split(wxString str, wxString delim);
