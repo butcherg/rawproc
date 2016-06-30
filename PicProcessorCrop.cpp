@@ -17,11 +17,14 @@ class CropPanel: public PicProcPanel
 			wxConfigBase::Get()->Read("tool.crop.controlpointradius",&radius,7);
 			isaspect = true;
 
+			int indent;
+			wxConfigBase::Get()->Read("tool.crop.initialindent",&indent,0);
+
 			wxArrayString p = split(params,",");
-			left = atoi(p[0]);
-			top = atoi(p[1]);
-			right = atoi(p[2]);
-			bottom = atoi(p[3]);
+			left = atoi(p[0])+indent;
+			top = atoi(p[1])+indent;
+			right = atoi(p[2])-indent;
+			bottom = atoi(p[3])-indent;
 			//wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			img = ThreadedFreeImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
