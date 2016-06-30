@@ -33,6 +33,7 @@
 #include "PicProcessorRotate.h"
 #include "myFileSelector.h"
 #include "util.h"
+#include <omp.h>
 
 #include "unchecked.xpm"
 #include "checked.xpm"
@@ -387,12 +388,15 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 	sourcefilename.Clear();
 	FIBITMAP *dib, *tmpdib;
 	FREE_IMAGE_FORMAT fif;
+	int threadcount = omp_get_max_threads();
 
 	fif = FreeImage_GetFileType(fname, 0);
 	if(fif != FIF_UNKNOWN) {
 		SetStatusText("Loading file...");
 		commandtree->DeleteAllItems();
+		mark();
 		dib = FreeImage_Load(fif, fname, flag);
+		wxString loadtime = duration();
 		if (!dib) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
 			SetStatusText("");
@@ -409,6 +413,9 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 			return;
 		}
 		wxString flagstring = "";
+		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
+			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",filename.GetFullName(),FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,loadtime));
+
 		if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
 		picdata->showParams();
