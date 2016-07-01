@@ -14,7 +14,8 @@ class CropPanel: public PicProcPanel
 			SetDoubleBuffered(true);
 			node = 0;
 			cropmode = 1; //0=freeform; 1=maintain aspect
-			wxConfigBase::Get()->Read("tool.crop.controlpointradius",&radius,7);
+			wxConfigBase::Get()->Read("tool.crop.controlpointradius",&cpradius,7);
+			wxConfigBase::Get()->Read("tool.crop.landingradius",&landingradius,7);
 			isaspect = true;
 
 			int indent;
@@ -84,31 +85,34 @@ class CropPanel: public PicProcPanel
 			dc.DrawLine(left*aspect, bottom*aspect, left*aspect, top*aspect);
 			dc.SetBrush(*wxYELLOW_BRUSH);
 			dc.SetPen(*wxYELLOW_PEN);
-			//dc.DrawCircle(left*aspect, top*aspect, radius);
-			dc.DrawRectangle(left*aspect-radius, top*aspect-radius,radius*2,radius*2);
+			//dc.DrawCircle(left*aspect, top*aspect, cpradius);
+			dc.DrawRectangle(left*aspect-cpradius, top*aspect-cpradius,cpradius*2,cpradius*2);
 			dc.SetBrush(*wxRED_BRUSH);
 			dc.SetPen(*wxRED_PEN);
-			dc.DrawCircle(right*aspect-1, bottom*aspect, radius);
-			//DrawRectangle (right*aspect-1-radius, bottom*aspect-radius, right*aspect-1+radius, bottom*aspect+radius)
+			dc.DrawCircle(right*aspect-1, bottom*aspect, cpradius);
+			//DrawRectangle (right*aspect-1-cpradius, bottom*aspect-cpradius, right*aspect-1+cpradius, bottom*aspect+cpradius)
 		}
 
 		void OnMouseDown(wxMouseEvent& event)
 		{
 			mousex = event.m_x;
 			mousey = event.m_y;
+			int radius;
+			wxConfigBase::Get()->Read("tool.crop.landingradius",&radius,7);
+
 			if ((mousex > left*aspect-radius) & (mousex < left*aspect+radius)) {
-				if ((mousey > top*aspect-radius) & (mousey < top*aspect+radius)) {
-					node = 1;
+				if ((mousey > top*aspect-landingradius) & (mousey < top*aspect+landingradius)) {
+					node = 1;  //top left
 				}
 			}
-			else if ((mousex > right*aspect-radius) & (mousex < right*aspect+radius)) {
-				if ((mousey > bottom*aspect-radius) & (mousey < bottom*aspect+radius)) {
-					node = 2;
+			else if ((mousex > right*aspect-landingradius) & (mousex < right*aspect+landingradius)) {
+				if ((mousey > bottom*aspect-landingradius) & (mousey < bottom*aspect+landingradius)) {
+					node = 2; //bottom right
 				}
 			}
 			else if ((mousex > left*aspect) * (mousex < right*aspect)) {
 				if ((mousey > top*aspect) & (mousey < bottom*aspect)) {
-					node = 3;
+					node = 3; //move
 				}
 			}
 			event.Skip();
@@ -246,9 +250,9 @@ class CropPanel: public PicProcPanel
 		//wxTextCtrl *widthedit, *heightedit;
 		wxImage img;
 		int ww, iw, wh, ih;
-		int node, cropmode, mousex, mousey, radius;
+		int node, cropmode, mousex, mousey;
 		double aspect, wa, ha, iwa, iha;
-		int left, top , bottom, right;
+		int left, top , bottom, right, cpradius, landingradius;
 		bool isaspect;
 
 };

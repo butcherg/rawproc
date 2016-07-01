@@ -106,8 +106,8 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	double x, y;
 	mousemoved = false;
 	mousemotion=true;
-	int radius;
-	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
+	int landingradius;
+	wxConfigBase::Get()->Read("tool.curve.landingradius",&landingradius,5);
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
 	pos = event.GetLogicalPosition(dc);
@@ -117,7 +117,7 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	mouseCP.x = pos.x;
 	mouseCP.y = pos.y;
 
-	int pt = c.isctrlpoint(pos.x,pos.y,radius);
+	int pt = c.isctrlpoint(pos.x,pos.y,landingradius);
 	if (pt != -1) {
 		selectedCP = c.getctrlpoint(pt);
 		paintNow();
@@ -126,8 +126,8 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 
 	for (x=1.0; x<255.0; x++) {
 		y = c.getpoint(x);
-		if ((pos.x > x-radius) & (pos.x < x+radius)) {
-			if ((pos.y > y-radius) & (pos.y < y+radius)) {
+		if ((pos.x > x-landingradius) & (pos.x < x+landingradius)) {
+			if ((pos.y > y-landingradius) & (pos.y < y+landingradius)) {
 				c.insertpoint(x,y);
 				selectedCP.x = x;
 				selectedCP.y = y;
@@ -260,7 +260,7 @@ void CurvePane::render(wxDC&  dc)
 	dc.Clear();
 	int w, h;
 	dc.GetSize(&w, &h);
-	int m=12;
+	int m=10;
 	int radius;
 	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	
