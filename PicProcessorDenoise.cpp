@@ -20,9 +20,9 @@ class DenoisePanel: public PicProcPanel
 			int initialvalue = atoi(params.c_str());
 
 			g->Add(0,10, wxGBPosition(0,0));
-			g->Add(new wxStaticText(this,wxID_ANY, "bright: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			bright = new wxSlider(this, wxID_ANY, initialvalue, -100, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(bright , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "sigma: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			sigma = new wxSlider(this, wxID_ANY, initialvalue, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(sigma , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
@@ -48,18 +48,18 @@ class DenoisePanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
+			val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
+			val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d",bright->GetValue()));
+			q->setParams(wxString::Format("%d",sigma->GetValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -67,8 +67,8 @@ class DenoisePanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			int resetval;
-			wxConfigBase::Get()->Read("tool.bright.initialvalue",&resetval,0);
-			bright->SetValue(resetval);
+			wxConfigBase::Get()->Read("tool.denoise.initialvalue",&resetval,35);
+			sigma->SetValue(resetval);
 			q->setParams(wxString::Format("%d",resetval));
 			val->SetLabel(wxString::Format("%4d", resetval));
 			q->processPic();
@@ -77,7 +77,7 @@ class DenoisePanel: public PicProcPanel
 
 
 	private:
-		wxSlider *bright;
+		wxSlider *sigma;
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxTimer *t;
@@ -104,18 +104,21 @@ bool PicProcessorDenoise::processPic() {
 	bool result = true;
 
 
-	int threadcount;
+	int threadcount, local, patch;
 	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+
+	wxConfigBase::Get()->Read("tool.denoise.local",&local,1);
+	wxConfigBase::Get()->Read("tool.denoise.patch",&patch,3);
 
 	mark();
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ApplyNLMeans(getPreviousPicProcessor()->getProcessedPic(), dib, sigma, 3, 1, threadcount);
+	ApplyNLMeans(getPreviousPicProcessor()->getProcessedPic(), dib, sigma, local, patch, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.denoise.log","0") == "1"))
-		log(wxString::Format("tool=denoise,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=denoise,sigma=%d,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty=false;
 
