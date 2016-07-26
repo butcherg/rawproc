@@ -118,7 +118,7 @@ bool PicProcessorDenoise::processPic() {
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.denoise.log","0") == "1"))
-		log(wxString::Format("tool=denoise,sigma=%d,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
 
 	dirty=false;
 
