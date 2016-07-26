@@ -119,6 +119,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_BLACKWHITEPOINT = 1024,
 			ID_MNU_SHARPEN = 1025,
 			ID_MNU_ROTATE = 1026,
+			ID_MNU_DENOISE = 1027,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -164,6 +165,7 @@ class rawprocFrm : public wxFrame
 	void MnuBlackWhitePointClick(wxCommandEvent& event);
 	void MnuSharpenClick(wxCommandEvent& event);
 	void MnuRotateClick(wxCommandEvent& event);
+	void MnuDenoiseClick(wxCommandEvent& event);
 	void Mnusave1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);
 	void MnuCut1201Click(wxCommandEvent& event);

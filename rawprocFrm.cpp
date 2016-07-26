@@ -31,6 +31,7 @@
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
+#include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
 #include "util.h"
 #include <omp.h>
@@ -75,6 +76,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
 	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
 	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
+	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -149,6 +151,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
@@ -817,6 +820,15 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 }
 
+void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
+{
+	SetStatusText("");
+	wxString defval = wxConfigBase::Get()->Read("tool.denoise.initialvalue","35");
+	PicProcessorDenoise *d = new PicProcessorDenoise("denoise", defval, commandtree, pic, parameters);
+	if (defval != "0") d->processPic();
+	wxSafeYield(this);
+	if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+}
 
 /*
  * Mnusave1009Click
