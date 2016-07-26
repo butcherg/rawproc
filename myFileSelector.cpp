@@ -23,6 +23,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	//flags.Add("Unprocessed");
 	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxPoint(20,270), wxSize(580,70), flags, 5);
 
+#ifdef CUSTOM_FREEIMAGE
 	wxArrayString cflags;
 	cflags.Add("Raw");
 	cflags.Add("sRGB");
@@ -38,7 +39,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	quflags.Add("PPG");
 	quflags.Add("AHD");
 	qualityflags = new wxRadioBox (this, wxID_ANY, "Demosaic Algorithm",  wxPoint(20,430), wxSize(300, 70), quflags, 4);
-
+#endif
 
 	wxButton* cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxPoint(20,510), wxDefaultSize);
 	wxButton* okButton = new wxButton(this, wxID_ANY, "Ok", wxPoint(150,510), wxDefaultSize);
@@ -56,6 +57,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	//if (rdefault.CmpNoCase("unprocessed")==0) 	rawflags->SetSelection(4);
 	rawflags->Disable();
 
+#ifdef CUSTOM_FREEIMAGE
 	wxString cdefault = wxConfigBase::Get()->Read("input.raw.colorspace","srgb");
 	if (cdefault.CmpNoCase("raw")==0)	colorflags->SetSelection(0);
 	if (cdefault.CmpNoCase("srgb")==0)	colorflags->SetSelection(1);
@@ -71,6 +73,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	if (qdefault.CmpNoCase("ppg")==0) 	qualityflags->SetSelection(2);
 	if (qdefault.CmpNoCase("ahd")==0) 	qualityflags->SetSelection(3);
 	qualityflags->Disable();
+#endif
 
 	Center();
 	israw=false;
@@ -115,6 +118,7 @@ int myFileSelector::GetFlag()
 		flags = flags | RAW_DEFAULT;
 	}
 
+#ifdef CUSTOM_FREEIMAGE
 	switch (colorflags->GetSelection()) {
 	case 0:
 		flags = flags | RAW_COLOR_RAW; break;
@@ -146,6 +150,7 @@ int myFileSelector::GetFlag()
 	default:
 		flags = flags | RAW_QUAL_AHD;
 	}
+#endif
 
 	return flags;
 }
@@ -159,16 +164,24 @@ void myFileSelector::onFileChange(wxFileCtrlEvent& WXUNUSED(pEvent))
 	if (fif == FIF_RAW) {
 		israw=true;
 		rawflags->Enable();
+
+#ifdef CUSTOM_FREEIMAGE
 		if (FreeImageVersion.Contains("ggb")) {
 			colorflags->Enable();
 			qualityflags->Enable();
 		}
+#endif
+
 	}
 	else {
 		israw=false;
 		rawflags->Disable();
+
+#ifdef CUSTOM_FREEIMAGE
 		colorflags->Disable();
 		qualityflags->Disable();
+#endif
+
 	}
 }
 
