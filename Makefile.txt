@@ -19,7 +19,7 @@ ifeq ($(UNAME), x86_64-linux-gnu)
 	OBJDIR=linux
 endif
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o FreeImage_Threaded.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o FreeImage16.o FreeImage_Threaded.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -34,25 +34,25 @@ all: rawproc img
 
 rawproc: $(OBJECTS)
 ifeq ($(OBJDIR),win)
-	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -fopenmp -o $(OBJDIR)/rawproc 
+	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -static -fopenmp -o $(OBJDIR)/rawproc 
 else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -fopenmp -o $(OBJDIR)/rawproc
 endif
 
 img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) -fopenmp  -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) -static -fopenmp  -o $(OBJDIR)/img
 
 $(OBJDIR)/img.o: img.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -w -c img.cpp -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -static -w -c img.cpp -o$@
 
 $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 	$(CXX) -c elapsedtime.cpp  -o$@
 
 $(OBJDIR)/util.o: util.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -fopenmp -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -static -fopenmp -o$@
 
 $(OBJDIR)/FreeImage_Threaded.o: FreeImage_Threaded.cpp Curve.h saturation.h
-	$(CXX) $(FIFLAGS) -w -c FreeImage_Threaded.cpp -fopenmp -o$@
+	$(CXX) $(FIFLAGS) -static -w -c FreeImage_Threaded.cpp -fopenmp -o$@
 
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
@@ -110,6 +110,9 @@ $(OBJDIR)/PicProcessorSharpen.o: PicProcessorSharpen.cpp
 
 $(OBJDIR)/PicProcessorRotate.o: PicProcessorRotate.cpp 
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorRotate.cpp   -o$@
+
+$(OBJDIR)/PicProcessorDenoise.o: PicProcessorDenoise.cpp 
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorDenoise.cpp   -o$@
 
 $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessor.cpp   -o$@
