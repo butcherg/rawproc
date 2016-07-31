@@ -1,0 +1,39 @@
+<html><body>
+
+<h2 id="LayoftherawprocLand">Lay of the rawproc Land</h2>
+
+<p>When started, rawproc will present you with a window containing three panes:</p>
+
+<ol>
+	<li>Display: The right-hand window, contains the image being manipulated.  There is also a thumbnail 
+	window in the top-left corner that will toggle through a thumb of the image, a histogram, or nothing.
+	You can toggle through the thumb modes with either the 't' key, or double-click on the thumb.  For the 
+	display image, you
+	can zoom in or out of the image using the mousewheel, or toggle 100%/fit by double-clicking
+	the image.</li><br>
+
+	<li>Commands: The top-left-hand window, contains the list of tools applied to the image.  You
+	can select a tool to mess with by left-clicking it.  Right-clicking a tool 
+	brings up a pop-up menu from which you can either display EXIF and image data or delete the
+	tool; the histogram selection doesn't work yet. The checkbox beside each tool is to
+	select that tool result for display; this can be done separate from selecting the tool to
+	mess with its parameters.  I thought being able to do that would be useful, but the jury is still out...</li><br>
+
+	<li>Parameters: The bottom-left-hand window, contains the tools for changing the tool 
+	selected in the Commands pane.  These are mostly sliders that you can manipulate with either
+	a mouse or a touchscreen implement (stylus, or your finger).  Sometimes, especially with Linux/GTK,
+	the parameter tools won't display when you select a command; just resize the window slightly and
+	they'll appear.  Something about Refresh() I need to figure out...</li><br>
+</ol>
+
+<p>You can drag the Commands and Parameters windows from their initial positions and dock them to various sides of the 
+rawproc window, or you can let them float like independent windows.  This is particularly useful for the crop and 
+rotate tools; you can make the Parameters window bigger to more easily work these tools.</p>
+
+<p>Running, rawproc looks like this:</p>
+<img width="100%"src=rawproc.png></img>
+
+<p>There is also a status bar that will display useful feedback as you work with images, as well as the
+display zoom ratio.</p>
+
+</body></html>

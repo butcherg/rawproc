@@ -1,0 +1,10 @@
+<html><body>
+
+<h3 id="Denoise">Denoise</h3>
+<p>Uses a Non-Local Means algorithm as presented by David Tschumperlé, lead developer of GMIC, in his blog at http://gmic.eu.
+The neighborhood and patch sizes are hidden in the configuration file, so the only control is sigma (denoies "strength").
+This is a slow algorithm, so a default of 0 (no denoise) is appropriate to keep from cooling your heels waiting while
+the algorithm walks the image when you initally add the tool.  sigma=35 is a good starting point for a small image.</p>
+<p align=center><img src=denoise.png></p>
+
+</body></html>

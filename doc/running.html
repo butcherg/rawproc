@@ -1,0 +1,31 @@
+<html><body>
+
+<h2 id="Runningrawproc">Running rawproc</h2>
+
+<p>It's really pretty simple, you can either run rawproc like you would any other program from the Start menu, or double
+click the desktop icon.</p>
+
+<p>You can make rawproc a lot easier to get to if you either specify it as the default program for the 
+image types you want to work with, or getting it into the list of programs you get when you right-click 
+on a file and select "Run With" from the popup menu.  Both Windows File Explorer and Nautilus in Ubuntu 
+have a "Run With" menu entry that allows this.</p>
+
+<p>If you put the rawproc install directory in your PATH environment variable, you can run rawproc from 
+the command line: 
+
+<pre>rawproc DSC_0001.NEF</pre>
+
+will run rawproc and open the image file specified.</p>
+
+<p>The -s switch is a unique rawproc feature.  If you've previously created an image with rawproc, it'll
+save the command sequence used to create it in the image's EXIF.  Using -s to open the image will actually
+open the image you started with (if it finds it in the same directory), and apply the tools in sequence to 
+reproduce the image you intended to open:
+
+<pre>rawproc -s DSC_0001.jpg</pre>
+
+If DSC_0001.jpg was created by rawproc from DSC_0001.NEF, this command will open the .NEF file and apply 
+the tools in sequence to recreate DSC_0001.jpg.
+</p>
+
+</body></html>

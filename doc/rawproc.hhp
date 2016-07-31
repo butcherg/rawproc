@@ -1,0 +1,31 @@
+[OPTIONS]
+Contents file=contents.hhc
+Index file=index.hhk
+Language=0x405 Èesky
+Title=rawproc Image Processor
+Default topic=main.html
+
+[FILES]
+main.htm
+introduction.html
+installation.html
+running.html
+layout.html
+menu.html
+tools.html
+blackwhitepoint.html
+bright.html
+contrast.html
+crop.html
+curve.html
+denoise.html
+gamma.html
+gray.html
+highlight.html
+resize.html
+rotate.html
+saturate.html
+shadow.html
+sharpen.html
+configurationfile.html
+tips.html

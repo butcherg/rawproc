@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Introduction">
+			<param name="Local" value="introduction.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Installation">
+			<param name="Local" value="installation.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Running rawproc">
+			<param name="Local" value="running.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Lay Of The rawproc Land">
+			<param name="Local" value="layout.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Menu">
+			<param name="Local" value="menu.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Image Tools">
+			<param name="Local" value="tools.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Black/White Point">
+			<param name="Local" value="blackwhitepoint.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Bright">
+			<param name="Local" value="bright.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Contrast">
+			<param name="Local" value="contrast.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Crop">
+			<param name="Local" value="crop.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Curve">
+			<param name="Local" value="curve.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Denoise">
+			<param name="Local" value="denoise.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Gamma">
+			<param name="Local" value="gamma.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Grayscale">
+			<param name="Local" value="gray.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Highlight">
+			<param name="Local" value="highlight.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Resize">
+			<param name="Local" value="resize.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Rotate">
+			<param name="Local" value="rotate.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Saturate">
+			<param name="Local" value="saturate.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Shadow">
+			<param name="Local" value="shadow.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Sharpen">
+			<param name="Local" value="sharpen.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Configuration">
+			<param name="Local" value="configurationfile.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Tips">
+			<param name="Local" value="tips.html">
+			</OBJECT>
+
+</UL>
+</BODY></HTML>

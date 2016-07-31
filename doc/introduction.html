@@ -1,0 +1,46 @@
+<html><body>
+
+
+<h2 id="Introduction">Introduction</h2>
+
+<p>rawproc is a simple raw image processor, primarily designed to open raw camera files and do basic 
+manipulations in their 16-bit tonal range.  I downloaded a lot of raw processors that will do this very 
+thing, but most either came with a lot of other processing or GUI baggage, or were too simple for interactive 
+use.  Anyway, the FreeImage library allowed me to write my own application without having to deal with 
+image formats and some manipulations, so now I have a program that does just what I need and only what I 
+need.  My main use case is, sitting in the hotel in the evening, be able to go through my day's images and 
+do what I call 'contact sheet' processing; that is, make decent images from the raw files for internet 
+posting, and later use as the basis for 'real' processing using RawTherapee or GIMP.</p>
+
+<p>One key feature of rawproc is my approach to non-destructive editing.  rawproc will open camera raw files, 
+but it will not save to them.  It saves TIFF, JPEG, and PNG image files, and it will write the string of 
+manipulation commands used to produce the image file from the originally opened image into the saved image's
+EXIF metadata.  You can later use a special open command to open the saved image by opening the original 
+image and apply the manipulations to get to the saved image equivalent.  No separate sidecar files.  The 
+command string also serves as the equivalent to the dodge and burn notes of a contact sheet or test image; 
+they allow me to apply the same or approximate set of manipulations when I go to do the 'real' editing in 
+RawTherapee or GIMP.</p>
+
+<p>rawproc source code can be downloaded from GitHub, <a href=https://github.com/butcherg/rawproc>
+https://github.com/butcherg/rawproc</a>.  rawproc will compile to a Windows executable with the MinGW C++ compiler, or to a Linux/GTK executable 
+with the GNU g++ compiler.  You'll need the FreeImage and wxWidgets libraries; I was able to install both 
+from the Ubuntu repositories for Linux, but you'll have to download them from their source websites and 
+probably compile them yourself for Windows.  The Makefile.txt will work for either Windows/MinGW or Linux, if
+you have the directories set up right.</p>
+
+<p>rawproc is by no means a tool you should use for serious image processing.  It does all of its
+manipulation on the entire RGB data, no per-channel or luminance-specific processing.  But, each operation 
+will work on 16-bit or 8-bit tone range (rawproc will open JPEGs, TIFFs, or PNGs for processing), preserving 
+the tone range as much as possible.  I'll have no qualms about using rawproc to create TIFFs for later
+editing in a more capable program.  It uses the libraw library to open camera raw files, so you are availed 
+of the fine work that went into the demosaic and basic operations contained therein, although at present 
+rawproc doesn't expose any processing option of that library.  FreeImage provides the basic manipulations, and 
+I wrote the others based on how FreeImage works and a lot of internet research.  The significant and 
+unanticipated benefit of this research was developing a really deep understanding of digital imaging and 
+software development to support it.</p>
+
+<p>All that said, I'm posting rawproc binaries and source code but I'm not planning on 'supporting' it as 
+a product.  In other words, you get what you see, no more.  Further, there are still crash-instigating 
+bugs that I have yet to fix, so save often.  So, use at your own peril, but have fun... <p>
+
+</body></html>
