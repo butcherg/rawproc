@@ -17,6 +17,7 @@
 #include <wx/clipbrd.h>
 #include <wx/aboutdlg.h> 
 #include <wx/fileconf.h>
+#include <wx/stdpaths.h>
 
 #include "PicProcessorGamma.h"
 #include "PicProcessorBright.h"
@@ -118,9 +119,11 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	help.UseConfig(wxConfig::Get());
 	bool ret;
 	help.SetTempDir(wxT("."));
-	ret = help.AddBook(wxFileName("win/doc-0.4.zip"));
+	wxFileName helpfile( wxStandardPaths::Get().GetExecutablePath());
+	helpfile.SetFullName("doc.zip");
+	ret = help.AddBook(wxFileName(helpfile));
 	if (! ret)
-		wxMessageBox(wxT("Failed adding book doc-0.4.zip"));
+		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
 	
 }
 
