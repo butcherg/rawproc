@@ -39,6 +39,13 @@
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
 //#include <wx/treelist.h>
+
+#include <wx/image.h>
+#include <wx/html/helpfrm.h>
+#include <wx/html/helpctrl.h>
+#include <wx/filesys.h>
+#include <wx/fs_zip.h>
+
 #include "FreeImage.h"
 #include "PicPanel.h"
 #include "PicProcessor.h"
@@ -120,6 +127,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_SHARPEN = 1025,
 			ID_MNU_ROTATE = 1026,
 			ID_MNU_DENOISE = 1027,
+			ID_MNU_VIEWHELP = 1028,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -173,6 +181,7 @@ class rawprocFrm : public wxFrame
 	void MnuPaste1203Click(wxCommandEvent& event);
 	void MnuShowCommand1010Click(wxCommandEvent& event);
 	void MnuAbout1011Click(wxCommandEvent& event);
+	void MnuHelpClick(wxCommandEvent& event);
 		
 	private:
 		void OnClose(wxCloseEvent& event);
@@ -191,6 +200,8 @@ class rawprocFrm : public wxFrame
 		wxTreeItemId olditem;
 		wxFileName filename, sourcefilename;
 		wxString configfile;
+
+		wxHtmlHelpController help;
 };
 
 #endif

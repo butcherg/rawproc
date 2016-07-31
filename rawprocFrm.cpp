@@ -39,7 +39,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.4Dev";
+wxString version = "0.4";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -82,6 +82,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
+	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -113,6 +114,14 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	commandtree->AssignStateImageList(states);
 
 	configfile = "(none)";
+
+	help.UseConfig(wxConfig::Get());
+	bool ret;
+	help.SetTempDir(wxT("."));
+	ret = help.AddBook(wxFileName("win/doc-0.4.zip"));
+	if (! ret)
+		wxMessageBox(wxT("Failed adding book doc-0.4.zip"));
+	
 }
 
 rawprocFrm::~rawprocFrm()
@@ -165,6 +174,7 @@ void rawprocFrm::CreateGUIControls()
 	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, _("Add"));
 	
 	wxMenu *ID_MNU_HELPMnu_Obj = new wxMenu();
+	ID_MNU_HELPMnu_Obj->Append(ID_MNU_VIEWHELP, _("View Help..."), _(""), wxITEM_NORMAL);
 	ID_MNU_HELPMnu_Obj->Append(ID_MNU_SHOWCOMMAND, _("Show Command..."), _(""), wxITEM_NORMAL);
 	ID_MNU_HELPMnu_Obj->Append(ID_MNU_ABOUT, _("About..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_HELPMnu_Obj, _("Help"));
@@ -208,12 +218,18 @@ void rawprocFrm::CreateGUIControls()
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
+	if ( help.GetFrame() ) // returns NULL if no help frame active
+		help.GetFrame()->Close(true);
+	// now we can safely delete the config pointer
+	event.Skip();
+	delete wxConfig::Set(NULL);
 	mgr.UnInit();
 	Destroy();
 }
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
+
 	mgr.UnInit();
 	Destroy();
 }
@@ -947,6 +963,11 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\n\nConfiguration file: %s",WxWidgetsVersion,FreeImageVersion,configfile));
 	wxAboutBox(info);
 
+}
+
+void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
+{
+	help.Display(wxT("rawproc"));
 }
 
 #define ID_EXIF		2001

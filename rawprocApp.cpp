@@ -14,6 +14,9 @@
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
+#include "wx/filesys.h"
+#include "wx/fs_zip.h"
+
 #include "util.h"
 #include "FreeImage.h"
 
@@ -24,6 +27,9 @@ bool rawprocFrmApp::OnInit()
 #ifdef FREEIMAGE_LIB
 	//FreeImage_Initialise();
 #endif // FREEIMAGE_LIB
+
+	wxInitAllImageHandlers();
+	wxFileSystem::AddHandler(new wxZipFSHandler);
 
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
