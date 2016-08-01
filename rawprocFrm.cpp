@@ -410,7 +410,7 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 	sourcefilename.Clear();
 	FIBITMAP *dib, *tmpdib;
 	FREE_IMAGE_FORMAT fif;
-	int threadcount = omp_get_max_threads();
+	//int threadcount = omp_get_max_threads();
 
 	fif = FreeImage_GetFileType(fname, 0);
 	if(fif != FIF_UNKNOWN) {
@@ -436,7 +436,7 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 		}
 		wxString flagstring = "";
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
-			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",filename.GetFullName(),FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,loadtime));
+			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,imagebpp=%d,time=%s",filename.GetFullName(),FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),loadtime));
 
 		if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);

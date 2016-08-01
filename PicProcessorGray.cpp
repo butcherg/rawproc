@@ -5,7 +5,7 @@
 #include "PicProcPanel.h"
 #include "FreeImage.h"
 #include "undo.xpm"
-#include <omp.h>
+//#include <omp.h>
 
 #include "util.h"
 
@@ -162,7 +162,7 @@ bool PicProcessorGray::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.gray.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+	if (threadcount == 0) threadcount = ThreadCount();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);

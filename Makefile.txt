@@ -4,6 +4,7 @@ UNAME := $(shell g++ -dumpmachine)
 
 WINFREEIMAGE=c:\FreeImage-3.17.0
 WINWXWIDGETS=c:\wxWidgets-3.0.2
+OPENMP=-fopenmp
 
 ifeq ($(UNAME), mingw32)
 	FILIBS=-L$(WINFREEIMAGE)
@@ -35,13 +36,13 @@ all: rawproc img
 
 rawproc: $(OBJECTS)
 ifeq ($(OBJDIR),win)
-	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -static -fopenmp -o $(OBJDIR)/rawproc 
+	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -static $(OPENMP) -o $(OBJDIR)/rawproc 
 else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -static -fopenmp -o $(OBJDIR)/rawproc
 endif
 
 img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) -static -fopenmp  -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) -static $(OPENMP) -o $(OBJDIR)/img
 
 $(OBJDIR)/img.o: img.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -static -w -c img.cpp -o$@
@@ -50,10 +51,10 @@ $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 	$(CXX) -c elapsedtime.cpp  -o$@
 
 $(OBJDIR)/util.o: util.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -static -fopenmp -o$@
+	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp -static $(OPENMP) -o$@
 
 $(OBJDIR)/FreeImage_Threaded.o: FreeImage_Threaded.cpp Curve.h saturation.h
-	$(CXX) $(FIFLAGS) -static -w -c FreeImage_Threaded.cpp -fopenmp -o$@
+	$(CXX) $(FIFLAGS) -static -w -c FreeImage_Threaded.cpp $(OPENMP) -o$@
 
 $(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
 	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@

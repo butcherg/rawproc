@@ -3,9 +3,19 @@
 #include "elapsedtime.h"
 #include <vector>
 #include <algorithm>
+#include <omp.h>
 
 #define LUMA(r, g, b)	(0.2126F * r + 0.7152F * g + 0.0722F * b)
 #define LUMIN(r, g, b)	(0.3000F * r + 0.5900F * g + 0.1100F * b)
+
+int ThreadCount()
+{
+#if defined(_OPENMP)
+	return omp_get_max_threads();
+#else
+	return 1;
+#endif
+}
 
 double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threadcount)
 {

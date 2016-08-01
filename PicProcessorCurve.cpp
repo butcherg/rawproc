@@ -85,7 +85,7 @@ bool PicProcessorCurve::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.curve.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+	if (threadcount == 0) threadcount = ThreadCount();
 
 	mark();
 	if (dib) FreeImage_Unload(dib);

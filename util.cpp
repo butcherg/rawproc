@@ -126,7 +126,12 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxhistogram.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+	if (threadcount == 0)
+#if defined(_OPENMP)
+		threadcount = (long) omp_get_max_threads();
+#else
+		threadcount = 1;
+#endif
 
 	#pragma omp parallel
 	{
@@ -218,7 +223,12 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 //	std::vector<ThreadedWxConvert *> t;
 	int threadcount = 1;
 	wxConfigBase::Get()->Read("display.wxconvert.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+	if (threadcount == 0) 
+#if defined(_OPENMP)
+		threadcount = (long) omp_get_max_threads();
+#else
+		threadcount = 1;
+#endif
 
 	unsigned dpitch = FreeImage_GetPitch(db);
 	void * dstbits = FreeImage_GetBits(db);

@@ -2,7 +2,7 @@
 #include "Curve.h"
 #include <vector>
 
-
+int ThreadCount();
 double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threadcount);
 double ApplyLUT(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount);
 double ApplyLUT2LUMA(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount);

@@ -5,7 +5,7 @@
 #include "FreeImage.h"
 #include "undo.xpm"
 #include "util.h"
-#include <omp.h>
+//#include <omp.h>
 
 #include <vector>
 #include <wx/fileconf.h>
@@ -119,7 +119,7 @@ bool PicProcessorSharpen::processPic() {
 	bool result = true;
 
 	wxConfigBase::Get()->Read("tool.sharpen.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = (long) omp_get_max_threads();
+	if (threadcount == 0) threadcount = ThreadCount();
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
