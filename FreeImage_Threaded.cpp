@@ -29,7 +29,7 @@ double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threa
 
 	Curve c;
 	BYTE LUT8[256];
-	WORD LUT16[65535];
+	WORD LUT16[65536];
 	c.setControlPoints(ctpts);
 	int bpp = FreeImage_GetBPP(src);
 	if (bpp == 24) {
