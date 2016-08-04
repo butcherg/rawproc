@@ -2,6 +2,8 @@
 
 UNAME := $(shell g++ -dumpmachine)
 
+$(info $(UNAME))
+
 WINFREEIMAGE=c:\FreeImage-3.17.0
 WINWXWIDGETS=c:\wxWidgets-3.0.2
 OPENMP=-fopenmp
@@ -130,9 +132,16 @@ ifeq ($(OBJDIR),win)
 	windres -c resource.rc -o$@
 endif
 
+makedoc:
+ifeq ($(OBJDIR),win)
+	zip  -r -j win\rawprocdoc.zip doc\*
+else
+	zip  -r -j linux/rawprocdoc.zip doc/*
+endif
+
 clean:
 ifeq ($(OBJDIR),win)
-	del win\*.o win\rawproc.exe
+	del win\*.o win\rawproc.exe win\rawprocdoc.zip
 else
-	rm linux/*.o linux/rawproc
+	rm linux/*.o linux/rawproc linux/rawprocdoc.zip
 endif

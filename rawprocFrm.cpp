@@ -118,13 +118,12 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	help.UseConfig(wxConfig::Get());
 	bool ret;
-	help.SetTempDir(wxT("."));
+	help.SetTempDir(wxStandardPaths::Get().GetTempDir());
 	wxFileName helpfile( wxStandardPaths::Get().GetExecutablePath());
-	helpfile.SetFullName("doc.zip");
+	helpfile.SetFullName("rawprocdoc.zip");
 	ret = help.AddBook(wxFileName(helpfile));
 	if (! ret)
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
-	
 }
 
 rawprocFrm::~rawprocFrm()
@@ -970,7 +969,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 {
-	help.Display(wxT("rawproc"));
+	help.DisplayContents();
 }
 
 #define ID_EXIF		2001
