@@ -484,24 +484,55 @@ double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double sigma, int local, int p
 	switch(bpp) {
 		case 48:
 			#pragma omp parallel for
-			for(unsigned y = 1; y < ih-1; y++) {
-				for(unsigned x = 1; x < iw-1; x++) {
+			for(unsigned y = local; y < ih-local; y++) {
+				unsigned py = y;
+				if (py<yplb) py = yplb;
+				if (py>ypub) py = ypub;
+				for(unsigned x = local; x < iw-local; x++) {
+					unsigned px = x;
+					if (px<xplb) px = xplb;
+					if (px>xpub) px = xpub;
 					FIRGB16 *wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
-					double R=0.0; double G=0.0; double B=0.0;
-					for (unsigned kx=0; kx<3; kx++) {
-						int ix=kx*3;
-						for (int ky=0; ky<3; ky++) {
-							int i = ix+ky;
-							FIRGB16 *pixel = (FIRGB16 *) (srcbits + spitch*(y-1+ky) + 6*(x-1+kx));
-							//R += pixel->red   * kernel[kx][ky];
-							//G += pixel->green * kernel[kx][ky];
-							//B += pixel->blue  * kernel[kx][ky];
-						}
-						wdstpix->red   = std::min(std::max(int(R), 0), 65535);
-						wdstpix->green = std::min(std::max(int(G), 0), 65535);
-						wdstpix->blue  = std::min(std::max(int(B), 0), 65535);
-					}
 
+					double valueR = 0.0;
+					double valueG = 0.0;
+					double valueB = 0.0;
+					double sum_weightsR = 0.0;
+					double sum_weightsG = 0.0;
+					double sum_weightsB = 0.0;
+					for (int q = -local; q<=local; ++q) {
+						for (int p = -local; p<=local; ++p) {
+							double diffR = 0.0;
+							double diffG = 0.0;
+							double diffB = 0.0;
+							for (int s = -patch; s<=patch; ++s) {
+								for (int r = -patch; r<=patch; ++r) {
+									FIRGB16 *ppix = (FIRGB16 *) (srcbits + spitch*(py+q+s) + 6*(px+p+r));
+									FIRGB16 *lpix = (FIRGB16 *) (srcbits + spitch*(py+s) + 6*(px+r));
+									diffR += pow((float) (ppix->red/256 - lpix->red/256),2);
+									diffG += pow((float) (ppix->green/256 - lpix->green/256),2);
+									diffB += pow((float) (ppix->blue/256 - lpix->blue/256),2);
+									//gmic: diff += pow(i[x+p+r,y+q+s] - i[x+r,y+s],2);
+
+								}
+							}
+							double weightR = exp(-diffR/sigma2);
+							double weightG = exp(-diffG/sigma2);
+							double weightB = exp(-diffB/sigma2);
+							FIRGB16 *localpix = (FIRGB16 *) (srcbits + spitch*(y+q) + 6*(x+p));
+							valueR += weightR*localpix->red/256;
+							valueG += weightG*localpix->green/256;
+							valueB += weightB*localpix->blue/256;
+							//gmic: value += weight*i(x+p,y+q);
+							sum_weightsR += weightR;
+							sum_weightsG += weightG;
+							sum_weightsB += weightB;
+
+						}
+					}
+					wdstpix->red   = int((valueR/(1e-5 + sum_weightsR))*256);
+					wdstpix->green = int((valueG/(1e-5 + sum_weightsG))*256);
+					wdstpix->blue  = int((valueB/(1e-5 + sum_weightsB))*256);
 				}
 			}
 			break;	            
