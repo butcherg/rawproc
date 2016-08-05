@@ -317,6 +317,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
 	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
