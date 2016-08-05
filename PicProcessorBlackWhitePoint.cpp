@@ -109,16 +109,18 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	int i;
 	double blk, wht;
 	DWORD hdata[256]; DWORD hmax=0;
-	FIBITMAP *hdib = FreeImage_ConvertTo24Bits(getPreviousPicProcessor()->getProcessedPic());
-	FreeImage_GetHistogram(hdib, hdata);
-	FreeImage_Unload(hdib);
-
-	for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
-	for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
-	blk = (double) i;
-	for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
-	wht = (double) i;
-	setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
+	if (command == "") {
+		FIBITMAP *hdib = FreeImage_ConvertTo24Bits(getPreviousPicProcessor()->getProcessedPic());
+		FreeImage_GetHistogram(hdib, hdata);
+		FreeImage_Unload(hdib);
+		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
+		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		blk = (double) i;
+		for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		wht = (double) i;
+		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
+	}
+	else setParams(command);
 	showParams();
 	processPic();
 }

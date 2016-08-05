@@ -812,7 +812,11 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorBlackWhitePoint *c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
+	PicProcessorBlackWhitePoint *c;
+	if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
+		c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
+	else
+		c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
 	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
