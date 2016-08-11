@@ -40,7 +40,7 @@ rawproc: $(OBJECTS)
 ifeq ($(OBJDIR),win)
 	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -static $(OPENMP) -o $(OBJDIR)/rawproc 
 else
-	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -static -fopenmp -o $(OBJDIR)/rawproc
+	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -fopenmp -o $(OBJDIR)/rawproc
 endif
 
 img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
