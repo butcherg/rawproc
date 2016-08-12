@@ -33,9 +33,11 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib);
 wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib);
 wxBitmap HistogramFromData(int width, int height);
 
+
 //cross-platform duration:
 void mark ();
 wxString duration ();
+
 
 //Logging to file:
 void log(wxString msg);

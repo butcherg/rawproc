@@ -4,7 +4,7 @@
 	#include <wx/wxprec.h>
 #endif
 
-
+#include "elapsedtime.h"
 #include <omp.h>
 
 #ifdef WIN32
@@ -31,52 +31,19 @@ wxArrayString split(wxString str, wxString delim)
 	return a;
 }
 
-//cross-platform duration:
 
-#ifdef WIN32
-LARGE_INTEGER f, t1, t2;
 
 void mark ()
 {
-	QueryPerformanceFrequency(&f);
-	QueryPerformanceCounter(&t1);
+	_mark();
 }
 
 wxString duration ()
 {
-	QueryPerformanceCounter(&t2);
-	double elapsedTime = ((t2.QuadPart - t1.QuadPart) * 1000.0 / f.QuadPart)/1000;
-	return wxString::Format("%fsec", elapsedTime);
-}
-#else
-timespec s,f;
-timespec diff(timespec start, timespec end)
-{
-	timespec temp;
-	if ((end.tv_nsec-start.tv_nsec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
-	}
-	return temp;
+	return wxString::Format("%fsec", _duration());
 }
 
-void mark ()
-{
-	clock_gettime(CLOCK_MONOTONIC,&s);
-}
 
-wxString duration ()
-{
-	clock_gettime(CLOCK_MONOTONIC,&f);
-	timespec d = diff(s,f);
-	return wxString::Format("%ld.%ldsec", d.tv_sec, d.tv_nsec);
-}
-#endif
-
-// end of cross-platform duration
 
 //File logging:
 void log(wxString msg)

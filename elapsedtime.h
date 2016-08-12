@@ -1,4 +1,4 @@
 
 
-void mark ();
-double duration ();
+void _mark ();
+double _duration ();

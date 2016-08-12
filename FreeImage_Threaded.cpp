@@ -19,7 +19,7 @@ int ThreadCount()
 
 double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threadcount)
 {
-	mark();
+	_mark();
 	unsigned spitch = FreeImage_GetPitch(src);
 	unsigned dpitch = FreeImage_GetPitch(dst);
 	unsigned w = FreeImage_GetWidth(src);
@@ -73,13 +73,13 @@ double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threa
 			}
 		}
 	}
-	return duration();
+	return _duration();
 }
 
 
 double ApplyLUT(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 {
-	mark();
+	_mark();
 	unsigned spitch = FreeImage_GetPitch(src);
 	unsigned dpitch = FreeImage_GetPitch(dst);
 	unsigned w = FreeImage_GetWidth(src);
@@ -132,12 +132,12 @@ double ApplyLUT(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 			}
 		}
 	}
-	return duration();
+	return _duration();
 }
 
 double ApplyLUT2LUMA(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 {
-	mark();
+	_mark();
 	unsigned spitch = FreeImage_GetPitch(src);
 	unsigned dpitch = FreeImage_GetPitch(dst);
 	unsigned w = FreeImage_GetWidth(src);
@@ -188,12 +188,12 @@ double ApplyLUT2LUMA(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 			}
 		}
 	}
-	return duration();
+	return _duration();
 }
 
 double ApplyKernel(FIBITMAP *src, FIBITMAP *dst, double kernel[3][3], int threadcount)
 {
-	mark();
+	_mark();
 	
 	int bpp = FreeImage_GetBPP(src);
 
@@ -249,7 +249,7 @@ double ApplyKernel(FIBITMAP *src, FIBITMAP *dst, double kernel[3][3], int thread
 			}
 			break;
 	}
-	return duration();
+	return _duration();
 }
 
 #define  Pr  .299
@@ -258,7 +258,7 @@ double ApplyKernel(FIBITMAP *src, FIBITMAP *dst, double kernel[3][3], int thread
 
 double ApplySaturation(FIBITMAP *src, FIBITMAP *dst, double saturate, int threadcount)
 {
-	mark();
+	_mark();
 
 	int bpp = FreeImage_GetBPP(src);
 
@@ -334,14 +334,14 @@ double ApplySaturation(FIBITMAP *src, FIBITMAP *dst, double saturate, int thread
 			}
 			break;
 	}
-	return duration();
+	return _duration();
 
 }
 
 
 double ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double greenpct, double bluepct, int threadcount)
 {
-	mark();
+	_mark();
 
 	int bpp = FreeImage_GetBPP(src);
 
@@ -388,13 +388,13 @@ double ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double greenpct, d
 			}
 			break;
 	}
-	return duration();
+	return _duration();
 
 }
 
 double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double strength, int threadcount)
 {
-	mark();
+	_mark();
 
 	int bpp = FreeImage_GetBPP(src);
 
@@ -457,13 +457,13 @@ double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double strength, int threadcou
 			}
 			break;
 	}
-	return duration();
+	return _duration();
 
 }
 
 double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double sigma, int local, int patch, int threadcount)
 {
-	mark();
+	_mark();
 	int bpp = FreeImage_GetBPP(src);
 
 	unsigned spitch = FreeImage_GetPitch(src);
@@ -590,6 +590,6 @@ double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double sigma, int local, int p
 			}
 			break;
 	}
-	return duration();
+	return _duration();
 
 }

@@ -5,13 +5,13 @@
 
 LARGE_INTEGER f, t1, t2; 
 
-void mark ()
+void _mark ()
 {
 	QueryPerformanceFrequency(&f);
 	QueryPerformanceCounter(&t1);
 }
 
-double duration ()
+double _duration ()
 {
 	QueryPerformanceCounter(&t2);
 	double elapsedTime = ((t2.QuadPart - t1.QuadPart) * 1000.0 / f.QuadPart)/1000;
@@ -33,15 +33,15 @@ timespec diff(timespec start, timespec end)
 	return temp;
 }
 
-void mark ()
+void _mark ()
 {
 	clock_gettime(CLOCK_MONOTONIC,&s);
 }
 
-double duration ()
+double _duration ()
 {
 	clock_gettime(CLOCK_MONOTONIC,&f);
 	timespec d = diff(s,f);
-	return d.tv_sec + d.tv_nsec/1E9;
+	return (double) d.tv_sec + (double) d.tv_nsec/ (double) 1E9;
 }
 #endif
