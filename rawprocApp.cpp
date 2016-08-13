@@ -72,8 +72,7 @@ bool rawprocFrmApp::OnInit()
 		wxFileName picdir = wxFileName::DirName(wxStandardPaths::Get().GetDocumentsDir());
 		picdir.RemoveLastDir();
 		picdir.AppendDir("Pictures");
-		wxSetWorkingDirectory(picdir.GetPath());
-		//wxSetWorkingDirectory(wxStandardPaths::Get().GetDocumentsDir());
+		if (picdir.DirExists()) wxSetWorkingDirectory(picdir.GetPath());
 	}
 	return true;
 }
