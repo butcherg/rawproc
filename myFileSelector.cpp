@@ -21,7 +21,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	flags.Add("Display");
 	flags.Add("Half Size");
 	//flags.Add("Unprocessed");
-	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxPoint(20,270), wxSize(580,70), flags, 5);
+	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxPoint(20,280), wxSize(580,70), flags, 5);
 
 #ifdef CUSTOM_FREEIMAGE
 	wxArrayString cflags;
