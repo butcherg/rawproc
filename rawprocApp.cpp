@@ -69,10 +69,20 @@ bool rawprocFrmApp::OnInit()
 			frame->OpenFile(f.GetFullPath(),0);
 	}
 	else {
-		wxFileName picdir = wxFileName::DirName(wxStandardPaths::Get().GetDocumentsDir());
-		picdir.RemoveLastDir();
-		picdir.AppendDir("Pictures");
-		if (picdir.DirExists()) wxSetWorkingDirectory(picdir.GetPath());
+		wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
+		if (startpath != "") {
+			if (wxFileName::DirExists(startpath))
+				wxSetWorkingDirectory(startpath);
+		}
+		else {
+			wxFileName picdir = wxFileName::DirName(wxStandardPaths::Get().GetDocumentsDir());
+			picdir.RemoveLastDir();
+			picdir.AppendDir("Pictures");
+			if (picdir.DirExists()) 
+				wxSetWorkingDirectory(picdir.GetPath());
+			else
+				wxSetWorkingDirectory(wxFileName::GetHomeDir());
+		}
 	}
 	return true;
 }
