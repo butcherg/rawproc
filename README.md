@@ -2,7 +2,7 @@
 Raw camera and general image processor, my way...
 
 I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but I'm aiming to make it tablet-
-friendly.  It doesn't do image management. With the exception of a saturation tool, it only does tone manipulation.  It saves 
+friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does tone manipulation.  It saves 
 the processing applied in the EXIF of the saved image because I do not like the sidecar concept.  It does 16-bit 
 manipulations to 16-bit data.  Here's a list of the implemented manipulations:
 
@@ -11,6 +11,7 @@ manipulations to 16-bit data.  Here's a list of the implemented manipulations:
 - Contrast
 - Crop
 - Curve
+- Denoise
 - Gamma
 - Gray
 - Highlight
@@ -47,6 +48,8 @@ Contributed code:
 - FreeImage image processing library: http://freeimage.sourceforge.net/ (FreeImage License)
 - Cubic Spline interpolation in C++: http://kluge.in-chemnitz.de/opensource/spline/ (GPL2)
 
+Algorithms include public domain saturation, and NLMeans denoise used with permission.
+
 I offer no promise of support or enhancement, past offering the code on Github for you to fork. It is organized to compile 
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
 on Ubuntu x86_64 and Windows 7, 8, and 10.
@@ -61,6 +64,15 @@ and copied the results to Makefile.txt.  You apparently should be able to run wx
 couldn't get it to work right in the Windows/Mingw32 environment.  Once you have the Makefile.txt set up properly, 
 you should be able to run 'make -f Makefile.txt' in the directory containing the rawproc source code.  Oh, make sure
 you make a 'linux' or 'win' subdirectory in the rawproc directory to hold the object and executable files.
+
+A late add is 'img', a command line program that uses the same image processing routines as rawproc. The only 
+comprehensive documentation is the img.cpp source file.  You use it like this:
+
+<pre>
+img input.jpg resize:640,0 sharpen:1 output.jpg
+</pre>
+
+The windows installer does not include img.
 
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
