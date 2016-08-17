@@ -38,15 +38,22 @@
 
 		<LI> 
 			<OBJECT type="text/sitemap">
-			<param name="Name" value="Menu">
+			<param name="Name" value="How to use rawproc">
 			<param name="ID" value=34>
+			<param name="Local" value="workflow.html">
+			</OBJECT>
+
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Menu">
+			<param name="ID" value=35>
 			<param name="Local" value="menu.html">
 			</OBJECT>
 
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Image Tools">
-			<param name="ID" value=35>
+			<param name="ID" value=36>
 			<param name="Local" value="tools.html">
 			</OBJECT>
 
@@ -126,14 +133,14 @@
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Configuration">
-			<param name="ID" value=36>
+			<param name="ID" value=37>
 			<param name="Local" value="configurationfile.html">
 			</OBJECT>
 
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Tips">
-			<param name="ID" value=37>
+			<param name="ID" value=38>
 			<param name="Local" value="tips.html">
 			</OBJECT>
 
