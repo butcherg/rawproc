@@ -1,0 +1,59 @@
+<html><body>
+
+<h3 id="Workflow">How to use rawproc</h3>
+<p>Basically, you open an image, apply one or more tools to change it, then save it.  You can apply tools in any order you wish, but there are some 
+considerations to consider:</p>
+<br>
+<ul>
+
+<li>Some tools depend on the image being in a certain state.  Gamma, for instance, is used to expand the tone values to a scale more along the lines 
+of what humans perceive; camera sensors record "linearly", that is, in a much smaller scale.  Open a camera raw image, note that it's pretty dark. 
+Look at the histogram, and you'll see that the pixels are all bunched up at the bottom of the tone scale. Add the gamma tool, and they spread out.  So,
+gamma should be used on raw images, applied first.<br></li>
+
+<li>After applying gamma to a camera raw image, you'll notice that the tones usually don't use the entire tone range from black to white.  Add a black/white point
+tool and adjust the sliders so the image tone range expands to fill the available range in the histogram.  I use these tools so frequently on raw images 
+that I hard-coded the default gamma to 2.2 and made an autocorrect option for the black/white point tool, where it'll read the histogram and pick appropriate 
+black and white point settings automatically.  You can turn it off in the config file.  So, when I open a camera raw, I just apply gamma then black/white point 
+without thinking about it, and go from there.  Usually, the third tool is a curve, a very flexible tool for modifying the tone range for contrast, etc.<br></li>
+
+<li>Some tools are slow.  Particularly denoise, followed by sharpen.  I usually don't use either until after I resize the image for web posting, and they 
+both run more quickly on fewer pixels<br></li>
+
+<li>If you're going to rotate the image to straighten it out and crop for composition, do the rotate first, then when you crop you'll also be taking care of 
+the black irregular borders around the rotated image.<br></li>
+
+</ul>
+
+<p>When you save an image, rawproc saves the list of applied tools and their parameters in the image metadata.  You can re-apply these tools to the original 
+image by using Open Source to open the saved image; instead of opening the saved image, rawproc will open the original image and re-apply each tool in order, 
+with the saved parameters.  You can change around the tools and re-save to the same image, or to another one by changing the file name.  rawproc doesn't have 
+a Save As file option by design; you have to pick the save file name each time.</p>
+
+<p>rawproc's name belies its flexibility; it can be used to edit any JPEG, TIFF, or PNG image.  Raw or otherwise, once you open an image, it's just an array
+of pixels...</p>
+
+<p>One of the main reasons I wrote rawproc was to make all the tools I used for image editing work on both 8-bit and 16-bit images.  When you open a raw 
+camera file, the tone values for each pixel are given in a 16-bit range, which means the values range from 0 (black) to 65535 (white).  You want to do most of
+your editing while the color values are in this range, as you have much smaller differences between each tone as you stretch contrast, etc.  To see the 
+difference, open a camera raw image, apply gamma, black/white point, and save it twice, first as a TIFF (.tif), then as JPEG (.jpg).  The .tif and .jpg files will
+look the same when opened, but the .tif tones are 16-bit while the .jpg tones are 8-bit.  Now, if you edit each image identically and look at the 
+histogram, you'll see spaces start to develop in the .jpg histogram because 8-bit tones only have 256 possible values between 0 (black) and 255 (white). This is called
+"posterization", because the image starts to look more like a poster and less like a photograph.  So, you want to do as much editing as possible while the 
+image is 16-bit; when you save it to JPEG, it'll automatically convert to 8-bit because JPEG doesn't support 16-bit tones.  This is why a lot of folks save the 
+basic edited image to TIFF, to use as the master.  This also has the advantage of being quicker to open than the raw file, because the raw conversion doesn't 
+have to be re-done.
+</p>
+
+<p>You can tell whether an image is 16- or 8-bit by right-clicking any of the applied tools and selecting Image Information.  You also get other helpful information
+such as image width and height, and basic exposure information.  rawproc doesn't manage image metadata, or EXIF data, very well, so consider getting the extremely
+useful exiftool utility to inspect, modify and copy image metadata.</p>
+
+<p>Having a desktop shortcut to rawproc (selectable option in the Windows install package) is handy for quick opening of images; with your file explorer, you 
+can review images and open the one you want to edit by dragging it to the rawproc desktop icon.</p>
+
+<p>The configuration file contains a boatload of settings for you to tweak to your convenience.  You need to save the file, then restart rawproc for them to take
+effect.  You can find the path of the configuration file on the Help->About dialog.</p>
+
+
+</body></html>
