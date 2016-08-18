@@ -430,9 +430,11 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 			dib = tmpdib;
 		}
 		if (FreeImage_GetBPP(dib) < 24) {
-			wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", filename.GetFullName()));
-			SetStatusText("");
-			return;
+			int ans = wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp), %dbpp\n\nOpen anyway?\nImage will display, but tools will have no effect.", filename.GetFullName(),FreeImage_GetBPP(dib)),"Warning",wxYES_NO);
+			if (ans == wxNO) {
+				SetStatusText("");
+				return;
+			}
 		}
 		wxString flagstring = "";
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
