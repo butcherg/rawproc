@@ -6,13 +6,14 @@ $(info $(UNAME))
 
 WINFREEIMAGE=c:\FreeImage-3.17.0
 WINWXWIDGETS=c:\wxWidgets-3.0.2
+WINLCMS=C:\lcms2-2.8
 OPENMP=-fopenmp
 
 ifeq ($(UNAME), mingw32)
-	FILIBS=-L$(WINFREEIMAGE)
+	FILIBS=-L$(WINFREEIMAGE) -L$(WINLCMS)\Lib
 	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
 	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
-	FIFLAGS=-I$(WINFREEIMAGE) -O2 # -lFreeImage -DFREEIMAGE_LIB
+	FIFLAGS=-I$(WINFREEIMAGE) -I$(WINLCMS)\include -O2 # -lFreeImage -DFREEIMAGE_LIB
 	OBJDIR=win
 endif
 
