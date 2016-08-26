@@ -451,6 +451,22 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 		SetStatusText("scale: fit",1);
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
+		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
+		if ((fif == FIF_RAW) & (raw_default != "")) {
+			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
+				wxArrayString token = split(raw_default, " ");
+				for (int i=0; i<token.GetCount(); i++) {
+					//SetStatusText(wxString::Format("Applying %s...",token[i]) );
+					wxArrayString cmd = split(token[i], ":");
+					if (cmd.GetCount() == 2)
+						AddItem(cmd[0], cmd[1]);
+					else
+						AddItem(cmd[0], "");
+					wxSafeYield(this);
+				}
+			}
+		}
+
 		Refresh();
 		Update();
 		//wxSafeYield(this);
