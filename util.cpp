@@ -6,6 +6,7 @@
 
 #include "elapsedtime.h"
 #include <omp.h>
+#include <lcms2.h>
 
 #ifdef WIN32
 #include <sys/time.h>
