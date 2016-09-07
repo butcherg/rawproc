@@ -864,9 +864,12 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString defval = wxConfigBase::Get()->Read("tool.denoise.initialvalue","35");
-	PicProcessorDenoise *d = new PicProcessorDenoise("denoise", defval, commandtree, pic, parameters);
-	if (defval != "0") d->processPic();
+	wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
+	wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+	wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
+	wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
+	PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
+	if (sigma != "0") d->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
 }

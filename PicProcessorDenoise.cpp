@@ -16,14 +16,14 @@ class DenoisePanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-
-			int initialvalue = atoi(params.c_str());
+			wxArrayString p = split(params,",");
+			int initialvalue = atoi(p[0]);
 
 			g->Add(0,10, wxGBPosition(0,0));
 			g->Add(new wxStaticText(this,wxID_ANY, "sigma: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			sigma = new wxSlider(this, wxID_ANY, initialvalue, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(sigma , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
+			val = new wxStaticText(this,wxID_ANY, p[0], wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
@@ -59,7 +59,11 @@ class DenoisePanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d",sigma->GetValue()));
+			wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+			wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
+
+
+			q->setParams(wxString::Format("%d,%s,%s",sigma->GetValue(),local,patch));
 			q->processPic();
 			event.Skip();
 		}
@@ -67,9 +71,11 @@ class DenoisePanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			int resetval;
-			wxConfigBase::Get()->Read("tool.denoise.initialvalue",&resetval,35);
+			wxConfigBase::Get()->Read("tool.denoise.initialvalue",&resetval,0);
+			wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+			wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
 			sigma->SetValue(resetval);
-			q->setParams(wxString::Format("%d",resetval));
+			q->setParams(wxString::Format("%d,%s,%s",resetval,local,patch));
 			val->SetLabel(wxString::Format("%4d", resetval));
 			q->processPic();
 			event.Skip();
@@ -100,16 +106,22 @@ void PicProcessorDenoise::showParams()
 
 bool PicProcessorDenoise::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");
-	double sigma = atof(c.c_str());
+	int threadcount;
+
+	wxArrayString cp = split(getParams(),",");
+	double sigma = atof(cp[0]);
+	int local = atoi(cp[1]);
+	int patch = atoi(cp[2]);
+
 	bool result = true;
 
 
-	int threadcount, local, patch;
+
 	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = ThreadCount();
 
-	wxConfigBase::Get()->Read("tool.denoise.local",&local,3);
-	wxConfigBase::Get()->Read("tool.denoise.patch",&patch,1);
+	//wxConfigBase::Get()->Read("tool.denoise.local",&local,3);
+	//wxConfigBase::Get()->Read("tool.denoise.patch",&patch,1);
 
 
 	if (dib) FreeImage_Unload(dib);
