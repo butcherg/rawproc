@@ -108,8 +108,8 @@ bool PicProcessorDenoise::processPic() {
 	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
 	if (threadcount == 0) threadcount = ThreadCount();
 
-	wxConfigBase::Get()->Read("tool.denoise.local",&local,1);
-	wxConfigBase::Get()->Read("tool.denoise.patch",&patch,3);
+	wxConfigBase::Get()->Read("tool.denoise.local",&local,3);
+	wxConfigBase::Get()->Read("tool.denoise.patch",&patch,1);
 
 
 	if (dib) FreeImage_Unload(dib);
