@@ -45,7 +45,11 @@ else
 endif
 
 img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
+ifeq ($(OBJDIR),win)
 	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) $(OPENMP) -static -o $(OBJDIR)/img
+else
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) $(OPENMP) -o $(OBJDIR)/img
+endif
 
 $(OBJDIR)/img.o: img.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -static -w -c img.cpp -o$@
