@@ -2,10 +2,10 @@
 
 <h3 id="Denoise">Denoise</h3>
 <p>Uses a Non-Local Means algorithm as presented by David Tschumperlé, lead developer of GMIC, in his blog at http://gmic.eu.
-The neighborhood and patch sizes are hidden in the configuration file, so the only control is sigma (denoies "strength").
+The primary control is sigma (denoise "strength").
 This is a slow algorithm, so a default of 0 (no denoise) is appropriate to keep from cooling your heels waiting while
 the algorithm walks the image when you initally add the tool.  sigma=10 is a good starting point for a small image.</p>
-<p>The local and patch sliders change the so-called radius of the chunks of the image used to compute the denoised
+<p>The local and patch sliders change the so-called radii of the chunks of the image used to compute the denoised
 pixel.  If you want to change them, refer to David's blog for definitions.  Changing these sliders will not update the 
 image, only the sigma slider will do that.</p>
 <p align=center><img src=denoise.png></p>
