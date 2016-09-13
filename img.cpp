@@ -164,6 +164,43 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 			printf("done (%f).\n",d);
 		}
 
+		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
+			double blk, wht;
+			wht = 255; blk = 0;
+			if (!cmd) {
+				int i;
+				DWORD hdata[256]; DWORD hmax=0;
+				FIBITMAP *hdib = FreeImage_ConvertTo24Bits(dib);
+				FreeImage_GetHistogram(hdib, hdata);
+				FreeImage_Unload(hdib);
+				for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
+				for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
+				blk = (double) i;
+				for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+				wht = (double) i;
+			}
+			else {
+
+				char *b = strtok(NULL,",");
+				char *w = strtok(NULL,", ");
+				if (w) wht = atof(w);
+				if (b) blk = atof(b);
+			}
+
+			int bpp = FreeImage_GetBPP(dib);
+			printf("blackwhitepoint: %0.2f,%0.2f (%dbpp)... ",blk,wht,bpp);
+
+			Curve ctrlpts;
+			ctrlpts.insertpoint(blk,0);
+			ctrlpts.insertpoint(wht,255);
+
+			int threadcount=0;
+			FIBITMAP *dst = FreeImage_Clone(dib);
+			double d = ApplyCurve(dib, dst, ctrlpts.getControlPoints(), threadcount);
+			FreeImage_Unload(dib);
+			dib = dst;
+			printf("done (%f).\n",d);
+		}
 
 		else if (strcmp(cmd,"contrast") == 0) {  //#contrast:[-100 - 100, default=0]
 			double contrast=0.0;
