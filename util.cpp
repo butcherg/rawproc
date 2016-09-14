@@ -434,6 +434,7 @@ bool ImageContainsRawprocCommand(wxString fname)
 			FreeImage_GetMetadata(FIMD_COMMENTS, srcdib, "Comment", &tagSource);
 		if(tagSource != NULL) {
 			wxString script = (char *) FreeImage_GetTagValue(tagSource);
+			if (script == "") return false;
 			wxArrayString token = split(script, " ");
 			if (token[0].Find("rawproc") != wxNOT_FOUND) return true;
 		}
