@@ -29,9 +29,22 @@ std::string endswith(std::string fname, std::string endstr)
 
 std::string makename(std::string variant, std::string endstr)
 {
-	endstr.erase(0,1);
-	variant.append(endstr);
-	return variant;
+	char e[1024];
+	char *a, *b;
+	strncpy(e,endstr.c_str(), 1023);
+	if (e[0] == '*') {
+		b = NULL;
+		a = e+1;
+	}
+	else {
+		b = strtok(e,"*");
+		a = strtok(NULL,"*");
+	}
+	std::string m;
+	if (b) m.append(b);
+	m.append(variant);
+	if (a) m.append(a);
+	return m;
 }
 
 std::vector<std::string> filelist(std::string dspec)
@@ -135,7 +148,7 @@ int main (int argc, char **argv)
 	}
 
 	if (argv[1][0] == '*') {
-		if (argv[argc-1][0] == '*') {
+		if (std::string(argv[argc-1]).find_first_of("*") != std::string::npos) {
 			std::vector<std::string> flist = filelist(".");
 			for (int i=0; i<flist.size(); i++) {
 				std::string variant = endswith(flist[i], std::string(argv[1]));
@@ -143,7 +156,6 @@ int main (int argc, char **argv)
 				fnames f;
 				f.infile = flist[i];
 				f.outfile = makename(variant,argv[argc-1]);
-				printf("infile: %s  outfile: %s\n",f.infile.c_str(), f.outfile.c_str());
 				files.push_back(f);
 			}
 				
@@ -439,7 +451,7 @@ for (int f=0; f<files.size(); f++)
 			FreeImage_Unload(dib);
 			dib = dst;
 		}
-		printf("Saving file %s...\n",output_filename);
+		printf("Saving file %s...\n\n",output_filename);
 		FreeImage_Save(out_fif, dib, output_filename, flags);
 	}
 	else {
