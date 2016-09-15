@@ -11,10 +11,42 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include <dirent.h>
 
 #include "FreeImage.h"
 #include "FreeImage_Threaded.h"
+
+std::string endswith(std::string fname, std::string endstr)
+{
+	std::string match, variant;
+	endstr.erase(0,1);
+	if (fname.size() < endstr.size()) return "";
+	match = fname.substr(fname.size()-endstr.size(), endstr.size());
+	variant = fname.substr(0, fname.size()-endstr.size());
+	if (match.compare(endstr) == 0) return variant;
+	return "";
+}
+
+std::string makename(std::string variant, std::string endstr)
+{
+	endstr.erase(0,1);
+	variant.append(endstr);
+	return variant;
+}
+
+std::vector<std::string> filelist(std::string dspec)
+{
+	std::vector<std::string> flist;
+	DIR *dir;
+	struct dirent *ent;
+	if ((dir = opendir(dspec.c_str())) != NULL) {
+		while ((ent = readdir(dir)) != NULL) {
+			flist.push_back(ent->d_name);
+		}
+		closedir(dir);
+	}
+	return flist;
+}
 
 
 void FreeImage_PrintImageType(FREE_IMAGE_TYPE t)
@@ -84,9 +116,14 @@ void strappend(char* s, char c)
 
 int _CRT_glob = 0;
 
+struct fnames {
+	std::string infile, outfile;
+};
+
 int main (int argc, char **argv) 
 {
 	char * filename;
+	std::vector<fnames> files;
 	int c;
 	int flags = 0;
 	FIBITMAP *dib;
@@ -97,38 +134,50 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
-/*
-	std::vector<std::string> files;
-
-	if (strcmp(argv[1],"-") == 0) {
-		char line[256];
-		while ((fgets(line, 256, stdin)) != NULL) {
-			files.push_back(std::string(line));
+	if (argv[1][0] == '*') {
+		if (argv[argc-1][0] == '*') {
+			std::vector<std::string> flist = filelist(".");
+			for (int i=0; i<flist.size(); i++) {
+				std::string variant = endswith(flist[i], std::string(argv[1]));
+				if (variant == "") continue;
+				fnames f;
+				f.infile = flist[i];
+				f.outfile = makename(variant,argv[argc-1]);
+				printf("infile: %s  outfile: %s\n",f.infile.c_str(), f.outfile.c_str());
+				files.push_back(f);
+			}
+				
+		}
+		else {
+			printf("Error: If input file has a wildcard spec, the output file should have one also.\n");
+			exit(1);
 		}
 	}
 	else {
-		if (!file_exists(argv[1])) {
-			printf("Error: Specified file doesn't exist.\n");
-			exit(1);
-		}
-		files.push_back(std::string(argv[1]));
+		fnames f;
+		f.infile = argv[1];
+		f.outfile = argv[argc-1];
+		files.push_back(f);
 	}
+	
 
-char fname[256];
+std::vector<std::string> commands;
+for (int i = 2; i<argc-1; i++) {
+	commands.push_back(std::string(argv[i]));
+}
 
-for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++it)
+
+
+for (int f=0; f<files.size(); f++)
 {
-	strcpy(fname,*it.c_str());
-*/
+	char fname[256];
+	strncpy(fname, files[f].infile.c_str(), 255);
 
-	fif = FreeImage_GetFileType(argv[1], 0);
-	//fif = FreeImage_GetFileType(fname, 0);
+	fif = FreeImage_GetFileType(fname, 0);
 	if(fif != FIF_UNKNOWN) {
 		// load from the file handle
-		printf("Loading file %s... ",argv[1]);
-		dib = FreeImage_Load(fif, argv[1], flags);
-		//printf("Loading file %s... ",fname);
-		//dib = FreeImage_Load(fif, fname, flags);
+		printf("Loading file %s... \n",fname);
+		dib = FreeImage_Load(fif, fname, flags);
 	}
 	else {
 		printf("Error: Unknown file type.\n");
@@ -139,8 +188,10 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 	FreeImage_PrintImageType(FreeImage_GetImageType(dib));
 	//int bpp = FreeImage_GetBPP(dib);
 
-	for (int i = 2; i<argc-1; i++) {
-		char* cmd=strtok(argv[i],":");
+	for (int i=0; i<commands.size(); i++) {
+		char c[256];
+		strncpy(c, commands[i].c_str(), 255);
+		char* cmd = strtok(c,":");
         
 		if (strcmp(cmd,"bright") == 0) {  //#bright:[-100 - 100, default=0]
 			double bright=0.0;
@@ -166,8 +217,10 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
 			double blk, wht;
+			char *b = strtok(NULL,",");
+			char *w = strtok(NULL,", ");
 			wht = 255; blk = 0;
-			if (!cmd) {
+			if (!b) {
 				int i;
 				DWORD hdata[256]; DWORD hmax=0;
 				FIBITMAP *hdib = FreeImage_ConvertTo24Bits(dib);
@@ -181,8 +234,7 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 			}
 			else {
 
-				char *b = strtok(NULL,",");
-				char *w = strtok(NULL,", ");
+
 				if (w) wht = atof(w);
 				if (b) blk = atof(b);
 			}
@@ -372,7 +424,7 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 
 
 	char outfilename[256];
-	strncpy(outfilename,argv[argc-1],255);
+	strncpy(outfilename, files[f].outfile.c_str(), 255);
 			
 	flags = 100;
 	const char *output_filename = strtok(outfilename,":");
@@ -387,7 +439,7 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 			FreeImage_Unload(dib);
 			dib = dst;
 		}
-		printf("Saving file %s...",output_filename);
+		printf("Saving file %s...\n",output_filename);
 		FreeImage_Save(out_fif, dib, output_filename, flags);
 	}
 	else {
@@ -396,7 +448,7 @@ for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++
 
 	FreeImage_Unload(dib);
 
-//}
+}
 
 
 	return 0;
