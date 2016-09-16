@@ -16,14 +16,21 @@
 #include "FreeImage.h"
 #include "FreeImage_Threaded.h"
 
-std::string endswith(std::string fname, std::string endstr)
+
+std::string matchspec(std::string fname, std::string fspec)
 {
-	std::string match, variant;
-	endstr.erase(0,1);
-	if (fname.size() < endstr.size()) return "";
-	match = fname.substr(fname.size()-endstr.size(), endstr.size());
-	variant = fname.substr(0, fname.size()-endstr.size());
-	if (match.compare(endstr) == 0) return variant;
+	if (fname.size() < fspec.size()) return "";
+	std::string specf, specb;
+	std::string fnamef, fnameb;
+	std::string variant;
+	int wp = fspec.find_first_of("*");
+	specf = fspec.substr(0,wp);
+	specb = fspec.substr(wp+1,fspec.size()-1);
+	fnamef = fname.substr(0,wp);
+	fnameb = fname.substr(fname.size()-specb.size(), fname.size()-1);
+	variant = fname.substr(wp,fname.size()-fspec.size()+1);
+	if ((specf.compare(fnamef) == 0) & (specb.compare(fnameb) == 0)) 
+		return variant;
 	return "";
 }
 
@@ -45,6 +52,15 @@ std::string makename(std::string variant, std::string endstr)
 	m.append(variant);
 	if (a) m.append(a);
 	return m;
+}
+
+int countchar(std::string s, char c)
+{
+	int count = 0;
+	for (int i=0; i<s.size(); i++) {
+		if (s[i] == c) count++;
+	}
+	return count;
 }
 
 std::vector<std::string> filelist(std::string dspec)
@@ -143,15 +159,30 @@ int main (int argc, char **argv)
 	FREE_IMAGE_FORMAT fif;
 
 	if (argc < 2) {
-		printf("Error: No file specified.\n");
+		printf("Error: No input file specified.\n");
 		exit(1);
 	}
 
-	if (argv[1][0] == '*') {
-		if (std::string(argv[argc-1]).find_first_of("*") != std::string::npos) {
+	if (argc < 3) {
+		printf("Error: No output file specified.\n");
+		exit(1);
+	}
+
+	if (countchar(std::string(argv[1]),'*') > 1) {
+		printf("Error: Too many wildcards in input filespec.\n");
+		exit(1);
+	}
+	if (countchar(std::string(argv[argc-1]),'*') > 1) {
+		printf("Error: Too many wildcards in output filespec.\n");
+		exit(1);
+	}
+
+	if (countchar(std::string(argv[1]),'*') == 1) {
+		if (countchar(std::string(argv[argc-1]),'*') == 1) {
 			std::vector<std::string> flist = filelist(".");
 			for (int i=0; i<flist.size(); i++) {
-				std::string variant = endswith(flist[i], std::string(argv[1]));
+				std::string variant = matchspec(flist[i], std::string(argv[1]));
+				matchspec(flist[i], std::string(argv[1]));
 				if (variant == "") continue;
 				fnames f;
 				f.infile = flist[i];
@@ -164,6 +195,7 @@ int main (int argc, char **argv)
 			printf("Error: If input file has a wildcard spec, the output file should have one also.\n");
 			exit(1);
 		}
+
 	}
 	else {
 		fnames f;
