@@ -154,7 +154,7 @@ int main (int argc, char **argv)
 	char * filename;
 	std::vector<fnames> files;
 	int c;
-	int flags = 0;
+	int flags;
 	FIBITMAP *dib;
 	FREE_IMAGE_FORMAT fif;
 
@@ -221,7 +221,11 @@ for (int f=0; f<files.size(); f++)
 	if(fif != FIF_UNKNOWN) {
 		// load from the file handle
 		printf("Loading file %s... \n",fname);
+		flags = 0;
 		dib = FreeImage_Load(fif, fname, flags);
+		int dw = FreeImage_GetWidth(dib);
+		int dh = FreeImage_GetHeight(dib);
+		printf("Image size: %dx%d\n",dw,dh);
 	}
 	else {
 		printf("Error: Unknown file type.\n");
