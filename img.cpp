@@ -482,10 +482,12 @@ for (int f=0; f<files.size(); f++)
 	FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
 
 	if(out_fif != FIF_UNKNOWN) {
-		if((out_fif = FIF_JPEG) && (FreeImage_GetBPP(dib) != 24)) {
-			FIBITMAP *dst = FreeImage_ConvertTo24Bits(dib);
-			FreeImage_Unload(dib);
-			dib = dst;
+		if(out_fif == FIF_JPEG) {
+			if(FreeImage_GetBPP(dib) != 24) {
+				FIBITMAP *dst = FreeImage_ConvertTo24Bits(dib);
+				FreeImage_Unload(dib);
+				dib = dst;
+			}
 		}
 		printf("Saving file %s...\n\n",output_filename);
 		FreeImage_Save(out_fif, dib, output_filename, flags);
