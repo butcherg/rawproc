@@ -37,7 +37,7 @@ double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threa
 		for (int x=0; x<256; x++) {
 			LUT8[x] = (BYTE)floor(c.getpoint(x) + 0.5); 
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				BYTE * bdstpix = (BYTE *) dstbits + dpitch*y + 3*x;
@@ -58,7 +58,7 @@ double ApplyCurve(FIBITMAP *src, FIBITMAP *dst, std::vector<cp> ctpts, int threa
 		for (int x=0; x<65536; x++) {
 			LUT16[x] = (WORD)floor(c.getpoint(x) + 0.5);
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -94,7 +94,7 @@ double ApplyLUT(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 		for (int x=0; x<256; x++) {
 			LUT8[x] = ((BYTE *) LUT)[x];; 
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				BYTE * bdstpix = (BYTE *) (dstbits + dpitch*y + 3*x);
@@ -115,7 +115,7 @@ double ApplyLUT(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 		for (int x=0; x<65536; x++) {
 			LUT16[x] = ((WORD *)LUT)[x];
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h-1; y++) {
 			for(unsigned x = 0; x < w-1; x++) {
 				FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -152,7 +152,7 @@ double ApplyLUT2LUMA(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 		for (int x=0; x<256; x++) {
 			LUT8[x] = ((BYTE *) LUT)[x]; 
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				BYTE * bdstpix = (BYTE *) (dstbits + dpitch*y + 3*x);
@@ -172,7 +172,7 @@ double ApplyLUT2LUMA(FIBITMAP *src, FIBITMAP *dst, char * LUT, int threadcount)
 		for (int x=0; x<65536; x++) {
 			LUT16[x] = ((WORD *)LUT)[x];
 		}
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(threadcount)
 		for(unsigned y = 0; y < h-1; y++) {
 			for(unsigned x = 0; x < w-1; x++) {
 				FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -204,7 +204,7 @@ double ApplyKernel(FIBITMAP *src, FIBITMAP *dst, double kernel[3][3], int thread
 
 	switch(bpp) {
 		case 48:
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 1; y < FreeImage_GetHeight(src)-1; y++) {
 				for(unsigned x = 1; x < FreeImage_GetWidth(src)-1; x++) {
 					FIRGB16 *wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -227,7 +227,7 @@ double ApplyKernel(FIBITMAP *src, FIBITMAP *dst, double kernel[3][3], int thread
 			}
 			break;	            
 		case 24 :
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 1; y < FreeImage_GetHeight(src)-1; y++) {
 				for(unsigned x = 1; x < FreeImage_GetWidth(src)-1; x++) {
 					BYTE *bdstpix = (BYTE *) dstbits + dpitch*y + 3*x;
@@ -270,7 +270,7 @@ double ApplySaturation(FIBITMAP *src, FIBITMAP *dst, double saturate, int thread
 
 	switch(bpp) {
 		case 48:
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
 				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
 					FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -302,7 +302,7 @@ double ApplySaturation(FIBITMAP *src, FIBITMAP *dst, double saturate, int thread
 			}
 			break;	            
 		case 24 :
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
 				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
 					BYTE * bdstpix = (BYTE *) dstbits + dpitch*y + 3*x;
@@ -353,7 +353,7 @@ double ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double greenpct, d
 
 	switch(bpp) {
 		case 48:
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
 				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
 					FIRGB16 * wdstpix = (FIRGB16 *) (dstbits + dpitch*y + 6*x);
@@ -370,7 +370,7 @@ double ApplyGray(FIBITMAP *src, FIBITMAP *dst, double redpct, double greenpct, d
 			}
 			break;	            
 		case 24 :
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = 0; y < FreeImage_GetHeight(src); y++) {
 				for(unsigned x = 0; x < FreeImage_GetWidth(src); x++) {
 					BYTE * bdstpix = (BYTE *) dstbits + dpitch*y + 3*x;
@@ -415,7 +415,7 @@ double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double sigma, int local, int p
 
 	switch(bpp) {
 		case 48:
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = local; y < ih-local; y++) {
 				unsigned py = y;
 				if (py<yplb) py = yplb;
@@ -469,7 +469,7 @@ double ApplyNLMeans(FIBITMAP *src, FIBITMAP *dst, double sigma, int local, int p
 			}
 			break;	            
 		case 24 :
-			#pragma omp parallel for
+			#pragma omp parallel for num_threads(threadcount)
 			for(unsigned y = local; y < ih-local; y++) {
 				unsigned py = y;
 				if (py<yplb) py = yplb;

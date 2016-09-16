@@ -98,6 +98,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 : wxFrame(parent, id, title, position, size, style)
 {
 	CreateGUIControls();
+	omp_set_dynamic(0);
 	deleting = false;
 
 	wxImageList *states;
