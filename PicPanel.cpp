@@ -2,6 +2,7 @@
 #include "PicPanel.h"
 #include "util.h"
 #include <vector>
+#include <wx/fileconf.h>
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -26,7 +27,6 @@ END_EVENT_TABLE()
 		SetDoubleBuffered(true);  //watch this one... tricksy...
 		showDebug = true;
 		scaleWindow = false;
-		toggleThumb = 1; //1=thumb, 2=histogram, 3=none
 		cropmode = false;
 		fitmode=true;
 		keyCode = 0;
@@ -79,6 +79,13 @@ END_EVENT_TABLE()
             dc.DrawLine(x+w, y+h, x, y+h);
             dc.DrawLine(x, y+h, x,y);
         }
+
+	void PicPanel::SetThumbMode(int mode)
+	{
+		toggleThumb = mode;
+		Refresh();
+		Update();
+	}
 
 	void PicPanel::ToggleThumb()
 	{

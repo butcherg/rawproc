@@ -97,6 +97,9 @@ END_EVENT_TABLE()
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
+	//configfile = "(none)";
+	//help.UseConfig(wxConfig::Get());
+
 	CreateGUIControls();
 	deleting = false;
 
@@ -234,6 +237,11 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 
 	mgr.UnInit();
 	Destroy();
+}
+
+void rawprocFrm::SetThumbMode(int mode)
+{
+	pic->SetThumbMode(mode);
 }
 
 PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)

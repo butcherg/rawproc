@@ -30,6 +30,7 @@ class PicPanel: public wxPanel
 	void render(wxDC &dc);
         void drawBox(wxDC &dc, int x, int y, int w,int h);
 	void SetPic(FIBITMAP *dib);
+	void SetThumbMode(int mode);
 	void ToggleThumb();
 	void ToggleCropMode();
 	wxString GetCropParams();

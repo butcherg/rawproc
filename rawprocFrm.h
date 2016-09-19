@@ -152,6 +152,7 @@ class rawprocFrm : public wxFrame
 	void CommandTreeDeleteItem(wxTreeItemId item);
 
 	void SetConfigFile(wxString cfile);
+	void SetThumbMode(int mode);
 	bool MoveBefore(wxTreeItemId item);
 	bool MoveAfter(wxTreeItemId item);
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
