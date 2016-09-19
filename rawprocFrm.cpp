@@ -924,6 +924,11 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			//printf("Saving file %s...",filename.c_str());
 			FreeImage_Save(out_fif, dib, fname, (int) flags);
 			FreeImage_Unload(dib);
+			wxFileName tmpname(fname);
+			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
+				sourcefilename.Assign(fname);
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			}
 		}
 		else {
 			//printf("Error: bad output file specification:\n",output_filename);
