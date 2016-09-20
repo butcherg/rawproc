@@ -7,6 +7,13 @@ add Black/White Point to the commands list, this tool attempts to find the ends 
 you can manually work the sliders to a more satisfactory position.
 <br>
 <p align=center><table><tr><td><img src=bwpoint-curve1.png></td><td></img><img src=bwpoint-curve.png></img></td></tr></table></p>
-
+<p>A configuration file parameter (tool.blackwhitepoint.auto) is available to make this tool do an 
+automatic adjustment when you 
+add it.  The algorithm is based on walking each end of the histogram until a value greater than or equal 
+to a set percentage of the largest "tone bucket", hard-coded to 5% (0.05).  The separate black and white 
+thresholds are configurable, if you find one or both to consistently clip out data you want to retain.  
+You can also simply just slide the sliders to where you want after auto does it's thing.  Note that 
+"auto" is not the saved parameter, rather the result parameters are in the command line applied 
+to the saved image</p>
 
 </body></html>

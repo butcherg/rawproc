@@ -3,15 +3,17 @@
 <h2 id="Tips">Tips</h2>
 <ul>
 	<li>If you're processing a raw file, just plan to add the 2.2 gamma right off the bat, then apply black/white point
-		to make the image tones fill the tone range.</li><br>
-	<li>While the program is named rawproc, it works well editing JPEGs, TIFFs, and PNGs too.</li><br>
+		to make the image tones fill the tone range.  I finally broke down and added a 
+		configuration paramter to automatically apply a list of commands to raw files (after it asks you 
+		if you want to do so), "gamma:2.2 blackwhitepoint" is in my input.raw.default parameter.</li><br>
+	<li>While the program is named rawproc, it works well for editing JPEGs, TIFFs, and PNGs too.</li><br>
 	<li>rawproc tools are mostly multithreaded and compiled with as much optimization as is tolerable.  However, 
 		Denoise and Sharpen are slow tools that become unbearably slow with big images; consider using them 
 		after resizing the image smaller.</li><br>
 	<li>Curves work best if the change is small.  Avoid shallow slopes, as they collapse large tone (rich) ranges into very
 		small (dull) ones.</li><br>
-	<li>My personal experience with sharpening is that it is most useful after a reduction resize, as image resolution
-		is usually lost even with the best algorithms.  After a resize, add a sharpen tool and bump it to 1, note the
+	<li>My personal experience with sharpening is that it is most useful after a reduction resize, as image clarity
+		is usually lost even with the best resize algorithms.  After a resize, add a sharpen tool and bump it to 1, note the
 		improvement.  In most cases values of 2 or greater have little marginal benefit at the expense of introducing
 		halos around the edges.</li><br>
 	<li>You can apply tools in any order you wish, but some orders are less beneficial than others.  This is why other

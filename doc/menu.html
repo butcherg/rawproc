@@ -12,11 +12,14 @@ if you're opening a camera raw for processing, you want to stick with Default.</
 happens is that the selected file is inspected for a rawproc command list; if one is found, 
 the original file specified in that list is opened instead, and the rest of the manipulation command list is
 applied to the opened image.  The original image has to be in the same directory as the selected image.
-This takes a bit of time, so be patient.</li><br>
+This takes a bit of time, so be patient.  When finished, the sourced filename is displayed first in the 
+title bar, then the file created from the source in parens.</li><br>
 
 <li><b>File->Save:</b> Brings up a dialog box in which you can specify a filename to save the image.  The
 image type is determined by what extension you give to the file name, .jpg, .tif, or .png.  Save will
-always bring up a dialog, whether you're saving to the same file or a new one.</li><br>
+always bring up a dialog, whether you're saving to the same file or a new one.  When finished, the 
+originally opened file name is still displayed in the title bar, but the saved file name is added, in 
+parens.</li><br>
 
 <li><b>File->Exit:</b>  Does what is says.  There is no prompt to save an unsaved image, so be careful.</li><br>
 
@@ -24,10 +27,10 @@ always bring up a dialog, whether you're saving to the same file or a new one.</
 cut/copy a selected command and paste it elsewhere in the list.</li><br>
 
 <li><b>Add->(tool):</b> Selecting one of the tools from this menu adds it to the Commands list,
-after the selected tool.  See below for more enlightenment on the various image tools.</li><br>
+after the selected tool.  See the sub-topics for more enlightenment on the various image tools.</li><br>
 
 <li><b>Help->Show Command:</b> Brings up a dialog box showing the command list that would be saved
-to the image EXIFif you saved the file at that point.</li><br>
+to the image EXIF if you saved the file at that point.</li><br>
 
 <li><b>Help->About:</b> Right now, this shows the rawproc description and version and the wxWidgets and FreeImage 
 information for the included versions, as 

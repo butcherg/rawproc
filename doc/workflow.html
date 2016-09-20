@@ -6,7 +6,8 @@ considerations to consider:</p>
 <br>
 <ul>
 
-<li>Some tools depend on the image being in a certain state.  Gamma, for instance, is used to expand the tone values to a scale more along the lines 
+<li>Some tools depend on the image being in a certain state.  Gamma, for instance, should only be used on a "linear-scale" image, which is what most 
+raw camera files contain.  Gamma is used to expand the tone values to a scale more along the lines 
 of what humans perceive; camera sensors record "linearly", that is, in a much smaller scale.  Open a camera raw image, note that it's pretty dark. 
 Look at the histogram, and you'll see that the pixels are all bunched up at the bottom of the tone scale. Add the gamma tool, and they spread out.  So,
 gamma should be used on raw images, applied first.<br></li>
