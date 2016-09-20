@@ -164,7 +164,10 @@ bool PicProcessorContrast::processPic() {
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = ThreadCount();
+	if (threadcount == 0) 
+		threadcount = ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(ThreadCount() + threadcount,0);
 
 	mark();
 	if (dib) FreeImage_Unload(dib);

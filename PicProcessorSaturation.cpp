@@ -112,7 +112,11 @@ bool PicProcessorSaturation::processPic() {
 	bool result = true;
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = ThreadCount();
+	if (threadcount == 0) 
+		threadcount = ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(ThreadCount() + threadcount,0);
+
 	if (dib) FreeImage_Unload(dib);
 	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 

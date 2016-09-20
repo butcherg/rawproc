@@ -160,7 +160,10 @@ bool PicProcessorDenoise::processPic() {
 
 
 	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
-	if (threadcount == 0) threadcount = ThreadCount();
+	if (threadcount == 0) 
+		threadcount = ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(ThreadCount() + threadcount,0);
 
 	//wxConfigBase::Get()->Read("tool.denoise.local",&local,3);
 	//wxConfigBase::Get()->Read("tool.denoise.patch",&patch,1);
