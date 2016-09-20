@@ -101,7 +101,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 		threadcount = 1;
 #endif
 
-	#pragma omp parallel
+	#pragma omp parallel num_threads(threadcount)
 	{
 		unsigned pdata[256] = {0};
 		#pragma omp for
@@ -204,7 +204,7 @@ wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib)
 	unsigned w = FreeImage_GetWidth(db);
 	int bytespp = FreeImage_GetLine(db) / w;
 
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(threadcount)
 	for(unsigned y = 0; y < h; y++) {
 		BYTE *bits = (BYTE *) dstbits + dpitch*y;
 		long pos = ((h-y-1) * w * 3);

@@ -97,10 +97,9 @@ END_EVENT_TABLE()
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
-	//configfile = "(none)";
-	//help.UseConfig(wxConfig::Get());
 
 	CreateGUIControls();
+	omp_set_dynamic(0);
 	deleting = false;
 
 	wxImageList *states;
