@@ -109,14 +109,17 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	int i;
 	double blk, wht;
 	DWORD hdata[256]; DWORD hmax=0;
+	double blkthresh, whtthresh;
 	if (command == "") {
 		FIBITMAP *hdib = FreeImage_ConvertTo24Bits(getPreviousPicProcessor()->getProcessedPic());
 		FreeImage_GetHistogram(hdib, hdata);
 		FreeImage_Unload(hdib);
+		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
+		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
 		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
-		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
 		blk = (double) i;
-		for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
 		wht = (double) i;
 		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
 	}
