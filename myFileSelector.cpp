@@ -11,19 +11,22 @@ RAW_UNPROCESSED
 
 myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, wxString title): wxDialog(parent, id, title, wxDefaultPosition, wxSize(730, 600))
 {
+	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *bt = new wxBoxSizer(wxHORIZONTAL);
 
-	//wxPanel* panel = new wxPanel(this, wxID_ANY);
+	fileselector = new wxFileCtrl(this, wxID_ANY, path, wxEmptyString, wxFileSelectorDefaultWildcardStr, wxFC_DEFAULT_STYLE, wxDefaultPosition, wxSize(600,300));
+	sz->Add(fileselector, 0,wxALL,10);
 
-	fileselector = new wxFileCtrl(this, wxID_ANY, path, wxEmptyString, wxFileSelectorDefaultWildcardStr, wxFC_DEFAULT_STYLE, wxPoint(20,5), wxSize(600,300));
 	wxArrayString flags;
 	flags.Add("Demosaic");
 	flags.Add("Preview");
 	flags.Add("Display");
 	flags.Add("Half Size");
 	//flags.Add("Unprocessed");
-	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxPoint(20,280), wxSize(580,70), flags, 5);
+	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxDefaultPosition, wxSize(580,70), flags, 5);
+	sz->Add(rawflags, 0,wxALL,10);
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 	wxArrayString cflags;
 	cflags.Add("Raw");
 	cflags.Add("sRGB");
@@ -31,18 +34,25 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	cflags.Add("Wide Gamut");
 	cflags.Add("ProPhoto");
 	cflags.Add("XYZ");
-	colorflags = new wxRadioBox (this, wxID_ANY, "Output ColorSpace",  wxPoint(20,350), wxSize(670, 70), cflags, 6);
+	colorflags = new wxRadioBox (this, wxID_ANY, "Output ColorSpace",  wxDefaultPosition, wxSize(670, 70), cflags, 6);
+	sz->Add(colorflags, 0,wxALL,10);
 
 	wxArrayString quflags;
 	quflags.Add("Linear");
 	quflags.Add("VNG");
 	quflags.Add("PPG");
 	quflags.Add("AHD");
-	qualityflags = new wxRadioBox (this, wxID_ANY, "Demosaic Algorithm",  wxPoint(20,430), wxSize(300, 70), quflags, 4);
+	qualityflags = new wxRadioBox (this, wxID_ANY, "Demosaic Algorithm",  wxDefaultPosition, wxSize(300, 70), quflags, 4);
+	sz->Add(qualityflags, 0,wxALL,10);
 #endif
 
-	wxButton* cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxPoint(20,510), wxDefaultSize);
-	wxButton* okButton = new wxButton(this, wxID_ANY, "Ok", wxPoint(150,510), wxDefaultSize);
+	wxButton* cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize);
+	bt->Add(cancelButton, 0,wxALL,10);
+	wxButton* okButton = new wxButton(this, wxID_ANY, "Ok", wxDefaultPosition, wxDefaultSize);
+	bt->Add(okButton, 0,wxALL,10);
+	sz->Add(bt, 0,wxALL,10);
+
+	SetSizerAndFit(sz);
 
 	Bind(wxEVT_COMMAND_BUTTON_CLICKED, &myFileSelector::onCancel, this, cancelButton->GetId());
 	Bind(wxEVT_COMMAND_BUTTON_CLICKED, &myFileSelector::onOk, this, okButton->GetId());
@@ -57,7 +67,7 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	//if (rdefault.CmpNoCase("unprocessed")==0) 	rawflags->SetSelection(4);
 	rawflags->Disable();
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 	wxString cdefault = wxConfigBase::Get()->Read("input.raw.colorspace","srgb");
 	if (cdefault.CmpNoCase("raw")==0)	colorflags->SetSelection(0);
 	if (cdefault.CmpNoCase("srgb")==0)	colorflags->SetSelection(1);
@@ -118,7 +128,7 @@ int myFileSelector::GetFlag()
 		flags = flags | RAW_DEFAULT;
 	}
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 	switch (colorflags->GetSelection()) {
 	case 0:
 		flags = flags | RAW_COLOR_RAW; break;
@@ -165,7 +175,7 @@ void myFileSelector::onFileChange(wxFileCtrlEvent& WXUNUSED(pEvent))
 		israw=true;
 		rawflags->Enable();
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 		if (FreeImageVersion.Contains("ggb")) {
 			colorflags->Enable();
 			qualityflags->Enable();
@@ -177,7 +187,7 @@ void myFileSelector::onFileChange(wxFileCtrlEvent& WXUNUSED(pEvent))
 		israw=false;
 		rawflags->Disable();
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 		colorflags->Disable();
 		qualityflags->Disable();
 #endif

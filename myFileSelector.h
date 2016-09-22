@@ -4,6 +4,7 @@
 
 #include <wx/wx.h>
 #include <wx/filectrl.h>
+#include <wx/sizer.h>
 #include "FreeImage.h"
 
 class myFileSelector: public wxDialog {
@@ -27,6 +28,7 @@ private:
 	wxRadioBox* rawflags;
 	wxRadioBox* colorflags;
 	wxRadioBox* qualityflags;
+
 };
 
 #endif 
