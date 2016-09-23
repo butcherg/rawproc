@@ -452,7 +452,7 @@ wxString RawFlags2Command(int flags)
 	else if ((flags & RAW_HALFSIZE) == RAW_HALFSIZE) cmd.Append("half");
 	else if ((flags & RAW_UNPROCESSED) == RAW_UNPROCESSED) cmd.Append("unprocessed");
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 	if ((flags & RAW_COLOR_RAW) == RAW_COLOR_RAW)    cmd.Append(",raw");
 	else if ((flags & RAW_COLOR_SRGB) == RAW_COLOR_SRGB)  cmd.Append(",srgb");
 	else if ((flags & RAW_COLOR_ADOBE) == RAW_COLOR_ADOBE) cmd.Append(",adobe");
@@ -481,7 +481,7 @@ int Command2RawFlags(wxString cmd)
 	if (commands[0].Cmp("unprocessed")==0) flags = flags | RAW_UNPROCESSED;
 	if (commands.GetCount() == 1) return flags;
 
-#ifdef CUSTOM_FREEIMAGE
+#ifdef RAW_COLOR_RAW
 	if (commands[1].Cmp("raw")==0) flags = flags | RAW_COLOR_RAW;
 	if (commands[1].Cmp("srgb")==0) flags = flags | RAW_COLOR_SRGB;
 	if (commands[1].Cmp("adobe")==0) flags = flags | RAW_COLOR_ADOBE;

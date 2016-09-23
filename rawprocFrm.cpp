@@ -35,6 +35,7 @@
 #include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
 #include "util.h"
+#include "lcms2.h"
 #include <omp.h>
 
 #include "unchecked.xpm"
@@ -1000,7 +1001,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 
 	wxString FreeImageVersion(FreeImage_GetVersion());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\n\nConfiguration file: %s",WxWidgetsVersion,FreeImageVersion,configfile));
+	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,FreeImageVersion,LittleCMSVersion,configfile));
 	wxAboutBox(info);
 
 }

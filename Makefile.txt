@@ -4,7 +4,7 @@ UNAME := $(shell g++ -dumpmachine)
 
 $(info $(UNAME))
 
-WINFREEIMAGE=c:\FreeImage-3.17.0
+WINFREEIMAGE=c:\FreeImage-3.17.0.ggb
 WINWXWIDGETS=c:\wxWidgets-3.0.2
 WINLCMS=C:\lcms2-2.8
 OPENMP=-fopenmp
@@ -33,7 +33,7 @@ WINDRES=windres
 #WXEXTERNALLIBS=-lwxexpat -lwxjpeg -lwxpng -lwxtiff -lwxzlib -lwxregexu 
 
 LIBDIRS=-L.
-LIBS=-lfreeimage
+LIBS=-lfreeimage -llcms2
 
 all: rawproc img
 
