@@ -274,6 +274,7 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	FIBITMAP * dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	char buff[4096];
 
 /*
 //exif.Append("Comments:\n");
@@ -296,6 +297,14 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 
 //	exif.Append("\n\n");
 	exif.Append(FreeImage_Information(dib));
+	FIICCPROFILE *profile = FreeImage_GetICCProfile(dib);
+	if (profile->data) {
+		cmsHPROFILE icc = cmsOpenProfileFromMem(profile->data,profile->size);
+		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
+		exif.Append(wxString::Format("ICC Profile: %s\n", wxString(buff)));
+		cmsCloseProfile(icc);
+	}
+	else exif.Append("ICC Profile: None\n");
 	wxMessageBox(exif,"Image Information");
 	
 /*
@@ -306,6 +315,7 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	exifdiag->~wxDialog();
 */
 }
+
 
 PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 {
@@ -1015,6 +1025,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 #define ID_EXIF		2001
 #define ID_HISTOGRAM	2002
 #define ID_DELETE	2003
+#define ID_ICC		2004
 
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
