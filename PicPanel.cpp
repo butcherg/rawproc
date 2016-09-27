@@ -506,6 +506,19 @@ END_EVENT_TABLE()
 				//PaintNow();
                 	}
 		}
+		if (scale == 1.0) {
+			unsigned px = x-picX;
+			unsigned py = y-picY;
+			if (px > 1) {
+				if (py > 1) {
+					if (px < scaledpic->GetWidth()) {
+						if (py < scaledpic->GetHeight()) {
+							parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %d,%d,%d", px, py, (unsigned) img.GetRed(px,py), (unsigned) img.GetGreen(px,py), (unsigned) img.GetBlue(px,py))); 
+						} else parentframe->SetStatusText("");
+					} else parentframe->SetStatusText("");
+				} else parentframe->SetStatusText("");
+			} else parentframe->SetStatusText("");
+		}
             }
 	    //event.Skip();
         }
@@ -535,7 +548,7 @@ END_EVENT_TABLE()
                     }
                 }
 		parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),1);
-
+		parentframe->SetStatusText("");
 		Refresh();
 		Update();
         }
@@ -557,6 +570,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 			SetScaleToWidth();
 			FitMode(true);
 			parentframe->SetStatusText("scale: fit",1);
+			parentframe->SetStatusText("");
 		}
 	}
 	Refresh();
