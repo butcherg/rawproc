@@ -3,6 +3,7 @@
 #include "elapsedtime.h"
 #include <vector>
 #include <algorithm>
+#include <cmath>
 #include <omp.h>
 
 #define LUMA(r, g, b)	(0.2126F * r + 0.7152F * g + 0.0722F * b)
