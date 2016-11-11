@@ -4,16 +4,26 @@ UNAME := $(shell g++ -dumpmachine)
 
 $(info $(UNAME))
 
+OBJDIR=build
+
 WINFREEIMAGE=c:\FreeImage-3.17.0.ggb
 WINWXWIDGETS=c:\wxWidgets-3.0.2
 WINLCMS=C:\lcms2-2.8
+
+LIBJPEG=../gimage/jpeg-6b/
+LIBTIFF=../gimage/tiff-4.0.6/
+LIBRAW=../gimage/LibRaw-0.17.2/
+LIBGIMAGE=../gimage/
+
 OPENMP=-fopenmp
 
 ifeq ($(UNAME), mingw32)
 	FILIBS=-L$(WINFREEIMAGE)\Dist -L$(WINLCMS)\Lib
+	FILIBS+=-L$(LIBGIMAGE)/build -L$(LIBJPEG) -L$(LIBTIFF)/libtiff/.libs -L$(LIBRAW)/lib
 	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
 	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
 	FIFLAGS=-I$(WINFREEIMAGE) -I$(WINLCMS)\include -O2 # -lFreeImage -DFREEIMAGE_LIB
+	FIFLAGS+=-I$(LIBGIMAGE)
 	OBJDIR=win
 endif
 
@@ -32,8 +42,12 @@ WINDRES=windres
 
 #WXEXTERNALLIBS=-lwxexpat -lwxjpeg -lwxpng -lwxtiff -lwxzlib -lwxregexu 
 
-LIBDIRS=-L.
-LIBS=-lfreeimage -llcms2
+LIBDIRS=-L. -L$(LIBGIMAGE)/build -L$(LIBJPEG) -L$(LIBTIFF)/libtiff/.libs -L$(LIBRAW)/lib -L$(WINLCMS)\Lib
+LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
+
+INCLUDEDIRS=-I$(LIBGIMAGE) 
+CFLAGS=-O4
+LFLAGS=
 
 all: rawproc img
 
@@ -44,15 +58,15 @@ else
 	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -fopenmp -o $(OBJDIR)/rawproc
 endif
 
-img: $(OBJECTS) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o 
+img: $(OBJDIR)/img.o
 ifeq ($(OBJDIR),win)
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) $(OPENMP) -static -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o $(LIBDIRS) $(LIBS) $(OPENMP) -static -o $(OBJDIR)/img
 else
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(OBJDIR)/FreeImage_Threaded.o  $(LIBS) $(FILIBS) $(OPENMP) -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o  $(LIBS) $(OPENMP) -o $(OBJDIR)/img
 endif
 
 $(OBJDIR)/img.o: img.cpp
-	$(CXX) $(FIFLAGS) $(WXFLAGS) -std=c++11 -static -w -c img.cpp -o$@
+	$(CXX) $(WXFLAGS) $(FILIBS) -std=c++11 -static -w -c img.cpp -o$@
 
 $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 	$(CXX) -c elapsedtime.cpp  -o$@
@@ -60,19 +74,13 @@ $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 $(OBJDIR)/util.o: util.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -c util.cpp $(OPENMP) -o$@
 
-$(OBJDIR)/FreeImage_Threaded.o: FreeImage_Threaded.cpp Curve.h saturation.h
-	$(CXX) $(FIFLAGS) -w -c FreeImage_Threaded.cpp $(OPENMP) -o$@
-
-$(OBJDIR)/FreeImage16.o: FreeImage16.cpp Curve.h saturation.h
-	$(CXX) $(FIFLAGS) -w -c FreeImage16.cpp -o$@
-
 $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 	$(CXX) $(WXFLAGS) $(FIFLAGS) -c myFileSelector.cpp  -o$@
 
 $(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@
 
-$(OBJDIR)/CurvePane.o: CurvePane.cpp Curve.h
+$(OBJDIR)/CurvePane.o: CurvePane.cpp 
 	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
 
 $(OBJDIR)/PicProcPanel.o: PicProcPanel.cpp

@@ -16,7 +16,7 @@
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
+#include <gimage.h>
 
 class PicProcPanel;
 
@@ -42,7 +42,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void setParams(wxString params);
 
 //	private:
-		FIBITMAP *dib;
+		gImage dib;
 		PicPanel *m_display;
 		
 		wxTreeCtrl *m_tree;

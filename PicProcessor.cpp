@@ -24,7 +24,7 @@ class BlankPanel: public PicProcPanel
 };
 
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, FIBITMAP *startpic) {
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startpic) {
 	m_parameters = parameters;
 	m_display = display;
 	m_tree = tree;
@@ -38,7 +38,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 		m_tree->SelectItem(id);
 	}
 	else {
-		dib = NULL;
+		dib = gImage();
 		wxTreeItemId id;
 		if (m_tree->IsSelected(m_tree->GetRootItem()))
 			id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
@@ -54,7 +54,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 PicProcessor::~PicProcessor()
 {
-	if (dib) FreeImage_Unload(dib); 
+
 }
 
 bool PicProcessor::processPic() { 
@@ -63,9 +63,7 @@ bool PicProcessor::processPic() {
 	//if selected, put processed pic in display
 	
 	if (GetId() != m_tree->GetRootItem()) {
-		FIBITMAP *s = getPreviousPicProcessor()->getProcessedPic();
-		if (dib) FreeImage_Unload(dib);
-		dib = FreeImage_Clone(s);
+		dib = getPreviousPicProcessor()->getProcessedPic();
 	}
 	dirty = false;
 
@@ -95,16 +93,12 @@ wxString PicProcessor::getName()
 wxString PicProcessor::getParams()
 {
 	return c;
-//	if (!r) return;
-//	c = r->getParams();
-//	processPic();
 }
 
 void PicProcessor::setParams(wxString params)
 {
 	c = params;
 	dirty = true;
-//	processPic();
 }
 
 void PicProcessor::showParams()
@@ -112,8 +106,6 @@ void PicProcessor::showParams()
 	if (!m_parameters) return;
 	m_parameters->DestroyChildren();
 	r = new BlankPanel(m_parameters, this, "");
-	//m_parameters->Refresh();
-	//m_parameters->Update();
 }
 
 PicProcessor *PicProcessor::getPreviousPicProcessor()
@@ -130,7 +122,7 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 	
 }
 
-FIBITMAP *PicProcessor::getProcessedPic() 
+gImage PicProcessor::getProcessedPic() 
 {
 	if (dirty) processPic();
 	if (!dib) processPic();
@@ -150,9 +142,7 @@ wxTreeCtrl *PicProcessor::getCommandTree()
 void PicProcessor::displayProcessedPic() 
 {
 	if (m_display) {
-		if (dib) {
-			m_display->SetPic(dib);
-		}
+		m_display->SetPic(dib);
 	}
 }
 
