@@ -24,13 +24,13 @@ class BlankPanel: public PicProcPanel
 };
 
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startpic) {
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage& startpic) {
 	m_parameters = parameters;
 	m_display = display;
 	m_tree = tree;
 	c = command;
 	n = name;
-	if (startpic) { 
+	if (startpic.getWidth() != 0) { 
 		dib = startpic;
 		m_tree->DeleteAllItems();
 		wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
@@ -122,10 +122,10 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 	
 }
 
-gImage PicProcessor::getProcessedPic() 
+gImage& PicProcessor::getProcessedPic() 
 {
 	if (dirty) processPic();
-	if (!dib) processPic();
+	//if (!dib) processPic();
 	return dib;
 }
 

@@ -26,7 +26,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 {
 
 	public:
-		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, FIBITMAP *startpic=NULL);
+		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage& startipc);
 		//PicProcessor(PicProcessor * copyof);
 		~PicProcessor();
 		virtual bool processPic();
@@ -35,7 +35,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getName();
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
-		FIBITMAP *getProcessedPic();
+		gImage& getProcessedPic();
 		PicPanel *getDisplay();
 		wxTreeCtrl *getCommandTree();
 		virtual void displayProcessedPic();

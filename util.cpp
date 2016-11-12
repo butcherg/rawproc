@@ -18,7 +18,7 @@
 #include <wx/tokenzr.h>
 #include <vector>
 
-#include "gImage.h"
+#include <gimage.h>
 
 wxString hstr="";
 
@@ -183,8 +183,30 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 
 wxImage gImage2wxImage(gImage dib)
 {
+	int threadcount;
+	unsigned h = dib.getHeight();
+	unsigned w =  dib.getWidth();
 	unsigned char *img = (unsigned char *) dib.getImageData(BPP_8);
-	wxImage image(dib.getWidth(), dib.getHeight(), img, true);
+	wxImage image(dib.getWidth(), dib.getHeight());
+	unsigned char *data = image.GetData();
+
+#if defined(_OPENMP)
+		threadcount = (long) omp_get_max_threads();
+#else
+		threadcount = 1;
+#endif
+
+	#pragma omp parallel num_threads(threadcount)
+	for(int y = 0; y < h; y++) {
+		unsigned pos = ((h-y-1) * w * 3);
+		for(int x = 0; x<w; x++) {
+			data[pos]   = img[pos]; 
+			data[pos+1] = img[pos+1];  
+			data[pos+2] = img[pos+2]; 
+			pos += 3;
+		}
+	}
+
 	delete img;
 	return image;
 }

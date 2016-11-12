@@ -19,21 +19,21 @@
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
-#include "PicProcessorGamma.h"
-#include "PicProcessorBright.h"
-#include "PicProcessorContrast.h"
-#include "PicProcessorSaturation.h"
-#include "PicProcessorShadow.h"
-#include "PicProcessorHighlight.h"
-#include "PicProcessorCurve.h"
-#include "PicProcessorGray.h"
-#include "PicProcessorCrop.h"
-#include "PicProcessorResize.h"
-#include "PicProcessorBlackWhitePoint.h"
-#include "PicProcessorSharpen.h"
-#include "PicProcessorRotate.h"
-#include "PicProcessorDenoise.h"
-#include "myFileSelector.h"
+//#include "PicProcessorGamma.h"
+//#include "PicProcessorBright.h"
+//#include "PicProcessorContrast.h"
+//#include "PicProcessorSaturation.h"
+//#include "PicProcessorShadow.h"
+//#include "PicProcessorHighlight.h"
+//#include "PicProcessorCurve.h"
+//#include "PicProcessorGray.h"
+//#include "PicProcessorCrop.h"
+//#include "PicProcessorResize.h"
+//#include "PicProcessorBlackWhitePoint.h"
+//#include "PicProcessorSharpen.h"
+//#include "PicProcessorRotate.h"
+//#include "PicProcessorDenoise.h"
+//#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
@@ -41,7 +41,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.4.1Dev";
+wxString version = "0.5Dev";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -65,20 +65,20 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_OPENSOURCE, rawprocFrm::Mnuopensource1004Click)
 	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
 	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
-	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
-	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
-	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
-	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
-	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
-	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
-	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
-	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
-	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
-	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
-	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
-	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
-	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
-	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
+//	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
+//	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
+//	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
+//	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
+//	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
+//	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
+//	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
+//	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
+//	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
+//	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
+//	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
+//	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
+//	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
+//	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -111,7 +111,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
         int width  = icons[0].GetWidth(),
             height = icons[0].GetHeight();
 
-        // Make an state image list containing small icons
+        // Make a state image list containing small icons
         states = new wxImageList(width, height, true);
 	for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
             states->Add(icons[i]);
@@ -145,7 +145,7 @@ void rawprocFrm::CreateGUIControls()
 	WxMenuBar1 = new wxMenuBar();
 	wxMenu *ID_MNU_FILEMnu_Obj = new wxMenu();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPEN, _("Open..."), _(""), wxITEM_NORMAL);
-	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
+//	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->AppendSeparator();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_EXIT, _("Exit"), _(""), wxITEM_NORMAL);
@@ -160,20 +160,20 @@ void rawprocFrm::CreateGUIControls()
 	
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
+//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	
 	
 	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, _("Add"));
@@ -252,97 +252,9 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 		wxMessageBox("bad item");
 }
 
-bool rawprocFrm::MoveAfter(wxTreeItemId item)
-{
-    bool result = false;
-/*
-	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
-	wxString name = prevpic->getName();
-	wxString params = prevpic->getParams();
-        wxTreeItemId after = commandtree->GetNextSibling(item);
-	   if(after.IsOk()) {
-            wxTreeItemId moved = commandtree->InsertItem(commandtree->GetItemParent(after), after, name, -1, -1, AddItem(name,params));
-            commandtree->SelectItem(moved);
-            commandtree->Delete(item);
-            result = true;
-        }
-*/
-    return result;
-}
-
-void rawprocFrm::EXIFDialog(wxTreeItemId item)
-{
-	wxString exif="";
-	FIBITMAP * dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	char buff[4096];
-
-/*
-//exif.Append("Comments:\n");
-	exif.Append(MetadataString("Comments", dib, FIMD_COMMENTS));
-//exif.Append("Exif-Main:\n");
-	exif.Append(MetadataString("Exif-Main", dib, FIMD_EXIF_MAIN));
-//exif.Append("Exif-Advanced:\n");
-	exif.Append(MetadataString("Exif-Advanced", dib, FIMD_EXIF_EXIF));
-//exif.Append("Exif-GPS:\n");
-	exif.Append(MetadataString("Exif-GPS", dib, FIMD_EXIF_GPS));
-//exif.Append("Exif-Interop:\n");
-	exif.Append(MetadataString("Exif-Interop", dib, FIMD_EXIF_INTEROP));
-//exif.Append("IPTC/NAA:\n");
-	exif.Append(MetadataString("IPTC/NAA", dib, FIMD_IPTC));
-//exif.Append("GEOTIFF:\n");
-	exif.Append(MetadataString("GEOTIFF", dib, FIMD_GEOTIFF));
-//exif.Append("Makernote:\n");
-	exif.Append(MetadataString("Makernote", dib, FIMD_EXIF_MAKERNOTE));
-*/
-
-//	exif.Append("\n\n");
-	exif.Append(FreeImage_Information(dib));
-	FIICCPROFILE *profile = FreeImage_GetICCProfile(dib);
-	if (profile->data) {
-		cmsHPROFILE icc = cmsOpenProfileFromMem(profile->data,profile->size);
-		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-		exif.Append(wxString::Format("ICC Profile: %s\n", wxString(buff)));
-		cmsCloseProfile(icc);
-	}
-	else exif.Append("ICC Profile: None\n");
-	wxMessageBox(exif,"Image Information");
-	
-/*
-	wxDialog *exifdiag = new wxDialog(this, wxID_ANY, "Image Information");
-	wxTextCtrl *exiftxt = new wxTextCtrl(exifdiag, wxID_ANY, exif, wxPoint(0,0), exifdiag->GetSize(), wxTE_READONLY | wxTE_MULTILINE);
-	exifdiag->ShowModal();
-	exiftxt->~wxTextCtrl();
-	exifdiag->~wxDialog();
-*/
-}
 
 
-PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
-{
-	SetStatusText("");
-	bool result = true;
-	PicProcessor *p;
-	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
-	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
-	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
-	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
-	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
-	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
-	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
-	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
-	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
-	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
-	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
-	else result = NULL;
-	p->processPic();
-	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
-	Refresh();
-	Update();
-	return p;
-}
+//ToDo: Get rid of MoveBefore, MoveAfter...
 
 bool rawprocFrm::MoveBefore(wxTreeItemId item)
 {
@@ -374,6 +286,82 @@ bool rawprocFrm::MoveBefore(wxTreeItemId item)
     return result;
 }
 
+bool rawprocFrm::MoveAfter(wxTreeItemId item)
+{
+    bool result = false;
+/*
+	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
+	wxString name = prevpic->getName();
+	wxString params = prevpic->getParams();
+        wxTreeItemId after = commandtree->GetNextSibling(item);
+	   if(after.IsOk()) {
+            wxTreeItemId moved = commandtree->InsertItem(commandtree->GetItemParent(after), after, name, -1, -1, AddItem(name,params));
+            commandtree->SelectItem(moved);
+            commandtree->Delete(item);
+            result = true;
+        }
+*/
+    return result;
+}
+
+void rawprocFrm::EXIFDialog(wxTreeItemId item)
+{
+	wxString exif="";
+	//FIBITMAP * dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	gImage& dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	std::map<std::string,std::string> e =  dib.getInfo();
+
+	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it)
+		exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
+	char buff[4096];
+
+//Save: display ICC info for LCMS
+/*
+	exif.Append(FreeImage_Information(dib));
+	FIICCPROFILE *profile = FreeImage_GetICCProfile(dib);
+	if (profile->data) {
+		cmsHPROFILE icc = cmsOpenProfileFromMem(profile->data,profile->size);
+		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
+		exif.Append(wxString::Format("ICC Profile: %s\n", wxString(buff)));
+		cmsCloseProfile(icc);
+	}
+	else exif.Append("ICC Profile: None\n");
+*/
+	wxMessageBox(exif,"Image Information");
+	
+}
+
+
+PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
+{
+	SetStatusText("");
+	bool result = true;
+	PicProcessor *p;
+/*
+	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
+	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
+	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
+	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
+	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
+	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
+	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
+	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
+	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
+	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
+	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
+	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+	else result = NULL;
+	p->processPic();
+	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	Refresh();
+	Update();
+*/
+	return p;
+}
+
+
 void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 {
 	SetStatusText("");
@@ -402,6 +390,7 @@ wxString rawprocFrm::AssembleCommand()
 	wxString cmd = "rawproc-";
 	cmd.Append(version);
 	cmd.Append(" ");
+/*ToDo: Make sure FreeImage doesn't get in the way
 	wxTreeItemIdValue cookie;
 	wxTreeItemId root = commandtree->GetRootItem();
 	//cmd.Append(wxString::Format("%s",commandtree->GetItemText(root)));
@@ -419,46 +408,56 @@ wxString rawprocFrm::AssembleCommand()
 			iter = commandtree->GetNextChild(root, cookie);
 		}
 	}
+*/
 	return cmd;
 }
 
-void rawprocFrm::OpenFile(wxString fname, int flag)
+void rawprocFrm::OpenFile(wxString fname, wxString params)
 {
 	filename.Assign(fname);
 	sourcefilename.Clear();
-	FIBITMAP *dib, *tmpdib;
-	FREE_IMAGE_FORMAT fif;
+	//FIBITMAP *dib, *tmpdib;
+	gImage dib, tmpdib;
+	//FREE_IMAGE_FORMAT fif;  
+	GIMAGE_FILETYPE fif;
 	//int threadcount = omp_get_max_threads();
 
-	fif = FreeImage_GetFileType(fname, 0);
-	if(fif != FIF_UNKNOWN) {
+	//fif = FreeImage_GetFileType(fname, 0);
+	fif = gImage::getFileType(fname);
+	//if(fif != FIF_UNKNOWN) {
+	if (fif != FILETYPE_UNKNOWN) {
+
 		SetStatusText("Loading file...");
 		commandtree->DeleteAllItems();
 		mark();
-		dib = FreeImage_Load(fif, fname, flag);
+		//dib = FreeImage_Load(fif, fname, flag);
+		dib = gImage::loadImageFile(fname, (std::string) params.c_str());
 		wxString loadtime = duration();
-		if (!dib) {
+		//if (!dib) {
+		if (dib.getWidth() == 0) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
-		if (fif == FIF_RAW & flag == RAW_UNPROCESSED) {
-			tmpdib = FreeImage_ConvertToRGB16(dib);
-			FreeImage_Unload(dib);
-			dib = tmpdib;
-		}
-		if (FreeImage_GetBPP(dib) < 24) {
-			int ans = wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp), %dbpp\n\nOpen anyway?\nImage will display, but tools will have no effect.", filename.GetFullName(),FreeImage_GetBPP(dib)),"Warning",wxYES_NO);
-			if (ans == wxNO) {
-				SetStatusText("");
-				return;
-			}
-		}
-		wxString flagstring = "";
-		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
-			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,imagebpp=%d,time=%s",filename.GetFullName(),FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),loadtime));
+		//if (fif == FIF_RAW & flag == RAW_UNPROCESSED) {
+		//	tmpdib = FreeImage_ConvertToRGB16(dib);
+		//	FreeImage_Unload(dib);
+		//	dib = tmpdib;
+		//}
+		//if (FreeImage_GetBPP(dib) < 24) {
+		//	int ans = wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp), %dbpp\n\nOpen anyway?\nImage will display, but tools will have no effect.", filename.GetFullName(),FreeImage_GetBPP(dib)),"Warning",wxYES_NO);
+		//	if (ans == wxNO) {
+		//		SetStatusText("");
+		//		return;
+		//	}
+		//}
 
-		if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
+		//wxString flagstring = "";
+		wxString flagstring(params.c_str());
+		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
+			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib.getWidth(), dib.getHeight(),loadtime));
+
+		//if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
@@ -470,7 +469,8 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
 		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
-		if ((fif == FIF_RAW) & (raw_default != "")) {
+		//if ((fif == FIF_RAW) & (raw_default != "")) {
+		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				for (int i=0; i<token.GetCount(); i++) {
@@ -496,6 +496,7 @@ void rawprocFrm::OpenFile(wxString fname, int flag)
 
 void rawprocFrm::OpenFileSource(wxString fname)
 {
+/*
 	//filename.Assign(fname);
 	FIBITMAP *srcdib, *dib;
 	int fflags = 0;
@@ -570,7 +571,9 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	else {
 		SetStatusText(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
 	}
+*/
 }
+
 
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
@@ -690,9 +693,16 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
+	//ToDo: re-incorporate myFileSelector
+	wxString fname = wxFileSelector("Open image ...", filename.GetPath());	
+	if ( !fname.empty() ) { 
+		wxFileName f(fname);
+		wxSetWorkingDirectory (f.GetPath());
+		OpenFile(fname);
+	}	
+
+/*
 	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open File");
-	//wxString filename = filediag->GetFileSelected();
-	//unsigned flags = filediag->GetFlag();
 
 	if(filediag->ShowModal() == wxID_OK)    {
 		wxFileName f(filediag->GetFileSelected());
@@ -700,6 +710,7 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
         	OpenFile(filediag->GetFileSelected(), filediag->GetFlag());
 	}
 	filediag->~myFileSelector();
+*/
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
@@ -725,9 +736,10 @@ void rawprocFrm::Mnuadd1005Click(wxCommandEvent& event)
 
 /*
  * Mnugamma1006Click
- */
+*/
 void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
+/*
 	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
@@ -735,14 +747,16 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+*/
 }
 
 
 /*
  * Mnubright1007Click
- */
+*/
 void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
+/*
 	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
@@ -750,13 +764,16 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+*/
 }
+
 
 /*
  * Mnucontrast1008Click
  */
 void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
+/*
 	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
@@ -764,29 +781,41 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
+
+
 
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
+
+
 
 void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
 	crv->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
+*/
 }
+
+
 
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
 	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
@@ -795,10 +824,12 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 	shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
+*/
 }
 
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
 	wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
@@ -807,10 +838,12 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 	s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
+*/
 }
 
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
 	wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
@@ -820,19 +853,23 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 	gr->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
+*/
 }
 
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
 
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
 	wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
@@ -843,10 +880,12 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	pic->SetScale(1.0);
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
 
 void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	PicProcessorBlackWhitePoint *c;
 	if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
@@ -856,31 +895,37 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 	//c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
 
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
 	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
 	if (defval != "0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 
 }
 
 void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
 	PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
 	if (defval != "0.0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+*/
 }
 
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
+/*
 	SetStatusText("");
 	wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
 	wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
@@ -890,6 +935,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	if (sigma != "0") d->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+*/
 }
 
 /*
@@ -909,6 +955,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 		if (wxFileName::FileExists(fname)) 
 			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
 				return;
+
+/*
 		// first, check the output format from the file name or file extension
 		FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(fname);
 		if(out_fif != FIF_UNKNOWN) {
@@ -952,6 +1000,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			//printf("Error: bad output file specification:\n",output_filename);
 			wxMessageBox("Save Error: bad output file specification");
 		}
+*/
 		WxStatusBar1->SetStatusText("");
 	}
 }
@@ -1009,10 +1058,11 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 
-	wxString FreeImageVersion(FreeImage_GetVersion());
+	//wxString FreeImageVersion(FreeImage_GetVersion());
+	wxString gImageVersion = "foo";
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,FreeImageVersion,LittleCMSVersion,configfile));
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,gImageVersion,LittleCMSVersion,configfile));
 	wxAboutBox(info);
 
 }

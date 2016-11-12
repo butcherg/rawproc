@@ -98,14 +98,14 @@ END_EVENT_TABLE()
 		//parentframe->SetStatusText(wxString::Format("thumbmode: %d", toggleThumb));
 	}
 
-	void PicPanel::SetPic(FIBITMAP *dib)
+	void PicPanel::SetPic(gImage& dib)
 	{
 		//parentframe->SetStatusText("display...");
 		int w, h;
 		GetSize(&w, &h);
 		img.Destroy();
 
-		DWORD hist[256];
+		int hist[256];
 		std::vector<int> hgram;
 		int hmax;
 
@@ -116,9 +116,7 @@ END_EVENT_TABLE()
 		if (scaledpic) scaledpic->~wxBitmap();
 		if (histogram) histogram->~wxBitmap();
 
-		//img = FreeImage2wxImageAndHistogram(dib);
-		//img = FreeImage2wxImage(dib);
-		img = ThreadedFreeImage2wxImage(dib);
+		img = gImage2wxImage(dib);
 
 		cropX = 0;
 		cropY = 0;
@@ -140,7 +138,6 @@ END_EVENT_TABLE()
 		////hsgram = HistogramFromVec(histdata, hmax, thumbW, thumbH);
 		hsgram = wxBitmap();
 
-		//scale =  (double) w/ (double) FreeImage_GetWidth(dib);
 		//parentframe->SetStatusText("");
                 Refresh();
 		Update();

@@ -14,7 +14,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "FreeImage.h"
+//#include "FreeImage.h"
+#include <gimage.h>
 //#include "PicProcessorCrop.h"
 
 
@@ -29,7 +30,7 @@ class PicPanel: public wxPanel
         void OnPaint(wxPaintEvent& event);
 	void render(wxDC &dc);
         void drawBox(wxDC &dc, int x, int y, int w,int h);
-	void SetPic(FIBITMAP *dib);
+	void SetPic(gImage& dib);
 	void SetThumbMode(int mode);
 	void ToggleThumb();
 	void ToggleCropMode();

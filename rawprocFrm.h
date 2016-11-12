@@ -46,7 +46,7 @@
 #include <wx/filesys.h>
 #include <wx/fs_zip.h>
 
-#include "FreeImage.h"
+#include "gimage.h"
 #include "PicPanel.h"
 #include "PicProcessor.h"
 
@@ -158,7 +158,8 @@ class rawprocFrm : public wxFrame
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
 	wxString AssembleCommand();
 	void EXIFDialog(wxTreeItemId item);
-	void OpenFile(wxString fname, int flag);
+	//void OpenFile(wxString fname, int flag);
+	void OpenFile(wxString fname, wxString params="");
 	void OpenFileSource(wxString fname);
 	void Mnuadd1005Click(wxCommandEvent& event);
 	void Mnugamma1006Click(wxCommandEvent& event);
@@ -192,11 +193,14 @@ class rawprocFrm : public wxFrame
 		
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
-		//wxPanel *parameters;
 		wxPanel *preview;
+		//wxPanel *parameters;
 		myParameters *parameters;
-		FIBITMAP *d;
+
+		//FIBITMAP *d;
+		gImage d;
 		wxImage *img;
+
 		bool deleting;
 		wxTreeItemId olditem;
 		wxFileName filename, sourcefilename;
