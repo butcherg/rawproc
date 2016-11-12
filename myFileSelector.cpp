@@ -26,7 +26,6 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	rawflags = new wxRadioBox (this, wxID_ANY, "RAW Mode",  wxDefaultPosition, wxSize(580,70), flags, 5);
 	sz->Add(rawflags, 0,wxALL,10);
 
-#ifdef RAW_COLOR_RAW
 	wxArrayString cflags;
 	cflags.Add("Raw");
 	cflags.Add("sRGB");
@@ -44,7 +43,6 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	quflags.Add("AHD");
 	qualityflags = new wxRadioBox (this, wxID_ANY, "Demosaic Algorithm",  wxDefaultPosition, wxSize(300, 70), quflags, 4);
 	sz->Add(qualityflags, 0,wxALL,10);
-#endif
 
 	wxButton* cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize);
 	bt->Add(cancelButton, 0,wxALL,10);
@@ -67,7 +65,6 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	//if (rdefault.CmpNoCase("unprocessed")==0) 	rawflags->SetSelection(4);
 	rawflags->Disable();
 
-#ifdef RAW_COLOR_RAW
 	wxString cdefault = wxConfigBase::Get()->Read("input.raw.colorspace","srgb");
 	if (cdefault.CmpNoCase("raw")==0)	colorflags->SetSelection(0);
 	if (cdefault.CmpNoCase("srgb")==0)	colorflags->SetSelection(1);
@@ -83,7 +80,6 @@ myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, w
 	if (qdefault.CmpNoCase("ppg")==0) 	qualityflags->SetSelection(2);
 	if (qdefault.CmpNoCase("ahd")==0) 	qualityflags->SetSelection(3);
 	qualityflags->Disable();
-#endif
 
 	Center();
 	israw=false;
@@ -106,91 +102,76 @@ wxString myFileSelector::GetFileSelected()
 	return fileselector->GetPath();
 }
 
-int myFileSelector::GetFlag()
+wxString myFileSelector::GetFlags()
 {
-	int flags = 0;
+	wxString flags = "";
 
-	if (!israw) return 0;
+	if (!israw) return "";
 
 	switch (rawflags->GetSelection()) {
 	case wxNOT_FOUND:
 	case 0:
-		flags = flags | RAW_DEFAULT; break;
+		flags.Append(wxString::Format("rawinput:default")); break;
 	case 1: 
-		flags = flags | RAW_PREVIEW; break;
+		flags.Append(wxString::Format("rawinput:preview")); break;
 	case 2:
-		flags = flags | RAW_DISPLAY; break;
+		flags.Append(wxString::Format("rawinput:display")); break;
 	case 3:
-		flags = flags | RAW_HALFSIZE; break;
+		flags.Append(wxString::Format("rawinput:half")); break;
 	//case 4:
-	//	flags = flags | RAW_UNPROCESSED; break;
+	//	flags.Append(wxString::Format("rawinput:unprocessed")); break;
 	default:
-		flags = flags | RAW_DEFAULT;
+		flags.Append(wxString::Format("rawinput:default")); break;
 	}
 
-#ifdef RAW_COLOR_RAW
 	switch (colorflags->GetSelection()) {
 	case 0:
-		flags = flags | RAW_COLOR_RAW; break;
+		flags.Append(wxString::Format(",colorspace:raw")); break;
 	case wxNOT_FOUND:
 	case 1: 
-		flags = flags | RAW_COLOR_SRGB; break;
+		flags.Append(wxString::Format(",colorspace:srgb")); break;
 	case 2:
-		flags = flags | RAW_COLOR_ADOBE; break;
+		flags.Append(wxString::Format(",colorspace:adobe")); break;
 	case 3:
-		flags = flags | RAW_COLOR_WIDE; break;
+		flags.Append(wxString::Format(",colorspace:wide")); break;
 	case 4:
-		flags = flags | RAW_COLOR_PROPHOTO; break;
+		flags.Append(wxString::Format(",colorspace:prophoto")); break;
 	case 5:
-		flags = flags | RAW_COLOR_XYZ; break;
+		flags.Append(wxString::Format(",colorspace:xyz")); break;
 	default:
-		flags = flags | RAW_DEFAULT;
+		flags.Append(wxString::Format(",colorspace:srgb")); break;
 	}
 
 	switch (qualityflags->GetSelection()) {
 	case 0:
-		flags = flags | RAW_QUAL_LINEAR; break;
+		flags.Append(wxString::Format(",demosaic:linear")); break;
 	case 1: 
-		flags = flags | RAW_QUAL_VNG; break;
+		flags.Append(wxString::Format(",demosaic:vng")); break;
 	case 2:
-		flags = flags | RAW_QUAL_PPG; break;
+		flags.Append(wxString::Format(",demosaic:ppg")); break;
 	case wxNOT_FOUND:
 	case 3:
-		flags = flags | RAW_QUAL_AHD; break;
 	default:
-		flags = flags | RAW_QUAL_AHD;
+		flags.Append(wxString::Format(",demosaic:ahd")); break;
 	}
-#endif
 
 	return flags;
 }
 
 void myFileSelector::onFileChange(wxFileCtrlEvent& WXUNUSED(pEvent))
 {
-	wxString FreeImageVersion(FreeImage_GetVersion());
-
-	FREE_IMAGE_FORMAT fif;
-	fif = FreeImage_GetFileType(fileselector->GetPath(), 0);
-	if (fif == FIF_RAW) {
+	if (gImage::getFileType(fileselector->GetPath().c_str()) == FILETYPE_RAW) {
 		israw=true;
 		rawflags->Enable();
-
-#ifdef RAW_COLOR_RAW
-		if (FreeImageVersion.Contains("ggb")) {
-			colorflags->Enable();
-			qualityflags->Enable();
-		}
-#endif
+		colorflags->Enable();
+		qualityflags->Enable();
 
 	}
 	else {
 		israw=false;
 		rawflags->Disable();
-
-#ifdef RAW_COLOR_RAW
 		colorflags->Disable();
 		qualityflags->Disable();
-#endif
 
 	}
 }

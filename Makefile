@@ -29,7 +29,7 @@ endif
 
 #OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -41,7 +41,7 @@ LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
 INCLUDEDIRS=-I$(LIBGIMAGE) 
-CFLAGS=-fopenmp -O4 -w  #ToDo: take out -w when Curve.h is isolated...
+CFLAGS=-fopenmp -w  #ToDo: take out -w when Curve.h is isolated...
 LFLAGS=-fopenmp
 
 -include $(OBJDIR)/localmake.txt
@@ -70,8 +70,8 @@ $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 $(OBJDIR)/util.o: util.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c util.cpp  -o$@
 
-#$(OBJDIR)/myFileSelector.o: myFileSelector.cpp
-#	$(CXX) $(WXFLAGS) $(FIFLAGS) -c myFileSelector.cpp  -o$@
+$(OBJDIR)/myFileSelector.o: myFileSelector.cpp
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myFileSelector.cpp  -o$@
 
 #$(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 #	$(CXX) $(FIFLAGS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@

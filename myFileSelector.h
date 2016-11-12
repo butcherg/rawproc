@@ -5,7 +5,8 @@
 #include <wx/wx.h>
 #include <wx/filectrl.h>
 #include <wx/sizer.h>
-#include "FreeImage.h"
+//#include "FreeImage.h"
+#include <gimage.h>
 
 class myFileSelector: public wxDialog {
 public:
@@ -17,7 +18,7 @@ public:
 	void onFileActivate(wxFileCtrlEvent& WXUNUSED(pEvent));
 
 	wxString GetFileSelected();
-	int GetFlag();
+	wxString GetFlags();
 
 
 

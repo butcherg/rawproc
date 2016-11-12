@@ -33,7 +33,7 @@
 //#include "PicProcessorSharpen.h"
 //#include "PicProcessorRotate.h"
 //#include "PicProcessorDenoise.h"
-//#include "myFileSelector.h"
+#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
@@ -256,10 +256,11 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 
 //ToDo: Get rid of MoveBefore, MoveAfter...
 
+/*
 bool rawprocFrm::MoveBefore(wxTreeItemId item)
 {
     bool result = false;
-/*
+
 	wxString n,c;
 	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
 	wxString name = prevpic->getName();
@@ -282,14 +283,12 @@ bool rawprocFrm::MoveBefore(wxTreeItemId item)
         
         result = true;
     }
-*/
     return result;
 }
 
 bool rawprocFrm::MoveAfter(wxTreeItemId item)
 {
     bool result = false;
-/*
 	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
 	wxString name = prevpic->getName();
 	wxString params = prevpic->getParams();
@@ -300,9 +299,9 @@ bool rawprocFrm::MoveAfter(wxTreeItemId item)
             commandtree->Delete(item);
             result = true;
         }
-*/
     return result;
 }
+*/
 
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
@@ -390,14 +389,9 @@ wxString rawprocFrm::AssembleCommand()
 	wxString cmd = "rawproc-";
 	cmd.Append(version);
 	cmd.Append(" ");
-/*ToDo: Make sure FreeImage doesn't get in the way
 	wxTreeItemIdValue cookie;
 	wxTreeItemId root = commandtree->GetRootItem();
-	//cmd.Append(wxString::Format("%s",commandtree->GetItemText(root)));
 	wxString rootcmd = ((PicProcessor *)commandtree->GetItemData(root))->getCommand();
-	//if (rootcmd.IsEmpty()) 
-	//	cmd.Append(" ");
-	//else
 		cmd.Append(wxString::Format("%s ",rootcmd));
 	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
 	if (iter.IsOk()) {
@@ -408,7 +402,7 @@ wxString rawprocFrm::AssembleCommand()
 			iter = commandtree->GetNextChild(root, cookie);
 		}
 	}
-*/
+
 	return cmd;
 }
 
@@ -416,65 +410,40 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 {
 	filename.Assign(fname);
 	sourcefilename.Clear();
-	//FIBITMAP *dib, *tmpdib;
 	gImage dib, tmpdib;
-	//FREE_IMAGE_FORMAT fif;  
 	GIMAGE_FILETYPE fif;
-	//int threadcount = omp_get_max_threads();
-
-	//fif = FreeImage_GetFileType(fname, 0);
 	fif = gImage::getFileType(fname);
-	//if(fif != FIF_UNKNOWN) {
 	if (fif != FILETYPE_UNKNOWN) {
 
 		SetStatusText("Loading file...");
 		commandtree->DeleteAllItems();
 		mark();
-		//dib = FreeImage_Load(fif, fname, flag);
 		dib = gImage::loadImageFile(fname, (std::string) params.c_str());
 		wxString loadtime = duration();
-		//if (!dib) {
 		if (dib.getWidth() == 0) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
-		//if (fif == FIF_RAW & flag == RAW_UNPROCESSED) {
-		//	tmpdib = FreeImage_ConvertToRGB16(dib);
-		//	FreeImage_Unload(dib);
-		//	dib = tmpdib;
-		//}
-		//if (FreeImage_GetBPP(dib) < 24) {
-		//	int ans = wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp), %dbpp\n\nOpen anyway?\nImage will display, but tools will have no effect.", filename.GetFullName(),FreeImage_GetBPP(dib)),"Warning",wxYES_NO);
-		//	if (ans == wxNO) {
-		//		SetStatusText("");
-		//		return;
-		//	}
-		//}
 
-		//wxString flagstring = "";
 		wxString flagstring(params.c_str());
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
 			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib.getWidth(), dib.getHeight(),loadtime));
 
-		//if (fif == FIF_RAW) flagstring = RawFlags2Command(flag);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
-		//picdata->showParams();
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 		SetStatusText("scale: fit",1);
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
 		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
-		//if ((fif == FIF_RAW) & (raw_default != "")) {
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				for (int i=0; i<token.GetCount(); i++) {
-					//SetStatusText(wxString::Format("Applying %s...",token[i]) );
 					wxArrayString cmd = split(token[i], ":");
 					if (cmd.GetCount() == 2)
 						AddItem(cmd[0], cmd[1]);
@@ -637,12 +606,12 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	case 8: //Backspace
 		CommandTreeDeleteItem(commandtree->GetSelection());
         	break;
-        case 315: //Up Arrow
-        	MoveBefore(commandtree->GetSelection());
-        	break;
-        case 317: //Down Arrow
-        	MoveAfter(commandtree->GetSelection());
-        	break;
+        //case 315: //Up Arrow
+        //	MoveBefore(commandtree->GetSelection());
+        //	break;
+        //case 317: //Down Arrow
+        //	MoveAfter(commandtree->GetSelection());
+        //	break;
 	case 102: //f
 	case 70: //F - fit image to window
 		pic->SetScaleToWidth();
@@ -693,29 +662,20 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
-	//ToDo: re-incorporate myFileSelector
-	wxString fname = wxFileSelector("Open image ...", filename.GetPath());	
-	if ( !fname.empty() ) { 
-		wxFileName f(fname);
-		wxSetWorkingDirectory (f.GetPath());
-		OpenFile(fname);
-	}	
-
-/*
-	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open File");
+	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open Image");
 
 	if(filediag->ShowModal() == wxID_OK)    {
 		wxFileName f(filediag->GetFileSelected());
 		wxSetWorkingDirectory (f.GetPath());
-        	OpenFile(filediag->GetFileSelected(), filediag->GetFlag());
+        	OpenFile(filediag->GetFileSelected(), filediag->GetFlags());
 	}
 	filediag->~myFileSelector();
-*/
+
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 {
-	wxString fname = wxFileSelector("Open image source...", filename.GetPath());	
+	wxString fname = wxFileSelector("Open Image source...", filename.GetPath());	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
@@ -944,6 +904,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 {
 	wxString fname;
+	gImage dib;
 
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
@@ -955,6 +916,31 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 		if (wxFileName::FileExists(fname)) 
 			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
 				return;
+			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
+				wxMessageBox("Error: invalid file type");
+				return;
+			}
+			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
+
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic();
+
+			else
+
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic();
+
+			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
+			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
+			WxStatusBar1->SetStatusText("Saving file...");
+			dib.saveImageFile(fname);
+			wxFileName tmpname(fname);
+
+			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
+
+				sourcefilename.Assign(fname);
+
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			}
+			
 
 /*
 		// first, check the output format from the file name or file extension
