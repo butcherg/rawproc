@@ -31,7 +31,8 @@ class Curve
 		{
 			controlpts.clear();
 			controlpts = pts;
-			loaded=false;
+			setpoints();
+			loaded=true;
 		}
 
 		void clearpoints()

@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "PicProcessor.h"
-#include "FreeImage.h"
+//#include "FreeImage.h"
+#include <gimage.h>
 #include "Curve.h"
 
 class PicProcessorCurve: public PicProcessor
@@ -15,12 +16,12 @@ class PicProcessorCurve: public PicProcessor
 		void setControlPoints(std::vector<cp> ctpts);
 		void setParams(std::vector<cp> ctpts, wxString params);
 		bool processPic();
-		void setLUT8(std::vector<BYTE> LUT);
-		void setLUT16(std::vector<WORD> LUT);
+		//void setLUT8(std::vector<BYTE> LUT);
+		//void setLUT16(std::vector<WORD> LUT);
 
 	private:
-		BYTE LUT8[256];
-		WORD LUT16[65535];
+		//BYTE LUT8[256];
+		//WORD LUT16[65535];
 
 		std::vector<cp> ctrlpts;
 

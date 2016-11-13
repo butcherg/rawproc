@@ -25,7 +25,7 @@
 //#include "PicProcessorSaturation.h"
 //#include "PicProcessorShadow.h"
 //#include "PicProcessorHighlight.h"
-//#include "PicProcessorCurve.h"
+#include "PicProcessorCurve.h"
 //#include "PicProcessorGray.h"
 //#include "PicProcessorCrop.h"
 //#include "PicProcessorResize.h"
@@ -71,7 +71,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 //	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
 //	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
 //	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
-//	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
+	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
 //	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
 //	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
 //	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
@@ -164,7 +164,7 @@ void rawprocFrm::CreateGUIControls()
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
@@ -306,8 +306,7 @@ bool rawprocFrm::MoveAfter(wxTreeItemId item)
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
-	//FIBITMAP * dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	gImage& dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 	std::map<std::string,std::string> e =  dib.getInfo();
 
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it)
@@ -336,27 +335,27 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	SetStatusText("");
 	bool result = true;
 	PicProcessor *p;
-/*
-	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
-	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
-	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
-	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
-	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
-	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
-	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
-	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
-	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
-	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
-	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+
+	//if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
+	//else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
+	//else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
+	//else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
+	//else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
+	//else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
+	if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
+	//else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
+	//else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
+	//else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
+	//else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
+	//else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
+	//else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
+	//else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	Refresh();
 	Update();
-*/
+
 	return p;
 }
 
@@ -637,10 +636,10 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeEvent& event)
 {
-	//wxTreeItemId s = commandtree->GetSelection();
-	//if (s)
-	//	((PicProcessor *) commandtree->GetItemData(s))->processPic();
-	//((PicProcessor *) commandtree->GetItemData(event.GetItem()))->processPic();
+	wxTreeItemId s = commandtree->GetSelection();
+	if (s)
+		((PicProcessor *) commandtree->GetItemData(s))->processPic();
+	((PicProcessor *) commandtree->GetItemData(event.GetItem()))->processPic();
 }
 
 void rawprocFrm::CommandTreeBeginDrag(wxTreeEvent& event)
@@ -762,13 +761,13 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 
 void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
-/*
+
 	SetStatusText("");
 	PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
 	crv->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
-*/
+
 }
 
 
@@ -1044,6 +1043,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 
+//ToDo: gImage needs a version method...
 	//wxString FreeImageVersion(FreeImage_GetVersion());
 	wxString gImageVersion = "foo";
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();

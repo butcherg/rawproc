@@ -26,16 +26,17 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 {
 
 	public:
-		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage& startipc);
-		//PicProcessor(PicProcessor * copyof);
+		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startipc);
+		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters) ;
 		~PicProcessor();
+
 		virtual bool processPic();
 		wxString getCommand();
 		wxString getParams();
 		wxString getName();
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
-		gImage& getProcessedPic();
+		gImage getProcessedPic();
 		PicPanel *getDisplay();
 		wxTreeCtrl *getCommandTree();
 		virtual void displayProcessedPic();

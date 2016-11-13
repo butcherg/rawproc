@@ -29,7 +29,7 @@ endif
 
 #OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorCurve.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -76,8 +76,8 @@ $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 #$(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 #	$(CXX) $(FIFLAGS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@
 
-#$(OBJDIR)/CurvePane.o: CurvePane.cpp 
-#	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
+$(OBJDIR)/CurvePane.o: CurvePane.cpp 
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
 
 $(OBJDIR)/PicProcPanel.o: PicProcPanel.cpp
 	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcPanel.cpp  -o$@
@@ -94,8 +94,8 @@ $(OBJDIR)/PicPanel.o: PicPanel.cpp
 #$(OBJDIR)/PicProcessorShadow.o: PicProcessorShadow.cpp
 #	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorShadow.cpp    -o$@
 
-#$(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
-#	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorCurve.cpp    -o$@
+$(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS)  -c PicProcessorCurve.cpp    -o$@
 
 #$(OBJDIR)/PicProcessorGamma.o: PicProcessorGamma.cpp
 #	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorGamma.cpp    -o$@

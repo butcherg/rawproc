@@ -24,32 +24,47 @@ class BlankPanel: public PicProcPanel
 };
 
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage& startpic) {
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startpic) 
+{
 	m_parameters = parameters;
 	m_display = display;
 	m_tree = tree;
 	c = command;
 	n = name;
-	if (startpic.getWidth() != 0) { 
-		dib = startpic;
-		m_tree->DeleteAllItems();
-		wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
-		m_tree->SetItemState(id,0);
-		m_tree->SelectItem(id);
-	}
-	else {
-		dib = gImage();
-		wxTreeItemId id;
-		if (m_tree->IsSelected(m_tree->GetRootItem()))
-			id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
-		else
-		 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
-		m_tree->SetItemState(id,0);
-		m_tree->SelectItem(id);
-	}
+
+	dib = startpic;
+	m_tree->DeleteAllItems();
+	wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
+	m_tree->SetItemState(id,0);
+	m_tree->SelectItem(id);
+
 	m_tree->ExpandAll();
 	dirty = true;
 }
+
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters) 
+{
+	m_parameters = parameters;
+	m_display = display;
+	m_tree = tree;
+	c = command;
+	n = name;
+
+
+	wxTreeItemId id;
+	if (m_tree->IsSelected(m_tree->GetRootItem()))
+		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
+	else
+	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
+	dib = getPreviousPicProcessor()->getProcessedPic();
+	m_tree->SetItemState(id,0);
+	m_tree->SelectItem(id);
+
+	m_tree->ExpandAll();
+	dirty = true;
+printf("PicProcessor: %dx%d\n",dib.getWidth(), dib.getHeight());
+}
+
 
 
 PicProcessor::~PicProcessor()
@@ -122,10 +137,9 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 	
 }
 
-gImage& PicProcessor::getProcessedPic() 
+gImage PicProcessor::getProcessedPic() 
 {
-	if (dirty) processPic();
-	//if (!dib) processPic();
+	if (dirty || dib.getWidth()==0) processPic();
 	return dib;
 }
 
