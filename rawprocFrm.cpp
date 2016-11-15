@@ -30,7 +30,7 @@
 //#include "PicProcessorCrop.h"
 //#include "PicProcessorResize.h"
 //#include "PicProcessorBlackWhitePoint.h"
-//#include "PicProcessorSharpen.h"
+#include "PicProcessorSharpen.h"
 //#include "PicProcessorRotate.h"
 //#include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
@@ -76,7 +76,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 //	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
 //	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
 //	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
-//	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
+	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
 //	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
 //	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
@@ -175,7 +175,7 @@ void rawprocFrm::CreateGUIControls()
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	
 	
 	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, _("Add"));
@@ -349,7 +349,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	//else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
 	//else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
 	//else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
-	//else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
+	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
 	//else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
 	//else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else result = NULL;
@@ -861,15 +861,12 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
 	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
 	if (defval != "0") c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
-*/
-
 }
 
 void rawprocFrm::MnuRotateClick(wxCommandEvent& event)

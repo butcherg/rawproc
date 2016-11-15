@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorSharpen.h"
-#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
+#include <gimage.h>
 #include "undo.xpm"
 #include "util.h"
 //#include <omp.h>
@@ -120,21 +119,20 @@ bool PicProcessorSharpen::processPic() {
 
 	wxConfigBase::Get()->Read("tool.sharpen.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+
 
 	if (sharp > 1.0) {
 		mark();
-		ApplyKernel(getPreviousPicProcessor()->getProcessedPic(), dib, kernel, threadcount);
+		dib = getPreviousPicProcessor()->getProcessedPic().ConvolutionKernel(kernel, threadcount);
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1"))
-			log(wxString::Format("tool=sharpen,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib.getWidth(), dib.getHeight(),threadcount,d));
 
 	}
 	dirty = false;
