@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
-#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
+#include <gimage.h>
 #include "util.h"
 #include "undo.xpm"
 //#include <omp.h>
@@ -113,20 +112,18 @@ bool PicProcessorSaturation::processPic() {
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
-
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	if (saturation != 1.0) {
 		mark();
-		ApplySaturation(getPreviousPicProcessor()->getProcessedPic(), dib, saturation, threadcount);
+		//ApplySaturation(getPreviousPicProcessor()->getProcessedPic(), dib, saturation, threadcount);
+		dib = getPreviousPicProcessor()->getProcessedPic().Saturate(saturation, threadcount);
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1"))
-			log(wxString::Format("tool=saturate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib.getWidth(), dib.getHeight(),threadcount,d));
 
 	}
 	dirty = false;

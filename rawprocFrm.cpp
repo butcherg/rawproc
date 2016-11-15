@@ -22,7 +22,7 @@
 //#include "PicProcessorGamma.h"
 //#include "PicProcessorBright.h"
 //#include "PicProcessorContrast.h"
-//#include "PicProcessorSaturation.h"
+#include "PicProcessorSaturation.h"
 //#include "PicProcessorShadow.h"
 //#include "PicProcessorHighlight.h"
 #include "PicProcessorCurve.h"
@@ -68,7 +68,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 //	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
 //	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
 //	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
-//	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
+	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
 //	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
 //	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
 	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
@@ -173,7 +173,7 @@ void rawprocFrm::CreateGUIControls()
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	
@@ -343,8 +343,8 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	//else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
 	//else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
 	//else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
-	//else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
-	if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
+	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
+	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	//else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
 	//else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
 	//else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
@@ -751,14 +751,12 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
-*/
 }
 
 
@@ -934,7 +932,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
 			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
 			WxStatusBar1->SetStatusText("Saving file...");
-			dib.saveImageFile(fname);
+			dib.saveImageFile(fname);  //ToDo: output params
 			wxFileName tmpname(fname);
 
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
