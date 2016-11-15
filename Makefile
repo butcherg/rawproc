@@ -41,7 +41,7 @@ LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
 INCLUDEDIRS=-I$(LIBGIMAGE) 
-CFLAGS=-fopenmp -w  #ToDo: take out -w when Curve.h is isolated...
+CFLAGS=#-fopenmp -w  #ToDo: take out -w when Curve.h is isolated...
 LFLAGS=-fopenmp
 
 -include $(OBJDIR)/localmake.txt
@@ -56,7 +56,7 @@ all: rawproc img
 #endif
 
 rawproc:  $(OBJECTS)
-	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -s -o $(OBJDIR)/rawproc
+	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc
 
 img: $(OBJDIR)/img.o
 	$(CXX) $(OBJDIR)/img.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img
@@ -145,5 +145,10 @@ makedoc:
 	zip  -r -j $(OBJDIR)/rawprocdoc.zip doc/*
 
 clean:
-	rm -f $(OBJDIR)/*.o $(OBJDIR)/rawproc $(OBJDIR)/rawprocdoc.zip
+	rm -f $(OBJDIR)/*.o $(OBJDIR)/rawproc 
+
+cleandoc:
+	rm -f $(OBJDIR)/rawprocdoc.zip
+
+
 
