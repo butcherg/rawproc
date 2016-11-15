@@ -62,7 +62,6 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	m_tree->ExpandAll();
 	dirty = true;
-printf("PicProcessor: %dx%d\n",dib.getWidth(), dib.getHeight());
 }
 
 

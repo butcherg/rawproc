@@ -198,7 +198,7 @@ class rawprocFrm : public wxFrame
 		myParameters *parameters;
 
 		//FIBITMAP *d;
-		gImage d;
+		gImage *d;
 		wxImage *img;
 
 		bool deleting;

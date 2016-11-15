@@ -91,8 +91,7 @@ bool PicProcessorCurve::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	gImage prev = getPreviousPicProcessor()->getProcessedPic();
-	dib =prev.ApplyCurve(ctrlpts, threadcount);
+	dib = getPreviousPicProcessor()->getProcessedPic().ApplyCurve(ctrlpts, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.curve.log","0") == "1"))

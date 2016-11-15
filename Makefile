@@ -41,7 +41,7 @@ LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
 INCLUDEDIRS=-I$(LIBGIMAGE) 
-CFLAGS=#-fopenmp -w  #ToDo: take out -w when Curve.h is isolated...
+CFLAGS=-fopenmp -O4
 LFLAGS=-fopenmp
 
 -include $(OBJDIR)/localmake.txt

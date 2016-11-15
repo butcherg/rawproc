@@ -86,7 +86,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
-	EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
+	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
 	EVT_TREE_STATE_IMAGE_CLICK(ID_COMMANDTREE, rawprocFrm::CommandTreeStateClick)
@@ -100,7 +100,9 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 {
 
 	CreateGUIControls();
+#if defined(_OPENMP)
 	omp_set_dynamic(0);
+#endif
 	deleting = false;
 
 	wxImageList *states;
@@ -411,20 +413,21 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	sourcefilename.Clear();
 	gImage dib, tmpdib;
 	GIMAGE_FILETYPE fif;
-	fif = gImage::getFileType(fname);
+	fif = gImage::getFileType(fname.c_str());
 	if (fif != FILETYPE_UNKNOWN) {
 
 		SetStatusText("Loading file...");
+
 		commandtree->DeleteAllItems();
+
 		mark();
-		dib = gImage::loadImageFile(fname, (std::string) params.c_str());
+		dib = gImage::loadImageFile(fname.c_str(), (std::string) params.c_str());
 		wxString loadtime = duration();
 		if (dib.getWidth() == 0) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
-
 		wxString flagstring(params.c_str());
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
 			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib.getWidth(), dib.getHeight(),loadtime));
@@ -455,6 +458,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		Refresh();
 		Update();
+		
 		//wxSafeYield(this);
 	}
 	else {
