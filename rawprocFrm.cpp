@@ -19,7 +19,7 @@
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
-//#include "PicProcessorGamma.h"
+#include "PicProcessorGamma.h"
 //#include "PicProcessorBright.h"
 //#include "PicProcessorContrast.h"
 #include "PicProcessorSaturation.h"
@@ -65,7 +65,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_OPENSOURCE, rawprocFrm::Mnuopensource1004Click)
 	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
 	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
-//	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
+	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
 //	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
 //	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
 	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
@@ -168,7 +168,7 @@ void rawprocFrm::CreateGUIControls()
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
@@ -338,12 +338,12 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	bool result = true;
 	PicProcessor *p;
 
-	//if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
+	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
 	//else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
 	//else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
 	//else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
 	//else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
-	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
+	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
 	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	//else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
 	//else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
@@ -702,15 +702,12 @@ void rawprocFrm::Mnuadd1005Click(wxCommandEvent& event)
 */
 void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
-/*
-	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 	PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
 	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
-*/
 }
 
 

@@ -1,10 +1,10 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
+#include <gimage.h>
 #include <omp.h>
 
 #include "util.h"
-#include "FreeImage_Threaded.h"
+#include "Curve.h"
 #include <wx/fileconf.h>
 
 
@@ -59,52 +59,33 @@ void PicProcessorGamma::showParams()
 }
 
 
-bool PicProcessorGamma::processPic() {
-	BYTE LUT8[256];
-	WORD LUT16[65536];
+bool PicProcessorGamma::processPic() 
+{
+	Curve ctrlpts;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
 	bool result = true;
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.gamma.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
+	double exponent = 1 / gamma;
+	double v = 255.0 * (double)pow((double)255, -exponent);
+	for (int i = 0; i< 256; i+=1) {
+		double color = (double)pow((double)i, exponent) * v;
+		if (color > 255.0) color = 255.0;
+		ctrlpts.insertpoint((double) i, color);
+	}	
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-
-	int bpp = FreeImage_GetBPP(dib);
-	if (bpp == 24) {
-		double exponent = 1 / gamma;
-		double v = 255.0 * (double)pow((double)255, -exponent);
-		for(int i = 0; i < 256; i++) {
-			double color = (double)pow((double)i, exponent) * v;
-			if(color > 255)
-				color = 255;
-			LUT8[i] = (BYTE)floor(color + 0.5);
-		}
-		ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, (char *) LUT8, threadcount);
-
-	}
-	else if(bpp == 48) {
-		double exponent = 1 / gamma;
-		double v = 65535.0 * (double)pow((double)65535, -exponent);
-		for(int i = 0; i < 65536; i++) {
-			double color = (double)pow((double)i, exponent) * v;
-			if(color > 65535)
-				color = 65535;
-			LUT16[i] = (WORD)floor(color + 0.5);
-		}
-		ApplyLUT(getPreviousPicProcessor()->getProcessedPic(), dib, (char *) LUT16, threadcount);
-	}
-	else result = false; 
+	dib = getPreviousPicProcessor()->getProcessedPic().ApplyCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gamma.log","0") == "1"))
-		log(wxString::Format("tool=gamma,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib.getWidth(), dib.getHeight(),threadcount,d));
 
 	dirty = false;
 
