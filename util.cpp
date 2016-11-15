@@ -189,7 +189,8 @@ wxImage gImage2wxImage(gImage dib)
 	unsigned char *img = (unsigned char *) dib.getImageData(BPP_8);
 	wxImage image(dib.getWidth(), dib.getHeight());
 	unsigned char *data = image.GetData();
-	//ToDo: Optimize?
+	//ToDo: gImage2wxImage Optimize?
+	//ToDo: gImage2wxImage logging
 	memcpy(data,img, w*h*3);
 	delete img;
 	return image;
