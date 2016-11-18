@@ -41,8 +41,8 @@ LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
 INCLUDEDIRS=-I$(LIBGIMAGE) 
-CFLAGS=-fopenmp -O4
-LFLAGS=-fopenmp
+CFLAGS=
+LFLAGS=
 
 -include $(OBJDIR)/localmake.txt
 
