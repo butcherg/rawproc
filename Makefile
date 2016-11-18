@@ -10,12 +10,12 @@ WINFREEIMAGE=c:\FreeImage-3.17.0.ggb
 WINWXWIDGETS=c:\wxWidgets-3.0.2
 WINLCMS=C:\lcms2-2.8
 
-LIBJPEG=../gimage/jpeg-6b
-LIBTIFF=../gimage/tiff-4.0.6
-LIBRAW=../gimage/LibRaw-0.17.2
-LIBGIMAGE=../gimage
+#LIBJPEG=../gimage/jpeg-6b
+#LIBTIFF=../gimage/tiff-4.0.6
+#LIBRAW=../gimage/LibRaw-0.17.2
+#LIBGIMAGE=../gimage
 
-OPENMP=-fopenmp
+#OPENMP=-fopenmp
 
 ifeq ($(UNAME), mingw32)
 	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
@@ -59,7 +59,7 @@ rawproc:  $(OBJECTS)
 	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc
 
 img: $(OBJDIR)/img.o
-	$(CXX) $(OBJDIR)/img.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img
 
 $(OBJDIR)/img.o: img.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -std=c++11 -c img.cpp -o$@
