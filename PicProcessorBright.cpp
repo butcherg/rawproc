@@ -113,14 +113,13 @@ bool PicProcessorBright::processPic() {
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.bright.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
 	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	dib = getPreviousPicProcessor()->getProcessedPic().ApplyCurve(ctrlpts, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
