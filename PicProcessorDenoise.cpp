@@ -1,12 +1,11 @@
 #include "PicProcessor.h"
 #include "PicProcessorDenoise.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
 #include "undo.xpm"
 //#include <omp.h>
 
 #include "util.h"
-#include "FreeImage_Threaded.h"
+#include <gimage.h>
 #include <wx/fileconf.h>
 
 #define SIGMASLIDER 8000
@@ -161,32 +160,26 @@ bool PicProcessorDenoise::processPic() {
 
 	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
-
-	//wxConfigBase::Get()->Read("tool.denoise.local",&local,3);
-	//wxConfigBase::Get()->Read("tool.denoise.patch",&patch,1);
-
-
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	if (sigma > 0.0) {
 		mark();
-		ApplyNLMeans(getPreviousPicProcessor()->getProcessedPic(), dib, sigma, local, patch, threadcount);
+		setdib(getPreviousPicProcessor()->getProcessedPic().NLMeans(sigma,local, patch, threadcount));
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.denoise.log","0") == "1"))
-			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 	}
+	else setdib(gImage(getPreviousPicProcessor()->getProcessedPic()));
 
 	dirty=false;
 
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

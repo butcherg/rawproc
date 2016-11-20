@@ -32,7 +32,7 @@
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcessorSharpen.h"
 //#include "PicProcessorRotate.h"
-//#include "PicProcessorDenoise.h"
+#include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
@@ -78,7 +78,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
 	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
 //	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
-//	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
+	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -167,7 +167,7 @@ void rawprocFrm::CreateGUIControls()
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
@@ -351,7 +351,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
 	//else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
-	//else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -876,7 +876,6 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
 	wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
@@ -886,7 +885,6 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	if (sigma != "0") d->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
-*/
 }
 
 /*
