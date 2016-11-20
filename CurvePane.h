@@ -5,7 +5,7 @@
 
 #include "wx/wx.h"
 #include <vector>
-#include "Curve.h"
+#include "curve.h"
 
 using namespace std;
 

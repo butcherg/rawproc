@@ -4,7 +4,7 @@
 #include <omp.h>
 
 #include "util.h"
-#include "Curve.h"
+#include "curve.h"
 #include <wx/fileconf.h>
 
 
