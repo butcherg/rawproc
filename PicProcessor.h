@@ -45,7 +45,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void displayProcessedPic();
 		virtual void setParams(wxString params);
 
-	private:
+	protected:
 		std::deque<gImage> dib;
 		PicPanel *m_display;
 		

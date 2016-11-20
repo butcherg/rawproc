@@ -4,8 +4,6 @@
 #include <vector>
 
 #include "PicProcessor.h"
-#include "FreeImage.h"
-
 
 class PicProcessorBlackWhitePoint: public PicProcessor
 {
@@ -13,11 +11,11 @@ class PicProcessorBlackWhitePoint: public PicProcessor
 		PicProcessorBlackWhitePoint(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
 		void showParams();
 		bool processPic();
-		void setLUT8(std::vector<BYTE> LUT);
-		void setLUT16(std::vector<WORD> LUT);
+//		void setLUT8(std::vector<BYTE> LUT);
+//		void setLUT16(std::vector<WORD> LUT);
 	private:
-		BYTE LUT8[256];
-		WORD LUT16[65535];
+//		BYTE LUT8[256];
+//		WORD LUT16[65535];
 
 };
 

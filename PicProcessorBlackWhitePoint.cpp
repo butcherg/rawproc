@@ -2,12 +2,11 @@
 #include "PicProcessor.h"
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
 #include "undo.xpm"
 //#include <omp.h>
 
 #include "util.h"
-#include "FreeImage_Threaded.h"
+#include "gimage.h"
 #include <wx/fileconf.h>
 
 class BlackWhitePointPanel: public PicProcPanel
@@ -108,12 +107,11 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 {
 	int i;
 	double blk, wht;
-	DWORD hdata[256]; DWORD hmax=0;
+	wht = 255; blk = 0;
 	double blkthresh, whtthresh;
 	if (command == "") {
-		FIBITMAP *hdib = FreeImage_ConvertTo24Bits(getPreviousPicProcessor()->getProcessedPic());
-		FreeImage_GetHistogram(hdib, hdata);
-		FreeImage_Unload(hdib);
+		std::vector<long> hdata = getdib().Histogram();
+		long hmax=0;
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
 		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
@@ -151,24 +149,22 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.blackwhitepoint.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	setdib(getPreviousPicProcessor()->getProcessedPic().ApplyCurve(ctrlpts.getControlPoints(), threadcount));
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1"))
-		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 
 	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
