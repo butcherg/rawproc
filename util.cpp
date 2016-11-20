@@ -181,7 +181,7 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	return bmp;
 }
 
-wxImage gImage2wxImage(gImage dib)
+wxImage gImage2wxImage(gImage& dib)
 {
 	int threadcount;
 	unsigned h = dib.getHeight();

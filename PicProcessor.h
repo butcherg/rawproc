@@ -16,11 +16,12 @@
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
+#include <deque>
 #include <gimage.h>
 
 class PicProcPanel;
-
 class PicPanel;
+
 
 class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 {
@@ -34,16 +35,18 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getCommand();
 		wxString getParams();
 		wxString getName();
+		void setdib(gImage d);
+		gImage& getdib();
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
-		gImage getProcessedPic();
+		gImage& getProcessedPic();
 		PicPanel *getDisplay();
 		wxTreeCtrl *getCommandTree();
 		virtual void displayProcessedPic();
 		virtual void setParams(wxString params);
 
-//	private:
-		gImage dib;
+	private:
+		std::deque<gImage> dib;
 		PicPanel *m_display;
 		
 		wxTreeCtrl *m_tree;
@@ -57,4 +60,6 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 };
 
 
+
 #endif
+

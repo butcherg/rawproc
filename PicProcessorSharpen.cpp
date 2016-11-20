@@ -128,17 +128,17 @@ bool PicProcessorSharpen::processPic() {
 
 	if (sharp > 1.0) {
 		mark();
-		dib = getPreviousPicProcessor()->getProcessedPic().ConvolutionKernel(kernel, threadcount);
+		setdib(getPreviousPicProcessor()->getProcessedPic().ConvolutionKernel(kernel, threadcount));
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.sharpen.log","0") == "1"))
-			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib.getWidth(), dib.getHeight(),threadcount,d));
+			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 
 	}
 	dirty = false;
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

@@ -32,7 +32,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 
-	dib = startpic;
+	setdib(startpic);
 	m_tree->DeleteAllItems();
 	wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
 	m_tree->SetItemState(id,0);
@@ -56,7 +56,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
 	else
 	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
-	dib = getPreviousPicProcessor()->getProcessedPic();
+	dib.push_front(gImage(getPreviousPicProcessor()->getProcessedPic()));
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
@@ -77,7 +77,7 @@ bool PicProcessor::processPic() {
 	//if selected, put processed pic in display
 	
 	if (GetId() != m_tree->GetRootItem()) {
-		dib = getPreviousPicProcessor()->getProcessedPic();
+		dib.push_front(gImage(getPreviousPicProcessor()->getProcessedPic()));
 	}
 	dirty = false;
 
@@ -136,10 +136,10 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 	
 }
 
-gImage PicProcessor::getProcessedPic() 
+gImage& PicProcessor::getProcessedPic() 
 {
-	if (dirty || dib.getWidth()==0) processPic();
-	return dib;
+	if (dirty || dib.front().getWidth()==0) processPic();
+	return dib.front();
 }
 
 PicPanel *PicProcessor::getDisplay()
@@ -155,7 +155,19 @@ wxTreeCtrl *PicProcessor::getCommandTree()
 void PicProcessor::displayProcessedPic() 
 {
 	if (m_display) {
-		m_display->SetPic(dib);
+		m_display->SetPic(dib.front());
 	}
 }
+
+void PicProcessor::setdib(gImage d)
+{
+	dib.push_front(d);
+	while (dib.size() > 1) dib.pop_back();
+}
+
+gImage& PicProcessor::getdib()
+{
+	return dib.front();
+}
+
 
