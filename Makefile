@@ -40,7 +40,7 @@ WINDRES=windres
 LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
-INCLUDEDIRS=-I$(LIBGIMAGE) 
+INCLUDEDIRS=
 CFLAGS=
 LFLAGS=
 
