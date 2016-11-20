@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorResize.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
-#include "FreeImage16.h"
+#include <gimage.h>
 #include "util.h"
 
 #include <wx/spinctrl.h>
@@ -73,8 +72,6 @@ class ResizePanel: public PicProcPanel
 
 PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	//p->DestroyChildren();
-	//r = new BrightPanel(p,this,c);
 	showParams();
 }
 
@@ -93,46 +90,45 @@ bool PicProcessorResize::processPic() {
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
 	if (cp.size() >2) algo  = cp[2];
-	int threadcount = 1; //hard-coded, no multithread
+	//int threadcount = 1; //hard-coded, no multithread
 
 	mark();
 	bool result = true;
-	FIBITMAP *prev = dib;
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	if (dib) {
+	unsigned dw = dib.front().getWidth();
+	unsigned dh = dib.front().getHeight();
+	if (height ==  0) height = dh * ((float)width/(float)dw);
+	if (width == 0)  width = dw * ((float)height/(float)dh); 
+	RESIZE_FILTER filter = FILTER_LANCZOS3;
+	//if (algo == "box") filter = FILTER_BOX;
+	//if (algo == "bilinear") filter = FILTER_BILINEAR;
+	//if (algo == "bspline") filter = FILTER_BSPLINE;
+	//if (algo == "bicubic") filter = FILTER_BICUBIC;
+	//if (algo == "catmullrom") filter = FILTER_CATMULLROM;
+	//if (algo == "lanczos3") filter = FILTER_LANCZOS3;
 
-		unsigned dw = FreeImage_GetWidth(dib);
-		unsigned dh = FreeImage_GetHeight(dib);
-		if (height ==  0) height = dh * ((float)width/(float)dw);
-		if (width == 0)  width = dw * ((float)height/(float)dh); 
-		FREE_IMAGE_FILTER filter = FILTER_CATMULLROM;
-		if (algo == "box") filter = FILTER_BOX;
-		if (algo == "bilinear") filter = FILTER_BILINEAR;
-		if (algo == "bspline") filter = FILTER_BSPLINE;
-		if (algo == "bicubic") filter = FILTER_BICUBIC;
-		if (algo == "catmullrom") filter = FILTER_CATMULLROM;
-		if (algo == "lanczos3") filter = FILTER_LANCZOS3;
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.curve.cores",&threadcount,0);
+	if (threadcount == 0) 
+		threadcount = gImage::ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-		int bpp = FreeImage_GetBPP(dib);
-		if (bpp == 8 |bpp == 24 | bpp == 32 | bpp == 48) {
-			dib = FreeImage_Rescale(dib, width, height, filter);
-			dirty = false;
-		}
-		else result = false; 
-		if (prev) FreeImage_Unload(prev);
-		wxString d = duration();
-
-		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.resize.log","0") == "1"))
-			log(wxString::Format("tool=resize,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+	mark();
+	setdib(getPreviousPicProcessor()->getProcessedPic().Resize(width, height, filter, threadcount));
+	wxString d = duration();
 
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
+	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.resize.log","0") == "1"))
+		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+	dirty = false;
+
+
+	//put in every processPic()...
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (next.IsOk()) {
+		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		nextitem->processPic();
 	}
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
