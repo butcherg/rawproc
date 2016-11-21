@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorRotate.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
-#include "FreeImage16.h"
+#include <gimage.h>
 #include "util.h"
 #include "undo.xpm"
 #include "run.xpm"
@@ -16,7 +15,6 @@ class RotatePreview: public wxPanel
 		RotatePreview(wxPanel *parent, wxImage image, double angle, const wxSize &size=wxDefaultSize, const wxPoint &pos=wxDefaultPosition): wxPanel(parent, wxID_ANY, pos, size)
 		{
 			SetDoubleBuffered(true);
-//SetBackgroundColour(*wxGREEN);
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
 			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
 			anglerad = angle * 0.01745329;
@@ -96,7 +94,6 @@ class RotatePanel: public PicProcPanel
 			//SetSize(s);
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			thumb = false;
-//SetBackgroundColour(*wxYELLOW);
 			double initialvalue = atof(params.c_str());
 
 //with gridbagsizer:
@@ -114,7 +111,7 @@ class RotatePanel: public PicProcPanel
 			g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//g->Add(0,10, wxGBPosition(0,5), wxDefaultSpan, wxEXPAND | wxALIGN_LEFT | wxALL, 1);
 
-			wxImage i = ThreadedFreeImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
+			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 			int pw = s.GetWidth();
 			int ph = pw * ((double)s.GetHeight()/(double)pw);
 			preview = new RotatePreview(this,i,initialvalue, wxSize(pw, ph));
@@ -225,8 +222,6 @@ class RotatePanel: public PicProcPanel
 
 PicProcessorRotate::PicProcessorRotate(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	//p->DestroyChildren();
-	//r = new RotatePanel(p,this,c);
 	showParams();
 }
 
@@ -242,20 +237,27 @@ bool PicProcessorRotate::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
 	double angle = atof(c.c_str());
 	bool result = true;
-	int threadcount = 1; //hard-coded, no multithread
+
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.rotate.cores",&threadcount,0);
+	if (threadcount == 0) 
+		threadcount = gImage::ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Rotate(getPreviousPicProcessor()->getProcessedPic(), angle);
+
+	setdib(getPreviousPicProcessor()->getProcessedPic().Rotate(-angle, threadcount));
 	dirty = false;
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.rotate.log","0") == "1"))
-		log(wxString::Format("tool=rotate,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=rotate,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

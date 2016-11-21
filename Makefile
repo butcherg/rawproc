@@ -29,7 +29,7 @@ endif
 
 #OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorCurve.o PicProcessorGamma.o  PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorGray.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorCurve.o PicProcessorGamma.o  PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -121,8 +121,8 @@ $(OBJDIR)/PicProcessorResize.o: PicProcessorResize.cpp
 $(OBJDIR)/PicProcessorSharpen.o: PicProcessorSharpen.cpp 
 	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorSharpen.cpp   -o$@
 
-#$(OBJDIR)/PicProcessorRotate.o: PicProcessorRotate.cpp 
-#	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorRotate.cpp   -o$@
+$(OBJDIR)/PicProcessorRotate.o: PicProcessorRotate.cpp 
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorRotate.cpp   -o$@
 
 $(OBJDIR)/PicProcessorDenoise.o: PicProcessorDenoise.cpp 
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorDenoise.cpp   -o$@
