@@ -1,10 +1,9 @@
 
 #include "PicProcessor.h"
 #include "PicProcessorGray.h"
-#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
 #include "undo.xpm"
+#include <gimage.h>
 //#include <omp.h>
 
 #include "util.h"
@@ -163,22 +162,20 @@ bool PicProcessorGray::processPic() {
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.gray.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ApplyGray(getPreviousPicProcessor()->getProcessedPic(), dib, r, g, b, threadcount);
+	setdib(getPreviousPicProcessor()->getProcessedPic().Gray(r, g, b, threadcount));
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gray.log","0") == "1"))
-		log(wxString::Format("tool=gray,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=gray,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 
 	dirty = false;
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
