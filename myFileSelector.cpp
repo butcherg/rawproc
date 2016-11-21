@@ -102,6 +102,7 @@ wxString myFileSelector::GetFileSelected()
 	return fileselector->GetPath();
 }
 
+//ToDo: Some kind of options dialog
 wxString myFileSelector::GetFlags()
 {
 	wxString flags = "";
