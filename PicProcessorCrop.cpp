@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorCrop.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
-#include "FreeImage16.h"
+#include <gimage.h>
 #include <wx/fileconf.h>
 #include "util.h"
 
@@ -27,7 +26,7 @@ class CropPanel: public PicProcPanel
 			right = atoi(p[2])-indent;
 			bottom = atoi(p[3])-indent;
 			//wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			img = ThreadedFreeImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
+			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
 			GetSize(&ww, &wh);
 			iw = img.GetWidth();
@@ -265,7 +264,7 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, "",  tree, display, parameters) 
 {
-	c = wxString::Format("0,0,%d,%d",FreeImage_GetWidth(getPreviousPicProcessor()->getProcessedPic()), FreeImage_GetHeight(getPreviousPicProcessor()->getProcessedPic()));
+	c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
 	showParams();
 }
 
@@ -285,20 +284,25 @@ bool PicProcessorCrop::processPic() {
 	int right = atoi(p[2]);
 	int bottom = atoi(p[3]);
 	bool result = true;
-	int threadcount=1; //hard-coded, no multi-threading
+
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.crop.cores",&threadcount,0);
+	if (threadcount == 0) 
+		threadcount = gImage::ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Copy(getPreviousPicProcessor()->getProcessedPic(), left, top, right, bottom);
+	setdib(getPreviousPicProcessor()->getProcessedPic().Crop(left, top, right, bottom, threadcount));
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.crop.log","0") == "1"))
-		log(wxString::Format("tool=crop,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
 
 	dirty = false;
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

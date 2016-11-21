@@ -27,7 +27,7 @@
 //#include "PicProcessorHighlight.h"
 #include "PicProcessorCurve.h"
 #include "PicProcessorGray.h"
-//#include "PicProcessorCrop.h"
+#include "PicProcessorCrop.h"
 #include "PicProcessorResize.h"
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcessorSharpen.h"
@@ -73,7 +73,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 //	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
 	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
 	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
-//	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
+	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
 	EVT_MENU(ID_MNU_RESIZE, rawprocFrm::MnuResizeClick)
 	EVT_MENU(ID_MNU_BLACKWHITEPOINT, rawprocFrm::MnuBlackWhitePointClick)
 	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
@@ -165,7 +165,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
 //	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
@@ -346,7 +346,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
 	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
-	//else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
+	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
 	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
 	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
@@ -814,13 +814,11 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
-*/
 }
 
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
