@@ -154,7 +154,8 @@ bool PicProcessorBlackWhitePoint::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	setdib(getPreviousPicProcessor()->getProcessedPic().ApplyCurve(ctrlpts.getControlPoints(), threadcount));
+	setdib(getPreviousPicProcessor()->getProcessedPic());
+	dib.front().ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1"))
