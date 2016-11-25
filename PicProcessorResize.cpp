@@ -99,12 +99,12 @@ bool PicProcessorResize::processPic() {
 	if (height ==  0) height = dh * ((float)width/(float)dw);
 	if (width == 0)  width = dw * ((float)height/(float)dh); 
 	RESIZE_FILTER filter = FILTER_LANCZOS3;
-	//if (algo == "box") filter = FILTER_BOX;
-	//if (algo == "bilinear") filter = FILTER_BILINEAR;
-	//if (algo == "bspline") filter = FILTER_BSPLINE;
-	//if (algo == "bicubic") filter = FILTER_BICUBIC;
-	//if (algo == "catmullrom") filter = FILTER_CATMULLROM;
-	//if (algo == "lanczos3") filter = FILTER_LANCZOS3;
+	if (algo == "box") filter = FILTER_BOX;
+	if (algo == "bilinear") filter = FILTER_BILINEAR;
+	if (algo == "bspline") filter = FILTER_BSPLINE;
+	if (algo == "bicubic") filter = FILTER_BICUBIC;
+	if (algo == "catmullrom") filter = FILTER_CATMULLROM;
+	if (algo == "lanczos3") filter = FILTER_LANCZOS3;
 
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.curve.cores",&threadcount,0);
