@@ -112,48 +112,48 @@ wxString myFileSelector::GetFlags()
 	switch (rawflags->GetSelection()) {
 	case wxNOT_FOUND:
 	case 0:
-		flags.Append(wxString::Format("rawinput:default")); break;
+		flags.Append(wxString::Format("rawinput=default")); break;
 	case 1: 
-		flags.Append(wxString::Format("rawinput:preview")); break;
+		flags.Append(wxString::Format("rawinput=preview")); break;
 	case 2:
-		flags.Append(wxString::Format("rawinput:display")); break;
+		flags.Append(wxString::Format("rawinput=display")); break;
 	case 3:
-		flags.Append(wxString::Format("rawinput:half")); break;
+		flags.Append(wxString::Format("rawinput=half")); break;
 	//case 4:
-	//	flags.Append(wxString::Format("rawinput:unprocessed")); break;
+	//	flags.Append(wxString::Format("rawinput=unprocessed")); break;
 	default:
-		flags.Append(wxString::Format("rawinput:default")); break;
+		flags.Append(wxString::Format("rawinput=default")); break;
 	}
 
 	switch (colorflags->GetSelection()) {
 	case 0:
-		flags.Append(wxString::Format(",colorspace:raw")); break;
+		flags.Append(wxString::Format(",colorspace=raw")); break;
 	case wxNOT_FOUND:
 	case 1: 
-		flags.Append(wxString::Format(",colorspace:srgb")); break;
+		flags.Append(wxString::Format(",colorspace=srgb")); break;
 	case 2:
-		flags.Append(wxString::Format(",colorspace:adobe")); break;
+		flags.Append(wxString::Format(",colorspace=adobe")); break;
 	case 3:
-		flags.Append(wxString::Format(",colorspace:wide")); break;
+		flags.Append(wxString::Format(",colorspace=wide")); break;
 	case 4:
-		flags.Append(wxString::Format(",colorspace:prophoto")); break;
+		flags.Append(wxString::Format(",colorspace=prophoto")); break;
 	case 5:
-		flags.Append(wxString::Format(",colorspace:xyz")); break;
+		flags.Append(wxString::Format(",colorspace=xyz")); break;
 	default:
-		flags.Append(wxString::Format(",colorspace:srgb")); break;
+		flags.Append(wxString::Format(",colorspace=srgb")); break;
 	}
 
 	switch (qualityflags->GetSelection()) {
 	case 0:
-		flags.Append(wxString::Format(",demosaic:linear")); break;
+		flags.Append(wxString::Format(",demosaic=linear")); break;
 	case 1: 
-		flags.Append(wxString::Format(",demosaic:vng")); break;
+		flags.Append(wxString::Format(",demosaic=vng")); break;
 	case 2:
-		flags.Append(wxString::Format(",demosaic:ppg")); break;
+		flags.Append(wxString::Format(",demosaic=ppg")); break;
 	case wxNOT_FOUND:
 	case 3:
 	default:
-		flags.Append(wxString::Format(",demosaic:ahd")); break;
+		flags.Append(wxString::Format(",demosaic=ahd")); break;
 	}
 
 	return flags;
