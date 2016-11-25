@@ -505,7 +505,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				commandtree->DeleteAllItems();
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
-wxMessageBox(oparams);
 				dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
 				if (dib->getWidth() == 0) {
 					wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
@@ -892,11 +891,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				return;
 			}
 			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
-
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic();
-
 			else
-
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic();
 
 			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
@@ -906,58 +902,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			wxFileName tmpname(fname);
 
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
-
-				sourcefilename.Assign(fname);
-
-				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
-			}
-			
-
-/*
-		// first, check the output format from the file name or file extension
-		FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(fname);
-		if(out_fif != FIF_UNKNOWN) {
-			// then save the file
-			
-			long flags=100;
-			wxConfigBase::Get()->Read("output.jpegquality",&flags,100);
-			FIBITMAP *dib;
-			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
-				dib = FreeImage_Clone(((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic());
-			else
-				dib = FreeImage_Clone(((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic());
-
-			if (out_fif == FIF_JPEG) {
-				int bpp = FreeImage_GetBPP(dib);
-				if (bpp != 24) {
-					FIBITMAP *dest = FreeImage_ConvertTo24Bits(dib);
-					if (dest) {
-						FreeImage_Unload(dib);
-						dib = dest;
-					}
-				}
-			}
-
-			if (out_fif == FIF_TIFF)
-				FreeImage_SetMetadataKeyValue(FIMD_EXIF_MAIN, dib, "ImageDescription", AssembleCommand());
-			else
-				FreeImage_SetMetadataKeyValue(FIMD_COMMENTS, dib, "Comment", AssembleCommand());
-
-			WxStatusBar1->SetStatusText("Saving file...");
-			//printf("Saving file %s...",filename.c_str());
-			FreeImage_Save(out_fif, dib, fname, (int) flags);
-			FreeImage_Unload(dib);
-			wxFileName tmpname(fname);
-			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
 				sourcefilename.Assign(fname);
 				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 			}
-		}
-		else {
-			//printf("Error: bad output file specification:\n",output_filename);
-			wxMessageBox("Save Error: bad output file specification");
-		}
-*/
+			
 		WxStatusBar1->SetStatusText("");
 	}
 }
@@ -1015,12 +963,10 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
 
-//ToDo: gImage needs a version method...
-	//wxString FreeImageVersion(FreeImage_GetVersion());
-	wxString gImageVersion = "foo";
+	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\nFreeImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,gImageVersion,LittleCMSVersion,configfile));
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,gImageVersion,LittleCMSVersion,configfile));
 	wxAboutBox(info);
 
 }

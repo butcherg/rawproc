@@ -48,8 +48,6 @@ bool rawprocFrmApp::OnInit()
 	wxConfigBase::Get()->Read("display.thumb.initialmode",&thumbmode,1);  //1=thumb, 2=histogram, 3=none
 	frame->SetThumbMode(thumbmode);
 
-//ToDo: command line file opens
-/*
 	if (wxGetApp().argc == 2) {
 		wxFileName f(wxGetApp().argv[1]);
 		f.MakeAbsolute();
@@ -58,9 +56,9 @@ bool rawprocFrmApp::OnInit()
 			if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
 				frame->OpenFileSource(f.GetFullPath());
 			else	
-				frame->OpenFile(f.GetFullPath(),0);
+				frame->OpenFile(f.GetFullPath(),"");
 		}
-		else frame->OpenFile(f.GetFullPath(),0);
+		else frame->OpenFile(f.GetFullPath(),"");
 	}
 	else if (wxGetApp().argc == 3) {
 		wxFileName f(wxGetApp().argv[2]);
@@ -69,10 +67,10 @@ bool rawprocFrmApp::OnInit()
 		if (wxGetApp().argv[1] == "-s") 
 			frame->OpenFileSource(f.GetFullPath());
 		else
-			frame->OpenFile(f.GetFullPath(),0);
+			frame->OpenFile(f.GetFullPath(),"");
 	}
 	else {
-*/
+
 		wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
 		if (startpath != "") {
 			if (wxFileName::DirExists(startpath))
@@ -87,7 +85,7 @@ bool rawprocFrmApp::OnInit()
 			else
 				wxSetWorkingDirectory(wxFileName::GetHomeDir());
 		}
-//	}
+	}
 	return true;
 }
  
