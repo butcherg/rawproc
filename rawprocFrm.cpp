@@ -147,7 +147,7 @@ void rawprocFrm::CreateGUIControls()
 	WxMenuBar1 = new wxMenuBar();
 	wxMenu *ID_MNU_FILEMnu_Obj = new wxMenu();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPEN, _("Open..."), _(""), wxITEM_NORMAL);
-//	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
+	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->AppendSeparator();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_EXIT, _("Exit"), _(""), wxITEM_NORMAL);
@@ -413,7 +413,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 {
 	filename.Assign(fname);
 	sourcefilename.Clear();
-	gImage *dib;  //, tmpdib;
+	gImage *dib;
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 	if (fif != FILETYPE_UNKNOWN) {
@@ -470,53 +470,49 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 void rawprocFrm::OpenFileSource(wxString fname)
 {
-/*
-	//filename.Assign(fname);
-	FIBITMAP *srcdib, *dib;
-	int fflags = 0;
+
+	filename.Assign(fname);
+	sourcefilename.Clear();
+	gImage *dib;
 	wxString ofilename;
 	wxString oparams = "";
-	FREE_IMAGE_FORMAT fif;
-	fif = FreeImage_GetFileType(fname, 0);
-	
-	// get the source script:
-	if(fif != FIF_UNKNOWN) {
+
+	GIMAGE_FILETYPE fif;
+	fif = gImage::getFileType(fname.c_str());
+
+	if (fif != FILETYPE_UNKNOWN) {
 		SetStatusText("Retrieving source script...");
-		srcdib = FreeImage_Load(fif, fname, FIF_LOAD_NOPIXELS);
-		FITAG *tagSource = NULL;
-		if (fif == FIF_TIFF)
-			FreeImage_GetMetadata(FIMD_EXIF_MAIN, srcdib, "ImageDescription", &tagSource);
-		else
-			FreeImage_GetMetadata(FIMD_COMMENTS, srcdib, "Comment", &tagSource);
-		if(tagSource != NULL) {
-			wxString script = (char *) FreeImage_GetTagValue(tagSource);
+		std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
+
+		if(info.find("ImageDescription") != info.end() && info["ImageDescription"].find("rawproc") != std::string::npos ) {
+			wxString script = info["ImageDescription"];
 			wxArrayString token = split(script, " ");
+			
 			if (token[1].Contains(":")) {
 				wxArrayString fparams = split(token[1],":");
 				if (fparams.GetCount() >1) {
-					fflags = Command2RawFlags(fparams[1]);
 					oparams = fparams[1];
 				}
 				ofilename = fparams[0];
 			}
 			else ofilename = token[1];
 				
-			//wxMessageBox(script);
 			if (token[0].Find("rawproc") == wxNOT_FOUND) {
-				SetStatusText(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
+				wxMessageBox(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
 				commandtree->DeleteAllItems();
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
-				fif = FreeImage_GetFileType(ofilename, 0);
-				dib = FreeImage_Load(fif, ofilename);
-				if (FreeImage_GetBPP(dib) < 24) {
-					wxMessageBox(wxString::Format("Error: File %s is not RGB (>=24bpp)", ofilename));
+wxMessageBox(oparams);
+				dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
+				if (dib->getWidth() == 0) {
+					wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
 					SetStatusText("");
 					return;
 				}
+
 				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 				picdata->processPic();
 				CommandTreeSetDisplay(picdata->GetId());
@@ -539,13 +535,13 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 		}
 		else {
-			SetStatusText(wxString::Format("No source script found in %s, aborting Open Source.",filename.GetFullName() ));
+			wxMessageBox(wxString::Format("No source script found in %s, aborting Open Source.",filename.GetFullName() ));
 		}
 	}
 	else {
-		SetStatusText(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
+		wxMessageBox(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
 	}
-*/
+	SetStatusText("");
 }
 
 
