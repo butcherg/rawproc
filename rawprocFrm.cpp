@@ -309,8 +309,10 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	std::map<std::string,std::string> e =  dib.getInfo();
 
+	exif.Append(wxString::Format("Width: %d Height: %d\n\n",dib.getWidth(), dib.getHeight()));
+
+	std::map<std::string,std::string> e =  dib.getInfo();
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it)
 		exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
 	char buff[4096];
