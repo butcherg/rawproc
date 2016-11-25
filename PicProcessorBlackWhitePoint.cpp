@@ -51,6 +51,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 		}
 
@@ -64,6 +65,12 @@ class BlackWhitePointPanel: public PicProcPanel
 			val1->SetLabel(wxString::Format("%4d", black->GetValue()));
 			val2->SetLabel(wxString::Format("%4d", white->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			val1->SetLabel(wxString::Format("%4d", black->GetValue()));
+			val2->SetLabel(wxString::Format("%4d", white->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
