@@ -3,6 +3,7 @@
 #include "util.h"
 #include <vector>
 #include <wx/fileconf.h>
+#include "util.h"
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -101,6 +102,7 @@ END_EVENT_TABLE()
 	void PicPanel::SetPic(gImage * dib)
 	{
 		//parentframe->SetStatusText("display...");
+		//mark();
 		int w, h;
 		GetSize(&w, &h);
 		img.Destroy();
@@ -139,6 +141,7 @@ END_EVENT_TABLE()
 		hsgram = wxBitmap();
 
 		//parentframe->SetStatusText("");
+		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
                 Refresh();
 		Update();
 		

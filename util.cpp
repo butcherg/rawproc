@@ -189,8 +189,13 @@ wxImage gImage2wxImage(gImage &dib)
 	unsigned char *img = (unsigned char *) dib.getImageData(BPP_8);
 	wxImage image(w, h);
 	unsigned char *data = image.GetData();
-	//ToDo: gImage2wxImage Optimize?
+	//ToDo: gImage2wxImage Optimize?  not so sure...
 	//ToDo: gImage2wxImage logging
+	//unsigned s = w*h*3;
+	//#pragma omp parallel for num_threads(4)
+	//for (int i = 0; i<s; i++) {
+	//	data[i] = img[i];
+	//}
 	memcpy(data,img, w*h*3);
 	delete img;
 	return image;
