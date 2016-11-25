@@ -20,11 +20,11 @@
 #include <wx/stdpaths.h>
 
 #include "PicProcessorGamma.h"
-//#include "PicProcessorBright.h"
-//#include "PicProcessorContrast.h"
+#include "PicProcessorBright.h"
+#include "PicProcessorContrast.h"
 #include "PicProcessorSaturation.h"
-//#include "PicProcessorShadow.h"
-//#include "PicProcessorHighlight.h"
+#include "PicProcessorShadow.h"
+#include "PicProcessorHighlight.h"
 #include "PicProcessorCurve.h"
 #include "PicProcessorGray.h"
 #include "PicProcessorCrop.h"
@@ -66,11 +66,11 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
 	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
 	EVT_MENU(ID_MNU_GAMMA, rawprocFrm::Mnugamma1006Click)
-//	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
-//	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
+	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
+	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
 	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
-//	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
-//	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
+	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
+	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
 	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
 	EVT_MENU(ID_MNU_GRAY, rawprocFrm::MnuGrayClick)
 	EVT_MENU(ID_MNU_CROP, rawprocFrm::MnuCropClick)
@@ -163,18 +163,18 @@ void rawprocFrm::CreateGUIControls()
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
-//	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	
 	
@@ -339,10 +339,10 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	PicProcessor *p;
 
 	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
-	//else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
-	//else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
-	//else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
-	//else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
+	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
+	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
+	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
+	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
 	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
@@ -716,15 +716,12 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 */
 void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
-/*
-	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
 	PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
 	g->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
-*/
 }
 
 
@@ -733,15 +730,12 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
  */
 void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
-/*
-	// insert your code here
 	SetStatusText("");
 	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
 	PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
 	c->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
-*/
 }
 
 
@@ -773,7 +767,6 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
 	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
@@ -782,12 +775,10 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 	shd->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
-*/
 }
 
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
-/*
 	SetStatusText("");
 	wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
 	wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
@@ -796,7 +787,6 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 	s->processPic();
 	wxSafeYield(this);
 	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
-*/
 }
 
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)

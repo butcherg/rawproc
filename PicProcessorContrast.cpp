@@ -1,12 +1,11 @@
 #include "PicProcessor.h"
 #include "PicProcessorContrast.h"
 #include "PicProcPanel.h"
-#include "FreeImage.h"
+#include <gimage.h>
 #include "undo.xpm"
 //#include <omp.h>
 
 #include "util.h"
-#include "FreeImage_Threaded.h"
 #include <wx/fileconf.h>
 
 
@@ -165,18 +164,18 @@ bool PicProcessorContrast::processPic() {
 	int threadcount;
 	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
 	if (threadcount == 0) 
-		threadcount = ThreadCount();
+		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
-		threadcount = std::max(ThreadCount() + threadcount,0);
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	if (dib) FreeImage_Unload(dib);
-	dib = FreeImage_Clone(getPreviousPicProcessor()->getProcessedPic());
-	ApplyCurve(getPreviousPicProcessor()->getProcessedPic(), dib, ctrlpts.getControlPoints(), threadcount);
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.contrast.log","0") == "1"))
-		log(wxString::Format("tool=contrast,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",FreeImage_GetWidth(dib), FreeImage_GetHeight(dib),FreeImage_GetBPP(dib),threadcount,d));
+		log(wxString::Format("tool=contrast,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

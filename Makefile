@@ -29,7 +29,7 @@ endif
 
 #OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorCurve.o PicProcessorGamma.o  PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -88,11 +88,11 @@ $(OBJDIR)/PicPanel.o: PicPanel.cpp
 $(OBJDIR)/PicProcessorBlackWhitePoint.o: PicProcessorBlackWhitePoint.cpp
 	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorBlackWhitePoint.cpp    -o$@
 
-#$(OBJDIR)/PicProcessorHighlight.o: PicProcessorHighlight.cpp
-#	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorHighlight.cpp    -o$@
+$(OBJDIR)/PicProcessorHighlight.o: PicProcessorHighlight.cpp
+	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorHighlight.cpp    -o$@
 
-#$(OBJDIR)/PicProcessorShadow.o: PicProcessorShadow.cpp
-#	$(CXX)  $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorShadow.cpp    -o$@
+$(OBJDIR)/PicProcessorShadow.o: PicProcessorShadow.cpp
+	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorShadow.cpp    -o$@
 
 $(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS)  -c PicProcessorCurve.cpp    -o$@
@@ -100,11 +100,11 @@ $(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
 $(OBJDIR)/PicProcessorGamma.o: PicProcessorGamma.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorGamma.cpp    -o$@
 
-#$(OBJDIR)/PicProcessorBright.o: PicProcessorBright.cpp 
-#	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorBright.cpp   -o$@
+$(OBJDIR)/PicProcessorBright.o: PicProcessorBright.cpp 
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorBright.cpp   -o$@
 
-#$(OBJDIR)/PicProcessorContrast.o: PicProcessorContrast.cpp 
-#	$(CXX) $(FIFLAGS) $(WXFLAGS) -w -c PicProcessorContrast.cpp   -o$@
+$(OBJDIR)/PicProcessorContrast.o: PicProcessorContrast.cpp 
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorContrast.cpp   -o$@
 
 $(OBJDIR)/PicProcessorSaturation.o: PicProcessorSaturation.cpp 
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorSaturation.cpp   -o$@
