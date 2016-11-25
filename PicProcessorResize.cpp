@@ -94,8 +94,8 @@ bool PicProcessorResize::processPic() {
 
 	mark();
 	bool result = true;
-	unsigned dw = dib.front().getWidth();
-	unsigned dh = dib.front().getHeight();
+	unsigned dw = dib->getWidth();
+	unsigned dh = dib->getHeight();
 	if (height ==  0) height = dh * ((float)width/(float)dw);
 	if (width == 0)  width = dw * ((float)height/(float)dh); 
 	RESIZE_FILTER filter = FILTER_LANCZOS3;
@@ -114,17 +114,19 @@ bool PicProcessorResize::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	setdib(getPreviousPicProcessor()->getProcessedPic().Resize(width, height, filter, threadcount));
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib->ApplyResize(width, height, filter, threadcount);
 	wxString d = duration();
 
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.resize.log","0") == "1"))
-		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	dirty = false;
 
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

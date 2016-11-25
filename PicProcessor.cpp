@@ -24,7 +24,7 @@ class BlankPanel: public PicProcPanel
 };
 
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startpic) 
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage * startpic) 
 {
 	m_parameters = parameters;
 	m_display = display;
@@ -32,7 +32,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 
-	setdib(startpic);
+	dib = startpic;
 	m_tree->DeleteAllItems();
 	wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
 	m_tree->SetItemState(id,0);
@@ -56,7 +56,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
 	else
 	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
-	dib.push_front(gImage(getPreviousPicProcessor()->getProcessedPic()));
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
@@ -68,7 +68,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 PicProcessor::~PicProcessor()
 {
-
+	if (dib) delete dib;
 }
 
 bool PicProcessor::processPic() { 
@@ -77,7 +77,8 @@ bool PicProcessor::processPic() {
 	//if selected, put processed pic in display
 	
 	if (GetId() != m_tree->GetRootItem()) {
-		dib.push_front(gImage(getPreviousPicProcessor()->getProcessedPic()));
+		if (dib) delete dib;
+		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	}
 	dirty = false;
 
@@ -138,8 +139,8 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 
 gImage& PicProcessor::getProcessedPic() 
 {
-	if (dirty || dib.front().getWidth()==0) processPic();
-	return dib.front();
+	if (dirty || dib->getWidth()==0) processPic();
+	return *dib;
 }
 
 PicPanel *PicProcessor::getDisplay()
@@ -155,19 +156,10 @@ wxTreeCtrl *PicProcessor::getCommandTree()
 void PicProcessor::displayProcessedPic() 
 {
 	if (m_display) {
-		m_display->SetPic(dib.front());
+		m_display->SetPic(dib);
 	}
 }
 
-void PicProcessor::setdib(gImage d)
-{
-	dib.push_front(d);
-	while (dib.size() > 1) dib.pop_back();
-}
 
-gImage& PicProcessor::getdib()
-{
-	return dib.front();
-}
 
 

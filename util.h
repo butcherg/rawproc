@@ -35,7 +35,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height);
 wxBitmap HistogramFromData(int width, int height);
 
 
-wxImage gImage2wxImage(gImage& dib);
+wxImage gImage2wxImage(gImage &dib);
 
 //cross-platform duration:
 void mark ();

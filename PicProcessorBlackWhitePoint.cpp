@@ -110,7 +110,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	wht = 255; blk = 0;
 	double blkthresh, whtthresh;
 	if (command == "") {
-		std::vector<long> hdata = getdib().Histogram();
+		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
@@ -154,18 +154,19 @@ bool PicProcessorBlackWhitePoint::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	setdib(getPreviousPicProcessor()->getProcessedPic());
-	dib.front().ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1"))
-		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

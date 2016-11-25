@@ -181,13 +181,13 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	return bmp;
 }
 
-wxImage gImage2wxImage(gImage& dib)
+wxImage gImage2wxImage(gImage &dib)
 {
 	int threadcount;
 	unsigned h = dib.getHeight();
 	unsigned w =  dib.getWidth();
 	unsigned char *img = (unsigned char *) dib.getImageData(BPP_8);
-	wxImage image(dib.getWidth(), dib.getHeight());
+	wxImage image(w, h);
 	unsigned char *data = image.GetData();
 	//ToDo: gImage2wxImage Optimize?
 	//ToDo: gImage2wxImage logging

@@ -30,7 +30,7 @@ class PicPanel: public wxPanel
         void OnPaint(wxPaintEvent& event);
 	void render(wxDC &dc);
         void drawBox(wxDC &dc, int x, int y, int w,int h);
-	void SetPic(gImage& dib);
+	void SetPic(gImage * dib);
 	void SetThumbMode(int mode);
 	void ToggleThumb();
 	void ToggleCropMode();

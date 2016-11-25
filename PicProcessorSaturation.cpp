@@ -118,18 +118,19 @@ bool PicProcessorSaturation::processPic() {
 
 	if (saturation != 1.0) {
 		mark();
-		//ApplySaturation(getPreviousPicProcessor()->getProcessedPic(), dib, saturation, threadcount);
-		setdib(getPreviousPicProcessor()->getProcessedPic().Saturate(saturation, threadcount));
+		if (dib) delete dib;
+		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+		dib->ApplySaturate(saturation, threadcount);
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1"))
-			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
 	dirty = false;
 
 		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 		wxTreeItemId next = m_tree->GetNextSibling(GetId());
 		if (next.IsOk()) {
 			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

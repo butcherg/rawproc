@@ -27,7 +27,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 {
 
 	public:
-		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage startipc);
+		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage * startipc);
 		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters) ;
 		~PicProcessor();
 
@@ -35,8 +35,6 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getCommand();
 		wxString getParams();
 		wxString getName();
-		void setdib(gImage d);
-		gImage& getdib();
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
 		gImage& getProcessedPic();
@@ -46,7 +44,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void setParams(wxString params);
 
 	protected:
-		std::deque<gImage> dib;
+		//std::deque<gImage> dib;
+		gImage *dib;
 		PicPanel *m_display;
 		
 		wxTreeCtrl *m_tree;

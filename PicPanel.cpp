@@ -98,7 +98,7 @@ END_EVENT_TABLE()
 		//parentframe->SetStatusText(wxString::Format("thumbmode: %d", toggleThumb));
 	}
 
-	void PicPanel::SetPic(gImage& dib)
+	void PicPanel::SetPic(gImage * dib)
 	{
 		//parentframe->SetStatusText("display...");
 		int w, h;
@@ -116,7 +116,7 @@ END_EVENT_TABLE()
 		if (scaledpic) scaledpic->~wxBitmap();
 		if (histogram) histogram->~wxBitmap();
 
-		img = gImage2wxImage(dib);
+		img = gImage2wxImage(*dib);
 
 		cropX = 0;
 		cropY = 0;

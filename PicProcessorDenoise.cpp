@@ -166,20 +166,21 @@ bool PicProcessorDenoise::processPic() {
 
 	if (sigma > 0.0) {
 		mark();
-		setdib(getPreviousPicProcessor()->getProcessedPic().NLMeans(sigma,local, patch, threadcount));
+		if (dib) delete dib;
+		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+		dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		wxString d = duration();
 
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.denoise.log","0") == "1"))
-			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
-	else setdib(gImage(getPreviousPicProcessor()->getProcessedPic()));
 
 	dirty=false;
 
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

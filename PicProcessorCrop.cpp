@@ -293,16 +293,19 @@ bool PicProcessorCrop::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	setdib(getPreviousPicProcessor()->getProcessedPic().Crop(left, top, right, bottom, threadcount));
+
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib->ApplyCrop(left, top, right, bottom, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.crop.log","0") == "1"))
-		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(),threadcount,d));
+		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

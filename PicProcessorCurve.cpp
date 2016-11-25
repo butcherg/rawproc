@@ -91,19 +91,20 @@ bool PicProcessorCurve::processPic() {
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 	mark();
-	setdib(getPreviousPicProcessor()->getProcessedPic());
-	dib.front().ApplyToneCurve(ctrlpts, threadcount);
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib->ApplyToneCurve(ctrlpts, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.curve.log","0") == "1"))
-		log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%s",dib.front().getWidth(), dib.front().getHeight(), threadcount, d));
+		log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(), threadcount, d));
 
 
 	dirty = false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 
 	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib.front());
+	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);

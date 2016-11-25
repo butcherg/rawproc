@@ -411,7 +411,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 {
 	filename.Assign(fname);
 	sourcefilename.Clear();
-	gImage dib, tmpdib;
+	gImage *dib;  //, tmpdib;
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 	if (fif != FILETYPE_UNKNOWN) {
@@ -421,16 +421,16 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		commandtree->DeleteAllItems();
 
 		mark();
-		dib = gImage::loadImageFile(fname.c_str(), (std::string) params.c_str());
+		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
 		wxString loadtime = duration();
-		if (dib.getWidth() == 0) {
+		if (dib->getWidth() == 0) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
 		wxString flagstring(params.c_str());
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
-			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib.getWidth(), dib.getHeight(),loadtime));
+			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
 		picdata->showParams();
