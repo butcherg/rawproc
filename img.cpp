@@ -221,7 +221,7 @@ for (int f=0; f<files.size(); f++)
 			printf("bright: %0.2f (%d threads)... ",bright,threadcount);
 
 			_mark();
-			dib = dib.ApplyCurve(ctrlpts.getControlPoints(), threadcount);
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -254,8 +254,8 @@ for (int f=0; f<files.size(); f++)
 			printf("blackwhitepoint: %0.2f,%0.2f (%d threads)... ",blk,wht,threadcount);
 
 			_mark();
-			dib = dib.ApplyCurve(ctrlpts.getControlPoints(), threadcount);
-			//dib = dib.ApplyLine(blk, wht, threadcount);
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			//dib.ApplyToneLine(blk, wht, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -278,7 +278,7 @@ for (int f=0; f<files.size(); f++)
 			printf("contrast: %0.2f (%d threads)... ",contrast,threadcount);
 
 			_mark();
-			dib = dib.ApplyCurve(ctrlpts.getControlPoints(), threadcount);
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -369,11 +369,9 @@ for (int f=0; f<files.size(); f++)
 			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount);
 
 			_mark();
-			dib = dib.Sharpen(sharp, threadcount);
+			dib.ApplySharpen(sharp, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-
-
 
 		else if (strcmp(cmd,"resize") == 0) {  //#resize:x,y      
 			//double sharp=0.0;
@@ -391,7 +389,7 @@ for (int f=0; f<files.size(); f++)
 			printf("resize: %dx%d (%d threads)... ",w,h,threadcount);
 
 			_mark();
-			dib = dib.Resize(w,h, FILTER_LANCZOS3, threadcount);
+			dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
 			printf("done (%fsec).\n", _duration());
 		}
 
@@ -405,7 +403,7 @@ for (int f=0; f<files.size(); f++)
 			printf("rotate: %0.2f (%d threads)... ",angle,threadcount);
 
 			_mark();
-			dib = dib.Rotate(angle, threadcount);
+			dib.ApplyRotate(angle, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -438,7 +436,7 @@ for (int f=0; f<files.size(); f++)
 			printf("saturate: %0.2f (%d threads)... ",saturation,threadcount);
 
 			_mark();
-			dib = dib.Saturate(saturation, threadcount);
+			dib.ApplySaturate(saturation, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -452,7 +450,7 @@ for (int f=0; f<files.size(); f++)
 			printf("denoise: %0.2f (%d threads)... ",sigma,threadcount);
 
 			_mark();
-			dib = dib.NLMeans(sigma, 3, 1, threadcount);
+			dib.ApplyNLMeans(sigma, 3, 1, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -470,7 +468,7 @@ for (int f=0; f<files.size(); f++)
 			printf("tint: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
 
 			_mark();
-			dib = dib.Tint(red,green,blue, threadcount);
+			dib.ApplyTint(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -488,7 +486,7 @@ for (int f=0; f<files.size(); f++)
 			printf("gray: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
 
 			_mark();
-			dib = dib.Gray(red,green,blue, threadcount);
+			dib.ApplyGray(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
 
 		}
