@@ -897,8 +897,15 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
 			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
+
+			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
+			wxString params = "";
+			if (filetype == FILETYPE_JPEG) {
+				params.Append(wxString::Format("quality=%s",wxConfigBase::Get()->Read("output.jpegquality","100")));
+			}
+
 			WxStatusBar1->SetStatusText("Saving file...");
-			dib.saveImageFile(fname);  //ToDo: output params
+			dib.saveImageFile(fname, std::string(params.c_str()));
 			wxFileName tmpname(fname);
 
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
