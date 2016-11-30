@@ -18,7 +18,7 @@ WINLCMS=C:\lcms2-2.8
 #OPENMP=-fopenmp
 
 ifeq ($(UNAME), mingw32)
-	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
+	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_propgrid -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
 	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
 endif
 
@@ -27,9 +27,9 @@ ifeq ($(UNAME), x86_64-linux-gnu)
 	WXFLAGS=$(shell wx-config --cxxflags)
 endif
 
-#OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+#OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o myPropertyDialog.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o myPropertyDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #Configure these:
 CXX=g++
@@ -69,6 +69,9 @@ $(OBJDIR)/elapsedtime.o: elapsedtime.cpp
 
 $(OBJDIR)/util.o: util.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c util.cpp  -o$@
+
+$(OBJDIR)/myPropertyDialog.o: myPropertyDialog.cpp
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myPropertyDialog.cpp  -o$@
 
 $(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myFileSelector.cpp  -o$@
