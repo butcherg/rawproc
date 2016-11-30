@@ -34,6 +34,7 @@
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
+#include "myPropertyDialog.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
@@ -85,6 +86,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
+	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -157,6 +159,8 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_Cut,_("Cut"), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_Copy,_("Copy"), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_Paste,_("Paste"), _(""), wxITEM_NORMAL);
+	ID_MNU_EDITMnu_Obj->AppendSeparator();
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_EDITMnu_Obj, _("Edit"));
 
 	
@@ -682,6 +686,23 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 		OpenFileSource(fname);
 	}
 
+}
+
+void rawprocFrm::MnuProperties(wxCommandEvent& event)
+{
+	PropertyDialog diag(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
+	Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
+	diag.ShowModal();
+	Unbind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
+	SetStatusText("");
+}
+
+void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
+{
+	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
+	//wxMessageBox(wxString::Format("%s: %s", event.GetPropertyName(), event.GetPropertyValue().GetString()));
+	wxConfigBase::Get()->Write(event.GetPropertyName(), event.GetPropertyValue().GetString());
+	wxConfigBase::Get()->Flush();
 }
 
 

@@ -39,6 +39,7 @@
 #include <wx/aui/aui.h>
 #include <wx/treectrl.h>
 //#include <wx/treelist.h>
+#include <wx/propgrid/propgrid.h>
 
 #include <wx/image.h>
 #include <wx/html/helpfrm.h>
@@ -128,6 +129,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_ROTATE = 1026,
 			ID_MNU_DENOISE = 1027,
 			ID_MNU_VIEWHELP = 1028,
+			ID_MNU_PROPERTIES = 1029,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -184,6 +186,9 @@ class rawprocFrm : public wxFrame
 	void MnuShowCommand1010Click(wxCommandEvent& event);
 	void MnuAbout1011Click(wxCommandEvent& event);
 	void MnuHelpClick(wxCommandEvent& event);
+	void MnuProperties(wxCommandEvent& event);
+
+	void UpdateConfig(wxPropertyGridEvent& event);
 		
 	private:
 		void OnClose(wxCloseEvent& event);
