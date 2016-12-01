@@ -50,6 +50,7 @@
 #include "gimage.h"
 #include "PicPanel.h"
 #include "PicProcessor.h"
+#include "myPropertyDialog.h"
 
 
 class myParameters: public wxPanel
@@ -201,6 +202,8 @@ class rawprocFrm : public wxFrame
 		wxPanel *preview;
 		//wxPanel *parameters;
 		myParameters *parameters;
+
+		//PropertyDialog *diag;
 
 		//FIBITMAP *d;
 		gImage *d;

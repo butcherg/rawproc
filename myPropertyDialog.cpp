@@ -4,7 +4,7 @@
 #include <wx/wx.h>
 
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::map<std::string, std::string> props, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size)
+wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	pg = new wxPropertyGrid(this, wxID_ANY);
@@ -19,7 +19,7 @@ wxDialog(parent, id, title, pos, size)
 
 
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxFileConfig *config, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size)
+wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);

@@ -34,7 +34,6 @@
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
 #include "myFileSelector.h"
-#include "myPropertyDialog.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
@@ -111,6 +110,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
         wxIcon icons[2];
         icons[0] = wxIcon(unchecked_xpm);
         icons[1] = wxIcon(checked_xpm);
+
+	//diag = NULL;
 
         int width  = icons[0].GetWidth(),
             height = icons[0].GetHeight();
@@ -422,12 +423,18 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	fif = gImage::getFileType(fname.c_str());
 	if (fif != FILETYPE_UNKNOWN) {
 
-		SetStatusText("Loading file...");
-
 		commandtree->DeleteAllItems();
 
+		wxString configparams;
+		if (fif == FILETYPE_RAW) configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
+		if (fif == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
+		if (fif == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
+
+		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
+
 		mark();
-		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
+		//dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
+		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
 		if (dib->getWidth() == 0) {
 			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
@@ -438,7 +445,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
 			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
-		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), flagstring, commandtree, pic, parameters, dib);
+		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
@@ -666,6 +673,7 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
+/*
 	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open Image");
 
 	if(filediag->ShowModal() == wxID_OK)    {
@@ -674,6 +682,13 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
         	OpenFile(filediag->GetFileSelected(), filediag->GetFlags());
 	}
 	filediag->~myFileSelector();
+*/
+	wxString fname = wxFileSelector("Open Image...", filename.GetPath());	
+	if ( !fname.empty() ) { 
+		wxFileName f(fname);
+		wxSetWorkingDirectory (f.GetPath());
+		OpenFile(fname, "");
+	}
 
 }
 
@@ -690,7 +705,11 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuProperties(wxCommandEvent& event)
 {
+	//if (!diag) diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
+	//diag->Show();
+
 	PropertyDialog diag(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
+
 	Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	diag.ShowModal();
 	Unbind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
@@ -920,13 +939,15 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
 
 			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
-			wxString params = "";
-			if (filetype == FILETYPE_JPEG) {
-				params.Append(wxString::Format("quality=%s",wxConfigBase::Get()->Read("output.jpegquality","100")));
-			}
+
+			wxString configparams;
+			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
+			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
+			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
+
 
 			WxStatusBar1->SetStatusText("Saving file...");
-			dib.saveImageFile(fname, std::string(params.c_str()));
+			dib.saveImageFile(fname, std::string(configparams.c_str()));
 			wxFileName tmpname(fname);
 
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
