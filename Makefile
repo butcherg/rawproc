@@ -23,7 +23,7 @@ ifeq ($(UNAME), mingw32)
 endif
 
 ifeq ($(UNAME), x86_64-linux-gnu)
-	WXLIBS=$(shell wx-config --libs std,aui)
+	WXLIBS=$(shell wx-config --libs std,aui,propgrid)
 	WXFLAGS=$(shell wx-config --cxxflags)
 endif
 
