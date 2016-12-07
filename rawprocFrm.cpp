@@ -322,18 +322,17 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 		exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
 	char buff[4096];
 
-//Save: display ICC info for LCMS
-/*
-	exif.Append(FreeImage_Information(dib));
-	FIICCPROFILE *profile = FreeImage_GetICCProfile(dib);
-	if (profile->data) {
-		cmsHPROFILE icc = cmsOpenProfileFromMem(profile->data,profile->size);
+
+	char *profile = dib.getProfile();
+	unsigned profile_length = dib.getProfileLength();
+	if (profile) {
+		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
 		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
 		exif.Append(wxString::Format("ICC Profile: %s\n", wxString(buff)));
 		cmsCloseProfile(icc);
 	}
 	else exif.Append("ICC Profile: None\n");
-*/
+
 	wxMessageBox(exif,"Image Information");
 	
 }

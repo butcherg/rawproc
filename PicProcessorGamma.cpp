@@ -71,7 +71,6 @@ bool PicProcessorGamma::processPic()
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
 	double exponent = 1 / gamma;
 	double v = 255.0 * (double)pow((double)255, -exponent);
 	for (int i = 0; i< 256; i+=1) {
