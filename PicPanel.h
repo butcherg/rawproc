@@ -53,6 +53,8 @@ class PicPanel: public wxPanel
 	void OnKey(wxKeyEvent& event);
         
     private:
+
+	gImage * d;
         wxFrame *parentframe;
         wxImage img;
         wxImage *thumbimg, *scaledimg;

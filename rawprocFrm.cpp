@@ -321,6 +321,8 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it)
 		exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
 	char buff[4096];
+	exif.Append("\n");
+	exif.Append(dib.Stats().c_str());
 
 
 	char *profile = dib.getProfile();
@@ -328,10 +330,10 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	if (profile) {
 		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
 		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-		exif.Append(wxString::Format("ICC Profile: %s\n", wxString(buff)));
+		exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
 		cmsCloseProfile(icc);
 	}
-	else exif.Append("ICC Profile: None\n");
+	else exif.Append("\nICC Profile: None\n");
 
 	wxMessageBox(exif,"Image Information");
 	
