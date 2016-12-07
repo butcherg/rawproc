@@ -116,10 +116,10 @@ bool PicProcessorSaturation::processPic() {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (saturation != 1.0) {
 		mark();
-		if (dib) delete dib;
-		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 		dib->ApplySaturate(saturation, threadcount);
 		wxString d = duration();
 

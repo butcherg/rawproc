@@ -164,10 +164,10 @@ bool PicProcessorDenoise::processPic() {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (sigma > 0.0) {
 		mark();
-		if (dib) delete dib;
-		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 		dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		wxString d = duration();
 

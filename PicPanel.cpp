@@ -506,17 +506,18 @@ END_EVENT_TABLE()
 		if (scale == 1.0) {
 			unsigned px = x-picX;
 			unsigned py = y-picY;
-			pix p = d->getPixel(px, py);
-			if (px > 1) {
-				if (py > 1) {
-					if (px < scaledpic->GetWidth()) {
-						if (py < scaledpic->GetHeight()) {
-							parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", px, py,  p.r, p.g, p.b)); 
-
+			if (d) {
+				pix p = d->getPixel(px, py);
+				if (px > 1) {
+					if (py > 1) {
+						if (px < scaledpic->GetWidth()) {
+							if (py < scaledpic->GetHeight()) {
+								parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", px, py,  p.r, p.g, p.b)); 
+							} else parentframe->SetStatusText("");
 						} else parentframe->SetStatusText("");
 					} else parentframe->SetStatusText("");
 				} else parentframe->SetStatusText("");
-			} else parentframe->SetStatusText("");
+			}
 		}
             }
 	    //event.Skip();
