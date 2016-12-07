@@ -126,10 +126,10 @@ bool PicProcessorSharpen::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
 
 
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (sharp > 1.0) {
 		mark();
-		if (dib) delete dib;
-		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 		dib->ApplyConvolutionKernel(kernel, threadcount);
 		wxString d = duration();
 
