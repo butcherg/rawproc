@@ -1,65 +1,41 @@
 #Makefile using Codeblocks MinGW and wxWidgets 3.0.2
 
-UNAME := $(shell g++ -dumpmachine)
-
-$(info $(UNAME))
-
 OBJDIR=build
 
-WINFREEIMAGE=c:\FreeImage-3.17.0.ggb
-WINWXWIDGETS=c:\wxWidgets-3.0.2
-WINLCMS=C:\lcms2-2.8
-
-#LIBJPEG=../gimage/jpeg-6b
-#LIBTIFF=../gimage/tiff-4.0.6
-#LIBRAW=../gimage/LibRaw-0.17.2
-#LIBGIMAGE=../gimage
-
-#OPENMP=-fopenmp
-
-ifeq ($(UNAME), mingw32)
-	WXLIBS= -mthreads -L. -L$(WINWXWIDGETS)\lib\gcc_lib -lwxmsw30u_propgrid -lwxmsw30u_xrc -lwxmsw30u_aui -lwxmsw30u_html -lwxmsw30u_adv -lwxmsw30u_core -lwxbase30u_xml -lwxbase30u_net -lwxbase30u -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregexu -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwxregexu -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
-	WXFLAGS=-Wl,--subsystem,windows -mwindows -mthreads -DHAVE_W32API_H -D__WXMSW__ -D__WXDEBUG__ -D_UNICODE -I$(WINWXWIDGETS)\lib\gcc_lib\mswu -I$(WINWXWIDGETS)\include -I$(WINFREEIMAGE) -Wno-ctor-dtor-privacy -pipe -fmessage-length=0 
-endif
-
-ifeq ($(UNAME), x86_64-linux-gnu)
-	WXLIBS=$(shell wx-config --libs std,aui,propgrid)
-	WXFLAGS=$(shell wx-config --cxxflags)
-endif
-
-#OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myHistogramPane.o myFileSelector.o myPropertyDialog.o CurvePane.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorGray.o PicProcessorCrop.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorRotate.o PicProcessorDenoise.o PicProcessor.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o  myFileSelector.o myPropertyDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
-#Configure these:
+#localmake.txt: += any of these to add, = to replace:
+
+#Change to the name of the cross compiler/tool, if applicable, e.g., x86_64-w64-mingw32-g++ to cross compile to 64-bit Windows on Linux
 CXX=g++
 WINDRES=windres
 
-#WXEXTERNALLIBS=-lwxexpat -lwxjpeg -lwxpng -lwxtiff -lwxzlib -lwxregexu 
+#Set to the libraries and flags needed for wxWidgets
+WXLIBS=
+WXFLAGS=
+#if you have wxWidgets installed in a standard place, you can use wx-config as follows:
+#WXLIBS=$(shell wx-config --libs std,aui,propgrid)
+#WXFLAGS=$(shell wx-config --cxxflags)
 
-LIBDIRS=
 LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 
-INCLUDEDIRS=
-CFLAGS=
-LFLAGS=
+LIBDIRS=	#-L to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched lib path
+INCLUDEDIRS=	#-I to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched include path
+CFLAGS=		#Use += to add any unique compiler flags
+LFLAGS=		#Use += to add any unique linker flags
+EXT=		#If you executable needs a file extension, specify it here (for cross-compiling, because I can't figure out how to make ld do it)
 
+#This includes local unique configuration
 -include $(OBJDIR)/localmake.txt
 
 all: rawproc img
 
-#rawproc: $(OBJECTS)
-#ifeq ($(OBJDIR),win)
-#	$(CXX)  $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS) $(FILIBS) -s -static $(OPENMP) -o $(OBJDIR)/rawproc 
-#else
-#	$(CXX) $(WXFLAGS)  $(OBJECTS) $(LIBS)  $(WXLIBS)  -s -fopenmp -o $(OBJDIR)/rawproc
-#endif
-
 rawproc:  $(OBJECTS)
-	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc
+	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc$(EXT)
 
 img: $(OBJDIR)/img.o
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img
+	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img$(EXT)
 
 $(OBJDIR)/img.o: img.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -std=c++11 -c img.cpp -o$@
@@ -148,7 +124,7 @@ makedoc:
 	zip  -r -j $(OBJDIR)/rawprocdoc.zip doc/*
 
 clean:
-	rm -f $(OBJDIR)/*.o $(OBJDIR)/rawproc 
+	rm -f $(OBJDIR)/*.o $(OBJDIR)/rawproc$(EXT) $(OBJDIR)/img$(EXT) 
 
 cleandoc:
 	rm -f $(OBJDIR)/rawprocdoc.zip
