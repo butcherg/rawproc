@@ -423,7 +423,7 @@ for (int f=0; f<files.size(); f++)
 			printf("crop: %d,%d %dx%d (%d threads)... ",x,y,width,height,threadcount);
 
 			_mark();
-			dib = dib.Crop(x,y,width,height,threadcount);
+			dib.ApplyCrop(x,y,width,height,threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
