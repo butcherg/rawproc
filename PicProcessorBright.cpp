@@ -124,7 +124,7 @@ bool PicProcessorBright::processPic() {
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.bright.log","0") == "1"))
-		log(wxString::Format("tool=bright,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		log(wxString::Format("tool=bright,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;
 
