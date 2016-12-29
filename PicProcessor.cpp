@@ -50,13 +50,14 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 
 	wxTreeItemId id;
 	if (m_tree->IsSelected(m_tree->GetRootItem()))
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
 	else
 	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
