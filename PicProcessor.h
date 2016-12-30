@@ -43,6 +43,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void displayProcessedPic();
 		virtual void setParams(wxString params);
 
+		static PicProcessor *getSelectedPicProcessor(wxTreeCtrl *tree);
+
 	protected:
 		//std::deque<gImage> dib;
 		gImage *dib;

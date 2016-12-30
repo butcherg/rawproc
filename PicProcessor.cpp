@@ -2,6 +2,7 @@
 #include "PicProcessor.h"
 #include "util.h"
 #include <wx/event.h>
+#include <exception>
 
 class BlankPanel: public PicProcPanel 
 {
@@ -50,12 +51,12 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = new gImage(getSelectedPicProcessor(m_tree)->getProcessedPic());
 
 	wxTreeItemId id;
-	if (m_tree->IsSelected(m_tree->GetRootItem()))
+	if (m_tree->IsSelected(m_tree->GetRootItem())) 
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
-	else
+	else 
 	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
 
 	m_tree->SetItemState(id,0);
@@ -136,6 +137,15 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 		return (PicProcessor *) m_tree->GetItemData(m_tree->GetRootItem());
 	}
 	
+}
+
+PicProcessor *PicProcessor::getSelectedPicProcessor(wxTreeCtrl *tree)
+{
+	wxTreeItemId sel = tree->GetSelection();
+	if (sel.IsOk())
+		return (PicProcessor *) tree->GetItemData(sel);
+	else
+		return NULL;
 }
 
 gImage& PicProcessor::getProcessedPic() 
