@@ -460,13 +460,18 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
-				for (int i=0; i<token.GetCount(); i++) {
-					wxArrayString cmd = split(token[i], ":");
-					if (cmd.GetCount() == 2)
-						AddItem(cmd[0], cmd[1]);
-					else
-						AddItem(cmd[0], "");
-					wxSafeYield(this);
+				try {
+					for (int i=0; i<token.GetCount(); i++) {
+						wxArrayString cmd = split(token[i], ":");
+						if (cmd.GetCount() == 2)
+							AddItem(cmd[0], cmd[1]);
+						else
+							AddItem(cmd[0], "");
+						wxSafeYield(this);
+					}
+				}
+				catch (std::exception& e) {
+					wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
 				}
 			}
 		}
