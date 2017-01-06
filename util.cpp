@@ -197,7 +197,7 @@ wxImage gImage2wxImage(gImage &dib)
 	//	data[i] = img[i];
 	//}
 	memcpy(data,img, w*h*3);
-	delete img;
+	delete [] img;
 	return image;
 }
 
