@@ -1090,7 +1090,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,gImageVersion,LittleCMSVersion,configfile));
+	//wxString PixelFormat = wxString::Format("%d",gImage::getRGBSize());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, configfile, gImage::getRGBCharacteristics().c_str()));
 	wxAboutBox(info);
 
 }
