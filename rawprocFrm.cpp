@@ -97,6 +97,11 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 END_EVENT_TABLE()
 ////Event Table End
 
+void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
+{
+	wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
+}
+
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
@@ -133,6 +138,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	ret = help.AddBook(wxFileName(helpfile));
 	if (! ret)
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
+	cmsSetLogErrorHandler(MyLogErrorHandler);
 }
 
 rawprocFrm::~rawprocFrm()
@@ -325,16 +331,19 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	exif.Append("\n");
 	exif.Append(dib.Stats().c_str());
 
-
 	char *profile = dib.getProfile();
 	unsigned profile_length = dib.getProfileLength();
-	if (profile) {
+
+	if (profile_length && profile) {
 		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
-		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-		exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
-		cmsCloseProfile(icc);
+		if (icc) {
+			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
+			exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
+			cmsCloseProfile(icc);
+		}
+		else exif.Append(wxString::Format("\nICC Profile: failed (%d)\n",profile_length));
 	}
-	else exif.Append("\nICC Profile: None\n");
+	else exif.Append(wxString::Format("\nICC Profile: None (%d)\n",profile_length));
 
 	wxMessageBox(exif,"Image Information");
 	
@@ -433,6 +442,11 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		if (fif == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
+
+		if (wxConfigBase::Get()->Read("app.cms","0") == "1") 
+			pic->SetColorManagement(true);
+		else
+			pic->SetColorManagement(false);
 
 		mark();
 		//dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
@@ -926,7 +940,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
 		else
 			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
-		//c->processPic();
+		c->processPic();
 		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}

@@ -28,7 +28,10 @@ END_EVENT_TABLE()
 		SetDoubleBuffered(true);  //watch this one... tricksy...
 		showDebug = true;
 		scaleWindow = false;
-		cropmode = false;
+
+		colormgt = false;
+		hTransform = NULL;
+
 		fitmode=true;
 		keyCode = 0;
 		//tick = 0;
@@ -36,12 +39,6 @@ END_EVENT_TABLE()
 		histogramcolor = wxColour(50,50,50);
 		picX = 0; picY = 0;
 		scale = 1.0;
-		cropX = 0;
-		cropY = 0;
-		cropW = 0;
-		cropH = 0;
-		cropnode = 0; //1=topleft, 3=bottomright, 5=in cropbox
-		cropratio = 1; //0=none; 1=maintain aspect
 
 		//wxImages:
 		thumbimg=NULL;
@@ -90,17 +87,16 @@ END_EVENT_TABLE()
 
 	void PicPanel::ToggleThumb()
 	{
-		if (!cropmode) {
-			toggleThumb++;
-			if (toggleThumb>3) toggleThumb = 1;
-			Refresh();
-			Update();
-		}
+		toggleThumb++;
+		if (toggleThumb>3) toggleThumb = 1;
+		Refresh();
+		Update();
 		//parentframe->SetStatusText(wxString::Format("thumbmode: %d", toggleThumb));
 	}
 
 	void PicPanel::SetPic(gImage * dib)
 	{
+		cmsHPROFILE hImgProfile, hDisplayProfile;
 		//parentframe->SetStatusText("display...");
 		//mark();
 		d = dib;
@@ -121,11 +117,37 @@ END_EVENT_TABLE()
 
 		img = gImage2wxImage(*dib);
 
-		cropX = 0;
-		cropY = 0;
-		cropW = img.GetWidth();
-		cropH = img.GetHeight();
-		cropnode = 0;
+		if (colormgt) {
+
+		hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+		wxString displayprof = wxConfigBase::Get()->Read("app.cms.displayprofie","srgb");
+		if (displayprof == "srgb") {
+			//Make a linear gamma sRGB profile for display:
+			cmsCIExyYTRIPLE srgb_primaries_pre_quantized = {
+				{0.639998686, 0.330010138, 1.0},
+				{0.300003784, 0.600003357, 1.0},
+				{0.150002046, 0.059997204, 1.0}
+			};
+			cmsCIExyY d65_srgb_adobe_specs = {0.3127, 0.3290, 1.0};
+			cmsCIEXYZ d65_media_whitepoint = {0.95045471, 1.0, 1.08905029};
+			cmsToneCurve *curve[3], *tonecurve;
+			tonecurve = cmsBuildGamma (NULL, 1.00);
+			curve[0] = curve[1] = curve[2] = tonecurve;
+			hDisplayProfile = cmsCreateRGBProfile ( &d65_srgb_adobe_specs, &srgb_primaries_pre_quantized, curve);
+		}
+		else
+			//load the monitor profile:
+			hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
+
+		if (hTransform) cmsDeleteTransform(hTransform);
+
+		hTransform = cmsCreateTransform(
+			hImgProfile, TYPE_RGB_8,
+			hDisplayProfile, TYPE_RGB_8,
+			INTENT_PERCEPTUAL, 0);
+		cmsCloseProfile(hImgProfile);
+		cmsCloseProfile(hDisplayProfile);
+		}
 
                 aspectW = (float) img.GetWidth() / (float) img.GetHeight();
                 aspectH = (float) img.GetHeight() / (float) img.GetWidth();
@@ -134,11 +156,9 @@ END_EVENT_TABLE()
                 thumbW = 100*aspectW;
                 thumbH = 100;
                 wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
-                //if (thumb) thumb->~wxBitmap();
+		if (colormgt) cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
                 thumb = new wxBitmap(thumbimg);
 
-		//hsgram = HistogramFrom(img, thumbW, thumbH);
-		////hsgram = HistogramFromVec(histdata, hmax, thumbW, thumbH);
 		hsgram = wxBitmap();
 
 		//parentframe->SetStatusText("");
@@ -148,115 +168,6 @@ END_EVENT_TABLE()
 		
 	}
 
-	wxString PicPanel::getHistogramString()
-	{
-		return histstr;
-	}
-        
-
-	void PicPanel::SetScaleToWidth()
-	{
-		int w, h;
-		GetSize(&w, &h);
-		if (img.IsOk()) {
-			scale = (double) w/ (double) img.GetWidth();
-			Refresh();
-		}
-	}
-
-	void PicPanel::SetScaleToWidth(double percentofwidth)
-	{
-		int w, h;
-		GetSize(&w, &h);
-		if (img.IsOk()) {
-			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
-			Refresh();
-		}
-	}
-
-	void PicPanel::SetScale(double s)
-	{
-		scale = s;
-		FitMode(false);
-		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),1);
-		Refresh();
-		Update();
-	}
-
-	void PicPanel::ToggleCropMode()
-	{
-		cropmode = !cropmode;
-		if (cropmode) {
-			toggleThumb = 3;
-			cropnode = 0;
-		}
-		Refresh();
-		Update();
-		if (cropmode) 
-			parentframe->SetStatusText("cropmode on");
-		else
-			parentframe->SetStatusText("cropmode off");
-	}
-
-	void PicPanel::CropMode(bool c)
-	{
-		cropmode = c;
-		if (cropmode) {
-			toggleThumb = 3;
-			cropnode = 0;
-		}
-		Refresh();
-		Update();
-	}
-
-	//void PicPanel::CropProcessor(PicProcessorCrop *c)
-	//{
-	//	cropproc = c;
-	//}
-
-	void PicPanel::SetCropRatio(int r)
-	{
-		cropratio = r;
-	}
-
-	wxString PicPanel::GetCropParams()
-	{
-		return wxString::Format("%d,%d,%d,%d", cropX, cropY, cropW, cropH);
-	}
-
-	void PicPanel::SetCropParams(wxString params)
-	{
-		wxArrayString cp = split(params,",");
-		cropX = atoi(cp[0]);
-		cropY = atoi(cp[1]);
-		cropW = atoi(cp[2]);
-		cropH = atoi(cp[3]);
-	}
-
-	void PicPanel::FitMode(bool f)
-	{
-		fitmode = f;
-	}
-
-
-	double PicPanel::GetScale()
-	{
-		return scale;
-	}
-
-	void PicPanel::PaintNow()
-	{
-		wxClientDC dc(this);
-		render(dc);
-	}
-
-	void PicPanel::OnPaint(wxPaintEvent & event)
-	{
-		wxPaintDC dc(this);
-		render(dc);
-	}
-
-      
 	void PicPanel::render(wxDC &dc)
 	{
 		int w, h;
@@ -300,6 +211,8 @@ END_EVENT_TABLE()
 		//	spic = img->Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
+
+		if (colormgt) cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
@@ -316,20 +229,11 @@ END_EVENT_TABLE()
 		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
 		if (toggleThumb == 2) {
 			if (!hsgram.IsOk()) {
-				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				//hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
 			}
 			dc.DrawBitmap(hsgram,2,2,false);
 		}
-
-		//draw crop rectangle:
-		if (cropmode) {
-			dc.SetPen(*wxYELLOW_PEN);
-			dc.SetBrush(*wxYELLOW_BRUSH);
-			drawBox(dc,picX+cropX*scale, picY+cropY*scale, cropW*scale, cropH*scale);
-			dc.DrawCircle(picX+cropX*scale, picY+cropY*scale, 10);
-			dc.DrawCircle(picX+cropX*scale+cropW*scale, picY+cropY*scale+cropH*scale, 10);
-		}
-		
 
 		//draw crop rectangle in thumbnail:
 		tw = thumbW * ((float) w/ (float) iw);
@@ -341,35 +245,78 @@ END_EVENT_TABLE()
 		}
 
 	}
+   
+
+	void PicPanel::SetColorManagement(bool b)
+	{
+		colormgt = b;
+	}
+
+	wxString PicPanel::getHistogramString()
+	{
+		return histstr;
+	}
         
-        
-        
+
+	void PicPanel::SetScaleToWidth()
+	{
+		int w, h;
+		GetSize(&w, &h);
+		if (img.IsOk()) {
+			scale = (double) w/ (double) img.GetWidth();
+			Refresh();
+		}
+	}
+
+	void PicPanel::SetScaleToWidth(double percentofwidth)
+	{
+		int w, h;
+		GetSize(&w, &h);
+		if (img.IsOk()) {
+			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
+			Refresh();
+		}
+	}
+
+	void PicPanel::SetScale(double s)
+	{
+		scale = s;
+		FitMode(false);
+		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),1);
+		Refresh();
+		Update();
+	}
+
+	void PicPanel::FitMode(bool f)
+	{
+		fitmode = f;
+	}
+
+
+	double PicPanel::GetScale()
+	{
+		return scale;
+	}
+
+	void PicPanel::PaintNow()
+	{
+		wxClientDC dc(this);
+		render(dc);
+	}
+
+	void PicPanel::OnPaint(wxPaintEvent & event)
+	{
+		wxPaintDC dc(this);
+		render(dc);
+	}
+
 	void PicPanel::OnLeftDown(wxMouseEvent& event)
 	{
 		SetFocus();
 		int radius = 20;
 		MouseX = event.m_x;
 		MouseY = event.m_y;
-		if (cropmode) {
-			// x/y:
-			if ((MouseX > picX-radius+cropX*scale) & (MouseX < picX+radius+cropX*scale)) {
-				if ((MouseY > picY-radius+cropY*scale) & (MouseY < picY+radius+cropY*scale)) {
-					cropnode = 1;
-				}
-			} 
-			// w/h:
-			else if ((MouseX > picX-radius+cropX*scale+cropW*scale) & (MouseX < picX+radius+cropX*scale+cropW*scale)) {
-				if ((MouseY > picY-radius+cropY*scale+cropH*scale) & (MouseY < picY+radius+cropY*scale+cropH*scale)) {
-					cropnode = 3;
-				}
-			}
-			// move:
-			else if ((MouseX > picX+cropX*scale) & (MouseX < picX+cropX*scale+cropW*scale)) {
-				if ((MouseY > picY+cropY*scale) & (MouseY < picY+cropY*scale+cropH*scale)) {
-					cropnode = 5;
-				}
-			}
-		}
+
 		if (toggleThumb != 2)
 			if (MouseX < thumbW & MouseY < thumbH)
 				thumbmoving = true;
@@ -392,12 +339,6 @@ END_EVENT_TABLE()
 		if (moving | thumbmoving) {
 			moving=false;
 			thumbmoving=false;
-		}
-		if (cropnode != 0) {
-			cropnode = 0;
-			wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-			e->SetString(wxString::Format("%d,%d,%d,%d", cropX, cropY, cropW, cropH));
-			wxQueueEvent(this,e);
 		}
 		//event.Skip();
 	}
@@ -422,70 +363,8 @@ END_EVENT_TABLE()
 		else 
 			anchorx = false;  //y
 
-		//todo: cropratio behavior (1=maintain aspect)
-		if (cropmode) {
-			switch (cropnode) {
-				case 1: //x/y:
-					cropX -= (MouseX-x)/scale;
-					cropY -= (MouseY-y)/scale;
-					if (cropX < 0) 
-						cropX = 0;
-					else
-						cropW += (MouseX-x)/scale;
-					if (cropY < 0) 
-						cropY = 0;
-					else
-						cropH += (MouseY-y)/scale;
-					if (cropratio==1) {
-						if (anchorx) {
-							cropH = cropW * aspectH;
-						}
-						else {
-							cropW = cropH * aspectW;
-						}
-						if (cropX+cropW > img.GetWidth())  cropX = img.GetWidth()-cropW;
-						if (cropY+cropH > img.GetHeight()) cropY = img.GetHeight()-cropH;
-					}
-					MouseX = x; MouseY = y;
-					Refresh();
-					Update();
-					//PaintNow();
-					break;
-				case 3: //w/h:
-					cropW -= (MouseX-x)/scale;
-					cropH -= (MouseY-y)/scale;
-					if (cropW > img.GetWidth()) cropW = img.GetWidth();
-					if (cropH > img.GetHeight()) cropH = img.GetHeight(); 
-					if (cropratio==1) {
-						if (anchorx) 
-							cropH = cropW * aspectH;
-						else
-							cropW = cropH * aspectW;
-					}
-					if (cropX+cropW > img.GetWidth())  cropX = img.GetWidth()-cropW;
-					if (cropY+cropH > img.GetHeight()) cropY = img.GetHeight()-cropH;
-					MouseX = x; MouseY = y;
-					Refresh();
-					Update();
-					//PaintNow();
-					break;
-				case 5:  //move:
-					cropX -= (MouseX-x)/scale;
-					cropY -= (MouseY-y)/scale;
-					if (cropX < 0) cropX = 0;
-					if (cropY < 0) cropY = 0;
-					if (cropX+cropW > img.GetWidth())  cropX = img.GetWidth()-cropW;
-					if (cropY+cropH > img.GetHeight()) cropY = img.GetHeight()-cropH;
-					MouseX = x; MouseY = y;
-					Refresh();
-					Update();
-					//PaintNow();
-					break;
-			}
-			parentframe->SetStatusText("");
-			//parentframe->SetStatusText(wxString::Format("%d,%d,%d,%d    %d,%d", cropX, cropY, cropW, cropH, iw, ih));
-		}
-		else {
+
+//		else {
                 	if (moving) {
 				picX -= MouseX-x; 
 				picY -= MouseY-y;
@@ -502,7 +381,7 @@ END_EVENT_TABLE()
 				Update();
 				//PaintNow();
                 	}
-		}
+//		}
 		if (scale == 1.0) {
 			unsigned px = x-picX;
 			unsigned py = y-picY;
