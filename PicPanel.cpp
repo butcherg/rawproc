@@ -118,35 +118,34 @@ END_EVENT_TABLE()
 		img = gImage2wxImage(*dib);
 
 		if (colormgt) {
+			hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			wxString displayprof = wxConfigBase::Get()->Read("app.cms.displayprofie","srgb");
+			if (displayprof == "srgb") {
+				//Make a linear gamma sRGB profile for display:
+				cmsCIExyYTRIPLE srgb_primaries_pre_quantized = {
+					{0.639998686, 0.330010138, 1.0},
+					{0.300003784, 0.600003357, 1.0},
+					{0.150002046, 0.059997204, 1.0}
+				};
+				cmsCIExyY d65_srgb_adobe_specs = {0.3127, 0.3290, 1.0};
+				cmsCIEXYZ d65_media_whitepoint = {0.95045471, 1.0, 1.08905029};
+				cmsToneCurve *curve[3], *tonecurve;
+				tonecurve = cmsBuildGamma (NULL, 1.00);
+				curve[0] = curve[1] = curve[2] = tonecurve;
+				hDisplayProfile = cmsCreateRGBProfile ( &d65_srgb_adobe_specs, &srgb_primaries_pre_quantized, curve);
+			}
+			else
+				//load the monitor profile:
+				hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
 
-		hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-		wxString displayprof = wxConfigBase::Get()->Read("app.cms.displayprofie","srgb");
-		if (displayprof == "srgb") {
-			//Make a linear gamma sRGB profile for display:
-			cmsCIExyYTRIPLE srgb_primaries_pre_quantized = {
-				{0.639998686, 0.330010138, 1.0},
-				{0.300003784, 0.600003357, 1.0},
-				{0.150002046, 0.059997204, 1.0}
-			};
-			cmsCIExyY d65_srgb_adobe_specs = {0.3127, 0.3290, 1.0};
-			cmsCIEXYZ d65_media_whitepoint = {0.95045471, 1.0, 1.08905029};
-			cmsToneCurve *curve[3], *tonecurve;
-			tonecurve = cmsBuildGamma (NULL, 1.00);
-			curve[0] = curve[1] = curve[2] = tonecurve;
-			hDisplayProfile = cmsCreateRGBProfile ( &d65_srgb_adobe_specs, &srgb_primaries_pre_quantized, curve);
-		}
-		else
-			//load the monitor profile:
-			hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
+			if (hTransform) cmsDeleteTransform(hTransform);
 
-		if (hTransform) cmsDeleteTransform(hTransform);
-
-		hTransform = cmsCreateTransform(
-			hImgProfile, TYPE_RGB_8,
-			hDisplayProfile, TYPE_RGB_8,
-			INTENT_PERCEPTUAL, 0);
-		cmsCloseProfile(hImgProfile);
-		cmsCloseProfile(hDisplayProfile);
+			hTransform = cmsCreateTransform(
+				hImgProfile, TYPE_RGB_8,
+				hDisplayProfile, TYPE_RGB_8,
+				INTENT_PERCEPTUAL, 0);
+			cmsCloseProfile(hImgProfile);
+			cmsCloseProfile(hDisplayProfile);
 		}
 
                 aspectW = (float) img.GetWidth() / (float) img.GetHeight();
@@ -229,8 +228,8 @@ END_EVENT_TABLE()
 		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
 		if (toggleThumb == 2) {
 			if (!hsgram.IsOk()) {
-				//hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
-				hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
+				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+				//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
 			}
 			dc.DrawBitmap(hsgram,2,2,false);
 		}
