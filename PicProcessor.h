@@ -38,6 +38,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
 		gImage& getProcessedPic();
+		gImage* getProcessedPicPointer();
 		PicPanel *getDisplay();
 		wxTreeCtrl *getCommandTree();
 		virtual void displayProcessedPic();

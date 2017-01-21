@@ -154,6 +154,12 @@ gImage& PicProcessor::getProcessedPic()
 	return *dib;
 }
 
+gImage* PicProcessor::getProcessedPicPointer()
+{
+	if (dirty || dib->getWidth()==0) processPic();
+	return dib;
+}
+
 PicPanel *PicProcessor::getDisplay()
 {
 	return m_display;
