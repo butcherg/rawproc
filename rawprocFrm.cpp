@@ -576,6 +576,75 @@ void rawprocFrm::OpenFileSource(wxString fname)
 }
 
 
+void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
+{
+	wxString fname;
+	gImage * dib;
+	cmsHPROFILE profile;
+
+	if (!sourcefilename.IsOk()) 
+		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+	else
+		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+
+	if ( !fname.empty() )
+	{
+		if (wxFileName::FileExists(fname)) 
+			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
+				return;
+			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
+				wxMessageBox("Error: invalid file type");
+				return;
+			}
+			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPicPointer();
+			else
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
+
+			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
+			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
+
+			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
+
+			wxString configparams;
+			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
+			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
+			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
+
+
+			if (pic->GetColorManagement()) {
+				wxString profilestr = "srgb";
+				if (filetype == FILETYPE_JPEG) {
+					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
+				}
+				else if (filetype == FILETYPE_TIFF) {
+					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","srgb");
+				}
+				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), 1.0);
+				if (!profile) cmsOpenProfileFromFile(profilestr.c_str(), "r");
+				WxStatusBar1->SetStatusText(wxString::Format("Saving %s with %s profile...",fname, profilestr));
+				if (!profile) {
+					wxMessageBox("No CMS profile found, saving without...");
+					dib->saveImageFile(fname, std::string(configparams.c_str()));
+				}
+				else dib->saveImageFile(fname, std::string(configparams.c_str()), profile);
+			}
+			else {
+				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
+				dib->saveImageFile(fname, std::string(configparams.c_str()));
+			}
+			wxFileName tmpname(fname);
+
+			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
+				sourcefilename.Assign(fname);
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			}
+			
+		WxStatusBar1->SetStatusText("");
+	}
+}
+
+
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
 	CommandTreeSetDisplay(event.GetItem());
@@ -997,56 +1066,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	}
 }
 
-/*
- * Mnusave1009Click
- */
-void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
-{
-	wxString fname;
-	gImage dib;
 
-	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
-	else
-		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
-
-	if ( !fname.empty() )
-	{
-		if (wxFileName::FileExists(fname)) 
-			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
-				return;
-			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
-				wxMessageBox("Error: invalid file type");
-				return;
-			}
-			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic();
-			else
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic();
-
-			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
-			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
-
-			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
-
-			wxString configparams;
-			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
-			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
-			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
-
-
-			WxStatusBar1->SetStatusText("Saving file...");
-			dib.saveImageFile(fname, std::string(configparams.c_str()));
-			wxFileName tmpname(fname);
-
-			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
-				sourcefilename.Assign(fname);
-				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
-			}
-			
-		WxStatusBar1->SetStatusText("");
-	}
-}
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 {

@@ -119,20 +119,10 @@ END_EVENT_TABLE()
 
 		if (colormgt) {
 			hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-			wxString displayprof = wxConfigBase::Get()->Read("app.cms.displayprofie","srgb");
+			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofie","srgb");
 			if (displayprof == "srgb") {
 				//Make a linear gamma sRGB profile for display:
-				cmsCIExyYTRIPLE srgb_primaries_pre_quantized = {
-					{0.639998686, 0.330010138, 1.0},
-					{0.300003784, 0.600003357, 1.0},
-					{0.150002046, 0.059997204, 1.0}
-				};
-				cmsCIExyY d65_srgb_adobe_specs = {0.3127, 0.3290, 1.0};
-				cmsCIEXYZ d65_media_whitepoint = {0.95045471, 1.0, 1.08905029};
-				cmsToneCurve *curve[3], *tonecurve;
-				tonecurve = cmsBuildGamma (NULL, 1.00);
-				curve[0] = curve[1] = curve[2] = tonecurve;
-				hDisplayProfile = cmsCreateRGBProfile ( &d65_srgb_adobe_specs, &srgb_primaries_pre_quantized, curve);
+				hDisplayProfile = gImage::makeLCMSProfile("srgb", 1.0);
 			}
 			else
 				//load the monitor profile:
@@ -249,6 +239,11 @@ END_EVENT_TABLE()
 	void PicPanel::SetColorManagement(bool b)
 	{
 		colormgt = b;
+	}
+
+	bool PicPanel::GetColorManagement()
+	{
+		return colormgt;
 	}
 
 	wxString PicPanel::getHistogramString()
