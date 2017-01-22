@@ -621,13 +621,17 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","srgb");
 				}
 				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), 1.0);
-				if (!profile) cmsOpenProfileFromFile(profilestr.c_str(), "r");
-				WxStatusBar1->SetStatusText(wxString::Format("Saving %s with %s profile...",fname, profilestr));
+				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
+				
 				if (!profile) {
-					wxMessageBox("No CMS profile found, saving without...");
+					wxMessageBox(wxString::Format("No CMS profile found for %s, saving without...", profilestr));
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
 					dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
-				else dib->saveImageFile(fname, std::string(configparams.c_str()), profile);
+				else {
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with icc profile %s...",fname, profilestr));
+					dib->saveImageFile(fname, std::string(configparams.c_str()), profile);
+				}
 			}
 			else {
 				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
