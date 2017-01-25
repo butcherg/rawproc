@@ -443,7 +443,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
-		if (wxConfigBase::Get()->Read("app.cms","0") == "1") 
+		if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
 			pic->SetColorManagement(true);
 		else
 			pic->SetColorManagement(false);
@@ -534,6 +534,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
+				if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
+					pic->SetColorManagement(true);
+				else
+					pic->SetColorManagement(false);
 				commandtree->DeleteAllItems();
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
