@@ -118,7 +118,15 @@ END_EVENT_TABLE()
 		img = gImage2wxImage(*dib);
 
 		if (colormgt) {
-			hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			if (dib->getProfile()) {
+				hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			}
+			if (!hImgProfile) {
+				wxMessageBox("Embedded profile not found, using internal srgb profile...");
+				wxString inputprof = wxConfigBase::Get()->Read("input.cms.defaultprofie","srgb");
+				//hImgProfile = gImage::makeLCMSProfile(std::string(inputprof.ToAscii()), 1.0);  //needs work...
+				hImgProfile = gImage::makeLCMSProfile("srgb", 1.0);
+			}
 			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofie","srgb");
 			if (displayprof == "srgb") {
 				//Make a linear gamma sRGB profile for display:
@@ -130,21 +138,57 @@ END_EVENT_TABLE()
 
 			if (hTransform) cmsDeleteTransform(hTransform);
 
+/*
+			if (hImgProfile)
+				printf("Image profile is okay...\n");
+			else
+				printf("Image profile is NOT okay...\n");
+
+			if (hDisplayProfile)
+				printf("Display profile is okay...\n");
+			else
+				printf("Display profile is NOT okay...\n");
+*/
+
+
 			hTransform = cmsCreateTransform(
 				hImgProfile, TYPE_RGB_8,
 				hDisplayProfile, TYPE_RGB_8,
 				INTENT_PERCEPTUAL, 0);
+
+			if (!hTransform) colormgt == false;
+
 			cmsCloseProfile(hImgProfile);
 			cmsCloseProfile(hDisplayProfile);
 		}
 
                 aspectW = (float) img.GetWidth() / (float) img.GetHeight();
                 aspectH = (float) img.GetHeight() / (float) img.GetWidth();
-                
+
+/*
+		if (img.IsOk()) 
+			printf("Image is okay...\n");
+		else
+			printf("Image is NOT okay...\n");
+*/
+              
                 //generate and store a thumbnail bitmap:
                 thumbW = 100*aspectW;
                 thumbH = 100;
                 wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
+
+/*
+		if (thumbimg.IsOk()) 
+			printf("Thumb is okay...\n");
+		else
+			printf("Thumb is NOT okay...\n");
+
+		if (hTransform)
+			printf("Transform is okay...\n");
+		else
+			printf("Transform is NOT okay...\n");
+*/
+
 		if (colormgt) cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
                 thumb = new wxBitmap(thumbimg);
 
@@ -300,8 +344,10 @@ END_EVENT_TABLE()
 
 	void PicPanel::OnPaint(wxPaintEvent & event)
 	{
-		wxPaintDC dc(this);
-		render(dc);
+		if (img.IsOk() && thumb != NULL) {
+			wxPaintDC dc(this);
+			render(dc);
+		}
 	}
 
 	void PicPanel::OnLeftDown(wxMouseEvent& event)

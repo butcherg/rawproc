@@ -99,7 +99,8 @@ END_EVENT_TABLE()
 
 void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
 {
-	wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
+	//wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
+	printf("CMS Error %d: %s\n", code, text);
 }
 
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
@@ -138,6 +139,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	ret = help.AddBook(wxFileName(helpfile));
 	if (! ret)
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
+
 	cmsSetLogErrorHandler(MyLogErrorHandler);
 }
 
