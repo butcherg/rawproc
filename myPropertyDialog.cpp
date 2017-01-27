@@ -21,7 +21,7 @@ wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 	ct->Add(fil, 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
-	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this);
+	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
 }
 
 
@@ -51,7 +51,7 @@ wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
 	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
-	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this);
+	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
 }
 
 
