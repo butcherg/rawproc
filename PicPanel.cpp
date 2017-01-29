@@ -426,13 +426,11 @@ END_EVENT_TABLE()
 			unsigned px = x-picX;
 			unsigned py = y-picY;
 			if (d) {
-				//pix p = d->getPixel(px, py);
-				std::vector<float> p = d->getPixelArray(px, py);
+				std::vector<PIXTYPE> p = d->getPixelArray(px, py);
 				if (px > 1) {
 					if (py > 1) {
 						if (px < scaledpic->GetWidth()) {
-							if (py < scaledpic->GetHeight()) {
-								//parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", px, py,  p.r, p.g, p.b)); 
+							if (py < scaledpic->GetHeight()) { 
 								parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", px, py,  p[0], p[1], p[2])); 
 							} else parentframe->SetStatusText("");
 						} else parentframe->SetStatusText("");
