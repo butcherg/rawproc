@@ -249,7 +249,7 @@ bool PicProcessorRotate::processPic() {
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyRotate(-angle, threadcount);
+	dib->ApplyRotate(-angle, false, threadcount);
 	dirty = false;
 	wxString d = duration();
 

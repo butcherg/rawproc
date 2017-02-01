@@ -2,6 +2,7 @@
 #include "PicProcessor.h"
 #include "util.h"
 #include <wx/event.h>
+#include <exception>
 
 class BlankPanel: public PicProcPanel 
 {
@@ -50,13 +51,14 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 
+	dib = new gImage(getSelectedPicProcessor(m_tree)->getProcessedPic());
 
 	wxTreeItemId id;
-	if (m_tree->IsSelected(m_tree->GetRootItem()))
+	if (m_tree->IsSelected(m_tree->GetRootItem())) 
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
-	else
+	else 
 	 	id = m_tree->InsertItem(m_tree->GetRootItem(), m_tree->GetSelection(), name, -1, -1, this);
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
@@ -137,10 +139,25 @@ PicProcessor *PicProcessor::getPreviousPicProcessor()
 	
 }
 
+PicProcessor *PicProcessor::getSelectedPicProcessor(wxTreeCtrl *tree)
+{
+	wxTreeItemId sel = tree->GetSelection();
+	if (sel.IsOk())
+		return (PicProcessor *) tree->GetItemData(sel);
+	else
+		return NULL;
+}
+
 gImage& PicProcessor::getProcessedPic() 
 {
 	if (dirty || dib->getWidth()==0) processPic();
 	return *dib;
+}
+
+gImage* PicProcessor::getProcessedPicPointer()
+{
+	if (dirty || dib->getWidth()==0) processPic();
+	return dib;
 }
 
 PicPanel *PicProcessor::getDisplay()

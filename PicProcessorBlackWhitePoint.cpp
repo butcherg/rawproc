@@ -130,7 +130,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	}
 	else setParams(command);
 	showParams();
-	processPic();
+	//processPic();
 }
 
 void PicProcessorBlackWhitePoint::showParams()

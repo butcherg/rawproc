@@ -15,10 +15,12 @@ class PropertyDialog: public wxDialog
 		PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxFileConfig *config, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);
 		~PropertyDialog();
 		void UpdateProperty(wxPropertyGridEvent& event);
+		void FilterGrid(wxCommandEvent& event);
 
 
 	private:
 		wxPropertyGrid *pg;
+		wxTextCtrl *fil;
 
 };
 

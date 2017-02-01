@@ -403,7 +403,7 @@ for (int f=0; f<files.size(); f++)
 			printf("rotate: %0.2f (%d threads)... ",angle,threadcount);
 
 			_mark();
-			dib.ApplyRotate(angle, threadcount);
+			dib.ApplyRotate(angle, false, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 

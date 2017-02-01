@@ -37,6 +37,7 @@
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
+#include <exception>
 
 #include "unchecked.xpm"
 #include "checked.xpm"
@@ -96,6 +97,12 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 END_EVENT_TABLE()
 ////Event Table End
 
+void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
+{
+	//wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
+	printf("CMS Error %d: %s\n", code, text);
+}
+
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
@@ -132,6 +139,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	ret = help.AddBook(wxFileName(helpfile));
 	if (! ret)
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
+
+	cmsSetLogErrorHandler(MyLogErrorHandler);
 }
 
 rawprocFrm::~rawprocFrm()
@@ -324,16 +333,19 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	exif.Append("\n");
 	exif.Append(dib.Stats().c_str());
 
-
 	char *profile = dib.getProfile();
 	unsigned profile_length = dib.getProfileLength();
-	if (profile) {
+
+	if (profile_length && profile) {
 		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
-		cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-		exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
-		cmsCloseProfile(icc);
+		if (icc) {
+			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
+			exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
+			cmsCloseProfile(icc);
+		}
+		else exif.Append(wxString::Format("\nICC Profile: failed (%d)\n",profile_length));
 	}
-	else exif.Append("\nICC Profile: None\n");
+	else exif.Append(wxString::Format("\nICC Profile: None (%d)\n",profile_length));
 
 	wxMessageBox(exif,"Image Information");
 	
@@ -433,6 +445,11 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
+		if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
+			pic->SetColorManagement(true);
+		else
+			pic->SetColorManagement(false);
+
 		mark();
 		//dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
@@ -459,13 +476,18 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
-				for (int i=0; i<token.GetCount(); i++) {
-					wxArrayString cmd = split(token[i], ":");
-					if (cmd.GetCount() == 2)
-						AddItem(cmd[0], cmd[1]);
-					else
-						AddItem(cmd[0], "");
-					wxSafeYield(this);
+				try {
+					for (int i=0; i<token.GetCount(); i++) {
+						wxArrayString cmd = split(token[i], ":");
+						if (cmd.GetCount() == 2)
+							AddItem(cmd[0], cmd[1]);
+						else
+							AddItem(cmd[0], "");
+						wxSafeYield(this);
+					}
+				}
+				catch (std::exception& e) {
+					wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
 				}
 			}
 		}
@@ -514,6 +536,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
+				if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
+					pic->SetColorManagement(true);
+				else
+					pic->SetColorManagement(false);
 				commandtree->DeleteAllItems();
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
@@ -553,6 +579,79 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		wxMessageBox(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
 	}
 	SetStatusText("");
+}
+
+
+void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
+{
+	wxString fname;
+	gImage * dib;
+	cmsHPROFILE profile;
+
+	if (!sourcefilename.IsOk()) 
+		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+	else
+		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+
+	if ( !fname.empty() )
+	{
+		if (wxFileName::FileExists(fname)) 
+			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
+				return;
+			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
+				wxMessageBox("Error: invalid file type");
+				return;
+			}
+			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPicPointer();
+			else
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
+
+			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
+			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
+
+			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
+
+			wxString configparams;
+			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
+			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
+			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
+
+
+			if (pic->GetColorManagement()) {
+				wxString profilestr = "srgb";
+				if (filetype == FILETYPE_JPEG) {
+					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
+				}
+				else if (filetype == FILETYPE_TIFF) {
+					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","srgb");
+				}
+				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), 1.0);
+				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
+				
+				if (!profile) {
+					wxMessageBox(wxString::Format("No CMS profile found for %s, saving without...", profilestr));
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
+					dib->saveImageFile(fname, std::string(configparams.c_str()));
+				}
+				else {
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with icc profile %s...",fname, profilestr));
+					dib->saveImageFile(fname, std::string(configparams.c_str()), profile);
+				}
+			}
+			else {
+				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
+				dib->saveImageFile(fname, std::string(configparams.c_str()));
+			}
+			wxFileName tmpname(fname);
+
+			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
+				sourcefilename.Assign(fname);
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			}
+			
+		WxStatusBar1->SetStatusText("");
+	}
 }
 
 
@@ -741,11 +840,16 @@ void rawprocFrm::Mnuadd1005Click(wxCommandEvent& event)
 void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
-	PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
-	g->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+	try {
+		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
+		PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
+		g->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
+	}
 }
 
 
@@ -755,11 +859,16 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
-	PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
-	g->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+	try {
+		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
+		PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
+		g->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding bright tool failed: %s",e.what()));
+	}
 }
 
 
@@ -769,11 +878,16 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
-	PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
-	c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
+		PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
+		c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding contrast tool failed: %s",e.what()));
+	}
 }
 
 
@@ -781,24 +895,32 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
-	PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
-	c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
+		PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
+		c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
+	}
 }
 
 
 
 void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
-
 	SetStatusText("");
-	PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
-	crv->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
-
+	try {
+		PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
+		crv->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
+	}
 }
 
 
@@ -806,159 +928,155 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
-	wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
-	wxString cmd= wxString::Format("%s,%s",level,threshold);
-	PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
-	shd->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
+	try {
+		wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
+		wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
+		wxString cmd= wxString::Format("%s,%s",level,threshold);
+		PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
+		shd->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding shadow tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
-	wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
-	wxString cmd= wxString::Format("%s,%s",level,threshold);
-	PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
-	s->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
+	try {
+		wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
+		wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
+		wxString cmd= wxString::Format("%s,%s",level,threshold);
+		PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
+		s->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding highlight tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
-	wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
-	wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
-	wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
-	PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
-	gr->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
+	try {
+		wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
+		wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
+		wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
+		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
+		PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
+		gr->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
-	c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
+		c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding crop tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
-	wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
-	wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
-	wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
-	PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
-	c->processPic();
-	pic->SetScale(1.0);
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
+		wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
+		wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
+		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
+		PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
+		c->processPic();
+		pic->SetScale(1.0);
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	PicProcessorBlackWhitePoint *c;
-	if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
-		c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
-	else
-		c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
-	//c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		PicProcessorBlackWhitePoint *c;
+		if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
+			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
+		else
+			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
+		c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
-	PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
-	if (defval != "0") c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
+		PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
+		if (defval != "0") c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
-	PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
-	if (defval != "0.0") c->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	try {
+		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
+		PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
+		if (defval != "0.0") c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
+	}
 }
 
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
 	SetStatusText("");
-	wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
-	wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
-	wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
-	wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
-	PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
-	if (sigma != "0") d->processPic();
-	wxSafeYield(this);
-	if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
-}
-
-/*
- * Mnusave1009Click
- */
-void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
-{
-	wxString fname;
-	gImage dib;
-
-	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
-	else
-		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
-
-	if ( !fname.empty() )
-	{
-		if (wxFileName::FileExists(fname)) 
-			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
-				return;
-			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
-				wxMessageBox("Error: invalid file type");
-				return;
-			}
-			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPic();
-			else
-				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPic();
-
-			dib.setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
-			dib.setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
-
-			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
-
-			wxString configparams;
-			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
-			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
-			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
-
-
-			WxStatusBar1->SetStatusText("Saving file...");
-			dib.saveImageFile(fname, std::string(configparams.c_str()));
-			wxFileName tmpname(fname);
-
-			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
-				sourcefilename.Assign(fname);
-				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
-			}
-			
-		WxStatusBar1->SetStatusText("");
+	try {
+		wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
+		wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+		wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
+		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
+		PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
+		if (sigma != "0") d->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding denoise tool failed: %s",e.what()));
 	}
 }
+
+
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 {
@@ -1016,7 +1134,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s",WxWidgetsVersion,gImageVersion,LittleCMSVersion,configfile));
+	//wxString PixelFormat = wxString::Format("%d",gImage::getRGBSize());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, configfile, gImage::getRGBCharacteristics().c_str()));
 	wxAboutBox(info);
 
 }
