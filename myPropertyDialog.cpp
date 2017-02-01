@@ -3,6 +3,8 @@
 
 #include <wx/wx.h>
 
+#define FILTERID 8400
+
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::map<std::string, std::string> props, const wxPoint &pos, const wxSize &size):
 wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 {
@@ -17,11 +19,12 @@ wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 	
 	ct->Add(new wxButton(this, wxID_OK, "Dismiss"), 0, wxALL, 10);
 	ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
-	fil = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+	fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
 	ct->Add(fil, 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
 	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
+	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
 }
 
 
@@ -46,12 +49,13 @@ wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 
 	ct->Add(new wxButton(this, wxID_OK, "Dismiss"), 0, wxALL, 10);
 	ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
-	fil = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+	fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
 	ct->Add(fil, 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
 	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
 	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
+	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
 }
 
 
