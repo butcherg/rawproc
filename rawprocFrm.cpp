@@ -589,9 +589,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	cmsHPROFILE profile;
 
 	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.ti",wxFD_SAVE);  // |PNG files (*.png)|*.png
 	else
-		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);
+		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif",wxFD_SAVE);  // |PNG files (*.png)|*.png
 
 	if ( !fname.empty() )
 	{
