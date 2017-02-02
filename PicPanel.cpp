@@ -31,6 +31,7 @@ END_EVENT_TABLE()
 
 		colormgt = false;
 		hTransform = NULL;
+		hImgProfile = NULL;
 
 		fitmode=true;
 		keyCode = 0;
@@ -96,7 +97,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::SetPic(gImage * dib)
 	{
-		cmsHPROFILE hImgProfile, hDisplayProfile;
+		cmsHPROFILE hDisplayProfile;
 		//parentframe->SetStatusText("display...");
 		//mark();
 		d = dib;
@@ -117,79 +118,42 @@ END_EVENT_TABLE()
 
 		img = gImage2wxImage(*dib);
 
-		if (colormgt) {
-			if (dib->getProfile()) {
-				hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-			}
-			if (!hImgProfile) {
-				wxMessageBox("Embedded profile not found, using internal srgb profile...");
-				wxString inputprof = wxConfigBase::Get()->Read("input.cms.defaultprofie","srgb");
-				//hImgProfile = gImage::makeLCMSProfile(std::string(inputprof.ToAscii()), 1.0);  //needs work...
-				hImgProfile = gImage::makeLCMSProfile("srgb", 1.0);
-			}
+		if (hImgProfile) {
 			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofie","srgb");
-			if (displayprof == "srgb") {
-				//Make a linear gamma sRGB profile for display:
-				hDisplayProfile = gImage::makeLCMSProfile("srgb", 1.0);
-			}
-			else
+			float gamma = wxConfigBase::Get()->Read("display.cms.gamma",2.4);
+			hDisplayProfile = gImage::makeLCMSProfile(std::string(displayprof.ToAscii()), gamma);
+			if (!hDisplayProfile)
 				//load the monitor profile:
 				hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
 
 			if (hTransform) cmsDeleteTransform(hTransform);
 
-/*
 			if (hImgProfile)
-				printf("Image profile is okay...\n");
-			else
-				printf("Image profile is NOT okay...\n");
+				if (hDisplayProfile)
+					hTransform = cmsCreateTransform(
+						hImgProfile, TYPE_RGB_8,
+						hDisplayProfile, TYPE_RGB_8,
+						INTENT_PERCEPTUAL, 0);
+				else printf("bad display profile...\n");
+			else printf("bad image profile...\n");
 
-			if (hDisplayProfile)
-				printf("Display profile is okay...\n");
-			else
-				printf("Display profile is NOT okay...\n");
-*/
+			//if (!hTransform) colormgt == false;
 
-
-			hTransform = cmsCreateTransform(
-				hImgProfile, TYPE_RGB_8,
-				hDisplayProfile, TYPE_RGB_8,
-				INTENT_PERCEPTUAL, 0);
-
-			if (!hTransform) colormgt == false;
-
-			cmsCloseProfile(hImgProfile);
+			//cmsCloseProfile(hImgProfile);
 			cmsCloseProfile(hDisplayProfile);
 		}
 
                 aspectW = (float) img.GetWidth() / (float) img.GetHeight();
                 aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
-/*
-		if (img.IsOk()) 
-			printf("Image is okay...\n");
-		else
-			printf("Image is NOT okay...\n");
-*/
               
                 //generate and store a thumbnail bitmap:
                 thumbW = 100*aspectW;
                 thumbH = 100;
                 wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 
-/*
-		if (thumbimg.IsOk()) 
-			printf("Thumb is okay...\n");
-		else
-			printf("Thumb is NOT okay...\n");
 
-		if (hTransform)
-			printf("Transform is okay...\n");
-		else
-			printf("Transform is NOT okay...\n");
-*/
-
-		if (colormgt) cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
+		if (hImgProfile) cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
                 thumb = new wxBitmap(thumbimg);
 
 		hsgram = wxBitmap();
@@ -245,7 +209,9 @@ END_EVENT_TABLE()
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
-		if (colormgt) cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+		if (hImgProfile) 
+			if (hTransform)
+				cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
@@ -288,6 +254,11 @@ END_EVENT_TABLE()
 	bool PicPanel::GetColorManagement()
 	{
 		return colormgt;
+	}
+
+	void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
+	{
+		hImgProfile = hImgProf;
 	}
 
 	wxString PicPanel::getHistogramString()

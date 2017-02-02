@@ -445,11 +445,6 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
-		if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
-			pic->SetColorManagement(true);
-		else
-			pic->SetColorManagement(false);
-
 		mark();
 		//dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
@@ -462,6 +457,17 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		wxString flagstring(params.c_str());
 		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
 			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
+
+		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+			cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 1.0);
+			pic->SetImageProfile(hImgProf);
+			pic->SetColorManagement(true);
+		}
+		else {
+			pic->SetImageProfile(NULL);
+			pic->SetColorManagement(false);
+		}
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, parameters, dib);
 		picdata->showParams();
@@ -620,13 +626,15 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			if (pic->GetColorManagement()) {
 				wxString profilestr = "srgb";
+				float gamma = 1.0;
 				if (filetype == FILETYPE_JPEG) {
 					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
+					gamma = wxConfigBase::Get()->Read("output.jpeg.cms.gamma",2.4);
 				}
 				else if (filetype == FILETYPE_TIFF) {
 					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","srgb");
 				}
-				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), 1.0);
+				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), gamma);
 				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
 				
 				if (!profile) {

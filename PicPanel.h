@@ -34,6 +34,7 @@ class PicPanel: public wxPanel
 	void SetPic(gImage * dib);
 	void SetColorManagement(bool b);
 	bool GetColorManagement();
+	void SetImageProfile(cmsHPROFILE hImgProf);
 	void SetThumbMode(int mode);
 	void ToggleThumb();
 	//void ToggleCropMode();
@@ -76,6 +77,7 @@ class PicPanel: public wxPanel
 	bool fitmode;
 
 	bool colormgt;
+	cmsHPROFILE hImgProfile;
 	cmsHTRANSFORM hTransform;
 
         wxColor histogramcolor;
