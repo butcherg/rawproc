@@ -119,7 +119,7 @@ END_EVENT_TABLE()
 		img = gImage2wxImage(*dib);
 
 		if (hImgProfile) {
-			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofie","srgb");
+			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofile","srgb");
 			float gamma = wxConfigBase::Get()->Read("display.cms.gamma",2.4);
 			hDisplayProfile = gImage::makeLCMSProfile(std::string(displayprof.ToAscii()), gamma);
 			if (!hDisplayProfile)
@@ -258,6 +258,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
 	{
+		if (hImgProfile) cmsCloseProfile(hImgProfile);
 		hImgProfile = hImgProf;
 	}
 

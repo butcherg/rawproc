@@ -270,54 +270,9 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 
 
 
-//ToDo: Get rid of MoveBefore, MoveAfter...
 
-/*
-bool rawprocFrm::MoveBefore(wxTreeItemId item)
-{
-    bool result = false;
 
-	wxString n,c;
-	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
-	wxString name = prevpic->getName();
-	wxString params = prevpic->getParams();
-    wxTreeItemId moved, prev, before;
-    prev = commandtree->GetPrevSibling(item);
-    if (prev.IsOk()) before = commandtree->GetPrevSibling(prev);
-    if (before.IsOk()) {          
-        moved = commandtree->InsertItem(commandtree->GetItemParent(item), before, name, -1, -1, AddItem(name,params));
-    }
-    else {
-        if (prev.IsOk() && prev != commandtree->GetItemParent(item)) {
-            moved = commandtree->InsertItem(commandtree->GetItemParent(item), 0, name, -1, -1, AddItem(name,params));
-        }
-    }
-    commandtree->Delete(item);
-    if (moved.IsOk()) {
-        commandtree->SelectItem(moved);
-	commandtree->SetItemState(moved,0);
-        
-        result = true;
-    }
-    return result;
-}
 
-bool rawprocFrm::MoveAfter(wxTreeItemId item)
-{
-    bool result = false;
-	PicProcessor * prevpic = (PicProcessor *) commandtree->GetItemData(item);
-	wxString name = prevpic->getName();
-	wxString params = prevpic->getParams();
-        wxTreeItemId after = commandtree->GetNextSibling(item);
-	   if(after.IsOk()) {
-            wxTreeItemId moved = commandtree->InsertItem(commandtree->GetItemParent(after), after, name, -1, -1, AddItem(name,params));
-            commandtree->SelectItem(moved);
-            commandtree->Delete(item);
-            result = true;
-        }
-    return result;
-}
-*/
 
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
@@ -327,8 +282,17 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	exif.Append(wxString::Format("Width: %d Height: %d\n\n",dib.getWidth(), dib.getHeight()));
 
 	std::map<std::string,std::string> e =  dib.getInfo();
-	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it)
-		exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
+	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
+		if (it->first == "ExposureTime") {
+			float exp = atof(it->second.c_str());
+			if (exp > 1.0)
+				exif.Append(wxString::Format("%s: 1/%f sec\n",it->first.c_str(),exp));
+			else
+				exif.Append(wxString::Format("%s: 1/%d sec\n",it->first.c_str(),int(1.0/exp)));
+		}
+		else 
+			exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
+	}
 	char buff[4096];
 	exif.Append("\n");
 	exif.Append(dib.Stats().c_str());
@@ -460,7 +424,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 			cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-			if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 1.0);
+			if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 2.4);
 			pic->SetImageProfile(hImgProf);
 			pic->SetColorManagement(true);
 		}
@@ -542,10 +506,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
-				if (wxConfigBase::Get()->Read("input.cms","0") == "1") 
-					pic->SetColorManagement(true);
-				else
-					pic->SetColorManagement(false);
 				commandtree->DeleteAllItems();
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
@@ -554,6 +514,17 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
 					SetStatusText("");
 					return;
+				}
+
+				if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+					cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+					if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 2.4);
+					pic->SetImageProfile(hImgProf);
+					pic->SetColorManagement(true);
+				}
+				else {
+					pic->SetImageProfile(NULL);
+					pic->SetColorManagement(false);
 				}
 
 				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
