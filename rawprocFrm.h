@@ -156,8 +156,7 @@ class rawprocFrm : public wxFrame
 
 	void SetConfigFile(wxString cfile);
 	void SetThumbMode(int mode);
-	//bool MoveBefore(wxTreeItemId item);
-	//bool MoveAfter(wxTreeItemId item);
+
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
 	wxString AssembleCommand();
 	void EXIFDialog(wxTreeItemId item);

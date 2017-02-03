@@ -397,8 +397,8 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	sourcefilename.Clear();
 	gImage *dib;
 	GIMAGE_FILETYPE fif;
-	fif = gImage::getFileType(fname.c_str());
-	if (fif != FILETYPE_UNKNOWN) {
+//	fif = gImage::getFileType(fname.c_str());
+//	if (fif != FILETYPE_UNKNOWN) {
 
 		commandtree->DeleteAllItems();
 
@@ -466,10 +466,10 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		Update();
 		
 		//wxSafeYield(this);
-	}
-	else {
-		SetStatusText(wxString::Format("Loading %s failed.",filename.GetFullName() ));
-	}
+	//}
+	//else {
+	//	SetStatusText(wxString::Format("Loading %s failed.",filename.GetFullName() ));
+	//}
 }
 
 void rawprocFrm::OpenFileSource(wxString fname)
@@ -481,10 +481,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	wxString ofilename;
 	wxString oparams = "";
 
-	GIMAGE_FILETYPE fif;
-	fif = gImage::getFileType(fname.c_str());
+//	GIMAGE_FILETYPE fif;
+//	fif = gImage::getFileType(fname.c_str());
 
-	if (fif != FILETYPE_UNKNOWN) {
+//	if (fif != FILETYPE_UNKNOWN) {
 		SetStatusText("Retrieving source script...");
 		std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
 
@@ -551,10 +551,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		else {
 			wxMessageBox(wxString::Format("No source script found in %s, aborting Open Source.",filename.GetFullName() ));
 		}
-	}
-	else {
-		wxMessageBox(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
-	}
+//	}
+//	else {
+//		wxMessageBox(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
+//	}
 	SetStatusText("");
 }
 
