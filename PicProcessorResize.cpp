@@ -102,7 +102,7 @@ bool PicProcessorResize::processPic() {
 	if (algo == "lanczos3") filter = FILTER_LANCZOS3;
 
 	int threadcount;
-	wxConfigBase::Get()->Read("tool.curve.cores",&threadcount,0);
+	wxConfigBase::Get()->Read("tool.resize.cores",&threadcount,0);
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
