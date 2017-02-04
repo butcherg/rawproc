@@ -140,7 +140,6 @@ class RotatePanel: public PicProcPanel
 		void OnSize(wxSizeEvent& event) 
 		{
 			wxSize s = GetParent()->GetSize();
-//wxMessageBox(wxString::Format("panel onsize, %d,%d",s.GetWidth(), s.GetHeight()));
 			SetSize(s);
 
 			preview->SetSize(g->GetCellSize(2,0));

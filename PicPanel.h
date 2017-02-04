@@ -15,9 +15,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <lcms2.h>
-//#include "FreeImage.h"
 #include <gimage.h>
-//#include "PicProcessorCrop.h"
 
 
 class PicPanel: public wxPanel
@@ -37,17 +35,12 @@ class PicPanel: public wxPanel
 	void SetImageProfile(cmsHPROFILE hImgProf);
 	void SetThumbMode(int mode);
 	void ToggleThumb();
-	//void ToggleCropMode();
-	//wxString GetCropParams();
-	//void SetCropParams(wxString params);
-	//void SetCropRatio(int r);
 	wxString getHistogramString();
 	double GetScale();
 	void SetScale(double s);
 	void SetScaleToWidth();
 	void SetScaleToWidth(double percentofwidth);
 	void FitMode(bool f);
-	//void CropMode(bool c);
         void OnMouseWheel(wxMouseEvent& event);
         void OnMouseMove(wxMouseEvent& event);
         void OnLeftUp(wxMouseEvent& event);

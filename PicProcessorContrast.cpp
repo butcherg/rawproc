@@ -3,7 +3,6 @@
 #include "PicProcPanel.h"
 #include <gimage.h>
 #include "undo.xpm"
-//#include <omp.h>
 
 #include "util.h"
 #include <wx/fileconf.h>
@@ -92,45 +91,6 @@ class ContrastPanel: public PicProcPanel
 
 };
 
-/*
-class ContrastPanel: public PicProcPanel
-{
-	public:
-		ContrastPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
-		{
-			SetSize(parent->GetSize());
-			b->SetOrientation(wxHORIZONTAL);
-			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			slide = new myTouchSlider((wxFrame *) this, wxID_ANY, "contrast", SLIDERWIDTH, atof(p.c_str()), 1.0, -100.0, 100.0, "%2.0f");
-			b->Add(100,100,1);
-			b->Add(slide, flags);
-			b->Add(100,100,1);
-			SetSizerAndFit(b);
-			b->Layout();
-			Refresh();
-			Update();
-			SetFocus();
-			Connect(wxID_ANY, wxEVT_SCROLL_THUMBRELEASE,wxCommandEventHandler(ContrastPanel::paramChanged));
-		}
-
-		~ContrastPanel()
-		{
-			slide->~myTouchSlider();
-		}
-
-		void paramChanged(wxCommandEvent& event)
-		{
-			q->setParams(wxString::Format("%d",slide->GetIntValue()));
-			q->processPic();
-			event.Skip();
-		}
-
-
-	private:
-		myTouchSlider *slide;
-
-};
-*/
 
 PicProcessorContrast::PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
@@ -151,7 +111,6 @@ bool PicProcessorContrast::processPic() {
 	bool result = true;
 
 	Curve ctrlpts;
-	//ctrlpts.insertpoint(0,0);
 	if (contrast < 0) {
 		ctrlpts.insertpoint(0,-contrast);
 		ctrlpts.insertpoint(255,255+contrast);

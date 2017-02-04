@@ -7,17 +7,8 @@
 
 #include "util.h"
 
-//#define radius 10
-
 
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
-// some useful events
-/*
- EVT_LEAVE_WINDOW(BasicCurvePane::mouseLeftWindow)
- 
- EVT_KEY_UP(BasicCurvePane::keyReleased)
- 
- */
  
 // catch paint events
 EVT_MOTION(CurvePane::mouseMoved)
@@ -47,8 +38,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(300,300) )
 	selectedCP.y = -1.0;
 	c.clampto(0.0,255.0);
 	paintNow();
-	//Refresh();
-	//Update();
+
 }
 
 void CurvePane::paintEvent(wxPaintEvent & evt)
@@ -183,7 +173,6 @@ void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 	else
 		z--;
 	if (z<1) z=1;
-	//Refresh();
 }
 
 void CurvePane::keyPressed(wxKeyEvent &event)
@@ -283,10 +272,6 @@ void CurvePane::render(wxDC&  dc)
 	dc.DrawLine(m,h-m-192,m+255,h-m-192);
 	dc.SetPen(*wxBLACK_PEN);
 
-	//double ax = ((double) w/x);
-	//double ay = ((double) h/y)*z;
-
-
 	for (double x=0.0; x<256.0; x++) {
 		y=c.getpoint(x);
 		if (y>255.0) y = 255.0; if (y<0.0) y=0.0;
@@ -295,20 +280,15 @@ void CurvePane::render(wxDC&  dc)
 		py = y;
 	}
 
-	//if (mousemotion)dc.DrawCircle(pos,5);
 	std::vector<cp> controlpts = c.getControlPoints();
 	for (unsigned int i=0; i<controlpts.size(); i++) {
 		if ((controlpts[i].x == selectedCP.x) & (controlpts[i].y == selectedCP.y)) {
-			//dc.DrawText(wxString::Format("%d,%d",selectedCP.x,selectedCP.y),selectedCP.x-20,selectedCP.y-20);
 			dc.SetPen(*wxRED_PEN);
 		}
 		dc.DrawCircle(m+controlpts[i].x,h-m-controlpts[i].y,radius);
 		dc.SetPen(*wxBLACK_PEN);
 	}
 }
-
-
-
 
 
 void CurvePane::bump(int i)

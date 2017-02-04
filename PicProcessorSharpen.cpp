@@ -4,7 +4,6 @@
 #include <gimage.h>
 #include "undo.xpm"
 #include "util.h"
-//#include <omp.h>
 
 #include <vector>
 #include <wx/fileconf.h>

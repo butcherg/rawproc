@@ -4,7 +4,6 @@
 #include "PicProcPanel.h"
 #include "undo.xpm"
 #include <gimage.h>
-//#include <omp.h>
 
 #include "util.h"
 
@@ -20,7 +19,6 @@ class GrayPanel: public PicProcPanel
 	public:
 		GrayPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			//c = new wxBoxSizer(wxHORIZONTAL); 
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString p = split(params,",");

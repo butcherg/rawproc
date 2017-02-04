@@ -1,7 +1,6 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
 #include <gimage.h>
-#include <omp.h>
 
 #include "util.h"
 #include "curve.h"
@@ -45,8 +44,6 @@ class GammaPanel: public PicProcPanel
 };
 
 PicProcessorGamma::PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) {
-	//p->DestroyChildren();
-	//r = new GammaPanel(p, this, c);
 	showParams();
 
 }

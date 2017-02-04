@@ -1,14 +1,6 @@
 #include "myFileSelector.h"
 #include <wx/fileconf.h>
 
-/*
-RAW_DEFAULT Load the file as linear RGB 48-bit
-RAW_PREVIEW Try to load the embedded JPEG preview with included Exif data or default to RGB 24-bit
-RAW_DISPLAY Load the file as RGB 24-bit
-RAW_HALFSIZE Output a half-size color image
-RAW_UNPROCESSED
-*/
-
 myFileSelector::myFileSelector(wxWindow* parent, wxWindowID id, wxString path, wxString title): wxDialog(parent, id, title, wxDefaultPosition, wxSize(730, 600))
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);

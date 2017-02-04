@@ -25,7 +25,7 @@ class CropPanel: public PicProcPanel
 			top = atoi(p[1])+indent;
 			right = atoi(p[2])-indent;
 			bottom = atoi(p[3])-indent;
-			//wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+
 			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
 			GetSize(&ww, &wh);
@@ -69,7 +69,6 @@ class CropPanel: public PicProcPanel
 
 		void OnPaint(wxPaintEvent& event)
 		{
-			//int ww, iw, wh, ih;
 			GetSize(&ww, &wh);
 			wxPaintDC dc(this);
 			dc.DrawBitmap(wxBitmap(img.Scale(iw*aspect, ih*aspect)),0,0);
@@ -84,7 +83,6 @@ class CropPanel: public PicProcPanel
 			dc.DrawLine(left*aspect, bottom*aspect, left*aspect, top*aspect);
 			dc.SetBrush(*wxYELLOW_BRUSH);
 			dc.SetPen(*wxYELLOW_PEN);
-			//dc.DrawCircle(left*aspect, top*aspect, cpradius);
 			dc.DrawRectangle(left*aspect-cpradius, top*aspect-cpradius,cpradius*2,cpradius*2);
 			dc.SetBrush(*wxRED_BRUSH);
 			dc.SetPen(*wxRED_PEN);

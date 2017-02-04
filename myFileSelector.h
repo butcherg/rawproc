@@ -5,7 +5,6 @@
 #include <wx/wx.h>
 #include <wx/filectrl.h>
 #include <wx/sizer.h>
-//#include "FreeImage.h"
 #include <gimage.h>
 
 class myFileSelector: public wxDialog {
@@ -23,7 +22,6 @@ public:
 
 
 private:
-	//wxTextCtrl* nameTextCtrl_;
 	wxFileCtrl* fileselector;
 	bool israw;
 	wxRadioBox* rawflags;

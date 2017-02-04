@@ -100,7 +100,7 @@ END_EVENT_TABLE()
 void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
 {
 	//wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
-	printf("CMS Error %d: %s\n", code, text);
+	//printf("CMS Error %d: %s\n", code, text);
 }
 
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
@@ -117,8 +117,6 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
         wxIcon icons[2];
         icons[0] = wxIcon(unchecked_xpm);
         icons[1] = wxIcon(checked_xpm);
-
-	//diag = NULL;
 
         int width  = icons[0].GetWidth(),
             height = icons[0].GetHeight();
@@ -213,26 +211,20 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
-	//wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false).Dockable(false).Floatable(false);   //.MinSize(280,200)
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 	pic = new PicPanel(this);
 
-	//wxPanel parms = new wxPanel(this, -1, wxDefaultPosition, wxSize(285,200),wxVSCROLL);
-	//parameters = new wxScrolled<wxPanel>(parms);
+
 	parameters = new myParameters(this, -1, wxDefaultPosition, wxSize(285,200));
-	//parameters = new wxPanel(this, -1, wxDefaultPosition, wxSize(285,200));
 	parameters->SetMinSize(wxSize(285,200));
 	parameters->SetMaxSize(wxSize(1200,750));
 	parameters->SetAutoLayout(true); 
-	//parameters->SetBackgroundColour(*wxBLUE);
-	//preview  = new wxPanel(this, -1, wxDefaultPosition, wxSize(285,200));
 
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(1).GripperTop());
-	//mgr.AddPane(preview, pinfo.Caption(wxT("Preview")).Position(2).GripperTop());
 
 	mgr.Update();
 }
@@ -267,11 +259,6 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 	else
 		wxMessageBox("bad item");
 }
-
-
-
-
-
 
 
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
@@ -410,7 +397,6 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
 		mark();
-		//dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) params.c_str()));
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
 		if (dib->getWidth() == 0) {
@@ -646,15 +632,12 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
 {
 	olditem = event.GetOldItem();
-	//if ((PicProcessor *) commandtree->GetItemData(olditem))
-		//((PicProcessor *) commandtree->GetItemData(olditem))->showParams(false);
 }
 
 void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 {
 	SetStatusText("");
 	wxTreeItemId item = event.GetItem();
-	//wxTreeItemId item = commandtree->GetSelection();
 	if (item.IsOk()) { 
 		if ((PicProcessor *) commandtree->GetItemData(item))
 			((PicProcessor *) commandtree->GetItemData(item))->showParams();
@@ -746,29 +729,16 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 
 //Menu Items (keep last in file)
 
-/*
- * Mnuopen1003Click
- */
+
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
-/*
-	myFileSelector *filediag = new myFileSelector(NULL, wxID_ANY, filename.GetPath(), "Open Image");
-
-	if(filediag->ShowModal() == wxID_OK)    {
-		wxFileName f(filediag->GetFileSelected());
-		wxSetWorkingDirectory (f.GetPath());
-        	OpenFile(filediag->GetFileSelected(), filediag->GetFlags());
-	}
-	filediag->~myFileSelector();
-*/
 	wxString fname = wxFileSelector("Open Image...", filename.GetPath());	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
 		OpenFile(fname, "");
 	}
-
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
@@ -784,9 +754,6 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuProperties(wxCommandEvent& event)
 {
-	//if (!diag) diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
-	//diag->Show();
-
 	PropertyDialog diag(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
 
 	Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
@@ -798,20 +765,10 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 {
 	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
-	//wxMessageBox(wxString::Format("%s: %s", event.GetPropertyName(), event.GetPropertyValue().GetString()));
 	wxConfigBase::Get()->Write(event.GetPropertyName(), event.GetPropertyValue().GetString());
 	wxConfigBase::Get()->Flush();
 }
 
-
-
-/*
- * Mnuadd1005Click
- */
-void rawprocFrm::Mnuadd1005Click(wxCommandEvent& event)
-{
-	// insert your code here
-}
 
 /*
  * Mnugamma1006Click
@@ -1099,8 +1056,6 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	wxMessageBox(AssembleCommand());
-	//wxMessageBox(wxString::Format("%d",(int) pic->getHistogramString().Length()));
-	//wxMessageBox( pic->getHistogramString());
 }
 
 void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
@@ -1113,7 +1068,6 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	//wxString PixelFormat = wxString::Format("%d",gImage::getRGBSize());
 	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, configfile, gImage::getRGBCharacteristics().c_str()));
 	wxAboutBox(info);
 

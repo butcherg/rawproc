@@ -12,7 +12,6 @@
 #include <wx/treectrl.h>
 #include <wx/sizer.h>
 #include <wx/event.h>
-//#include <wx/thread.h>
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
@@ -47,7 +46,6 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		static PicProcessor *getSelectedPicProcessor(wxTreeCtrl *tree);
 
 	protected:
-		//std::deque<gImage> dib;
 		gImage *dib;
 		PicPanel *m_display;
 		

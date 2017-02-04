@@ -4,7 +4,6 @@
 #include <gimage.h>
 #include "util.h"
 #include "undo.xpm"
-//#include <omp.h>
 
 #include <wx/fileconf.h>
 
@@ -43,14 +42,7 @@ class SaturationPanel: public PicProcPanel
 		{
 			t->~wxTimer();
 		}
-/*
-		void paramChanged(wxCommandEvent& event)
-		{
-			q->setParams(wxString::Format("%2.2f",saturate->GetValue()/10.0));
-			q->processPic();
-			event.Skip();
-		}
-*/
+
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
@@ -92,8 +84,6 @@ class SaturationPanel: public PicProcPanel
 
 PicProcessorSaturation::PicProcessorSaturation(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	//p->DestroyChildren();
-	//r = new SaturationPanel(p,this,c);
 	showParams();
 }
 

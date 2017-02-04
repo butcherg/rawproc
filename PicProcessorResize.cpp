@@ -48,11 +48,7 @@ class ResizePanel: public PicProcPanel
 
 		~ResizePanel()
 		{
-/*
-			widthedit->~wxTextCtrl();
-			heightedit->~wxTextCtrl();
-			algoselect->~wxRadioBox();
-*/
+
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -90,7 +86,6 @@ bool PicProcessorResize::processPic() {
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
 	if (cp.size() >2) algo  = cp[2];
-	//int threadcount = 1; //hard-coded, no multithread
 
 	mark();
 	bool result = true;

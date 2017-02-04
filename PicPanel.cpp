@@ -35,7 +35,6 @@ END_EVENT_TABLE()
 
 		fitmode=true;
 		keyCode = 0;
-		//tick = 0;
 		moving=false; thumbmoving=false;
 		histogramcolor = wxColour(50,50,50);
 		picX = 0; picY = 0;
@@ -92,7 +91,6 @@ END_EVENT_TABLE()
 		if (toggleThumb>3) toggleThumb = 1;
 		Refresh();
 		Update();
-		//parentframe->SetStatusText(wxString::Format("thumbmode: %d", toggleThumb));
 	}
 
 	void PicPanel::SetPic(gImage * dib)
@@ -137,9 +135,7 @@ END_EVENT_TABLE()
 				else printf("bad display profile...\n");
 			else printf("bad image profile...\n");
 
-			//if (!hTransform) colormgt == false;
-
-			//cmsCloseProfile(hImgProfile);
+			//cmsCloseProfile(hImgProfile);  //Now done from rawprocFrm with a method call...
 			cmsCloseProfile(hDisplayProfile);
 		}
 
@@ -217,7 +213,6 @@ END_EVENT_TABLE()
 		scaledpic = new wxBitmap(spic);
 		dc.SetPen(wxPen(wxColour(255,255,255),1));
 		dc.SetBrush(wxBrush(wxColour(50,50,50)));
-		//dc.DrawRectangle(0,h-20,160,h);
 		dc.DrawBitmap(*scaledpic, picX, picY, false);
 		if (toggleThumb != 3) {
 			dc.SetPen(wxPen(wxColour(0,0,0),1));
@@ -376,24 +371,23 @@ END_EVENT_TABLE()
 			anchorx = false;  //y
 
 
-//		else {
-                	if (moving) {
-				picX -= MouseX-x; 
-				picY -= MouseY-y;
-				MouseX = x; MouseY = y;
-				Refresh();
-				Update();
-				//PaintNow();
-                	}
-                	if (thumbmoving) {
-				picX += (MouseX-x) * ((float) iw / (float) thumbW);
-				picY += (MouseY-y) * ((float) ih / (float) thumbH);
-				MouseX = x; MouseY = y;
-				Refresh();
-				Update();
-				//PaintNow();
-                	}
-//		}
+               	if (moving) {
+			picX -= MouseX-x; 
+			picY -= MouseY-y;
+			MouseX = x; MouseY = y;
+			Refresh();
+			Update();
+			//PaintNow();
+               	}
+               	if (thumbmoving) {
+			picX += (MouseX-x) * ((float) iw / (float) thumbW);
+			picY += (MouseY-y) * ((float) ih / (float) thumbH);
+			MouseX = x; MouseY = y;
+			Refresh();
+			Update();
+			//PaintNow();
+               	}
+
 		if (scale == 1.0) {
 			unsigned px = x-picX;
 			unsigned py = y-picY;

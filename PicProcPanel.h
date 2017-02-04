@@ -19,7 +19,6 @@
 
 class PicProcessor;
 
-//class PicProcPanel: public wxScrolledWindow
 class PicProcPanel: public wxPanel
 {
 
@@ -35,7 +34,6 @@ class PicProcPanel: public wxPanel
 		wxGridBagSizer *g;
 		wxString p;
 
-	//DECLARE_EVENT_TABLE()
 };
 
 

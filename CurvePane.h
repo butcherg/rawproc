@@ -15,7 +15,6 @@ class CurvePane : public wxPanel
 public:	
 CurvePane(wxWindow* parent, wxString controlpoints);
  
-	//bool loadData(vector v);
 	void paintEvent(wxPaintEvent & evt);	
 	void paintNow();
 	void OnSize(wxSizeEvent & evt);

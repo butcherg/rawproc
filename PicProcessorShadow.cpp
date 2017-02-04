@@ -4,7 +4,6 @@
 #include "PicProcPanel.h"
 #include <gimage.h>
 #include "undo.xpm"
-//#include <omp.h>
 
 #include "util.h"
 #include <wx/fileconf.h>

@@ -1,12 +1,9 @@
 
 #include "PicProcessor.h"
 #include "PicProcessorCurve.h"
-//#include "FreeImage_Threaded.h"
 #include "PicProcPanel.h"
-//#include "FreeImage.h"
 #include "CurvePane.h"
 #include "util.h"
-#include <omp.h>
 
 #include <wx/fileconf.h>
 

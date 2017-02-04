@@ -2,7 +2,6 @@
 #include "PicProcessorDenoise.h"
 #include "PicProcPanel.h"
 #include "undo.xpm"
-//#include <omp.h>
 
 #include "util.h"
 #include <gimage.h>

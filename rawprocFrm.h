@@ -69,7 +69,6 @@ public:
 		{
 			wxWindow *child = *iter;
 			wxSizeEvent *e = new wxSizeEvent(event.GetSize());
-			//e->SetString(wxString::Format(fmt, val));
 			wxQueueEvent(child,e);
 		}
 
@@ -141,7 +140,6 @@ class rawprocFrm : public wxFrame
 		};
 		
 	public:
-        //void SetPic(FIBITMAP *dib);
 	PicProcessor *  AddItem(wxString name, wxString command);
 	void CommandTreeSelChanging(wxTreeEvent& event);
         void CommandTreeSelChanged(wxTreeEvent& event);
@@ -160,10 +158,9 @@ class rawprocFrm : public wxFrame
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
 	wxString AssembleCommand();
 	void EXIFDialog(wxTreeItemId item);
-	//void OpenFile(wxString fname, int flag);
 	void OpenFile(wxString fname, wxString params="");
 	void OpenFileSource(wxString fname);
-	void Mnuadd1005Click(wxCommandEvent& event);
+
 	void Mnugamma1006Click(wxCommandEvent& event);
 	void Mnubright1007Click(wxCommandEvent& event);
 	void Mnucontrast1008Click(wxCommandEvent& event);
@@ -178,6 +175,7 @@ class rawprocFrm : public wxFrame
 	void MnuSharpenClick(wxCommandEvent& event);
 	void MnuRotateClick(wxCommandEvent& event);
 	void MnuDenoiseClick(wxCommandEvent& event);
+
 	void Mnusave1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);
 	void MnuCut1201Click(wxCommandEvent& event);
@@ -199,12 +197,8 @@ class rawprocFrm : public wxFrame
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
 		wxPanel *preview;
-		//wxPanel *parameters;
 		myParameters *parameters;
 
-		//PropertyDialog *diag;
-
-		//FIBITMAP *d;
 		gImage *d;
 		wxImage *img;
 
