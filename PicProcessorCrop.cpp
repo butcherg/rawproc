@@ -13,7 +13,9 @@ class CropPanel: public PicProcPanel
 			SetDoubleBuffered(true);
 			node = 0;
 			cropmode = 1; //0=freeform; 1=maintain aspect
+			//parm tool.crop.controlpointradius: Radius of the rectangle displayed to indicate a control point.  Default=7
 			wxConfigBase::Get()->Read("tool.crop.controlpointradius",&cpradius,7);
+			//parm tool.crop.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7
 			wxConfigBase::Get()->Read("tool.crop.landingradius",&landingradius,7);
 			isaspect = true;
 

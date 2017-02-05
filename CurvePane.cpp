@@ -97,6 +97,7 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	mousemoved = false;
 	mousemotion=true;
 	int landingradius;
+	//parm tool.curve.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5
 	wxConfigBase::Get()->Read("tool.curve.landingradius",&landingradius,5);
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
@@ -155,6 +156,7 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 void CurvePane::mouseDclick(wxMouseEvent& event)
 {
 	int radius;
+	//parm tool.curve.controlpointradius: Radius of the circle displayed to indicate a control point.  Default=5
 	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	if (c.isendpoint(selectedCP.x, selectedCP.y, radius)) return;
 	c.deletepoint(selectedCP.x, selectedCP.y);

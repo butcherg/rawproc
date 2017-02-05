@@ -384,14 +384,17 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	sourcefilename.Clear();
 	gImage *dib;
 	GIMAGE_FILETYPE fif;
-//	fif = gImage::getFileType(fname.c_str());
+	fif = gImage::getFileType(fname.c_str());
 //	if (fif != FILETYPE_UNKNOWN) {
 
 		commandtree->DeleteAllItems();
 
 		wxString configparams;
+		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
 		if (fif == FILETYPE_RAW) configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
+		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 		if (fif == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
+		//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
 		if (fif == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
@@ -405,9 +408,11 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 			return;
 		}
 		wxString flagstring(params.c_str());
-		if ((wxConfigBase::Get()->Read("input.log","0") == "1") || (wxConfigBase::Get()->Read("input.load.log","0") == "1"))
-			log(wxString::Format("tool=load,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
+		//parm input.log: log the file input operation.  Default=0
+		if (wxConfigBase::Get()->Read("input.log","0") == "1") 
+			log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
+		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 			cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
 			if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 2.4);
@@ -428,6 +433,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		SetStatusText("scale: fit",1);
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
+		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)
 		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
@@ -467,8 +473,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	wxString ofilename;
 	wxString oparams = "";
 
-//	GIMAGE_FILETYPE fif;
-//	fif = gImage::getFileType(fname.c_str());
+	GIMAGE_FILETYPE fif;
+	fif = gImage::getFileType(fname.c_str());
 
 //	if (fif != FILETYPE_UNKNOWN) {
 		SetStatusText("Retrieving source script...");
@@ -576,8 +582,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
 
 			wxString configparams;
-			if (filetype == FILETYPE_RAW)  configparams = wxConfigBase::Get()->Read("output.raw.parameters", "");
+			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)
 			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
+			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)
 			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
 
 
@@ -585,11 +592,14 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				wxString profilestr = "srgb";
 				float gamma = 1.0;
 				if (filetype == FILETYPE_JPEG) {
+					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
 					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
+					//parm output.jpeg.cms.gamma: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4
 					gamma = wxConfigBase::Get()->Read("output.jpeg.cms.gamma",2.4);
 				}
 				else if (filetype == FILETYPE_TIFF) {
-					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","srgb");
+					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","prophoto");
 				}
 				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), gamma);
 				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
@@ -777,6 +787,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.gamma.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 		PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
 		g->processPic();
@@ -796,6 +807,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.bright.initialvalue: The initial (and reset button) value of the bright tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
 		PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
 		g->processPic();
@@ -815,6 +827,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.contrast.initialvalue: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
 		PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
 		c->processPic();
@@ -832,6 +845,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
 		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 		PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
 		c->processPic();
@@ -865,7 +879,9 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.shadow.level: The initial (and reset button) value of the shadow tool, 0=no change.  Default=0
 		wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
+		//parm tool.shadow.threshold: The initial (and reset button) value of the shadow curve threshold.  Default=64
 		wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
@@ -882,7 +898,9 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.highlight.level: The initial (and reset button) value of the highlight tool, 0=no change.  Default=0
 		wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
+		//parm tool.highlight.threshold: The initial (and reset button) value of the highlight curve threshold.  Default=192
 		wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
@@ -899,8 +917,11 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
 		wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
+		//parm tool.gray.g: The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72
 		wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
+		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
 		wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
 		PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
@@ -931,8 +952,11 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.resize.x: Default resize of the width dimension.  Default=640
 		wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
+		//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
 		wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
+		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom
 		wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
 		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
 		PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
@@ -951,6 +975,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorBlackWhitePoint *c;
+		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
 		if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
 			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
 		else
@@ -968,6 +993,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
 		PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
 		if (defval != "0") c->processPic();
@@ -983,6 +1009,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
 		PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
 		if (defval != "0.0") c->processPic();
@@ -998,8 +1025,11 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
 	SetStatusText("");
 	try {
+		//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
 		wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
+		//parm tool.denoise.local: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3
 		wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+		//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
 		wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
 		PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);

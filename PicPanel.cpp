@@ -117,7 +117,9 @@ END_EVENT_TABLE()
 		img = gImage2wxImage(*dib);
 
 		if (hImgProfile) {
+			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
 			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofile","srgb");
+			//parm display.cms.gamma: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4
 			float gamma = wxConfigBase::Get()->Read("display.cms.gamma",2.4);
 			hDisplayProfile = gImage::makeLCMSProfile(std::string(displayprof.ToAscii()), gamma);
 			if (!hDisplayProfile)

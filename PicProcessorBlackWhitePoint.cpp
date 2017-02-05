@@ -3,7 +3,6 @@
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcPanel.h"
 #include "undo.xpm"
-//#include <omp.h>
 
 #include "util.h"
 #include "gimage.h"
@@ -119,7 +118,9 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
+		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
+		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
 		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
 		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
@@ -154,6 +155,7 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	bool result = true;
 
 	int threadcount;
+	//parm tool.*.cores: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);
 	wxConfigBase::Get()->Read("tool.blackwhitepoint.cores",&threadcount,0);
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
@@ -166,6 +168,8 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
+	//parm tool.all.log: Turns on logging for all tools.  Default=0
+	//parm tool.*.log: Turns on logging for the specified tool.  Default=0
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.blackwhitepoint.log","0") == "1"))
 		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
