@@ -6,11 +6,17 @@ considerations to consider:</p>
 <br>
 <ul>
 
+<li>As of 0.5, rawproc does intput-to-output color management.  You can turn this off in the configuration parameters, but you want to make sure you've
+picked appropriate raw input parameters in order to start with a sRGB colorspace image.  You can adjust gamma either in the raw parameters or with the
+gamma tool, but I recommend doing so with the raw parameters when using color management so that the attached ICC profile properly reflects the input image.
+The color management enable parameter is applied when an image is opened, so it can be switched prior to opening the next image.</li>
+
 <li>Some tools depend on the image being in a certain state.  Gamma, for instance, should only be used on a "linear-scale" image, which is what most 
 raw camera files contain.  Gamma is used to expand the tone values to a scale more along the lines 
 of what humans perceive; camera sensors record "linearly", that is, in a much smaller scale.  Open a camera raw image, note that it's pretty dark. 
 Look at the histogram, and you'll see that the pixels are all bunched up at the bottom of the tone scale. Add the gamma tool, and they spread out.  So,
-gamma should be used on raw images, applied first.<br></li>
+gamma should be used on raw images, applied first.  However, as of version 0.5, rawproc does color management, where the ICC profiles contain 
+tone response curves appropriate to the color space, so you'll probably want to work gamma there rather than with the rawproc tool<br></li>
 
 <li>After applying gamma to a camera raw image, you'll notice that the tones usually don't use the entire tone range from black to white.  Add a black/white point
 tool and adjust the sliders so the image tone range expands to fill the available range in the histogram.  I use these tools so frequently on raw images 
@@ -34,21 +40,10 @@ a Save As file option by design; you have to pick the save file name each time.<
 <p>rawproc's name belies its flexibility; it can be used to edit any JPEG, TIFF, or PNG image.  Raw or otherwise, once you open an image, it's just an array
 of pixels...</p>
 
-<p>One of the main reasons I wrote rawproc was to make all the tools I used for image editing work on both 8-bit and 16-bit images.  When you open a raw 
-camera file, the tone values for each pixel are given in a 16-bit range, which means the values range from 0 (black) to 65535 (white).  You want to do most of
-your editing while the color values are in this range, as you have much smaller differences between each tone as you stretch contrast, etc.  To see the 
-difference, open a camera raw image, apply gamma, black/white point, and save it twice, first as a TIFF (.tif), then as JPEG (.jpg).  The .tif and .jpg files will
-look the same when opened, but the .tif tones are 16-bit while the .jpg tones are 8-bit.  Now, if you edit each image identically and look at the 
-histogram, you'll see spaces start to develop in the .jpg histogram because 8-bit tones only have 256 possible values between 0 (black) and 255 (white). This is called
-"posterization", because the image starts to look more like a poster and less like a photograph.  So, you want to do as much editing as possible while the 
-image is 16-bit; when you save it to JPEG, it'll automatically convert to 8-bit because JPEG doesn't support 16-bit tones.  This is why a lot of folks save the 
-basic edited image to TIFF, to use as the master.  This also has the advantage of being quicker to open than the raw file, because the raw conversion doesn't 
-have to be re-done.
-</p>
-
-<p>You can tell whether an image is 16- or 8-bit by right-clicking any of the applied tools and selecting Image Information.  You also get other helpful information
-such as image width and height, and basic exposure information.  rawproc doesn't manage image metadata, or EXIF data, very well, so consider getting the extremely
-useful exiftool utility to inspect, modify and copy image metadata.</p>
+<p>One of the main reasons I wrote rawproc was to make all the tools I used for image editing work well on both 8-bit and 16-bit images.  When you open any image file, 
+the tone values for each pixel are converted to floating point numbers, which means the values range from 0.0 (black) to 1.0 (white).  Depending on 
+the host, the internal floating point representation is either 32-bit float (Linux) or 16-bit half (Windows).  Even the half format provides 
+plenty of room for tone manipulation to avoid posterization.</p>
 
 <p>Having a desktop shortcut to rawproc (selectable option in the Windows install package) is handy for quick opening of images; with your file explorer, you 
 can review images and open the one you want to edit by dragging it to the rawproc desktop icon.</p>

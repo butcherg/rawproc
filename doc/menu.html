@@ -26,13 +26,23 @@ parens.</li><br>
 <li><b>Edit->Cut/Copy/Paste:</b> These menu items work on the list of tools applied to the image, so you can 
 cut/copy a selected command and paste it elsewhere in the list.</li><br>
 
+<li><b>Edit->Properties:</b> Opens a dialog box for editing all of the configuration parameters from rawproc.conf.
+As of 0.5, you can only edit parameters that were in the configuration file at startup, no add/delete. The
+.conf file can be edited with a standard text editor between rawproc instances.  Changing a parameter requires
+clicking in the value cell, keyboard editing the value, and typing Return.  Clicking Dismiss will also save a
+parameter in the middle of editing.  Changed parameter values are saved to the .conf file immediately upon 
+change.  Parameters are presented in sorted order, but the original order and
+formatting of the .conf file is preserved. The filter box allows culling the list to find selected parameters; 
+typing a string immediately culls the list to those that contain the string.  See the Configuration topic for
+more information on the available parameters.</li><br>
+
 <li><b>Add->(tool):</b> Selecting one of the tools from this menu adds it to the Commands list,
 after the selected tool.  See the sub-topics for more enlightenment on the various image tools.</li><br>
 
 <li><b>Help->Show Command:</b> Brings up a dialog box showing the command list that would be saved
 to the image EXIF if you saved the file at that point.</li><br>
 
-<li><b>Help->About:</b> Right now, this shows the rawproc description and version and the wxWidgets and FreeImage 
+<li><b>Help->About:</b> Right now, this shows the rawproc description and version and the wxWidgets  
 information for the included versions, as 
 well as the directory containing the rawproc.conf file read at startup. </li><br>
 

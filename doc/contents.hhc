@@ -137,6 +137,20 @@
 			<param name="Local" value="configurationfile.html">
 			</OBJECT>
 
+		<UL>
+
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Configuration Parameters">
+				<param name="Local" value="confparams.html">
+				</OBJECT>
+
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Raw Parameters">
+				<param name="Local" value="rawparams.html">
+				</OBJECT>
+
+		</UL>
+
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Tips">

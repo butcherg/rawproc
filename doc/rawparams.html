@@ -1,0 +1,164 @@
+<html><head><title>Raw Parameters</title></head><body><h3>Raw Parameters</h3>
+<p>Use these parameters to tell LibRaw how to process the input raw image. In the input.raw.parameters configuration parameter, build a string of the ones you want to use, separated by semicolons, e.g., "gamma=prophoto;demosaic=prophoto".</p>
+<p>Each of the LibRaw imgdata.params fields has a corresponding raw parameter, and there are selected parameters that have more intuitive abstractions.</p>
+<hr><pre>
+
+ output_color=0|1|2|3|4|5 - Output color space, default=1
+ colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb
+
+
+ user_qual=0|1|2|3|4 - Demosaic algorithm, default=3 (ahd)
+ demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. Default=ahd
+
+
+ output_bps=8|16 - bits per sample, default=16
+
+ Gamma:  three ways to set it:
+       1. gamma=preset
+       2. gammaval=2.222;gammatoe=4.5
+       3. gamm=2.222,4.5
+
+    gamma=bt709|srgb|linear|prophoto - Gamma presets
+
+
+    gammaval=2.222 - Set specific power gamma value, overrides preset, default=1.0 (linear)
+    gammatoe=4.5 - Set specific gamma toe, overrides preset, default=1.0 (linear)
+
+    gamm=2.222,4.5 - Set gamm[0] and gamm[1]
+
+
+ autobright=0|1 - Use dcraw automatic brightness (note the difference from no_auto_bright)
+
+
+ greybox=x,y,w,h - coordinates of a rectangle used for white balance 
+
+
+ cropbox=x,y,w,h - coordinates of a rectangle used for crop 
+
+
+ aber=rmult,gmult - chromatic aberration correction 
+
+
+ user_mul=mul0,mul1,mul2,mul3 - user white balance multipliers, r,g,b,g
+
+
+ shot_select=n - select image number for processing
+
+
+ bright=1.0 - brighten image, default=1.0
+
+
+ threshold=1.0 - wavelet denoising threshold
+
+
+ half_size=0|1 - output image in half-size
+
+
+ four_color_rgb=0|1 - separate interpolations for the two green components
+
+
+ highlight=0|1|2|3+ - deal with image highlights, clip=0, 1=unclip, 2=blend, 3+=rebuild
+
+
+ use_auto_wb=0|1 - use auto white balance, averaging over entire image
+
+
+ use_camera_wb=0|1 - use camera white balance, if available
+
+
+ use_camera_matrix=0|1 - use camera color matrix
+
+
+ output_profile=filepath - use ICC profile from the file
+
+
+ camera_profile=filepath|embed - use ICC profile from the file
+
+
+ bad_pixels=filepath - use bad pixel map
+
+
+ dark_frame=filepath - use bad pixel map
+
+
+ output_bps=8|16 - bits per sample
+
+
+ output_tiff=0|1 - 0=output PPM, 1=output TIFF
+
+
+ user_flip=0|1 - Flip image (0=none, 3=180, 5=90CCW, =90CW)
+
+
+ user_black=n - User black level
+
+
+ user_cblack=rb,gb,bb,gb - user per-channel black levels, r,g,b,g
+
+
+ user_sat=n - saturation
+
+
+ med_passes=n - number of median filter passes
+
+
+ auto_bright_thr=0.01 - portion of clipped pixel with autobright
+
+
+ adjust_maximum_thr=0.01 - portion of clipped pixel with autobright
+
+
+ use_fuji_rotate=0|1 - rotation for cameras with Fuji sensor
+
+
+ green_matching=0|1 - fix green channel disbalance
+
+
+ dcb_iterations=n - number of DCB correction passes, -1 is no correction, default
+
+
+ dcb_enhance_fl=n - DCB interpolation with enhanced interpolated colors
+
+
+ fbdd_noiserd=n - FBDD noise reduction, before demosaic
+
+
+ eeci_refine=n - non-zero for ECCI refine for VCD interpolation
+
+
+ es_med_passes=n - number of edge-sensitive median filter passes after VCD+AHD demosaic
+
+
+ ca_correc=0|1 - chromatic aberration suppression
+
+
+ cared=0.01 - chromatic aberration suppression red correction
+
+
+ cablue=0.01 - chromatic aberration suppression blue correction
+
+
+ cfaline=0|1 - banding reduction
+
+
+ linenoise=0.01 - banding reduction amount
+
+
+ cfa_clean=0|1 - Turns on impulse noise and Gaussian high frequency reduction
+ lclean=0.005 to 0.05 - Amount of luminance reduction, 0.01 is a common value
+ cclean=0.005 to 0.05 - Amount of color reduction, 0.01 is a common value
+
+
+ cfa_green=0|1 - Turns on reduction of maze artifacts produced by bad balance of green channels
+ green_thresh=0.01 to 0.1 - Max difference between channels allowed for equalization 
+
+
+ exp_correc=0|1 - Turns on exposure correction before demosaic
+ exp_shift=0.25 (2 stops darken) to 8.0 (3 stops lighten), default 1.0=no shift
+ exp_preser=0.0 to 1.0 Preserve hightlights when lightening the image
+
+
+ wf_debanding=0|1 - Turns on banding suppression
+ wf_deband_threshold=tr,tg,tb,tg - Per-channel debanding thresholds
+
+</pre></body></html>

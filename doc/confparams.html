@@ -1,0 +1,44 @@
+<html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>
+<li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
+<li><b>display.cms.gamma</b>: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4</li><br>
+<li><b>input.cms</b>: When a file is input, enable or disable color management.  Default=0</li><br>
+<li><b>input.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li><br>
+<li><b>input.log</b>: log the file input operation.  Default=0</li><br>
+<li><b>input.raw.default</b>: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)</li><br>
+<li><b>input.raw.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)</li><br>
+<li><b>input.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)</li><br>
+<li><b>output.jpeg.cms.gamma</b>: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4</li><br>
+<li><b>output.jpeg.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li><br>
+<li><b>output.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)</li><br>
+<li><b>output.tiff.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
+<li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)</li><br>
+<li><b>tool.*.cores</b>: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li><br>
+<li><b>tool.*.log</b>: Turns on logging for the specified tool.  Default=0</li><br>
+<li><b>tool.all.log</b>: Turns on logging for all tools.  Default=0</li><br>
+<li><b>tool.blackwhitepoint.auto</b>: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0</li><br>
+<li><b>tool.blackwhitepoint.blackthreshold</b>: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li><br>
+<li><b>tool.blackwhitepoint.blackthreshold</b>: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li><br>
+<li><b>tool.bright.initialvalue</b>: The initial (and reset button) value of the bright tool, 0=no change.  Default=0</li><br>
+<li><b>tool.contrast.initialvalue</b>: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0</li><br>
+<li><b>tool.crop.controlpointradius</b>: Radius of the rectangle displayed to indicate a control point.  Default=7</li><br>
+<li><b>tool.crop.landingradius</b>: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7</li><br>
+<li><b>tool.curve.controlpointradius</b>: Radius of the circle displayed to indicate a control point.  Default=5</li><br>
+<li><b>tool.curve.landingradius</b>: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li><br>
+<li><b>tool.denoise.initialvalue</b>: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li><br>
+<li><b>tool.denoise.local</b>: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li><br>
+<li><b>tool.denoise.patch</b>: Defines the initial (and reset button) size of the patch pixel array.  Default=1</li><br>
+<li><b>tool.gamma.initialvalue</b>: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li><br>
+<li><b>tool.gray.b</b>: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li><br>
+<li><b>tool.gray.g</b>: The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li><br>
+<li><b>tool.gray.r</b>: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li><br>
+<li><b>tool.highlight.level</b>: The initial (and reset button) value of the highlight tool, 0=no change.  Default=0</li><br>
+<li><b>tool.highlight.threshold</b>: The initial (and reset button) value of the highlight curve threshold.  Default=192</li><br>
+<li><b>tool.resize.algorithm</b>: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom</li><br>
+<li><b>tool.resize.x</b>: Default resize of the width dimension.  Default=640</li><br>
+<li><b>tool.resize.y</b>: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li><br>
+<li><b>tool.rotate.initialvalue</b>: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li><br>
+<li><b>tool.saturate.initialvalue</b>: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li><br>
+<li><b>tool.shadow.level</b>: The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li><br>
+<li><b>tool.shadow.threshold</b>: The initial (and reset button) value of the shadow curve threshold.  Default=64</li><br>
+<li><b>tool.sharpen.initialvalue</b>: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li><br>
+</ul></body></html>
