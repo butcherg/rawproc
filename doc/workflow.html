@@ -3,12 +3,12 @@
 <h3 id="Workflow">How to use rawproc</h3>
 <p>Basically, you open an image, apply one or more tools to change it, then save it.  You can apply tools in any order you wish, but there are some 
 considerations to consider:</p>
-<br>
+
 <ul>
 
 <li>Color Management, or Not?  You need to make this choice before you open your image, as it's set then and not changeable until you open another image.  In
 the configuration parameters, this is done with input.cms; 1=on, 0=off.  Here
-are the key considerations in rawproc for each:</li>
+are the key considerations in rawproc for each:</li><br>
 
 	<ul>
 
@@ -17,11 +17,11 @@ an ICC profile representative of its color space.  For raw images, you need to s
 as LibRaw delivers the image with a profile, except if output_color=0 (linear).  rawproc has internal profiles for prophoto, srgb, wide, and adobe; srgb is somewhat okay for 
 the display profile if you don't have a calibrated profile for your monitor, but you really need to do a calibrated profile if you want color management to work for you.
 For output, srgb is appropriate for JPEGs to be displayed; for TIFFs, consider saving in one of the working profiles, preferrably the one you opened the image with, for subsequent
-editing in, say, GIMP.  You can also choose to specify a .icc file for display or output; Elle Stone's profiles work well: https://github.com/ellelstone/elles_icc_profiles</li>
+editing in, say, GIMP.  You can also choose to specify a .icc file for display or output; Elle Stone's profiles work well: https://github.com/ellelstone/elles_icc_profiles</li><br>
 
 	<li>input.cms=0: If you choose to not use color management, you need to read the input image already converted to something that looks decent on the screen.
 That's likely to  be srgb, which you can probably assume is already in effect for JPEGs.  If you're opening a raw file, you need to set that prior to opening, like this: 
-input.raw.parameters=colorspace=srgb;gamma=srgb.  The image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li>
+input.raw.parameters=colorspace=srgb;gamma=srgb.  The image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li><br>
 
 	</ul>
 
@@ -33,10 +33,10 @@ black and white point settings automatically.  You can turn it off in the config
 without thinking about it, and go from there.  Usually, the third tool is a curve, a very flexible tool for modifying the tone range for contrast, etc.<br></li>
 
 <li>Some tools are slow.  Particularly denoise, followed by sharpen.  I usually don't use either until after I resize the image for web posting, and they 
-both run more quickly on fewer pixels<br></li>
+both run more quickly on fewer pixels</li><br>
 
 <li>If you're going to rotate the image to straighten it out and crop for composition, do the rotate first, then when you crop you'll also be taking care of 
-the black irregular borders around the rotated image.<br></li>
+the black irregular borders around the rotated image.</li><br>
 
 </ul>
 
