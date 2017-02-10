@@ -6,19 +6,27 @@ considerations to consider:</p>
 <br>
 <ul>
 
-<li>As of 0.5, rawproc does intput-to-output color management.  You can turn this off in the configuration parameters, but you want to make sure you've
-picked appropriate raw input parameters in order to start with a sRGB colorspace image.  You can adjust gamma either in the raw parameters or with the
-gamma tool, but I recommend doing so with the raw parameters when using color management so that the attached ICC profile properly reflects the input image.
-The color management enable parameter is applied when an image is opened, so it can be switched prior to opening the next image.</li>
+<li>Color Management, or Not?  You need to make this choice before you open your image, as it's set then and not changeable until you open another image.  In
+the configuration parameters, this is done with input.cms; 1=on, 0=off.  Here
+are the key considerations in rawproc for each:</li>
 
-<li>Some tools depend on the image being in a certain state.  Gamma, for instance, should only be used on a "linear-scale" image, which is what most 
-raw camera files contain.  Gamma is used to expand the tone values to a scale more along the lines 
-of what humans perceive; camera sensors record "linearly", that is, in a much smaller scale.  Open a camera raw image, note that it's pretty dark. 
-Look at the histogram, and you'll see that the pixels are all bunched up at the bottom of the tone scale. Add the gamma tool, and they spread out.  So,
-gamma should be used on raw images, applied first.  However, as of version 0.5, rawproc does color management, where the ICC profiles contain 
-tone response curves appropriate to the color space, so you'll probably want to work gamma there rather than with the rawproc tool<br></li>
+	<ul>
 
-<li>After applying gamma to a camera raw image, you'll notice that the tones usually don't use the entire tone range from black to white.  Add a black/white point
+	<li>input.cms=1: You need to specify profiles for display (display.cms.displayprofile) and output (output.*.cms.profile).  Your input image is (at present) assumed to contain 
+an ICC profile representative of its color space.  For raw images, you need to specify both an output colorspace (output_color= or colorspace=) and gamma (there are three ways do do gamma)
+as LibRaw delivers the image with a profile, except if output_color=0 (linear).  rawproc has internal profiles for prophoto, srgb, wide, and adobe; srgb is somewhat okay for 
+the display profile if you don't have a calibrated profile for your monitor, but you really need to do a calibrated profile if you want color management to work for you.
+For output, srgb is appropriate for JPEGs to be displayed; for TIFFs, consider saving in one of the working profiles, preferrably the one you opened the image with, for subsequent
+editing in, say, GIMP.  You can also choose to specify a .icc file for display or output; Elle Stone's profiles work well: https://github.com/ellelstone/elles_icc_profiles</li>
+
+	<li>input.cms=0: If you choose to not use color management, you need to read the input image already converted to something that looks decent on the screen.
+That's likely to  be srgb, which you can probably assume is already in effect for JPEGs.  If you're opening a raw file, you need to set that prior to opening, like this: 
+input.raw.parameters=colorspace=srgb;gamma=srgb.  The image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li>
+
+	</ul>
+
+
+<li>After opening a camera raw image, you'll notice that the tones usually don't use the entire tone range from black to white.  Add a black/white point
 tool and adjust the sliders so the image tone range expands to fill the available range in the histogram.  I use these tools so frequently on raw images 
 that I hard-coded the default gamma to 2.2 and made an autocorrect option for the black/white point tool, where it'll read the histogram and pick appropriate 
 black and white point settings automatically.  You can turn it off in the config file.  So, when I open a camera raw, I just apply gamma then black/white point 
