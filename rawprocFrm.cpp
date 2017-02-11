@@ -467,8 +467,8 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 void rawprocFrm::OpenFileSource(wxString fname)
 {
 
-	filename.Assign(fname);
-	sourcefilename.Clear();
+//	filename.Assign(fname);
+//	sourcefilename.Clear();
 	gImage *dib;
 	wxString ofilename;
 	wxString oparams = "";
@@ -498,15 +498,23 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
-				commandtree->DeleteAllItems();
-				filename.Assign(ofilename);
-				sourcefilename.Assign(fname);
+
+				if (!wxFileName::FileExists(ofilename)) {
+					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
+					SetStatusText("");
+					return;
+				}
+
 				dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
 				if (dib->getWidth() == 0) {
 					wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
 					SetStatusText("");
 					return;
 				}
+
+				commandtree->DeleteAllItems();
+				filename.Assign(ofilename);
+				sourcefilename.Assign(fname);
 
 				if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 					cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
