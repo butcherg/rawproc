@@ -389,13 +389,25 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		commandtree->DeleteAllItems();
 
-		wxString configparams;
+		wxString configparams, inputprofile;
 		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
-		if (fif == FILETYPE_RAW) configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
+		//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=raw
+		if (fif == FILETYPE_RAW) {
+			configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
+			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+		}
 		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
-		if (fif == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
+		//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=srgb
+		if (fif == FILETYPE_JPEG) {
+			configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
+			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+		}
 		//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
-		if (fif == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
+		//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=adobe
+		if (fif == FILETYPE_TIFF) {
+			configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
+			inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+		}
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
@@ -419,11 +431,21 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
 			}
 			else {
-				wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Using identity/linear profile...",filename.GetFullName()));
-				hImgProf = gImage::makeLCMSProfile("linear", 1.0);
+				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
+					hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+					char * prof; cmsUInt32Number proflen;
+					if (hImgProf) {
+						gImage::makeICCProfile(hImgProf, prof, proflen);
+						dib->setProfile(prof, proflen);
+					}
+					pic->SetImageProfile(hImgProf);
+					pic->SetColorManagement(true);
+				}
+				else {
+					pic->SetImageProfile(NULL);
+					pic->SetColorManagement(false);
+				}
 			}
-			pic->SetImageProfile(hImgProf);
-			pic->SetColorManagement(true);
 		}
 		else {
 			pic->SetImageProfile(NULL);
