@@ -387,7 +387,6 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	fif = gImage::getFileType(fname.c_str());
 //	if (fif != FILETYPE_UNKNOWN) {
 
-		commandtree->DeleteAllItems();
 
 		wxString configparams, inputprofile;
 		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
@@ -411,6 +410,14 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
+		if (!wxFileName::FileExists(fname)) {
+			wxMessageBox(wxString::Format("Error: Source file %s not found", filename.GetFullName()));
+			SetStatusText("");
+			return;
+		}
+
+		commandtree->DeleteAllItems();
+
 		mark();
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
@@ -429,6 +436,8 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 			cmsHPROFILE hImgProf;
 			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+				pic->SetImageProfile(hImgProf);
+				pic->SetColorManagement(true);
 			}
 			else {
 				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
