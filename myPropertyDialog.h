@@ -16,6 +16,7 @@ class PropertyDialog: public wxDialog
 		~PropertyDialog();
 		void UpdateProperty(wxPropertyGridEvent& event);
 		void FilterGrid(wxCommandEvent& event);
+		std::map<std::string,std::string> FilterList(wxString filter);
 
 
 	private:

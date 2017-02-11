@@ -93,4 +93,22 @@ void PropertyDialog::FilterGrid(wxCommandEvent& event)
 	}
 }
 
+std::map<std::string,std::string> PropertyDialog::FilterList(wxString filter)
+{
+	std::map<std::string,std::string> params;
+	wxString str = fil->GetValue();
+	wxPropertyGridIterator it;
+	for ( it = pg->GetIterator();
+		!it.AtEnd();
+		it++ )
+	{
+  		wxPGProperty* p = *it;
+
+		if (p->GetName().Find(str) > wxNOT_FOUND) {
+			params[std::string(p->GetName().c_str())] = std::string(p->GetValue().GetString().c_str());
+		}
+
+	}
+	return params;
+}
 
