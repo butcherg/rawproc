@@ -415,7 +415,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 			cmsHPROFILE hImgProf;
-			if (dib->getProfile() != NULL) {
+			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
 			}
 			else {
