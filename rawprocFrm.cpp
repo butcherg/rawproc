@@ -414,8 +414,14 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
-			cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-			if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 2.4);
+			cmsHPROFILE hImgProf;
+			if (dib->getProfile() != NULL) {
+				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			}
+			else {
+				wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Using identity/linear profile...",filename.GetFullName()));
+				hImgProf = gImage::makeLCMSProfile("linear", 1.0);
+			}
 			pic->SetImageProfile(hImgProf);
 			pic->SetColorManagement(true);
 		}
@@ -517,8 +523,14 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				sourcefilename.Assign(fname);
 
 				if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
-					cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-					if (!hImgProf) hImgProf = gImage::makeLCMSProfile("srgb", 2.4);
+					cmsHPROFILE hImgProf;
+					if (dib->getProfile() != NULL) {
+						hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+					}
+					else {
+						wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Using identity/linear profile...",filename.GetFullName()));
+						hImgProf = gImage::makeLCMSProfile("linear", 1.0);
+					}
 					pic->SetImageProfile(hImgProf);
 					pic->SetColorManagement(true);
 				}
@@ -602,12 +614,14 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
 					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
-					//parm output.jpeg.cms.gamma: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4
-					gamma = wxConfigBase::Get()->Read("output.jpeg.cms.gamma",2.4);
+					//parm output.jpeg.cms.gamma: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.2
+					gamma = wxConfigBase::Get()->Read("output.jpeg.cms.gamma",2.2);
 				}
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
 					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","prophoto");
+					//parm output.tiff.cms.gamma: if the output.tiff.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=1.8
+					gamma = wxConfigBase::Get()->Read("output.tiff.cms.gamma",1.8);
 				}
 				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), gamma);
 				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
