@@ -200,8 +200,8 @@ void rawprocFrm::CreateGUIControls()
 	SetMenuBar(WxMenuBar1);
 
 	WxStatusBar1 = new wxStatusBar(this, ID_WXSTATUSBAR1);
-	int widths[2] = {-1, 100};
-	WxStatusBar1->SetFieldsCount (2, widths);
+	int widths[3] = {-1,25, 100};
+	WxStatusBar1->SetFieldsCount (3, widths);
 
 	SetStatusBar(WxStatusBar1);
 	SetTitle(_("rawproc"));
@@ -467,7 +467,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		CommandTreeSetDisplay(picdata->GetId());
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
-		SetStatusText("scale: fit",1);
+		SetStatusText("scale: fit",2);
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)
@@ -575,7 +575,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				CommandTreeSetDisplay(picdata->GetId());
 				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 				SetStatusText("");
-				SetStatusText("scale: fit",1);
+				SetStatusText("scale: fit",2);
 				pic->SetScaleToWidth();
 				pic->FitMode(true);
 				for (int i=2; i<token.GetCount(); i++) {
@@ -752,7 +752,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	case 70: //F - fit image to window
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
-		SetStatusText("scale: fit",1);
+		SetStatusText("scale: fit",2);
 		break;
 	case 67: //c - test cropmode
 		//pic->ToggleCropMode();

@@ -246,6 +246,10 @@ END_EVENT_TABLE()
 	void PicPanel::SetColorManagement(bool b)
 	{
 		colormgt = b;
+		if (colormgt)
+			parentframe->SetStatusText("CMS",1);
+		else
+			parentframe->SetStatusText("",1);
 	}
 
 	bool PicPanel::GetColorManagement()
@@ -294,7 +298,7 @@ END_EVENT_TABLE()
 	{
 		scale = s;
 		FitMode(false);
-		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),1);
+		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
 		Refresh();
 		Update();
 	}
@@ -439,7 +443,7 @@ END_EVENT_TABLE()
                         picY -= picY * 0.1;
                     }
                 }
-		parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),1);
+		parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
 		parentframe->SetStatusText("");
 		Refresh();
 		Update();
@@ -456,12 +460,12 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 		if (scale != 1.0) {
 			scale = 1.0;
 			FitMode(false);
-			parentframe->SetStatusText("scale: 100%",1);
+			parentframe->SetStatusText("scale: 100%",2);
 		}
 		else {
 			SetScaleToWidth();
 			FitMode(true);
-			parentframe->SetStatusText("scale: fit",1);
+			parentframe->SetStatusText("scale: fit",2);
 			parentframe->SetStatusText("");
 		}
 	}
