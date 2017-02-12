@@ -29,8 +29,6 @@ class CropPanel: public PicProcPanel
 			bottom = atoi(p[3])-indent;
 
 			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
-			hTransform = proc->getDisplay()->GetDisplayTransform();
-
 
 			GetSize(&ww, &wh);
 			iw = img.GetWidth();
@@ -39,6 +37,7 @@ class CropPanel: public PicProcPanel
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
 
+			hTransform = proc->getDisplay()->GetDisplayTransform();
 			if (hTransform)
 				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
 
