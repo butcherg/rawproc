@@ -33,10 +33,6 @@ all: rawproc img
 
 rawproc:  $(OBJECTS)
 	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc$(EXT)
-	echo "rawproc:" > $(OBJDIR)/build.txt
-	#git status |grep "On branch" >> $(OBJDIR)/build.txt
-	echo "CFLAGS=$(CFLAGS)" >> $(OBJDIR)/build.txt
-	echo "LFLAGS=$(LFLAGS)" >> $(OBJDIR)/build.txt
 
 img: $(OBJDIR)/img.o
 	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img$(EXT)
