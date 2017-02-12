@@ -259,6 +259,11 @@ END_EVENT_TABLE()
 		hImgProfile = hImgProf;
 	}
 
+	cmsHTRANSFORM PicPanel::GetDisplayTransform()
+	{
+		return hTransform;
+	}
+
 	wxString PicPanel::getHistogramString()
 	{
 		return histstr;

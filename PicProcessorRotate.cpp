@@ -28,6 +28,7 @@ class RotatePreview: public wxPanel
 				img = image.Scale(size.GetHeight() * vaspect, size.GetHeight());
 				aspect = vaspect;
 			}
+
 			Bind(wxEVT_PAINT,&RotatePreview::OnPaint, this);
 			Bind(wxEVT_SIZE,&RotatePreview::OnSize, this);
 			Refresh();
@@ -114,6 +115,11 @@ class RotatePanel: public PicProcPanel
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 			int pw = s.GetWidth();
 			int ph = pw * ((double)s.GetHeight()/(double)pw);
+
+			hTransform = proc->getDisplay()->GetDisplayTransform();
+			if (hTransform)
+				cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
+
 			preview = new RotatePreview(this,i,initialvalue, wxSize(pw, ph));
 			g->Add(preview , wxGBPosition(2,0), wxGBSpan(1,5), wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 1);
 
@@ -216,6 +222,8 @@ class RotatePanel: public PicProcPanel
 		//wxTimer *t;
 		RotatePreview *preview;
 		bool thumb;
+		cmsHTRANSFORM hTransform;
+
 };
 
 

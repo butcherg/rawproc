@@ -29,6 +29,8 @@ class CropPanel: public PicProcPanel
 			bottom = atoi(p[3])-indent;
 
 			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
+			hTransform = proc->getDisplay()->GetDisplayTransform();
+
 
 			GetSize(&ww, &wh);
 			iw = img.GetWidth();
@@ -36,6 +38,9 @@ class CropPanel: public PicProcPanel
 			wa = (double) ww/ (double) iw;
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
+
+			if (hTransform)
+				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
 
 			iwa = (double) img.GetWidth() / (double) img.GetHeight();
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
@@ -253,6 +258,7 @@ class CropPanel: public PicProcPanel
 		double aspect, wa, ha, iwa, iha;
 		int left, top , bottom, right, cpradius, landingradius;
 		bool isaspect;
+		cmsHTRANSFORM hTransform;
 
 };
 
