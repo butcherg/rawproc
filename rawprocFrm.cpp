@@ -200,7 +200,7 @@ void rawprocFrm::CreateGUIControls()
 	SetMenuBar(WxMenuBar1);
 
 	WxStatusBar1 = new wxStatusBar(this, ID_WXSTATUSBAR1);
-	int widths[3] = {-1,25, 100};
+	int widths[3] = {-1,50, 100};
 	WxStatusBar1->SetFieldsCount (3, widths);
 
 	SetStatusBar(WxStatusBar1);
