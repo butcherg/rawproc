@@ -547,10 +547,27 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			else {
 				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
 
-				if (!wxFileName::FileExists(ofilename)) {
-					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
-					SetStatusText("");
-					return;
+				if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
+					//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 (This is the precursor to possibly more extensive search behavior in future versions)
+					if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
+						wxFileName findfile(ofilename);
+						if (findfile.Normalize()) {
+							findfile.RemoveLastDir();  //see if source file is in the parent directory
+							if (findfile.Exists()) {
+								ofilename = findfile.GetFullPath();
+							}
+							else {
+								wxMessageBox(wxString::Format("Error: Source file %s not found either in current or parent directory", ofilename));
+								SetStatusText("");
+								return;
+							}
+						}
+					}
+					else {
+						wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
+						SetStatusText("");
+						return;
+					}
 				}
 
 				dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
