@@ -507,13 +507,24 @@ void rawprocFrm::OpenFileSource(wxString fname)
 //	filename.Assign(fname);
 //	sourcefilename.Clear();
 	gImage *dib;
-	wxString ofilename;
+	wxString ofilename, inputprofile;
 	wxString oparams = "";
 
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 
 //	if (fif != FILETYPE_UNKNOWN) {
+
+		if (fif == FILETYPE_RAW) {
+			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+		}
+		if (fif == FILETYPE_JPEG) {
+			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+		}
+		if (fif == FILETYPE_TIFF) {
+			inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+		}
+
 		SetStatusText("Retrieving source script...");
 		std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
 
@@ -553,6 +564,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				filename.Assign(ofilename);
 				sourcefilename.Assign(fname);
 
+
+/*
 				if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 					cmsHPROFILE hImgProf;
 					if (dib->getProfile() != NULL) {
@@ -569,6 +582,36 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					pic->SetImageProfile(NULL);
 					pic->SetColorManagement(false);
 				}
+*/
+
+		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+			cmsHPROFILE hImgProf;
+			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
+				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+				pic->SetImageProfile(hImgProf);
+				pic->SetColorManagement(true);
+			}
+			else {
+				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
+					hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+					char * prof; cmsUInt32Number proflen;
+					if (hImgProf) {
+						gImage::makeICCProfile(hImgProf, prof, proflen);
+						dib->setProfile(prof, proflen);
+					}
+					pic->SetImageProfile(hImgProf);
+					pic->SetColorManagement(true);
+				}
+				else {
+					pic->SetImageProfile(NULL);
+					pic->SetColorManagement(false);
+				}
+			}
+		}
+		else {
+			pic->SetImageProfile(NULL);
+			pic->SetColorManagement(false);
+		}
 
 				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 				picdata->processPic();
