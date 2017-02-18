@@ -393,7 +393,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=raw
 		if (fif == FILETYPE_RAW) {
 			configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
-			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
 		}
 		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 		//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=srgb
@@ -516,7 +516,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 //	if (fif != FILETYPE_UNKNOWN) {
 
 		if (fif == FILETYPE_RAW) {
-			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
 		}
 		if (fif == FILETYPE_JPEG) {
 			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
