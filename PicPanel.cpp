@@ -127,13 +127,21 @@ END_EVENT_TABLE()
 				hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
 
 			if (hTransform) cmsDeleteTransform(hTransform);
+			
+			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+			wxString intentstr = wxConfigBase::Get()->Read("display.cms.renderingintent","perceptual");
+			cmsUInt32Number intent = INTENT_PERCEPTUAL;
+			if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+			if (intentstr == "saturation") intent = INTENT_SATURATION;
+			if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+			if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
 			if (hImgProfile)
 				if (hDisplayProfile)
 					hTransform = cmsCreateTransform(
 						hImgProfile, TYPE_RGB_8,
 						hDisplayProfile, TYPE_RGB_8,
-						INTENT_PERCEPTUAL, 0);
+						intent, 0);
 				else printf("bad display profile...\n");
 			else printf("bad image profile...\n");
 
