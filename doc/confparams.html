@@ -1,6 +1,7 @@
 <html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
 <li><b>display.cms.gamma</b>: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4</li><br>
+<li><b>display.cms.renderingintent</b>: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
 <li><b>input.cms</b>: When a file is input, enable or disable color management.  Default=0</li><br>
 <li><b>input.jpeg.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=srgb</li><br>
 <li><b>input.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li><br>
@@ -11,11 +12,13 @@
 <li><b>input.raw.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)</li><br>
 <li><b>input.tiff.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=adobe</li><br>
 <li><b>input.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)</li><br>
-<li><b>output.jpeg.cms.gamma</b>: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.2</li><br>
+<li><b>output.jpeg.cms.gamma</b>: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4</li><br>
 <li><b>output.jpeg.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li><br>
+<li><b>output.jpeg.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
 <li><b>output.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)</li><br>
 <li><b>output.tiff.cms.gamma</b>: if the output.tiff.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=1.8</li><br>
 <li><b>output.tiff.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
+<li><b>output.tiff.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
 <li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)</li><br>
 <li><b>tool.*.cores</b>: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li><br>
 <li><b>tool.*.log</b>: Turns on logging for the specified tool.  Default=0</li><br>
