@@ -33,7 +33,7 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
-#include "myFileSelector.h"
+//#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
