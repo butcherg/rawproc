@@ -513,151 +513,129 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 
-//	if (fif != FILETYPE_UNKNOWN) {
 
-		if (fif == FILETYPE_RAW) {
-			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
-		}
-		if (fif == FILETYPE_JPEG) {
-			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
-		}
-		if (fif == FILETYPE_TIFF) {
-			inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
-		}
 
-		SetStatusText("Retrieving source script...");
-		std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
+	if (fif == FILETYPE_RAW) {
+		inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
+	}
+	if (fif == FILETYPE_JPEG) {
+		inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+	}
+	if (fif == FILETYPE_TIFF) {
+		inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+	}
 
-		if(info.find("ImageDescription") != info.end() && info["ImageDescription"].find("rawproc") != std::string::npos ) {
-			wxString script = info["ImageDescription"];
-			wxArrayString token = split(script, " ");
+	SetStatusText("Retrieving source script...");
+	std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
+
+	if(info.find("ImageDescription") != info.end() && info["ImageDescription"].find("rawproc") != std::string::npos ) {
+		wxString script = info["ImageDescription"];
+		wxArrayString token = split(script, " ");
 			
-			if (token[1].Contains(":")) {
-				wxArrayString fparams = split(token[1],":");
-				if (fparams.GetCount() >1) {
-					oparams = fparams[1];
-				}
-				ofilename = fparams[0];
+		if (token[1].Contains(":")) {
+			wxArrayString fparams = split(token[1],":");
+			if (fparams.GetCount() >1) {
+				oparams = fparams[1];
 			}
-			else ofilename = token[1];
+			ofilename = fparams[0];
+		}
+		else ofilename = token[1];
 				
-			if (token[0].Find("rawproc") == wxNOT_FOUND) {
-				wxMessageBox(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
-			}
-			else {
-				SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
+		if (token[0].Find("rawproc") == wxNOT_FOUND) {
+			wxMessageBox(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
+		}
+		else {
+			SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
 
-				if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
-					//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 (This is the precursor to possibly more extensive search behavior in future versions)
-					if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
-						wxFileName findfile(ofilename);
-						if (findfile.Normalize()) {
-							findfile.RemoveLastDir();  //see if source file is in the parent directory
-							if (findfile.Exists()) {
-								ofilename = findfile.GetFullPath();
-							}
-							else {
-								wxMessageBox(wxString::Format("Error: Source file %s not found either in current or parent directory", ofilename));
-								SetStatusText("");
-								return;
-							}
+			if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
+				//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 (This is the precursor to possibly more extensive search behavior in future versions)
+				if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
+					wxFileName findfile(ofilename);
+					if (findfile.Normalize()) {
+						findfile.RemoveLastDir();  //see if source file is in the parent directory
+						if (findfile.Exists()) {
+							SetStatusText(wxString::Format("Loading source file %s from parent directory...",ofilename) );
+							ofilename = findfile.GetFullPath();
+						}
+						else {
+							wxMessageBox(wxString::Format("Error: Source file %s not found either in current or parent directory", ofilename));
+							SetStatusText("");
+							return;
 						}
 					}
-					else {
-						wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
-						SetStatusText("");
-						return;
-					}
 				}
-
-				dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
-				if (dib->getWidth() == 0) {
-					wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
+				else {
+					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
 					SetStatusText("");
 					return;
 				}
+			}
 
-				commandtree->DeleteAllItems();
-				filename.Assign(ofilename);
-				sourcefilename.Assign(fname);
+			dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
+			if (dib->getWidth() == 0) {
+				wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
+				SetStatusText("");
+				return;
+			}
 
+			commandtree->DeleteAllItems();
+			filename.Assign(ofilename);
+			sourcefilename.Assign(fname);
 
-/*
-				if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
-					cmsHPROFILE hImgProf;
-					if (dib->getProfile() != NULL) {
-						hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+				cmsHPROFILE hImgProf;
+				if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
+					hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+					pic->SetImageProfile(hImgProf);
+					pic->SetColorManagement(true);
+				}
+				else {
+					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
+						hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+						char * prof; cmsUInt32Number proflen;
+						if (hImgProf) {
+							gImage::makeICCProfile(hImgProf, prof, proflen);
+							dib->setProfile(prof, proflen);
+						}
+						pic->SetImageProfile(hImgProf);
+						pic->SetColorManagement(true);
 					}
 					else {
-						wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Using identity/linear profile...",filename.GetFullName()));
-						hImgProf = gImage::makeLCMSProfile("linear", 1.0);
+						pic->SetImageProfile(NULL);
+						pic->SetColorManagement(false);
 					}
-					pic->SetImageProfile(hImgProf);
-					pic->SetColorManagement(true);
 				}
-				else {
-					pic->SetImageProfile(NULL);
-					pic->SetColorManagement(false);
-				}
-*/
-
-		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
-			cmsHPROFILE hImgProf;
-			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
-				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-				pic->SetImageProfile(hImgProf);
-				pic->SetColorManagement(true);
 			}
 			else {
-				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
-					hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
-					char * prof; cmsUInt32Number proflen;
-					if (hImgProf) {
-						gImage::makeICCProfile(hImgProf, prof, proflen);
-						dib->setProfile(prof, proflen);
-					}
-					pic->SetImageProfile(hImgProf);
-					pic->SetColorManagement(true);
-				}
-				else {
-					pic->SetImageProfile(NULL);
-					pic->SetColorManagement(false);
-				}
+				pic->SetImageProfile(NULL);
+				pic->SetColorManagement(false);
 			}
-		}
-		else {
-			pic->SetImageProfile(NULL);
-			pic->SetColorManagement(false);
-		}
 
-				PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
-				picdata->processPic();
-				CommandTreeSetDisplay(picdata->GetId());
-				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
-				SetStatusText("");
-				SetStatusText("scale: fit",2);
-				pic->SetScaleToWidth();
-				pic->FitMode(true);
-				for (int i=2; i<token.GetCount(); i++) {
-					//SetStatusText(wxString::Format("Applying %s...",token[i]) );
-					wxArrayString cmd = split(token[i], ":");					
-					AddItem(cmd[0], cmd[1]);
-					wxSafeYield(this);
-				}
-				SetStatusText("");
-				pic->SetScaleToWidth();
-				Refresh();
-				Update();
+			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
+			picdata->processPic();
+			CommandTreeSetDisplay(picdata->GetId());
+			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			SetStatusText("");
+			SetStatusText("scale: fit",2);
+			pic->SetScaleToWidth();
+			pic->FitMode(true);
+			for (int i=2; i<token.GetCount(); i++) {
+				//SetStatusText(wxString::Format("Applying %s...",token[i]) );
+				wxArrayString cmd = split(token[i], ":");					
+				AddItem(cmd[0], cmd[1]);
+				wxSafeYield(this);
 			}
+			SetStatusText("");
+			pic->SetScaleToWidth();
+			Refresh();
+			Update();
+		}
 			
-		}
-		else {
-			wxMessageBox(wxString::Format("No source script found in %s, aborting Open Source.",filename.GetFullName() ));
-		}
-//	}
-//	else {
-//		wxMessageBox(wxString::Format("Loading %s failed, unknown file format.",filename.GetFullName() ));
-//	}
+	}
+	else {
+		wxMessageBox(wxString::Format("No source script found in %s, aborting Open Source.",fname ));
+	}
+
 	SetStatusText("");
 }
 
