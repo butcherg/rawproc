@@ -196,8 +196,10 @@ wxImage gImage2wxImage(gImage &dib)
 	//for (int i = 0; i<s; i++) {
 	//	data[i] = img[i];
 	//}
-	memcpy(data,img, w*h*3);
-	delete [] img;
+	if (img) {
+		memcpy(data,img, w*h*3);
+		delete [] img;
+	}
 	return image;
 }
 
