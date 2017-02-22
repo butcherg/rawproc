@@ -74,7 +74,7 @@ I offer no promise of support or enhancement, past offering the code on Github f
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
 on Ubuntu x86_64 and Windows 7, 8, and 10.
 
-To compile in a Linux OS,  you need to have wxWidgets, LibRaw, libjpeg, libtiff, and LittleCMS installed, with the associated development headers.  
+To compile in a Linux OS,  you need to have wxWidgets, gimage, LibRaw, libjpeg, libtiff, and LittleCMS installed, with the associated development headers.  
 Basically the same thing applies to compiling in Windows, except you'll probably have to spend more time figuring where 
 you put wxWidgets.  The wx-config utility that comes with wxWidgets helps substantially; I ran:
 
