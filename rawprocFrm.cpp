@@ -260,16 +260,17 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 		wxMessageBox("bad item");
 }
 
-
+/*
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 
-	exif.Append(wxString::Format("Width: %d Height: %d\nColors: %d\n\n",dib.getWidth(), dib.getHeight(), dib.getColors()));
+	exif.Append(wxString::Format("Width: %d Height: %d\nColors: %d Bits: %s\n\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
 
 	std::map<std::string,std::string> e =  dib.getInfo();
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
+		if (it->first == "ExifTag") continue;
 		if (it->first == "ExposureTime") {
 			float exp = atof(it->second.c_str());
 			if (exp > 1.0)
@@ -301,6 +302,57 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	wxMessageBox(exif,"Image Information");
 	
 }
+*/
+
+void rawprocFrm::EXIFDialog(wxTreeItemId item)
+{
+	wxString exif="";
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+
+	exif.Append(wxString::Format("<b>Image Information:</b><br>\nWidth: %d Height: %d<br>\nColors: %d Bits: %s<br>\n<br>\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
+
+	std::map<std::string,std::string> e =  dib.getInfo();
+	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
+		if (it->first == "ExifTag") continue;
+		if (it->first == "ExposureTime") {
+			float exp = atof(it->second.c_str());
+			if (exp > 1.0)
+				exif.Append(wxString::Format("<b>%s:</b> 1/%f sec<br>\n",it->first.c_str(),exp));
+			else
+				exif.Append(wxString::Format("<b>%s:</b> 1/%d sec<br>\n",it->first.c_str(),int(1.0/exp)));
+		}
+		else 
+			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
+	}
+	char buff[4096];
+	exif.Append("<br><b>Image Stats:</b><br><pre>\n");
+	exif.Append(dib.Stats().c_str());
+	exif.Append("</pre><br>\n");
+
+	char *profile = dib.getProfile();
+	unsigned profile_length = dib.getProfileLength();
+
+	if (profile_length && profile) {
+		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
+		if (icc) {
+			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
+			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s<br>\n", wxString(buff)));
+			cmsCloseProfile(icc);
+		}
+		else exif.Append(wxString::Format("<br>\nICC Profile: failed (%d)<br>\n",profile_length));
+	}
+	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
+	
+	wxBoxSizer s( wxVERTICAL );
+	wxDialog dlg(NULL, wxID_ANY, "Image Information" );
+	wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
+	html.SetPage(wxString::Format("%s",exif));
+	s.Add(&html, 1, wxALL, 1);
+	s.Add(dlg.CreateButtonSizer(wxOK), 1, wxALL, 1);
+	dlg.SetSizerAndFit(&s);
+	dlg.ShowModal();
+	
+}
 
 
 PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
@@ -315,14 +367,14 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
 	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
 	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
-	else if (name == "blackwhitepoint")     p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
+	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -385,7 +437,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 	gImage *dib;
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
-//	if (fif != FILETYPE_UNKNOWN) {
+	if (fif != FILETYPE_UNKNOWN) {
 
 
 		wxString configparams, inputprofile;
@@ -495,24 +547,20 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		Update();
 		
 		//wxSafeYield(this);
-	//}
-	//else {
-	//	SetStatusText(wxString::Format("Loading %s failed.",filename.GetFullName() ));
-	//}
+	}
+	else {
+		SetStatusText(wxString::Format("%s file type unknown.",filename.GetFullName() ));
+	}
 }
 
 void rawprocFrm::OpenFileSource(wxString fname)
 {
-
-//	filename.Assign(fname);
-//	sourcefilename.Clear();
 	gImage *dib;
 	wxString ofilename, inputprofile;
 	wxString oparams = "";
 
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
-
 
 
 	if (fif == FILETYPE_RAW) {
