@@ -3,8 +3,8 @@ Raw camera and general image processor, my way...
 
 I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but I'm aiming to make it tablet-
 friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does tone manipulation.  It saves 
-the processing applied in the EXIF of the saved image because I do not like the sidecar concept.  It does 16-bit 
-manipulations to 16-bit data.  Here's a list of the implemented manipulations:
+the processing applied in the EXIF of the saved image because I do not like the sidecar concept.  It works internally 
+with floating point pixel values.  Here's a list of the implemented manipulations:
 
 - Black/White Point
 - Bright
@@ -21,8 +21,9 @@ manipulations to 16-bit data.  Here's a list of the implemented manipulations:
 - Sharpen
 
 You open an image, add whatever manipulations you want to apply to the list, then save the result.   You determine
-the order of the manipulations; for a RAW image, I apply the default 2.2 gamma first, then add a bright to bring the image 
-up to a normal range. 
+the order of the manipulations.  Also, you have to deal with the raw image, in that the choices regarding white balance,
+demosaic, colorspace conversion, and gamma are for you to make.  The input image is dark, so learn to deal with it.  
+And, in doing so, you'll learn valuable things about digital images.
 
 In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, 
 a 255-value histogram, and no thumbnail.
@@ -44,19 +45,40 @@ image, you have to check a subsequent manipulation.
 This code is licensed for widespread use under the terms of the GPL.
 
 Contributed code:
-- wxWidgets cross-platform GUI toolkit: http://wxwidgets.org (wxWindows Library Licence, Version 3.1)
-- FreeImage image processing library: http://freeimage.sourceforge.net/ (FreeImage License)
-- Cubic Spline interpolation in C++: http://kluge.in-chemnitz.de/opensource/spline/ (GPL2)
+<ul>
+	<li>Spline Curve: Copyright (C) 2011, 2014 Tino Kluge, http://kluge.in-chemnitz.de/opensource/spline/, GPL2</li>
+	<li>Saturation: adapted from a public-domain function by Darel Rex Finley, http://alienryderflex.com/saturation.html</li>
+	<li>Non-Local Means Denoise: A. Buades, http://www.ipol.im/pub/art/2011/bcm_nlm/; adapted from from an interpretation by
+		David Tschumperlé presented at http://opensource.graphics/, 17 Sep 2015, #4.</li>
+	<li>Rotation: Alan Paeth, "A Fast Algorithm for General Raster Rotation", Graphics Interface '86
+	  http://supercomputingblog.com/graphics/coding-bilinear-interpolation/, and Coding Bilinear Interpolation, 
+	  http://supercomputingblog.com/graphics/coding-bilinear-interpolation/</li>
+	<li>Resizing: Graphics Gems III: Schumacher, Dale A., General Filtered Image Rescaling, p. 8-16
+	  https://github.com/erich666/GraphicsGems/blob/master/gemsiii/filter.c</li>
+	<li>Color Management: Primaries and black/white points from Elle Stone's make-elles-profiles.c, 
+	  https://github.com/ellelstone/elles_icc_profiles</li>
+</ul>
 
-Algorithms include public domain saturation, and NLMeans denoise used with permission.
+Algorithms include public domain saturation, and spline construction and NLMeans denoise used with permission.
+
+I started rawproc development with FreeImage, http://freeimage.sourceforge.net/.  It served well to flesh out 
+the initial look and behavior of rawproc, but I encounterd significant hurdles with it and color management.  So, 
+I ended up writing my own image library, gimage, https://github.com/butcherg/gimage.  That was a significant learning 
+endeavor, but well worth the effort, as I now have high-quality image algorithms with OpenMP threading throughout, with 
+color management tools to boot.
+
+Color management is new to 0.5, and is probably deficient in more than one way.  I defer to LibRaw for input profiles and
+transformations, and use Little CMS for display and output transforms.  I also made use of Elle Stone's profile code to
+implement internal profiles.  Any feedback on correcting or improving what I've implemented for color 
+management is appreciated.
 
 I offer no promise of support or enhancement, past offering the code on Github for you to fork. It is organized to compile 
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
 on Ubuntu x86_64 and Windows 7, 8, and 10.
 
-To compile in a Linux OS,  you need to have wxWidgets and FreeImage installed, with the associated development headers.  
+To compile in a Linux OS,  you need to have wxWidgets, LibRaw, libjpeg, libtiff, and LittleCMS installed, with the associated development headers.  
 Basically the same thing applies to compiling in Windows, except you'll probably have to spend more time figuring where 
-you put wxWidgets and FreeImage.  The wx-config utility that comes with wxWidgets helps substantially; I ran:
+you put wxWidgets.  The wx-config utility that comes with wxWidgets helps substantially; I ran:
 
 wx-config --libs --cxxflags
 
@@ -72,7 +94,8 @@ comprehensive documentation is the img.cpp source file.  You use it like this:
 img input.jpg resize:640,0 sharpen:1 output.jpg
 </pre>
 
-The windows installer does not include img.
+img will allow wildcards in the input and output filespecifications, so you can use it to apply processing to all 
+images in a directory.
 
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
