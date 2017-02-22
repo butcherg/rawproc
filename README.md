@@ -44,7 +44,7 @@ image, you have to check a subsequent manipulation.
 
 This code is licensed for widespread use under the terms of the GPL.
 
-Contributed code:
+Contributed code and algorithmns:
 <ul>
 	<li>Spline Curve: Copyright (C) 2011, 2014 Tino Kluge, http://kluge.in-chemnitz.de/opensource/spline/, GPL2</li>
 	<li>Saturation: adapted from a public-domain function by Darel Rex Finley, http://alienryderflex.com/saturation.html</li>
@@ -58,8 +58,6 @@ Contributed code:
 	<li>Color Management: Primaries and black/white points from Elle Stone's make-elles-profiles.c, 
 	  https://github.com/ellelstone/elles_icc_profiles</li>
 </ul>
-
-Algorithms include public domain saturation, and spline construction and NLMeans denoise used with permission.
 
 I started rawproc development with FreeImage, http://freeimage.sourceforge.net/.  It served well to flesh out 
 the initial look and behavior of rawproc, but I encounterd significant hurdles with it and color management.  So, 
