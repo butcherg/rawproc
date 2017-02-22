@@ -344,11 +344,12 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
 	
 	wxBoxSizer s( wxVERTICAL );
-	wxDialog dlg(NULL, wxID_ANY, "Image Information" );
+	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
 	wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
 	html.SetPage(wxString::Format("%s",exif));
-	s.Add(&html, 1, wxALL, 1);
-	s.Add(dlg.CreateButtonSizer(wxOK), 1, wxALL, 1);
+	s.Add(&html, 0, wxALL, 10);
+	wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
+	s.Add(&ok, 0, wxALL, 10);
 	dlg.SetSizerAndFit(&s);
 	dlg.ShowModal();
 	
