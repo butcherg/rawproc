@@ -63,7 +63,12 @@ I started rawproc development with FreeImage, http://freeimage.sourceforge.net/.
 the initial look and behavior of rawproc, but I encounterd significant hurdles with it and color management.  So, 
 I ended up writing my own image library, gimage, https://github.com/butcherg/gimage.  That was a significant learning 
 endeavor, but well worth the effort, as I now have high-quality image algorithms with OpenMP threading throughout, with 
-color management tools to boot.
+color management tools to boot.  Also, gimage has only one internal tone representation, floating point.  Image
+manipulations are a little slower as a result, but I've done some pixel-peep comparisons and the tone gradations do
+look better.  double, float, or half floating point representations are selectable at compile-time; the 0.5 Windows 
+installer version uses half because I ran into heap limits with a 32-bit executable.  One of my post-0.5 to-do items 
+is to make a 64-bit compilation line.  I compile my Linux version with float; I can't see that using double provides 
+any advantage worth the memory use for the tone ranges we work with in general purpose photography.
 
 Color management is new to 0.5, and is probably deficient in more than one way.  I defer to LibRaw for input profiles and
 transformations, and use Little CMS for display and output transforms.  I also made use of Elle Stone's profile code to
