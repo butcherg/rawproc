@@ -578,6 +578,9 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					return;
 				}
 			}
+			
+			commandtree->DeleteAllItems();
+			pic->BlankPic();
 
 			dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
 			if (dib->getWidth() == 0) {
@@ -586,8 +589,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 
-			commandtree->DeleteAllItems();
-			pic->BlankPic();
 			filename.Assign(ofilename);
 			sourcefilename.Assign(fname);
 
