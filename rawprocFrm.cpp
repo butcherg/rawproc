@@ -897,6 +897,7 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 */
 void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.gamma.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
@@ -917,6 +918,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 */
 void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.bright.initialvalue: The initial (and reset button) value of the bright tool, 0=no change.  Default=0
@@ -937,6 +939,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
  */
 void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.contrast.initialvalue: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0
@@ -955,6 +958,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
@@ -973,6 +977,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 
 void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
@@ -989,6 +994,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.shadow.level: The initial (and reset button) value of the shadow tool, 0=no change.  Default=0
@@ -1008,6 +1014,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.highlight.level: The initial (and reset button) value of the highlight tool, 0=no change.  Default=0
@@ -1027,6 +1034,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
@@ -1048,6 +1056,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
@@ -1062,6 +1071,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.resize.x: Default resize of the width dimension.  Default=640
@@ -1084,6 +1094,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		PicProcessorBlackWhitePoint *c;
@@ -1103,6 +1114,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
@@ -1119,6 +1131,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
@@ -1135,6 +1148,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
 		//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
@@ -1205,7 +1219,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxAboutDialogInfo info;
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
-	info.SetCopyright(wxT("(C) 2016 Glenn Butcher <glenn.butcher@gmail.com>"));
+	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
 
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
