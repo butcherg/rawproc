@@ -260,56 +260,14 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 		wxMessageBox("bad item");
 }
 
-/*
-void rawprocFrm::EXIFDialog(wxTreeItemId item)
-{
-	wxString exif="";
-	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 
-	exif.Append(wxString::Format("Width: %d Height: %d\nColors: %d Bits: %s\n\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
-
-	std::map<std::string,std::string> e =  dib.getInfo();
-	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
-		if (it->first == "ExifTag") continue;
-		if (it->first == "ExposureTime") {
-			float exp = atof(it->second.c_str());
-			if (exp > 1.0)
-				exif.Append(wxString::Format("%s: 1/%f sec\n",it->first.c_str(),exp));
-			else
-				exif.Append(wxString::Format("%s: 1/%d sec\n",it->first.c_str(),int(1.0/exp)));
-		}
-		else 
-			exif.Append(wxString::Format("%s: %s\n",it->first.c_str(),it->second.c_str()));
-	}
-	char buff[4096];
-	exif.Append("\n");
-	exif.Append(dib.Stats().c_str());
-
-	char *profile = dib.getProfile();
-	unsigned profile_length = dib.getProfileLength();
-
-	if (profile_length && profile) {
-		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
-		if (icc) {
-			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-			exif.Append(wxString::Format("\nICC Profile: %s\n", wxString(buff)));
-			cmsCloseProfile(icc);
-		}
-		else exif.Append(wxString::Format("\nICC Profile: failed (%d)\n",profile_length));
-	}
-	else exif.Append(wxString::Format("\nICC Profile: None (%d)\n",profile_length));
-
-	wxMessageBox(exif,"Image Information");
-	
-}
-*/
 
 void rawprocFrm::EXIFDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 
-	exif.Append(wxString::Format("<b>Image Information:</b><br>\nWidth: %d Height: %d<br>\nColors: %d Bits: %s<br>\n<br>\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
+	exif.Append(wxString::Format("<b>Image Information:</b><br>\nWidth: %d Height: %d<br>\nColors: %d Original Image Bits: %s<br>\n<br>\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
 
 	std::map<std::string,std::string> e =  dib.getInfo();
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
@@ -470,7 +428,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 		}
 
 		commandtree->DeleteAllItems();
-
+		pic->BlankPic();
 		mark();
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
@@ -514,15 +472,16 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 			pic->SetColorManagement(false);
 		}
 
+		pic->SetScaleToWidth();
+		pic->FitMode(true);
+		SetStatusText("scale: fit",2);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, parameters, dib);
 		picdata->showParams();
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
-		SetStatusText("scale: fit",2);
-		pic->SetScaleToWidth();
-		pic->FitMode(true);
+
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)
 		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
@@ -628,6 +587,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 
 			commandtree->DeleteAllItems();
+			pic->BlankPic();
 			filename.Assign(ofilename);
 			sourcefilename.Assign(fname);
 
@@ -660,14 +620,15 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetColorManagement(false);
 			}
 
+			pic->SetScaleToWidth();
+			pic->FitMode(true);
+			SetStatusText("scale: fit",2);
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 			picdata->processPic();
 			CommandTreeSetDisplay(picdata->GetId());
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 			SetStatusText("");
-			SetStatusText("scale: fit",2);
-			pic->SetScaleToWidth();
-			pic->FitMode(true);
+			
 			for (int i=2; i<token.GetCount(); i++) {
 				//SetStatusText(wxString::Format("Applying %s...",token[i]) );
 				wxArrayString cmd = split(token[i], ":");					
@@ -675,7 +636,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				wxSafeYield(this);
 			}
 			SetStatusText("");
-			pic->SetScaleToWidth();
 			Refresh();
 			Update();
 		}

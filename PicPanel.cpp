@@ -28,6 +28,7 @@ END_EVENT_TABLE()
 		SetDoubleBuffered(true);  //watch this one... tricksy...
 		showDebug = true;
 		scaleWindow = false;
+		blank = true;
 
 		colormgt = false;
 		hTransform = NULL;
@@ -89,6 +90,13 @@ END_EVENT_TABLE()
 	{
 		toggleThumb++;
 		if (toggleThumb>3) toggleThumb = 1;
+		Refresh();
+		Update();
+	}
+	
+	void PicPanel::BlankPic()
+	{
+		blank = true;
 		Refresh();
 		Update();
 	}
@@ -163,10 +171,11 @@ END_EVENT_TABLE()
                 thumb = new wxBitmap(thumbimg);
 
 		hsgram = wxBitmap();
+		blank =  false;
 
 		//parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
-                Refresh();
+		Refresh();
 		Update();
 		
 	}
@@ -177,6 +186,11 @@ END_EVENT_TABLE()
 		int tw, th;
 		int iw, ih;
 		wxImage spic;
+		
+		if (blank) {
+			dc.Clear();
+			return;
+		}
             
 		if (fitmode) SetScaleToWidth();
 		GetSize(&w, &h);
@@ -369,19 +383,19 @@ END_EVENT_TABLE()
 		//event.Skip();
 	}
 
-        void PicPanel::OnMouseMove(wxMouseEvent& event)
-        {
-		bool anchorx;
-            int x, y, posx, posy;
-            int iw, ih;
-		int dx, dy;
+void PicPanel::OnMouseMove(wxMouseEvent& event)
+{
+	bool anchorx;
+    int x, y, posx, posy;
+    int iw, ih;
+	int dx, dy;
             
-            if (img.IsOk()){
-                iw = img.GetWidth()*scale;
-                ih = img.GetHeight()*scale;
+    if (img.IsOk()){
+		iw = img.GetWidth()*scale;
+		ih = img.GetHeight()*scale;
             
-                GetPosition(&posx, &posy);
-                x=event.m_x; y=event.m_y;
+		GetPosition(&posx, &posy);
+		x=event.m_x; y=event.m_y;
 		dx = MouseX-x;
 		dy = MouseY-y;
 		if (abs(dx) > abs(dy))
@@ -390,22 +404,23 @@ END_EVENT_TABLE()
 			anchorx = false;  //y
 
 
-               	if (moving) {
+		if (moving) {
 			picX -= MouseX-x; 
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
 			Refresh();
 			Update();
 			//PaintNow();
-               	}
-               	if (thumbmoving) {
+		}
+		
+		if (thumbmoving) {
 			picX += (MouseX-x) * ((float) iw / (float) thumbW);
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
 			Refresh();
 			Update();
 			//PaintNow();
-               	}
+		}
 
 		if (scale == 1.0) {
 			unsigned px = x-picX;
@@ -423,9 +438,9 @@ END_EVENT_TABLE()
 				} else parentframe->SetStatusText("");
 			}
 		}
-            }
-	    //event.Skip();
-        }
+	}
+	//event.Skip();
+}
         
         void PicPanel::OnMouseWheel(wxMouseEvent& event)
         {
