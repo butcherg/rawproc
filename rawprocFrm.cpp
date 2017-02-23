@@ -666,7 +666,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 		if (wxFileName::FileExists(fname)) 
 			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
 				return;
-			if (gImage::getFileType(fname) == FILETYPE_UNKNOWN) {
+			
+			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname);
+			
+			if (filetype == FILETYPE_UNKNOWN) {
 				wxMessageBox("Error: invalid file type");
 				return;
 			}
@@ -678,7 +681,6 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
 			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
 
-			GIMAGE_FILETYPE filetype = gImage::getFileType(fname);
 
 			wxString configparams;
 			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)
