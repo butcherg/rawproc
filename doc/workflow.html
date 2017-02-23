@@ -14,14 +14,17 @@ are the key considerations in rawproc for each:</li><br>
 
 	<li>input.cms=1: You need to specify profiles for display (display.cms.displayprofile) and output (output.*.cms.profile).  Your input image is (at present) assumed to contain 
 an ICC profile representative of its color space.  For raw images, you need to specify both an output colorspace (output_color= or colorspace=) and gamma (there are three ways do do gamma)
-as LibRaw delivers the image with a profile, except if output_color=0 (linear).  rawproc has internal profiles for prophoto, srgb, wide, and adobe; srgb is somewhat okay for 
+as LibRaw delivers the image with a profile, except if output_color=0 (linear).  Here's a good parameters string to start with a prophoto working space:
+<pre>input.raw.parameters=colorspace=prophoto;gamma=prophoto</pre><br><br>
+rawproc has internal profiles for prophoto, srgb, wide, and adobe; srgb is somewhat okay for 
 the display profile if you don't have a calibrated profile for your monitor, but you really need to do a calibrated profile if you want color management to work for you.
 For output, srgb is appropriate for JPEGs to be displayed; for TIFFs, consider saving in one of the working profiles, preferrably the one you opened the image with, for subsequent
 editing in, say, GIMP.  You can also choose to specify a .icc file for display or output; Elle Stone's profiles work well: https://github.com/ellelstone/elles_icc_profiles</li><br>
 
 	<li>input.cms=0: If you choose to not use color management, you need to read the input image already converted to something that looks decent on the screen.
 That's likely to  be srgb, which you can probably assume is already in effect for JPEGs.  If you're opening a raw file, you need to set that prior to opening, like this: 
-input.raw.parameters=colorspace=srgb;gamma=srgb.  The image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li><br>
+<pre>input.raw.parameters=colorspace=srgb;gamma=srgb</pre><br><br>
+The image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li><br>
 
 	</ul>
 

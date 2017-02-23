@@ -24,7 +24,7 @@ RawTherapee or GIMP.</p>
 https://github.com/butcherg/rawproc</a>.  rawproc will compile to a Windows executable with the MinGW C++ compiler, or to a Linux/GTK executable 
 with the GNU g++ compiler.  You'll need the wxWidgets library; I was able to install it 
 from the Ubuntu repositories for Linux, but you'll have to download it from the source website and 
-probably compile it yourself for Windows.  The Makefile.txt will work for either Windows/MinGW or Linux, if
+probably compile it yourself for Windows.  The Makefile should work unmodified for  Linux, if
 you have the directories set up right.</p>
 
 <p>rawproc is by no means a tool you should use for serious image processing.  It does all of its
@@ -35,7 +35,8 @@ the tone range as much as possible.  I'll have no qualms about using rawproc to 
 editing in a more capable program.  It uses the libraw library to open camera raw files, so you are availed 
 of the fine work that went into the demosaic and all other processing operations contained therein. 
 rawproc started life using the FreeImage library; as of 0.5, that library was replaced with one I wrote specifically 
-for rawproc, called gImage.  It implements all the image operations as floating point, as well as supporting 
+for rawproc, called gImage, found at <a href=https://github.com/butcherg/gimage>
+https://github.com/butcherg/gimage</a>.  It implements all the image operations as floating point, as well as supporting 
 every processing option exposed in LibRaw and input-to-output color management. The significant and 
 unanticipated benefit of the research required to develop gImage was to develop a really deep understanding of digital imaging and 
 software development to support it.</p>
