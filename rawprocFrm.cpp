@@ -33,6 +33,7 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
+#include "myHistogramPane.h"
 //#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
@@ -1242,6 +1243,22 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 #define ID_DELETE	2003
 #define ID_ICC		2004
 
+void rawprocFrm::showHistogram(wxTreeItemId item)
+{
+	wxBoxSizer s( wxVERTICAL );
+	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
+	//wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	std::map<GIMAGE_CHANNEL, std::vector<long> > hdata = dib.Histogram(CHANNEL_RED | CHANNEL_GREEN |CHANNEL_BLUE, 65535);
+	myHistogramPane hist(&dlg, hdata, wxDefaultPosition, wxSize(400,500));
+	//html.SetPage(wxString::Format("%s",exif));
+	s.Add(&hist, 0, wxALL, 10);
+	wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
+	s.Add(&ok, 0, wxALL, 10);
+	dlg.SetSizerAndFit(&s);
+	dlg.ShowModal();
+}
+
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
 	wxMenu mnu;
@@ -1254,7 +1271,22 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			EXIFDialog(event.GetItem());
 			break;
 		case ID_HISTOGRAM:
-			wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
+			showHistogram(event.GetItem());
+			/*
+			wxBoxSizer s( wxVERTICAL );
+			wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
+			//wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
+			gImage dib = ((PicProcessor *) commandtree->GetItemData(event.GetItem()))->getProcessedPic();
+			std::map<GIMAGE_CHANNEL, std::vector<long> > hdata = dib.Histogram(CHANNEL_RED | CHANNEL_GREEN |CHANNEL_BLUE, 65536);
+			myHistogramPane hist(&dlg, hdata, wxDefaultPosition, wxSize(400,500));
+			//html.SetPage(wxString::Format("%s",exif));
+			s.Add(&hist, 0, wxALL, 10);
+			wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
+			s.Add(&ok, 0, wxALL, 10);
+			dlg.SetSizerAndFit(&s);
+			dlg.ShowModal();
+			*/
+			//wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
 			break;
 		case ID_DELETE:
 			CommandTreeDeleteItem(event.GetItem());

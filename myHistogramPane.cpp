@@ -19,50 +19,23 @@ BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
 END_EVENT_TABLE()
  
 
-myHistogramPane::myHistogramPane(wxFrame* parent, std::vector<unsigned int> data, int maxval, const wxPoint &pos, const wxSize &size) :
+myHistogramPane::myHistogramPane(wxDialog* parent, std::map<GIMAGE_CHANNEL, std::vector<long> > histograms, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
 {
 	SetSize(parent->GetSize());
-	hdata = data;
-	hmax = maxval;
-	if (hmax == 0) {
-		for (int i = 0; i<hdata.size(); i++) {
-			if (hdata[i] > hmax) hmax = hdata[i];
-		}
-	} 
-	pressedDown = false;
-	paintNow();
-}
-
-myHistogramPane::myHistogramPane(wxFrame* parent, wxImage img, int maxval, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size)
-{
-	SetSize(parent->GetSize());
-	int iw = img.GetWidth();
-	int ih = img.GetHeight();
+	hdata = histograms;
 	hmax = 0;
-	hdata.resize(256);
-	for (int i=0; i<256; i++) hdata[i] = 0;
-	for (int x=0; x<iw; x++) {
-		for (int y=0; y<ih; y++) {
-			int gray = 0.21 * img.GetRed(x,y) + 0.72 * img.GetGreen(x,y) + 0.07 * img.GetBlue(x,y);
-			hdata[gray]++;
-			if (hdata[gray] > hmax) hmax = hdata[gray];
-		}
+	hscale = histograms[CHANNEL_RED].size();
+	for (unsigned i = 0; i<hscale; i++) {
+		if (histograms[CHANNEL_RED][i] < hmax) hmax = histograms[CHANNEL_RED][i];
+		if (histograms[CHANNEL_GREEN][i] < hmax) hmax = histograms[CHANNEL_GREEN][i];
+		if (histograms[CHANNEL_BLUE][i] < hmax) hmax = histograms[CHANNEL_BLUE][i];
 	}
-			
+	
 	pressedDown = false;
 	paintNow();
 }
 
-/*
-myHistogramPane::myHistogramPane(wxFrame* parent, FIBITMAP *dib, int maxval, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
-wxWindow(parent, wxID_ANY, pos, size)
-{
-
-
-}
-*/
  
 void myHistogramPane::paintEvent(wxPaintEvent & evt)
 {
@@ -82,9 +55,14 @@ void myHistogramPane::render(wxDC&  dc)
 	GetSize(&w, &h);
 	dc.Clear();
 	dc.SetLogicalScale(w/hdata.size(), h/hmax);
-	for(int x=0; x<hdata.size(); x++) {
-		dc.DrawLine(x,0,x,hdata[x]);
+	dc.SetUserScale((double) w / (double) hscale, (double) h/ (double) hmax);
+	dc.SetPen(wxPen(wxColour(255,0,0),1));
+	for(int x=0; x<hscale; x++) {
+		dc.DrawLine(x,dc.DeviceToLogicalY(h),x,dc.DeviceToLogicalY(h)-hdata[CHANNEL_RED][x]);
 	}
+
+	//dc.SelectObject(wxNullBitmap);
+
 
 }
  

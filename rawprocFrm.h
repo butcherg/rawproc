@@ -158,6 +158,7 @@ class rawprocFrm : public wxFrame
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
 	wxString AssembleCommand();
 	void EXIFDialog(wxTreeItemId item);
+	void showHistogram(wxTreeItemId item);
 	void OpenFile(wxString fname, wxString params="");
 	void OpenFileSource(wxString fname);
 
