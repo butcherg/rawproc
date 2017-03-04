@@ -23,6 +23,10 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage dib, const wxPoint &po
  wxWindow(parent, wxID_ANY, pos, size)
 {
 	SetSize(parent->GetSize());
+	unsigned hm;
+	//rdata = dib.Histogram(CHANNEL_RED, 256, hm);
+	rdata = dib.Histogram();
+	hmax = 65535;
 
 	/*
 	hdata = histograms;
@@ -57,11 +61,12 @@ void myHistogramPane::render(wxDC&  dc)
 	int w, h;
 	GetSize(&w, &h);
 	dc.Clear();
-	dc.SetLogicalScale(w/hdata.size(), h/hmax);
-	dc.SetUserScale((double) w / (double) hscale, (double) h/ (double) hmax);
+	//dc.SetLogicalScale(w/rdata.size(), h/hmax);
+	//dc.SetUserScale((double) w / (double) 256, (double) h/ (double) hmax);
 	dc.SetPen(wxPen(wxColour(255,0,0),1));
-	for(int x=0; x<hscale; x++) {
-		dc.DrawLine(x,dc.DeviceToLogicalY(h),x,dc.DeviceToLogicalY(h)-hdata[CHANNEL_RED][x]);
+	for(int x=0; x<256; x++) {
+		//dc.DrawLine(x,dc.DeviceToLogicalY(h),x,dc.DeviceToLogicalY(h)-rdata[x]);
+		dc.DrawLine(x,h,x,h-rdata[x]);
 	}
 
 	//dc.SelectObject(wxNullBitmap);
