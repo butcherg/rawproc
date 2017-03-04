@@ -18,7 +18,7 @@ class myHistogramPane : public wxWindow
 
 public:
 
-	myHistogramPane(wxDialog* parent, std::map<GIMAGE_CHANNEL, std::vector<long> > histograms, const wxPoint &pos, const wxSize &size);
+	myHistogramPane(wxDialog* parent, std::map<GIMAGE_CHANNEL, std::vector<unsigned> > histograms, const wxPoint &pos, const wxSize &size);
 
  
 	void paintEvent(wxPaintEvent & evt);
@@ -38,7 +38,7 @@ public:
 
 private:
 	bool pressedDown;
-	std::map<GIMAGE_CHANNEL, std::vector<long> > hdata;
+	std::map<GIMAGE_CHANNEL, std::vector<unsigned> > hdata;
 	long hmax;
 	unsigned hscale;
 	

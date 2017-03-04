@@ -19,18 +19,21 @@ BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
 END_EVENT_TABLE()
  
 
-myHistogramPane::myHistogramPane(wxDialog* parent, std::map<GIMAGE_CHANNEL, std::vector<long> > histograms, const wxPoint &pos, const wxSize &size) :
+myHistogramPane::myHistogramPane(wxDialog* parent, gImage dib, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
 {
 	SetSize(parent->GetSize());
+
+	/*
 	hdata = histograms;
 	hmax = 0;
 	hscale = histograms[CHANNEL_RED].size();
 	for (unsigned i = 0; i<hscale; i++) {
-		if (histograms[CHANNEL_RED][i] < hmax) hmax = histograms[CHANNEL_RED][i];
-		if (histograms[CHANNEL_GREEN][i] < hmax) hmax = histograms[CHANNEL_GREEN][i];
-		if (histograms[CHANNEL_BLUE][i] < hmax) hmax = histograms[CHANNEL_BLUE][i];
+		if (histograms[CHANNEL_RED].size() < hscale && histograms[CHANNEL_RED][i] < hmax) hmax = histograms[CHANNEL_RED][i];
+		if (histograms[CHANNEL_GREEN].size() < hscale && histograms[CHANNEL_GREEN][i] < hmax) hmax = histograms[CHANNEL_GREEN][i];
+		if (histograms[CHANNEL_BLUE].size() < hscale && histograms[CHANNEL_BLUE][i] < hmax) hmax = histograms[CHANNEL_BLUE][i];
 	}
+	*/
 	
 	pressedDown = false;
 	paintNow();

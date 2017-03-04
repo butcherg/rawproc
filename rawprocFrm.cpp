@@ -1249,7 +1249,7 @@ void rawprocFrm::showHistogram(wxTreeItemId item)
 	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
 	//wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	std::map<GIMAGE_CHANNEL, std::vector<long> > hdata = dib.Histogram(CHANNEL_RED | CHANNEL_GREEN |CHANNEL_BLUE, 65535);
+	std::map<GIMAGE_CHANNEL, std::vector<unsigned> > hdata = dib.Histogram(CHANNEL_RED | CHANNEL_GREEN |CHANNEL_BLUE, 65535);
 	myHistogramPane hist(&dlg, hdata, wxDefaultPosition, wxSize(400,500));
 	//html.SetPage(wxString::Format("%s",exif));
 	s.Add(&hist, 0, wxALL, 10);
