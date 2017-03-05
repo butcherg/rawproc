@@ -33,6 +33,7 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
+#include "myEXIFDialog.h"
 //#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
@@ -300,7 +301,8 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 		else exif.Append(wxString::Format("<br>\nICC Profile: failed (%d)<br>\n",profile_length));
 	}
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
-	
+
+/*
 	wxBoxSizer s( wxVERTICAL );
 	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
 	wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
@@ -310,7 +312,10 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	s.Add(&ok, 0, wxALL, 10);
 	dlg.SetSizerAndFit(&s);
 	dlg.ShowModal();
-	
+*/
+
+	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxDefaultSize);
+	dlg.ShowModal();
 }
 
 
