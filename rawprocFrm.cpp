@@ -33,7 +33,7 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
-#include "myHistogramPane.h"
+#include "myHistogramDialog.h"
 //#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
@@ -1245,15 +1245,8 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
-	wxBoxSizer s( wxVERTICAL );
-	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
-	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
-	myHistogramPane hist(&dlg, dib, wxDefaultPosition, wxSize(400,500));
-	s.Add(&hist, 0, wxALL, 10);
-	wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
-	s.Add(&ok, 0, wxALL, 10);
-	dlg.SetSizerAndFit(&s);
-	dlg.ShowModal();
+	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic(), wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
+	hdiag.ShowModal();
 }
 
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
@@ -1269,20 +1262,6 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			break;
 		case ID_HISTOGRAM:
 			showHistogram(event.GetItem());
-			/*
-			wxBoxSizer s( wxVERTICAL );
-			wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
-			//wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
-			gImage dib = ((PicProcessor *) commandtree->GetItemData(event.GetItem()))->getProcessedPic();
-			std::map<GIMAGE_CHANNEL, std::vector<long> > hdata = dib.Histogram(CHANNEL_RED | CHANNEL_GREEN |CHANNEL_BLUE, 65536);
-			myHistogramPane hist(&dlg, hdata, wxDefaultPosition, wxSize(400,500));
-			//html.SetPage(wxString::Format("%s",exif));
-			s.Add(&hist, 0, wxALL, 10);
-			wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
-			s.Add(&ok, 0, wxALL, 10);
-			dlg.SetSizerAndFit(&s);
-			dlg.ShowModal();
-			*/
 			//wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
 			break;
 		case ID_DELETE:

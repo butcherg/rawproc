@@ -13,13 +13,13 @@
 
 #include "gimage.h"
 
-class myHistogramPane : public wxWindow
+class myHistogramPane : public wxPanel
 {
 
 public:
 
 	myHistogramPane(wxDialog* parent,  gImage dib,  const wxPoint &pos, const wxSize &size);
-
+	void OnSize(wxSizeEvent& event);
  
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
@@ -41,6 +41,9 @@ private:
 	std::vector<long> rdata, gdata, bdata;
 	long hmax;
 	unsigned hscale;
+	unsigned xorigin, yorigin, MouseX, MouseY;
+
+	double wscale;
 	
  
 	DECLARE_EVENT_TABLE()
