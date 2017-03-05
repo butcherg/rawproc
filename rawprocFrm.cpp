@@ -34,6 +34,7 @@
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
 #include "myHistogramDialog.h"
+#include "myEXIFDialog.h"
 //#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
@@ -43,7 +44,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.5";
+wxString version = "0.5.1";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -301,17 +302,9 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 		else exif.Append(wxString::Format("<br>\nICC Profile: failed (%d)<br>\n",profile_length));
 	}
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
-	
-	wxBoxSizer s( wxVERTICAL );
-	wxDialog dlg(NULL, wxID_ANY, "Image Information", wxDefaultPosition, wxSize(400,600) );
-	wxHtmlWindow html(&dlg, wxID_ANY, wxDefaultPosition, wxSize(400,500));
-	html.SetPage(wxString::Format("%s",exif));
-	s.Add(&html, 0, wxALL, 10);
-	wxButton ok(&dlg, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize); //wxSize(50,20));
-	s.Add(&ok, 0, wxALL, 10);
-	dlg.SetSizerAndFit(&s);
+
+	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxDefaultSize);
 	dlg.ShowModal();
-	
 }
 
 

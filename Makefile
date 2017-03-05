@@ -3,7 +3,7 @@
 OBJDIR=build
 
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #localmake.txt: += any of these to add, = to replace:
 
@@ -48,6 +48,9 @@ $(OBJDIR)/util.o: util.cpp
 
 $(OBJDIR)/myPropertyDialog.o: myPropertyDialog.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myPropertyDialog.cpp  -o$@
+
+$(OBJDIR)/myEXIFDialog.o: myEXIFDialog.cpp
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myEXIFDialog.cpp  -o$@
 
 #$(OBJDIR)/myFileSelector.o: myFileSelector.cpp
 #	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myFileSelector.cpp  -o$@
