@@ -1,5 +1,7 @@
 
 #include "myHistogramPane.h"
+#include <math.h>
+#include <algorithm>
 
 BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
  
@@ -24,12 +26,23 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage dib, const wxPoint &po
  wxPanel(parent, wxID_ANY, pos, size)
 {
 	SetInitialSize(wxSize(500,400));
-	long hm = 0;
-	//rdata = dib.Histogram(CHANNEL_RED, 256, hm);
-	rdata = dib.Histogram();
-	for (unsigned i = 0; i<256; i++) if (hm < rdata[i]) hm = rdata[i];
-	hmax = hm;
-	hscale = 256;
+	unsigned hm = 0;
+	hmax = 0;
+	hscale = 0;
+	rdata = dib.Histogram(CHANNEL_RED, hm);
+	if (hmax < hm) hmax = hm;
+	if (hscale < rdata.size()) hscale = rdata.size();
+
+	gdata = dib.Histogram(CHANNEL_GREEN, hm);
+	if (hmax < hm) hmax = hm;
+	if (hscale < gdata.size()) hscale = gdata.size();
+
+	bdata = dib.Histogram(CHANNEL_BLUE, hm);
+	if (hmax < hm) hmax = hm;
+	if (hscale < bdata.size()) hscale = bdata.size();
+
+	ord = 1;
+
 	wscale = 1.0;
 	xorigin = 0; yorigin = 0;
 	MouseX = 0; MouseY=0;
@@ -66,40 +79,66 @@ void myHistogramPane::render(wxDC&  dc)
 	int hx;
 	GetSize(&w, &h);
 	dc.Clear();
-	//dc.SetBackground(*wxMEDIUM_GREY_BRUSH);
-	//dc.SetLogicalScale(w/256.0, h/hmax);
 
-	dc.SetTextForeground(wxColour(0,0,0));
-	//if (!pressedDown) 
-	//	dc.DrawText(wxString::Format("x: %d y: %d",MouseX,MouseY),10,h-20);
+	dc.DrawRectangle(0,0,w,h);
+
+	//dc.SetTextForeground(wxColour(0,0,0));
 	
-	dc.SetUserScale(((double) w / (double) 256.0)* wscale, ((double) h/ (double) hmax) * wscale);
+	//go to histogram coordinates:
+	dc.SetUserScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
 	dc.SetDeviceOrigin (xorigin, yorigin);
 
+	unsigned order = ord;
+	for (unsigned i=0; i<3; i++) {
+		//red histogram line:
+		if (order == 1) {
+			dc.SetPen(wxPen(wxColour(255,0,0),1));
+			for (int x = 0; x <rdata.size()-1; x++) {
+				dc.DrawLine(x,hmax-rdata[x],x+1,hmax-rdata[x+1]);
+			}
+		}
 
-	dc.DrawLine(0,0,0,hmax);
-	dc.DrawLine(0,0,hscale,0);
+		if (order == 2) {
+			dc.SetPen(wxPen(wxColour(0,255,0),1));
+			for (int x = 0; x <gdata.size()-1; x++) {
+				dc.DrawLine(x,hmax-gdata[x],x+1,hmax-gdata[x+1]);
+			}
+		}
 
+		if (order == 3) {
+			dc.SetPen(wxPen(wxColour(0,0,255),1));
+			for (int x = 0; x <bdata.size()-1; x++) {
+				dc.DrawLine(x,hmax-bdata[x],x+1,hmax-bdata[x+1]);
+			}
+		}
 
-	dc.SetPen(wxPen(wxColour(255,0,0),1));
-	for (int x = 0; x <256-1; x++) {
-		//dc.DrawLine(x,dc.DeviceToLogicalY(h)-rdata[x],x+1,dc.DeviceToLogicalY(h)-rdata[x+1]);
-		dc.DrawLine(x,hmax-rdata[x],x+1,hmax-rdata[x+1]);
+		order++;
+		if (order > 3) order = 1;
 	}
 
+	//vertical marker line:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
+	unsigned mlx = fmin(fmax(dc.DeviceToLogicalX(MouseX),0.0),hscale);
+	
 	if (!pressedDown) {
-		dc.DrawLine(dc.DeviceToLogicalX(MouseX),0,dc.DeviceToLogicalX(MouseX),hmax);
+		dc.DrawLine(mlx,0,mlx,hmax);
 	}
+
+	//vertical marker value:
 	hx = dc.DeviceToLogicalX(MouseX);
 
+	//return to window coords:
 	dc.SetUserScale(1.0, 1.0);
 	dc.SetDeviceOrigin (0, 0);
-	dc.DrawText(wxString::Format("x: %d",hx),10,h-20);
+
+	if (!pressedDown & mlx > 0 & mlx < hscale) 
+		dc.DrawText(wxString::Format("x: %d",hx),10,h-20);
+
 }
 
 void myHistogramPane::mouseWheelMoved(wxMouseEvent& event) 
 {
+	xcenter = event.m_x; ycenter = event.m_y;
 	if (event.GetWheelRotation() > 0) { 
 		wscale += 0.1;
 	}
@@ -112,12 +151,18 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 
 void myHistogramPane::keyPressed(wxKeyEvent& event) 
 {
+	//printf("keycode: %d\n", event.GetKeyCode());
 	switch (event.GetKeyCode()) {
 		case 116: //t
 		case 84: //T - toggle display thumbnail
 			wscale = 1.0;
 			xorigin = 0;
 			yorigin = 0;
+			break;
+		case 9: //tab
+			if (ord == 1) ord = 2;
+			else if(ord == 2) ord = 3;
+			else if(ord == 3) ord = 1;
 			break;
 	}
 	Update();

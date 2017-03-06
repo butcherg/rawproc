@@ -38,10 +38,11 @@ public:
 
 private:
 	bool pressedDown;
-	std::vector<long> rdata, gdata, bdata;
+	std::vector<unsigned> rdata, gdata, bdata;
 	long hmax;
 	unsigned hscale;
-	unsigned xorigin, yorigin, MouseX, MouseY;
+	unsigned xorigin, yorigin, MouseX, MouseY, xcenter, ycenter;
+	unsigned ord;
 
 	double wscale;
 	
