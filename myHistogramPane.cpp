@@ -25,7 +25,8 @@ END_EVENT_TABLE()
 myHistogramPane::myHistogramPane(wxDialog* parent, gImage dib, const wxPoint &pos, const wxSize &size) :
  wxPanel(parent, wxID_ANY, pos, size)
 {
-	SetInitialSize(wxSize(500,400));
+	SetDoubleBuffered(true);
+
 	unsigned hm = 0;
 	hmax = 0;
 	hscale = 0;
@@ -48,7 +49,7 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage dib, const wxPoint &po
 	MouseX = 0; MouseY=0;
 
 	//wxMessageBox(wxString::Format("scale: %d; max: %ld",hscale, hmax));
-	
+	SetInitialSize(wxSize(500,400));
 	pressedDown = false;
 	paintNow();
 }
@@ -160,6 +161,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			yorigin = 0;
 			break;
 		case 9: //tab
+		case 115: // s?
 			if (ord == 1) ord = 2;
 			else if(ord == 2) ord = 3;
 			else if(ord == 3) ord = 1;
