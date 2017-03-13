@@ -1238,7 +1238,8 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
-	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic(), wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
+	gImage &g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", g , wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
 	hdiag.ShowModal();
 }
 
