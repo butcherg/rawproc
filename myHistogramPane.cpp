@@ -129,12 +129,15 @@ void myHistogramPane::render(wxDC&  dc)
 		if (order>3) order=1;
 	}
 
-	//vertical marker line:
+	//marker lines:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
 	unsigned mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
-	unsigned mly = wxCoord(frontcolor[mlx].y);
 	
-	dc.DrawLine(0,mly,hscale,mly);
+	unsigned mly=0;
+	if (mlx > 0 & mlx < hscale) {
+		mly = wxCoord(frontcolor[mlx].y);
+		dc.DrawLine(0,mly,hscale,mly);
+	}
 
 	//return to window coords:
 	dc.SetLogicalScale(1.0, 1.0);
@@ -142,10 +145,10 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetAxisOrientation(true,false);
 
 	dc.SetTextBackground(wxColour(255,255,255));
-	if (!pressedDown) { // & mlx > 0 & mlx < hscale) 
+	if (!pressedDown & mlx > 0 & mlx < hscale) 
 		dc.DrawLine(MouseX,0,MouseX,h);
-		dc.DrawText(wxString::Format("x: %d y: %d      hscale=%d  wscale=%f",mlx,mly,hscale,wscale),10,h-20);
-	}
+	dc.DrawText(wxString::Format("x: %d y: %d      hscale=%d  wscale=%f",mlx,mly,hscale,wscale),10,h-20);
+
 }
 
 
@@ -154,6 +157,7 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	xcenter = event.m_x; ycenter = event.m_y;
 	double inc = 0.1;
 	if (event.ShiftDown()) inc = 1.0;
+	if (event.ControlDown()) inc = 10.0;
 	if (event.GetWheelRotation() > 0) { 
 		wscale += inc;
 	}
