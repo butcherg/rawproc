@@ -63,30 +63,19 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage &dib, const wxPoint &p
 	SetInitialSize(wxSize(500,400));
 	pressedDown = false;
 
-	
-	//hredraw = true;	
-	//himage = histogramBitmap();
-	//Bind(wxEVT_TIMER, &myHistogramPane::OnTimer,  this);
-	//t->Start(50,wxTIMER_ONE_SHOT);
-	
-	//paintNow();
 	Update();
 	Refresh();
 }
 
 myHistogramPane::~myHistogramPane()
 {
-	//if (himage) delete himage;
 	if (r) delete[] r;
 	if (g) delete[] g;
 	if (b) delete[] b;
-	//t->Stop();
-	//if (t) t->~wxTimer();
 }
 
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
-	//SetSize(GetParent()->GetSize());
 	Update();
 	Refresh();
 }
@@ -103,63 +92,16 @@ void myHistogramPane::paintNow()
 	wxClientDC dc(this);
 	render(dc);
 }
-
-wxBitmap myHistogramPane::histogramBitmap()
-{
-	int w, h;
-	GetSize(&w, &h);
-	wxMemoryDC mdc;
-	//wxMessageBox(wxString::Format("myHistogramPane::histogramBitmap: w=%d h=%d",w,h));
-	wxBitmap bitmap(w,h);
-	mdc.SelectObject(bitmap);
-	mdc.SetBackground(*wxWHITE_BRUSH);
-	mdc.Clear();
-	
-	//mdc.SetLogicalScale(wscale, wscale);
-	//mdc.SetDeviceOrigin (xorigin, yorigin);
-	
-	mdc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
-	mdc.SetDeviceOrigin (xorigin, yorigin);
-
-//	unsigned order = ord;
-//	for (unsigned i=0; i<3; i++) {
-		//red histogram line:
-//		if (order == 1) {
-			mdc.SetPen(wxPen(wxColour(255,0,0),1));
-			for (int x = 0; x <rdata.size()-1; x++) {
-				mdc.DrawLine(x,hmax-rdata[x],x+1,hmax-rdata[x+1]);
-			}
-//		}
-
-//		if (order == 2) {
-			mdc.SetPen(wxPen(wxColour(0,255,0),1));
-			for (int x = 0; x <gdata.size()-1; x++) {
-				mdc.DrawLine(x,hmax-gdata[x],x+1,hmax-gdata[x+1]);
-			}
-//		}
-
-//		if (order == 3) {
-			mdc.SetPen(wxPen(wxColour(0,0,255),1));
-			for (int x = 0; x <bdata.size()-1; x++) {
-				mdc.DrawLine(x,hmax-bdata[x],x+1,hmax-bdata[x+1]);
-			}
-//		}
-//	}
-	mdc.SelectObject(wxNullBitmap);
-	return bitmap;
-}
  
 void myHistogramPane::render(wxDC&  dc)
 {
 	int w, h;
 	int hx;
-	//printf("myHistogramPane::render: scale=%f\n",wscale);
 	GetSize(&w, &h);
 	dc.SetBackground(*wxWHITE_BRUSH);
 	dc.Clear();
 	
 	//go to histogram coordinates:
-	
 	dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
 	dc.SetDeviceOrigin (xorigin, h-yorigin);
 	dc.SetAxisOrientation(true,true);
@@ -189,7 +131,6 @@ void myHistogramPane::render(wxDC&  dc)
 
 	//vertical marker line:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
-	//unsigned mlx = ((((float)MouseX/(float)w)*hscale)*wscale)-xorigin;
 	unsigned mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
 	unsigned mly = wxCoord(frontcolor[mlx].y);
 	
@@ -207,13 +148,6 @@ void myHistogramPane::render(wxDC&  dc)
 	}
 }
 
-void myHistogramPane::OnTimer(wxTimerEvent& event)
-{
-	//wxMessageBox("histogram update");
-	himage = histogramBitmap();
-	Update();
-	Refresh();
-}
 
 void myHistogramPane::mouseWheelMoved(wxMouseEvent& event) 
 {
@@ -228,7 +162,6 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	}
 	if (wscale < 1.0) wscale = 1.0;
 
-	//t->Start(500,wxTIMER_ONE_SHOT);
 	Update();
 	Refresh();
 }
@@ -242,13 +175,11 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			wscale = 1.0;
 			xorigin = 0;
 			yorigin = 0;
-			//t->Start(50,wxTIMER_ONE_SHOT);
 			break;
 		case WXK_SPACE : // s?
 			if (ord == 1) ord = 2;
 			else if(ord == 2) ord = 3;
 			else if(ord == 3) ord = 1;
-			//t->Start(50,wxTIMER_ONE_SHOT);
 			break;
 	}
 	Update();
@@ -291,7 +222,6 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 	wscale = 1.0;
 	xorigin = 0;
 	yorigin = 0;
-	//t->Start(50,wxTIMER_ONE_SHOT);
 	Update();
 	Refresh();
 }
@@ -300,7 +230,6 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 
 void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) {}
 void myHistogramPane::rightClick(wxMouseEvent& event) {}
-
 void myHistogramPane::keyReleased(wxKeyEvent& event) {}
  
  

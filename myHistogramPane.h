@@ -36,8 +36,6 @@ public:
 	void mouseLeftWindow(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent& event);
 	void keyReleased(wxKeyEvent& event);
-	
-	void OnTimer(wxTimerEvent& event);
 
 private:
 	wxBitmap histogramBitmap();
@@ -51,10 +49,6 @@ private:
 	unsigned hscale;
 	unsigned xorigin, yorigin, MouseX, MouseY, xcenter, ycenter;
 	unsigned ord;
-	
-	wxBitmap himage;
-	bool hredraw;
-	wxTimer *t;
 
 	double wscale;
 	
