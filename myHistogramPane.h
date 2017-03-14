@@ -38,7 +38,6 @@ public:
 	void keyReleased(wxKeyEvent& event);
 
 private:
-	wxBitmap histogramBitmap();
 	bool pressedDown;
 	std::vector<long> rdata, gdata, bdata;
 	

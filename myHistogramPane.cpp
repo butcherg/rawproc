@@ -181,6 +181,16 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			else if(ord == 2) ord = 3;
 			else if(ord == 3) ord = 1;
 			break;
+		case 82: //r - pan right
+			if (event.ShiftDown()) xorigin -= 10;
+			else if (event.ControlDown()) xorigin -= 100;
+			else xorigin -= 1;
+			break;
+		case 76: //l - pan left
+			if (event.ShiftDown()) xorigin += 10;
+			else if (event.ControlDown()) xorigin += 100;
+			else xorigin += 1;
+			break;
 	}
 	Update();
 	Refresh();
@@ -202,6 +212,8 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	if (pressedDown) {
 		dx = MouseX-x;
 		dy = MouseY-y;
+		if (event.ShiftDown())   if (dx > dy) dx *= 10;  else dy *= 10;
+		if (event.ControlDown()) if (dx > dy) dx *= 100; else dy *= 100;
 		xorigin -= dx; yorigin += dy;
 	}
 	MouseX = x;
