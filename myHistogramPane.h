@@ -13,12 +13,13 @@
 
 #include "gimage.h"
 
-class myHistogramPane : public wxPanel
+class myHistogramPane : public wxWindow
 {
 
 public:
 
-	myHistogramPane(wxDialog* parent,  gImage dib,  const wxPoint &pos, const wxSize &size);
+	myHistogramPane(wxDialog* parent,  gImage &dib,  const wxPoint &pos, const wxSize &size);
+	~myHistogramPane();
 	void OnSize(wxSizeEvent& event);
  
 	void paintEvent(wxPaintEvent & evt);
@@ -38,7 +39,11 @@ public:
 
 private:
 	bool pressedDown;
-	std::vector<unsigned> rdata, gdata, bdata;
+	std::vector<long> rdata, gdata, bdata;
+	
+	wxPoint *r, *g, *b;
+	int rlen, glen, blen;
+	
 	long hmax;
 	unsigned hscale;
 	unsigned xorigin, yorigin, MouseX, MouseY, xcenter, ycenter;

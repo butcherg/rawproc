@@ -11,7 +11,7 @@
 class myHistogramDialog: public wxDialog
 {
 	public:
-		myHistogramDialog(wxWindow *parent, wxWindowID id, const wxString &title, gImage dib, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);
+		myHistogramDialog(wxWindow *parent, wxWindowID id, const wxString &title, gImage &dib, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);
 		void OnSize(wxSizeEvent& event);
 		~myHistogramDialog();
 
