@@ -12,12 +12,13 @@
 #include <string>
 #include <iostream>
 #include <dirent.h>
+#include <glob.h>
 
 #include "gimage.h"
 #include "elapsedtime.h"
 #include "strutil.h"
 
-
+//matchspec: takes a file name and returns the variant part, specified by the file specification
 std::string matchspec(std::string fname, std::string fspec)
 {
 	if (fname.size() < fspec.size()) return "";
@@ -35,11 +36,12 @@ std::string matchspec(std::string fname, std::string fspec)
 	return "";
 }
 
-std::string makename(std::string variant, std::string endstr)
+//makename: returns a file name constructed using a file specification and the variant string to insert
+std::string makename(std::string variant, std::string fspec)
 {
 	char e[1024];
 	char *a, *b;
-	strncpy(e,endstr.c_str(), 1023);
+	strncpy(e,fspec.c_str(), 1023);
 	if (e[0] == '*') {
 		b = NULL;
 		a = e+1;
@@ -64,18 +66,33 @@ int countchar(std::string s, char c)
 	return count;
 }
 
-std::vector<std::string> filelist(std::string dspec)
+//gets the file out of a path/file string
+std::string getfile(std::string path)
 {
-	std::vector<std::string> flist;
-	DIR *dir;
-	struct dirent *ent;
-	if ((dir = opendir(dspec.c_str())) != NULL) {
-		while ((ent = readdir(dir)) != NULL) {
-			flist.push_back(ent->d_name);
-		}
-		closedir(dir);
+	std::size_t found = path.find_last_of("/\\");
+	if (found == std::string::npos) return path;
+	return path.substr(found+1);
+}
+
+//gets the path out of a path/file string
+std::string getpath(std::string path)
+{
+	std::size_t found = path.find_last_of("/\\");
+	if (found == std::string::npos) return ".";
+	return path.substr(0,found);
+}
+
+std::vector<std::string> fileglob(std::string dspec)
+{
+	glob_t glob_result;
+	glob(dspec.c_str(), 0, NULL, &glob_result);
+	std::vector<std::string> ret;
+	for(unsigned int i=0;i<glob_result.gl_pathc;++i){
+		ret.push_back(std::string(glob_result.gl_pathv[i]));
 	}
-	return flist;
+	globfree(&glob_result);
+	return ret;
+	
 }
 
 
@@ -101,6 +118,8 @@ void strappend(char* s, char c)
 
 int _CRT_glob = 0;
 
+//used to contain a list of corresponding input and output file names,
+//constructed from the input and output file specifications
 struct fnames {
 	std::string infile, outfile;
 };
@@ -108,7 +127,10 @@ struct fnames {
 int main (int argc, char **argv) 
 {
 	char * filename;
+	
+	//the corresponding input and output file names 
 	std::vector<fnames> files;
+	
 	int c;
 	int flags;
 	gImage dib;
@@ -121,16 +143,16 @@ int main (int argc, char **argv)
 		printf("open all the .NEFs in the current directory, apply gamma and auto black/white \n");
 		printf("point correction to each,and save each as the corresponding filename.tif.\n\n");
 		printf("Available commands:\n");
-		//printf("\tbright:[-100 - 100, default=0]\n");
-                //printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
-                //printf("\tcontrast:[-100 - 100, default=0]\n");
-                //printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
-                printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
-		//printf("\t\tlanczos3 (default)]\n");
+		printf("\tbright:[-100 - 100, default=0]\n");
+		printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
+		printf("\tcontrast:[-100 - 100, default=0]\n");
+		printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
+		printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
+		printf("\t\tlanczos3 (default)]\n");
 		printf("\trotate:[0 - 45, default=0]\n");
-                printf("\tsharpen:[0 - 10, default=0]\n");
-                //printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
-                //printf("\tgray (no parameters ,uses the saturate algorithm to desaturate, 0.0)\n\n");
+		printf("\tsharpen:[0 - 10, default=0]\n");
+		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
+		printf("\tgray (no parameters ,uses the saturate algorithm to desaturate, 0.0)\n\n");
 		exit(1);
 	}
 
@@ -148,6 +170,7 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
+	//separates the parameters from the input and output file strings
 	std::vector<std::string> infile = split(std::string(argv[1]),":");
 	if (infile.size() < 2) infile.push_back("");
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
@@ -157,10 +180,9 @@ int main (int argc, char **argv)
 
 	if (countchar(infile[0],'*') == 1) {
 		if (countchar(outfile[0],'*') == 1) {
-			std::vector<std::string> flist = filelist(".");
+			std::vector<std::string> flist = fileglob(infile[0]);
 			for (int i=0; i<flist.size(); i++) {
 				std::string variant = matchspec(flist[i], infile[0]);
-				matchspec(flist[i], infile[0]);
 				if (variant == "") continue;
 				fnames f;
 				f.infile = flist[i];
@@ -183,21 +205,22 @@ int main (int argc, char **argv)
 	}
 	
 
+//list of commands to apply to each input file
 std::vector<std::string> commands;
 for (int i = 2; i<argc-1; i++) {
 	commands.push_back(std::string(argv[i]));
 }
 
-
+printf("start...\n");
 
 for (int f=0; f<files.size(); f++)
 {
-	char fname[256];
-	strncpy(fname, files[f].infile.c_str(), 255);
+	char iname[256];
+	strncpy(iname, files[f].infile.c_str(), 255);
 
-	printf("Loading file %s... ",fname);
+	printf("Loading file %s %s... ",iname, infile[1].c_str());
 	_mark();
-	dib = gImage::loadImageFile(fname, infile[1]);
+	dib = gImage::loadImageFile(iname, infile[1]);
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
 	
 	for (int i=0; i<commands.size(); i++) {
@@ -224,7 +247,6 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-
 
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
 			double blk, wht;
@@ -282,84 +304,27 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 		}
 
-/* //leave commented...
 		else if (strcmp(cmd,"gamma") == 0) {  //#gamma:[0.0 - 5.0, default=1.0]
-			double d;
 			double gamma=1.0;
 			char *g = strtok(NULL," ");
 			if (g) gamma = atof(g);
-			int bpp = FreeImage_GetBPP(dib);
-			printf("gamma: %0.1f (%dbpp)... ",gamma,bpp);
 
-			BYTE LUT8[256];
-			WORD LUT16[65536];
-			FIBITMAP *dst = FreeImage_Clone(dib);
-			int threadcount=0;
+			Curve ctrlpts;
+			double exponent = 1 / gamma;
+			double v = 255.0 * (double)pow((double)255, -exponent);
+			for (int i = 0; i< 256; i+=1) {
+				double color = (double)pow((double)i, exponent) * v;
+				if (color > 255.0) color = 255.0;
+				ctrlpts.insertpoint((double) i, color);
+			}	
 
-			if (bpp == 24) {
-				double exponent = 1 / gamma;
-				double v = 255.0 * (double)pow((double)255, -exponent);
-				for(int i = 0; i < 256; i++) {
-					double color = (double)pow((double)i, exponent) * v;
-					if(color > 255) color = 255;
-					LUT8[i] = (BYTE)floor(color + 0.5);
-				}
-				d = ApplyLUT(dib, dst, (char *)LUT8, threadcount);
-			}
-			else if(bpp == 48) {
-				double exponent = 1 / gamma;
-				double v = 65535.0 * (double)pow((double)65535, -exponent);
-				for(int i = 0; i < 65536; i++) {
-					double color = (double)pow((double)i, exponent) * v;
-					if(color > 65535)color = 65535;
-					LUT16[i] = (WORD)floor(color + 0.5);
-				}
-				d = ApplyLUT(dib, dst, (char *)LUT16, threadcount);
-			}
+			int threadcount=gImage::ThreadCount();
+			printf("gamma: %0.2f (%d threads)... ",gamma,threadcount);
 
-			FreeImage_Unload(dib);
-			dib = dst;
-			printf("done (%f).\n",d);
+			_mark();
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			printf("done (%fsec).\n",_duration());
 		}
-*/
-
-/* leave commented
-		else if (strcmp(cmd,"resize") == 0) {  //#resize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|lanczos3 (default)]
-			char *w = strtok(NULL,",");
-			char *h = strtok(NULL,", ");
-			char *f = strtok(NULL," ");
-			char algo[30];
-			if (f)
-				strncpy(algo,f,29);
-			else
-				strncpy(algo,"lanczos3",29);
-			int width = atoi(w);
-			int height = atoi(h);
-			unsigned dw = FreeImage_GetWidth(dib);
-			unsigned dh = FreeImage_GetHeight(dib);
-			float pct;
-			if (height ==  0) height = dh * ((float)width/(float)dw);
-			if (width == 0)  width = dw * ((float)height/(float)dh); 
-			printf("resize: from %dx%d to %dx%d, filter: %s... ",dw,dh,width,height,algo);
-			FREE_IMAGE_FILTER filter;
-			if (strcmp(algo,"box") == 0) filter = FILTER_BOX;
-			if (strcmp(algo,"bilinear") == 0) filter = FILTER_BILINEAR;
-			if (strcmp(algo,"bspline") == 0) filter = FILTER_BSPLINE;
-			if (strcmp(algo,"bicubic") == 0) filter = FILTER_BICUBIC;
-			if (strcmp(algo,"catmullrom") == 0) filter = FILTER_CATMULLROM;
-			if (strcmp(algo,"lanczos3") == 0) filter = FILTER_LANCZOS3;
-			FIBITMAP *dest = FreeImage_Rescale(dib,width,height,filter);
-			if (dest) {
-				FreeImage_Unload(dib);
-				dib = dest;
-				printf("done.\n");
-			}
-			else {
-				printf("failed.\n");
-			}
-		}
-*/
-
 
 		else if (strcmp(cmd,"sharpen") == 0) {  //#sharpen:[0 - 10, default=0]      //add in else when other commands are uncommented
 			double sharp=0.0;
@@ -374,7 +339,6 @@ for (int f=0; f<files.size(); f++)
 		}
 
 		else if (strcmp(cmd,"resize") == 0) {  //#resize:x,y      
-			//double sharp=0.0;
 			unsigned w, h;
 			char *wstr = strtok(NULL,", ");
 			char *hstr = strtok(NULL," ");
@@ -392,8 +356,6 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
 			printf("done (%fsec).\n", _duration());
 		}
-
-
 
 		else if (strcmp(cmd,"rotate") == 0) {  //#rotate:[0 - 45, default=0] 
 			double angle=0.0;
@@ -440,7 +402,6 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 		}
 
-
 		else if (strcmp(cmd,"denoise") == 0) {  //#saturation:[0 - 5.0, default=1.0, no change]
 			double sigma=0.0;
 			char *s = strtok(NULL," ");
@@ -453,7 +414,6 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyNLMeans(sigma, 3, 1, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-
 
 		else if (strcmp(cmd,"tint") == 0) {  //#tint:r,g,b
 			double red=0.0; double green=0.0; double blue = 0.0;
@@ -471,7 +431,6 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyTint(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-
 
 		else if (strcmp(cmd,"gray") == 0) {  //#gray:[r],[g],[b] 
 			double red=0.21; double green=0.72; double blue = 0.07;
@@ -491,11 +450,7 @@ for (int f=0; f<files.size(); f++)
 
 		}
 
-
-
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
-
-
 
 	} //end of processing commands.
 
@@ -511,16 +466,13 @@ for (int f=0; f<files.size(); f++)
 		printf("\n");
 		exit(0);
 	}
-			
-	//flags = 100;
-	//const char *output_filename = strtok(outfilename,":");
-	//const char *fl = strtok(NULL," ");
-	//if (fl) flags = atoi(fl);
+
 
 	_mark();
-	printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
+	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
+	printf("Saving file %s %s... ",outfilename, outfile[1].c_str());
 	dib.setInfo("Software","gimg 0.1");
-	if (dib.saveImageFile(outfile[0].c_str(), outfile[1].c_str())) 
+	if (dib.saveImageFile(outfilename, outfile[1].c_str())) 
 		printf("done. (%fsec)\n\n",_duration());
 	else
 		printf("Error: bad output file specification: %s\n\n",outfile[0].c_str());
