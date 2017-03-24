@@ -1,8 +1,13 @@
 
-OBJDIR=build
+SYS=$(shell gcc -dumpmachine)
+
+ifneq (,$(findstring,mingw,$(SYS)))
+        STATIC=-static
+endif
 
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+
+OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #localmake.txt: += any of these to add, = to replace:
 
@@ -17,122 +22,132 @@ WXFLAGS=
 #WXLIBS=$(shell wx-config --libs std,aui,propgrid)
 #WXFLAGS=$(shell wx-config --cxxflags)
 
-LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
+#LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
+LIBS=@LIBS@
+CPPFLAGS=@CPPFLAGS@
+CXXFLAGS=@CXXFLAGS@
+LDFLAGS=@LDFLAGS@
+INCLUDEDIRS=@CPPFLAGS@
+EXT=@EXEEXT@
 
-LIBDIRS=	#-L to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched lib path
-INCLUDEDIRS=	#-I to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched include path
-CFLAGS=		#Use += to add any unique compiler flags
-LFLAGS=		#Use += to add any unique linker flags
-EXT=		#If you executable needs a file extension, specify it here (for cross-compiling, because I can't figure out how to make ld do it)
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+
+#LIBDIRS=	#-L to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched lib path
+#INCLUDEDIRS=	#-I to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched include path
+#CFLAGS=		#Use += to add any unique compiler flags
+#LFLAGS=		#Use += to add any unique linker flags
+#EXT=		#If you executable needs a file extension, specify it here (for cross-compiling, because I can't figure out how to make ld do it)
 
 #This includes local unique configuration
--include $(OBJDIR)/localmake.txt
+#-include $(OBJDIR)/localmake.txt
 
 all: rawproc img
 
 rawproc:  $(OBJECTS)
-	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc$(EXT)
+	mkdir -p bin
+	$(CXX) $(LDFLAGS) -o bin/rawproc$(EXT) $(OBJECTS)  $(LIBS) 
 
-img: $(OBJDIR)/img.o
-	$(CXX) $(OBJDIR)/img.o $(OBJDIR)/elapsedtime.o $(LIBDIRS) $(LIBS) $(LFLAGS) -o $(OBJDIR)/img$(EXT)
+img: img.o elapsedtime.o
+	mkdir -p bin
+	$(CXX) $
+	$(CXX) $(LDFLAGS) $(STATIC) -o bin/rawproc$(EXT) img.o elapsedtime.o $(LIBS)
 
-$(OBJDIR)/img.o: img.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -std=c++11 -c img.cpp -o$@
+img.o: $(srcdir)/img.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -std=c++11 -c $(srcdir)/img.cpp -o$@
 
-$(OBJDIR)/elapsedtime.o: elapsedtime.cpp
-	$(CXX) -c elapsedtime.cpp  -o$@
+elapsedtime.o: $(srcdir)/elapsedtime.cpp
+	$(CXX) -c $(srcdir)/elapsedtime.cpp  -o$@
 
-$(OBJDIR)/util.o: util.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c util.cpp  -o$@
+util.o: $(srcdir)/util.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/util.cpp  -o$@
 
-$(OBJDIR)/myPropertyDialog.o: myPropertyDialog.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myPropertyDialog.cpp  -o$@
+myPropertyDialog.o: $(srcdir)/myPropertyDialog.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myPropertyDialog.cpp  -o$@
 
-$(OBJDIR)/myEXIFDialog.o: myEXIFDialog.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myEXIFDialog.cpp  -o$@
+myEXIFDialog.o: $(srcdir)/myEXIFDialog.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myEXIFDialog.cpp  -o$@
 
-#$(OBJDIR)/myFileSelector.o: myFileSelector.cpp
-#	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myFileSelector.cpp  -o$@
+myHistogramPane.o: $(srcdir)/myHistogramPane.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myHistogramPane.cpp  -o$@
 
-$(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myHistogramPane.cpp  -o$@
+myHistogramDialog.o: $(srcdir)/myHistogramDialog.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myHistogramDialog.cpp  -o$@
 
-$(OBJDIR)/myHistogramDialog.o: myHistogramDialog.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myHistogramDialog.cpp  -o$@
+CurvePane.o: $(srcdir)/CurvePane.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -w -c $(srcdir)/CurvePane.cpp  -o$@
 
-$(OBJDIR)/CurvePane.o: CurvePane.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
+PicProcPanel.o: $(srcdir)/PicProcPanel.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcPanel.cpp  -o$@
 
-$(OBJDIR)/PicProcPanel.o: PicProcPanel.cpp
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcPanel.cpp  -o$@
+PicPanel.o: $(srcdir)/PicPanel.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicPanel.cpp  -o$@
 
-$(OBJDIR)/PicPanel.o: PicPanel.cpp
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicPanel.cpp  -o$@
+PicProcessorBlackWhitePoint.o: $(srcdir)/PicProcessorBlackWhitePoint.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorBlackWhitePoint.cpp -o$@
 
-$(OBJDIR)/PicProcessorBlackWhitePoint.o: PicProcessorBlackWhitePoint.cpp
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorBlackWhitePoint.cpp    -o$@
+PicProcessorHighlight.o: $(srcdir)/PicProcessorHighlight.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorHighlight.cpp -o$@
 
-$(OBJDIR)/PicProcessorHighlight.o: PicProcessorHighlight.cpp
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorHighlight.cpp    -o$@
+PicProcessorShadow.o: $(srcdir)/PicProcessorShadow.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorShadow.cpp -o$@
 
-$(OBJDIR)/PicProcessorShadow.o: PicProcessorShadow.cpp
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorShadow.cpp    -o$@
+PicProcessorCurve.o: $(srcdir)/PicProcessorCurve.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorCurve.cpp -o$@
 
-$(OBJDIR)/PicProcessorCurve.o: PicProcessorCurve.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS)  -c PicProcessorCurve.cpp    -o$@
+PicProcessorGamma.o: $(srcdir)/PicProcessorGamma.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorGamma.cpp -o$@
 
-$(OBJDIR)/PicProcessorGamma.o: PicProcessorGamma.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorGamma.cpp    -o$@
+PicProcessorBright.o: $(srcdir)/PicProcessorBright.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorBright.cpp -o$@
 
-$(OBJDIR)/PicProcessorBright.o: PicProcessorBright.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorBright.cpp   -o$@
+PicProcessorContrast.o: $(srcdir)/PicProcessorContrast.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorContrast.cpp -o$@
 
-$(OBJDIR)/PicProcessorContrast.o: PicProcessorContrast.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorContrast.cpp   -o$@
+PicProcessorSaturation.o: $(srcdir)/PicProcessorSaturation.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorSaturation.cpp -o$@
 
-$(OBJDIR)/PicProcessorSaturation.o: PicProcessorSaturation.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorSaturation.cpp   -o$@
+PicProcessorGray.o: $(srcdir)/PicProcessorGray.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorGray.cpp -o$@
 
-$(OBJDIR)/PicProcessorGray.o: PicProcessorGray.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorGray.cpp   -o$@
+PicProcessorCrop.o: $(srcdir)/PicProcessorCrop.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorCrop.cpp -o$@
 
-$(OBJDIR)/PicProcessorCrop.o: PicProcessorCrop.cpp 
-	$(CXX)$(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorCrop.cpp   -o$@
+PicProcessorResize.o: $(srcdir)/PicProcessorResize.cpp 
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorResize.cpp -o$@
 
-$(OBJDIR)/PicProcessorResize.o: PicProcessorResize.cpp 
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorResize.cpp   -o$@
+PicProcessorSharpen.o: $(srcdir)/PicProcessorSharpen.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorSharpen.cpp -o$@
 
-$(OBJDIR)/PicProcessorSharpen.o: PicProcessorSharpen.cpp 
-	$(CXX)  $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorSharpen.cpp   -o$@
+PicProcessorRotate.o: $(srcdir)/PicProcessorRotate.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorRotate.cpp -o$@
 
-$(OBJDIR)/PicProcessorRotate.o: PicProcessorRotate.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorRotate.cpp   -o$@
+PicProcessorDenoise.o: $(srcdir)/PicProcessorDenoise.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorDenoise.cpp -o$@
 
-$(OBJDIR)/PicProcessorDenoise.o: PicProcessorDenoise.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessorDenoise.cpp   -o$@
+PicProcessor.o: $(srcdir)/PicProcessor.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessor.cpp -o$@
 
-$(OBJDIR)/PicProcessor.o: PicProcessor.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessor.cpp -o$@
+rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
 
-$(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c rawprocFrm.cpp   -o$@
+rawprocApp.o: $(srcdir)/rawprocApp.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocApp.cpp  -o$@
 
-$(OBJDIR)/rawprocApp.o: rawprocApp.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c rawprocApp.cpp   -o$@
-
-$(OBJDIR)/resource.o: resource.rc
-ifeq ($(OBJDIR),win)
-	windres -c resource.rc -o$@
+resource.o: $(srcdir)/resource.rc
+ifneq (,$(findstring,mingw,$(SYS)))
+        windres -c $(srcdir)/resource.rc -o$@
 endif
 
 makedoc:
-	zip  -r -j $(OBJDIR)/rawprocdoc.zip doc/*
+	zip  -r -j rawprocdoc.zip $(srcdir)/doc/*
 
 clean:
-	rm -f $(OBJDIR)/*.o $(OBJDIR)/rawproc$(EXT) $(OBJDIR)/img$(EXT) 
+	rm -f *.o rawproc$(EXT) img$(EXT) 
 
 cleandoc:
-	rm -f $(OBJDIR)/rawprocdoc.zip
+	rm -f rawprocdoc.zip
 
 
 
