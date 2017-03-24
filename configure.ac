@@ -37,15 +37,15 @@ CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 LIBS="$LIBS $WX_LIBS"
 
 # FIXME: Replace `main' with a function in `-lgimage':
-AC_CHECK_LIB([gimage], [main])
+AC_CHECK_LIB([gimage], [Version])
 # FIXME: Replace `main' with a function in `-ljpeg':
-AC_CHECK_LIB([jpeg], [main])
+AC_CHECK_LIB([jpeg], [jpeg_create_compress])
 # FIXME: Replace `main' with a function in `-llcms2':
-AC_CHECK_LIB([lcms2], [main])
+AC_CHECK_LIB([lcms2], [cmsGetEncodedCMMversion])
 # FIXME: Replace `main' with a function in `-lraw':
-AC_CHECK_LIB([raw], [main])
+AC_CHECK_LIB([raw], [LibRaw::version])
 # FIXME: Replace `main' with a function in `-ltiff':
-AC_CHECK_LIB([tiff], [main])
+AC_CHECK_LIB([tiff], [TIFFGetVersion])
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h wchar.h])
