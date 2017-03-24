@@ -5,24 +5,11 @@ ifneq (,$(findstring,mingw,$(SYS)))
         STATIC=-static
 endif
 
-
-
 OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
-
-#localmake.txt: += any of these to add, = to replace:
 
 CXX=@CXX@
 LD=@CXX@
-#WINDRES=windres
 
-#Set to the libraries and flags needed for wxWidgets
-WXLIBS=
-WXFLAGS=
-#if you have wxWidgets installed in a standard place, you can use wx-config as follows:
-#WXLIBS=$(shell wx-config --libs std,aui,propgrid)
-#WXFLAGS=$(shell wx-config --cxxflags)
-
-#LIBS=-lgimage -lraw -ltiff -ljpeg -llcms2 
 LIBS=@LIBS@
 CPPFLAGS=@CPPFLAGS@
 CXXFLAGS=@CXXFLAGS@
@@ -34,25 +21,13 @@ srcdir=@srcdir@
 VPATH=@srcdir@
 
 
-#LIBDIRS=	#-L to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched lib path
-#INCLUDEDIRS=	#-I to libraw, libjpeg, libtiff, liblcms2 if any is not installed in a gcc-searched include path
-#CFLAGS=		#Use += to add any unique compiler flags
-#LFLAGS=		#Use += to add any unique linker flags
-#EXT=		#If you executable needs a file extension, specify it here (for cross-compiling, because I can't figure out how to make ld do it)
-
-#This includes local unique configuration
-#-include $(OBJDIR)/localmake.txt
-
-all: rawproc img
+all: rawproc img makedoc
 
 rawproc:  $(OBJECTS)
-	mkdir -p bin
-	$(CXX) $(LDFLAGS) -o bin/rawproc$(EXT) $(OBJECTS)  $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS)  $(LIBS) 
 
 img: img.o elapsedtime.o
-	mkdir -p bin
-	$(CXX) $
-	$(CXX) $(LDFLAGS) $(STATIC) -o bin/rawproc$(EXT) img.o elapsedtime.o $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBS)
 
 img.o: $(srcdir)/img.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -std=c++11 -c $(srcdir)/img.cpp -o$@
@@ -140,12 +115,18 @@ ifneq (,$(findstring,mingw,$(SYS)))
         windres -c $(srcdir)/resource.rc -o$@
 endif
 
+.PHONY: cleanall
+cleanall: clean cleandoc
+
+.PHONY: makedoc
 makedoc:
 	zip  -r -j rawprocdoc.zip $(srcdir)/doc/*
 
+.PHONY: clean
 clean:
 	rm -f *.o rawproc$(EXT) img$(EXT) 
 
+.PHONY: cleandoc
 cleandoc:
 	rm -f rawprocdoc.zip
 
