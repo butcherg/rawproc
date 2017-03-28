@@ -38,6 +38,7 @@
 //#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
+#include "libraw/libraw.h"
 #include <omp.h>
 #include <exception>
 
@@ -1221,7 +1222,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, configfile, gImage::getRGBCharacteristics().c_str()));
+	wxString LibRawVersion = wxString(LibRaw::version());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\nLibRaw %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, LibRawVersion, configfile, gImage::getRGBCharacteristics().c_str()));
 	wxAboutBox(info);
 
 }

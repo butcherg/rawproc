@@ -13,6 +13,7 @@ AC_PROG_CC
 #AC_PROG_CPP
 AC_PROG_MAKE_SET
 
+#LDFLAGS=-static 
 
 #Process enables:
 AC_ARG_ENABLE([openmp],
@@ -59,6 +60,32 @@ then
         fi
 fi
 
+AC_ARG_WITH([libraw],
+        AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of LibRaw library. Omitting the path looks for a Libraw* directory in the cwd.])
+)
+if test "$with_libraw" == "yes"  #look for unpacked tiff library in ./
+then
+        LIBRAW=`stat --printf='%n' LibRaw-* 2>/dev/null`
+        if test $LIBRAW == ""  
+        then 
+                AC_ERROR([no LibRaw library found in ./]) 
+        fi
+        if test -d $LIBRAW
+        then
+                CPPFLAGS="$CPPFLAGS -I$LIBRAW"
+                LDFLAGS="$LDFLAGS -L$LIBRAW/lib/.libs"
+        else
+                AC_ERROR([thing found is not a libraw library in ./])
+        fi
+else
+        if test "$with_libraw" != ""
+        then
+                CPPFLAGS="$CPPFLAGS -I$with_libraw"
+                LDFLAGS="$LDFLAGS -L$with_libraw/lib/.libs"
+        fi
+fi
+
+
 
 # Checks for libraries.
 
@@ -99,7 +126,7 @@ AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_ERROR([libraw.h not found])])
 AC_SEARCH_LIBS(libraw_init,raw, [], [AC_ERROR([A working libraw is required])])
 
 AC_CHECK_HEADERS(gimage.h, [], [AC_ERROR([gimage.h not found])])
-AC_CHECK_LIB([gimage],[main])
+AC_CHECK_LIB([gimage],[main],[],[AC_ERROR([A working gimage is required])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])

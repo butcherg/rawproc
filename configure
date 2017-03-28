@@ -3456,6 +3456,7 @@ $as_echo "no" >&6; }
 fi
 
 
+#LDFLAGS=-static
 
 #Process enables:
 # Check whether --enable-openmp was given.
@@ -4617,6 +4618,8 @@ _ACEOF
 
   LIBS="-lgimage $LIBS"
 
+else
+  as_fn_error $? "A working gimage is required" "$LINENO" 5
 fi
 
 
