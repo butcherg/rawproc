@@ -12,7 +12,6 @@
 #include <string>
 #include <iostream>
 #include <dirent.h>
-#include <glob.h>
 
 #include "gimage.h"
 #include "elapsedtime.h"
@@ -84,15 +83,14 @@ std::string getpath(std::string path)
 
 std::vector<std::string> fileglob(std::string dspec)
 {
-	glob_t glob_result;
-	glob(dspec.c_str(), 0, NULL, &glob_result);
-	std::vector<std::string> ret;
-	for(unsigned int i=0;i<glob_result.gl_pathc;++i){
-		ret.push_back(std::string(glob_result.gl_pathv[i]));
-	}
-	globfree(&glob_result);
-	return ret;
-	
+	std::vector<std::string> glob;
+	struct dirent *dp;
+	DIR *dirp = opendir(".");
+	while ((dp = readdir(dirp)) != NULL)
+		if (matchspec(std::string(dp->d_name), dspec) != "")
+			glob.push_back(std::string(dp->d_name));
+	(void)closedir(dirp);
+	return glob;
 }
 
 
@@ -133,7 +131,7 @@ int main (int argc, char **argv)
 	
 	int c;
 	int flags;
-	gImage dib;
+	//gImage dib;
 
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
@@ -220,7 +218,7 @@ for (int f=0; f<files.size(); f++)
 
 	printf("Loading file %s %s... ",iname, infile[1].c_str());
 	_mark();
-	dib = gImage::loadImageFile(iname, infile[1]);
+	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
 	
 	for (int i=0; i<commands.size(); i++) {
