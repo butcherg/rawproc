@@ -90,7 +90,7 @@ PicProcessorCrop.o: $(srcdir)/PicProcessorCrop.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorCrop.cpp -o$@
 
 PicProcessorResize.o: $(srcdir)/PicProcessorResize.cpp 
-	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorResize.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorResize.cpp -o$@
 
 PicProcessorSharpen.o: $(srcdir)/PicProcessorSharpen.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorSharpen.cpp -o$@
