@@ -693,6 +693,7 @@ enable_openmp
 enable_debug
 enable_optimization
 with_localprefix
+with_libraw
 with_wxdir
 with_wx_config
 with_wx_prefix
@@ -1347,6 +1348,10 @@ Optional Packages:
                           lib and include paths are prepended to LDFLAGS and
                           CPPFLAGS, respectively. Use this to make and use
                           alternate combinations of the supporting libraries
+
+  --with-libraw           =PATH, specifies path to non-standard location of
+                          LibRaw library. Omitting the path looks for a
+                          Libraw* directory in the cwd.
 
   --with-wxdir=PATH       Use uninstalled version of wxWidgets in PATH
   --with-wx-config=CONFIG wx-config script to use (optional)
@@ -3511,6 +3516,35 @@ then
                 LDFLAGS="-L$with_localprefix/usr/local/lib $LDFLAGS"
         fi
 fi
+
+
+# Check whether --with-libraw was given.
+if test "${with_libraw+set}" = set; then :
+  withval=$with_libraw;
+fi
+
+if test "$with_libraw" == "yes"  #look for unpacked tiff library in ./
+then
+        LIBRAW=`stat --printf='%n' LibRaw-* 2>/dev/null`
+        if test $LIBRAW == ""
+        then
+                as_fn_error $? "no LibRaw library found in ./" "$LINENO" 5
+        fi
+        if test -d $LIBRAW
+        then
+                CPPFLAGS="$CPPFLAGS -I$LIBRAW"
+                LDFLAGS="$LDFLAGS -L$LIBRAW/lib/.libs"
+        else
+                as_fn_error $? "thing found is not a libraw library in ./" "$LINENO" 5
+        fi
+else
+        if test "$with_libraw" != ""
+        then
+                CPPFLAGS="$CPPFLAGS -I$with_libraw"
+                LDFLAGS="$LDFLAGS -L$with_libraw/lib/.libs"
+        fi
+fi
+
 
 
 # Checks for libraries.
