@@ -107,7 +107,7 @@ if test "$wxWin" != 1; then
 fi
  
 
-
+AC_CHECK_LIB([ws2_32],[main])
 
 AC_CHECK_HEADERS(jpeglib.h, [], [AC_ERROR([jpeglib.h not found])])
 AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_ERROR([A working libjpeg is required])])
