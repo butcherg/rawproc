@@ -93,7 +93,7 @@ m4_include(wxwin.m4)
 
 AM_OPTIONS_WXCONFIG
 reqwx=3.1.0
-AM_PATH_WXCONFIG([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
+AM_PATH_WXCONFIG([$reqwx], [wxWin=1], [wxWin=0], [aui,propgrid], [])
 if test "$wxWin" != 1; then
 	AC_MSG_ERROR([
 		wxWidgets must be installed on your system.
