@@ -3,6 +3,7 @@ SYS=$(shell gcc -dumpmachine)
 
 ifneq (,$(findstring,mingw,$(SYS)))
         STATIC=-static
+        LIBRAWFLAGS=-DLIBRAW_NODLL
 endif
 
 OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
@@ -105,7 +106,7 @@ PicProcessor.o: $(srcdir)/PicProcessor.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessor.cpp -o$@
 
 rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(LIBRAWFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
 
 rawprocApp.o: $(srcdir)/rawprocApp.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocApp.cpp  -o$@
