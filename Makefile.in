@@ -1,7 +1,7 @@
 
 SYS=$(shell gcc -dumpmachine)
 
-ifneq (,$(findstring,mingw,$(SYS)))
+ifeq (,$(findstring,mingw,$(SYS)))
         STATIC=-static
         LIBRAWFLAGS=-DLIBRAW_NODLL
 endif

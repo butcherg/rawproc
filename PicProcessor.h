@@ -15,8 +15,8 @@
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
-#include <deque>
-#include <gimage.h>
+//#include <deque>
+#include <gimage/gimage.h>
 
 class PicProcPanel;
 class PicPanel;

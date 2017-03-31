@@ -18,7 +18,7 @@
 #include <wx/tokenzr.h>
 #include <vector>
 
-#include <gimage.h>
+#include <gimage/gimage.h>
 
 wxString hstr="";
 

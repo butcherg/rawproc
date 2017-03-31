@@ -5,7 +5,7 @@
 #include "undo.xpm"
 
 #include "util.h"
-#include "gimage.h"
+//#include "gimage/gimage.h"
 #include <wx/fileconf.h>
 
 class BlackWhitePointPanel: public PicProcPanel

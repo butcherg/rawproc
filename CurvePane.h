@@ -5,7 +5,7 @@
 
 #include "wx/wx.h"
 #include <vector>
-#include "curve.h"
+#include "gimage/curve.h"
 
 using namespace std;
 

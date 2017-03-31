@@ -4,7 +4,6 @@
 #include "undo.xpm"
 
 #include "util.h"
-#include <gimage.h>
 #include <wx/fileconf.h>
 
 #define SIGMASLIDER 8000

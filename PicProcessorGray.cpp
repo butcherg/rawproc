@@ -3,7 +3,6 @@
 #include "PicProcessorGray.h"
 #include "PicProcPanel.h"
 #include "undo.xpm"
-#include <gimage.h>
 
 #include "util.h"
 

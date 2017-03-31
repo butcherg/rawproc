@@ -47,7 +47,7 @@
 #include <wx/filesys.h>
 #include <wx/fs_zip.h>
 
-#include "gimage.h"
+#include "gimage/gimage.h"
 #include "PicPanel.h"
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"

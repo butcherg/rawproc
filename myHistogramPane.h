@@ -11,7 +11,7 @@
 	#include <wx/wxprec.h>
 #endif
 
-#include "gimage.h"
+#include "gimage/gimage.h"
 
 class myHistogramPane : public wxWindow
 {

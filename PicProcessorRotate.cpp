@@ -1,7 +1,6 @@
 #include "PicProcessor.h"
 #include "PicProcessorRotate.h"
 #include "PicProcPanel.h"
-#include <gimage.h>
 #include "util.h"
 #include "undo.xpm"
 #include "run.xpm"

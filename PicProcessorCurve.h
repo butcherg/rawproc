@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "PicProcessor.h"
-#include "curve.h"
+#include "gimage/curve.h"
 
 class PicProcessorCurve: public PicProcessor
 {

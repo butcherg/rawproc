@@ -1,7 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorCrop.h"
 #include "PicProcPanel.h"
-#include <gimage.h>
+//#include <gimage/gimage.h>
 #include <wx/fileconf.h>
 #include "util.h"
 

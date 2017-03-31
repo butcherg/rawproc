@@ -1,7 +1,6 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
 #include "PicProcPanel.h"
-#include <gimage.h>
 #include "util.h"
 #include "undo.xpm"
 

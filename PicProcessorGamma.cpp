@@ -1,9 +1,7 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
-#include <gimage.h>
-
 #include "util.h"
-#include "curve.h"
+#include "gimage/curve.h"
 #include <wx/fileconf.h>
 
 

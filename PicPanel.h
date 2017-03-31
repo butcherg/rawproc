@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <lcms2.h>
-#include <gimage.h>
+#include <gimage/gimage.h>
 
 
 class PicPanel: public wxPanel

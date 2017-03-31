@@ -1,7 +1,6 @@
 #include "PicProcessor.h"
 #include "PicProcessorResize.h"
 #include "PicProcPanel.h"
-#include <gimage.h>
 #include "util.h"
 
 #include <wx/spinctrl.h>

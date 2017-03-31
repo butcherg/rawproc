@@ -5,7 +5,7 @@
 
 #include <wx/dialog.h>
 #include "myHistogramPane.h"
-#include "gimage.h"
+#include "gimage/gimage.h"
 
 
 class myHistogramDialog: public wxDialog
