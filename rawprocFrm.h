@@ -130,6 +130,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_DENOISE = 1027,
 			ID_MNU_VIEWHELP = 1028,
 			ID_MNU_PROPERTIES = 1029,
+			ID_MNU_EXIF = 1030,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -157,7 +158,8 @@ class rawprocFrm : public wxFrame
 
 	PicProcessor * GetItemProcessor(wxTreeItemId item);
 	wxString AssembleCommand();
-	void EXIFDialog(wxTreeItemId item);
+	void InfoDialog(wxTreeItemId item);
+	void EXIFDialog(wxFileName filename);
 	void showHistogram(wxTreeItemId item);
 	void OpenFile(wxString fname, wxString params="");
 	void OpenFileSource(wxString fname);
@@ -186,6 +188,7 @@ class rawprocFrm : public wxFrame
 	void MnuAbout1011Click(wxCommandEvent& event);
 	void MnuHelpClick(wxCommandEvent& event);
 	void MnuProperties(wxCommandEvent& event);
+	void MnuEXIF(wxCommandEvent& event);
 
 	void UpdateConfig(wxPropertyGridEvent& event);
 		

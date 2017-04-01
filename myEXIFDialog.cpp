@@ -3,10 +3,10 @@
 
 
 myEXIFDialog::myEXIFDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxString &exif, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
+wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
 {
 	s = new wxBoxSizer( wxVERTICAL );
-	html = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, wxSize(400,500));
+	html = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, size);
 	html->SetPage(exif);
 	s->Add(html, 1, wxEXPAND | wxALL, 10);
 	wxButton *ok = new wxButton(this, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize);

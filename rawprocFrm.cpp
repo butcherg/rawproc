@@ -90,6 +90,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
+	EVT_MENU(ID_MNU_EXIF,rawprocFrm::MnuEXIF)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -172,6 +173,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_Paste,_("Paste"), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_EDITMnu_Obj, _("Edit"));
 
 	
@@ -265,7 +267,7 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 
 
 
-void rawprocFrm::EXIFDialog(wxTreeItemId item)
+void rawprocFrm::InfoDialog(wxTreeItemId item)
 {
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
@@ -304,7 +306,31 @@ void rawprocFrm::EXIFDialog(wxTreeItemId item)
 	}
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
 
-	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxDefaultSize);
+	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxSize(400,500));
+	dlg.ShowModal();
+}
+
+void rawprocFrm::EXIFDialog(wxFileName filename)
+{
+	if (!filename.FileExists()) return;
+	//parm exif.command: Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.
+	wxString exifcommand = wxConfigBase::Get()->Read("exif.command","");
+	if (exifcommand == "") {
+		wxMessageBox("No exiftool path defined in exif.command");
+		return;
+	}
+	//parm exif.parameters: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.
+	wxString exifparameters = wxConfigBase::Get()->Read("exif.parameters","-g -h");
+
+	wxString command = wxString::Format("%s %s %s",exifcommand, exifparameters, filename.GetFullPath());
+	wxArrayString output;
+	wxArrayString errors;
+	SetStatusText(wxString::Format("Loading metadata using \"%s\"...",command));
+	wxExecute (command, output, errors);
+	wxString exif;
+	for (int i=0; i<output.GetCount(); i++) exif.Append(output[i]);
+	SetStatusText("");
+	myEXIFDialog dlg(this, wxID_ANY, filename.GetFullName(), exif,  wxDefaultPosition, wxSize(500,500));
 	dlg.ShowModal();
 }
 
@@ -882,6 +908,11 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 	SetStatusText("");
 }
 
+void rawprocFrm::MnuEXIF(wxCommandEvent& event)
+{
+	EXIFDialog(filename);
+}
+
 void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 {
 	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
@@ -1256,7 +1287,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 	mnu.Append(ID_DELETE, "Delete");
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
 		case ID_EXIF:
-			EXIFDialog(event.GetItem());
+			InfoDialog(event.GetItem());
 			break;
 		case ID_HISTOGRAM:
 			showHistogram(event.GetItem());
