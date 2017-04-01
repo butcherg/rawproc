@@ -23,6 +23,7 @@
 #include "PicProcessorBright.h"
 #include "PicProcessorContrast.h"
 #include "PicProcessorSaturation.h"
+#include "PicProcessorExposure.h"
 #include "PicProcessorShadow.h"
 #include "PicProcessorHighlight.h"
 #include "PicProcessorCurve.h"
@@ -73,6 +74,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_BRIGHT, rawprocFrm::Mnubright1007Click)
 	EVT_MENU(ID_MNU_CONTRAST, rawprocFrm::Mnucontrast1008Click)
 	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
+	EVT_MENU(ID_MNU_EXPOSURE, rawprocFrm::MnuexposureClick)
 	EVT_MENU(ID_MNU_SHADOW, rawprocFrm::MnuShadow1015Click)
 	EVT_MENU(ID_MNU_HIGHLIGHT, rawprocFrm::MnuHighlightClick)
 	EVT_MENU(ID_MNU_CURVE, rawprocFrm::Mnucurve1010Click)
@@ -185,6 +187,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
@@ -1002,6 +1005,22 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	}
 }
 
+void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
+		wxString val = wxConfigBase::Get()->Read("tool.exposure.initialvalue","0.0");
+		PicProcessorExposure *c = new PicProcessorExposure("exposure",val, commandtree, pic, parameters);
+		c->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
+	}
+}
 
 
 void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)

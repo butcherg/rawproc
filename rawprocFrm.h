@@ -131,6 +131,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_VIEWHELP = 1028,
 			ID_MNU_PROPERTIES = 1029,
 			ID_MNU_EXIF = 1030,
+			ID_MNU_EXPOSURE = 1031,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -168,6 +169,7 @@ class rawprocFrm : public wxFrame
 	void Mnubright1007Click(wxCommandEvent& event);
 	void Mnucontrast1008Click(wxCommandEvent& event);
 	void MnusaturateClick(wxCommandEvent& event);
+	void MnuexposureClick(wxCommandEvent& event);
 	void Mnucurve1010Click(wxCommandEvent& event);
 	void MnuShadow1015Click(wxCommandEvent& event);
 	void MnuHighlightClick(wxCommandEvent& event);
