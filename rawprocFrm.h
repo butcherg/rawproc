@@ -162,7 +162,7 @@ class rawprocFrm : public wxFrame
 	void InfoDialog(wxTreeItemId item);
 	void EXIFDialog(wxFileName filename);
 	void showHistogram(wxTreeItemId item);
-	void OpenFile(wxString fname, wxString params="");
+	void OpenFile(wxString fname);  //, wxString params="");
 	void OpenFileSource(wxString fname);
 
 	void Mnugamma1006Click(wxCommandEvent& event);

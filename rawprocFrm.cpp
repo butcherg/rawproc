@@ -413,7 +413,7 @@ wxString rawprocFrm::AssembleCommand()
 	return cmd;
 }
 
-void rawprocFrm::OpenFile(wxString fname, wxString params)
+void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 {
 	filename.Assign(fname);
 	sourcefilename.Clear();
@@ -461,7 +461,7 @@ void rawprocFrm::OpenFile(wxString fname, wxString params)
 			SetStatusText("");
 			return;
 		}
-		wxString flagstring(params.c_str());
+		//wxString flagstring(params.c_str());
 		//parm input.log: log the file input operation.  Default=0
 		if (wxConfigBase::Get()->Read("input.log","0") == "1") 
 			log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
@@ -886,7 +886,7 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
-		OpenFile(fname, "");
+		OpenFile(fname);
 	}
 }
 

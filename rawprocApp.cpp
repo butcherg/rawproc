@@ -56,9 +56,9 @@ bool rawprocFrmApp::OnInit()
 			if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
 				frame->OpenFileSource(f.GetFullPath());
 			else	
-				frame->OpenFile(f.GetFullPath(),"");
+				frame->OpenFile(f.GetFullPath());
 		}
-		else frame->OpenFile(f.GetFullPath(),"");
+		else frame->OpenFile(f.GetFullPath());
 	}
 	else if (wxGetApp().argc == 3) {
 		wxFileName f(wxGetApp().argv[2]);
@@ -67,7 +67,7 @@ bool rawprocFrmApp::OnInit()
 		if (wxGetApp().argv[1] == "-s") 
 			frame->OpenFileSource(f.GetFullPath());
 		else
-			frame->OpenFile(f.GetFullPath(),"");
+			frame->OpenFile(f.GetFullPath());
 	}
 	else {
 
