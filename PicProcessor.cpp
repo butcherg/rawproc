@@ -177,6 +177,11 @@ void PicProcessor::displayProcessedPic()
 	}
 }
 
+void PicProcessor::displayDraw(wxDC &dc)
+{
+	
+}
+
 
 
 

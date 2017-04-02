@@ -3,7 +3,7 @@
 #include "util.h"
 #include <vector>
 #include <wx/fileconf.h>
-#include "util.h"
+#include "PicProcessor.h"
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -20,8 +20,9 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
-        PicPanel::PicPanel(wxFrame *parent): wxPanel(parent) {
+        PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree): wxPanel(parent) {
 		parentframe = parent;
+		commandtree = tree;
 		wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
 		wxInitAllImageHandlers();
@@ -412,7 +413,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			Update();
 			//PaintNow();
 		}
-		
+		else
 		if (thumbmoving) {
 			picX += (MouseX-x) * ((float) iw / (float) thumbW);
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);

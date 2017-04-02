@@ -222,7 +222,7 @@ void rawprocFrm::CreateGUIControls()
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
-	pic = new PicPanel(this);
+	pic = new PicPanel(this, commandtree);
 
 
 	parameters = new myParameters(this, -1, wxDefaultPosition, wxSize(285,200));
