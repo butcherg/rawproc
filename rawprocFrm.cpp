@@ -34,6 +34,7 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
+#include "PicProcessorRedEye.h"
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 //#include "myFileSelector.h"
@@ -85,6 +86,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_SHARPEN, rawprocFrm::MnuSharpenClick)
 	EVT_MENU(ID_MNU_ROTATE, rawprocFrm::MnuRotateClick)
 	EVT_MENU(ID_MNU_DENOISE, rawprocFrm::MnuDenoiseClick)
+	EVT_MENU(ID_MNU_REDEYE, rawprocFrm::MnuRedEyeClick)
 	EVT_MENU(ID_MNU_Cut,rawprocFrm::MnuCut1201Click)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
@@ -191,6 +193,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
@@ -353,13 +356,15 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
-	else if (name == "resize")     		p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
+	else if (name == "resize") 			p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
 	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
 	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic, parameters);
 	else result = NULL;
 	p->processPic();
+	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	Refresh();
 	Update();
@@ -1213,6 +1218,27 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding denoise tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+		try {
+		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
+		wxString threshold = wxConfigBase::Get()->Read("tool.redeye.initialvalue","1.5");
+		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
+		wxString radius = wxConfigBase::Get()->Read("tool.redeye.radius","50");
+		
+		wxString cmd = wxString::Format("%s,%s",threshold,radius);
+		PicProcessorRedEye *d = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
+		//d->processPic();
+		wxSafeYield(this);
+		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
 	}
 }
 

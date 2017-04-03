@@ -6,7 +6,7 @@ ifeq (,$(findstring,mingw,$(SYS)))
         LIBRAWFLAGS=-DLIBRAW_NODLL
 endif
 
-OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
+OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
 
 CXX=@CXX@
 LD=@CXX@
@@ -83,6 +83,12 @@ PicProcessorContrast.o: $(srcdir)/PicProcessorContrast.cpp
 
 PicProcessorSaturation.o: $(srcdir)/PicProcessorSaturation.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorSaturation.cpp -o$@
+	
+PicProcessorExposure.o: $(srcdir)/PicProcessorExposure.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorExposure.cpp -o$@
+	
+PicProcessorRedEye.o: $(srcdir)/PicProcessorRedEye.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorRedEye.cpp -o$@
 
 PicProcessorGray.o: $(srcdir)/PicProcessorGray.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorGray.cpp -o$@

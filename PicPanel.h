@@ -43,6 +43,8 @@ class PicPanel: public wxPanel
 		void SetScale(double s);
 		void SetScaleToWidth();
 		void SetScaleToWidth(double percentofwidth);
+		coord GetImgCoords();
+		void SetDrawList(wxString list);
 		void FitMode(bool f);
 		void OnMouseWheel(wxMouseEvent& event);
 		void OnMouseMove(wxMouseEvent& event);
@@ -65,8 +67,11 @@ class PicPanel: public wxPanel
     
 		int MouseX, MouseY;
 		int picX, picY;
+		int imgX, imgY;
 		int thumbW, thumbH;
 		float scale, aspectW, aspectH;
+		
+		wxString dcList;
         
 		bool moving, thumbmoving;
         

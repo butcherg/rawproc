@@ -30,6 +30,7 @@ END_EVENT_TABLE()
 		showDebug = true;
 		scaleWindow = false;
 		blank = true;
+		dcList = "";
 
 		colormgt = false;
 		hTransform = NULL;
@@ -158,18 +159,21 @@ END_EVENT_TABLE()
 			cmsCloseProfile(hDisplayProfile);
 		}
 
-                aspectW = (float) img.GetWidth() / (float) img.GetHeight();
-                aspectH = (float) img.GetHeight() / (float) img.GetWidth();
+		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
+		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
+		if (hImgProfile) 
+			if (hTransform) 
+				cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
               
-                //generate and store a thumbnail bitmap:
-                thumbW = 100*aspectW;
-                thumbH = 100;
-                wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
+		//generate and store a thumbnail bitmap:
+		thumbW = 100*aspectW;
+		thumbH = 100;
+		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 
 
-		if (hImgProfile) cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
-                thumb = new wxBitmap(thumbimg);
+			
+		thumb = new wxBitmap(thumbimg);
 
 		hsgram = wxBitmap();
 		blank =  false;
@@ -186,7 +190,7 @@ END_EVENT_TABLE()
 		int w, h;
 		int tw, th;
 		int iw, ih;
-		wxImage spic;
+		wxImage spic, sspic;
 		
 		if (blank) {
 			dc.Clear();
@@ -225,20 +229,36 @@ END_EVENT_TABLE()
                 
 		if (scale == 1.0)
 			spic = img.Copy();
-		//else if (scale <= .5)
-		//	spic = img->Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
+		else if (scale <= .5)
+			spic = img.Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
-		if (hImgProfile) 
-			if (hTransform)
-				cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+		//if (hImgProfile) 
+		//	if (hTransform)
+		//		cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
 		dc.SetPen(wxPen(wxColour(255,255,255),1));
 		dc.SetBrush(wxBrush(wxColour(50,50,50)));
 		dc.DrawBitmap(*scaledpic, picX, picY, false);
+		
+		if (dcList != "" & scale == 1.0) {
+			dc.SetPen(*wxYELLOW_PEN);
+			wxArrayString l = split(dcList, ";");
+			for (unsigned i=0; i<l.GetCount(); i++) {
+				wxArrayString c = split(l[i],",");
+				if (c[0] == "cross") {
+					if (c.GetCount() < 3) continue;
+					int px = atoi(c[1].c_str())+picX;
+					int py = atoi(c[2].c_str())+picY;
+					dc.DrawLine(px-10, py, px+10, py);
+					dc.DrawLine(px, py-10, px, py+10);
+				}
+			}
+		}
+		
 		if (toggleThumb != 3) {
 			dc.SetPen(wxPen(wxColour(0,0,0),1));
 			dc.DrawRectangle(0,0,thumb->GetWidth()+4, thumb->GetHeight()+4);			
@@ -263,6 +283,12 @@ END_EVENT_TABLE()
 			if (toggleThumb == 1) drawBox(dc, (-picX * ((float) thumbW/ (float) iw)), (-picY * ((float) thumbH/(float) ih)),tw,th);
 		}
 
+	}
+	
+	void PicPanel::SetDrawList(wxString list)
+	{
+		dcList = list;
+		Refresh();
 	}
    
 
@@ -336,11 +362,28 @@ END_EVENT_TABLE()
 	{
 		return scale;
 	}
-
+	
+	coord PicPanel::GetImgCoords()
+	{
+		coord c; 
+		c.x = imgX; c.y = imgY;
+		return c;
+	}
+	
 	void PicPanel::PaintNow()
 	{
 		wxClientDC dc(this);
 		render(dc);
+		/*
+		wxTreeItemId item = commandtree->GetSelection();
+		if (item.IsOk()) {
+			PicProcessor * i = ((PicProcessor *) commandtree->GetItemData(item));
+			if (i) { 
+				parentframe->SetStatusText("going to displayDraw()...");
+				i->displayDraw(dc);
+			}
+		}
+		*/
 	}
 
 	void PicPanel::OnPaint(wxPaintEvent & event)
@@ -348,6 +391,16 @@ END_EVENT_TABLE()
 		if (img.IsOk() && thumb != NULL) {
 			wxPaintDC dc(this);
 			render(dc);
+			/*
+			wxTreeItemId item = commandtree->GetSelection();
+			if (item.IsOk()) {
+				PicProcessor * i = ((PicProcessor *) commandtree->GetItemData(item));
+				if (i) { 
+					parentframe->SetStatusText("going to displayDraw()...");
+					i->displayDraw(dc);
+				}
+			}
+			*/
 		}
 	}
 
@@ -365,14 +418,14 @@ END_EVENT_TABLE()
 				moving=true;
 		else
 			moving=true;
-		//event.Skip();
+		event.Skip();
 	}
         
         void PicPanel::OnRightDown(wxMouseEvent& event)
         {
             picX = 0; picY = 0;
             PaintNow();
-	    //event.Skip();
+			event.Skip();
         }
 
         void PicPanel::OnLeftUp(wxMouseEvent& event)
@@ -381,7 +434,7 @@ END_EVENT_TABLE()
 			moving=false;
 			thumbmoving=false;
 		}
-		//event.Skip();
+		event.Skip();
 	}
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
@@ -410,29 +463,29 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
 			Refresh();
-			Update();
+			//Update();
 			//PaintNow();
 		}
-		else
+
 		if (thumbmoving) {
 			picX += (MouseX-x) * ((float) iw / (float) thumbW);
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
 			Refresh();
-			Update();
+			//Update();
 			//PaintNow();
 		}
 
 		if (scale == 1.0) {
-			unsigned px = x-picX;
-			unsigned py = y-picY;
+			imgX = x-picX;
+			imgY = y-picY;
 			if (d) {
-				std::vector<PIXTYPE> p = d->getPixelArray(px, py);
-				if (px > 1) {
-					if (py > 1) {
-						if (px < scaledpic->GetWidth()) {
-							if (py < scaledpic->GetHeight()) { 
-								parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", px, py,  p[0], p[1], p[2])); 
+				std::vector<PIXTYPE> p = d->getPixelArray(imgX, imgY);
+				if (imgX > 1) {
+					if (imgY > 1) {
+						if (imgX < scaledpic->GetWidth()) {
+							if (imgY < scaledpic->GetHeight()) { 
+								parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", imgX, imgY,  p[0], p[1], p[2])); 
 							} else parentframe->SetStatusText("");
 						} else parentframe->SetStatusText("");
 					} else parentframe->SetStatusText("");
@@ -440,7 +493,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			}
 		}
 	}
-	//event.Skip();
+	event.Skip();
 }
         
         void PicPanel::OnMouseWheel(wxMouseEvent& event)

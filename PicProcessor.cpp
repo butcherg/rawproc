@@ -32,6 +32,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree = tree;
 	c = command;
 	n = name;
+	dcList = "";
 
 	dib = startpic;
 	m_tree->DeleteAllItems();
@@ -50,6 +51,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree = tree;
 	c = command;
 	n = name;
+	dcList = "";
 
 	dib = new gImage(getSelectedPicProcessor(m_tree)->getProcessedPic());
 
@@ -174,6 +176,7 @@ void PicProcessor::displayProcessedPic()
 {
 	if (m_display) {
 		m_display->SetPic(dib);
+		m_display->SetDrawList(dcList);
 	}
 }
 

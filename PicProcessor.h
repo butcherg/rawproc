@@ -42,7 +42,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxTreeCtrl *getCommandTree();
 		virtual void displayProcessedPic();
 		virtual void setParams(wxString params);
-		void displayDraw(wxDC &dc);
+		virtual void displayDraw(wxDC &dc);
 
 		static PicProcessor *getSelectedPicProcessor(wxTreeCtrl *tree);
 
@@ -57,6 +57,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		PicProcPanel *r;
 
 		bool dirty;
+		
+		wxString dcList;
 
 };
 
