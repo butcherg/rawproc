@@ -533,15 +533,14 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	
 	int iw = img.GetWidth();
 	int ih = img.GetHeight();
-	
-	picX = -(iw * ((MouseX-picX)/(iw*scale)) - ((iw*scale)/2));
-	picY = -(ih * ((MouseY-picY)/(ih*scale)) - ((ih*scale)/2));
 
 	if (MouseX < thumbW & MouseY < thumbH) {
 		ToggleThumb();
 	}
 	else {
 		if (scale != 1.0) {
+			picX = -(iw * ((MouseX-picX)/(iw*scale)) - ((iw*scale)/2));
+			picY = -(ih * ((MouseY-picY)/(ih*scale)) - ((ih*scale)/2));
 			scale = 1.0;
 			FitMode(false);
 			parentframe->SetStatusText("scale: 100%",2);
