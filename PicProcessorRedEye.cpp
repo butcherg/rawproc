@@ -39,6 +39,10 @@ class RedEyePanel: public PicProcPanel
 			btn2->SetToolTip("Reset to default");
 			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
+			g->Add(0,10, wxGBPosition(3,0));
+			wxString help = "Double-click in the display to toggle to scale 100%.\nShift-Click the center of the red eye to apply.\nCtrl-Click near the cross to remove application.\n\nOperation can only be done in display scale 100%.";
+			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(4,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
+			
 			SetSizerAndFit(g);
 			g->Layout();
 			Refresh();
