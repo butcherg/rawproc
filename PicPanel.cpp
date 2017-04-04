@@ -496,40 +496,47 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	event.Skip();
 }
         
-        void PicPanel::OnMouseWheel(wxMouseEvent& event)
-        {
-		double increment = 0.05;
- 
-		fitmode=false;
-                wxImage scaledimg;
-                if (event.GetWheelRotation() > 0)
-                    scale += increment;
-                else
-                    scale -= increment;
-                if (scale < 0.1) 
-                    scale = 0.1;
-                else if (scale > 2) 
-                    scale = 2; 
-                else {
-                    if (event.GetWheelRotation() > 0) { 
-                        picX += picX * 0.1;
-                        picY += picY * 0.1;
-                    }
-                    else {
-                        picX -= picX * 0.1;
-                        picY -= picY * 0.1;
-                    }
-                }
-		parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
-		parentframe->SetStatusText("");
-		Refresh();
-		Update();
-        }
+void PicPanel::OnMouseWheel(wxMouseEvent& event)
+{
+	double increment = 0.05;
+	
+	fitmode=false;
+	wxImage scaledimg;
+	if (event.GetWheelRotation() > 0)
+		scale += increment;
+	else
+		scale -= increment;
+	if (scale < 0.1) 
+		scale = 0.1;
+	else if (scale > 2) 
+		scale = 2; 
+	else {
+		if (event.GetWheelRotation() > 0) { 
+			picX += picX * 0.1;
+			picY += picY * 0.1;
+		}
+		else {
+			picX -= picX * 0.1;
+			picY -= picY * 0.1;
+		}
+	}
+	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
+	parentframe->SetStatusText("");
+	Refresh();
+	Update();
+}
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
 	MouseX = event.m_x;
 	MouseY = event.m_y;
+	
+	int iw = img.GetWidth();
+	int ih = img.GetHeight();
+	
+	picX = -(iw * ((MouseX-picX)/(iw*scale)) - ((iw*scale)/2));
+	picY = -(ih * ((MouseY-picY)/(ih*scale)) - ((ih*scale)/2));
+
 	if (MouseX < thumbW & MouseY < thumbH) {
 		ToggleThumb();
 	}
