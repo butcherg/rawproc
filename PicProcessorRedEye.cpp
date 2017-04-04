@@ -122,12 +122,12 @@ PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCt
 	}
 	m_display->SetDrawList(dcList);
 	showParams();
-	m_display->Bind(wxEVT_LEFT_DOWN, PicProcessorRedEye::OnLeftDown, this);
+	m_display->Bind(wxEVT_LEFT_DOWN, &PicProcessorRedEye::OnLeftDown, this);
 }
 
 PicProcessorRedEye::~PicProcessorRedEye()
 {
-	m_display->Unbind(wxEVT_LEFT_DOWN, PicProcessorRedEye::OnLeftDown, this);
+	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorRedEye::OnLeftDown, this);
 	m_display->SetDrawList("");
 }
 
