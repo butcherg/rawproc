@@ -169,7 +169,7 @@ bool PicProcessorRedEye::processPic() {
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyRedeye(points, threshold, radius, threadcount);
+	dib->ApplyRedeye(points, threshold, radius, 1.0, 0.8, 1.0, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.redeye.log","0") == "1"))
@@ -202,6 +202,10 @@ wxString PicProcessorRedEye::getPointList()
 
 void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 {
+	if (m_tree->GetItemState(GetId()) != 1) {
+		event.Skip();
+		return;
+	}
 	if (event.ShiftDown() & m_display->GetScale() == 1.0) {
 		coord c = m_display->GetImgCoords();
 		points.push_back(c);
