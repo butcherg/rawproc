@@ -21,6 +21,8 @@ class RedEyePanel: public PicProcPanel
 			int rad = atoi(p[1].c_str());
 
 			g->Add(0,10, wxGBPosition(0,0));
+
+			//Threshold slider
 			g->Add(new wxStaticText(this,wxID_ANY, "threshold: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			threshold = new wxSlider(this, wxID_ANY, thr*10, 0, 50, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(threshold , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -30,6 +32,7 @@ class RedEyePanel: public PicProcPanel
 			btn1->SetToolTip("Reset to default");
 			g->Add(btn1, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			
+			//Limit, or radius, slider
 			g->Add(new wxStaticText(this,wxID_ANY, "radius: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			radius = new wxSlider(this, wxID_ANY, rad, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(radius , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
