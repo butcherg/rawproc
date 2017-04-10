@@ -86,6 +86,7 @@ class rawprocFrm : public wxFrame
 		virtual ~rawprocFrm();
 		void Mnuopen1003Click(wxCommandEvent& event);
 		void Mnuopensource1004Click(wxCommandEvent& event);
+		void Mnureopen1033Click(wxCommandEvent& event);
 		
 	private:
 		//Do not add custom control declarations between
@@ -133,6 +134,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_EXIF = 1030,
 			ID_MNU_EXPOSURE = 1031,
 			ID_MNU_REDEYE = 1032,
+			ID_MNU_REOPEN = 1033,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,

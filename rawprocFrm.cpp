@@ -68,6 +68,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	
 	EVT_CLOSE(rawprocFrm::OnClose)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
+	EVT_MENU(ID_MNU_REOPEN, rawprocFrm::Mnureopen1033Click)
 	EVT_MENU(ID_MNU_OPENSOURCE, rawprocFrm::Mnuopensource1004Click)
 	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
 	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
@@ -165,6 +166,7 @@ void rawprocFrm::CreateGUIControls()
 	WxMenuBar1 = new wxMenuBar();
 	wxMenu *ID_MNU_FILEMnu_Obj = new wxMenu();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPEN, _("Open..."), _(""), wxITEM_NORMAL);
+	ID_MNU_FILEMnu_Obj->Append(ID_MNU_REOPEN, _("Re-open"), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->AppendSeparator();
@@ -893,6 +895,14 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 		wxSetWorkingDirectory (f.GetPath());
 		OpenFile(fname);
 	}
+}
+
+void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
+{
+	if (filename.IsOk() && filename.FileExists()) 
+		OpenFile(filename.GetFullPath());
+	else
+		wxMessageBox("No file to re-open.");
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
