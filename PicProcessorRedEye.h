@@ -16,12 +16,13 @@ class PicProcessorRedEye: public PicProcessor
 		void OnLeftDown(wxMouseEvent& event);
 		wxString getPointList();
 
-		void setGreenPct(double pct);
-		double getGreenPct();
+		void setDesatPercent(double pct);
+		void setDesat(bool d);
 		
 	private:
 		std::vector<coord> points;
-		double threshold, greenpct;
+		double threshold, desatpct;
+		bool desat;
 		unsigned radius;
 };
 
