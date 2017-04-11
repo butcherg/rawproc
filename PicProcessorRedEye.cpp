@@ -42,9 +42,19 @@ class RedEyePanel: public PicProcPanel
 			btn2->SetToolTip("Reset to default");
 			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(0,10, wxGBPosition(3,0));
+			//green adjustment
+			g->Add(new wxStaticText(this,wxID_ANY, "greenpct: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			greenpct = new wxSlider(this, wxID_ANY, 100, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			g->Add(greenpct , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			val3 = new wxStaticText(this,wxID_ANY, "1.0", wxDefaultPosition, wxSize(30, -1));
+			g->Add(val3, wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			btn3 = new wxBitmapButton(this, 9002, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn3->SetToolTip("Reset to default");
+			g->Add(btn3, wxGBPosition(3,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			g->Add(0,10, wxGBPosition(4,0));
 			wxString help = "Double-click in the display to toggle to scale 100%.\nShift-Click the center of the red eye to apply.\nCtrl-Click near the cross to remove application.\n\nOperation can only be done in display scale 100%.";
-			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(4,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
+			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(5,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
 			
 			SetSizerAndFit(g);
 			g->Layout();
@@ -67,6 +77,7 @@ class RedEyePanel: public PicProcPanel
 		{
 			val1->SetLabel(wxString::Format("%2.2f", (float) threshold->GetValue() / 10.0));
 			val2->SetLabel(wxString::Format("%d", radius->GetValue()));
+			val3->SetLabel(wxString::Format("%2.2f", (float) greenpct->GetValue() / 100.0));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -74,11 +85,13 @@ class RedEyePanel: public PicProcPanel
 		{
 			val1->SetLabel(wxString::Format("%2.2f", (float) threshold->GetValue() / 10.0));
 			val2->SetLabel(wxString::Format("%d", radius->GetValue()));	
+			val3->SetLabel(wxString::Format("%2.2f", (float) greenpct->GetValue() / 100.0));
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
 			((PicProcessorRedEye *) q)->setThresholdLimit(wxString::Format("%2.2f,%d", (float) threshold->GetValue() / 10.0, radius->GetValue()));
+			((PicProcessorRedEye *) q)->setGreenPct(greenpct->GetValue()/100.0);
 			q->processPic();
 			event.Skip();
 		}
@@ -90,18 +103,20 @@ class RedEyePanel: public PicProcPanel
 			wxConfigBase::Get()->Read("tool.redeye.radius.initialvalue",&resetrad,50);
 			threshold->SetValue(resetthr*10);
 			radius->SetValue(resetrad);
+			greenpct->SetValue(100);
 			((PicProcessorRedEye *) q)->setThresholdLimit(wxString::Format("%2.2f,%d",resetthr,resetrad));
 			val1->SetLabel(wxString::Format("%2.2f", resetthr));
 			val2->SetLabel(wxString::Format("%d", resetrad));
+			val3->SetLabel(wxString::Format("%2.2f", (float) greenpct->GetValue() / 100.0));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		wxSlider *threshold, *radius;
-		wxStaticText *val1, *val2;
-		wxBitmapButton *btn1, *btn2;
+		wxSlider *threshold, *radius, *greenpct;
+		wxStaticText *val1, *val2, *val3;
+		wxBitmapButton *btn1, *btn2, *btn3;
 		wxTimer *t;
 
 };
@@ -109,7 +124,7 @@ class RedEyePanel: public PicProcPanel
 
 PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	threshold = 1.5; radius=50;
+	threshold = 1.5; radius=50; greenpct = 1.0;
 	if (command != "") {
 		wxArrayString pts = split(command,";");
 		wxArrayString parms = split(pts[0],",");
@@ -157,9 +172,19 @@ void PicProcessorRedEye::setThresholdLimit(wxString params)
 	dirty = true;
 }
 
+void PicProcessorRedEye::setGreenPct(double pct)
+{
+	greenpct = pct;
+}
+
+double PicProcessorRedEye::getGreenPct()
+{
+	return greenpct;
+}
+
 
 bool PicProcessorRedEye::processPic() {
-	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("redeye... greenpct=%2.2f",greenpct));
 	bool result = true;
 
 	int threadcount;
@@ -172,16 +197,16 @@ bool PicProcessorRedEye::processPic() {
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyRedeye(points, threshold, radius, 1.0, 0.8, 1.0, threadcount);
+	dib->ApplyRedeye(points, threshold, radius, true, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.redeye.log","0") == "1"))
-		log(wxString::Format("tool=bright,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		log(wxString::Format("tool=redeye,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;
 
 
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	//((wxFrame*) m_display->GetParent())->SetStatusText("");
 	//put in every processPic()...
 	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());

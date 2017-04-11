@@ -15,10 +15,13 @@ class PicProcessorRedEye: public PicProcessor
 		void setThresholdLimit(wxString params);
 		void OnLeftDown(wxMouseEvent& event);
 		wxString getPointList();
+
+		void setGreenPct(double pct);
+		double getGreenPct();
 		
 	private:
 		std::vector<coord> points;
-		double threshold;
+		double threshold, greenpct;
 		unsigned radius;
 };
 
