@@ -19,7 +19,9 @@ class RedEyePanel: public PicProcPanel
 			wxArrayString p = split(params,",");
 			double thr = atof(p[0].c_str());
 			int rad = atoi(p[1].c_str());
-			double dpct = atof(p[2].c_str());
+			int desatbool = atoi(p[2].c_str());
+			double dpct = atof(p[3].c_str());
+			
 
 			g->Add(0,10, wxGBPosition(0,0));
 
@@ -47,12 +49,13 @@ class RedEyePanel: public PicProcPanel
 			
 			desat = new wxCheckBox(this, wxID_ANY, "desaturate");
 			g->Add(desat, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			if (desatbool == 1) desat->SetValue(true);
 
 			//desaturate adjustment
 			g->Add(new wxStaticText(this,wxID_ANY, "percent: "), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			desatpct = new wxSlider(this, wxID_ANY, 100, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			desatpct = new wxSlider(this, wxID_ANY, dpct*100, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(desatpct , wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val3 = new wxStaticText(this,wxID_ANY, "1.0", wxDefaultPosition, wxSize(30, -1));
+			val3 = new wxStaticText(this,wxID_ANY, p[3], wxDefaultPosition, wxSize(30, -1));
 			g->Add(val3, wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn3 = new wxBitmapButton(this, 9002, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn3->SetToolTip("Reset to default");
@@ -103,7 +106,8 @@ class RedEyePanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			((PicProcessorRedEye *) q)->setThresholdLimit(wxString::Format("%2.2f,%d", (float) threshold->GetValue() / 10.0, radius->GetValue()));
+			((PicProcessorRedEye *) q)->setThreshold((float) threshold->GetValue() / 10.0);
+			((PicProcessorRedEye *) q)->setRadius(radius->GetValue());
 			((PicProcessorRedEye *) q)->setDesatPercent(desatpct->GetValue()/100.0);
 			q->processPic();
 			event.Skip();
@@ -111,16 +115,20 @@ class RedEyePanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			double resetthr; int resetrad;
+			double resetthr; int resetrad; double desatpct;
 			wxConfigBase::Get()->Read("tool.redeye.threshold.initialvalue",&resetthr,1.5);
 			wxConfigBase::Get()->Read("tool.redeye.radius.initialvalue",&resetrad,50);
+			wxConfigBase::Get()->Read("tool.redeye.desaturatepercent.initialvalue",&desatpct,1.0);
 			threshold->SetValue(resetthr*10);
 			radius->SetValue(resetrad);
 			desat->SetValue(100);
-			((PicProcessorRedEye *) q)->setThresholdLimit(wxString::Format("%2.2f,%d",resetthr,resetrad));
+			//((PicProcessorRedEye *) q)->setThresholdLimit(wxString::Format("%2.2f,%d",resetthr,resetrad));
+			((PicProcessorRedEye *) q)->setThreshold(resetthr);
+			((PicProcessorRedEye *) q)->setRadius(resetrad);
+			((PicProcessorRedEye *) q)->setDesatPercent(desatpct);
 			val1->SetLabel(wxString::Format("%2.2f", resetthr));
 			val2->SetLabel(wxString::Format("%d", resetrad));
-			val3->SetLabel(wxString::Format("%2.2f", (float) desatpct->GetValue() / 100.0));
+			val3->SetLabel(wxString::Format("%2.2f", desatpct));
 			q->processPic();
 			event.Skip();
 		}
@@ -144,6 +152,8 @@ PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCt
 		wxArrayString parms = split(pts[0],",");
 		if (parms.size() >= 1) threshold = atof(parms[0].c_str());
 		if (parms.size() >= 2) radius = atoi(parms[1].c_str());
+		if (parms.size() >= 3) if (parms[2] == "1") desat = true;
+		if (parms.size() >= 4) desatpct = atof(parms[3].c_str());
 		for (unsigned i=1; i<pts.size(); i++) {
 			struct coord p;
 			wxArrayString c = split(pts[i],",");
@@ -167,11 +177,21 @@ PicProcessorRedEye::~PicProcessorRedEye()
 	m_display->SetDrawList("");
 }
 
+
 void PicProcessorRedEye::showParams()
 {
+	int desatint = 0;
 	if (!m_parameters) return;
 	m_parameters->DestroyChildren();
-	r = new RedEyePanel(m_parameters, this, wxString::Format("%2.2f,%d",threshold,radius));
+	if (desat) desatint = 1;
+	r = new RedEyePanel(m_parameters, this, wxString::Format("%2.2f,%d,%d,%2.2f",threshold,radius,desat,desatpct));
+}
+
+wxString PicProcessorRedEye::buildCommand()
+{
+	wxString cmd = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
+	cmd.Append(getPointList());
+	return cmd;
 }
 
 void PicProcessorRedEye::setThresholdLimit(wxString params)
@@ -186,14 +206,28 @@ void PicProcessorRedEye::setThresholdLimit(wxString params)
 	dirty = true;
 }
 
+void PicProcessorRedEye::setThreshold(double t)
+{
+	threshold = t;
+	c = buildCommand();
+}
+
+void PicProcessorRedEye::setRadius(int r)
+{
+	radius = r;
+	c = buildCommand();
+}
+
 void PicProcessorRedEye::setDesatPercent(double pct)
 {
 	desatpct = pct;
+	c = buildCommand();
 }
 
 void PicProcessorRedEye::setDesat(bool d)
 {
 	desat = d;
+	c = buildCommand();
 }
 
 
@@ -268,7 +302,7 @@ void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 	}
 	
 	dcList = "";
-	c = wxString::Format("%2.2f,%d;",threshold, radius);
+	c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
 	for (unsigned i=0; i<points.size(); i++) {
 		dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
 		c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));

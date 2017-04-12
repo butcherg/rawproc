@@ -1237,11 +1237,15 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 	SetStatusText("");
 		try {
 		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
-		wxString threshold = wxConfigBase::Get()->Read("tool.redeye.initialvalue","1.5");
+		wxString threshold = wxConfigBase::Get()->Read("tool.redeye.threshold","1.5");
 		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
 		wxString radius = wxConfigBase::Get()->Read("tool.redeye.radius","50");
+		//parm tool.redeye.desaturation: The initial (and reset button) desaturation toggle.  Default=0
+		wxString desat = wxConfigBase::Get()->Read("tool.redeye.desaturation","0");
+		//parm tool.redeye.desaturationpercent: The initial (and reset button) desaturation percent.  Default=1.0
+		wxString desatpct = wxConfigBase::Get()->Read("tool.redeye.desaturationpercent","1.0");
 		
-		wxString cmd = wxString::Format("%s,%s",threshold,radius);
+		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *d = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
 		//d->processPic();
 		wxSafeYield(this);
