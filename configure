@@ -620,6 +620,10 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+APP_LIBS
+APP_LDFLAGS
+APP_CXXFLAGS
+APP_CPPFLAGS
 EGREP
 GREP
 CXXCPP
@@ -698,6 +702,10 @@ with_wxdir
 with_wx_config
 with_wx_prefix
 with_wx_exec_prefix
+with_jpeg
+with_tiff
+with_lcms2
+with_gimage
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1358,6 +1366,22 @@ Optional Packages:
   --with-wx-prefix=PREFIX Prefix where wxWidgets is installed (optional)
   --with-wx-exec-prefix=PREFIX
                           Exec prefix where wxWidgets is installed (optional)
+  --with-localprefix      =PATH, specifies path to a non-standard location of
+                          lib and include directories. The lib and include
+                          paths are prepended to LDFLAGS and CPPFLAGS,
+                          respectively. Use this to make and use alternate
+                          combinations of the supporting libraries
+
+  --with-jpeg             =PATH, specifies path to non-standard location of
+                          the jpeg library.
+  --with-tiff             =PATH, specifies path to non-standard location of
+                          the tiff library.
+  --with-libraw           =PATH, specifies path to non-standard location of
+                          the LibRaw library.
+  --with-lcms2            =PATH, specifies path to non-standard location of
+                          Little CMS2 library.
+  --with-gimage           =PATH, specifies path to non-standard location of
+                          gimage library.
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2378,7 +2402,13 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-: ${CXXFLAGS=""}
+#: ${CXXFLAGS=""}
+
+# MINGW_AC_WIN32_NATIVE_HOST
+# --------------------------
+# Check if the runtime platform is a native Win32 host.
+#
+
 
 
 # Checks for programs.
@@ -3909,6 +3939,23 @@ if test "$wxWin" != 1; then
 fi
 
 
+# Check whether --with-localprefix was given.
+if test "${with_localprefix+set}" = set; then :
+  withval=$with_localprefix;
+fi
+
+if test "$with_localprefix" != ""
+then
+	if test "$with_localprefix" != "yes"
+	then
+		APP_CPPFLAGS="-I$with_localprefix/usr/local/include $APP_CPPFLAGS"
+		APP_LDFLAGS="-L$with_localprefix/usr/local/lib $APP_LDFLAGS"
+	fi
+fi
+
+if test "$mingw_cv_win32_host" == "yes" ;
+then
+#	AC_MSG_NOTICE ([adding win32 libs and flags])
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lws2_32" >&5
 $as_echo_n "checking for main in -lws2_32... " >&6; }
@@ -3949,7 +3996,33 @@ _ACEOF
 
 fi
 
+	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
+fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are building for a Win32 host" >&5
+$as_echo_n "checking whether we are building for a Win32 host... " >&6; }
+if ${mingw_cv_win32_host+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef _WIN32
+choke me
+#endif
+
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  mingw_cv_win32_host=no
+else
+  mingw_cv_win32_host=yes
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $mingw_cv_win32_host" >&5
+$as_echo "$mingw_cv_win32_host" >&6; }
+
+#jpeg lib doesn't do cross-build, so it doesn't have a BUILDDIR option
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4343,7 +4416,22 @@ fi
 done
 
 
-for ac_header in jpeglib.h
+
+# Check whether --with-jpeg was given.
+if test "${with_jpeg+set}" = set; then :
+  withval=$with_jpeg;
+		echo "libjpeg: using $with_jpeg"
+		if test -d $with_jpeg
+		then
+			APP_LIBS="$with_jpeg/libjpeg.a $APP_LIBS"
+			APP_CPPFLAGS=" -I$with_jpeg $APP_CPPFLAGS"
+		else
+			as_fn_error $? "no jpeg directory found." "$LINENO" 5
+		fi
+
+else
+
+		for ac_header in jpeglib.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
 if test "x$ac_cv_header_jpeglib_h" = xyes; then :
@@ -4352,12 +4440,12 @@ if test "x$ac_cv_header_jpeglib_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "jpeglib.h not found" "$LINENO" 5
+  as_fn_error $? "jpeglib.h not found." "$LINENO" 5
 fi
 
 done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
 $as_echo_n "checking for library containing jpeg_set_defaults... " >&6; }
 if ${ac_cv_search_jpeg_set_defaults+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4412,11 +4500,39 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  as_fn_error $? "A working libjpeg is required" "$LINENO" 5
+  as_fn_error $? "A working libjpeg is required." "$LINENO" 5
 fi
 
 
-for ac_header in tiffio.h
+
+fi
+
+
+
+
+#libtiff does cross-compile, uses BUILDDIR if declared
+
+# Check whether --with-tiff was given.
+if test "${with_tiff+set}" = set; then :
+  withval=$with_tiff;
+		echo "libtiff: using $with_tiff"
+		if test -d $with_tiff
+		then
+			if test -z "${BUILDDIR+x}"
+			then
+				APP_LIBS="$with_tiff/libtiff/.libs/libtiff.a $APP_LIBS"
+			else
+				APP_LIBS="$with_tiff/$BUILDDIR/libtiff/.libs/libtiff.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_tiff/libtiff $APP_CPPFLAGS"
+
+		else
+			as_fn_error $? "no tiff directory found." "$LINENO" 5
+		fi
+
+else
+
+		for ac_header in tiffio.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "tiffio.h" "ac_cv_header_tiffio_h" "$ac_includes_default"
 if test "x$ac_cv_header_tiffio_h" = xyes; then :
@@ -4425,12 +4541,12 @@ if test "x$ac_cv_header_tiffio_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "tiffio.h not found" "$LINENO" 5
+  as_fn_error $? "tiffio.h not found." "$LINENO" 5
 fi
 
 done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
 $as_echo_n "checking for library containing TIFFSetErrorHandler... " >&6; }
 if ${ac_cv_search_TIFFSetErrorHandler+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4485,84 +4601,36 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  as_fn_error $? "A working libtiff is required" "$LINENO" 5
+  as_fn_error $? "A working libtiff is required." "$LINENO" 5
 fi
 
 
-for ac_header in lcms2.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "lcms2.h" "ac_cv_header_lcms2_h" "$ac_includes_default"
-if test "x$ac_cv_header_lcms2_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LCMS2_H 1
-_ACEOF
+
+fi
+
+
+#libraw does cross-compile, uses BUILDDIR if declared
+
+# Check whether --with-libraw was given.
+if test "${with_libraw+set}" = set; then :
+  withval=$with_libraw;
+	echo "libraw: using $with_libraw"
+		if test -d $with_libraw
+		then
+			if test -z "${BUILDDIR+x}"
+			then
+				APP_LIBS="$with_libraw/lib/.libs/libraw.a $APP_LIBS"
+			else
+				APP_LIBS="$with_libraw/$BUILDDIR/lib/.libs/libraw.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_libraw $APP_CPPFLAGS"
+		else
+			as_fn_error $? "no libraw directory found." "$LINENO" 5
+		fi
 
 else
-  as_fn_error $? "lcms2.h not found" "$LINENO" 5
-fi
 
-done
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cmsSetLogErrorHandler" >&5
-$as_echo_n "checking for library containing cmsSetLogErrorHandler... " >&6; }
-if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char cmsSetLogErrorHandler ();
-int
-main ()
-{
-return cmsSetLogErrorHandler ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' lcms2; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_cmsSetLogErrorHandler=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
-
-else
-  ac_cv_search_cmsSetLogErrorHandler=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_cmsSetLogErrorHandler" >&5
-$as_echo "$ac_cv_search_cmsSetLogErrorHandler" >&6; }
-ac_res=$ac_cv_search_cmsSetLogErrorHandler
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working libcms2 is required" "$LINENO" 5
-fi
-
-
-for ac_header in libraw/libraw.h
+		for ac_header in libraw/libraw.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "libraw/libraw.h" "ac_cv_header_libraw_libraw_h" "$ac_includes_default"
 if test "x$ac_cv_header_libraw_libraw_h" = xyes; then :
@@ -4576,7 +4644,7 @@ fi
 
 done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libraw_init" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libraw_init" >&5
 $as_echo_n "checking for library containing libraw_init... " >&6; }
 if ${ac_cv_search_libraw_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4635,7 +4703,131 @@ else
 fi
 
 
-for ac_header in gimage.h
+
+fi
+
+
+#lcms2 does cross-compile, uses BUILDDIR if declared
+
+# Check whether --with-lcms2 was given.
+if test "${with_lcms2+set}" = set; then :
+  withval=$with_lcms2;
+	echo "libcms2: using $with_lcms2"
+		if test -d $with_lcms2
+		then
+			if test -z "${BUILDDIR+x}"
+			then
+				APP_LIBS="$with_lcms2/src/.libs/liblcms2.a $APP_LIBS"
+			else
+				APP_LIBS="$with_lcms2/$BUILDDIR/src/.libs/liblcms2.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_lcms2/include $APP_CPPFLAGS "
+		else
+			as_fn_error $? "no lcms2 directory found." "$LINENO" 5
+		fi
+
+else
+
+		for ac_header in lcms2.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "lcms2.h" "ac_cv_header_lcms2_h" "$ac_includes_default"
+if test "x$ac_cv_header_lcms2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LCMS2_H 1
+_ACEOF
+
+else
+  as_fn_error $? "lcms2.h not found" "$LINENO" 5
+fi
+
+done
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cmsSetLogErrorHandler" >&5
+$as_echo_n "checking for library containing cmsSetLogErrorHandler... " >&6; }
+if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char cmsSetLogErrorHandler ();
+int
+main ()
+{
+return cmsSetLogErrorHandler ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' lcms2; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_cmsSetLogErrorHandler=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
+
+else
+  ac_cv_search_cmsSetLogErrorHandler=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_cmsSetLogErrorHandler" >&5
+$as_echo "$ac_cv_search_cmsSetLogErrorHandler" >&6; }
+ac_res=$ac_cv_search_cmsSetLogErrorHandler
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working libcms2 is required" "$LINENO" 5
+fi
+
+
+
+fi
+
+
+
+#gimage does cross-compile, uses BUILDDIR if declared
+
+# Check whether --with-gimage was given.
+if test "${with_gimage+set}" = set; then :
+  withval=$with_gimage;
+	echo "gimage: using $with_gimage"
+		if test -d $with_gimage
+		then
+			if test -z "${BUILDDIR+x}"
+			then
+				APP_LIBS="$with_gimage/liblgimage.a $APP_LIBS"
+			else
+				APP_LIBS="$with_gimage/$BUILDDIR/libgimage.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_gimage $APP_CPPFLAGS "
+		else
+			as_fn_error $? "no gimage directory found." "$LINENO" 5
+		fi
+
+else
+
+		for ac_header in gimage.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "gimage.h" "ac_cv_header_gimage_h" "$ac_includes_default"
 if test "x$ac_cv_header_gimage_h" = xyes; then :
@@ -4649,45 +4841,66 @@ fi
 
 done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lgimage" >&5
-$as_echo_n "checking for main in -lgimage... " >&6; }
-if ${ac_cv_lib_gimage_main+:} false; then :
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cmsSetLogErrorHandler" >&5
+$as_echo_n "checking for library containing cmsSetLogErrorHandler... " >&6; }
+if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgimage  $LIBS"
+  ac_func_search_save_LIBS=$LIBS
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char cmsSetLogErrorHandler ();
 int
 main ()
 {
-return main ();
+return cmsSetLogErrorHandler ();
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_gimage_main=yes
-else
-  ac_cv_lib_gimage_main=no
+for ac_lib in '' gimage; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_cmsSetLogErrorHandler=$ac_res
 fi
 rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+    conftest$ac_exeext
+  if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
+  break
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gimage_main" >&5
-$as_echo "$ac_cv_lib_gimage_main" >&6; }
-if test "x$ac_cv_lib_gimage_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBGIMAGE 1
-_ACEOF
+done
+if ${ac_cv_search_cmsSetLogErrorHandler+:} false; then :
 
-  LIBS="-lgimage $LIBS"
+else
+  ac_cv_search_cmsSetLogErrorHandler=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_cmsSetLogErrorHandler" >&5
+$as_echo "$ac_cv_search_cmsSetLogErrorHandler" >&6; }
+ac_res=$ac_cv_search_cmsSetLogErrorHandler
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
   as_fn_error $? "A working gimage is required" "$LINENO" 5
+fi
+
+
+
 fi
 
 
@@ -4900,6 +5113,11 @@ CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 LIBS="$WX_LIBS $LIBS"
+
+
+
+
+
 
 
 ac_config_files="$ac_config_files Makefile"

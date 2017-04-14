@@ -4,7 +4,20 @@
 AC_PREREQ([2.69])
 AC_INIT(rawproc, 0.6Dev)
 AC_LANG([C++])
-: ${CXXFLAGS=""}
+#: ${CXXFLAGS=""}
+
+# MINGW_AC_WIN32_NATIVE_HOST
+# --------------------------
+# Check if the runtime platform is a native Win32 host.
+#
+AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
+[AC_CACHE_CHECK([whether we are building for a Win32 host], 
+                [mingw_cv_win32_host],
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#ifdef _WIN32
+choke me
+#endif
+])], [mingw_cv_win32_host=no], [mingw_cv_win32_host=yes]))])
 
 
 # Checks for programs.
@@ -68,14 +81,14 @@ then
         LIBRAW=`stat --printf='%n' LibRaw-* 2>/dev/null`
         if test $LIBRAW == ""  
         then 
-                AC_ERROR([no LibRaw library found in ./]) 
+                AC_MSG_ERROR([no LibRaw library found in ./]) 
         fi
         if test -d $LIBRAW
         then
                 CPPFLAGS="$CPPFLAGS -I$LIBRAW"
                 LDFLAGS="$LDFLAGS -L$LIBRAW/lib/.libs"
         else
-                AC_ERROR([thing found is not a libraw library in ./])
+                AC_MSG_ERROR([thing found is not a libraw library in ./])
         fi
 else
         if test "$with_libraw" != ""
@@ -105,24 +118,146 @@ if test "$wxWin" != 1; then
 		wxWidgets version is $reqwx or above.
 		])
 fi
+
+AC_ARG_WITH([localprefix],
+	AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of lib and include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
+)
+if test "$with_localprefix" != ""
+then
+	if test "$with_localprefix" != "yes"
+	then
+		APP_CPPFLAGS="-I$with_localprefix/usr/local/include $APP_CPPFLAGS"
+		APP_LDFLAGS="-L$with_localprefix/usr/local/lib $APP_LDFLAGS"
+	fi
+fi
+
+if test "$mingw_cv_win32_host" == "yes" ;
+then
+#	AC_MSG_NOTICE ([adding win32 libs and flags])
+	AC_CHECK_LIB([ws2_32],[main])
+	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
+fi
+
+MINGW_AC_WIN32_NATIVE_HOST
+
+#jpeg lib doesn't do cross-build, so it doesn't have a BUILDDIR option
+AC_ARG_WITH([jpeg],
+	AS_HELP_STRING([--with-jpeg], [=PATH, specifies path to non-standard location of the jpeg library.]),
+	[
+		echo "libjpeg: using $with_jpeg"
+		if test -d $with_jpeg 
+		then
+			APP_LIBS="$with_jpeg/libjpeg.a $APP_LIBS" 
+			APP_CPPFLAGS=" -I$with_jpeg $APP_CPPFLAGS"
+		else
+			AC_MSG_ERROR([no jpeg directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([jpeglib.h not found.])])
+		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
+	]
+)
  
 
-AC_CHECK_LIB([ws2_32],[main])
 
-AC_CHECK_HEADERS(jpeglib.h, [], [AC_ERROR([jpeglib.h not found])])
-AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_ERROR([A working libjpeg is required])])
+#libtiff does cross-compile, uses BUILDDIR if declared
+AC_ARG_WITH([tiff],
+	AS_HELP_STRING([--with-tiff], [=PATH, specifies path to non-standard location of the tiff library.]),
+	[
+		echo "libtiff: using $with_tiff"
+		if test -d $with_tiff 
+		then
+			if test -z "${BUILDDIR+x}" 
+			then 
+				APP_LIBS="$with_tiff/libtiff/.libs/libtiff.a $APP_LIBS"
+			else
+				APP_LIBS="$with_tiff/$BUILDDIR/libtiff/.libs/libtiff.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_tiff/libtiff $APP_CPPFLAGS"
+			
+		else
+			AC_MSG_ERROR([no tiff directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
+		AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
+	]
+)
 
-AC_CHECK_HEADERS(tiffio.h, [], [AC_ERROR([tiffio.h not found])])
-AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_ERROR([A working libtiff is required])])
+#libraw does cross-compile, uses BUILDDIR if declared
+AC_ARG_WITH([libraw],
+	AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of the LibRaw library.]),
+	[
+	echo "libraw: using $with_libraw"
+		if test -d $with_libraw 
+		then
+			if test -z "${BUILDDIR+x}" 
+			then 
+				APP_LIBS="$with_libraw/lib/.libs/libraw.a $APP_LIBS"
+			else
+				APP_LIBS="$with_libraw/$BUILDDIR/lib/.libs/libraw.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_libraw $APP_CPPFLAGS"
+		else
+			AC_MSG_ERROR([no libraw directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
+		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
+	]
+)
 
-AC_CHECK_HEADERS(lcms2.h, [], [AC_ERROR([lcms2.h not found])])
-AC_SEARCH_LIBS(cmsSetLogErrorHandler,lcms2, [], [AC_ERROR([A working libcms2 is required])])
+#lcms2 does cross-compile, uses BUILDDIR if declared
+AC_ARG_WITH([lcms2],
+	AS_HELP_STRING([--with-lcms2], [=PATH, specifies path to non-standard location of Little CMS2 library.]),
+	[
+	echo "libcms2: using $with_lcms2"
+		if test -d $with_lcms2 
+		then
+			if test -z "${BUILDDIR+x}" 
+			then 
+				APP_LIBS="$with_lcms2/src/.libs/liblcms2.a $APP_LIBS"
+			else
+				APP_LIBS="$with_lcms2/$BUILDDIR/src/.libs/liblcms2.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_lcms2/include $APP_CPPFLAGS "
+		else
+			AC_MSG_ERROR([no lcms2 directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(lcms2.h, [], [AC_MSG_ERROR([lcms2.h not found])])
+		AC_SEARCH_LIBS(cmsSetLogErrorHandler,lcms2, [], [AC_MSG_ERROR([A working libcms2 is required])])
+	]
+)
 
-AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_ERROR([libraw.h not found])])
-AC_SEARCH_LIBS(libraw_init,raw, [], [AC_ERROR([A working libraw is required])])
 
-AC_CHECK_HEADERS(gimage.h, [], [AC_ERROR([gimage.h not found])])
-AC_CHECK_LIB([gimage],[main],[],[AC_ERROR([A working gimage is required])])
+#gimage does cross-compile, uses BUILDDIR if declared
+AC_ARG_WITH([gimage],
+	AS_HELP_STRING([--with-gimage], [=PATH, specifies path to non-standard location of gimage library.]),
+	[
+	echo "gimage: using $with_gimage"
+		if test -d $with_gimage 
+		then
+			if test -z "${BUILDDIR+x}" 
+			then 
+				APP_LIBS="$with_gimage/liblgimage.a $APP_LIBS"
+			else
+				APP_LIBS="$with_gimage/$BUILDDIR/libgimage.a $APP_LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_gimage $APP_CPPFLAGS "
+		else
+			AC_MSG_ERROR([no gimage directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(gimage.h, [], [AC_MSG_ERROR([gimage.h not found])])
+		AC_SEARCH_LIBS(cmsSetLogErrorHandler,gimage, [], [AC_MSG_ERROR([A working gimage is required])])
+	]
+)
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])
@@ -144,6 +279,11 @@ CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 LIBS="$WX_LIBS $LIBS"
+
+AC_SUBST(APP_CPPFLAGS)
+AC_SUBST(APP_CXXFLAGS)
+AC_SUBST(APP_LDFLAGS)
+AC_SUBST(APP_LIBS)
 
 
 AC_OUTPUT(Makefile)
