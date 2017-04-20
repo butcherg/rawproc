@@ -115,18 +115,32 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	double blk, wht;
 	wht = 255; blk = 0;
 	double blkthresh, whtthresh;
+	long whtinitial;
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
 		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
-		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
+		//parm tool.blackwhitepoint.whitethreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
+		//parm tool.blackwhitepoint.whiteinitialvalue: The starting point in the histogram for walking down to the white threshold.  Use to bypass bunched clipped highlights.  Default=255
+		wxConfigBase::Get()->Read("tool.blackwhitepoint.whiteinitialvalue",&whtinitial,255);
+		
+		//Compute hmax:
 		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
+		
+		//Find black threshold:
 		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
 		blk = (double) i;
-		for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
+		
+		//Find white threshold:
+		for (i=whtinitial; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
+		//Alternate white threshold walk, based on cumulative pixels < original hmax.  
+		//Thought was to equalize the clipped pixel count with hmax, but it doesn't work that way...
+		//int accum = 0;
+		//for (i=whtinitial; i>=128; i--) {accum += hdata[i]; if (accum > hmax) break;}
 		wht = (double) i;
+		
 		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
 	}
 	else setParams(command);
