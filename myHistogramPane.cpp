@@ -2,6 +2,7 @@
 #include "myHistogramPane.h"
 #include <math.h>
 #include <algorithm>
+#include <wx/clipbrd.h>
 
 BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
  
@@ -58,6 +59,8 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage &dib, const wxPoint &p
 	blen=bdata.size();
 	b = new wxPoint[blen];
 	for (unsigned i=0; i<blen; i++) b[i] = wxPoint(i,bdata[i]);
+	
+	smalldata = dib.Histogram();
 
 	MouseX = 0; MouseY=0;
 	SetInitialSize(wxSize(500,400));
@@ -194,6 +197,16 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			if (event.ShiftDown()) xorigin += 10;
 			else if (event.ControlDown()) xorigin += 100;
 			else xorigin += 1;
+			break;
+		case 67: //c - with Ctrl, copy 256-scale histogram to clipboard
+			wxString histogram = wxString::Format("%d", (int) smalldata[0]);
+			for (int i = 1; i< smalldata.size(); i++) 
+				histogram.Append(wxString::Format(",%d", (int) smalldata[i]));
+			if (wxTheClipboard->Open())
+			{
+				wxTheClipboard->SetData( new wxTextDataObject(histogram) );
+				wxTheClipboard->Close();
+			}
 			break;
 	}
 	Update();

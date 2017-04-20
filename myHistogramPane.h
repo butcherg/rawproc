@@ -39,7 +39,7 @@ public:
 
 private:
 	bool pressedDown;
-	std::vector<long> rdata, gdata, bdata;
+	std::vector<long> rdata, gdata, bdata, smalldata;
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
