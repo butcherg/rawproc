@@ -123,7 +123,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
 		//parm tool.blackwhitepoint.whitethreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
-		//parm tool.blackwhitepoint.whiteinitialvalue: The starting point in the histogram for walking down to the white threshold.  Use to bypass bunched clipped highlights.  Default=255
+		//parm tool.blackwhitepoint.whiteinitialvalue: The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whiteinitialvalue",&whtinitial,255);
 		
 		//Compute hmax:
