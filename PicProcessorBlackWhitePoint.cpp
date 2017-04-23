@@ -133,8 +133,16 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
 		blk = (double) i;
 		
+		
+		//find the local max in 250-255:
+		int m = 0, l=255;
+		for (i=255; i>=250; i--) if (hdata[i]>m) {m = hdata[i]; l = i;}
+
+		//start looking for the white point threshold right after the location of the local max:
+		for (i=l-1; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		
 		//Find white threshold:
-		for (i=whtinitial; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
+		//for (i=whtinitial; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
 		//Alternate white threshold walk, based on cumulative pixels < original hmax.  
 		//Thought was to equalize the clipped pixel count with hmax, but it doesn't work that way...
 		//int accum = 0;
