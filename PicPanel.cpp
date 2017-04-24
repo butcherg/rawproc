@@ -125,6 +125,11 @@ END_EVENT_TABLE()
 		if (histogram) histogram->~wxBitmap();
 
 		img = gImage2wxImage(*dib);
+		
+		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
+		if (rotation == 3) img.Rotate180();
+		if (rotation == 5) img.Rotate90(false);
+		if (rotation == 6) img.Rotate90(true);
 
 		if (hImgProfile) {
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
