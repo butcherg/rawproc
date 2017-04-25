@@ -711,7 +711,16 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
 			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
-
+			
+			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
+			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
+			if ((wxConfigBase::Get()->Read("output.orient","0") == "1") & (rotation != 0)) {
+				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
+				if (rotation == 3) dib->ApplyRotate180();
+				if (rotation == 5) dib->ApplyRotate270();
+				if (rotation == 6) dib->ApplyRotate90();
+				dib->setInfo("Orientation","0");
+			}
 
 			wxString configparams;
 			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)
