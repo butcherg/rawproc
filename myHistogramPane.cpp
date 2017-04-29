@@ -22,8 +22,27 @@ BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
  
 END_EVENT_TABLE()
 
+myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
+ wxWindow(parent, wxID_ANY, pos, size)
+{
+	SetDoubleBuffered(true);
+	//t = new wxTimer(this);
+	unsigned hm = 0;
+	wscale = 1.0;
+	xorigin = 0;
+	yorigin = 0;
+	hmax = 0;
+	hscale = 0;
+	ord = 1;
+	
+	r = NULL; g = NULL; b = NULL;
+	rlen=0; glen=0; blen=0;
+	
+	MouseX = 0; MouseY=0;
+	pressedDown = false;
+}
 
-myHistogramPane::myHistogramPane(wxDialog* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
+myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
 {
 	SetDoubleBuffered(true);
@@ -70,6 +89,7 @@ myHistogramPane::myHistogramPane(wxDialog* parent, gImage &dib, const wxPoint &p
 	Refresh();
 }
 
+
 myHistogramPane::~myHistogramPane()
 {
 	if (r) delete[] r;
@@ -95,13 +115,48 @@ void myHistogramPane::paintNow()
 	wxClientDC dc(this);
 	render(dc);
 }
+
+void myHistogramPane::SetPic(gImage &dib, unsigned scale)
+{	
+	hmax = 0;
+	hscale = scale;
+	rlen=scale; glen=scale; blen=scale;
+	
+	std::vector<histogramdata> histogram = dib.Histogram(scale);
+	
+	if (r) delete r;
+	if (g) delete g;
+	if (b) delete b;
+	r = new wxPoint[scale];
+	g = new wxPoint[scale];
+	b = new wxPoint[scale];
+	
+	unsigned lower = scale * 0.05;
+	unsigned upper = scale * 0.95;
+	
+	for (unsigned i=0; i<scale; i++) {
+		r[i] = wxPoint(i, histogram[i].r);
+		g[i] = wxPoint(i, histogram[i].g);
+		b[i] = wxPoint(i, histogram[i].b);
+		if (i > lower & i < upper) {
+			if (hmax < histogram[i].r) hmax = histogram[i].r;
+			if (hmax < histogram[i].g) hmax = histogram[i].g;
+			if (hmax < histogram[i].b) hmax = histogram[i].b;
+		}
+	}
+	
+	Update();
+	Refresh();
+
+}
+
  
 void myHistogramPane::render(wxDC&  dc)
 {
 	int w, h;
 	int hx;
 	GetSize(&w, &h);
-	dc.SetBackground(*wxWHITE_BRUSH);
+	//dc.SetBackground(*wxWHITE_BRUSH);
 	dc.Clear();
 	
 	//go to histogram coordinates:
@@ -114,19 +169,25 @@ void myHistogramPane::render(wxDC&  dc)
 	unsigned order = ord;
 	for (unsigned i=0; i<3; i++) {
 		if (order == 1) {
-			dc.SetPen(wxPen(wxColour(255,0,0),1));
-			dc.DrawLines(rlen,r,0,0);
-			if (i==2) frontcolor = r;
+			if (r) {
+				dc.SetPen(wxPen(wxColour(255,0,0),1));
+				dc.DrawLines(rlen,r,0,0);
+				if (i==2) frontcolor = r;
+			}
 		}
 		if (order == 2) {
-			dc.SetPen(wxPen(wxColour(0,255,0),1));
-			dc.DrawLines(glen,g,0,0);
-			if (i==2) frontcolor = g;
+			if (g) {
+				dc.SetPen(wxPen(wxColour(0,255,0),1));
+				dc.DrawLines(glen,g,0,0);
+				if (i==2) frontcolor = g;
+			}
 		}
 		if (order == 3) {
-			dc.SetPen(wxPen(wxColour(0,0,255),1));
-			dc.DrawLines(blen,b,0,0);
-			if (i==2) frontcolor = b;
+			if (b) {
+				dc.SetPen(wxPen(wxColour(0,0,255),1));
+				dc.DrawLines(blen,b,0,0);
+				if (i==2) frontcolor = b;
+			}
 		}
 		order++;
 		if (order>3) order=1;
@@ -134,7 +195,7 @@ void myHistogramPane::render(wxDC&  dc)
 
 	//marker lines:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
-	unsigned mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
+	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
 	
 	unsigned mly=0;
 	if (mlx > 0 & mlx < hscale) {
@@ -150,8 +211,11 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetTextBackground(wxColour(255,255,255));
 	if (!pressedDown & mlx > 0 & mlx < hscale) 
 		dc.DrawLine(MouseX,0,MouseX,h);
-	dc.DrawText(wxString::Format("x: %d y: %d      hscale=%d  wscale=%f",mlx,mly,hscale,wscale),10,h-20);
-
+	if (mlx < 0) mlx = 0;
+	if (mlx > hscale) mlx = hscale;
+	wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
+	wxSize sz = dc.GetTextExtent(str);
+	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
 }
 
 
@@ -209,6 +273,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			}
 			break;
 	}
+	event.Skip();
 	Update();
 	Refresh();
 }

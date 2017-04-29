@@ -82,7 +82,7 @@ wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int heigh
 wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height) 
 {
 	mark();
-	unsigned hdata[256];
+	unsigned hdata[256], rdata[256]={0}, gdata[256]={0}, bdata[256]={0};
 	int hmax = 0;
 	wxBitmap bmp(width, height);  //, outbmp(width, height);
 	for (int i=0; i<256; i++) hdata[i]=0;
@@ -105,35 +105,62 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 	#pragma omp parallel num_threads(threadcount)
 	{
 		unsigned pdata[256] = {0};
+		unsigned pr[256] = {0};
+		unsigned pg[256] = {0};
+		unsigned pb[256] = {0};
 		#pragma omp for
 		for(unsigned y = 0; y < ih; y++) {
 			for(unsigned x = 0; x < iw; x++) {
 				long pos = (y * iw + x) * 3;
-				int gray = (data[pos]+data[pos+1]+data[pos+2]) / 3;
-				pdata[gray]++;
+				//int gray = (data[pos]+data[pos+1]+data[pos+2]) / 3;
+				//pdata[gray]++;
+				pr[data[pos]]++;
+				pg[data[pos+1]]++;
+				pb[data[pos+2]]++;
 			}
 		}
 
 		#pragma omp critical 
 		{
 			for (unsigned i=0; i<256; i++) {
-				hdata[i] += pdata[i];
+				//hdata[i] += pdata[i];
+				rdata[i] += pr[i];
+				gdata[i] += pg[i];
+				bdata[i] += pb[i];
 			}
 		}
 
 	}
 
 
-	for (int i=0; i<256; i++) if (hdata[i]>hmax) hmax = hdata[i];
+	//for (int i=0; i<256; i++) if (hdata[i]>hmax) hmax = hdata[i];
+	for (int i=0; i<256; i++) if (rdata[i]>hmax) hmax = rdata[i];
+	for (int i=0; i<256; i++) if (gdata[i]>hmax) hmax = gdata[i];
+	for (int i=0; i<256; i++) if (bdata[i]>hmax) hmax = bdata[i];
 
 	wxMemoryDC dc;
 	dc.SelectObject(bmp);
 	dc.Clear();
 	dc.SetUserScale((double) width / 256.0, (double) height/ (double) hmax);
 	dc.SetPen(wxPen(wxColour(128,128,128),1));
-	for(int x=0; x<256; x++) {
-		dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
+	for(int x=1; x<256; x++) {
+		//dc.DrawLine(x,dc.DeviceToLogicalY(height),x,dc.DeviceToLogicalY(height)-hdata[x]);
+		//dc.DrawLine(x-1,dc.DeviceToLogicalY(height)-hdata[x-1],x,dc.DeviceToLogicalY(height)-hdata[x]);
 	}
+	dc.SetPen(wxPen(wxColour(255,0,0),1));
+	for(int x=1; x<256; x++) {
+		dc.DrawLine(x-1,dc.DeviceToLogicalY(height)-rdata[x-1],x,dc.DeviceToLogicalY(height)-rdata[x]);
+	}
+	dc.SetPen(wxPen(wxColour(0,255,0),1));
+	for(int x=1; x<256; x++) {
+		dc.DrawLine(x-1,dc.DeviceToLogicalY(height)-gdata[x-1],x,dc.DeviceToLogicalY(height)-gdata[x]);
+	}
+	dc.SetPen(wxPen(wxColour(0,0,255),1));
+	for(int x=1; x<256; x++) {
+		dc.DrawLine(x-1,dc.DeviceToLogicalY(height)-bdata[x-1],x,dc.DeviceToLogicalY(height)-bdata[x]);
+	}
+	//dc.SetBrush(wxBrush(wxColour(128,128,128)));
+	//dc.FloodFill(128, dc.DeviceToLogicalY(height)-hdata[128+50], wxColour(128,128,128), wxFLOOD_BORDER);
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();

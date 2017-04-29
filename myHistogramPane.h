@@ -11,6 +11,7 @@
 	#include <wx/wxprec.h>
 #endif
 
+#define PIXTYPE float
 #include "gimage/gimage.h"
 
 class myHistogramPane : public wxWindow
@@ -18,12 +19,15 @@ class myHistogramPane : public wxWindow
 
 public:
 
-	myHistogramPane(wxDialog* parent,  gImage &dib,  const wxPoint &pos, const wxSize &size);
+	myHistogramPane(wxWindow* parent,  gImage &dib,  const wxPoint &pos, const wxSize &size);
+	myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size);
 	~myHistogramPane();
 	void OnSize(wxSizeEvent& event);
  
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
+	
+	void SetPic(gImage &dib, unsigned scale=256);
  
 	void render(wxDC& dc);
  
