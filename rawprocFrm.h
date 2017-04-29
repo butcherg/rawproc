@@ -46,6 +46,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/filesys.h>
 #include <wx/fs_zip.h>
+#include <wx/generic/statbmpg.h>
 
 #include "gimage/gimage.h"
 #include "PicPanel.h"
@@ -197,6 +198,7 @@ class rawprocFrm : public wxFrame
 	void MnuEXIF(wxCommandEvent& event);
 
 	void UpdateConfig(wxPropertyGridEvent& event);
+	void SetBackground();
 		
 	private:
 		void OnClose(wxCloseEvent& event);
@@ -211,6 +213,9 @@ class rawprocFrm : public wxFrame
 
 		gImage *d;
 		wxImage *img;
+		
+		//wxGenericStaticBitmap *histogram;
+		myHistogramPane *histogram;
 
 		bool deleting;
 		wxTreeItemId olditem;

@@ -12,6 +12,8 @@
 #include <wx/dcbuffer.h>
 #include <wx/string.h>
 #include <wx/treectrl.h>
+//#include <wx/generic/statbmpg.h>
+#include "myHistogramPane.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -22,7 +24,7 @@
 class PicPanel: public wxPanel
 {
 	public:
-		PicPanel(wxFrame *parent, wxTreeCtrl *tree);
+		PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram);
 		~PicPanel();
 		void OnEraseBackground(wxEraseEvent& event);
 		void OnSize(wxSizeEvent& event);
@@ -59,9 +61,11 @@ class PicPanel: public wxPanel
 		gImage * d;
 		wxFrame *parentframe;
 		wxTreeCtrl *commandtree;
+		myHistogramPane *histogram;
+		
 		wxImage img;
 		wxImage *thumbimg, *scaledimg;
-		wxBitmap *pic, *thumb, *scaledpic, *histogram;
+		wxBitmap *pic, *thumb, *scaledpic;  //, *histogram;
 		wxBitmap hsgram;
 		bool blank;
     

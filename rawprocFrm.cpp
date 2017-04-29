@@ -224,22 +224,53 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
+	//histogram = new wxGenericStaticBitmap(this, wxID_ANY, wxBitmap(), wxDefaultPosition, wxSize(285,150));
+	//histogram->SetDoubleBuffered(true);
+	
+	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
+	
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
+	
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
-	pic = new PicPanel(this, commandtree);
+	
+	pic = new PicPanel(this, commandtree, histogram);
 
 
-	parameters = new myParameters(this, -1, wxDefaultPosition, wxSize(285,200));
-	parameters->SetMinSize(wxSize(285,200));
+	parameters = new myParameters(this, -1, wxDefaultPosition, wxSize(285,300));
+	parameters->SetMinSize(wxSize(285,300));
 	parameters->SetMaxSize(wxSize(1200,750));
-	parameters->SetAutoLayout(true); 
+	//parameters->SetAutoLayout(true); 
+	
+	//histogram = new wxGenericStaticBitmap(this, wxID_ANY, wxDefaultPosition, wxSize(285,200));
 
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
-	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(1).GripperTop());
+	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1));  //.GripperTop());
+	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(2).MinSize(wxSize(285,300))); //.GripperTop());
 
 	mgr.Update();
+}
+
+void rawprocFrm::SetBackground()
+{
+	//parm app.backgroundcolor: r,g,b (0-255), set at startup.  Default=(255,255,255)
+	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
+	wxArrayString bkgnd = split(bk,",");
+	int r = atoi(bkgnd[0].c_str());
+	int g = atoi(bkgnd[1].c_str());
+	int b = atoi(bkgnd[2].c_str());
+	parameters->SetBackgroundColour(wxColour(r,g,b));
+	parameters->Refresh();
+	pic->SetBackgroundColour(wxColour(r,g,b));
+	pic->Refresh();
+	commandtree->SetBackgroundColour(wxColour(r,g,b));
+	commandtree->Refresh();
+	histogram->SetBackgroundColour(wxColour(r,g,b));
+	histogram->Refresh();
+	SetBackgroundColour(wxColour(r,g,b));
+	Refresh();
+	
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)

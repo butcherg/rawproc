@@ -43,6 +43,8 @@ bool rawprocFrmApp::OnInit()
 		wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_configd));
 		frame->SetConfigFile(conf_configd);
 	}
+	
+	frame->SetBackground();
 
 	int thumbmode;
 	wxConfigBase::Get()->Read("display.thumb.initialmode",&thumbmode,1);  //1=thumb, 2=histogram, 3=none

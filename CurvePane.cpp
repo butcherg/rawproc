@@ -30,6 +30,13 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(300,300) )
 	p = parent;
 	z=1;
 	mousemotion=false;
+	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
+	wxArrayString bkgnd = split(bk,",");
+	int r = atoi(bkgnd[0].c_str());
+	int g = atoi(bkgnd[1].c_str());
+	int b = atoi(bkgnd[2].c_str());
+	SetBackgroundColour(wxColour(r,g,b));
+	
 	wxArrayString ctrlpts = split(controlpoints,",");
 	for (int i=0; i<ctrlpts.GetCount()-1; i+=2) {
 		c.insertpoint(atof(ctrlpts[i]), atof(ctrlpts[i+1]));
@@ -245,6 +252,9 @@ void CurvePane::setPoints(std::vector<cp> pts)
 
 void CurvePane::render(wxDC&  dc)
 {
+	wxColour b = GetBackgroundColour();
+	unsigned g = (b.Red() + b.Green() + b.Blue()) / 3;
+		
 	double px = 0.0;
 	double py = 0.0;
 	double x=0, y=0;
@@ -255,24 +265,34 @@ void CurvePane::render(wxDC&  dc)
 	int radius;
 	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
 	
-	//x axis:
-	dc.DrawLine(m,h-m,m,h-m-255);
-	//y axis:
-	dc.DrawLine(m,h-m,m+255,h-m);
 
+	
 	//center lines:
-	dc.SetPen(*wxLIGHT_GREY_PEN);
+	if (g < 192)
+		dc.SetPen(*wxWHITE_PEN);
+	else 
+		dc.SetPen(*wxLIGHT_GREY_PEN);
 	dc.DrawLine(m+128,h-m,m+128,h-m-255);
 	dc.DrawLine(m,h-m-128,m+255,h-m-128);
 	//null curve:
 	dc.DrawLine(m,h-m,m+255,h-m-255);
 	//quarter lines:
-	dc.SetPen(wxPen(wxColour(192,192,192), 1, wxPENSTYLE_DOT_DASH ));
+	if (g < 192)
+		//dc.SetPen(*wxWHITE_PEN);
+		dc.SetPen(wxPen(wxColour(255,255,255), 1, wxPENSTYLE_DOT_DASH ));
+	else 
+		//dc.SetPen(*wxLIGHT_GREY_PEN);
+		dc.SetPen(wxPen(wxColour(192,192,192), 1, wxPENSTYLE_DOT_DASH ));
 	dc.DrawLine(m+64,h-m,m+64,h-m-255);
 	dc.DrawLine(m,h-m-64,m+255,h-m-64);
 	dc.DrawLine(m+192,h-m,m+192,h-m-255);
 	dc.DrawLine(m,h-m-192,m+255,h-m-192);
+
 	dc.SetPen(*wxBLACK_PEN);
+	//x axis:
+	dc.DrawLine(m,h-m,m,h-m-255);
+	//y axis:
+	dc.DrawLine(m,h-m,m+255,h-m);
 
 	for (double x=0.0; x<256.0; x++) {
 		y=c.getpoint(x);

@@ -14,16 +14,17 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_LEFT_UP(PicPanel::OnLeftUp)
     EVT_MOTION(PicPanel::OnMouseMove)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
-    EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
+    //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
     EVT_CHAR(PicPanel::OnKey)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
-        PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree): wxPanel(parent) {
+	PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent) {
 		parentframe = parent;
 		commandtree = tree;
-		wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
+		histogram = hgram;
+		//wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
 		wxInitAllImageHandlers();
 		SetDoubleBuffered(true);  //watch this one... tricksy...
@@ -51,7 +52,7 @@ END_EVENT_TABLE()
         	pic=NULL;
 		thumb=NULL;
 		scaledpic=NULL;
-		histogram=NULL;
+		//histogram=NULL;
 
 		histstr="histogram: ";
         }
@@ -63,7 +64,7 @@ END_EVENT_TABLE()
 		if (pic) pic->~wxBitmap();
 		if (thumb) thumb->~wxBitmap();
 		if (scaledpic) scaledpic->~wxBitmap();
-		if (histogram) histogram->~wxBitmap();
+		//if (histogram) histogram->~wxBitmap();
 	}
         
         void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
@@ -122,7 +123,7 @@ END_EVENT_TABLE()
 		if (pic) pic->~wxBitmap();
 		if (thumb) thumb->~wxBitmap();
 		if (scaledpic) scaledpic->~wxBitmap();
-		if (histogram) histogram->~wxBitmap();
+		//if (histogram) histogram->~wxBitmap();
 
 		img = gImage2wxImage(*dib);
 		
@@ -176,7 +177,9 @@ END_EVENT_TABLE()
 		thumbH = 100;
 		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 
-
+		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
+		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
+		histogram->SetPic(*dib, scale);
 			
 		thumb = new wxBitmap(thumbimg);
 
@@ -271,6 +274,11 @@ END_EVENT_TABLE()
 			dc.DrawRectangle(1,1,thumb->GetWidth()+2, thumb->GetHeight()+2);
 		}
 		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
+		
+		//wxSize hs = histogram->GetSize();
+		//histogram->SetBitmap(ThreadedHistogramFrom(img, hs.GetWidth(), hs.GetHeight()));
+		
+		//keep only to debug myHistogramPane...
 		if (toggleThumb == 2) {
 			if (!hsgram.IsOk()) {
 				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
@@ -504,6 +512,9 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
 {
 	double increment = 0.05;
+	
+	int iw = img.GetWidth();
+	int ih = img.GetHeight();
 	
 	fitmode=false;
 	wxImage scaledimg;
