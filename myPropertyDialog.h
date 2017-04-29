@@ -17,6 +17,10 @@ class PropertyDialog: public wxDialog
 		void UpdateProperty(wxPropertyGridEvent& event);
 		void FilterGrid(wxCommandEvent& event);
 		std::map<std::string,std::string> FilterList(wxString filter);
+		
+		bool PropExists(wxString name);
+		void AddProp(wxCommandEvent& event);
+		void DelProp(wxCommandEvent& event);
 
 
 	private:
