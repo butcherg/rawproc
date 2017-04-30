@@ -1,10 +1,6 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
-
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 AC_INIT(rawproc, 0.6Dev)
-AC_LANG([C++])
-#: ${CXXFLAGS=""}
+
 
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
@@ -20,13 +16,13 @@ choke me
 ])], [mingw_cv_win32_host=no], [mingw_cv_win32_host=yes]))])
 
 
-# Checks for programs.
+AC_LANG([C++])
+: ${CXXFLAGS=""}
 AC_PROG_CXX
 AC_PROG_CC
-#AC_PROG_CPP
 AC_PROG_MAKE_SET
 
-#LDFLAGS=-static 
+MINGW_AC_WIN32_NATIVE_HOST
 
 #Process enables:
 AC_ARG_ENABLE([openmp],
@@ -34,8 +30,8 @@ AC_ARG_ENABLE([openmp],
 )
 if test "$enable_openmp" == "yes"
 then
-        CXXFLAGS="$CXXFLAGS -fopenmp"
-        LDFLAGS="$LDFLAGS -fopenmp"
+        APP_CXXFLAGS="$APP_CXXFLAGS -fopenmp"
+        APP_LDFLAGS="$APP_LDFLAGS -fopenmp"
 fi
 
 AC_ARG_ENABLE([debug],
@@ -43,7 +39,7 @@ AC_ARG_ENABLE([debug],
 )
 if test "$enable_debug" == "yes"
 then
-        CXXFLAGS="$CXXFLAGS -g"
+        APP_CXXFLAGS="$APP_CXXFLAGS -g"
 fi
 
 
@@ -52,52 +48,10 @@ AC_ARG_ENABLE([optimization],
 )
 if test "$enable_optimization" == "yes"
 then
-        CXXFLAGS="$CXXFLAGS -O4"
+        APP_CXXFLAGS="$APP_CXXFLAGS -O4"
 else
-        CXXFLAGS="$CXXFLAGS -O2"
+        APP_CXXFLAGS="$APP_CXXFLAGS -O2"
 fi
-
-
-
-
-#Process withs:
-AC_ARG_WITH([localprefix],
-        AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of usr/local/lib and usr/local/include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
-)
-if test "$with_localprefix" != ""
-then
-        if test "$with_localprefix" != "yes"
-        then
-                CPPFLAGS="-I$with_localprefix/usr/local/include -I$with_localprefix/usr/local/include/gimage $CPPFLAGS"
-                LDFLAGS="-L$with_localprefix/usr/local/lib $LDFLAGS"
-        fi
-fi
-
-AC_ARG_WITH([libraw],
-        AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of LibRaw library. Omitting the path looks for a Libraw* directory in the cwd.])
-)
-if test "$with_libraw" == "yes"  #look for unpacked tiff library in ./
-then
-        LIBRAW=`stat --printf='%n' LibRaw-* 2>/dev/null`
-        if test $LIBRAW == ""  
-        then 
-                AC_MSG_ERROR([no LibRaw library found in ./]) 
-        fi
-        if test -d $LIBRAW
-        then
-                CPPFLAGS="$CPPFLAGS -I$LIBRAW"
-                LDFLAGS="$LDFLAGS -L$LIBRAW/lib/.libs"
-        else
-                AC_MSG_ERROR([thing found is not a libraw library in ./])
-        fi
-else
-        if test "$with_libraw" != ""
-        then
-                CPPFLAGS="$CPPFLAGS -I$with_libraw"
-                LDFLAGS="$LDFLAGS -L$with_libraw/lib/.libs"
-        fi
-fi
-
 
 
 # Checks for libraries.
@@ -122,23 +76,23 @@ fi
 AC_ARG_WITH([localprefix],
 	AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of lib and include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
 )
-if test "$with_localprefix" != ""
+if test "$with_localprefix" != "" 
 then
-	if test "$with_localprefix" != "yes"
+	if test "$with_localprefix" != "yes" ;
 	then
-		APP_CPPFLAGS="-I$with_localprefix/usr/local/include $APP_CPPFLAGS"
-		APP_LDFLAGS="-L$with_localprefix/usr/local/lib $APP_LDFLAGS"
+		CPPFLAGS="-I$with_localprefix/usr/local/include $CPPFLAGS"
+		LDFLAGS="-L$with_localprefix/usr/local/lib $LDFLAGS"
 	fi
 fi
 
-if test "$mingw_cv_win32_host" == "yes" ;
+
+if test "$mingw_cv_win32_host" == "yes" 
 then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
 fi
 
-MINGW_AC_WIN32_NATIVE_HOST
 
 #jpeg lib doesn't do cross-build, so it doesn't have a BUILDDIR option
 AC_ARG_WITH([jpeg],
@@ -147,7 +101,7 @@ AC_ARG_WITH([jpeg],
 		echo "libjpeg: using $with_jpeg"
 		if test -d $with_jpeg 
 		then
-			APP_LIBS="$with_jpeg/libjpeg.a $APP_LIBS" 
+			LIBS="$with_jpeg/libjpeg.a $LIBS" 
 			APP_CPPFLAGS=" -I$with_jpeg $APP_CPPFLAGS"
 		else
 			AC_MSG_ERROR([no jpeg directory found.]) 
@@ -170,9 +124,9 @@ AC_ARG_WITH([tiff],
 		then
 			if test -z "${BUILDDIR+x}" 
 			then 
-				APP_LIBS="$with_tiff/libtiff/.libs/libtiff.a $APP_LIBS"
+				LIBS="$with_tiff/libtiff/.libs/libtiff.a $LIBS"
 			else
-				APP_LIBS="$with_tiff/$BUILDDIR/libtiff/.libs/libtiff.a $APP_LIBS"
+				LIBS="$with_tiff/$BUILDDIR/libtiff/.libs/libtiff.a $LIBS"
 			fi
 			APP_CPPFLAGS="-I$with_tiff/libtiff $APP_CPPFLAGS"
 			
@@ -186,30 +140,6 @@ AC_ARG_WITH([tiff],
 	]
 )
 
-#libraw does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([libraw],
-	AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of the LibRaw library.]),
-	[
-	echo "libraw: using $with_libraw"
-		if test -d $with_libraw 
-		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				APP_LIBS="$with_libraw/lib/.libs/libraw.a $APP_LIBS"
-			else
-				APP_LIBS="$with_libraw/$BUILDDIR/lib/.libs/libraw.a $APP_LIBS"
-			fi
-			APP_CPPFLAGS="-I$with_libraw $APP_CPPFLAGS"
-		else
-			AC_MSG_ERROR([no libraw directory found.]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
-		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
-	]
-)
-
 #lcms2 does cross-compile, uses BUILDDIR if declared
 AC_ARG_WITH([lcms2],
 	AS_HELP_STRING([--with-lcms2], [=PATH, specifies path to non-standard location of Little CMS2 library.]),
@@ -219,9 +149,9 @@ AC_ARG_WITH([lcms2],
 		then
 			if test -z "${BUILDDIR+x}" 
 			then 
-				APP_LIBS="$with_lcms2/src/.libs/liblcms2.a $APP_LIBS"
+				LIBS="$with_lcms2/src/.libs/liblcms2.a $LIBS"
 			else
-				APP_LIBS="$with_lcms2/$BUILDDIR/src/.libs/liblcms2.a $APP_LIBS"
+				LIBS="$with_lcms2/$BUILDDIR/src/.libs/liblcms2.a $LIBS"
 			fi
 			APP_CPPFLAGS="-I$with_lcms2/include $APP_CPPFLAGS "
 		else
@@ -235,6 +165,32 @@ AC_ARG_WITH([lcms2],
 )
 
 
+#libraw does cross-compile, uses BUILDDIR if declared
+AC_ARG_WITH([libraw],
+	AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of the LibRaw library.]),
+	[
+	echo "libraw: using $with_libraw"
+		if test -d $with_libraw 
+		then
+			if test -z "${BUILDDIR+x}" 
+			then 
+				LIBS="$with_libraw/lib/.libs/libraw.a $LIBS"
+			else
+				LIBS="$with_libraw/$BUILDDIR/lib/.libs/libraw.a $LIBS"
+			fi
+			APP_CPPFLAGS="-I$with_libraw $APP_CPPFLAGS"
+		else
+			AC_MSG_ERROR([no libraw directory found.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
+		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
+	]
+)
+
+
+
 #gimage does cross-compile, uses BUILDDIR if declared
 AC_ARG_WITH([gimage],
 	AS_HELP_STRING([--with-gimage], [=PATH, specifies path to non-standard location of gimage library.]),
@@ -244,9 +200,9 @@ AC_ARG_WITH([gimage],
 		then
 			if test -z "${BUILDDIR+x}" 
 			then 
-				APP_LIBS="$with_gimage/liblgimage.a $APP_LIBS"
+				LIBS="$with_gimage/libgimage.a $LIBS "
 			else
-				APP_LIBS="$with_gimage/$BUILDDIR/libgimage.a $APP_LIBS"
+				LIBS="$with_gimage/$BUILDDIR/libgimage.a $LIBS "
 			fi
 			APP_CPPFLAGS="-I$with_gimage $APP_CPPFLAGS "
 		else
@@ -263,7 +219,7 @@ AC_ARG_WITH([gimage],
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
 AC_TYPE_SIZE_T
