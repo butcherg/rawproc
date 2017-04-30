@@ -1,7 +1,6 @@
 #ifndef __DRAWPANE_H__
 #define __DRAWPANE_H__
 
-#define NDEBUG
 
 #include "wx/wx.h"
 #include <vector>
