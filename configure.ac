@@ -93,16 +93,20 @@ then
 	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
 fi
 
-
-#jpeg lib doesn't do cross-build, so it doesn't have a BUILDDIR option
+#jpeg lib doesn't do cross-build, but it still has a BUILDDIR option; you have to copy stuff by hand
 AC_ARG_WITH([jpeg],
 	AS_HELP_STRING([--with-jpeg], [=PATH, specifies path to non-standard location of the jpeg library.]),
 	[
 		echo "libjpeg: using $with_jpeg"
 		if test -d $with_jpeg 
 		then
-			LIBS="$with_jpeg/libjpeg.a $LIBS" 
-			APP_CPPFLAGS=" -I$with_jpeg $APP_CPPFLAGS"
+			if test -z "${BUILDDIR+x}" 
+			then 
+				LIBS="$with_jpeg/libjpeg.a $LIBS"
+			else
+				LIBS="$with_jpeg/$BUILDDIR/libjpeg.a $LIBS"
+			fi 
+			APP_CPPFLAGS=" -I$with_jpeg -I$with_jpeg/$BUILDDIR $APP_CPPFLAGS"
 		else
 			AC_MSG_ERROR([no jpeg directory found.]) 
 		fi
@@ -112,8 +116,6 @@ AC_ARG_WITH([jpeg],
 		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
 	]
 )
- 
-
 
 #libtiff does cross-compile, uses BUILDDIR if declared
 AC_ARG_WITH([tiff],
