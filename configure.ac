@@ -91,7 +91,7 @@ then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
-	APP_LDFLAGS=$APP_LDFLAGS -static"
+	APP_LDFLAGS="$APP_LDFLAGS -static"
 fi
 
 #jpeg lib doesn't do cross-build, but it still has a BUILDDIR option; you have to copy stuff by hand
