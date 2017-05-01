@@ -1,8 +1,7 @@
-
-SYS=$(shell gcc -dumpmachine)
-
 CXX=@CXX@
 LD=@CXX@
+
+SYS=$(shell $(CC) -dumpmachine)
 
 ifneq (,$(findstring,mingw,$(SYS)))
         STATIC=-static
