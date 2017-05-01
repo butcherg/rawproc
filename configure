@@ -3927,7 +3927,7 @@ _ACEOF
 
 fi
 
-	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
+	APP_CXXFLAGS="$APP_CXXFLAGS -static -DLIBRAW_NODLL"
 fi
 
 #jpeg lib doesn't do cross-build, but it still has a BUILDDIR option; you have to copy stuff by hand
