@@ -1,15 +1,15 @@
 
 SYS=$(shell gcc -dumpmachine)
 
+CXX=@CXX@
+LD=@CXX@
+
 ifneq (,$(findstring,mingw,$(SYS)))
         STATIC=-static
         LIBRAWFLAGS=-DLIBRAW_NODLL
 endif
 
 OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
-
-CXX=@CXX@
-LD=@CXX@
 
 LIBS=@LIBS@
 LIBS+=@APP_LIBS@
