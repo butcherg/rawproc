@@ -148,6 +148,10 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
 
 	cmsSetLogErrorHandler(MyLogErrorHandler);
+	
+	//parm app.start.logmessage - message to print in the log when rawproc starts. 
+	wxString startmessage = wxConfigBase::Get()->Read("app.start.logmessage","");
+	if (startmessage != "") log(startmessage);
 }
 
 rawprocFrm::~rawprocFrm()
