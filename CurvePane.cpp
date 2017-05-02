@@ -31,6 +31,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(300,300) )
 	z=1;
 	mousemotion=false;
 	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
+	if (bk == "") bk = "255,255,255";
 	wxArrayString bkgnd = split(bk,",");
 	int r = atoi(bkgnd[0].c_str());
 	int g = atoi(bkgnd[1].c_str());

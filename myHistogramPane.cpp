@@ -12,8 +12,9 @@ BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
     EVT_LEFT_DCLICK(myHistogramPane::mouseDoubleClicked)
     EVT_RIGHT_DOWN(myHistogramPane::rightClick)
     EVT_LEAVE_WINDOW(myHistogramPane::mouseLeftWindow)
+	//EVT_CHAR(myHistogramPane::keyPressed)
     EVT_KEY_DOWN(myHistogramPane::keyPressed)
-    EVT_KEY_UP(myHistogramPane::keyReleased)
+    //EVT_KEY_UP(myHistogramPane::keyReleased)
     EVT_MOUSEWHEEL(myHistogramPane::mouseWheelMoved)
     EVT_SIZE(myHistogramPane::OnSize)
  
@@ -38,7 +39,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
-	
+		
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
 }
@@ -130,6 +131,8 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	hmax = 0;
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
+	
+	smalldata = dib.Histogram();
 	
 	std::vector<histogramdata> histogram = dib.Histogram(scale);
 	
@@ -283,7 +286,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			}
 			break;
 	}
-	event.Skip();
+	//event.Skip();
 	Update();
 	Refresh();
 }

@@ -620,27 +620,41 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
 
 			if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
-				//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 (This is the precursor to possibly more extensive search behavior in future versions)
-				if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
-					wxFileName findfile(ofilename);
-					if (findfile.Normalize()) {
-						findfile.RemoveLastDir();  //see if source file is in the parent directory
-						if (findfile.Exists()) {
-							SetStatusText(wxString::Format("Loading source file %s from parent directory...",ofilename) );
-							ofilename = findfile.GetFullPath();
+				//parm input.opensource.subdirectory: Enable search of specific directory for source file.  
+				wxString subdir = wxConfigBase::Get()->Read("input.opensource.subdirectory",""); 
+				if (subdir != "") {
+					wxFileName findfilesubdir(ofilename);
+					if (findfilesubdir.Normalize()) {
+						findfilesubdir.AppendDir(subdir);  //see if source file is in the parent directory
+						if (findfilesubdir.Exists()) {
+							SetStatusText(wxString::Format("Loading source file %s from %s directory...",ofilename,subdir) );
+							ofilename = findfilesubdir.GetFullPath();
 						}
-						else {
-							wxMessageBox(wxString::Format("Error: Source file %s not found either in current or parent directory", ofilename));
-							SetStatusText("");
-							return;
+					}
+					else {
+						//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 
+						if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
+							wxFileName findfileparentdir(ofilename);
+							if (findfileparentdir.Normalize()) {
+								findfileparentdir.RemoveLastDir();  //see if source file is in the parent directory
+								if (findfileparentdir.Exists()) {
+									SetStatusText(wxString::Format("Loading source file %s from parent directory...",ofilename) );
+									ofilename = findfileparentdir.GetFullPath();
+								}
+								else {
+									wxMessageBox(wxString::Format("Error: Source file %s not found in source, parent or sub directory", ofilename));
+									SetStatusText("");
+									return;
+								}
+							}
 						}
 					}
 				}
-				else {
-					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
-					SetStatusText("");
-					return;
-				}
+//				else {
+//					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
+//					SetStatusText("");
+//					return;
+//				}
 			}
 			
 			commandtree->DeleteAllItems();
