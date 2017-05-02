@@ -149,9 +149,6 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	cmsSetLogErrorHandler(MyLogErrorHandler);
 	
-	//parm app.start.logmessage - message to print in the log when rawproc starts. 
-	wxString startmessage = wxConfigBase::Get()->Read("app.start.logmessage","");
-	if (startmessage != "") log(startmessage);
 }
 
 rawprocFrm::~rawprocFrm()
@@ -260,6 +257,7 @@ void rawprocFrm::SetBackground()
 {
 	//parm app.backgroundcolor: r,g,b (0-255), set at startup.  Default=(255,255,255)
 	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
+	if (bk == "") bk = "255,255,255";
 	wxArrayString bkgnd = split(bk,",");
 	int r = atoi(bkgnd[0].c_str());
 	int g = atoi(bkgnd[1].c_str());
