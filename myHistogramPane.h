@@ -28,6 +28,7 @@ public:
 	void paintNow();
 	
 	void SetPic(gImage &dib, unsigned scale=256);
+	void BlankPic();
  
 	void render(wxDC& dc);
  
@@ -42,7 +43,7 @@ public:
 	void keyReleased(wxKeyEvent& event);
 
 private:
-	bool pressedDown;
+	bool blankpic, pressedDown;
 	std::vector<long> rdata, gdata, bdata, smalldata;
 	
 	wxPoint *r, *g, *b;

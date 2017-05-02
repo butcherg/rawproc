@@ -25,6 +25,7 @@ END_EVENT_TABLE()
 myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
 {
+	blankpic = true;
 	SetDoubleBuffered(true);
 	//t = new wxTimer(this);
 	unsigned hm = 0;
@@ -45,6 +46,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
 {
+	blankpic = false;
 	SetDoubleBuffered(true);
 	//t = new wxTimer(this);
 	unsigned hm = 0;
@@ -116,8 +118,15 @@ void myHistogramPane::paintNow()
 	render(dc);
 }
 
+void myHistogramPane::BlankPic()
+{
+	blankpic = true;
+	Refresh();
+}
+
 void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 {	
+	blankpic = false;
 	hmax = 0;
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
@@ -158,6 +167,7 @@ void myHistogramPane::render(wxDC&  dc)
 	GetSize(&w, &h);
 	//dc.SetBackground(*wxWHITE_BRUSH);
 	dc.Clear();
+	if (blankpic) return;
 	
 	//go to histogram coordinates:
 	dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
