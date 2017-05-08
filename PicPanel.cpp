@@ -267,24 +267,26 @@ END_EVENT_TABLE()
 			}
 		}
 		
-		if (toggleThumb != 3) {
-			dc.SetPen(wxPen(wxColour(0,0,0),1));
-			dc.DrawRectangle(0,0,thumb->GetWidth()+4, thumb->GetHeight()+4);			
-			dc.SetPen(wxPen(wxColour(255,255,255),1));
-			dc.DrawRectangle(1,1,thumb->GetWidth()+2, thumb->GetHeight()+2);
-		}
-		if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
-		
-		//wxSize hs = histogram->GetSize();
-		//histogram->SetBitmap(ThreadedHistogramFrom(img, hs.GetWidth(), hs.GetHeight()));
-		
-		//keep only to debug myHistogramPane...
-		if (toggleThumb == 2) {
-			if (!hsgram.IsOk()) {
-				hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
-				//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
+		if (thumb) {
+			if (toggleThumb != 3) {
+				dc.SetPen(wxPen(wxColour(0,0,0),1));
+				dc.DrawRectangle(0,0,thumb->GetWidth()+4, thumb->GetHeight()+4);			
+				dc.SetPen(wxPen(wxColour(255,255,255),1));
+				dc.DrawRectangle(1,1,thumb->GetWidth()+2, thumb->GetHeight()+2);
 			}
-			dc.DrawBitmap(hsgram,2,2,false);
+			if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
+		
+			//wxSize hs = histogram->GetSize();
+			//histogram->SetBitmap(ThreadedHistogramFrom(img, hs.GetWidth(), hs.GetHeight()));
+		
+			//keep only to debug myHistogramPane...
+			if (toggleThumb == 2) {
+				if (!hsgram.IsOk()) {
+					hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+					//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
+				}
+				dc.DrawBitmap(hsgram,2,2,false);	
+			}
 		}
 
 		//draw crop rectangle in thumbnail:
