@@ -190,6 +190,7 @@ END_EVENT_TABLE()
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
 		Refresh();
 		Update();
+
 		
 	}
 

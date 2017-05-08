@@ -157,8 +157,7 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 		}
 	}
 	
-	Update();
-	Refresh();
+	paintNow();
 
 }
 
