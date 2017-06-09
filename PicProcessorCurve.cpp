@@ -6,13 +6,21 @@
 #include "util.h"
 
 #include <wx/fileconf.h>
+#include <wx/choice.h>
 
 class CurvePanel: public PicProcPanel
 {
 	public:
 		CurvePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
+			wxArrayString str;
+			str.Add("rgb");
+			str.Add("red");
+			str.Add("green");
+			str.Add("blue");
+			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			b->Add(chan, flags);
 			curve = new CurvePane(this, params);
 			b->Add(curve, flags);
 			SetSizerAndFit(b);
@@ -20,6 +28,8 @@ class CurvePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
+			chan->SetSelection(chan->FindString("rgb"));
+			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
 		}
 
@@ -36,10 +46,19 @@ class CurvePanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
+		
+		void channelChanged(wxCommandEvent& event)
+		{
+			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
+			q->setParams(curve->getControlPoints());
+			q->processPic();
+			event.Skip();
+		}
 
 
 	private:
 		CurvePane *curve;
+		wxChoice *chan;
 
 };
 
