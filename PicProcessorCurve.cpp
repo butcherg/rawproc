@@ -41,16 +41,20 @@ class CurvePanel: public PicProcPanel
 
 		void paramChanged(wxScrollEvent& event)
 		{
+			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
-			q->setParams(curve->getControlPoints());
+			((PicProcessorCurve *) q)->setChannel(ch);
+			q->setParams(ch+","+curve->getControlPoints());
 			q->processPic();
 			event.Skip();
 		}
 		
 		void channelChanged(wxCommandEvent& event)
 		{
+			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
-			q->setParams(curve->getControlPoints());
+			((PicProcessorCurve *) q)->setChannel(ch);
+			q->setParams(ch+","+curve->getControlPoints());
 			q->processPic();
 			event.Skip();
 		}
@@ -65,8 +69,17 @@ class CurvePanel: public PicProcPanel
 PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	Curve crv;
+	int ctstart;
 	wxArrayString cpts = split(command,",");
-	for (int i=0; i<cpts.GetCount()-1; i+=2) {
+	if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) {
+		setChannel(cpts[0]);
+		ctstart = 1;
+	}
+	else {
+		setChannel("rgb");
+		ctstart = 0;
+	}
+	for (int i=ctstart; i<cpts.GetCount()-1; i+=2) {
 		crv.insertpoint(atof(cpts[i]), atof(cpts[i+1]));
 	}
 	ctrlpts = crv.getControlPoints();
@@ -86,6 +99,14 @@ void PicProcessorCurve::setControlPoints(std::vector<cp> ctpts)
 {
 	ctrlpts.clear();
 	ctrlpts = ctpts;
+}
+
+void PicProcessorCurve::setChannel(wxString chan)
+{
+	if (chan == "rgb")   channel = CHANNEL_RGB;
+	if (chan == "red")   channel = CHANNEL_RED;
+	if (chan == "green") channel = CHANNEL_GREEN;
+	if (chan == "blue")  channel = CHANNEL_BLUE;
 }
 
 void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
@@ -109,7 +130,7 @@ bool PicProcessorCurve::processPic() {
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts, threadcount);
+	dib->ApplyToneCurve(ctrlpts, channel, threadcount);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.curve.log","0") == "1"))
