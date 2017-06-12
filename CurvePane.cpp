@@ -27,6 +27,7 @@ END_EVENT_TABLE()
 CurvePane::CurvePane(wxWindow* parent, wxString controlpoints) :
 wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(272,270) )
 {
+	int ctstart;
 	p = parent;
 	z=1;
 	mousemotion=false;
@@ -39,7 +40,15 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(272,270) )
 	SetBackgroundColour(wxColour(r,g,b));
 	
 	wxArrayString ctrlpts = split(controlpoints,",");
-	for (int i=0; i<ctrlpts.GetCount()-1; i+=2) {
+
+	if ((ctrlpts[0] == "rgb") | (ctrlpts[0] == "red") | (ctrlpts[0] == "green") | (ctrlpts[0] == "blue")) {
+		ctstart = 1;
+	}
+	else {
+		ctstart = 0;
+	}
+
+	for (int i=ctstart; i<ctrlpts.GetCount()-1; i+=2) {
 		c.insertpoint(atof(ctrlpts[i]), atof(ctrlpts[i+1]));
 	}
 	selectedCP.x = -1.0;
@@ -48,6 +57,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(272,270) )
 	paintNow();
 
 }
+
 
 void CurvePane::paintEvent(wxPaintEvent & evt)
 {
