@@ -93,6 +93,7 @@ END_EVENT_TABLE()
 	{
 		toggleThumb++;
 		if (toggleThumb>3) toggleThumb = 1;
+		if (toggleThumb==2) toggleThumb = 3;
 		Refresh();
 		Update();
 	}
@@ -281,13 +282,13 @@ END_EVENT_TABLE()
 			//histogram->SetBitmap(ThreadedHistogramFrom(img, hs.GetWidth(), hs.GetHeight()));
 		
 			//keep only to debug myHistogramPane...
-			if (toggleThumb == 2) {
-				if (!hsgram.IsOk()) {
-					hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
-					//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
-				}
-				dc.DrawBitmap(hsgram,2,2,false);	
-			}
+			//if (toggleThumb == 2) {
+			//	if (!hsgram.IsOk()) {
+			//		hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
+			//		//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
+			//	}
+			//	dc.DrawBitmap(hsgram,2,2,false);	
+			//}
 		}
 
 		//draw crop rectangle in thumbnail:
