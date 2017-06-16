@@ -1366,7 +1366,8 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString libraries = wxString(gImage::LibraryVersions());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\ngImage %s%s", WxWidgetsVersion, gImageVersion, libraries.c_str()));
+	wxString pixtype = wxString(gImage::getRGBCharacteristics());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\ngImage %s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s", WxWidgetsVersion, gImageVersion, libraries.c_str(),pixtype, configfile));
 
 	wxAboutBox(info);
 
