@@ -37,17 +37,15 @@
 #include "PicProcessorRedEye.h"
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
-//#include "myFileSelector.h"
 #include "util.h"
 #include "lcms2.h"
-#include "libraw/libraw.h"
 #include <omp.h>
 #include <exception>
 
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.5.1";
+wxString version = "0.6Dev";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -1364,12 +1362,12 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetName(_("rawproc"));
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
-
+	
 	wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
-	wxString LittleCMSVersion = wxString::Format("%d",cmsGetEncodedCMMversion());
-	wxString LibRawVersion = wxString(LibRaw::version());
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\n%s\ngImage %s\nLittleCMS %s\nLibRaw %s\n\nConfiguration file: %s\nPixel Format: %s", WxWidgetsVersion, gImageVersion, LittleCMSVersion, LibRawVersion, configfile, gImage::getRGBCharacteristics().c_str()));
+	wxString libraries = wxString(gImage::LibraryVersions());
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\ngImage %s%s", WxWidgetsVersion, gImageVersion, libraries.c_str()));
+
 	wxAboutBox(info);
 
 }
