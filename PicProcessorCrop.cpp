@@ -106,11 +106,13 @@ class CropPanel: public PicProcPanel
 			if ((mousex > left*aspect-radius) & (mousex < left*aspect+radius)) {
 				if ((mousey > top*aspect-landingradius) & (mousey < top*aspect+landingradius)) {
 					node = 1;  //top left
+					cropmode = 1;
 				}
 			}
 			else if ((mousex > right*aspect-landingradius) & (mousex < right*aspect+landingradius)) {
 				if ((mousey > bottom*aspect-landingradius) & (mousey < bottom*aspect+landingradius)) {
 					node = 2; //bottom right
+					cropmode = 0;
 				}
 			}
 			else if ((mousex > left*aspect) * (mousex < right*aspect)) {
@@ -118,6 +120,8 @@ class CropPanel: public PicProcPanel
 					node = 3; //move
 				}
 			}
+			Refresh();
+			Update();
 			event.Skip();
 		}
 
@@ -134,25 +138,25 @@ class CropPanel: public PicProcPanel
 			if (cropmode == 0) {
 				isaspect = false;
 				switch (node) {
-					case 1:
+					case 1:  //top left
 						if (left - dx/aspect < right) left -= dx/aspect;
 						if (top - dy/aspect < bottom) top  -= dy/aspect;
 						if (left < 0) {
-							bottom - left;
+							bottom -= left;
 							left = 0;
 						}
 						if (top < 0) {
-							right - top;
+							right -= top;
 							top = 0;
 						}
 						break;
-					case 2:
+					case 2:  //bottom right
 						if (right - dx/aspect > left) right -= dx/aspect;
 						if (bottom - dy/aspect > top) bottom  -= dy/aspect;
 						if (right > iw) right = iw;
 						if (bottom > ih) bottom = ih;
 						break;
-					case 3:
+					case 3:  //move
 						if ((left - dx/aspect > 0) & (top - dy/aspect > 0) & (right - dx/aspect < iw) & (bottom - dy/aspect < ih)) {
 							left -= dx/aspect;
 							top  -= dy/aspect;
