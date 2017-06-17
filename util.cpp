@@ -33,7 +33,22 @@ wxArrayString split(wxString str, wxString delim)
 	return a;
 }
 
-
+wxString paramString(wxString filter)
+{
+	wxString paramstr, name, val;
+	long dummy;
+	
+	bool bCont = wxConfigBase::Get()->GetFirstEntry(name, dummy);
+	while ( bCont ) {
+		if (name.Find(filter) != wxNOT_FOUND) {
+			val = wxConfigBase::Get()->Read(name, "");
+			name.Replace(filter,"");
+			paramstr.Append(wxString::Format("%s=%s;",name, val));
+		}
+		bCont = wxConfigBase::Get()->GetNextEntry(name, dummy);
+	}
+	return paramstr;
+}
 
 void mark ()
 {

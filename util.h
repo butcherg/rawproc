@@ -16,6 +16,7 @@ void FillHistogram(unsigned *histogram);
 bool ImageContainsRawprocCommand(wxString fname);
 
 wxArrayString split(wxString str, wxString delim);
+wxString paramString(wxString filter);
 
 wxBitmap HistogramFrom(wxImage img, int width, int height);
 

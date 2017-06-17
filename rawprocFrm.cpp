@@ -463,9 +463,11 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		wxString configparams, inputprofile;
 		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
+		//parm input.raw.libraw.*: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.
 		//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=raw
 		if (fif == FILETYPE_RAW) {
-			configparams = wxConfigBase::Get()->Read("input.raw.parameters","");
+			configparams = paramString("input.raw.libraw.");
+			configparams.Append(wxConfigBase::Get()->Read("input.raw.parameters",""));
 			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
 		}
 		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
