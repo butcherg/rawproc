@@ -210,10 +210,10 @@ void myHistogramPane::render(wxDC&  dc)
 	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
 	
 	unsigned mly=0;
-	if (mlx > 0 & mlx < hscale) {
-		mly = wxCoord(frontcolor[mlx].y);
-		dc.DrawLine(0,mly,hscale,mly);
-	}
+	//if (mlx > 0 & mlx < hscale) {
+	//	mly = wxCoord(frontcolor[mlx].y);
+	//	dc.DrawLine(0,mly,hscale,mly);
+	//}
 
 	//return to window coords:
 	dc.SetLogicalScale(1.0, 1.0);
@@ -225,7 +225,8 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.DrawLine(MouseX,0,MouseX,h);
 	if (mlx < 0) mlx = 0;
 	if (mlx > hscale) mlx = hscale;
-	wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
+	//wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
+	wxString str = wxString::Format("x: %d    hscale=%d",mlx,hscale);
 	wxSize sz = dc.GetTextExtent(str);
 	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
 }
