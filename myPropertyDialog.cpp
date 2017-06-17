@@ -119,6 +119,7 @@ PropertyDialog::~PropertyDialog()
 
 void PropertyDialog::UpdateProperty(wxPropertyGridEvent& event)
 {
+	//Note: rawprocFrm::UpdateConfig() is changing the .conf file, so don't remove event.Skip()
 	Refresh();
 	event.Skip();
 }
