@@ -395,7 +395,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
 	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic, parameters);
-	else result = NULL;
+	else return NULL;
 	p->processPic();
 	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -711,8 +711,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			for (int i=2; i<token.GetCount(); i++) {
 				//SetStatusText(wxString::Format("Applying %s...",token[i]) );
 				wxArrayString cmd = split(token[i], ":");					
-				AddItem(cmd[0], cmd[1]);
-				wxSafeYield(this);
+				if (AddItem(cmd[0], cmd[1])) 
+					wxSafeYield(this);
+				else
+					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
 			}
 			SetStatusText("");
 			Refresh();
