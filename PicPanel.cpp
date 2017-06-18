@@ -506,7 +506,12 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 					if (imgY > 1) {
 						if (imgX < scaledpic->GetWidth()) {
 							if (imgY < scaledpic->GetHeight()) { 
-								parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", imgX, imgY,  p[0], p[1], p[2])); 
+								//parm display.rgb.scale - multiplier for rgb display in status line.  Default=1
+								int pscale = wxConfigBase::Get()->Read("display.rgb.scale",1);
+								if (pscale > 1)
+									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %0.0f,%0.0f,%0.0f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 
+								else
+									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 									
 							} else parentframe->SetStatusText("");
 						} else parentframe->SetStatusText("");
 					} else parentframe->SetStatusText("");
