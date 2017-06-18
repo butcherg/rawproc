@@ -31,6 +31,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(272,270) )
 	p = parent;
 	z=1;
 	mousemotion=false;
+	SetDoubleBuffered(true);
 	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
 	if (bk == "") bk = "255,255,255";
 	wxArrayString bkgnd = split(bk,",");
@@ -316,6 +317,7 @@ void CurvePane::render(wxDC&  dc)
 	std::vector<cp> controlpts = c.getControlPoints();
 	for (unsigned int i=0; i<controlpts.size(); i++) {
 		if ((controlpts[i].x == selectedCP.x) & (controlpts[i].y == selectedCP.y)) {
+			dc.DrawText(wxString::Format("%0.0f,%0.0f",controlpts[i].x,controlpts[i].y),m+5,m+5);
 			dc.SetPen(*wxRED_PEN);
 		}
 		dc.DrawCircle(m+controlpts[i].x,h-m-controlpts[i].y,radius);
