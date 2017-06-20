@@ -123,6 +123,7 @@ void myHistogramPane::BlankPic()
 {
 	blankpic = true;
 	Refresh();
+	Update();
 }
 
 void myHistogramPane::SetPic(gImage &dib, unsigned scale)

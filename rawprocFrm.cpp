@@ -493,6 +493,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		commandtree->DeleteAllItems();
 		pic->BlankPic();
+		histogram->BlankPic();
+		
 		mark();
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();

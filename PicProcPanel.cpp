@@ -14,7 +14,8 @@ PicProcPanel::PicProcPanel(wxPanel *parent, PicProcessor *proc, wxString params)
 
 PicProcPanel::~PicProcPanel()
 {
-	b->~wxBoxSizer();
+	if (b) b->~wxBoxSizer();
+	if (g) g->~wxGridBagSizer();
 }
 
 void PicProcPanel::OnSize(wxSizeEvent& event) 
