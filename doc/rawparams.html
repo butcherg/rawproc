@@ -3,12 +3,15 @@
 <p>Each of the LibRaw imgdata.params fields has a corresponding raw parameter, and there are selected parameters that have more intuitive abstractions.</p>
 <hr><pre>
 
- output_color=0|1|2|3|4|5 - Output color space, default=1
+ rawdata=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color 16-bit grayscale.  Default=0.
+
+
+ output_color=0|1|2|3|4|5 - Output color space, default=1 (srgb)
  colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb
 
 
  user_qual=0|1|2|3|4 - Demosaic algorithm, default=3 (ahd)
- demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. Default=ahd
+ demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. default=ahd
 
 
  output_bps=8|16 - bits per sample, default=16
