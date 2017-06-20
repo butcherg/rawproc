@@ -24,11 +24,13 @@ RawTherapee or GIMP.</p>
 https://github.com/butcherg/rawproc</a>.  rawproc will compile to a Windows executable with the MinGW C++ compiler, or to a Linux/GTK executable 
 with the GNU g++ compiler.  You'll need the wxWidgets library; I was able to install it 
 from the Ubuntu repositories for Linux, but you'll have to download it from the source website and 
-probably compile it yourself for Windows.  The Makefile should work unmodified for  Linux, if
-you have the directories set up right.</p>
+probably compile it yourself for Windows.  There are two build paths for rawproc: 1) ../configure && make in 
+a build directory, and 2) make OBJDIR=xxx, which will include a xxx/localmake.txt for local stuff.  Don't just
+run ./configure in the source tree; it'll overwrite the OBJDIR-based Makefile.  See the Readme.md file
+in the source tree for more build information.</p>
 
-<p>rawproc is by no means a tool you should use for serious image processing.  It does all of its
-manipulation on the entire RGB data, no per-channel or luminance-specific processing.  But any image opened
+<p>rawproc is by no means a tool you should use for serious image processing.  It does most of its
+manipulation on the entire RGB data, no luminance-specific processing.  But any image opened
 in rawproc is converted to floating point RGB and stays that way until saved in one of the supported image
 formats, preserving 
 the tone range as much as possible.  I'll have no qualms about using rawproc to create TIFFs for later
