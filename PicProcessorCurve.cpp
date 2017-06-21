@@ -20,6 +20,7 @@ class CurvePanel: public PicProcPanel
 			str.Add("green");
 			str.Add("blue");
 			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+
 			b->Add(chan, flags);
 			curve = new CurvePane(this, params);
 			b->Add(curve, flags);
@@ -28,7 +29,11 @@ class CurvePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			chan->SetSelection(chan->FindString("rgb"));
+			wxArrayString cpts = split(params,",");
+			if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) 
+				chan->SetStringSelection(cpts[0]);
+			else
+				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
 		}
