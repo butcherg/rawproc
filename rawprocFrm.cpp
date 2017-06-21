@@ -662,15 +662,21 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			commandtree->DeleteAllItems();
 			pic->BlankPic();
 
+			mark();
 			dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
+			wxString loadtime = duration();
 			if (dib->getWidth() == 0) {
 				wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
 				SetStatusText("");
 				return;
 			}
-
+			
 			filename.Assign(ofilename);
 			sourcefilename.Assign(fname);
+			
+			if (wxConfigBase::Get()->Read("input.log","0") == "1") 
+				log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
+
 
 			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 				cmsHPROFILE hImgProf;
