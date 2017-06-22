@@ -122,7 +122,7 @@ $(OBJDIR)/PicProcessor.o: PicProcessor.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c PicProcessor.cpp -o$@
 
 $(OBJDIR)/rawprocFrm.o: rawprocFrm.cpp
-	$(CXX) -DBUILDDATE=$(BUILDDATE) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c rawprocFrm.cpp   -o$@
+	$(CXX) $(BUILDDATE) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c rawprocFrm.cpp   -o$@
 
 $(OBJDIR)/rawprocApp.o: rawprocApp.cpp 
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c rawprocApp.cpp   -o$@
