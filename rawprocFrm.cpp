@@ -286,7 +286,11 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
-
+	if ( help.GetFrame() ) // returns NULL if no help frame active
+		help.GetFrame()->Close(true);
+	// now we can safely delete the config pointer
+	event.Skip();
+	delete wxConfig::Set(NULL);
 	mgr.UnInit();
 	Destroy();
 }
