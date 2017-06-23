@@ -48,12 +48,12 @@ image by using Open Source to open the saved image; instead of opening the saved
 with the saved parameters.  You can change around the tools and re-save to the same image, or to another one by changing the file name.  rawproc doesn't have 
 a Save As file option by design; you have to pick the save file name each time.</p>
 
-<p>rawproc's name belies its flexibility; it can be used to edit any JPEG, TIFF, or PNG image.  Raw or otherwise, once you open an image, it's just an array
+<p>rawproc's name belies its flexibility; it can be used to edit any JPEG or TIFF image.  Raw or otherwise, once you open an image, it's just an array
 of pixels...</p>
 
 <p>One of the main reasons I wrote rawproc was to make all the tools I used for image editing work well on both 8-bit and 16-bit images.  When you open any image file, 
 the tone values for each pixel are converted to floating point numbers, which means the values range from 0.0 (black) to 1.0 (white).  Depending on 
-the host, the internal floating point representation is either 32-bit float (Linux) or 16-bit half (Windows).  Even the half format provides 
+the host, the internal floating point representation is either 32-bit float or 16-bit half (Windows 32-bit executables).  Even the half format provides 
 plenty of room for tone manipulation to avoid posterization.</p>
 
 <p>Having a desktop shortcut to rawproc (selectable option in the Windows install package) is handy for quick opening of images; with your file explorer, you 

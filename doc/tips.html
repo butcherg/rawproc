@@ -17,9 +17,21 @@
 		is usually lost even with the best resize algorithms.  After a resize, add a sharpen tool and bump it to 1, note the
 		improvement.  In most cases values of 2 or greater have little marginal benefit at the expense of introducing
 		halos around the edges.</li><br>
+	<li>All the tools are multithreaded.  The default is to use all the available cores, e.g., tool.sharpen.cores=0, but 
+		the specific number can be specified for each tool in the Properties list.  Using a negative number uses
+		the max available minus that number, which can be useful for reserving a core for UI processing, e.g., 
+		tool.denoise.cores=-1.  This can be handy with certain operating systems to allow interactive work to continue
+		while an image tool is processed.</li><br>
+	<li>The Re-open menu selection was implemented specifically for use with the LibRaw parameters.  The raw file can
+		be opened with a set of parameters, and if something needs to be adjusted/added/omitted, the Properties parameter
+		can be modified and the image re-opened to apply it.</li><br>
+	<li>When you edit properties, use the filter to isolate the relevant ones.  For example, just type "curve" in the 
+		filter, and only the parameters with "curve" in the name will be displayed.  Makes it easier to find 
+		parameters.</li><br>
 	<li>You can apply tools in any order you wish, but some orders are less beneficial than others.  This is why other
 		programs such as DarkTable and RawTherapee hard-code the order, but I am more charitable to your whims while 
 		less interested in your complaints...  :D</li><br>
+
 </ul>
 
 </body></html>
