@@ -87,6 +87,11 @@
 				<param name="Name" value="Denoise">
 				<param name="Local" value="denoise.html">
 				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Exposure">
+				<param name="Local" value="exposure.html">
+				</OBJECT>
 
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Gamma">
@@ -101,6 +106,11 @@
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Highlight">
 				<param name="Local" value="highlight.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Redeye">
+				<param name="Local" value="redeye.html">
 				</OBJECT>
 
 			<LI> <OBJECT type="text/sitemap">

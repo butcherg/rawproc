@@ -1,0 +1,17 @@
+<html><body>
+
+<h3 id="Redeye">Redeye</h3>
+<p>Use to correct red-eye.  This implemention requires more manual intervention than most, but the 
+results are fairly pleasing.  For each pixel, the algorithm first checks to see if the red value is 
+at least 1.5 times the average of the green and blue values.  If so, it then replaces the red value
+with the average of the green and blue values.  This transform helps to preserve highlights in the eyes.
+There are color spaces for which this algorithm produces a green cast; if this is encountered, the
+desaturate option provides a suitable transformation alternative.</p>
+<p>Use of the tool first requires zooming to 100%; double-clicking the display will eventually toggle 
+to it.  Then, the eye centers are selected directly in the display with the mouse; the selections are
+marked with a cross.  There are threshold and radius sliders to control the process, as well as a 
+percent for the desaturate if selected.  Follow the instructions in the tool parameters box.</p>
+<p align=center><img src=redeye.jpg></p>
+
+
+</body></html>

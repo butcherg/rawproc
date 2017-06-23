@@ -6,8 +6,8 @@
 
 <ol>
 	<li>Display: The right-hand window, contains the image being manipulated.  There is also a thumbnail 
-	window in the top-left corner that will toggle through a thumb of the image, a histogram, or nothing.
-	You can toggle through the thumb modes with either the 't' key, or double-click on the thumb.  For the 
+	window in the top-left corner that will toggle visible or hidden.
+	You can toggle the thumb modes with either the 't' key, or double-click on the thumb.  For the 
 	display image, you
 	can zoom in or out of the image using the mousewheel, or toggle 100%/fit by double-clicking
 	the image.</li><br>
@@ -15,11 +15,16 @@
 	<li>Commands: The top-left-hand window, contains the list of tools applied to the image.  You
 	can select a tool to mess with by left-clicking it.  Right-clicking a tool 
 	brings up a pop-up menu from which you can either display EXIF and image data or delete the
-	tool; the histogram selection doesn't work yet. The checkbox beside each tool is to
+	tool. The checkbox beside each tool is to
 	select that tool result for display; this can be done separate from selecting the tool to
 	mess with its parameters.  This is extremely useful to compare the results of different tools,
 	as the display is switched from image to image without having to reprocess, at the expense of
 	memory.  It works well for 16MP images, but I'm not sure how it'll scale to larger ones.</li><br>
+	
+	<li>Histogram: Standard RGB histogram.  It can be zoomed in with the mouse thumbwheel, and panned
+	by dragging with the mouse. The default scale is 256 bins; this can be changed with the 
+	histogram.scale parameter in the Properties list, for instance, to set 65536 for sixteen-bit 
+	scaling.</li><br>
 
 	<li>Parameters: The bottom-left-hand window, contains the tools for changing the tool 
 	selected in the Commands pane.  These are mostly sliders that you can manipulate with either
@@ -34,7 +39,7 @@ rawproc window, or you can let them float like independent windows.  This is par
 rotate tools; you can make the Parameters window bigger to more easily work these tools.</p>
 
 <p>Running, rawproc looks like this:</p>
-<img width="100%"src=rawproc.png></img>
+<img width="100%"src=rawproc.jpg></img>
 
 <p>There is also a status bar that will display useful feedback as you work with images, as well as the
 display zoom ratio.</p>
