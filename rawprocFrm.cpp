@@ -99,7 +99,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
 	EVT_TREE_STATE_IMAGE_CLICK(ID_COMMANDTREE, rawprocFrm::CommandTreeStateClick)
-	EVT_TREE_SEL_CHANGING(ID_COMMANDTREE, rawprocFrm::CommandTreeSelChanging)
+	//EVT_TREE_SEL_CHANGING(ID_COMMANDTREE, rawprocFrm::CommandTreeSelChanging)
 	EVT_TREE_ITEM_MENU(ID_COMMANDTREE, rawprocFrm::CommandTreePopup)
 END_EVENT_TABLE()
 ////Event Table End
@@ -410,27 +410,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 }
 
 
-void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
-{
-	SetStatusText("");
-	if (!item.IsOk()) return;
-	wxTreeItemIdValue cookie;
-	wxTreeItemId root = commandtree->GetRootItem();
-	if (root.IsOk()) commandtree->SetItemState(root,0);
-	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
-	if (iter.IsOk()) {
-		commandtree->SetItemState(iter,0);
-		iter = commandtree->GetNextChild(root, cookie);
-		while (iter.IsOk()) {
-			commandtree->SetItemState(iter,0);
-			iter = commandtree->GetNextChild(root, cookie);
-		}
-	}
-	commandtree->SetItemState(item,1);
-	((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
-	Refresh();
-	Update();
-}
+
 
 wxString rawprocFrm::AssembleCommand()
 {
@@ -843,20 +823,56 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	}
 }
 
+void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
+{
+	SetStatusText("");
+	if (!item.IsOk()) return;
+	wxTreeItemIdValue cookie;
+	wxTreeItemId root = commandtree->GetRootItem();
+	if (root.IsOk()) commandtree->SetItemState(root,0);
+	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
+	if (iter.IsOk()) {
+		commandtree->SetItemState(iter,0);
+		iter = commandtree->GetNextChild(root, cookie);
+		while (iter.IsOk()) {
+			commandtree->SetItemState(iter,0);
+			iter = commandtree->GetNextChild(root, cookie);
+		}
+	}
+	commandtree->SetItemState(item,1);
+	((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
+
+}
+
+bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
+{
+	wxTreeItemId at = here;
+	while (at.IsOk()) {
+		if (at == down) return true;
+		at = commandtree->GetNextSibling(at);
+	}
+	return false;
+}
+
 
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
-	CommandTreeSetDisplay(event.GetItem());
-	Update();
-	Refresh();
+	wxTreeItemId item = event.GetItem();
+	CommandTreeSetDisplay(item);
+	
 	event.Skip();
+	Refresh();
+	Update();
+	
+	if (isDownstream(displayitem, item)) {
+		wxTreeItemId next = commandtree->GetNextSibling(displayitem);
+		if (next.IsOk()) ((PicProcessor *) commandtree->GetItemData(next))->processPic();
+	}
+		
+
+	displayitem = item;
 }
 
-
-void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
-{
-	olditem = event.GetOldItem();
-}
 
 void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 {
@@ -868,7 +884,6 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	}
 	Update();
 	Refresh();
-	event.Skip();
 }
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)

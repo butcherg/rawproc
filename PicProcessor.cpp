@@ -74,11 +74,8 @@ PicProcessor::~PicProcessor()
 	if (dib) delete dib;
 }
 
-bool PicProcessor::processPic() { 
-	//get pointer to previous sibling's processed pic
-	//apply the processing
-	//if selected, put processed pic in display
-	
+bool PicProcessor::processPic() 
+{ 	
 	if (GetId() != m_tree->GetRootItem()) {
 		if (dib) delete dib;
 		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
@@ -95,10 +92,10 @@ void PicProcessor::processNext()
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (m_tree->GetItemState(GetId()) == 1) {
 		displayProcessedPic();
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->setDirty();
-		}
+		//if (next.IsOk()) {
+		//	PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+		//	nextitem->setDirty();
+		//}
 	}
 	else { 
 		if (next.IsOk()) {

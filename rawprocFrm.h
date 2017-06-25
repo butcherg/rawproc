@@ -147,8 +147,8 @@ class rawprocFrm : public wxFrame
 		
 	public:
 	PicProcessor *  AddItem(wxString name, wxString command);
-	void CommandTreeSelChanging(wxTreeEvent& event);
-        void CommandTreeSelChanged(wxTreeEvent& event);
+	//void CommandTreeSelChanging(wxTreeEvent& event);
+	void CommandTreeSelChanged(wxTreeEvent& event);
 	void CommandTreeKeyDown(wxTreeEvent& event);
 	void CommandTreeDeleteItem(wxTreeEvent& event);
 	void CommandTreeBeginDrag(wxTreeEvent& event);
@@ -204,21 +204,23 @@ class rawprocFrm : public wxFrame
 		void OnClose(wxCloseEvent& event);
 		void CreateGUIControls();
 		
+		bool isDownstream(wxTreeItemId here, wxTreeItemId down);
+		
 		wxAuiManager mgr;
 		
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
 		wxPanel *preview;
 		myParameters *parameters;
+		myHistogramPane *histogram;
 
 		gImage *d;
 		wxImage *img;
 		
-		//wxGenericStaticBitmap *histogram;
-		myHistogramPane *histogram;
 
 		bool deleting;
-		wxTreeItemId olditem;
+		//wxTreeItemId olditem;
+		wxTreeItemId displayitem;
 		wxFileName filename, sourcefilename;
 		wxString configfile;
 
