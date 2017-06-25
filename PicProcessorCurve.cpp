@@ -46,7 +46,6 @@ class CurvePanel: public PicProcPanel
 
 		void paramChanged(wxScrollEvent& event)
 		{
-			wxMessageBox("paramChanged...");
 			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 			((PicProcessorCurve *) q)->setChannel(ch);
@@ -57,7 +56,6 @@ class CurvePanel: public PicProcPanel
 		
 		void channelChanged(wxCommandEvent& event)
 		{
-			wxMessageBox("channelChanged...");
 			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 			((PicProcessorCurve *) q)->setChannel(ch);
