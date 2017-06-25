@@ -476,8 +476,10 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		}
 
 		commandtree->DeleteAllItems();
+		commandtree->Update();
 		pic->BlankPic();
 		histogram->BlankPic();
+		parameters->DestroyChildren();
 		
 		mark();
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
@@ -642,10 +644,11 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			
 			commandtree->DeleteAllItems();
+			commandtree->Update();
 			pic->BlankPic();
-			
+			histogram->BlankPic();
+			parameters->DestroyChildren();
 			SetStatusText(wxString::Format("Loading file:%s params:%s",ofilename, oparams));
-
 
 			mark();
 			dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
@@ -692,17 +695,15 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetColorManagement(false);
 			}
 
-			SetStatusText("Applying embedded processing...");
 			pic->SetScaleToWidth();
 			pic->FitMode(true);
-			//SetStatusText("scale: fit",2);
+			SetStatusText("scale: fit",2);
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 			picdata->processPic();
 			CommandTreeSetDisplay(picdata->GetId());
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 			
 			for (int i=2; i<token.GetCount(); i++) {
-				//SetStatusText(wxString::Format("Applying %s...",token[i]) );
 				wxArrayString cmd = split(token[i], ":");					
 				if (AddItem(cmd[0], cmd[1])) 
 					wxSafeYield(this);
@@ -712,7 +713,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			Refresh();
 			Update();
-			SetStatusText("Done.");
 		}
 			
 	}
