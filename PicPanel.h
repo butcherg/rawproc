@@ -44,6 +44,7 @@ class PicPanel: public wxPanel
 		double GetScale();
 		void SetScale(double s);
 		void SetScaleToWidth();
+		void SetScaleToHeight();
 		void SetScaleToWidth(double percentofwidth);
 		coord GetImgCoords();
 		void SetDrawList(wxString list);

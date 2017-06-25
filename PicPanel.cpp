@@ -211,7 +211,12 @@ END_EVENT_TABLE()
 			return;
 		}
             
-		if (fitmode) SetScaleToWidth();
+		if (fitmode) {
+			if (img.GetWidth() > img.GetHeight())
+				SetScaleToWidth();
+			else
+				SetScaleToHeight();
+		}
 		GetSize(&w, &h);
 		dc.Clear();
 		 if (!img.IsOk()) return;
@@ -350,6 +355,16 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = (double) w/ (double) img.GetWidth();
+			Refresh();
+		}
+	}
+	
+	void PicPanel::SetScaleToHeight()
+	{
+		int w, h;
+		GetSize(&w, &h);
+		if (img.IsOk()) {
+			scale = (double) h/ (double) img.GetHeight();
 			Refresh();
 		}
 	}
