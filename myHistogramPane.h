@@ -38,6 +38,7 @@ public:
 	void mouseReleased(wxMouseEvent& event);
 	void mouseDoubleClicked(wxMouseEvent& event);
 	void rightClick(wxMouseEvent& event);
+	void mouseEnterWindow(wxMouseEvent& event);
 	void mouseLeftWindow(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent& event);
 	void keyReleased(wxKeyEvent& event);
@@ -48,6 +49,8 @@ private:
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
+	
+	bool inwindow;
 	
 	long hmax;
 	unsigned hscale;

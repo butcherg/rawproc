@@ -11,6 +11,7 @@ BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
     EVT_LEFT_UP(myHistogramPane::mouseReleased)
     EVT_LEFT_DCLICK(myHistogramPane::mouseDoubleClicked)
     EVT_RIGHT_DOWN(myHistogramPane::rightClick)
+	EVT_ENTER_WINDOW(myHistogramPane::mouseEnterWindow)
     EVT_LEAVE_WINDOW(myHistogramPane::mouseLeftWindow)
 	//EVT_CHAR(myHistogramPane::keyPressed)
     EVT_KEY_DOWN(myHistogramPane::keyPressed)
@@ -220,12 +221,16 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetAxisOrientation(true,false);
 
 	dc.SetTextBackground(wxColour(255,255,255));
-	if (!pressedDown & mlx > 0 & mlx < hscale) 
+	if (inwindow & !pressedDown & mlx > 0 & mlx < hscale) 
 		dc.DrawLine(MouseX,0,MouseX,h);
 	if (mlx < 0) mlx = 0;
 	if (mlx > hscale) mlx = hscale;
 	//wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
-	wxString str = wxString::Format("x: %d    hscale=%d",mlx,hscale);
+	wxString str = "";
+	if (inwindow)
+		str = wxString::Format("x: %d    hscale=%d",mlx,hscale);
+	else
+		str = wxString::Format("hscale=%d",hscale);
 	wxSize sz = dc.GetTextExtent(str);
 	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
 }
@@ -333,8 +338,20 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 }
 
 
+void myHistogramPane::mouseEnterWindow(wxMouseEvent& event) 
+{
+	inwindow = true;
+	Update();
+	Refresh();
+}
 
-void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) {}
+void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) 
+{
+	inwindow =  false;
+	Update();
+	Refresh();
+}
+
 void myHistogramPane::rightClick(wxMouseEvent& event) {}
 void myHistogramPane::keyReleased(wxKeyEvent& event) {}
  
