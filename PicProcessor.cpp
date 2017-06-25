@@ -64,7 +64,6 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
-	m_tree->ExpandAll();
 	dirty = true;
 }
 

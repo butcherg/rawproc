@@ -575,8 +575,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		Refresh();
 		Update();
-		
-		//wxSafeYield(this);
 	}
 	else {
 		SetStatusText(wxString::Format("%s file type unknown.",filename.GetFullName() ));
@@ -871,7 +869,6 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	Update();
 	Refresh();
 	event.Skip();
-	wxSafeYield(this);
 }
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
@@ -1021,7 +1018,6 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 		PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
 		g->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
 	}
 	catch (std::exception& e) {
@@ -1042,7 +1038,6 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
 		PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
 		g->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
 	}
 	catch (std::exception& e) {
@@ -1063,7 +1058,6 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
 		PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
 		c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1082,7 +1076,6 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
 		PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
 		c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1099,7 +1092,6 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.exposure.initialvalue","0.0");
 		PicProcessorExposure *c = new PicProcessorExposure("exposure",val, commandtree, pic, parameters);
 		c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1115,7 +1107,6 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	try {
 		PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
 		crv->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
 	}
 	catch (std::exception& e) {
@@ -1137,7 +1128,6 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
 		shd->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
 	}
 	catch (std::exception& e) {
@@ -1157,7 +1147,6 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
 		s->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
 	}
 	catch (std::exception& e) {
@@ -1179,7 +1168,6 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
 		PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
 		gr->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
 	}
 	catch (std::exception& e) {
@@ -1194,7 +1182,6 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	try {
 		PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
 		c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1217,7 +1204,6 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 		PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
 		c->processPic();
 		pic->SetScale(1.0);
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1237,7 +1223,6 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 		else
 			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
 		c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1254,7 +1239,6 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
 		PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
 		if (defval != "0") c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1271,7 +1255,6 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
 		PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
 		if (defval != "0.0") c->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
 	}
 	catch (std::exception& e) {
@@ -1293,7 +1276,6 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
 		PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
 		if (sigma != "0") d->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
 	}
 	catch (std::exception& e) {
@@ -1318,7 +1300,6 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *d = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
 		//d->processPic();
-		wxSafeYield(this);
 		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
 	}
 	catch (std::exception& e) {

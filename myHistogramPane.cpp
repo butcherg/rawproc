@@ -133,8 +133,6 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
 	
-	smalldata = dib.Histogram();
-	
 	std::vector<histogramdata> histogram = dib.Histogram(scale);
 	
 	if (r) delete r;

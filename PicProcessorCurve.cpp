@@ -96,8 +96,6 @@ void PicProcessorCurve::showParams()
 	if (!m_parameters) return;
 	m_parameters->DestroyChildren();
 	r = new CurvePanel(m_parameters, this, c);
-	m_parameters->Refresh();
-	m_parameters->Update();
 }
 
 void PicProcessorCurve::setControlPoints(std::vector<cp> ctpts)
