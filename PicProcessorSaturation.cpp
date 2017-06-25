@@ -116,18 +116,12 @@ bool PicProcessorSaturation::processPic() {
 			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
+	
 	dirty = false;
 
-		//put in every processPic()...
-		if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-		wxTreeItemId next = m_tree->GetNextSibling(GetId());
-		if (next.IsOk()) {
-			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-			nextitem->processPic();
-		}
-
-
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	processNext();
+	
 	return result;
 }
 

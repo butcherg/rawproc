@@ -149,15 +149,9 @@ bool PicProcessorShadow::processPic() {
 		log(wxString::Format("tool=shadow,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-
-	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) m_display->SetPic(dib);
-	wxTreeItemId next = m_tree->GetNextSibling(GetId());
-	if (next.IsOk()) {
-		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-		nextitem->processPic();
-	}
+	processNext();
 
 	return result;
 }

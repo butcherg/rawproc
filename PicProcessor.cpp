@@ -84,15 +84,43 @@ bool PicProcessor::processPic() {
 		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	}
 	dirty = false;
+	
+	processNext();
 
-	//put in every processPic()...
-	if (m_tree->GetItemState(GetId()) == 1) displayProcessedPic();
+	return true;
+}
+
+void PicProcessor::processNext()
+{
+	wxTreeItemId next = m_tree->GetNextSibling(GetId());
+	if (m_tree->GetItemState(GetId()) == 1) {
+		displayProcessedPic();
+		if (next.IsOk()) {
+			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+			nextitem->setDirty();
+		}
+	}
+	else { 
+		if (next.IsOk()) {
+			PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
+			nextitem->processPic();
+		}
+	}
+}
+
+void PicProcessor::setDirty()
+{
+	dirty = true;
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (next.IsOk()) {
 		PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-		nextitem->processPic();
+		nextitem->setDirty();
 	}
-	return true;
+}
+
+bool PicProcessor::isDirty()
+{
+	return dirty;
 }
 
 wxString PicProcessor::getCommand()
