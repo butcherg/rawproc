@@ -43,6 +43,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 		
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
+	inwindow = false;
 }
 
 myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
@@ -88,6 +89,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	MouseX = 0; MouseY=0;
 	SetInitialSize(wxSize(500,400));
 	pressedDown = false;
+	inwindow = false;
 
 	Update();
 	Refresh();
