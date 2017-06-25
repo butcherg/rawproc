@@ -151,12 +151,14 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 
 void CurvePane::mouseReleased(wxMouseEvent& event)
 {
-	mousemotion=false;
-	paintNow();
-	if (mousemoved) {
-		wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-		e->SetString("This is the data");
-		wxQueueEvent(p,e);
+	if (mousemotion) {
+		mousemotion=false;
+		paintNow();
+		if (mousemoved) {
+			wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
+			e->SetString("This is the data");
+			wxQueueEvent(p,e);
+		}
 	}
 }
 
