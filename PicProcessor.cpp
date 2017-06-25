@@ -92,10 +92,6 @@ void PicProcessor::processNext()
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (m_tree->GetItemState(GetId()) == 1) {
 		displayProcessedPic();
-		//if (next.IsOk()) {
-		//	PicProcessor * nextitem = (PicProcessor *) m_tree->GetItemData(next);
-		//	nextitem->setDirty();
-		//}
 	}
 	else { 
 		if (next.IsOk()) {
@@ -105,6 +101,7 @@ void PicProcessor::processNext()
 	}
 }
 
+/*
 void PicProcessor::setDirty()
 {
 	dirty = true;
@@ -119,6 +116,7 @@ bool PicProcessor::isDirty()
 {
 	return dirty;
 }
+*/
 
 wxString PicProcessor::getCommand()
 {

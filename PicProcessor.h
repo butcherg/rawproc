@@ -41,8 +41,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		gImage* getProcessedPicPointer();
 		PicPanel *getDisplay();
 		wxTreeCtrl *getCommandTree();
-		void setDirty();
-		bool isDirty();
+		//void setDirty();
+		//bool isDirty();
 		virtual void displayProcessedPic();
 		virtual void setParams(wxString params);
 		virtual void displayDraw(wxDC &dc);
