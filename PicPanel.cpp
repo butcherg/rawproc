@@ -201,6 +201,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::render(wxDC &dc)
 	{
+		if (blank) return;
 		int w, h;
 		int tw, th;
 		int iw, ih;
@@ -424,6 +425,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::OnPaint(wxPaintEvent & event)
 	{
+		if (blank) return;
 		if (img.IsOk() && thumb != NULL) {
 			wxPaintDC dc(this);
 			render(dc);
@@ -442,6 +444,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::OnLeftDown(wxMouseEvent& event)
 	{
+		if (blank) return;
 		SetFocus();
 		int radius = 20;
 		MouseX = event.m_x;
@@ -457,15 +460,17 @@ END_EVENT_TABLE()
 		event.Skip();
 	}
         
-        void PicPanel::OnRightDown(wxMouseEvent& event)
-        {
-            picX = 0; picY = 0;
-            PaintNow();
-			event.Skip();
-        }
+	void PicPanel::OnRightDown(wxMouseEvent& event)
+	{
+		if (blank) return;
+		picX = 0; picY = 0;
+		PaintNow();
+		event.Skip();
+	}
 
-        void PicPanel::OnLeftUp(wxMouseEvent& event)
-        {
+	void PicPanel::OnLeftUp(wxMouseEvent& event)
+	{
+		if (blank) return;
 		if (moving | thumbmoving) {
 			moving=false;
 			thumbmoving=false;
@@ -475,6 +480,7 @@ END_EVENT_TABLE()
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
+	if (blank) return;
 	bool anchorx;
     int x, y, posx, posy;
     int iw, ih;
@@ -539,6 +545,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
         
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
 {
+	if (blank) return;
 	double increment = 0.05;
 	
 	int iw = img.GetWidth();
@@ -572,6 +579,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
+	if (blank) return;
 	MouseX = event.m_x;
 	MouseY = event.m_y;
 	
@@ -602,6 +610,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	if (blank) return;
 	//parentframe->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
 		case 116: //t
