@@ -1,0 +1,37 @@
+<html><body>
+
+<h2 id="img">img Command Line Image Processor</h2>
+
+<p>img is a command line image processor, in the way of ImageMagick and G'MIC.  It simply
+provides a command line interface to the gimage library, exposing the tools with commands 
+that look like this:</p>
+
+<pre>img DSG_0001.NEF gamma:2.2 blackwhitepoint resize:640,0 sharpen:1 DSG_0001.jpg</pre>
+
+<p>which opens the NEF, applies gamma, auto-adjusted black/white point, resize preserving
+aspect ratio, just a bit of sharpen, and saves to a JPEG.  If you compiled rawproc, you 
+probably compiled gimage first; img is the same program as gimg from gimage.  In the 
+Windows installers, you are queried regarding adding the path to img to the PATH variable;
+if you intend to use img, that's a good idea.</p>
+
+<p>The available commands in img can be seen by running img with no arguments.  img has a
+couple of batch tricks worth mentioning here:</p>
+
+<ul>
+
+<li>Wild card processing: The "*" character can be used in input and output file names to apply
+the same processing to a batch of files:
+<pre>img "*.NEF" gamma:2.2 blackwhitepoint "processed/*.jpg"</pre><br>
+This command will process each of the .NEFs in the current directory and save a correspondingly-named 
+JPEG in the processed/ directory.  Note the quotes, this keeps the shell from expanding the filenames itself.</li><br>
+<li>Incremental processing: img will skip an input file if the corresponding output file already 
+exists.  This is handy for processing a set of images, and later coming back with the same SD card
+and processing the new images shot since the first run.  There's no command line switch, img just 
+does that all the time.  So, if you want to reprocess an image, you have to delete or move the 
+previously generated output image.</li><br>
+
+</ul>
+
+
+
+</body></html>
