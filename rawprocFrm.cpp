@@ -554,9 +554,12 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				}
 			}
 		}
+		
+		opensource = false;
 
 		Refresh();
 		Update();
+		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
 	}
 	else {
 		SetStatusText(wxString::Format("%s file type unknown.",filename.GetFullName() ));
@@ -710,9 +713,12 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				else
 					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
 			}
+			
+			opensource = true;
 
 			Refresh();
 			Update();
+			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
 		}
 			
 	}
@@ -985,10 +991,15 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 {
-	if (filename.IsOk() && filename.FileExists()) 
-		OpenFile(filename.GetFullPath());
-	else
+	if (filename.IsOk() && filename.FileExists()) {
+		if (opensource)
+			OpenFileSource(sourcefilename.GetFullPath());
+		else
+			OpenFile(filename.GetFullPath());
+	}
+	else {
 		wxMessageBox("No file to re-open.");
+	}
 }
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
@@ -998,6 +1009,7 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
 		OpenFileSource(fname);
+		opensource = true;
 	}
 
 }

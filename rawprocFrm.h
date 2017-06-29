@@ -219,6 +219,7 @@ class rawprocFrm : public wxFrame
 		
 
 		bool deleting;
+		bool opensource;
 		//wxTreeItemId olditem;
 		wxTreeItemId displayitem;
 		wxFileName filename, sourcefilename;
