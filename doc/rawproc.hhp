@@ -7,6 +7,7 @@ Default topic=main.html
 
 [FILES]
 main.htm
+img.html
 introduction.html
 installation.html
 running.html
@@ -19,9 +20,11 @@ contrast.html
 crop.html
 curve.html
 denoise.html
+exposure.html
 gamma.html
 gray.html
 highlight.html
+redeye.html
 resize.html
 rotate.html
 saturate.html

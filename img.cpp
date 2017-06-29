@@ -156,6 +156,8 @@ int main (int argc, char **argv)
 		printf("\tsharpen:[0 - 10, default=0]\n");
 		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
 		printf("\ttint:r,g,b - add/subtract value from each channel\n\n");
+		printf("\twhitebalance:rmult,gmult,bmult\n");
+		
 		exit(1);
 	}
 

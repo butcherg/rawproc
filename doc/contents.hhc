@@ -160,11 +160,18 @@
 				</OBJECT>
 
 		</UL>
+		
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="img Command Line Program">
+			<param name="ID" value=38>
+			<param name="Local" value="img.html">
+			</OBJECT>
 
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Tips">
-			<param name="ID" value=38>
+			<param name="ID" value=39>
 			<param name="Local" value="tips.html">
 			</OBJECT>
 
