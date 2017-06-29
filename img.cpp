@@ -13,9 +13,9 @@
 #include <iostream>
 #include <dirent.h>
 
-#include "gimage/gimage.h"
+#include <gimage/gimage.h>
 #include "elapsedtime.h"
-#include "gimage/strutil.h"
+#include <gimage/strutil.h>
 
 //matchspec: takes a file name and returns the variant part, specified by the file specification
 std::string matchspec(std::string fname, std::string fspec)
@@ -94,7 +94,7 @@ std::vector<std::string> fileglob(std::string dspec)
 }
 
 
-int file_exists (char *filename)
+int file_exists (const char *filename)
 {
 	struct stat   buffer;   
 	return (stat (filename, &buffer) == 0);
@@ -129,6 +129,8 @@ int main (int argc, char **argv)
 	//the corresponding input and output file names 
 	std::vector<fnames> files;
 	
+	std::string commandstring;
+	
 	int c;
 	int flags;
 	//gImage dib;
@@ -144,13 +146,16 @@ int main (int argc, char **argv)
 		printf("\tbright:[-100 - 100, default=0]\n");
 		printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
 		printf("\tcontrast:[-100 - 100, default=0]\n");
+		printf("\tcrop:x,y,w,h\n");
+		printf("\tdenoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3\n");
 		printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
+		printf("\tgray:r,g,b - values are the fractional (0.x) proportions with which to calculate the neutral value.\n");
 		printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
 		printf("\t\tlanczos3 (default)]\n");
 		printf("\trotate:[0 - 45, default=0]\n");
 		printf("\tsharpen:[0 - 10, default=0]\n");
 		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
-		printf("\tgray (no parameters ,uses the saturate algorithm to desaturate, 0.0)\n\n");
+		printf("\ttint:r,g,b - add/subtract value from each channel\n\n");
 		exit(1);
 	}
 
@@ -207,16 +212,23 @@ int main (int argc, char **argv)
 std::vector<std::string> commands;
 for (int i = 2; i<argc-1; i++) {
 	commands.push_back(std::string(argv[i]));
+	//commandstring.append(" "+std::string(argv[i]));
 }
 
-printf("start...\n");
+int count = 0;
 
 for (int f=0; f<files.size(); f++)
 {
+	count++;
 	char iname[256];
 	strncpy(iname, files[f].infile.c_str(), 255);
+	
+	if (file_exists(files[f].outfile.c_str())) {
+		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
+		continue;
+	}
 
-	printf("Loading file %s %s... ",iname, infile[1].c_str());
+	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
@@ -256,9 +268,17 @@ for (int f=0; f<files.size(); f++)
 				std::vector<long> hdata = dib.Histogram();
 				long hmax=0;
 				for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
+				
+				//find the lower threshold, the black point
 				for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
 				blk = (double) i;
-				for (i=255; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+				
+				//find the local max in 250-255:
+				int m = 0, l=255;
+				for (i=255; i>=250; i--) if (hdata[i]>m) {m = hdata[i]; l = i;}
+
+				//start looking for the white point threshold right after the location of the local max:
+				for (i=l-1; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
 				wht = (double) i;
 			}
 			else {
@@ -277,6 +297,8 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			//dib.ApplyToneLine(blk, wht, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, blk, wht);
 		}
 
 		else if (strcmp(cmd,"contrast") == 0) {  //#contrast:[-100 - 100, default=0]
@@ -324,17 +346,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 		}
 
-		else if (strcmp(cmd,"sharpen") == 0) {  //#sharpen:[0 - 10, default=0]      //add in else when other commands are uncommented
-			double sharp=0.0;
-			char *s = strtok(NULL," ");
-			if (s) sharp = atof(s);
-			int threadcount=gImage::ThreadCount();
-			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount);
 
-			_mark();
-			dib.ApplySharpen(sharp, threadcount);
-			printf("done (%fsec).\n",_duration());
-		}
 
 		else if (strcmp(cmd,"resize") == 0) {  //#resize:x,y      
 			unsigned w, h;
@@ -364,6 +376,18 @@ for (int f=0; f<files.size(); f++)
 
 			_mark();
 			dib.ApplyRotate(angle, false, threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
+		
+		else if (strcmp(cmd,"sharpen") == 0) {  //#sharpen:[0 - 10, default=0]      //add in else when other commands are uncommented
+			double sharp=0.0;
+			char *s = strtok(NULL," ");
+			if (s) sharp = atof(s);
+			int threadcount=gImage::ThreadCount();
+			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount);
+
+			_mark();
+			dib.ApplySharpen(sharp, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 
@@ -400,7 +424,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 		}
 
-		else if (strcmp(cmd,"denoise") == 0) {  //#saturation:[0 - 5.0, default=1.0, no change]
+		else if (strcmp(cmd,"denoise") == 0) {  //#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
 			double sigma=0.0;
 			char *s = strtok(NULL," ");
 			if (s) sigma = atof(s);
@@ -429,6 +453,23 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyTint(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
+		
+		else if (strcmp(cmd,"whitebalance") == 0) {  //#whitebalance:rmult,gmult,bmult
+			double redmult=1.0; double greenmult = 1.0; double bluemult = 1.0;
+			char *rm = strtok(NULL,", ");
+			char *gm = strtok(NULL,", ");
+			char *bm = strtok(NULL," ");
+			if (rm) redmult = atof(rm);
+			if (gm) greenmult = atof(gm);
+			if (bm) bluemult = atof(bm);
+
+			int threadcount=gImage::ThreadCount();
+			printf("whitebalance: %0.2f,%0.2f,%0.2f (%d threads)... ",redmult,greenmult,bluemult,threadcount);
+
+			_mark();
+			dib.ApplyWhiteBalance(redmult,greenmult,bluemult, threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
 
 		else if (strcmp(cmd,"gray") == 0) {  //#gray:[r],[g],[b] 
 			double red=0.21; double green=0.72; double blue = 0.07;
@@ -445,7 +486,57 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyGray(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
-
+		}
+		
+		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
+			int limit = 25; double threshold = 1.5;
+			char *sx = strtok(NULL,", ");
+			char *sy = strtok(NULL,", ");
+			char *st = strtok(NULL,", ");
+			char *sl = strtok(NULL,", ");
+			if (sx) {
+				int x = atoi(sx);
+				if (sy) {
+					if (st) threshold = atof(st);
+					if (sl) limit = atoi(sl);
+					int y = atoi(sy);
+					std::vector<coord> pts;
+					struct coord pt; pt.x = x; pt.y = y;
+					pts.push_back(pt);
+					int threadcount = gImage::ThreadCount();
+					printf("redeye (%d threads)... ", threadcount);
+					_mark();
+					dib.ApplyRedeye(pts, threshold, limit, false, 1.0,  threadcount);
+					printf("done (%fsec).\n",_duration());
+				}
+				else printf("redeye: bad y coord\n");
+			}
+			else printf("redeye: bad x coord\n");
+		
+		}
+		
+		else if (strcmp(cmd,"rotate90") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("rotate90 (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyRotate90(threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
+		
+		else if (strcmp(cmd,"rotate180") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("rotate180 (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyRotate180(threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
+		
+		else if (strcmp(cmd,"rotate270") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("rotate270 (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyRotate270(threadcount);
+			printf("done (%fsec).\n",_duration());
 		}
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
