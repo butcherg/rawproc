@@ -41,6 +41,16 @@ both run more quickly on fewer pixels</li><br>
 <li>If you're going to rotate the image to straighten it out and crop for composition, do the rotate first, then when you crop you'll also be taking care of 
 the black irregular borders around the rotated image.</li><br>
 
+<li>I have plans to incorporate a white balance tool, but the per-channel curve tool lets you do this
+manually.  You can get a decent approximation by zooming the display to 100%, looking for what should be
+a white patch, and finding a representative pixel in that patch.  Most straightforward thing to do is to identify 
+the largest channel value, then add a curve for each of the other two channels to bring the value up to the max.
+For instance, if the pixel has a RGB of 185,193,232, then add a red channel curve with the upper control point
+moved to 175,255 (255-(232-185)=175), and a green channel curve with the upper control point moved to 198,255 (255-(232-193)=198).  
+That should get you in the ballpark.  Or... since R and G are close, you just could do the inverse - you could pull the B down to them.
+Try a B channel with 255,Y, where you just slide the point up and down until it looks right.  The objective
+is to find  set of curves that pull the RGB values for a known white thing to near each other.</li><br>
+
 </ul>
 
 <p>When you save an image, rawproc saves the list of applied tools and their parameters in the image metadata.  You can re-apply these tools to the original 
@@ -59,8 +69,11 @@ plenty of room for tone manipulation to avoid posterization.</p>
 <p>Having a desktop shortcut to rawproc (selectable option in the Windows install package) is handy for quick opening of images; with your file explorer, you 
 can review images and open the one you want to edit by dragging it to the rawproc desktop icon.</p>
 
-<p>The configuration file contains a boatload of settings for you to tweak to your convenience.  You need to save the file, then restart rawproc for them to take
-effect.  You can find the path of the configuration file on the Help->About dialog.</p>
+<p>The configuration file contains a boatload of settings for you to tweak to your convenience.  rawproc will first look for a configuration file in its
+current working directory; if one is not found there, it looks in the operating system default user
+data directory.  For Windows installations, the configuration file is installed and accessed in
+the AppData directory.  You can find the path of the configuration file used by the running rawproc
+ on the Help->About dialog.</p>
 
 
 </body></html>
