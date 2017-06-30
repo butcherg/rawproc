@@ -109,8 +109,8 @@ END_EVENT_TABLE()
 	{
 		cmsHPROFILE hDisplayProfile;
 		
-		//parm display.status=0|1 - Write display... in status when setting the display image.  Default=0
-		if (wxConfigBase::Get()->Read("display.status","0") ==  "1")
+		//parm display.status=0|1 - Write display... in status when setting the display image.  Default=1
+		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
 			parentframe->SetStatusText("display...");
 		//mark();
 		
@@ -173,8 +173,8 @@ END_EVENT_TABLE()
 		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
 		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
-		//parm display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=render
-		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","render");
+		//parm display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
+		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
 		if (cmstransform == "set") {
 			if (hImgProfile) 
 				if (hTransform) 
