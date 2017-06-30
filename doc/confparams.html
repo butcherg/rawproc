@@ -4,7 +4,9 @@
 <li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
 <li><b>display.cms.gamma</b>: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4</li><br>
 <li><b>display.cms.renderingintent</b>: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
+<li><b>display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set</li><br>
 <li><b>display.rgb.scale - multiplier for rgb display in status line.  Default=1</li><br>
+<li><b>display.status=0|1 - Write display... in status when setting the display image.  Default=1</li><br>
 <li><b>exif.command</b>: Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li><br>
 <li><b>exif.parameters</b>: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li><br>
 <li><b>histogram.scale</b>: The number of buckets to display in the histogram. Default=256</li><br>
