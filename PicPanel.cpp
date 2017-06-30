@@ -108,8 +108,12 @@ END_EVENT_TABLE()
 	void PicPanel::SetPic(gImage * dib)
 	{
 		cmsHPROFILE hDisplayProfile;
-		//parentframe->SetStatusText("display...");
+		
+		//parm display.status=0|1 - Write display... in status when setting the display image.  Default=0
+		if (wxConfigBase::Get()->Read("display.status","0") ==  "1")
+			parentframe->SetStatusText("display...");
 		//mark();
+		
 		d = dib;
 		int w, h;
 		GetSize(&w, &h);
@@ -182,9 +186,11 @@ END_EVENT_TABLE()
 		thumbH = 100;
 		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 		
+		if (cmstransform == "render") {
 		if (hImgProfile) 
 			if (hTransform) 
 				cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
+		}
 
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
@@ -195,7 +201,7 @@ END_EVENT_TABLE()
 		hsgram = wxBitmap();
 		blank =  false;
 
-		//parentframe->SetStatusText("");
+		parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
 		Refresh();
 		Update();
