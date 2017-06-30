@@ -369,7 +369,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	wxArrayString output;
 	wxArrayString errors;
 	SetStatusText(wxString::Format("Loading metadata using \"%s\"...",command));
-	wxExecute (command, output, errors);
+	wxExecute (command, output, errors, wxEXEC_NODISABLE);
 	wxString exif;
 	for (int i=0; i<output.GetCount(); i++) exif.Append(output[i]);
 	SetStatusText("");
