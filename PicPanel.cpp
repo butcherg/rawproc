@@ -169,10 +169,14 @@ END_EVENT_TABLE()
 		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
 		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
-		//if (hImgProfile) 
-		//	if (hTransform) 
-		//		cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
-              
+		//parm display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=render
+		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","render");
+		if (cmstransform == "set") {
+			if (hImgProfile) 
+				if (hTransform) 
+					cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+		}
+		
 		//generate and store a thumbnail bitmap:
 		thumbW = 100*aspectW;
 		thumbH = 100;
@@ -254,9 +258,12 @@ END_EVENT_TABLE()
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
-		if (hImgProfile) 
-			if (hTransform)
-				cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","render");
+		if (cmstransform == "render") {
+			if (hImgProfile) 
+				if (hTransform)
+					cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+		}
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
