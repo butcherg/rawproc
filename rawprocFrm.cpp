@@ -275,6 +275,11 @@ void rawprocFrm::SetBackground()
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
+	commandtree->DeleteAllItems();
+	commandtree->Update();
+	pic->BlankPic();
+	histogram->BlankPic();
+	parameters->DestroyChildren();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
@@ -286,6 +291,11 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
+	commandtree->DeleteAllItems();
+	commandtree->Update();
+	pic->BlankPic();
+	histogram->BlankPic();
+	parameters->DestroyChildren();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
