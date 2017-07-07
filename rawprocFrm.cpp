@@ -462,7 +462,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		if (fif == FILETYPE_RAW) {
 			configparams = paramString("input.raw.libraw.");
 			configparams.Append(wxConfigBase::Get()->Read("input.raw.parameters",""));
-			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
+			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
 		}
 		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 		//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=srgb
@@ -471,7 +471,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
 		}
 		//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
-		//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=adobe
+		//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=prophoto
 		if (fif == FILETYPE_TIFF) {
 			configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
 			inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
