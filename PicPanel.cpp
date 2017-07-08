@@ -186,11 +186,11 @@ END_EVENT_TABLE()
 		thumbH = 100;
 		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 		
-		if (cmstransform == "render") {
+		//if (cmstransform == "set") {
 		if (hImgProfile) 
 			if (hTransform) 
 				cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
-		}
+		//}
 
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
@@ -264,7 +264,7 @@ END_EVENT_TABLE()
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
-		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","render");
+		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
 		if (cmstransform == "render") {
 			if (hImgProfile) 
 				if (hTransform)
