@@ -452,8 +452,25 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 	gImage *dib;
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
-	if (fif != FILETYPE_UNKNOWN) {
 
+
+	wxFileName profilepath;
+	// cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
+	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+
+
+	if (fif == FILETYPE_RAW) {
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
+	}
+	if (fif == FILETYPE_JPEG) {
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
+	}
+	if (fif == FILETYPE_TIFF) {
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
+	}
+
+
+	if (fif != FILETYPE_UNKNOWN) {
 
 		wxString configparams, inputprofile;
 		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
@@ -462,19 +479,19 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		if (fif == FILETYPE_RAW) {
 			configparams = paramString("input.raw.libraw.");
 			configparams.Append(wxConfigBase::Get()->Read("input.raw.parameters",""));
-			inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+			//inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
 		}
 		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 		//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=srgb
 		if (fif == FILETYPE_JPEG) {
 			configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
-			inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+			//inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
 		}
 		//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
 		//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=prophoto
 		if (fif == FILETYPE_TIFF) {
 			configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
-			inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+			//inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
 		}
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
@@ -506,6 +523,9 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+
+			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") wxMessageBox("CMS enabled, but no display profile was found.  Image will be displayed in its working profile.");
+
 			cmsHPROFILE hImgProf;
 			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
@@ -513,8 +533,9 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				pic->SetColorManagement(true);
 			}
 			else {
-				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
-					hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+					hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+					//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
 					char * prof; cmsUInt32Number proflen;
 					if (hImgProf) {
 						gImage::makeICCProfile(hImgProf, prof, proflen);
@@ -585,15 +606,19 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 
+	wxFileName profilepath;
+	// cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
+	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+
 
 	if (fif == FILETYPE_RAW) {
-		inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","prophoto");
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
 	}
 	if (fif == FILETYPE_JPEG) {
-		inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
 	}
 	if (fif == FILETYPE_TIFF) {
-		inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+		profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
 	}
 
 	SetStatusText("Retrieving source script...");
@@ -680,6 +705,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 
 			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+
+				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") wxMessageBox("CMS enabled, but no display profile was found.  Image will be displayed in its working profile.");
 				cmsHPROFILE hImgProf;
 				if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 					hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
@@ -687,8 +714,9 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					pic->SetColorManagement(true);
 				}
 				else {
-					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),inputprofile),"foo",wxYES_NO) == wxYES) {
-						hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+						hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+						//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
 						char * prof; cmsUInt32Number proflen;
 						if (hImgProf) {
 							gImage::makeICCProfile(hImgProf, prof, proflen);
@@ -746,6 +774,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	gImage * dib;
 	cmsHPROFILE profile;
 
+	wxFileName profilepath;
+	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
+	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif",wxFD_SAVE);  // |PNG files (*.png)|*.png
 	else
@@ -789,23 +821,19 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 
 			if (pic->GetColorManagement()) {
-				wxString profilestr = "srgb";
-				float gamma = 1.0;
-				wxString intentstr = "perceptual";
+
+				wxString intentstr;
 				cmsUInt32Number intent = INTENT_PERCEPTUAL;
+
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
-					profilestr = wxConfigBase::Get()->Read("output.jpeg.cms.profile","srgb");
-					//parm output.jpeg.cms.gamma: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4
-					gamma = wxConfigBase::Get()->Read("output.jpeg.cms.gamma",2.4);
+					profilepath.SetFullName(wxConfigBase::Get()->Read("output.jpeg.cms.profile",""));
 					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
 					intentstr = wxConfigBase::Get()->Read("output.jpeg.cms.renderingintent","perceptual");
 				}
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
-					profilestr = wxConfigBase::Get()->Read("output.tiff.cms.profile","prophoto");
-					//parm output.tiff.cms.gamma: if the output.tiff.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=1.8
-					gamma = wxConfigBase::Get()->Read("output.tiff.cms.gamma",1.8);
+					profilepath.SetFullName(wxConfigBase::Get()->Read("output.tiff.cms.profile",""));
 					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
 					intentstr = wxConfigBase::Get()->Read("output.tiff.cms.renderingintent","perceptual");
 				}
@@ -815,18 +843,18 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
 				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
-				profile = gImage::makeLCMSProfile(std::string(profilestr.c_str()), gamma);
-				if (!profile)  profile = cmsOpenProfileFromFile(profilestr.c_str(), "r");
-				
+				profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 				if (!profile) {
-					wxMessageBox(wxString::Format("No CMS profile found for %s, saving without...", profilestr));
-					WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
+					wxMessageBox(wxString::Format("No CMS profile found, saving with the working profile..."));
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with working profile...",fname));
 					dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
 				else {
-					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with icc profile %s, rendering intent %s...",fname, profilestr, intentstr));
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with icc profile %s, rendering intent %s...",fname, profilepath.GetFullName(), intentstr));
 					dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
 				}
+
+
 			}
 			else {
 				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));

@@ -12,6 +12,7 @@
 #include <wx/dcbuffer.h>
 #include <wx/string.h>
 #include <wx/treectrl.h>
+#include <wx/filename.h>
 //#include <wx/generic/statbmpg.h>
 #include "myHistogramPane.h"
 #include <sys/types.h>
@@ -85,6 +86,7 @@ class PicPanel: public wxPanel
 		bool fitmode;
 
 		bool colormgt;
+		wxFileName profilepath;
 		cmsHPROFILE hImgProfile;
 		cmsHTRANSFORM hTransform;
 

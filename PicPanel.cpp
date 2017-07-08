@@ -138,15 +138,15 @@ END_EVENT_TABLE()
 		if (rotation == 6) img.Rotate90(true);
 
 		if (hImgProfile) {
-			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
-			wxString displayprof = wxConfigBase::Get()->Read("display.cms.displayprofile","srgb");
-			//parm display.cms.gamma: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4
-			float gamma = wxConfigBase::Get()->Read("display.cms.gamma",2.4);
-			hDisplayProfile = gImage::makeLCMSProfile(std::string(displayprof.ToAscii()), gamma);
-			if (!hDisplayProfile)
-				//load the monitor profile:
-				hDisplayProfile = cmsOpenProfileFromFile(displayprof.c_str(), "r");
 
+			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+
+			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
+			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
+			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") 
+				hDisplayProfile = NULL;
+			else
+				hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 			if (hTransform) cmsDeleteTransform(hTransform);
 			
 			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
