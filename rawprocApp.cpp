@@ -44,7 +44,7 @@ bool rawprocFrmApp::OnInit()
 		frame->SetConfigFile(conf_configd);
 	}
 	
-	//parm app.start.logmessage - message to print in the log when rawproc starts. 
+	//parm app.start.logmessage: Message to print in the log when rawproc starts. 
 	wxString startmessage = wxConfigBase::Get()->Read("app.start.logmessage","");
 	if (startmessage != "") log(startmessage);
 	

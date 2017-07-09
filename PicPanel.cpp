@@ -109,7 +109,7 @@ END_EVENT_TABLE()
 	{
 		cmsHPROFILE hDisplayProfile;
 		
-		//parm display.status=0|1 - Write display... in status when setting the display image.  Default=1
+		//parm display.status=0|1: Write display... in status when setting the display image.  Default=1
 		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
 			parentframe->SetStatusText("display...");
 		//mark();
@@ -173,7 +173,7 @@ END_EVENT_TABLE()
 		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
 		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
-		//parm display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
+		//parm display.cms.transform=set|render: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
 		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
 		if (cmstransform == "set") {
 			if (hImgProfile) 
@@ -266,9 +266,10 @@ END_EVENT_TABLE()
 
 		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
 		if (cmstransform == "render") {
-			if (hImgProfile) 
-				if (hTransform)
-					cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+			//if (hImgProfile) 
+			//	if (hDisplayProfile)
+					if (hTransform)
+						cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
 		}
     
 		if (scaledpic) scaledpic->~wxBitmap();
@@ -540,7 +541,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 					if (imgY > 1) {
 						if (imgX < scaledpic->GetWidth()) {
 							if (imgY < scaledpic->GetHeight()) { 
-								//parm display.rgb.scale - multiplier for rgb display in status line.  Default=1
+								//parm display.rgb.scale: Multiplier for rgb display in status line.  Default=1
 								int pscale = wxConfigBase::Get()->Read("display.rgb.scale",1);
 								if (pscale > 1)
 									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %0.0f,%0.0f,%0.0f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 

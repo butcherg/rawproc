@@ -453,45 +453,38 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 
-
 	wxFileName profilepath;
-	// cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
+	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
 	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
-
-
-	if (fif == FILETYPE_RAW) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
-	}
-	if (fif == FILETYPE_JPEG) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
-	}
-	if (fif == FILETYPE_TIFF) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
-	}
 
 
 	if (fif != FILETYPE_UNKNOWN) {
 
 		wxString configparams, inputprofile;
-		//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
-		//parm input.raw.libraw.*: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.
-		//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=raw
+		
 		if (fif == FILETYPE_RAW) {
+			//parm input.raw.libraw.*: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.
 			configparams = paramString("input.raw.libraw.");
+			//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
 			configparams.Append(wxConfigBase::Get()->Read("input.raw.parameters",""));
-			//inputprofile = wxConfigBase::Get()->Read("input.raw.cms.profile","raw");
+			//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
 		}
-		//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
-		//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=srgb
+		
+
 		if (fif == FILETYPE_JPEG) {
+			//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 			configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
-			//inputprofile = wxConfigBase::Get()->Read("input.jpeg.cms.profile","srgb");
+			//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
 		}
-		//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
-		//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=prophoto
+
+		
 		if (fif == FILETYPE_TIFF) {
+			//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
 			configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
-			//inputprofile = wxConfigBase::Get()->Read("input.tiff.cms.profile","prophoto");
+			//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
 		}
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
@@ -607,7 +600,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	fif = gImage::getFileType(fname.c_str());
 
 	wxFileName profilepath;
-	// cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
 	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 
 
