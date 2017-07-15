@@ -136,6 +136,7 @@ END_EVENT_TABLE()
 		if (rotation == 3) img.Rotate180();
 		if (rotation == 5) img.Rotate90(false);
 		if (rotation == 6) img.Rotate90(true);
+		if (rotation == 8) img.Rotate90(false);
 
 		if (hImgProfile) {
 

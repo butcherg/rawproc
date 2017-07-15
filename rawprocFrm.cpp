@@ -799,9 +799,13 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
 			if ((wxConfigBase::Get()->Read("output.orient","0") == "1") & (rotation != 0)) {
 				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
+				if (rotation == 2) dib->ApplyHorizontalMirror();
 				if (rotation == 3) dib->ApplyRotate180();
-				if (rotation == 5) dib->ApplyRotate270();
+				if (rotation == 4) dib->ApplyVerticalMirror();
+				if (rotation == 5) {dib->ApplyHorizontalMirror(); dib->ApplyRotate270();}
 				if (rotation == 6) dib->ApplyRotate90();
+				if (rotation == 7) {dib->ApplyHorizontalMirror(); dib->ApplyRotate90();}
+				if (rotation == 8) dib->ApplyRotate270();
 				dib->setInfo("Orientation","0");
 			}
 
