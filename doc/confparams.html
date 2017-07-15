@@ -1,33 +1,32 @@
 <html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.backgroundcolor</b>: r,g,b (0-255), set at startup.  Default=(255,255,255)</li><br>
-<li><b>app.start.logmessage - message to print in the log when rawproc starts. </li><br>
+<li><b>app.start.logmessage</b>: Message to print in the log when rawproc starts. </li><br>
+<li><b>cms.profilepath</b>: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li><br>
+<li><b>cms.profilepath</b>: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li><br>
 <li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
-<li><b>display.cms.gamma</b>: If color management is enabled and an internal profile is used, sets the gamma used for generating it. Default=2.4</li><br>
 <li><b>display.cms.renderingintent</b>: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
-<li><b>display.cms.transform=set|render - Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set</li><br>
-<li><b>display.rgb.scale - multiplier for rgb display in status line.  Default=1</li><br>
-<li><b>display.status=0|1 - Write display... in status when setting the display image.  Default=1</li><br>
+<li><b>display.cms.transform=set|render</b>: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set</li><br>
+<li><b>display.rgb.scale</b>: Multiplier for rgb display in status line.  Default=1</li><br>
+<li><b>display.status=0|1</b>: Write display... in status when setting the display image.  Default=1</li><br>
 <li><b>exif.command</b>: Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li><br>
 <li><b>exif.parameters</b>: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li><br>
 <li><b>histogram.scale</b>: The number of buckets to display in the histogram. Default=256</li><br>
 <li><b>input.cms</b>: When a file is input, enable or disable color management.  Default=0</li><br>
-<li><b>input.jpeg.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=srgb</li><br>
+<li><b>input.jpeg.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=(none)</li><br>
 <li><b>input.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li><br>
 <li><b>input.log</b>: log the file input operation.  Default=0</li><br>
 <li><b>input.opensource.parentdirectory</b>: Enable search of parent directory for source file.  Default=0 </li><br>
 <li><b>input.opensource.subdirectory</b>: Enable search of specific directory for source file.  </li><br>
-<li><b>input.raw.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=raw</li><br>
+<li><b>input.raw.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=(none)</li><br>
 <li><b>input.raw.default</b>: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)</li><br>
 <li><b>input.raw.libraw.*</b>: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.</li><br>
 <li><b>input.raw.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)</li><br>
-<li><b>input.tiff.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=adobe</li><br>
+<li><b>input.tiff.cms.profile</b>: ICC profile to use if the input image doesn't have one.  Default=(none)</li><br>
 <li><b>input.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)</li><br>
-<li><b>output.jpeg.cms.gamma</b>: if the output.jpeg.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=2.4</li><br>
 <li><b>output.jpeg.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li><br>
 <li><b>output.jpeg.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
 <li><b>output.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)</li><br>
 <li><b>output.orient</b>: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0</li><br>
-<li><b>output.tiff.cms.gamma</b>: if the output.tiff.cms profile is one of the internal profiles, it is generated using the specified gamma.  Default=1.8</li><br>
 <li><b>output.tiff.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
 <li><b>output.tiff.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
 <li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)</li><br>
