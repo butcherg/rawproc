@@ -76,6 +76,11 @@ class RotatePreview: public wxPanel
 			dc.DrawLine(0,ih*0.4,iw,ih*0.4);
 			dc.DrawLine(0,ih*0.6,iw,ih*0.6);
 			dc.DrawLine(0,ih*0.8,iw,ih*0.8);
+			
+			dc.DrawLine(iw*0.2,0,iw*0.2,ih);
+			dc.DrawLine(iw*0.4,0,iw*0.4,ih);
+			dc.DrawLine(iw*0.6,0,iw*0.6,ih);
+			dc.DrawLine(iw*0.8,0,iw*0.8,ih);
 		}
 
 	private:
