@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <dirent.h>
+#include <math.h> 
 
 #include <gimage/gimage.h>
 #include "elapsedtime.h"
@@ -221,7 +222,7 @@ int count = 0;
 
 for (int f=0; f<files.size(); f++)
 {
-	count++;
+
 	char iname[256];
 	strncpy(iname, files[f].infile.c_str(), 255);
 	
@@ -229,11 +230,30 @@ for (int f=0; f<files.size(); f++)
 		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
 		continue;
 	}
+	
+	count++;
 
 	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
+
+	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
+	printf("Orientation: %d\n", orientation);
+	if (orientation != 0) {
+		printf("Normalizing image orientation from %d...",orientation);
+		_mark();
+		if (orientation == 2) dib.ApplyHorizontalMirror();
+		if (orientation == 3) dib.ApplyRotate180();
+		if (orientation == 4) dib.ApplyVerticalMirror();
+		if (orientation == 5) {dib.ApplyHorizontalMirror(); dib.ApplyRotate270();}
+		if (orientation == 6) dib.ApplyRotate90();
+		if (orientation == 7) {dib.ApplyHorizontalMirror(); dib.ApplyRotate90();}
+		if (orientation == 8) dib.ApplyRotate270();
+		dib.setInfo("Orientation","0");
+		printf("done. (%fsec)\n",_duration());
+	}
+	
 	
 	for (int i=0; i<commands.size(); i++) {
 		char c[256];
@@ -261,7 +281,7 @@ for (int f=0; f<files.size(); f++)
 		}
 
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
-			double blk, wht;
+			double blk=0.0, wht=255.0;
 			char *b = strtok(NULL,",");
 			char *w = strtok(NULL,", ");
 			wht = 255; blk = 0;
@@ -354,19 +374,24 @@ for (int f=0; f<files.size(); f++)
 			unsigned w, h;
 			char *wstr = strtok(NULL,", ");
 			char *hstr = strtok(NULL," ");
-			if (wstr) w = atoi(wstr);
-			if (hstr) h = atoi(hstr);
-			unsigned dw = dib.getWidth();
-			unsigned dh = dib.getHeight();
+			if (wstr == NULL & hstr == NULL) {
+				printf("Error: resize needs both width and height parameters.\n");
+			}
+			else {
+				if (wstr) w = atoi(wstr);
+				if (hstr) h = atoi(hstr);
+				unsigned dw = dib.getWidth();
+				unsigned dh = dib.getHeight();
 
-			if (h ==  0) h = dh * ((float)w/(float)dw);
-			if (w == 0)  w = dw * ((float)h/(float)dh); 
-			int threadcount=gImage::ThreadCount();
-			printf("resize: %dx%d (%d threads)... ",w,h,threadcount);
+				if (h ==  0) h = dh * ((float)w/(float)dw);
+				if (w == 0)  w = dw * ((float)h/(float)dh); 
+				int threadcount=gImage::ThreadCount();
+				printf("resize: %dx%d (%d threads)... ",w,h,threadcount);
 
-			_mark();
-			dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
-			printf("done (%fsec).\n", _duration());
+				_mark();
+				dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
+				printf("done (%fsec).\n", _duration());
+			}
 		}
 
 		else if (strcmp(cmd,"rotate") == 0) {  //#rotate:[0 - 45, default=0] 
@@ -540,6 +565,22 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyRotate270(threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
+		
+		else if (strcmp(cmd,"hmirror") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("mirror horizontal (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyHorizontalMirror(threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
+		
+		else if (strcmp(cmd,"vmirror") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("mirror vertical (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyVerticalMirror(threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 
@@ -552,12 +593,20 @@ for (int f=0; f<files.size(); f++)
 
 	if (strcmp(outfilename, "info") == 0) {
 		std::map<std::string,std::string> imginfo = dib.getInfo();
-		for (std::map<std::string,std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it)
-			printf("%s: %s\n",it->first.c_str(), it->second.c_str());
+		for (std::map<std::string,std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
+			if (it->first == "ExposureTime") {
+				if (atof(it->second.c_str()) < 1.0) {
+					printf("%s: 1/%d\n",it->first.c_str(), int(round(1.0/atof(it->second.c_str()))));
+				}
+			}
+			else
+				printf("%s: %s\n",it->first.c_str(), it->second.c_str());
+		}
 		printf("\n");
 		exit(0);
 	}
 
+	dib.deleteProfile();  //NOT color managed...
 
 	_mark();
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
