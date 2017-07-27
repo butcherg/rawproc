@@ -219,10 +219,11 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 void PropertyDialog::DelProp(wxCommandEvent& event)
 {
 	wxPGProperty* p = pg->GetSelectedProperty();
-	int answer = wxMessageBox(wxString::Format("Delete %s?",p->GetName()), "Confirm",wxYES_NO | wxCANCEL, this);
+	wxString name = p->GetName();
+	int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
 	if (answer == wxYES) {
 		pg->DeleteProperty(p);
-		wxConfigBase::Get()->DeleteEntry(p->GetName());
+		wxConfigBase::Get()->DeleteEntry(name);
 		wxConfigBase::Get()->Flush();
 	}
 }
