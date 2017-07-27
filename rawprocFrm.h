@@ -84,7 +84,7 @@ class rawprocFrm : public wxFrame
 		
 	public:
 		rawprocFrm(wxWindow *parent, wxWindowID id = 1, const wxString &title = wxT("rawproc"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = rawprocFrm_STYLE);
-		virtual ~rawprocFrm();
+		
 		void Mnuopen1003Click(wxCommandEvent& event);
 		void Mnuopensource1004Click(wxCommandEvent& event);
 		void Mnureopen1033Click(wxCommandEvent& event);
@@ -213,6 +213,7 @@ class rawprocFrm : public wxFrame
 		wxPanel *preview;
 		myParameters *parameters;
 		myHistogramPane *histogram;
+		PropertyDialog *diag;
 
 		gImage *d;
 		wxImage *img;

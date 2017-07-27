@@ -22,6 +22,8 @@ class PropertyDialog: public wxDialog
 		bool PropExists(wxString name);
 		void AddProp(wxCommandEvent& event);
 		void DelProp(wxCommandEvent& event);
+		void HideDialog(wxCommandEvent& event);
+		void ClearModifiedStatus();
 
 
 	private:

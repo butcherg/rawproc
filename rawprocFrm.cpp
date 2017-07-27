@@ -146,12 +146,9 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
 
 	cmsSetLogErrorHandler(MyLogErrorHandler);
+
+	diag == NULL;
 	
-}
-
-rawprocFrm::~rawprocFrm()
-{
-
 }
 
 void rawprocFrm::CreateGUIControls()
@@ -1050,12 +1047,12 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuProperties(wxCommandEvent& event)
 {
-	PropertyDialog diag(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
-
-	Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
-	diag.ShowModal();
-	Unbind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
-	SetStatusText("");
+	if (diag == NULL) {
+		diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
+		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
+	}
+	diag->ClearModifiedStatus();
+	diag->Show();
 }
 
 void rawprocFrm::MnuEXIF(wxCommandEvent& event)

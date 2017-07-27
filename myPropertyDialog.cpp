@@ -6,6 +6,7 @@
 #define FILTERID 8400
 #define ADDID 8401
 #define DELETEID 8402
+#define HIDEID 8403
 
 class AddDialog: public wxDialog
 {
@@ -109,12 +110,23 @@ wxDialog(parent, id, title, pos, size)
 	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
 	Bind(wxEVT_BUTTON, &PropertyDialog::AddProp, this, ADDID);
 	Bind(wxEVT_BUTTON, &PropertyDialog::DelProp, this, DELETEID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::HideDialog, this, HIDEID);
 }
 
 
 PropertyDialog::~PropertyDialog()
 {
 	if (pg) delete pg;
+}
+
+void PropertyDialog::HideDialog(wxCommandEvent& event)
+{
+	Hide();
+}
+
+void PropertyDialog::ClearModifiedStatus()
+{
+	if (pg) pg->ClearModifiedStatus();
 }
 
 void PropertyDialog::UpdateProperty(wxPropertyGridEvent& event)
