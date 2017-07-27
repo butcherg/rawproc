@@ -109,7 +109,7 @@ END_EVENT_TABLE()
 	{
 		cmsHPROFILE hDisplayProfile;
 		
-		//parm display.status=0|1: Write display... in status when setting the display image.  Default=1
+		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
 		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
 			parentframe->SetStatusText("display...");
 		//mark();
