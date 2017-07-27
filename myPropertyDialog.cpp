@@ -53,7 +53,7 @@ class AddDialog: public wxDialog
 };
 
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::map<std::string, std::string> props, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
+wxDialog(parent, id, title, pos, size)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
@@ -78,7 +78,7 @@ wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
 
 
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxFileConfig *config, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size, wxRESIZE_BORDER)
+wxDialog(parent, id, title, pos, size)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
