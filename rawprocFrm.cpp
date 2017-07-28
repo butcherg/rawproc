@@ -35,6 +35,7 @@
 #include "PicProcessorRotate.h"
 #include "PicProcessorDenoise.h"
 #include "PicProcessorRedEye.h"
+#include "PicProcessorColorSpace.h"
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 #include "util.h"
@@ -94,6 +95,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
 	EVT_MENU(ID_MNU_EXIF,rawprocFrm::MnuEXIF)
+	EVT_MENU(ID_MNU_COLORSPACE, rawprocFrm::MnuColorSpace)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -183,6 +185,7 @@ void rawprocFrm::CreateGUIControls()
 	
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BRIGHT,	_("Bright"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,	_("Colorspace"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
@@ -1349,7 +1352,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
-		try {
+	try {
 		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
 		wxString threshold = wxConfigBase::Get()->Read("tool.redeye.threshold","1.5");
 		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
@@ -1366,6 +1369,19 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorColorSpace *d = new PicProcessorColorSpace("colorspace", "", commandtree, pic, parameters);
+		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
 	}
 }
 

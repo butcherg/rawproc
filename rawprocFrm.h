@@ -136,6 +136,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_EXPOSURE = 1031,
 			ID_MNU_REDEYE = 1032,
 			ID_MNU_REOPEN = 1033,
+			ID_MNU_COLORSPACE = 1034,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -196,6 +197,7 @@ class rawprocFrm : public wxFrame
 	void MnuHelpClick(wxCommandEvent& event);
 	void MnuProperties(wxCommandEvent& event);
 	void MnuEXIF(wxCommandEvent& event);
+	void MnuColorSpace(wxCommandEvent& event);
 
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetBackground();
