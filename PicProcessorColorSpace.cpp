@@ -13,7 +13,7 @@ class ColorspacePanel: public PicProcPanel
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
-			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(200,20),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
 			SetSizerAndFit(b);
 			b->Layout();
@@ -53,6 +53,8 @@ void PicProcessorColorSpace::showParams()
 	if (!m_parameters) return;
 	m_parameters->DestroyChildren();
 	r = new ColorspacePanel(m_parameters, this, c);
+	r->Refresh();
+	r->Update();
 }
 
 
@@ -68,7 +70,7 @@ bool PicProcessorColorSpace::processPic()
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC);
+	dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
