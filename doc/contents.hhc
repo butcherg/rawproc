@@ -67,6 +67,11 @@
 				<param name="Name" value="Bright">
 				<param name="Local" value="bright.html">
 				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Colorspace">
+				<param name="Local" value="colorspace.html">
+				</OBJECT>
 
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Contrast">

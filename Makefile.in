@@ -1,7 +1,7 @@
 CXX=@CXX@
 LD=@CXX@
 
-OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
+OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
 
 LIBS=@LIBS@
 LIBS+=@APP_LIBS@
@@ -109,6 +109,10 @@ PicProcessorRotate.o: $(srcdir)/PicProcessorRotate.cpp
 
 PicProcessorDenoise.o: $(srcdir)/PicProcessorDenoise.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorDenoise.cpp -o$@
+	
+PicProcessorColorSpace.o: $(srcdir)/PicProcessorColorSpace.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessorColorSpace.cpp -o$@
+
 
 PicProcessor.o: $(srcdir)/PicProcessor.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/PicProcessor.cpp -o$@
