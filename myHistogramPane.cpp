@@ -59,8 +59,9 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	hmax = 0;
 	hscale = 0;
 	ord = 1;
-	
 
+	//not needed, for now; renders 'c' key command inop
+	//smalldata = dib.Histogram();
 	
 	rdata = dib.Histogram(CHANNEL_RED, hm);
 	if (hmax < hm) hmax = hm;
@@ -83,8 +84,6 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	blen=bdata.size();
 	b = new wxPoint[blen];
 	for (unsigned i=0; i<blen; i++) b[i] = wxPoint(i,bdata[i]);
-	
-	smalldata = dib.Histogram();
 
 	MouseX = 0; MouseY=0;
 	SetInitialSize(wxSize(500,400));
