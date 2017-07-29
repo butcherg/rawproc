@@ -32,6 +32,8 @@ bool rawprocFrmApp::OnInit()
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
+	
+	wxConfigBase::DontCreateOnDemand();
 
 	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";

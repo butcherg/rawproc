@@ -1050,6 +1050,10 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 
 void rawprocFrm::MnuProperties(wxCommandEvent& event)
 {
+	if (configfile == "(none)") {
+		wxMessageBox("No configuration file found.");
+		return;
+	}
 	if (diag == NULL) {
 		diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
