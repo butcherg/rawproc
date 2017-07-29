@@ -533,9 +533,14 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 					if (hImgProf) {
 						gImage::makeICCProfile(hImgProf, prof, proflen);
 						dib->setProfile(prof, proflen);
+						pic->SetImageProfile(hImgProf);
+						pic->SetColorManagement(true);
 					}
-					pic->SetImageProfile(hImgProf);
-					pic->SetColorManagement(true);
+					else {
+						wxMessageBox("Set profile failed, disabling color management.");
+						pic->SetImageProfile(NULL);
+						pic->SetColorManagement(false);
+					}
 				}
 				else {
 					pic->SetImageProfile(NULL);
@@ -574,7 +579,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 					}
 				}
 				catch (std::exception& e) {
-					wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
+					wxMessageBox(wxString::Format("Error: Adding tool failed: %s",e.what()));
 				}
 			}
 		}
@@ -713,9 +718,14 @@ void rawprocFrm::OpenFileSource(wxString fname)
 						if (hImgProf) {
 							gImage::makeICCProfile(hImgProf, prof, proflen);
 							dib->setProfile(prof, proflen);
+							pic->SetImageProfile(hImgProf);
+							pic->SetColorManagement(true);
 						}
-						pic->SetImageProfile(hImgProf);
-						pic->SetColorManagement(true);
+						else {
+							wxMessageBox("Set profile failed, disabling color management.");
+							pic->SetImageProfile(NULL);
+							pic->SetColorManagement(false);
+						}
 					}
 					else {
 						pic->SetImageProfile(NULL);
