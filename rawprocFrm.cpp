@@ -227,6 +227,7 @@ void rawprocFrm::CreateGUIControls()
 	//histogram->SetDoubleBuffered(true);
 	
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
+	histogram->SetMinSize(wxSize(285,300));
 	
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
@@ -526,23 +527,30 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				pic->SetColorManagement(true);
 			}
 			else {
-				if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
-					hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-					//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
-					char * prof; cmsUInt32Number proflen;
-					if (hImgProf) {
-						gImage::makeICCProfile(hImgProf, prof, proflen);
-						dib->setProfile(prof, proflen);
-						pic->SetImageProfile(hImgProf);
-						pic->SetColorManagement(true);
+				if (profilepath.FileExists()) {
+					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+						hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+						//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+						char * prof; cmsUInt32Number proflen;
+						if (hImgProf) {
+							gImage::makeICCProfile(hImgProf, prof, proflen);
+							dib->setProfile(prof, proflen);
+							pic->SetImageProfile(hImgProf);
+							pic->SetColorManagement(true);
+						}
+						else {
+							wxMessageBox("Set profile failed, disabling color management.");
+							pic->SetImageProfile(NULL);
+							pic->SetColorManagement(false);
+						}
 					}
 					else {
-						wxMessageBox("Set profile failed, disabling color management.");
 						pic->SetImageProfile(NULL);
 						pic->SetColorManagement(false);
 					}
 				}
 				else {
+					wxMessageBox("No input profile found, disabling color management.");
 					pic->SetImageProfile(NULL);
 					pic->SetColorManagement(false);
 				}
@@ -711,23 +719,30 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					pic->SetColorManagement(true);
 				}
 				else {
-					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
-						hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-						//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
-						char * prof; cmsUInt32Number proflen;
-						if (hImgProf) {
-							gImage::makeICCProfile(hImgProf, prof, proflen);
-							dib->setProfile(prof, proflen);
-							pic->SetImageProfile(hImgProf);
-							pic->SetColorManagement(true);
+					if (profilepath.FileExists()) {
+						if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+							hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+							//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+							char * prof; cmsUInt32Number proflen;
+							if (hImgProf) {
+								gImage::makeICCProfile(hImgProf, prof, proflen);
+								dib->setProfile(prof, proflen);
+								pic->SetImageProfile(hImgProf);
+								pic->SetColorManagement(true);
+							}
+							else {
+								wxMessageBox("Set profile failed, disabling color management.");
+								pic->SetImageProfile(NULL);
+								pic->SetColorManagement(false);
+							}
 						}
 						else {
-							wxMessageBox("Set profile failed, disabling color management.");
 							pic->SetImageProfile(NULL);
 							pic->SetColorManagement(false);
 						}
 					}
 					else {
+						wxMessageBox("No input profile found, disabling color management.");
 						pic->SetImageProfile(NULL);
 						pic->SetColorManagement(false);
 					}

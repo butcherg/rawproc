@@ -15,11 +15,19 @@ class ColorspacePanel: public PicProcPanel
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
 			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
+
+			wxArrayString opers;
+			opers.Add("apply");
+			opers.Add("assign");
+
+			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			b->Add(operselect,flags);
+
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
-			//SetFocus();
+			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 		}
 
@@ -30,7 +38,8 @@ class ColorspacePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(edit->GetLineText(0));
+			q->setParams(wxString::Format("%s,%s",edit->GetLineText(0), operselect->GetString(operselect->GetSelection())));
+			//q->setParams(edit->GetLineText(0));
 			q->processPic();
 			event.Skip();
 			Refresh();
@@ -40,6 +49,7 @@ class ColorspacePanel: public PicProcPanel
 
 	private:
 		wxTextCtrl *edit;
+		wxRadioBox *operselect;
 
 };
 
@@ -63,14 +73,22 @@ bool PicProcessorColorSpace::processPic()
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
 
+	wxArrayString cp = split(getParams(),",");
+
 	wxFileName fname;
 	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
-	fname.SetFullName(c);
+	fname.SetFullName(cp[0]);
 
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+
+	if (cp[1] == "apply") {
+		dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+	}
+	else if (cp[1] == "assign") {
+		dib->AssignColorspace(std::string(fname.GetFullPath().c_str()));
+	}
 	wxString d = duration();
 
 	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
