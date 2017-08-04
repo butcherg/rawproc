@@ -20,7 +20,7 @@ class GammaPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			Bind(wxEVT_TEXT_ENTER,GammaPanel::paramChanged, this);
+			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this);
 		}
 
 		~GammaPanel()
