@@ -223,26 +223,23 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
-	//histogram = new wxGenericStaticBitmap(this, wxID_ANY, wxBitmap(), wxDefaultPosition, wxSize(285,150));
-	//histogram->SetDoubleBuffered(true);
-	
-	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
-	histogram->SetMinSize(wxSize(285,300));
-	
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
 	
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
-	
+	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
 
+	//Image manipulation panels:
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 
-	parameters = new myParameters(this, -1, wxDefaultPosition, wxSize(285,300));
+	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
+	histogram->SetMinSize(wxSize(285,300));
+
+	parameters = new myParameters(this, wxID_ANY, wxDefaultPosition, wxSize(285,300));
 	parameters->SetMinSize(wxSize(285,300));
 	parameters->SetMaxSize(wxSize(1200,750));
 	//parameters->SetAutoLayout(true); 
 	
-	//histogram = new wxGenericStaticBitmap(this, wxID_ANY, wxDefaultPosition, wxSize(285,200));
 
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
