@@ -97,8 +97,9 @@ bool PicProcessorColorSpace::processPic()
 		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
 			log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 
-		dirty = false;
 	}
+	
+	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	processNext();
