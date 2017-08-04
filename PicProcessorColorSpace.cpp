@@ -82,19 +82,23 @@ bool PicProcessorColorSpace::processPic()
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	
+	if (fname.IsOk() & fname.FileExists()) {
 
-	if (cp[1] == "apply") {
-		dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+		if (cp[1] == "apply") {
+			dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+		}
+		else if (cp[1] == "assign") {
+			dib->AssignColorspace(std::string(fname.GetFullPath().c_str()));
+		}
+	
+		wxString d = duration();
+
+		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+			log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+
+		dirty = false;
 	}
-	else if (cp[1] == "assign") {
-		dib->AssignColorspace(std::string(fname.GetFullPath().c_str()));
-	}
-	wxString d = duration();
-
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
-		log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
-
-	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	processNext();
