@@ -72,12 +72,12 @@ bool PicProcessorColorSpace::processPic()
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
-
+	
 	wxArrayString cp = split(getParams(),",");
 
 	wxFileName fname;
 	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
-	fname.SetFullName(cp[0]);
+	if (cp.GetCount() > 0) fname.SetFullName(cp[0]);
 
 	mark();
 	if (dib) delete dib;
