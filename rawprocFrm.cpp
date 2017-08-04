@@ -225,9 +225,6 @@ void rawprocFrm::CreateGUIControls()
 	
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.SetManagedWindow(this);
-	
-	//Main picture panel:
-	pic = new PicPanel(this, commandtree, histogram);
 
 	//Image manipulation panels:
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
@@ -239,7 +236,9 @@ void rawprocFrm::CreateGUIControls()
 	parameters->SetMinSize(wxSize(285,300));
 	parameters->SetMaxSize(wxSize(1200,750));
 	//parameters->SetAutoLayout(true); 
-	
+
+	//Main picture panel:
+	pic = new PicPanel(this, commandtree, histogram);
 
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
