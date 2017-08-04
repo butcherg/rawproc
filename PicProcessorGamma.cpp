@@ -20,12 +20,12 @@ class GammaPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			Connect(wxID_ANY,wxEVT_TEXT_ENTER,wxCommandEventHandler(GammaPanel::paramChanged));
+			Bind(wxEVT_TEXT_ENTER,GammaPanel::paramChanged, this);
 		}
 
 		~GammaPanel()
 		{
-			edit->~wxTextCtrl();
+			
 		}
 
 		void paramChanged(wxCommandEvent& event)

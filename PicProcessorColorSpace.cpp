@@ -33,17 +33,14 @@ class ColorspacePanel: public PicProcPanel
 
 		~ColorspacePanel()
 		{
-			edit->~wxTextCtrl();
+			
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%s,%s",edit->GetLineText(0), operselect->GetString(operselect->GetSelection())));
-			//q->setParams(edit->GetLineText(0));
 			q->processPic();
 			event.Skip();
-			Refresh();
-			Update();
 		}
 
 
