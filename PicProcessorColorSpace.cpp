@@ -22,7 +22,7 @@ class ColorspacePanel: public PicProcPanel
 			opers.Add("assign");
 
 			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
-			operselect->SetSelection(operselect->FindString(parms[1]));
+			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
 			b->Add(operselect,flags);
 
 			SetSizerAndFit(b);
@@ -97,6 +97,7 @@ bool PicProcessorColorSpace::processPic()
 			log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 
 	}
+	else wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
 	
 	dirty = false;
 

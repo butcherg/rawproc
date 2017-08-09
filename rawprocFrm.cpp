@@ -1403,7 +1403,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *d = new PicProcessorColorSpace("colorspace", "", commandtree, pic, parameters);
+		PicProcessorColorSpace *d = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic, parameters);
 		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
 	}
 	catch (std::exception& e) {
