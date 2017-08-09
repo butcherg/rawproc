@@ -17,7 +17,9 @@ class RotatePreview: public wxPanel
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
 			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
 			anglerad = angle * 0.01745329;
+			angledeg = angle;
 			orig = image;
+			autocrop = true;
 
 			if (haspect < vaspect) {
 				img = image.Scale(size.GetWidth(), size.GetWidth()* haspect);
@@ -37,6 +39,7 @@ class RotatePreview: public wxPanel
 		void Rotate(double angle)
 		{
 			anglerad = angle * 0.01745329;
+			angledeg = angle;
 		}
 
 		void OnSize(wxSizeEvent& event) 
@@ -81,11 +84,31 @@ class RotatePreview: public wxPanel
 			dc.DrawLine(iw*0.4,0,iw*0.4,ih);
 			dc.DrawLine(iw*0.6,0,iw*0.6,ih);
 			dc.DrawLine(iw*0.8,0,iw*0.8,ih);
+			
+			double a = angledeg / 45.0;
+
+//autocrop box, needs further work...			
+/*
+			int y1 = (ih*0.6) * a;
+			int y2 = ih - ((ih*0.4) * a);
+			int x1 = (iw*0.4) * a;
+			int x2 = iw - ((iw*0.6) * a);
+			
+			printf("%d,%d,%d,%d",x1, y1, x2, y2);
+			
+			dc.SetPen(wxPen(*wxYELLOW, 1, wxPENSTYLE_SOLID));
+			
+			dc.DrawLine(x1, y1, x2, y1);
+			dc.DrawLine(x2, y1, x2, y2);
+			dc.DrawLine(x2, y2, x1, y2);
+			dc.DrawLine(x1, y2, x1, y1);
+*/
 		}
 
 	private:
 		wxImage img, orig;
-		double haspect, vaspect, aspect, anglerad;
+		double haspect, vaspect, aspect, anglerad, angledeg;
+		bool autocrop;
 
 };
 
