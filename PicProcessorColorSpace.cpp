@@ -12,8 +12,9 @@ class ColorspacePanel: public PicProcPanel
 		ColorspacePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
-			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
 
 			wxArrayString opers;
@@ -21,6 +22,7 @@ class ColorspacePanel: public PicProcPanel
 			opers.Add("assign");
 
 			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			operselect->SetSelection(operselect->FindString(parms[1]));
 			b->Add(operselect,flags);
 
 			SetSizerAndFit(b);
