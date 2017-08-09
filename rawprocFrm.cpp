@@ -606,23 +606,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	wxString ofilename, inputprofile;
 	wxString oparams = "";
 
-	GIMAGE_FILETYPE fif;
-	fif = gImage::getFileType(fname.c_str());
-
-	wxFileName profilepath;
-	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
-
-
-	if (fif == FILETYPE_RAW) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
-	}
-	if (fif == FILETYPE_JPEG) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
-	}
-	if (fif == FILETYPE_TIFF) {
-		profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
-	}
-
 	SetStatusText("Retrieving source script...");
 	std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
 
@@ -682,7 +665,24 @@ void rawprocFrm::OpenFileSource(wxString fname)
 //					return;
 //				}
 			}
-			
+
+			GIMAGE_FILETYPE fif;
+			fif = gImage::getFileType(ofilename.c_str());
+
+			wxFileName profilepath;
+			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+
+
+			if (fif == FILETYPE_RAW) {
+				profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
+			}
+			if (fif == FILETYPE_JPEG) {
+				profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
+			}
+			if (fif == FILETYPE_TIFF) {
+				profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
+			}
+
 			commandtree->DeleteAllItems();
 			commandtree->Update();
 			pic->BlankPic();
