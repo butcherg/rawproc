@@ -281,14 +281,14 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			else xorigin += 1;
 			break;
 		case 67: //c - with Ctrl, copy 256-scale histogram to clipboard
-			wxString histogram = wxString::Format("%d", (int) smalldata[0]);
-			for (int i = 1; i< smalldata.size(); i++) 
-				histogram.Append(wxString::Format(",%d", (int) smalldata[i]));
-			if (wxTheClipboard->Open())
-			{
-				wxTheClipboard->SetData( new wxTextDataObject(histogram) );
-				wxTheClipboard->Close();
-			}
+			//wxString histogram = wxString::Format("%d", (int) smalldata[0]);
+			//for (int i = 1; i< smalldata.size(); i++) 
+			//	histogram.Append(wxString::Format(",%d", (int) smalldata[i]));
+			//if (wxTheClipboard->Open())
+			//{
+			//	wxTheClipboard->SetData( new wxTextDataObject(histogram) );
+			//	wxTheClipboard->Close();
+			//}
 			break;
 	}
 	//event.Skip();
