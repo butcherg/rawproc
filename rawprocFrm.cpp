@@ -406,6 +406,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
 	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
 	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic, parameters);
+	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic, parameters);
 	else return NULL;
 	p->processPic();
 	if (name == "resize") pic->SetScale(1.0);
