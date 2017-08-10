@@ -12,6 +12,7 @@
 #include <wx/treectrl.h>
 #include <wx/sizer.h>
 #include <wx/event.h>
+#include <wx/simplebook.h>
 
 #include "PicPanel.h"
 #include "PicProcPanel.h"
@@ -35,6 +36,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getCommand();
 		wxString getParams();
 		wxString getName();
+		virtual void createPanel(wxSimplebook* parent);
+		virtual PicProcPanel* getPanel();
 		virtual void showParams();
 		PicProcessor *getPreviousPicProcessor();
 		gImage& getProcessedPic();
@@ -57,7 +60,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString n, c;
 
 		wxPanel *m_parameters;
-		PicProcPanel *r;
+		PicProcPanel *r, *toolpanel;
 
 		bool dirty;
 		

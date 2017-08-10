@@ -23,7 +23,7 @@ class PicProcPanel: public wxPanel
 {
 
 	public:
-		PicProcPanel(wxPanel *parent, PicProcessor *proc, wxString params);
+		PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params);
 		~PicProcPanel();
 		wxString getParams();
 		void OnSize(wxSizeEvent& event);

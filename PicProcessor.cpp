@@ -7,7 +7,7 @@
 class BlankPanel: public PicProcPanel 
 {
 	public:
-		BlankPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		BlankPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			panel = new wxPanel(this);
 			b->Add(panel, 1, wxALIGN_LEFT, 10);
@@ -72,6 +72,17 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 PicProcessor::~PicProcessor()
 {
 	if (dib) delete dib;
+}
+
+void PicProcessor::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new BlankPanel(parent, this, "");
+	parent->ShowNewPage(toolpanel);
+}
+
+PicProcPanel* PicProcessor::getPanel()
+{
+	return toolpanel;
 }
 
 bool PicProcessor::processPic() 
