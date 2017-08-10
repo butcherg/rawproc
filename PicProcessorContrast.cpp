@@ -101,6 +101,8 @@ void PicProcessorContrast::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ContrastPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorContrast::showParams()

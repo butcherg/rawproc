@@ -20,7 +20,8 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
-	PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent) {
+	PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,800)) 
+	{
 		parentframe = parent;
 		commandtree = tree;
 		histogram = hgram;

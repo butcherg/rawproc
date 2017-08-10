@@ -114,6 +114,8 @@ void PicProcessorShadow::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ShadowPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorShadow::showParams()

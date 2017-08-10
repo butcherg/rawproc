@@ -160,6 +160,8 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new BlackWhitePointPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorBlackWhitePoint::showParams()

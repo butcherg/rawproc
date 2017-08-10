@@ -281,6 +281,8 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new CropPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorCrop::showParams()

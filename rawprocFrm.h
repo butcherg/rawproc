@@ -53,6 +53,8 @@
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"
 
+//#define USE_WXAUI
+
 
 class myParameters: public wxPanel
 {
@@ -208,12 +210,17 @@ class rawprocFrm : public wxFrame
 		
 		bool isDownstream(wxTreeItemId here, wxTreeItemId down);
 		
+#ifdef USE_WXAUI
 		wxAuiManager mgr;
+#else
+		wxBoxSizer *hs, *vs;
+#endif
 		
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
 		wxPanel *preview;
 		myParameters *parameters;
+		wxSimplebook* parambook;
 		myHistogramPane *histogram;
 		PropertyDialog *diag;
 

@@ -78,6 +78,8 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new BlankPanel(parent, this, "");
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 PicProcPanel* PicProcessor::getPanel()

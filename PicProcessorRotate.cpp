@@ -263,6 +263,8 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new RotatePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorRotate::showParams()

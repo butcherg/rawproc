@@ -145,6 +145,8 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new GrayPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorGray::showParams()

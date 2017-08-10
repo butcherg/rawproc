@@ -115,6 +115,8 @@ void PicProcessorHighlight::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new HighlightPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorHighlight::showParams()

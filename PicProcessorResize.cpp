@@ -74,6 +74,8 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ResizePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorResize::showParams()

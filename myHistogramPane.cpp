@@ -4,25 +4,25 @@
 #include <algorithm>
 #include <wx/clipbrd.h>
 
-BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
+//BEGIN_EVENT_TABLE(myHistogramPane, wxWindow)
  
-    EVT_MOTION(myHistogramPane::mouseMoved)
-    EVT_LEFT_DOWN(myHistogramPane::mouseDown)
-    EVT_LEFT_UP(myHistogramPane::mouseReleased)
-    EVT_LEFT_DCLICK(myHistogramPane::mouseDoubleClicked)
-    EVT_RIGHT_DOWN(myHistogramPane::rightClick)
-	EVT_ENTER_WINDOW(myHistogramPane::mouseEnterWindow)
-    EVT_LEAVE_WINDOW(myHistogramPane::mouseLeftWindow)
+//    EVT_MOTION(myHistogramPane::mouseMoved)
+//    EVT_LEFT_DOWN(myHistogramPane::mouseDown)
+//    EVT_LEFT_UP(myHistogramPane::mouseReleased)
+//    EVT_LEFT_DCLICK(myHistogramPane::mouseDoubleClicked)
+//    EVT_RIGHT_DOWN(myHistogramPane::rightClick)
+//	EVT_ENTER_WINDOW(myHistogramPane::mouseEnterWindow)
+//    EVT_LEAVE_WINDOW(myHistogramPane::mouseLeftWindow)
 	//EVT_CHAR(myHistogramPane::keyPressed)
-    EVT_KEY_DOWN(myHistogramPane::keyPressed)
+//    EVT_KEY_DOWN(myHistogramPane::keyPressed)
     //EVT_KEY_UP(myHistogramPane::keyReleased)
-    EVT_MOUSEWHEEL(myHistogramPane::mouseWheelMoved)
-    EVT_SIZE(myHistogramPane::OnSize)
+//    EVT_MOUSEWHEEL(myHistogramPane::mouseWheelMoved)
+//    EVT_SIZE(myHistogramPane::OnSize)
  
     // catch paint events
-    EVT_PAINT(myHistogramPane::paintEvent)
+//    EVT_PAINT(myHistogramPane::paintEvent)
  
-END_EVENT_TABLE()
+//END_EVENT_TABLE()
 
 myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size)
@@ -44,6 +44,22 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
 	inwindow = false;
+
+	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
+	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
+	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
+	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
+	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
+	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
+        //EVT_CHAR(myHistogramPane::keyPressed)
+        Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
+        //EVT_KEY_UP(myHistogramPane::keyReleased)
+        Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
+        Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
+
+    	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
+
 }
 
 myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
@@ -89,6 +105,22 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	SetInitialSize(wxSize(500,400));
 	pressedDown = false;
 	inwindow = false;
+
+	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
+	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
+	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
+	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
+	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
+	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
+        //EVT_CHAR(myHistogramPane::keyPressed)
+        Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
+        //EVT_KEY_UP(myHistogramPane::keyReleased)
+        Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
+        Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
+
+    	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
+
 
 	Update();
 	Refresh();

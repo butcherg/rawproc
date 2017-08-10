@@ -18,6 +18,7 @@
 #include <wx/aboutdlg.h> 
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
+#include <wx/statline.h>
 
 #include "PicProcessorGamma.h"
 #include "PicProcessorBright.h"
@@ -223,8 +224,6 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
-	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
-	mgr.SetManagedWindow(this);
 
 	//Image manipulation panels:
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
@@ -232,20 +231,48 @@ void rawprocFrm::CreateGUIControls()
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
 	histogram->SetMinSize(wxSize(285,300));
 
-	parameters = new myParameters(this, wxID_ANY, wxDefaultPosition, wxSize(285,300));
-	parameters->SetMinSize(wxSize(285,300));
-	parameters->SetMaxSize(wxSize(1200,750));
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,300));
+//	parameters = new myParameters(this, wxID_ANY, wxDefaultPosition, wxSize(285,300));
+//	parameters->SetMinSize(wxSize(285,300));
+//	parameters->SetMaxSize(wxSize(1200,750));
 	//parameters->SetAutoLayout(true); 
 
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
 
+
+#ifdef USE_WXAUI
+	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
+	mgr.SetManagedWindow(this);
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1));  //.GripperTop());
+	mgr.AddPane(parambook, pinfo.Caption(wxT("ParametersB")).Position(2).MinSize(wxSize(285,300)));
 	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(2).MinSize(wxSize(285,300))); //.GripperTop());
-
 	mgr.Update();
+
+
+#else
+	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+	hs = new wxBoxSizer(wxHORIZONTAL);
+	vs = new wxBoxSizer(wxVERTICAL);
+	vs->Add(new wxStaticText(this,wxID_ANY, "commands:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(commandtree, flags);
+	vs->Add(new wxStaticLine(this), flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "histogram:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(histogram, flags);
+	vs->Add(new wxStaticLine(this), flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "parameters:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(parambook, flags);
+	hs->Add(vs, flags);
+	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags);
+	hs->Add(pic, flags);
+	SetSizerAndFit(hs);
+	Update();
+	Refresh();
+	Update();
+#endif
+
 }
 
 void rawprocFrm::SetBackground()
@@ -257,8 +284,8 @@ void rawprocFrm::SetBackground()
 	int r = atoi(bkgnd[0].c_str());
 	int g = atoi(bkgnd[1].c_str());
 	int b = atoi(bkgnd[2].c_str());
-	parameters->SetBackgroundColour(wxColour(r,g,b));
-	parameters->Refresh();
+//	parameters->SetBackgroundColour(wxColour(r,g,b));
+//	parameters->Refresh();
 	pic->SetBackgroundColour(wxColour(r,g,b));
 	pic->Refresh();
 	commandtree->SetBackgroundColour(wxColour(r,g,b));
@@ -276,13 +303,18 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
-	parameters->DestroyChildren();
+	parambook->DeleteAllPages();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
+#ifdef USE_WXAUI
 	mgr.UnInit();
+#else
+	if (vs) vs->~wxBoxSizer();
+	if (hs) hs->~wxBoxSizer();
+#endif
 	Destroy();
 }
 
@@ -292,13 +324,18 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
-	parameters->DestroyChildren();
+	parambook->DeleteAllPages();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
+#ifdef USE_WXAUI
 	mgr.UnInit();
+#else
+	if (vs) vs->~wxBoxSizer();
+	if (hs) hs->~wxBoxSizer();
+#endif
 	Destroy();
 }
 
@@ -497,7 +534,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		commandtree->Update();
 		pic->BlankPic();
 		histogram->BlankPic();
-		parameters->DestroyChildren();
+		parambook->DeleteAllPages();
 		
 		mark();
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
@@ -562,7 +599,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		pic->FitMode(true);
 		SetStatusText("scale: fit",2);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, parameters, dib);
-		picdata->showParams();
+		picdata->createPanel(parambook);
 		picdata->processPic();
 		CommandTreeSetDisplay(picdata->GetId());
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
@@ -687,7 +724,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			commandtree->Update();
 			pic->BlankPic();
 			histogram->BlankPic();
-			parameters->DestroyChildren();
+			parambook->DeleteAllPages();
 			SetStatusText(wxString::Format("Loading file:%s params:%s",ofilename, oparams));
 
 			mark();
@@ -754,6 +791,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			pic->FitMode(true);
 			SetStatusText("scale: fit",2);
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
+			picdata->createPanel(parambook);
 			picdata->processPic();
 			CommandTreeSetDisplay(picdata->GetId());
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
@@ -946,7 +984,9 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	wxTreeItemId item = event.GetItem();
 	if (item.IsOk()) { 
 		if ((PicProcessor *) commandtree->GetItemData(item))
-			((PicProcessor *) commandtree->GetItemData(item))->showParams();
+			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND)
+				parambook->SetSelection(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
+//			((PicProcessor *) commandtree->GetItemData(item))->showParams();
 	}
 	Update();
 	Refresh();
@@ -965,9 +1005,10 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
 		else
 			newitem = prev;
 		commandtree->SelectItem(newitem);
+		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
        		commandtree->Delete(item);
 		if (newitem.IsOk()) {
-			((PicProcessor *) commandtree->GetItemData(newitem))->showParams();
+//			((PicProcessor *) commandtree->GetItemData(newitem))->showParams();
 			((PicProcessor *) commandtree->GetItemData(newitem))->processPic();
 		}
 		deleting = true;
@@ -1107,9 +1148,10 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	try {
 		//parm tool.gamma.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
-		PicProcessorGamma *g = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);	
-		g->processPic();
-		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
@@ -1127,9 +1169,10 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	try {
 		//parm tool.bright.initialvalue: The initial (and reset button) value of the bright tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
-		PicProcessorBright *g = new PicProcessorBright("bright",val, commandtree, pic, parameters);
-		g->processPic();
-		if (!commandtree->GetNextSibling(g->GetId()).IsOk()) CommandTreeSetDisplay(g->GetId());
+		PicProcessorBright *p = new PicProcessorBright("bright",val, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding bright tool failed: %s",e.what()));
@@ -1147,9 +1190,10 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	try {
 		//parm tool.contrast.initialvalue: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
-		PicProcessorContrast *c = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
-		c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorContrast *p = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding contrast tool failed: %s",e.what()));
@@ -1165,9 +1209,10 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	try {
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
 		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
-		PicProcessorSaturation *c = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
-		c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
@@ -1181,9 +1226,10 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	try {
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
 		wxString val = wxConfigBase::Get()->Read("tool.exposure.initialvalue","0.0");
-		PicProcessorExposure *c = new PicProcessorExposure("exposure",val, commandtree, pic, parameters);
-		c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
@@ -1196,9 +1242,10 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorCurve *crv = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
-		crv->processPic();
-		if (!commandtree->GetNextSibling(crv->GetId()).IsOk()) CommandTreeSetDisplay(crv->GetId());
+		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
@@ -1217,9 +1264,10 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 		//parm tool.shadow.threshold: The initial (and reset button) value of the shadow curve threshold.  Default=64
 		wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
-		PicProcessorShadow *shd = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
-		shd->processPic();
-		if (!commandtree->GetNextSibling(shd->GetId()).IsOk()) CommandTreeSetDisplay(shd->GetId());
+		PicProcessorShadow *p = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding shadow tool failed: %s",e.what()));
@@ -1236,9 +1284,10 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 		//parm tool.highlight.threshold: The initial (and reset button) value of the highlight curve threshold.  Default=192
 		wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
-		PicProcessorHighlight *s = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
-		s->processPic();
-		if (!commandtree->GetNextSibling(s->GetId()).IsOk()) CommandTreeSetDisplay(s->GetId());
+		PicProcessorHighlight *p = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding highlight tool failed: %s",e.what()));
@@ -1257,9 +1306,10 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
 		wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
-		PicProcessorGray *gr = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
-		gr->processPic();
-		if (!commandtree->GetNextSibling(gr->GetId()).IsOk()) CommandTreeSetDisplay(gr->GetId());
+		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
@@ -1271,9 +1321,10 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorCrop *c = new PicProcessorCrop("crop", commandtree, pic, parameters);
-		c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding crop tool failed: %s",e.what()));
@@ -1292,10 +1343,11 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom
 		wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
 		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
-		PicProcessorResize *c = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
-		c->processPic();
+		PicProcessorResize *p = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
 		pic->SetScale(1.0);
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
@@ -1307,14 +1359,15 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorBlackWhitePoint *c;
+		PicProcessorBlackWhitePoint *p;
 		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
 		if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
-			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
 		else
-			c = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
-		c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
@@ -1328,9 +1381,10 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 	try {
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
-		PicProcessorSharpen *c = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
-		if (defval != "0") c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		if (defval != "0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
@@ -1344,9 +1398,10 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 	try {
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
-		PicProcessorRotate *c = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
-		if (defval != "0.0") c->processPic();
-		if (!commandtree->GetNextSibling(c->GetId()).IsOk()) CommandTreeSetDisplay(c->GetId());
+		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		if (defval != "0.0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
@@ -1365,9 +1420,10 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
 		wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
-		PicProcessorDenoise *d = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
-		if (sigma != "0") d->processPic();
-		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
+		if (sigma != "0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding denoise tool failed: %s",e.what()));
@@ -1389,9 +1445,10 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		wxString desatpct = wxConfigBase::Get()->Read("tool.redeye.desaturationpercent","1.0");
 		
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
-		PicProcessorRedEye *d = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
+		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
+		p->createPanel(parambook);
 		//d->processPic();
-		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
@@ -1403,8 +1460,9 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *d = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic, parameters);
-		if (!commandtree->GetNextSibling(d->GetId()).IsOk()) CommandTreeSetDisplay(d->GetId());
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic, parameters);
+		p->createPanel(parambook);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));

@@ -92,6 +92,8 @@ void PicProcessorBright::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new BrightPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorBright::showParams()

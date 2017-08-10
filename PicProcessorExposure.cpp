@@ -90,6 +90,8 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ExposurePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorExposure::showParams()

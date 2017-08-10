@@ -61,6 +61,8 @@ void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ColorspacePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorColorSpace::showParams()

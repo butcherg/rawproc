@@ -139,6 +139,8 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new DenoisePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorDenoise::showParams()

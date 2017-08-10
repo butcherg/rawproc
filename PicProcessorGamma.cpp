@@ -4,6 +4,7 @@
 #include "gimage/curve.h"
 #include <wx/fileconf.h>
 
+#define GAMMAID 8500
 
 class GammaPanel: public PicProcPanel
 {
@@ -13,14 +14,14 @@ class GammaPanel: public PicProcPanel
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			b->Add(new wxStaticText(this,-1, "gamma", wxDefaultPosition, wxSize(100,20)), flags);
-			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, GAMMAID, p, wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
 			Update();
 			SetFocus();
-			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this);
+			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this, GAMMAID);
 		}
 
 		~GammaPanel()
@@ -50,6 +51,8 @@ void PicProcessorGamma::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new GammaPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorGamma::showParams()

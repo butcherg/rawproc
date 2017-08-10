@@ -60,7 +60,7 @@ private:
 	double wscale;
 	
  
-	DECLARE_EVENT_TABLE()
+//	DECLARE_EVENT_TABLE()
 };
  
 

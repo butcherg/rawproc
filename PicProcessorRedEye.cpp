@@ -181,6 +181,8 @@ void PicProcessorRedEye::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new RedEyePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorRedEye::showParams()

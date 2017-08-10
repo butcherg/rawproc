@@ -92,6 +92,8 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new SharpenPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorSharpen::showParams()
