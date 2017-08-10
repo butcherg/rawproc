@@ -10,7 +10,7 @@
 class ShadowPanel: public PicProcPanel
 {
 	public:
-		ShadowPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		ShadowPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxArrayString p = split(params,",");
 
@@ -107,7 +107,13 @@ class ShadowPanel: public PicProcPanel
 
 PicProcessorShadow::PicProcessorShadow(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorShadow::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new ShadowPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorShadow::showParams()

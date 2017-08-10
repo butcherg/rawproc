@@ -10,7 +10,7 @@
 class BrightPanel: public PicProcPanel
 {
 	public:
-		BrightPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		BrightPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -85,7 +85,13 @@ class BrightPanel: public PicProcPanel
 
 PicProcessorBright::PicProcessorBright(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorBright::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new BrightPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorBright::showParams()

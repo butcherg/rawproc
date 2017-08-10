@@ -11,7 +11,7 @@
 class ContrastPanel: public PicProcPanel
 {
 	public:
-		ContrastPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		ContrastPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -94,7 +94,13 @@ class ContrastPanel: public PicProcPanel
 
 PicProcessorContrast::PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorContrast::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new ContrastPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorContrast::showParams()

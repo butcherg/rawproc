@@ -11,7 +11,7 @@
 class CurvePanel: public PicProcPanel
 {
 	public:
-		CurvePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		CurvePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
 			wxArrayString str;
@@ -88,7 +88,13 @@ PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl
 		crv.insertpoint(atof(cpts[i]), atof(cpts[i+1]));
 	}
 	ctrlpts = crv.getControlPoints();
-	showParams();
+	//showParams();
+}
+
+void PicProcessorCurve::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new CurvePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorCurve::showParams()

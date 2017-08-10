@@ -10,7 +10,7 @@
 class RedEyePanel: public PicProcPanel
 {
 	public:
-		RedEyePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		RedEyePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -167,7 +167,7 @@ PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCt
 		c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
 	}
 	m_display->SetDrawList(dcList);
-	showParams();
+	//showParams();
 	m_display->Bind(wxEVT_LEFT_DOWN, &PicProcessorRedEye::OnLeftDown, this);
 }
 
@@ -177,6 +177,11 @@ PicProcessorRedEye::~PicProcessorRedEye()
 	m_display->SetDrawList("");
 }
 
+void PicProcessorRedEye::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new RedEyePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
+}
 
 void PicProcessorRedEye::showParams()
 {

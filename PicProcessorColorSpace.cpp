@@ -9,7 +9,7 @@ class ColorspacePanel: public PicProcPanel
 {
 
 	public:
-		ColorspacePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			wxArrayString parms = split(params, ",");
@@ -52,9 +52,15 @@ class ColorspacePanel: public PicProcPanel
 
 };
 
-PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) {
-	showParams();
+PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) 
+{
+	//showParams();
+}
 
+void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new ColorspacePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorColorSpace::showParams()

@@ -10,7 +10,7 @@
 class SharpenPanel: public PicProcPanel
 {
 	public:
-		SharpenPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		SharpenPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -85,7 +85,13 @@ class SharpenPanel: public PicProcPanel
 
 PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorSharpen::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new SharpenPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorSharpen::showParams()

@@ -11,7 +11,7 @@
 class RotatePreview: public wxPanel
 {
 	public:
-		RotatePreview(wxPanel *parent, wxImage image, double angle, const wxSize &size=wxDefaultSize, const wxPoint &pos=wxDefaultPosition): wxPanel(parent, wxID_ANY, pos, size)
+		RotatePreview(wxWindow *parent, wxImage image, double angle, const wxSize &size=wxDefaultSize, const wxPoint &pos=wxDefaultPosition): wxPanel(parent, wxID_ANY, pos, size)
 		{
 			SetDoubleBuffered(true);
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
@@ -115,7 +115,7 @@ class RotatePreview: public wxPanel
 class RotatePanel: public PicProcPanel
 {
 	public:
-		RotatePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		RotatePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetDoubleBuffered(true);
 			wxSize s = GetSize();
@@ -256,7 +256,13 @@ class RotatePanel: public PicProcPanel
 
 PicProcessorRotate::PicProcessorRotate(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorRotate::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new RotatePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorRotate::showParams()

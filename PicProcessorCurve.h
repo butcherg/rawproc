@@ -10,6 +10,7 @@ class PicProcessorCurve: public PicProcessor
 {
 	public:
 		PicProcessorCurve(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		void createPanel(wxSimplebook* parent);
 		void showParams();
 		void setControlPoints(std::vector<cp> ctpts);
 		void setChannel(wxString chan);

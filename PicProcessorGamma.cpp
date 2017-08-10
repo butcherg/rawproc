@@ -9,7 +9,7 @@ class GammaPanel: public PicProcPanel
 {
 
 	public:
-		GammaPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		GammaPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			b->Add(new wxStaticText(this,-1, "gamma", wxDefaultPosition, wxSize(100,20)), flags);
@@ -41,9 +41,15 @@ class GammaPanel: public PicProcPanel
 
 };
 
-PicProcessorGamma::PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) {
-	showParams();
+PicProcessorGamma::PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) 
+{
+	//showParams();
+}
 
+void PicProcessorGamma::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new GammaPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorGamma::showParams()

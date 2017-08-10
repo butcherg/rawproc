@@ -9,7 +9,7 @@
 class ExposurePanel: public PicProcPanel
 {
 	public:
-		ExposurePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		ExposurePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -83,7 +83,13 @@ class ExposurePanel: public PicProcPanel
 
 PicProcessorExposure::PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorExposure::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new ExposurePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorExposure::showParams()

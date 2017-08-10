@@ -8,7 +8,7 @@
 class CropPanel: public PicProcPanel
 {
 	public:
-		CropPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		CropPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetDoubleBuffered(true);
 			node = 0;
@@ -268,13 +268,19 @@ class CropPanel: public PicProcPanel
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
 }
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, "",  tree, display, parameters) 
 {
 	c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
-	showParams();
+	//showParams();
+}
+
+void PicProcessorCrop::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new CropPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorCrop::showParams()

@@ -11,7 +11,7 @@
 class BlackWhitePointPanel: public PicProcPanel
 {
 	public:
-		BlackWhitePointPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		BlackWhitePointPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxArrayString p = split(params,",");
 
@@ -152,8 +152,14 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
 	}
 	else setParams(command);
-	showParams();
+	//showParams();
 	//processPic();
+}
+
+void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new BlackWhitePointPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorBlackWhitePoint::showParams()

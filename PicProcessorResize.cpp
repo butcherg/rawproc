@@ -9,7 +9,7 @@
 class ResizePanel: public PicProcPanel
 {
 	public:
-		ResizePanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		ResizePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxArrayString algos;
@@ -67,7 +67,13 @@ class ResizePanel: public PicProcPanel
 
 PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorResize::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new ResizePanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorResize::showParams()

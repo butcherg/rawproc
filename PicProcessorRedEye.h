@@ -9,6 +9,7 @@ class PicProcessorRedEye: public PicProcessor
 	public:
 		PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
 		~PicProcessorRedEye();
+		void createPanel(wxSimplebook* parent);
 		void showParams();
 		bool processPic();
 		

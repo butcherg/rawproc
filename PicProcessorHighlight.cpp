@@ -10,7 +10,7 @@
 class HighlightPanel: public PicProcPanel
 {
 	public:
-		HighlightPanel(wxPanel *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		HighlightPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxArrayString p = split(params,",");
 
@@ -108,7 +108,13 @@ class HighlightPanel: public PicProcPanel
 
 PicProcessorHighlight::PicProcessorHighlight(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
-	showParams();
+	//showParams();
+}
+
+void PicProcessorHighlight::createPanel(wxSimplebook* parent)
+{
+	toolpanel = new HighlightPanel(parent, this, c);
+	parent->ShowNewPage(toolpanel);
 }
 
 void PicProcessorHighlight::showParams()
