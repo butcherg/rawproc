@@ -591,6 +591,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	parentframe->SetStatusText("");
 	Refresh();
 	Update();
+	event.Skip();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
@@ -622,6 +623,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	}
 	Refresh();
 	Update();
+	event.Skip();
 }
 
 void PicPanel::OnKey(wxKeyEvent& event)

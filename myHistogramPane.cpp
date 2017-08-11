@@ -45,15 +45,15 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	pressedDown = false;
 	inwindow = false;
 
-	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
+	//Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
 	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
 	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
 	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
-	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
+	//Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
+	//Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
         //EVT_CHAR(myHistogramPane::keyPressed)
-        Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
+        //Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
         //EVT_KEY_UP(myHistogramPane::keyReleased)
         Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
         Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
@@ -63,7 +63,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 }
 
 myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size)
+ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
 	blankpic = false;
 	SetDoubleBuffered(true);
@@ -106,13 +106,13 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	pressedDown = false;
 	inwindow = false;
 
-	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
+	//Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
 	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
 	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
 	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
-	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
+	//Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
+	//Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
         //EVT_CHAR(myHistogramPane::keyPressed)
         Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
         //EVT_KEY_UP(myHistogramPane::keyReleased)
@@ -200,6 +200,8 @@ void myHistogramPane::render(wxDC&  dc)
 	int w, h;
 	int hx;
 	GetSize(&w, &h);
+	w-=6;
+	h-=6;
 	//dc.SetBackground(*wxWHITE_BRUSH);
 	dc.Clear();
 	if (blankpic) return;
@@ -285,6 +287,7 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 void myHistogramPane::keyPressed(wxKeyEvent& event) 
@@ -323,9 +326,10 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			//}
 			break;
 	}
-	//event.Skip();
+
 	Update();
 	Refresh();
+	event.Skip();
 }
  
 void myHistogramPane::mouseDown(wxMouseEvent& event) 
@@ -335,6 +339,7 @@ void myHistogramPane::mouseDown(wxMouseEvent& event)
 	MouseY = event.m_y;
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 void myHistogramPane::mouseMoved(wxMouseEvent& event)  
@@ -352,6 +357,7 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	MouseY = y;
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 void myHistogramPane::mouseReleased(wxMouseEvent& event) 
@@ -359,6 +365,7 @@ void myHistogramPane::mouseReleased(wxMouseEvent& event)
 	pressedDown = false;
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
@@ -368,6 +375,7 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 	yorigin = 0;
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 

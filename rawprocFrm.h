@@ -53,7 +53,7 @@
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"
 
-//#define USE_WXAUI
+#define USE_WXAUI
 
 
 class myParameters: public wxPanel

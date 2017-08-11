@@ -35,7 +35,8 @@ class CurvePanel: public PicProcPanel
 			else
 				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
-			Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
+			curve->Bind(wxEVT_LEFT_UP, &CurvePanel::paramChangedMouse, this);
+			//Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
 		}
 
 		~CurvePanel()
@@ -44,6 +45,16 @@ class CurvePanel: public PicProcPanel
 		}
 
 
+		void paramChangedMouse(wxMouseEvent& event)
+		{
+			wxString ch = chan->GetString(chan->GetSelection());
+			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
+			((PicProcessorCurve *) q)->setChannel(ch);
+			q->setParams(ch+","+curve->getControlPoints());
+			q->processPic();
+			event.Skip();
+		}
+
 		void paramChanged(wxScrollEvent& event)
 		{
 			wxString ch = chan->GetString(chan->GetSelection());
@@ -51,8 +62,9 @@ class CurvePanel: public PicProcPanel
 			((PicProcessorCurve *) q)->setChannel(ch);
 			q->setParams(ch+","+curve->getControlPoints());
 			q->processPic();
-			//event.Skip();
+			event.Skip();
 		}
+
 		
 		void channelChanged(wxCommandEvent& event)
 		{
@@ -61,7 +73,7 @@ class CurvePanel: public PicProcPanel
 			((PicProcessorCurve *) q)->setChannel(ch);
 			q->setParams(ch+","+curve->getControlPoints());
 			q->processPic();
-			//event.Skip();
+			event.Skip();
 		}
 
 

@@ -160,6 +160,7 @@ void CurvePane::mouseReleased(wxMouseEvent& event)
 			wxQueueEvent(p,e);
 		}
 	}
+	event.Skip();
 }
 
 void CurvePane::mouseRightDown(wxMouseEvent& event)
@@ -172,7 +173,7 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 	paintNow();
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 	e->SetString("This is the data");
-	wxQueueEvent(p,e);
+	wxQueueEvent(this,e);
 }
 
 void CurvePane::mouseDclick(wxMouseEvent& event)
@@ -187,7 +188,8 @@ void CurvePane::mouseDclick(wxMouseEvent& event)
 	paintNow();
 	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 	e->SetString("This is the data");
-	wxQueueEvent(p,e);
+	wxQueueEvent(this,e);
+	event.Skip();
 }
 
 void CurvePane::mouseWheelMoved(wxMouseEvent& event)
@@ -209,7 +211,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 			Refresh();
 			wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
 			e->SetString("This is the data");
-			wxQueueEvent(p,e);
+			wxQueueEvent(this,e);
 			break;
 	}
 	event.Skip();

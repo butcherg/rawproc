@@ -20,7 +20,7 @@ class GammaPanel: public PicProcPanel
 			b->Layout();
 			Refresh();
 			Update();
-			SetFocus();
+			edit->SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this, GAMMAID);
 		}
 
@@ -35,7 +35,6 @@ class GammaPanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
-
 
 	private:
 		wxTextCtrl *edit;

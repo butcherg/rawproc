@@ -224,6 +224,10 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
+#ifdef USE_WXAUI
+	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
+	mgr.SetManagedWindow(this);
+#endif
 
 	//Image manipulation panels:
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
@@ -231,7 +235,7 @@ void rawprocFrm::CreateGUIControls()
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
 	histogram->SetMinSize(wxSize(285,300));
 
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,300));
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,300), wxBORDER_SUNKEN);
 //	parameters = new myParameters(this, wxID_ANY, wxDefaultPosition, wxSize(285,300));
 //	parameters->SetMinSize(wxSize(285,300));
 //	parameters->SetMaxSize(wxSize(1200,750));
@@ -242,16 +246,11 @@ void rawprocFrm::CreateGUIControls()
 
 
 #ifdef USE_WXAUI
-	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
-	mgr.SetManagedWindow(this);
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1));  //.GripperTop());
-	mgr.AddPane(parambook, pinfo.Caption(wxT("ParametersB")).Position(2).MinSize(wxSize(285,300)));
-	mgr.AddPane(parameters, pinfo.Caption(wxT("Parameters")).Position(2).MinSize(wxSize(285,300))); //.GripperTop());
+	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2).MinSize(wxSize(285,300)));
 	mgr.Update();
-
-
 #else
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 	hs = new wxBoxSizer(wxHORIZONTAL);
@@ -268,10 +267,10 @@ void rawprocFrm::CreateGUIControls()
 	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags);
 	hs->Add(pic, flags);
 	SetSizerAndFit(hs);
-	Update();
+#endif
+
 	Refresh();
 	Update();
-#endif
 
 }
 
@@ -445,6 +444,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic, parameters);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic, parameters);
 	else return NULL;
+	p->createPanel(parambook);
 	p->processPic();
 	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -975,6 +975,7 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 		
 
 	displayitem = item;
+	event.Skip();
 }
 
 
@@ -990,6 +991,7 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	}
 	Update();
 	Refresh();
+	event.Skip();
 }
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
@@ -1022,7 +1024,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	switch (event.GetKeyCode()) {
         case 127:  //Delete
 	case 8: //Backspace
-		CommandTreeDeleteItem(commandtree->GetSelection());
+		//CommandTreeDeleteItem(commandtree->GetSelection());
         	break;
         //case 315: //Up Arrow
         //	MoveBefore(commandtree->GetSelection());
@@ -1059,6 +1061,7 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeEvent& event)
 	if (s)
 		((PicProcessor *) commandtree->GetItemData(s))->processPic();
 	((PicProcessor *) commandtree->GetItemData(event.GetItem()))->processPic();
+	event.Skip();
 }
 
 void rawprocFrm::CommandTreeBeginDrag(wxTreeEvent& event)
@@ -1150,6 +1153,8 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
+		Refresh();
+		Update();
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
