@@ -26,7 +26,7 @@ EVT_MOUSEWHEEL(CurvePane::mouseWheelMoved)
 END_EVENT_TABLE()
 
 CurvePane::CurvePane(wxWindow* parent, wxString controlpoints) :
-wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(272,270) )
+wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 {
 	int ctstart;
 	p = parent;

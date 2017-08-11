@@ -156,6 +156,9 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 void rawprocFrm::CreateGUIControls()
 {
+#ifdef USE_WXAUI
+	mgr.SetManagedWindow(this);
+#endif
 	//Do not add custom code between
 	//GUI Items Creation Start and GUI Items Creation End
 	//wxDev-C++ designer will remove them.
@@ -224,47 +227,38 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
-#ifdef USE_WXAUI
-	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
-	mgr.SetManagedWindow(this);
-#endif
 
 	//Image manipulation panels:
 	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
 
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
-	histogram->SetMinSize(wxSize(285,300));
 
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,300), wxBORDER_SUNKEN);
-//	parameters = new myParameters(this, wxID_ANY, wxDefaultPosition, wxSize(285,300));
-//	parameters->SetMinSize(wxSize(285,300));
-//	parameters->SetMaxSize(wxSize(1200,750));
-	//parameters->SetAutoLayout(true); 
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,320), wxBORDER_SUNKEN);
+
 
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
 
 
 #ifdef USE_WXAUI
+	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
-	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1));  //.GripperTop());
-	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2).MinSize(wxSize(285,300)));
+	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.GripperTop());
+	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2));
 	mgr.Update();
 #else
-	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).FixedMinSize();  
 	hs = new wxBoxSizer(wxHORIZONTAL);
 	vs = new wxBoxSizer(wxVERTICAL);
 	vs->Add(new wxStaticText(this,wxID_ANY, "commands:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(commandtree, flags);
-	vs->Add(new wxStaticLine(this), flags);
 	vs->Add(new wxStaticText(this,wxID_ANY, "histogram:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(histogram, flags);
-	vs->Add(new wxStaticLine(this), flags);
 	vs->Add(new wxStaticText(this,wxID_ANY, "parameters:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(parambook, flags);
 	hs->Add(vs, flags);
-	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags);
+	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags.Expand());
 	hs->Add(pic, flags);
 	SetSizerAndFit(hs);
 #endif
