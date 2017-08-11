@@ -35,8 +35,7 @@ class CurvePanel: public PicProcPanel
 			else
 				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
-			curve->Bind(wxEVT_LEFT_UP, &CurvePanel::paramChangedMouse, this);
-			//Bind(wxEVT_SCROLL_THUMBRELEASE, &CurvePanel::paramChanged, this);
+			Bind(myCURVE_UPDATE, &CurvePanel::paramChanged, this);
 		}
 
 		~CurvePanel()
@@ -44,18 +43,7 @@ class CurvePanel: public PicProcPanel
 			curve->~CurvePane();
 		}
 
-
-		void paramChangedMouse(wxMouseEvent& event)
-		{
-			wxString ch = chan->GetString(chan->GetSelection());
-			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
-			((PicProcessorCurve *) q)->setChannel(ch);
-			q->setParams(ch+","+curve->getControlPoints());
-			q->processPic();
-			event.Skip();
-		}
-
-		void paramChanged(wxScrollEvent& event)
+		void paramChanged(wxCommandEvent& event)
 		{
 			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());

@@ -7,6 +7,8 @@
 
 #include "util.h"
 
+wxDEFINE_EVENT(myCURVE_UPDATE, wxCommandEvent);
+
 
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
  
@@ -155,9 +157,10 @@ void CurvePane::mouseReleased(wxMouseEvent& event)
 		mousemotion=false;
 		paintNow();
 		if (mousemoved) {
-			wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-			e->SetString("This is the data");
-			wxQueueEvent(p,e);
+			wxCommandEvent e(myCURVE_UPDATE);
+			e.SetEventObject(this);
+			e.SetString("update");
+			ProcessWindowEvent(e);
 		}
 	}
 	event.Skip();
@@ -171,9 +174,10 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
 	paintNow();
-	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-	e->SetString("This is the data");
-	wxQueueEvent(this,e);
+	wxCommandEvent e(myCURVE_UPDATE);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
 }
 
 void CurvePane::mouseDclick(wxMouseEvent& event)
@@ -186,10 +190,10 @@ void CurvePane::mouseDclick(wxMouseEvent& event)
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
 	paintNow();
-	wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-	e->SetString("This is the data");
-	wxQueueEvent(this,e);
-	event.Skip();
+	wxCommandEvent e(myCURVE_UPDATE);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
 }
 
 void CurvePane::mouseWheelMoved(wxMouseEvent& event)
@@ -209,9 +213,10 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 		case 8: //Backspace
 			c.deletepoint(selectedCP.x, selectedCP.y);
 			Refresh();
-			wxCommandEvent *e = new wxCommandEvent(wxEVT_SCROLL_THUMBRELEASE);
-			e->SetString("This is the data");
-			wxQueueEvent(this,e);
+			wxCommandEvent e(myCURVE_UPDATE);
+			e.SetEventObject(this);
+			e.SetString("update");
+			ProcessWindowEvent(e);
 			break;
 	}
 	event.Skip();

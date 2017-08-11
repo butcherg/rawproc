@@ -8,6 +8,8 @@
 
 using namespace std;
 
+wxDECLARE_EVENT(myCURVE_UPDATE, wxCommandEvent);
+
 class CurvePane : public wxPanel
 {
  
