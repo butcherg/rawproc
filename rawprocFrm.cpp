@@ -244,11 +244,11 @@ void rawprocFrm::CreateGUIControls()
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).FixedMinSize();  
 	hs = new wxBoxSizer(wxHORIZONTAL);
 	vs = new wxBoxSizer(wxVERTICAL);
-	vs->Add(new wxStaticText(this,wxID_ANY, "commands:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Commands:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(commandtree, flags);
-	vs->Add(new wxStaticText(this,wxID_ANY, "histogram:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Histogram:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(histogram, flags);
-	vs->Add(new wxStaticText(this,wxID_ANY, "parameters:", wxDefaultPosition, wxSize(100,20)), flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Parameters:", wxDefaultPosition, wxSize(100,20)), flags);
 	vs->Add(parambook, flags);
 	hs->Add(vs, flags);
 	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags.Expand());
