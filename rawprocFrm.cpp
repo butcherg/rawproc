@@ -156,7 +156,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 void rawprocFrm::CreateGUIControls()
 {
-#ifdef USE_WXAUI
+#ifndef SIZERLAYOUT
 	mgr.SetManagedWindow(this);
 #endif
 	//Do not add custom code between
@@ -229,7 +229,7 @@ void rawprocFrm::CreateGUIControls()
 	
 
 	//Image manipulation panels:
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);  
 
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
 
@@ -240,14 +240,7 @@ void rawprocFrm::CreateGUIControls()
 	pic = new PicPanel(this, commandtree, histogram);
 
 
-#ifdef USE_WXAUI
-	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
-	mgr.AddPane(pic, wxCENTER);
-	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
-	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.GripperTop());
-	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2));
-	mgr.Update();
-#else
+#ifdef SIZERLAYOUT
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).FixedMinSize();  
 	hs = new wxBoxSizer(wxHORIZONTAL);
 	vs = new wxBoxSizer(wxVERTICAL);
@@ -261,6 +254,13 @@ void rawprocFrm::CreateGUIControls()
 	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags.Expand());
 	hs->Add(pic, flags);
 	SetSizerAndFit(hs);
+#else
+	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
+	mgr.AddPane(pic, wxCENTER);
+	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
+	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.GripperTop());
+	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2));
+	mgr.Update();
 #endif
 
 	Refresh();
@@ -302,11 +302,11 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef USE_WXAUI
-	mgr.UnInit();
-#else
+#ifdef SIZERLAYOUT
 	if (vs) vs->~wxBoxSizer();
 	if (hs) hs->~wxBoxSizer();
+#else
+	mgr.UnInit();
 #endif
 	Destroy();
 }
@@ -323,11 +323,11 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef USE_WXAUI
-	mgr.UnInit();
-#else
+#ifdef SIZERLAYOUT
 	if (vs) vs->~wxBoxSizer();
 	if (hs) hs->~wxBoxSizer();
+#else
+	mgr.UnInit();
 #endif
 	Destroy();
 }
