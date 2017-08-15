@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
     //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
-    EVT_CHAR(PicPanel::OnKey)
+    //EVT_CHAR(PicPanel::OnKey)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
@@ -72,7 +72,9 @@ END_EVENT_TABLE()
         
         void PicPanel::OnSize(wxSizeEvent& event) 
         {
+	    Update();
             Refresh();
+            event.Skip();
         }
         
         void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
@@ -331,6 +333,7 @@ END_EVENT_TABLE()
 	void PicPanel::SetDrawList(wxString list)
 	{
 		dcList = list;
+		Update();
 		Refresh();
 	}
    
@@ -372,6 +375,7 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = (double) w/ (double) img.GetWidth();
+			Update();
 			Refresh();
 		}
 	}
@@ -382,6 +386,7 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = (double) h/ (double) img.GetHeight();
+			Update();
 			Refresh();
 		}
 	}
@@ -392,6 +397,7 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
+			Update();
 			Refresh();
 		}
 	}
@@ -401,8 +407,8 @@ END_EVENT_TABLE()
 		scale = s;
 		FitMode(false);
 		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
-		Refresh();
 		Update();
+		Refresh();
 	}
 
 	void PicPanel::FitMode(bool f)
@@ -441,6 +447,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::OnPaint(wxPaintEvent & event)
 	{
+		event.Skip();
 		if (blank) return;
 		if (img.IsOk() && thumb != NULL) {
 			wxPaintDC dc(this);
@@ -460,6 +467,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::OnLeftDown(wxMouseEvent& event)
 	{
+		event.Skip();
 		if (blank) return;
 		SetFocus();
 		int radius = 20;
@@ -473,36 +481,35 @@ END_EVENT_TABLE()
 				moving=true;
 		else
 			moving=true;
-		event.Skip();
 	}
         
 	void PicPanel::OnRightDown(wxMouseEvent& event)
 	{
+		event.Skip();
 		if (blank) return;
 		picX = 0; picY = 0;
 		PaintNow();
-		event.Skip();
 	}
 
 	void PicPanel::OnLeftUp(wxMouseEvent& event)
 	{
+		event.Skip();
 		if (blank) return;
 		if (moving | thumbmoving) {
 			moving=false;
 			thumbmoving=false;
 		}
-		event.Skip();
 	}
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
 	if (blank) return;
 	bool anchorx;
-    int x, y, posx, posy;
-    int iw, ih;
+	int x, y, posx, posy;
+	int iw, ih;
 	int dx, dy;
-            
-    if (img.IsOk()){
+	
+	if (img.IsOk()){
 		iw = img.GetWidth()*scale;
 		ih = img.GetHeight()*scale;
             
@@ -520,8 +527,8 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picX -= MouseX-x; 
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
+			Update();
 			Refresh();
-			//Update();
 			//PaintNow();
 		}
 
@@ -529,8 +536,8 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picX += (MouseX-x) * ((float) iw / (float) thumbW);
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
+			Update();
 			Refresh();
-			//Update();
 			//PaintNow();
 		}
 
@@ -561,6 +568,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
         
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
 {
+	event.Skip();
 	if (blank) return;
 	double increment = 0.05;
 	
@@ -589,13 +597,13 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	}
 	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
 	parentframe->SetStatusText("");
-	Refresh();
 	Update();
-	event.Skip();
+	Refresh();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
+	event.Skip();
 	if (blank) return;
 	MouseX = event.m_x;
 	MouseY = event.m_y;
@@ -621,13 +629,13 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 			parentframe->SetStatusText("");
 		}
 	}
-	Refresh();
 	Update();
-	event.Skip();
+	Refresh();
 }
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	event.Skip();
 	if (blank) return;
 	//parentframe->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
@@ -636,7 +644,6 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			ToggleThumb();
 			break;
 	}
-	event.Skip();
 }
         
         

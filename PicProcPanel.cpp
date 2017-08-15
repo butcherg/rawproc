@@ -23,6 +23,7 @@ void PicProcPanel::OnSize(wxSizeEvent& event)
 	if (b) {
 		Refresh();
 	}
+	event.Skip();
 }
 
 wxString PicProcPanel::getParams()

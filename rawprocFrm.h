@@ -72,7 +72,7 @@ public:
 			wxSizeEvent *e = new wxSizeEvent(event.GetSize());
 			wxQueueEvent(child,e);
 		}
-
+		event.Skip();
 	}
 
 };

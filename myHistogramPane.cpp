@@ -119,6 +119,7 @@ void myHistogramPane::OnSize(wxSizeEvent& event)
 {
 	Update();
 	Refresh();
+	event.Skip();
 }
 
  
