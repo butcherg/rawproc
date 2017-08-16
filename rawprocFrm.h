@@ -200,6 +200,7 @@ class rawprocFrm : public wxFrame
 	void MnuColorSpace(wxCommandEvent& event);
 
 	void UpdateConfig(wxPropertyGridEvent& event);
+	void SetStartPath(wxString path);
 	void SetBackground();
 		
 	private:
@@ -232,6 +233,7 @@ class rawprocFrm : public wxFrame
 		wxTreeItemId displayitem;
 		wxFileName filename, sourcefilename;
 		wxString configfile;
+		wxString openfilepath;
 
 		wxHtmlHelpController help;
 };
