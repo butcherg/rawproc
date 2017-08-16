@@ -80,7 +80,7 @@ bool rawprocFrmApp::OnInit()
 			frame->OpenFile(f.GetFullPath());
 	}
 	else {
-
+		//parm app.start.path: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.
 		wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
 		if (startpath != "") {
 			if (wxFileName::DirExists(startpath))
