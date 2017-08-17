@@ -27,7 +27,6 @@ END_EVENT_TABLE()
 		histogram = hgram;
 		//wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
-		wxInitAllImageHandlers();
 		SetDoubleBuffered(true);  //watch this one... tricksy...
 		showDebug = true;
 		scaleWindow = false;
@@ -68,13 +67,13 @@ END_EVENT_TABLE()
 		//if (histogram) histogram->~wxBitmap();
 	}
         
-        void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
+//        void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
         
         void PicPanel::OnSize(wxSizeEvent& event) 
         {
-	    Update();
-            Refresh();
-            event.Skip();
+		Refresh();
+		Update();
+		event.Skip();
         }
         
         void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
@@ -111,6 +110,8 @@ END_EVENT_TABLE()
 	void PicPanel::SetPic(gImage * dib)
 	{
 		cmsHPROFILE hDisplayProfile;
+
+		blank = true;
 		
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
 		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
@@ -221,10 +222,10 @@ END_EVENT_TABLE()
 		int iw, ih;
 		wxImage spic, sspic;
 		
-		if (blank) {
-			dc.Clear();
-			return;
-		}
+		//if (blank) {
+		//	dc.Clear();
+		//	return;
+		//}
             
 		if (fitmode) {
 			if (img.GetWidth() > img.GetHeight())
@@ -333,8 +334,8 @@ END_EVENT_TABLE()
 	void PicPanel::SetDrawList(wxString list)
 	{
 		dcList = list;
-		Update();
 		Refresh();
+		Update();
 	}
    
 
@@ -375,8 +376,8 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = (double) w/ (double) img.GetWidth();
-			Update();
 			Refresh();
+			Update();
 		}
 	}
 	
@@ -386,8 +387,8 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = (double) h/ (double) img.GetHeight();
-			Update();
 			Refresh();
+			Update();
 		}
 	}
 
@@ -397,8 +398,8 @@ END_EVENT_TABLE()
 		GetSize(&w, &h);
 		if (img.IsOk()) {
 			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
-			Update();
 			Refresh();
+			Update();
 		}
 	}
 
@@ -407,8 +408,8 @@ END_EVENT_TABLE()
 		scale = s;
 		FitMode(false);
 		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
-		Update();
 		Refresh();
+		Update();
 	}
 
 	void PicPanel::FitMode(bool f)
@@ -469,7 +470,7 @@ END_EVENT_TABLE()
 	{
 		event.Skip();
 		if (blank) return;
-		SetFocus();
+		//SetFocus();
 		int radius = 20;
 		MouseX = event.m_x;
 		MouseY = event.m_y;
@@ -488,7 +489,8 @@ END_EVENT_TABLE()
 		event.Skip();
 		if (blank) return;
 		picX = 0; picY = 0;
-		PaintNow();
+		Refresh();
+		Update();
 	}
 
 	void PicPanel::OnLeftUp(wxMouseEvent& event)
@@ -527,18 +529,16 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picX -= MouseX-x; 
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
-			Update();
 			Refresh();
-			//PaintNow();
+			Update();
 		}
 
 		if (thumbmoving) {
 			picX += (MouseX-x) * ((float) iw / (float) thumbW);
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
-			Update();
 			Refresh();
-			//PaintNow();
+			Update();
 		}
 
 		if (scale == 1.0) {
@@ -597,8 +597,8 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	}
 	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
 	parentframe->SetStatusText("");
-	Update();
 	Refresh();
+	Update();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
@@ -629,10 +629,11 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 			parentframe->SetStatusText("");
 		}
 	}
-	Update();
 	Refresh();
+	Update();
 }
 
+/*
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	event.Skip();
@@ -645,5 +646,5 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			break;
 	}
 }
-        
-        
+*/
+

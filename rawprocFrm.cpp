@@ -1147,8 +1147,6 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
 		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
-		Refresh();
-		Update();
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}

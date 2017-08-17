@@ -37,11 +37,11 @@ public:
 	void mouseWheelMoved(wxMouseEvent& event);
 	void mouseReleased(wxMouseEvent& event);
 	void mouseDoubleClicked(wxMouseEvent& event);
-	void rightClick(wxMouseEvent& event);
+	//void rightClick(wxMouseEvent& event);
 	void mouseEnterWindow(wxMouseEvent& event);
 	void mouseLeftWindow(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent& event);
-	void keyReleased(wxKeyEvent& event);
+	//void keyReleased(wxKeyEvent& event);
 
 private:
 	bool blankpic, pressedDown;

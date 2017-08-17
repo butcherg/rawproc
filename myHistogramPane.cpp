@@ -30,7 +30,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
 	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
 	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
-	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
+	//Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
 	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
 	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
         //EVT_CHAR(myHistogramPane::keyPressed)
@@ -91,7 +91,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
 	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
 	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
-	Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
+	//Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
 	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
 	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
         //EVT_CHAR(myHistogramPane::keyPressed)
@@ -117,8 +117,8 @@ myHistogramPane::~myHistogramPane()
 
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
@@ -171,9 +171,8 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 			if (hmax < histogram[i].b) hmax = histogram[i].b;
 		}
 	}
-	
-	paintNow();
-
+	Refresh();
+	Update();
 }
 
  
@@ -267,8 +266,8 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	}
 	if (wscale < 1.0) wscale = 1.0;
 
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
@@ -309,8 +308,8 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			break;
 	}
 
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
  
@@ -319,8 +318,8 @@ void myHistogramPane::mouseDown(wxMouseEvent& event)
 	pressedDown = true;
 	MouseX = event.m_x;
 	MouseY = event.m_y;
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
@@ -337,16 +336,16 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	}
 	MouseX = x;
 	MouseY = y;
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
 void myHistogramPane::mouseReleased(wxMouseEvent& event) 
 {
 	pressedDown = false;
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
@@ -355,8 +354,8 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 	wscale = 1.0;
 	xorigin = 0;
 	yorigin = 0;
-	Update();
 	Refresh();
+	Update();
 	event.Skip();
 }
 
@@ -364,19 +363,19 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 void myHistogramPane::mouseEnterWindow(wxMouseEvent& event) 
 {
 	inwindow = true;
-	Update();
 	Refresh();
+	Update();
 }
 
 void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) 
 {
 	inwindow =  false;
-	Update();
 	Refresh();
+	Update();
 }
 
-void myHistogramPane::rightClick(wxMouseEvent& event) {}
-void myHistogramPane::keyReleased(wxKeyEvent& event) {}
+//void myHistogramPane::rightClick(wxMouseEvent& event) {}
+//void myHistogramPane::keyReleased(wxKeyEvent& event) {}
  
  
 

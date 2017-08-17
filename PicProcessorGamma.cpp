@@ -18,10 +18,10 @@ class GammaPanel: public PicProcPanel
 			b->Add(edit, flags);
 			SetSizerAndFit(b);
 			b->Layout();
-			Refresh();
-			Update();
 			edit->SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this, GAMMAID);
+			Refresh();
+			Update();
 		}
 
 		~GammaPanel()

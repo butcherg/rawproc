@@ -27,7 +27,7 @@ class PicPanel: public wxPanel
 	public:
 		PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram);
 		~PicPanel();
-		void OnEraseBackground(wxEraseEvent& event);
+		//void OnEraseBackground(wxEraseEvent& event);
 		void OnSize(wxSizeEvent& event);
 		void PaintNow();
 		void OnPaint(wxPaintEvent& event);
@@ -56,7 +56,7 @@ class PicPanel: public wxPanel
 		void OnRightDown(wxMouseEvent& event);
 		void OnLeftDown(wxMouseEvent& event);
 		void OnLeftDoubleClicked(wxMouseEvent& event);
-		void OnKey(wxKeyEvent& event);
+		//void OnKey(wxKeyEvent& event);
         
     private:
 
