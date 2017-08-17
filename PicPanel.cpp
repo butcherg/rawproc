@@ -88,7 +88,7 @@ END_EVENT_TABLE()
 	{
 		toggleThumb = mode;
 		Refresh();
-		Update();
+		//Update();
 	}
 
 	void PicPanel::ToggleThumb()
@@ -97,14 +97,14 @@ END_EVENT_TABLE()
 		if (toggleThumb>3) toggleThumb = 1;
 		if (toggleThumb==2) toggleThumb = 3;
 		Refresh();
-		Update();
+		//Update();
 	}
 	
 	void PicPanel::BlankPic()
 	{
 		blank = true;
 		Refresh();
-		Update();
+		//Update();
 	}
 
 	void PicPanel::SetPic(gImage * dib)
@@ -209,23 +209,23 @@ END_EVENT_TABLE()
 		parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
 		Refresh();
-		Update();
+		//Update();
 
 		
 	}
 
 	void PicPanel::render(wxDC &dc)
 	{
-		if (blank) return;
+		//if (blank) return;
 		int w, h;
 		int tw, th;
 		int iw, ih;
 		wxImage spic, sspic;
 		
-		//if (blank) {
-		//	dc.Clear();
-		//	return;
-		//}
+		if (blank) {
+			dc.Clear();
+			return;
+		}
             
 		if (fitmode) {
 			if (img.GetWidth() > img.GetHeight())
@@ -264,8 +264,8 @@ END_EVENT_TABLE()
                 
 		if (scale == 1.0)
 			spic = img.Copy();
-		else if (scale <= .5)
-			spic = img.Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
+		//else if (scale <= .5)
+		//	spic = img.Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
@@ -282,7 +282,7 @@ END_EVENT_TABLE()
 		dc.SetPen(wxPen(wxColour(255,255,255),1));
 		dc.SetBrush(wxBrush(wxColour(50,50,50)));
 		dc.DrawBitmap(*scaledpic, picX, picY, false);
-		
+
 		if (dcList != "" & scale == 1.0) {
 			dc.SetPen(*wxYELLOW_PEN);
 			wxArrayString l = split(dcList, ";");
@@ -297,7 +297,7 @@ END_EVENT_TABLE()
 				}
 			}
 		}
-		
+
 		if (thumb) {
 			if (toggleThumb != 3) {
 				dc.SetPen(wxPen(wxColour(0,0,0),1));
@@ -328,14 +328,14 @@ END_EVENT_TABLE()
 			dc.SetPen(wxPen(wxColour(255,255,255),1));
 			if (toggleThumb == 1) drawBox(dc, (-picX * ((float) thumbW/ (float) iw)), (-picY * ((float) thumbH/(float) ih)),tw,th);
 		}
-
+		
 	}
 	
 	void PicPanel::SetDrawList(wxString list)
 	{
 		dcList = list;
 		Refresh();
-		Update();
+		//Update();
 	}
    
 
@@ -377,7 +377,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = (double) w/ (double) img.GetWidth();
 			Refresh();
-			Update();
+			//Update();
 		}
 	}
 	
@@ -388,7 +388,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = (double) h/ (double) img.GetHeight();
 			Refresh();
-			Update();
+			//Update();
 		}
 	}
 
@@ -399,7 +399,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
 			Refresh();
-			Update();
+			//Update();
 		}
 	}
 
@@ -409,7 +409,7 @@ END_EVENT_TABLE()
 		FitMode(false);
 		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
 		Refresh();
-		Update();
+		//Update();
 	}
 
 	void PicPanel::FitMode(bool f)
@@ -453,16 +453,6 @@ END_EVENT_TABLE()
 		if (img.IsOk() && thumb != NULL) {
 			wxPaintDC dc(this);
 			render(dc);
-			/*
-			wxTreeItemId item = commandtree->GetSelection();
-			if (item.IsOk()) {
-				PicProcessor * i = ((PicProcessor *) commandtree->GetItemData(item));
-				if (i) { 
-					parentframe->SetStatusText("going to displayDraw()...");
-					i->displayDraw(dc);
-				}
-			}
-			*/
 		}
 	}
 
@@ -490,7 +480,7 @@ END_EVENT_TABLE()
 		if (blank) return;
 		picX = 0; picY = 0;
 		Refresh();
-		Update();
+		//Update();
 	}
 
 	void PicPanel::OnLeftUp(wxMouseEvent& event)
@@ -530,7 +520,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
 			Refresh();
-			Update();
+			//Update();
 		}
 
 		if (thumbmoving) {
@@ -538,7 +528,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
 			Refresh();
-			Update();
+			//Update();
 		}
 
 		if (scale == 1.0) {
@@ -598,7 +588,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
 	parentframe->SetStatusText("");
 	Refresh();
-	Update();
+	//Update();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
@@ -630,7 +620,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 		}
 	}
 	Refresh();
-	Update();
+	//Update();
 }
 
 /*
