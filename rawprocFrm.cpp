@@ -1129,9 +1129,10 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 	if (diag == NULL) {
 		diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
+		diag->ClearModifiedStatus();
+		diag->Show();
 	}
-	diag->ClearModifiedStatus();
-	diag->Show();
+
 }
 
 void rawprocFrm::MnuEXIF(wxCommandEvent& event)
