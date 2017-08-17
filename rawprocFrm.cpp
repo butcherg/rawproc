@@ -116,6 +116,11 @@ void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *t
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
+	//parm app.start.path: Specify the starting directory from which to open files.
+	wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
+	if (startpath != "") 
+		if (wxFileName::DirExists(startpath))
+			openfilepath = startpath;
 
 	CreateGUIControls();
 #if defined(_OPENMP)
@@ -288,6 +293,11 @@ void rawprocFrm::SetBackground()
 	SetBackgroundColour(wxColour(r,g,b));
 	Refresh();
 	
+}
+
+void rawprocFrm::SetStartPath(wxString path)
+{
+	openfilepath = path;
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
@@ -1075,10 +1085,11 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
-	wxString fname = wxFileSelector("Open Image...", filename.GetPath());	
+	wxString fname = wxFileSelector("Open Image...", openfilepath);	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
+		openfilepath = f.GetPath();
 		OpenFile(fname);
 	}
 }
@@ -1098,10 +1109,11 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 {
-	wxString fname = wxFileSelector("Open Image source...", filename.GetPath());	
+	wxString fname = wxFileSelector("Open Image source...", openfilepath);	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
+		openfilepath = f.GetPath();
 		OpenFileSource(fname);
 		opensource = true;
 	}

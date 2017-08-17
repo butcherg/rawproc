@@ -11,6 +11,7 @@ class ColorspacePanel: public PicProcPanel
 	public:
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
@@ -24,6 +25,8 @@ class ColorspacePanel: public PicProcPanel
 			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
 			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
 			b->Add(operselect,flags);
+			
+			b->Add(new wxButton(this, wxID_ANY, "Select profile"), flags);
 
 			SetSizerAndFit(b);
 			b->Layout();
@@ -31,11 +34,32 @@ class ColorspacePanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
+			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this);
 		}
 
 		~ColorspacePanel()
 		{
 			
+		}
+		
+		void selectProfile(wxCommandEvent& event)
+		{
+			wxFileName fname, pname;
+			pname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+#ifdef WIN32
+			pname.SetVolume(pname.GetVolume().MakeUpper());
+#endif
+			fname.Assign(wxFileSelector("Select profile", pname.GetPath()));
+
+			if (fname.FileExists()) {
+				edit->SetValue(fname.GetFullName());
+				if (pname.GetPath() == fname.GetPath())
+					q->setParams(wxString::Format("%s,%s",fname.GetFullName(), operselect->GetString(operselect->GetSelection())));
+				else
+					q->setParams(wxString::Format("%s,%s",fname.GetFullPath(), operselect->GetString(operselect->GetSelection())));					
+				q->processPic();
+			}
+			event.Skip();
 		}
 
 		void paramChanged(wxCommandEvent& event)

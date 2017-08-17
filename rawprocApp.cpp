@@ -60,6 +60,7 @@ bool rawprocFrmApp::OnInit()
 		wxFileName f(wxGetApp().argv[1]);
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
+		frame->SetStartPath(f.GetPath());
 		if (ImageContainsRawprocCommand(wxGetApp().argv[1])) {
 			if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
 				frame->OpenFileSource(f.GetFullPath());
@@ -72,26 +73,32 @@ bool rawprocFrmApp::OnInit()
 		wxFileName f(wxGetApp().argv[2]);
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
+		frame->SetStartPath(f.GetPath());
 		if (wxGetApp().argv[1] == "-s") 
 			frame->OpenFileSource(f.GetFullPath());
 		else
 			frame->OpenFile(f.GetFullPath());
 	}
 	else {
-
+		//parm app.start.path: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.
 		wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
 		if (startpath != "") {
 			if (wxFileName::DirExists(startpath))
 				wxSetWorkingDirectory(startpath);
+				frame->SetStartPath(startpath);
 		}
 		else {
 			wxFileName picdir = wxFileName::DirName(wxStandardPaths::Get().GetDocumentsDir());
 			picdir.RemoveLastDir();
 			picdir.AppendDir("Pictures");
-			if (picdir.DirExists()) 
+			if (picdir.DirExists()) {
 				wxSetWorkingDirectory(picdir.GetPath());
-			else
+				frame->SetStartPath(picdir.GetPath());
+			}
+			else {
 				wxSetWorkingDirectory(wxFileName::GetHomeDir());
+				frame->SetStartPath(wxFileName::GetHomeDir());
+			}
 		}
 	}
 	return true;
