@@ -487,6 +487,10 @@ wxString rawprocFrm::AssembleCommand()
 void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 {
 	filename.Assign(fname);
+	if (!filename.FileExists()) {
+		wxMessageBox(wxString::Format("Error: %s not found.",filename.GetFullName()));
+		return;
+	}
 	sourcefilename.Clear();
 	gImage *dib;
 	GIMAGE_FILETYPE fif;
