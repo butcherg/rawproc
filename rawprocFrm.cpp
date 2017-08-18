@@ -570,7 +570,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			}
 			else {
 				if (profilepath.FileExists()) {
-					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
 						hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 						//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
 						char * prof; cmsUInt32Number proflen;
@@ -762,7 +762,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				}
 				else {
 					if (profilepath.FileExists()) {
-						if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Apply the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+						if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
 							hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 							//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
 							char * prof; cmsUInt32Number proflen;
