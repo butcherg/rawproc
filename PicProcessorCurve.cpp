@@ -26,8 +26,6 @@ class CurvePanel: public PicProcPanel
 			b->Add(curve, flags);
 			SetSizerAndFit(b);
 			b->Layout();
-			Refresh();
-			Update();
 			SetFocus();
 			wxArrayString cpts = split(params,",");
 			if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) 
@@ -36,6 +34,7 @@ class CurvePanel: public PicProcPanel
 				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
 			Bind(myCURVE_UPDATE, &CurvePanel::paramChanged, this);
+			Refresh();
 		}
 
 		~CurvePanel()
