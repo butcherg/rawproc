@@ -275,22 +275,65 @@ void rawprocFrm::CreateGUIControls()
 
 void rawprocFrm::SetBackground()
 {
-	//parm app.backgroundcolor: r,g,b (0-255), set at startup.  Default=(255,255,255)
+	int pr, pg, pb;
+	int dr, dg, db;
+	wxString f;
+	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(255,255,255)
 	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
 	if (bk == "") bk = "255,255,255";
 	wxArrayString bkgnd = split(bk,",");
-	int r = atoi(bkgnd[0].c_str());
-	int g = atoi(bkgnd[1].c_str());
-	int b = atoi(bkgnd[2].c_str());
-//	parameters->SetBackgroundColour(wxColour(r,g,b));
-//	parameters->Refresh();
-	pic->SetBackgroundColour(wxColour(r,g,b));
-	pic->Refresh();
-	commandtree->SetBackgroundColour(wxColour(r,g,b));
+	pr = atoi(bkgnd[0].c_str());
+	if (bkgnd.GetCount() < 3) {
+		pg = atoi(bkgnd[0].c_str());
+		pb = atoi(bkgnd[0].c_str());
+	}
+	else {
+		pg = atoi(bkgnd[1].c_str());
+		pb = atoi(bkgnd[2].c_str());
+	}
+	dr = pr; dg = pg; db = pb;
+	
+	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(255,255,255)
+	if (wxConfigBase::Get()->Read("app.picpanel.backgroundcolor",&f)) {
+		wxString pbk = wxConfigBase::Get()->Read("app.picpanel.backgroundcolor","255,255,255");
+		if (pbk == "") pbk = "255,255,255";
+		wxArrayString picbkgnd = split(pbk,",");
+		pr = atoi(picbkgnd[0].c_str());
+		if (picbkgnd.GetCount() < 3) {
+			pg = atoi(picbkgnd[0].c_str());
+			pb = atoi(picbkgnd[0].c_str());
+		}
+		else {
+			pg = atoi(picbkgnd[1].c_str());
+			pb = atoi(picbkgnd[2].c_str());
+		}
+	}
+	
+	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(255,255,255)
+	if (wxConfigBase::Get()->Read("app.dock.backgroundcolor",&f)) {
+		wxString dbk = wxConfigBase::Get()->Read("app.dock.backgroundcolor","255,255,255");
+		if (dbk == "") dbk = "255,255,255";
+		wxArrayString dockbkgnd = split(dbk,",");
+		dr = atoi(dockbkgnd[0].c_str());
+		if (dockbkgnd.GetCount() < 3) {
+			dg = atoi(dockbkgnd[0].c_str());
+			db = atoi(dockbkgnd[0].c_str());
+		}
+		else {
+			dg = atoi(dockbkgnd[1].c_str());
+			db = atoi(dockbkgnd[2].c_str());
+		}
+	}
+
+	commandtree->SetBackgroundColour(wxColour(dr,dg,db));
 	commandtree->Refresh();
-	histogram->SetBackgroundColour(wxColour(r,g,b));
+	histogram->SetBackgroundColour(wxColour(dr,dg,db));
 	histogram->Refresh();
-	SetBackgroundColour(wxColour(r,g,b));
+	parambook->SetBackgroundColour(wxColour(dr,dg,db));
+	parambook->Refresh();
+	pic->SetBackgroundColour(wxColour(pr,pg,pb));
+	pic->Refresh();
+	SetBackgroundColour(wxColour(pr,pg,pb));
 	Refresh();
 	
 }
