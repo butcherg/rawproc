@@ -12,11 +12,13 @@ class ColorspacePanel: public PicProcPanel
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
 			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
+			b->Add(new wxButton(this, wxID_ANY, "Select profile"), flags);
+			b->AddSpacer(10);
 
 			wxArrayString opers;
 			opers.Add("apply");
@@ -26,8 +28,6 @@ class ColorspacePanel: public PicProcPanel
 			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
 			b->Add(operselect,flags);
 			
-			b->Add(new wxButton(this, wxID_ANY, "Select profile"), flags);
-
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
