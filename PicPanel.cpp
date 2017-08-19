@@ -14,6 +14,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_LEFT_UP(PicPanel::OnLeftUp)
     EVT_MOTION(PicPanel::OnMouseMove)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
+	EVT_LEAVE_WINDOW(PicPanel::OnMouseLeave)
     //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
     EVT_KEY_DOWN(PicPanel::OnKey)
@@ -556,6 +557,11 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 		}
 	}
 	event.Skip();
+}
+
+void PicPanel::OnMouseLeave(wxMouseEvent& event)
+{
+	parentframe->SetStatusText("");
 }
         
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
