@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
     //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
-    EVT_CHAR(PicPanel::OnKey)
+    EVT_KEY_DOWN(PicPanel::OnKey)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
@@ -462,7 +462,7 @@ END_EVENT_TABLE()
 	{
 		event.Skip();
 		if (blank) return;
-		//SetFocus();
+		SetFocus();
 		int radius = 20;
 		MouseX = event.m_x;
 		MouseY = event.m_y;
