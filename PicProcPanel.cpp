@@ -10,6 +10,7 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 	SetSize(parent->GetSize());
 	b = new wxBoxSizer(wxVERTICAL); 
 	g = new wxGridBagSizer();
+	Bind(wxEVT_LEFT_DOWN, &PicProcPanel::OnLeftDown, this);
 }
 
 PicProcPanel::~PicProcPanel()
@@ -25,6 +26,13 @@ void PicProcPanel::OnSize(wxSizeEvent& event)
 	}
 	event.Skip();
 }
+
+void PicProcPanel::OnLeftDown(wxMouseEvent& event)
+{
+	SetFocus();
+	Refresh();
+}
+
 
 wxString PicProcPanel::getParams()
 {

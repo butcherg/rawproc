@@ -27,6 +27,7 @@ class PicProcPanel: public wxPanel
 		~PicProcPanel();
 		wxString getParams();
 		void OnSize(wxSizeEvent& event);
+		void OnLeftDown(wxMouseEvent& event);
 
 	protected:
 		PicProcessor *q;

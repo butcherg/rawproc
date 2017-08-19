@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE(PicPanel, wxPanel)
     EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
     //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
     EVT_SIZE(PicPanel::OnSize)
-    //EVT_CHAR(PicPanel::OnKey)
+    EVT_CHAR(PicPanel::OnKey)
     //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
@@ -625,7 +625,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	//Update();
 }
 
-/*
+
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	event.Skip();
@@ -638,5 +638,5 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			break;
 	}
 }
-*/
+
 
