@@ -878,7 +878,6 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	cmsHPROFILE profile;
 
 	wxFileName profilepath;
-	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
 	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 
 	if (!sourcefilename.IsOk()) 
