@@ -473,10 +473,10 @@ wxString rawprocFrm::AssembleCommand()
 		cmd.Append(wxString::Format("%s ",rootcmd));
 	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
 	if (iter.IsOk()) {
-		cmd.Append(wxString::Format("%s ",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
+		cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
 		iter = commandtree->GetNextChild(root, cookie);
 		while (iter.IsOk()) {
-			cmd.Append(wxString::Format("%s ",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
+			cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
 			iter = commandtree->GetNextChild(root, cookie);
 		}
 	}
@@ -1526,7 +1526,18 @@ void rawprocFrm::MnuPaste1203Click(wxCommandEvent& event)
 void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	wxMessageBox(AssembleCommand());
+	//parm menu.showcommand.type: Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text
+	wxString diagtype = wxConfigBase::Get()->Read("menu.showcommand.type","text");
+	if (diagtype == "text") {
+		wxMessageBox(AssembleCommand());
+	}
+	else if (diagtype == "html") {
+		wxString cmd = AssembleCommand();
+		cmd.Replace(" ","<br>");
+		myEXIFDialog dlg(this, wxID_ANY, "Image Command", cmd,  wxDefaultPosition, wxSize(400,200));
+		dlg.ShowModal();
+	}
+	else wxMessageBox("Invalid dialog type for Show Command... (menu.showcommand.type)");
 }
 
 void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
