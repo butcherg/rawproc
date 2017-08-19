@@ -1557,7 +1557,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 }
 
 #define ID_EXIF		2001
-#define ID_HISTOGRAM	2002
+//#define ID_HISTOGRAM	2002
 #define ID_DELETE	2003
 #define ID_ICC		2004
 
@@ -1574,17 +1574,17 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
 	wxMenu mnu;
  	mnu.Append(ID_EXIF, "Image Information...");
- 	mnu.Append(ID_HISTOGRAM, "Full Histogram...");
+ 	//mnu.Append(ID_HISTOGRAM, "Full Histogram...");
 	mnu.AppendSeparator();
 	mnu.Append(ID_DELETE, "Delete");
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
 		case ID_EXIF:
 			InfoDialog(event.GetItem());
 			break;
-		case ID_HISTOGRAM:
-			showHistogram(event.GetItem());
-			//wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
-			break;
+	//	case ID_HISTOGRAM:
+	//		showHistogram(event.GetItem());
+	//		//wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
+	//		break;
 		case ID_DELETE:
 			CommandTreeDeleteItem(event.GetItem());
 			break;
