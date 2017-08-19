@@ -13,7 +13,11 @@ class BlackWhitePointPanel: public PicProcPanel
 	public:
 		BlackWhitePointPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			int whtlimit, blklimit;
 			wxArrayString p = split(params,",");
+
+			wxConfigBase::Get()->Read("tool.blackwhitepoint.whitelimit",&whtlimit,128);
+			wxConfigBase::Get()->Read("tool.blackwhitepoint.blacklimit",&blklimit,128);
 
 			int blk = atoi(p[0]);
 			int wht = atoi(p[1]);
@@ -23,7 +27,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(0,10, wxGBPosition(0,0));
 
 			g->Add(new wxStaticText(this,wxID_ANY, "black: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			black = new wxSlider(this, wxID_ANY, blk, 0, 128, wxPoint(10, 30), wxSize(140, -1));
+			black = new wxSlider(this, wxID_ANY, blk, 0, blklimit, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(black , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",blk), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -33,7 +37,7 @@ class BlackWhitePointPanel: public PicProcPanel
 
 
 			g->Add(new wxStaticText(this,wxID_ANY, "white: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			white = new wxSlider(this, wxID_ANY, wht, 128, 255, wxPoint(10, 30), wxSize(140, -1));
+			white = new wxSlider(this, wxID_ANY, wht, whtlimit, 255, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(white , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",wht), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -116,6 +120,12 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	wht = 255; blk = 0;
 	double blkthresh, whtthresh;
 	long whtinitial;
+	int whtlimit, blklimit;
+	//parm tool.blackwhitepoint.whitelimit: The lower whitepoint limit.  Default=128
+	wxConfigBase::Get()->Read("tool.blackwhitepoint.whitelimit",&whtlimit,128);
+	//parm tool.blackwhitepoint.blacklimit: The upper blackpoint limit.  Default=128
+	wxConfigBase::Get()->Read("tool.blackwhitepoint.blacklimit",&blklimit,128);
+
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
@@ -130,7 +140,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
 		
 		//Find black threshold:
-		for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
+		for (i=1; i<blklimit; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
 		blk = (double) i;
 		
 		
@@ -139,7 +149,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		for (i=255; i>=250; i--) if (hdata[i]>m) {m = hdata[i]; l = i;}
 
 		//start looking for the white point threshold right after the location of the local max:
-		for (i=l-1; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
+		for (i=l-1; i>=whtlimit; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
 		
 		//Find white threshold:
 		//for (i=whtinitial; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;

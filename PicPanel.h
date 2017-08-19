@@ -69,7 +69,7 @@ class PicPanel: public wxPanel
 		wxImage *thumbimg, *scaledimg;
 		wxBitmap *pic, *thumb, *scaledpic;  //, *histogram;
 		wxBitmap hsgram;
-		bool blank;
+		bool blank, settingpic;
     
 		int MouseX, MouseY;
 		int picX, picY;

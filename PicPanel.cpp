@@ -31,6 +31,7 @@ END_EVENT_TABLE()
 		showDebug = true;
 		scaleWindow = false;
 		blank = true;
+		settingpic = false;
 		dcList = "";
 
 		colormgt = false;
@@ -111,7 +112,7 @@ END_EVENT_TABLE()
 	{
 		cmsHPROFILE hDisplayProfile;
 
-		blank = true;
+		settingpic = true;
 		
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
 		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
@@ -204,7 +205,8 @@ END_EVENT_TABLE()
 		thumb = new wxBitmap(thumbimg);
 
 		hsgram = wxBitmap();
-		blank =  false;
+		settingpic =  false;
+		blank = false;
 
 		parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
@@ -449,7 +451,7 @@ END_EVENT_TABLE()
 	void PicPanel::OnPaint(wxPaintEvent & event)
 	{
 		event.Skip();
-		if (blank) return;
+		if (blank | settingpic ) return;
 		if (img.IsOk() && thumb != NULL) {
 			wxPaintDC dc(this);
 			render(dc);
