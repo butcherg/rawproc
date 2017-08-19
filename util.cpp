@@ -43,7 +43,7 @@ wxString paramString(wxString filter)
 		if (name.Find(filter) != wxNOT_FOUND) {
 			val = wxConfigBase::Get()->Read(name, "");
 			name.Replace(filter,"");
-			paramstr.Append(wxString::Format("%s=%s;",name, val));
+			if (val != "") paramstr.Append(wxString::Format("%s=%s;",name, val));
 		}
 		bCont = wxConfigBase::Get()->GetNextEntry(name, dummy);
 	}
