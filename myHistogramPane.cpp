@@ -103,7 +103,6 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
     	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
 	
 	Refresh();
-	Update();
 }
 
 
@@ -117,7 +116,7 @@ myHistogramPane::~myHistogramPane()
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -138,7 +137,7 @@ void myHistogramPane::BlankPic()
 {
 	blankpic = true;
 	Refresh();
-	//Update();
+	
 }
 
 void myHistogramPane::SetPic(gImage &dib, unsigned scale)
@@ -171,7 +170,7 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 		}
 	}
 	Refresh();
-	//Update();
+	
 }
 
  
@@ -266,7 +265,7 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	if (wscale < 1.0) wscale = 1.0;
 
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -308,7 +307,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 	}
 
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
  
@@ -318,7 +317,7 @@ void myHistogramPane::mouseDown(wxMouseEvent& event)
 	MouseX = event.m_x;
 	MouseY = event.m_y;
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -336,7 +335,7 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	MouseX = x;
 	MouseY = y;
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -344,7 +343,7 @@ void myHistogramPane::mouseReleased(wxMouseEvent& event)
 {
 	pressedDown = false;
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -354,7 +353,7 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 	xorigin = 0;
 	yorigin = 0;
 	Refresh();
-	//Update();
+	
 	event.Skip();
 }
 
@@ -363,14 +362,14 @@ void myHistogramPane::mouseEnterWindow(wxMouseEvent& event)
 {
 	inwindow = true;
 	Refresh();
-	//Update();
+	
 }
 
 void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) 
 {
 	inwindow =  false;
 	Refresh();
-	//Update();
+	
 }
 
 //void myHistogramPane::rightClick(wxMouseEvent& event) {}
