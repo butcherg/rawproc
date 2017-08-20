@@ -74,7 +74,6 @@ END_EVENT_TABLE()
         void PicPanel::OnSize(wxSizeEvent& event) 
         {
 		Refresh();
-		Update();
 		event.Skip();
         }
         
@@ -90,7 +89,7 @@ END_EVENT_TABLE()
 	{
 		toggleThumb = mode;
 		Refresh();
-		//Update();
+		
 	}
 
 	void PicPanel::ToggleThumb()
@@ -99,14 +98,14 @@ END_EVENT_TABLE()
 		if (toggleThumb>3) toggleThumb = 1;
 		if (toggleThumb==2) toggleThumb = 3;
 		Refresh();
-		//Update();
+		
 	}
 	
 	void PicPanel::BlankPic()
 	{
 		blank = true;
 		Refresh();
-		//Update();
+		
 	}
 
 	void PicPanel::SetPic(gImage * dib)
@@ -212,7 +211,7 @@ END_EVENT_TABLE()
 		parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
 		Refresh();
-		//Update();
+		
 
 		
 	}
@@ -338,7 +337,7 @@ END_EVENT_TABLE()
 	{
 		dcList = list;
 		Refresh();
-		//Update();
+		
 	}
    
 
@@ -380,7 +379,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = (double) w/ (double) img.GetWidth();
 			Refresh();
-			//Update();
+			
 		}
 	}
 	
@@ -391,7 +390,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = (double) h/ (double) img.GetHeight();
 			Refresh();
-			//Update();
+			
 		}
 	}
 
@@ -402,7 +401,7 @@ END_EVENT_TABLE()
 		if (img.IsOk()) {
 			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
 			Refresh();
-			//Update();
+			
 		}
 	}
 
@@ -412,7 +411,7 @@ END_EVENT_TABLE()
 		FitMode(false);
 		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
 		Refresh();
-		//Update();
+		
 	}
 
 	void PicPanel::FitMode(bool f)
@@ -483,7 +482,7 @@ END_EVENT_TABLE()
 		if (blank) return;
 		picX = 0; picY = 0;
 		Refresh();
-		//Update();
+		
 	}
 
 	void PicPanel::OnLeftUp(wxMouseEvent& event)
@@ -523,7 +522,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picY -= MouseY-y;
 			MouseX = x; MouseY = y;
 			Refresh();
-			//Update();
+			
 		}
 
 		if (thumbmoving) {
@@ -531,7 +530,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			picY += (MouseY-y) * ((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
 			Refresh();
-			//Update();
+			
 		}
 
 		if (scale == 1.0) {
@@ -596,7 +595,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
 	parentframe->SetStatusText("");
 	Refresh();
-	//Update();
+	
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
@@ -628,7 +627,7 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 		}
 	}
 	Refresh();
-	//Update();
+	
 }
 
 
