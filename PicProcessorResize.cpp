@@ -65,7 +65,7 @@ class ResizePanel: public PicProcPanel
 };
 
 
-PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
@@ -77,14 +77,6 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
-
-void PicProcessorResize::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new ResizePanel(m_parameters, this, c);
-}
-
 
 bool PicProcessorResize::processPic() {
 	wxString algo = "";

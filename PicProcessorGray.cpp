@@ -136,7 +136,7 @@ class GrayPanel: public PicProcPanel
 };
 
 
-PicProcessorGray::PicProcessorGray(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorGray::PicProcessorGray(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
@@ -147,13 +147,6 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
-}
-
-void PicProcessorGray::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new GrayPanel(m_parameters, this, c);
 }
 
 bool PicProcessorGray::processPic() {

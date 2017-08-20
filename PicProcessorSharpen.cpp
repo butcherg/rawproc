@@ -83,7 +83,7 @@ class SharpenPanel: public PicProcPanel
 };
 
 
-PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
@@ -95,14 +95,6 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
-
-void PicProcessorSharpen::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new SharpenPanel(m_parameters, this, c);
-}
-
 
 bool PicProcessorSharpen::processPic() {
 	double kernel[3][3] =

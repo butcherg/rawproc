@@ -7,9 +7,8 @@
 class PicProcessorSaturation: public PicProcessor
 {
 	public:
-		PicProcessorSaturation(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		PicProcessorSaturation(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		void showParams();
 		bool processPic();
 };
 

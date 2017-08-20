@@ -25,9 +25,8 @@ class BlankPanel: public PicProcPanel
 };
 
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters, gImage * startpic) 
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, gImage * startpic) 
 {
-	m_parameters = parameters;
 	m_display = display;
 	m_tree = tree;
 	c = command;
@@ -44,9 +43,8 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	dirty = true;
 }
 
-PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters) 
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) 
 {
-	m_parameters = parameters;
 	m_display = display;
 	m_tree = tree;
 	c = command;
@@ -155,12 +153,6 @@ void PicProcessor::setParams(wxString params)
 	dirty = true;
 }
 
-void PicProcessor::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new BlankPanel(m_parameters, this, "");
-}
 
 PicProcessor *PicProcessor::getPreviousPicProcessor()
 {

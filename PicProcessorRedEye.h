@@ -7,10 +7,9 @@
 class PicProcessorRedEye: public PicProcessor
 {
 	public:
-		PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		~PicProcessorRedEye();
 		void createPanel(wxSimplebook* parent);
-		void showParams();
 		bool processPic();
 		
 		void setThresholdLimit(wxString params);

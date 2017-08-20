@@ -266,12 +266,12 @@ class CropPanel: public PicProcPanel
 };
 
 
-PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
 
-PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, "",  tree, display, parameters) 
+PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, "",  tree, display) 
 {
 	c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
 	//showParams();
@@ -284,14 +284,6 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
-
-void PicProcessorCrop::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new CropPanel(m_parameters, this, c);
-}
-
 
 bool PicProcessorCrop::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");

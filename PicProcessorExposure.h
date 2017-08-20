@@ -7,9 +7,8 @@
 class PicProcessorExposure: public PicProcessor
 {
 	public:
-		PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		void showParams();
 		bool processPic();
 };
 

@@ -7,9 +7,8 @@
 class PicProcessorResize: public PicProcessor
 {
 	public:
-		PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		void showParams();
 		bool processPic();
 };
 
