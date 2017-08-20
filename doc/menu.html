@@ -4,12 +4,11 @@
 
 <ul>
 
-<li><b>File->Open:</b> Brings up a dialog box in which you can select a file to open.  If you select 
-a camera raw file to open, a radio box with options is enabled; these correspond to the libraw options, but
-if you're opening a camera raw for processing, you want to stick with Default.</li><br>
+<li><b>File->Open:</b> Brings up a dialog box in which you can select a file to open.</li><br>
 
 <li><b>File->Re-Open:</b> Re-opens the previously opened file.  Helpful if you're trying various raw
-parameters.</li></br>
+parameters.  If the previous open was Open Source, the source image will be opened and its command
+parameters applied.</li></br>
 
 <li><b>File->Open Source:</b> Brings up a dialog box in which you can select a file to open.  But, what then 
 happens is that the selected file is inspected for a rawproc command list; if one is found, 
@@ -19,7 +18,7 @@ This takes a bit of time, so be patient.  When finished, the sourced filename is
 title bar, then the file created from the source in parens.</li><br>
 
 <li><b>File->Save:</b> Brings up a dialog box in which you can specify a filename to save the image.  The
-image type is determined by what extension you give to the file name, .jpg, .tif, or .png.  Save will
+image type is determined by what extension you give to the file name, .jpg or .tif.  Save will
 always bring up a dialog, whether you're saving to the same file or a new one.  When finished, the 
 originally opened file name is still displayed in the title bar, but the saved file name is added, in 
 parens.</li><br>
@@ -30,8 +29,7 @@ parens.</li><br>
 cut/copy a selected command and paste it elsewhere in the list.</li><br>
 
 <li><b>Edit->Properties:</b> Opens a dialog box for editing all of the configuration parameters from rawproc.conf.
-As of 0.5, you can only edit parameters that were in the configuration file at startup, no add/delete. The
-.conf file can be edited with a standard text editor between rawproc instances.  Changing a parameter requires
+Parameters can be added or deleted with the Add and Delete buttons.  Changing a parameter requires
 clicking in the value cell, keyboard editing the value, and typing Return.  Clicking Dismiss will also save a
 parameter in the middle of editing.  Changed parameter values are saved to the .conf file immediately upon 
 change.  Parameters are presented in sorted order, but the original order and
