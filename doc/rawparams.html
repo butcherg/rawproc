@@ -52,7 +52,9 @@
  bright=1.0 - brighten image, default=1.0
 
 
- threshold=1.0 - wavelet denoising threshold
+ threshold=100-1000 - wavelet denoising threshold
+ wavelet_denoise - alias for threshold
+ From the dcraw manpage: "Use wavelets to erase noise while preserving real detail. The best threshold should be somewhere between 100 and 1000."
 
 
  half_size=0|1 - output image in half-size
@@ -125,6 +127,7 @@
 
 
  fbdd_noiserd=n - FBDD noise reduction, before demosaic
+ fbdd_denoise - alias for fbdd_noiserd
 
 
  eeci_refine=n - non-zero for ECCI refine for VCD interpolation
