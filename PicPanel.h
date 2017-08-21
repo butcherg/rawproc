@@ -57,6 +57,7 @@ class PicPanel: public wxPanel
 		void OnLeftDown(wxMouseEvent& event);
 		void OnLeftDoubleClicked(wxMouseEvent& event);
 		void OnKey(wxKeyEvent& event);
+		void OnMouseEnter(wxMouseEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
         
     private:

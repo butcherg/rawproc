@@ -127,6 +127,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	omp_set_dynamic(0);
 #endif
 	deleting = false;
+	displayitem.Unset();
 
 	wxImageList *states;
         wxIcon icons[2];
@@ -269,7 +270,6 @@ void rawprocFrm::CreateGUIControls()
 #endif
 
 	Refresh();
-	Update();
 
 }
 
@@ -346,7 +346,6 @@ void rawprocFrm::SetStartPath(wxString path)
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
 	commandtree->DeleteAllItems();
-	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
 	parambook->DeleteAllPages();
@@ -367,7 +366,6 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
 	commandtree->DeleteAllItems();
-	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
 	parambook->DeleteAllPages();
@@ -582,7 +580,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		}
 
 		commandtree->DeleteAllItems();
-		commandtree->Update();
 		pic->BlankPic();
 		histogram->BlankPic();
 		parambook->DeleteAllPages();
@@ -679,8 +676,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		
 		opensource = false;
 
-		Refresh();
-		Update();
+		//Refresh();
 		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
 	}
 	else {
@@ -772,7 +768,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 
 			commandtree->DeleteAllItems();
-			commandtree->Update();
 			pic->BlankPic();
 			histogram->BlankPic();
 			parambook->DeleteAllPages();
@@ -858,7 +853,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			opensource = true;
 
 			Refresh();
-			Update();
 			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
 		}
 			
@@ -981,19 +975,11 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 {
 	SetStatusText("");
 	if (!item.IsOk()) return;
-	wxTreeItemIdValue cookie;
-	wxTreeItemId root = commandtree->GetRootItem();
-	if (root.IsOk()) commandtree->SetItemState(root,0);
-	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
-	if (iter.IsOk()) {
-		commandtree->SetItemState(iter,0);
-		iter = commandtree->GetNextChild(root, cookie);
-		while (iter.IsOk()) {
-			commandtree->SetItemState(iter,0);
-			iter = commandtree->GetNextChild(root, cookie);
-		}
-	}
+
+	if (displayitem.IsOk()) commandtree->SetItemState(displayitem, 0);
 	commandtree->SetItemState(item,1);
+	displayitem = item;
+
 	((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
 
 }
@@ -1014,16 +1000,11 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 	wxTreeItemId item = event.GetItem();
 	CommandTreeSetDisplay(item);
 	
-	event.Skip();
-	Refresh();
-	Update();
-	
 	if (isDownstream(displayitem, item)) {
 		wxTreeItemId next = commandtree->GetNextSibling(displayitem);
 		if (next.IsOk()) ((PicProcessor *) commandtree->GetItemData(next))->processPic();
 	}
 		
-
 	displayitem = item;
 	event.Skip();
 }
@@ -1037,10 +1018,7 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 		if ((PicProcessor *) commandtree->GetItemData(item))
 			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND)
 				parambook->SetSelection(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
-//			((PicProcessor *) commandtree->GetItemData(item))->showParams();
 	}
-	Update();
-	Refresh();
 	event.Skip();
 }
 
