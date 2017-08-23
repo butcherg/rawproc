@@ -533,7 +533,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			
 		}
 
-		if (scale == 1.0) {
+		if (scale == 1.0 & scaledpic != NULL) {
 			imgX = x-picX;
 			imgY = y-picY;
 			if (d) {
