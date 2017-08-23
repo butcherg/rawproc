@@ -76,8 +76,8 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new BlankPanel(parent, this, "");
 	parent->ShowNewPage(toolpanel);
-	toolpanel->Refresh();
-	toolpanel->Update();
+//	toolpanel->Refresh();
+//	toolpanel->Update();
 }
 
 PicProcPanel* PicProcessor::getPanel()
@@ -203,7 +203,7 @@ void PicProcessor::displayProcessedPic()
 {
 	if (m_display) {
 		m_display->SetPic(dib);
-		if (dcList != "") m_display->SetDrawList(dcList);
+		//if (dcList != "") m_display->SetDrawList(dcList);
 	}
 }
 

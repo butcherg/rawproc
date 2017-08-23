@@ -30,7 +30,7 @@ void PicProcPanel::OnSize(wxSizeEvent& event)
 void PicProcPanel::OnLeftDown(wxMouseEvent& event)
 {
 	SetFocus();
-	Refresh();
+	//Refresh();
 }
 
 

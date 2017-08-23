@@ -269,8 +269,6 @@ void rawprocFrm::CreateGUIControls()
 	mgr.Update();
 #endif
 
-	Refresh();
-
 }
 
 void rawprocFrm::SetBackground()
@@ -333,8 +331,8 @@ void rawprocFrm::SetBackground()
 	parambook->Refresh();
 	pic->SetBackgroundColour(wxColour(pr,pg,pb));
 	pic->Refresh();
-	SetBackgroundColour(wxColour(pr,pg,pb));
-	Refresh();
+	//SetBackgroundColour(wxColour(pr,pg,pb));
+	//Refresh();
 	
 }
 
@@ -643,13 +641,21 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			pic->SetColorManagement(false);
 		}
 
-		pic->SetScaleToWidth();
-		pic->FitMode(true);
+
 		SetStatusText("scale: fit",2);
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
 		picdata->createPanel(parambook);
-		picdata->processPic();
-		CommandTreeSetDisplay(picdata->GetId());
+		//picdata->processPic();
+
+	wxTreeItemId item = picdata->GetId();
+	if (displayitem.IsOk()) commandtree->SetItemState(displayitem, 0);
+	commandtree->SetItemState(item,1);
+	displayitem = item;
+	picdata->displayProcessedPic();
+
+		//CommandTreeSetDisplay(picdata->GetId());
+		pic->SetScaleToWidth();
+		pic->FitMode(true);
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
@@ -676,7 +682,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		
 		opensource = false;
 
-		//Refresh();
 		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
 	}
 	else {
@@ -852,7 +857,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 			opensource = true;
 
-			Refresh();
 			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
 		}
 			

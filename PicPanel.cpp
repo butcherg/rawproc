@@ -212,9 +212,6 @@ END_EVENT_TABLE()
 		parentframe->SetStatusText("");
 		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
 		Refresh();
-		
-
-		
 	}
 
 	void PicPanel::render(wxDC &dc)
@@ -498,6 +495,7 @@ END_EVENT_TABLE()
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
+	event.Skip();
 	if (blank) return;
 	bool anchorx;
 	int x, y, posx, posy;
@@ -556,7 +554,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			}
 		}
 	}
-	event.Skip();
+
 }
 
 void PicPanel::OnMouseLeave(wxMouseEvent& event)
@@ -567,7 +565,8 @@ void PicPanel::OnMouseLeave(wxMouseEvent& event)
 void PicPanel::OnMouseEnter(wxMouseEvent& event)
 {
 	event.Skip();
-	parentframe->SetStatusText("Enter picpanel...");
+	SetFocus();
+	//parentframe->SetStatusText("Enter picpanel...");
 	Refresh();
 }
         
