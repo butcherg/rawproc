@@ -203,7 +203,7 @@ void PicProcessor::displayProcessedPic()
 {
 	if (m_display) {
 		m_display->SetPic(dib);
-		if (dcList != "") m_display->SetDrawList(dcList);
+		m_display->SetDrawList(dcList);
 	}
 }
 

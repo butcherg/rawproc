@@ -7,19 +7,18 @@
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
-	EVT_PAINT(PicPanel::OnPaint)
-	EVT_LEFT_DOWN(PicPanel::OnLeftDown)
-	EVT_RIGHT_DOWN(PicPanel::OnRightDown)
-	EVT_LEFT_DCLICK(PicPanel::OnLeftDoubleClicked)
-	EVT_LEFT_UP(PicPanel::OnLeftUp)
-	EVT_MOTION(PicPanel::OnMouseMove)
-	EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
+    EVT_PAINT(PicPanel::OnPaint)
+    EVT_LEFT_DOWN(PicPanel::OnLeftDown)
+    EVT_RIGHT_DOWN(PicPanel::OnRightDown)
+    EVT_LEFT_DCLICK(PicPanel::OnLeftDoubleClicked)
+    EVT_LEFT_UP(PicPanel::OnLeftUp)
+    EVT_MOTION(PicPanel::OnMouseMove)
+    EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
 	EVT_LEAVE_WINDOW(PicPanel::OnMouseLeave)
-	EVT_ENTER_WINDOW(PicPanel::OnMouseEnter)
-	//EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
-	EVT_SIZE(PicPanel::OnSize)
-	EVT_KEY_DOWN(PicPanel::OnKey)
-	//EVT_DROP_FILES(PicPanel::DropFiles)
+    //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
+    EVT_SIZE(PicPanel::OnSize)
+    EVT_KEY_DOWN(PicPanel::OnKey)
+    //EVT_DROP_FILES(PicPanel::DropFiles)
 END_EVENT_TABLE()
 
 	PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
@@ -562,13 +561,6 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 void PicPanel::OnMouseLeave(wxMouseEvent& event)
 {
 	parentframe->SetStatusText("");
-}
-
-void PicPanel::OnMouseEnter(wxMouseEvent& event)
-{
-	event.Skip();
-	parentframe->SetStatusText("Enter picpanel...");
-	Refresh();
 }
         
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
