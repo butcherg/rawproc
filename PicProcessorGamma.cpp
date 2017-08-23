@@ -41,7 +41,7 @@ class GammaPanel: public PicProcPanel
 
 };
 
-PicProcessorGamma::PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) 
+PicProcessorGamma::PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	//showParams();
 }
@@ -53,14 +53,6 @@ void PicProcessorGamma::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
-
-void PicProcessorGamma::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new GammaPanel(m_parameters, this, c);
-}
-
 
 bool PicProcessorGamma::processPic() 
 {

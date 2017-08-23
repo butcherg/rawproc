@@ -113,7 +113,7 @@ class BlackWhitePointPanel: public PicProcPanel
 };
 
 
-PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	int i;
 	double blk, wht;
@@ -172,13 +172,6 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
-}
-
-void PicProcessorBlackWhitePoint::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new BlackWhitePointPanel(m_parameters, this, c);
 }
 
 bool PicProcessorBlackWhitePoint::processPic() {

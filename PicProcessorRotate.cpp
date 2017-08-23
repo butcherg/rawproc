@@ -254,7 +254,7 @@ class RotatePanel: public PicProcPanel
 };
 
 
-PicProcessorRotate::PicProcessorRotate(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorRotate::PicProcessorRotate(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
@@ -266,14 +266,6 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
-
-void PicProcessorRotate::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new RotatePanel(m_parameters, this, c);
-}
-
 
 bool PicProcessorRotate::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");

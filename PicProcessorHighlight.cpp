@@ -106,7 +106,7 @@ class HighlightPanel: public PicProcPanel
 };
 
 
-PicProcessorHighlight::PicProcessorHighlight(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
+PicProcessorHighlight::PicProcessorHighlight(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
 }
@@ -117,13 +117,6 @@ void PicProcessorHighlight::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
-}
-
-void PicProcessorHighlight::showParams()
-{
-	if (!m_parameters) return;
-	m_parameters->DestroyChildren();
-	r = new HighlightPanel(m_parameters, this, c);
 }
 
 bool PicProcessorHighlight::processPic() {

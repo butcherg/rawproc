@@ -7,9 +7,8 @@
 class PicProcessorColorSpace: public PicProcessor
 {
 	public:
-		PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
+		PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		void showParams();
 		bool processPic();
 };
 
