@@ -116,6 +116,7 @@ myHistogramPane::~myHistogramPane()
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -264,6 +265,7 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	if (wscale < 1.0) wscale = 1.0;
 
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -305,6 +307,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 	}
 
 	Refresh();
+	
 	event.Skip();
 }
  
@@ -313,8 +316,8 @@ void myHistogramPane::mouseDown(wxMouseEvent& event)
 	pressedDown = true;
 	MouseX = event.m_x;
 	MouseY = event.m_y;
-	SetFocus();
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -332,6 +335,7 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	MouseX = x;
 	MouseY = y;
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -339,6 +343,7 @@ void myHistogramPane::mouseReleased(wxMouseEvent& event)
 {
 	pressedDown = false;
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -348,6 +353,7 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 	xorigin = 0;
 	yorigin = 0;
 	Refresh();
+	
 	event.Skip();
 }
 
@@ -355,7 +361,6 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 void myHistogramPane::mouseEnterWindow(wxMouseEvent& event) 
 {
 	inwindow = true;
-	SetFocus();
 	Refresh();
 	
 }
