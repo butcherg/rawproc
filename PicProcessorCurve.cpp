@@ -70,7 +70,7 @@ class CurvePanel: public PicProcPanel
 
 };
 
-PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	Curve crv;
 	int ctstart;
@@ -96,6 +96,13 @@ void PicProcessorCurve::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorCurve::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new CurvePanel(m_parameters, this, c);
 }
 
 void PicProcessorCurve::setControlPoints(std::vector<cp> ctpts)

@@ -76,7 +76,7 @@ class ColorspacePanel: public PicProcPanel
 
 };
 
-PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
+PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command, tree, display, parameters) 
 {
 	//showParams();
 }
@@ -88,6 +88,16 @@ void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
+
+void PicProcessorColorSpace::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new ColorspacePanel(m_parameters, this, c);
+	r->Refresh();
+	r->Update();
+}
+
 
 bool PicProcessorColorSpace::processPic() 
 {

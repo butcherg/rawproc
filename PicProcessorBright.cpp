@@ -83,7 +83,7 @@ class BrightPanel: public PicProcPanel
 };
 
 
-PicProcessorBright::PicProcessorBright(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorBright::PicProcessorBright(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	//showParams();
 }
@@ -95,6 +95,14 @@ void PicProcessorBright::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
+
+void PicProcessorBright::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new BrightPanel(m_parameters, this, c);
+}
+
 
 bool PicProcessorBright::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("bright...");

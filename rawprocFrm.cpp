@@ -470,22 +470,22 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	bool result = true;
 	PicProcessor *p;
 
-	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
-	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic);
-	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic);
-	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
-	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic);
-	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
-	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
-	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize") 		p = new PicProcessorResize("resize",command, commandtree, pic);
-	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
-	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
-	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
+	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic,  parameters);
+	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic, parameters);
+	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic, parameters);
+	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic, parameters);
+	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic, parameters);
+	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic, parameters);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic, parameters);
+	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic, parameters);
+	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic, parameters);
+	else if (name == "resize") 			p = new PicProcessorResize("resize",command, commandtree, pic, parameters);
+	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic, parameters);
+	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic, parameters);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic, parameters);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic, parameters);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic, parameters);
+	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic, parameters);
 	else return NULL;
 	p->createPanel(parambook);
 	p->processPic();
@@ -643,7 +643,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 
 		SetStatusText("scale: fit",2);
-		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
+		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, parameters, dib);
 		picdata->createPanel(parambook);
 		//picdata->processPic();
 
@@ -841,7 +841,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			pic->SetScaleToWidth();
 			pic->FitMode(true);
 			SetStatusText("scale: fit",2);
-			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
+			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, parameters, dib);
 			picdata->createPanel(parambook);
 			picdata->processPic();
 			CommandTreeSetDisplay(picdata->GetId());
@@ -1186,7 +1186,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	try {
 		//parm tool.gamma.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
 		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
-		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic);
+		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1207,7 +1207,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	try {
 		//parm tool.bright.initialvalue: The initial (and reset button) value of the bright tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
-		PicProcessorBright *p = new PicProcessorBright("bright",val, commandtree, pic);
+		PicProcessorBright *p = new PicProcessorBright("bright",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1228,7 +1228,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	try {
 		//parm tool.contrast.initialvalue: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0
 		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
-		PicProcessorContrast *p = new PicProcessorContrast("contrast",val, commandtree, pic);
+		PicProcessorContrast *p = new PicProcessorContrast("contrast",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1247,7 +1247,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	try {
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
 		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
-		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
+		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1264,7 +1264,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	try {
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
 		wxString val = wxConfigBase::Get()->Read("tool.exposure.initialvalue","0.0");
-		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
+		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1280,7 +1280,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
+		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1302,7 +1302,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 		//parm tool.shadow.threshold: The initial (and reset button) value of the shadow curve threshold.  Default=64
 		wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
-		PicProcessorShadow *p = new PicProcessorShadow("shadow",cmd, commandtree, pic);
+		PicProcessorShadow *p = new PicProcessorShadow("shadow",cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1322,7 +1322,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 		//parm tool.highlight.threshold: The initial (and reset button) value of the highlight curve threshold.  Default=192
 		wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
-		PicProcessorHighlight *p = new PicProcessorHighlight("highlight",cmd, commandtree, pic);
+		PicProcessorHighlight *p = new PicProcessorHighlight("highlight",cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1344,7 +1344,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
 		wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
-		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
+		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1359,7 +1359,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
+		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1381,7 +1381,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom
 		wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
 		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
-		PicProcessorResize *p = new PicProcessorResize("resize", cmd, commandtree, pic);
+		PicProcessorResize *p = new PicProcessorResize("resize", cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		pic->SetScale(1.0);
@@ -1400,9 +1400,9 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 		PicProcessorBlackWhitePoint *p;
 		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
 		if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic);
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic, parameters);
 		else
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic);
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic, parameters);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1419,7 +1419,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 	try {
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
-		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
+		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		if (defval != "0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1436,7 +1436,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 	try {
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
 		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
-		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
+		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		if (defval != "0.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1458,7 +1458,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
 		wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
-		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
+		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		if (sigma != "0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1483,7 +1483,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		wxString desatpct = wxConfigBase::Get()->Read("tool.redeye.desaturationpercent","1.0");
 		
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
-		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
+		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic, parameters);
 		p->createPanel(parambook);
 		//d->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -1498,7 +1498,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic);
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic, parameters);
 		p->createPanel(parambook);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}

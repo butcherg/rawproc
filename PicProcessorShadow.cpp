@@ -105,7 +105,7 @@ class ShadowPanel: public PicProcPanel
 };
 
 
-PicProcessorShadow::PicProcessorShadow(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorShadow::PicProcessorShadow(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	//showParams();
 }
@@ -116,6 +116,13 @@ void PicProcessorShadow::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorShadow::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new ShadowPanel(m_parameters, this, c);
 }
 
 bool PicProcessorShadow::processPic() {

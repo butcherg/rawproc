@@ -130,7 +130,7 @@ class DenoisePanel: public PicProcPanel
 };
 
 
-PicProcessorDenoise::PicProcessorDenoise(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorDenoise::PicProcessorDenoise(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	//showParams();
 }
@@ -142,6 +142,14 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
+
+void PicProcessorDenoise::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new DenoisePanel(m_parameters, this, c);
+}
+
 
 bool PicProcessorDenoise::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");

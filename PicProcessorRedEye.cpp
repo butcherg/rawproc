@@ -144,7 +144,7 @@ class RedEyePanel: public PicProcPanel
 };
 
 
-PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	threshold = 1.5; radius=50; desatpct = 1.0; desat=false;
 	if (command != "") {
@@ -183,6 +183,15 @@ void PicProcessorRedEye::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorRedEye::showParams()
+{
+	int desatint = 0;
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	if (desat) desatint = 1;
+	r = new RedEyePanel(m_parameters, this, wxString::Format("%2.2f,%d,%d,%2.2f",threshold,radius,desat,desatpct));
 }
 
 wxString PicProcessorRedEye::buildCommand()

@@ -7,8 +7,9 @@
 class PicProcessorGamma: public PicProcessor
 {
 	public:
-		PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
+		PicProcessorGamma(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
 		void createPanel(wxSimplebook* parent);
+		void showParams();
 		bool processPic();
 };
 

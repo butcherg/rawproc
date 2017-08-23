@@ -54,6 +54,29 @@
 #include "myPropertyDialog.h"
 
 
+class myParameters: public wxPanel
+{
+public:
+	myParameters(wxWindow *parent, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize): wxPanel(parent, id, pos, size)
+	{
+		Bind(wxEVT_SIZE,&myParameters::OnSize, this);
+	}
+
+	void OnSize(wxSizeEvent& event)
+	{
+		wxWindowList children = GetChildren();
+		wxWindowList::iterator iter;
+		for (iter = children.begin(); iter != children.end(); ++iter)
+		{
+			wxWindow *child = *iter;
+			wxSizeEvent *e = new wxSizeEvent(event.GetSize());
+			wxQueueEvent(child,e);
+		}
+		event.Skip();
+	}
+
+};
+
 class rawprocFrm : public wxFrame
 {
 	private:
@@ -195,6 +218,7 @@ class rawprocFrm : public wxFrame
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
 		wxPanel *preview;
+		myParameters *parameters;
 		wxSimplebook* parambook;
 		myHistogramPane *histogram;
 		PropertyDialog *diag;

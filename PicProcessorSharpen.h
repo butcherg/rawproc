@@ -7,8 +7,9 @@
 class PicProcessorSharpen: public PicProcessor
 {
 	public:
-		PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
+		PicProcessorSharpen(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
 		void createPanel(wxSimplebook* parent);
+		void showParams();
 		bool processPic();
 };
 

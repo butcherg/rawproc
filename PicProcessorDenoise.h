@@ -7,8 +7,9 @@
 class PicProcessorDenoise: public PicProcessor
 {
 	public:
-		PicProcessorDenoise(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
+		PicProcessorDenoise(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters);
 		void createPanel(wxSimplebook* parent);
+		void showParams();
 		bool processPic();
 };
 

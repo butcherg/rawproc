@@ -92,7 +92,7 @@ class ContrastPanel: public PicProcPanel
 };
 
 
-PicProcessorContrast::PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorContrast::PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	//showParams();
 }
@@ -104,6 +104,14 @@ void PicProcessorContrast::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
+
+void PicProcessorContrast::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new ContrastPanel(m_parameters, this, c);
+}
+
 
 bool PicProcessorContrast::processPic() {
 	((wxFrame*) m_display->GetParent())->SetStatusText("contrast...");

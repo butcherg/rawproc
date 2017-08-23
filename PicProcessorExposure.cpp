@@ -81,7 +81,7 @@ class ExposurePanel: public PicProcPanel
 };
 
 
-PicProcessorExposure::PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
+PicProcessorExposure::PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxPanel *parameters): PicProcessor(name, command,  tree, display, parameters) 
 {
 	//showParams();
 }
@@ -93,6 +93,14 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
+
+void PicProcessorExposure::showParams()
+{
+	if (!m_parameters) return;
+	m_parameters->DestroyChildren();
+	r = new ExposurePanel(m_parameters, this, c);
+}
+
 
 bool PicProcessorExposure::processPic() 
 {
