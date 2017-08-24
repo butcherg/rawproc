@@ -267,7 +267,7 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorRotate::processPic() {
+bool PicProcessorRotate::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
 	double angle = atof(c.c_str());
 	bool result = true;
@@ -292,7 +292,7 @@ bool PicProcessorRotate::processPic() {
 	dirty = false;
 		
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

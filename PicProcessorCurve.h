@@ -14,7 +14,7 @@ class PicProcessorCurve: public PicProcessor
 		void setControlPoints(std::vector<cp> ctpts);
 		void setChannel(wxString chan);
 		void setParams(std::vector<cp> ctpts, wxString params);
-		bool processPic();
+		bool processPic(bool processnext=true);
 
 	private:
 		std::vector<cp> ctrlpts;

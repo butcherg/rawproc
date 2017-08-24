@@ -94,7 +94,7 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSaturation::processPic() {
+bool PicProcessorSaturation::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
 	bool result = true;
@@ -120,7 +120,7 @@ bool PicProcessorSaturation::processPic() {
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

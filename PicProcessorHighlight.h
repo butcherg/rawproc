@@ -10,7 +10,7 @@ class PicProcessorHighlight: public PicProcessor
 	public:
 		PicProcessorHighlight(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		bool processPic();
+		bool processPic(bool processnext=true);
 
 };
 

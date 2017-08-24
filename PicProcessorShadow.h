@@ -10,7 +10,7 @@ class PicProcessorShadow: public PicProcessor
 	public:
 		PicProcessorShadow(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		bool processPic();
+		bool processPic(bool processnext=true);
 
 };
 

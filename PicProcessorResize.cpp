@@ -78,7 +78,7 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorResize::processPic() {
+bool PicProcessorResize::processPic(bool processnext) {
 	wxString algo = "";
 	((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
 	wxArrayString cp = split(getParams(),",");
@@ -119,7 +119,7 @@ bool PicProcessorResize::processPic() {
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

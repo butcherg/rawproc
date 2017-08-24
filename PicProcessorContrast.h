@@ -9,7 +9,7 @@ class PicProcessorContrast: public PicProcessor
 	public:
 		PicProcessorContrast(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		bool processPic();
+		bool processPic(bool processnext=true);
 };
 
 #endif

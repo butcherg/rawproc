@@ -149,7 +149,7 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorGray::processPic() {
+bool PicProcessorGray::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("gray...");
 	wxArrayString cp = split(getParams(),",");
 	double r = atof(cp[0]);
@@ -177,7 +177,7 @@ bool PicProcessorGray::processPic() {
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

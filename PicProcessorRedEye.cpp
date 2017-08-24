@@ -229,7 +229,7 @@ void PicProcessorRedEye::setDesat(bool d)
 }
 
 
-bool PicProcessorRedEye::processPic() {
+bool PicProcessorRedEye::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
 	bool result = true;
 
@@ -252,7 +252,7 @@ bool PicProcessorRedEye::processPic() {
 	dirty=false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

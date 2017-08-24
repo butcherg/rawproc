@@ -174,7 +174,7 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorBlackWhitePoint::processPic() {
+bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
 	wxArrayString cp = split(getParams(),",");
@@ -209,7 +209,7 @@ bool PicProcessorBlackWhitePoint::processPic() {
 	dirty=false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

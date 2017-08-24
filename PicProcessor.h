@@ -31,7 +31,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) ;
 		~PicProcessor();
 
-		virtual bool processPic();
+		virtual bool processPic(bool processnext=true);
 		void processNext();
 		wxString getCommand();
 		wxString getParams();

@@ -94,7 +94,7 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorExposure::processPic() 
+bool PicProcessorExposure::processPic(bool processnext) 
 {
 	double ev = atof(c.c_str());
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure %2.2f...", ev));
@@ -119,7 +119,7 @@ bool PicProcessorExposure::processPic()
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

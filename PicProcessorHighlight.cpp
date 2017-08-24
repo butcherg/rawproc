@@ -119,7 +119,7 @@ void PicProcessorHighlight::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorHighlight::processPic() {
+bool PicProcessorHighlight::processPic(bool processnext) {
 	bool result = true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("highlight...");
 
@@ -153,7 +153,7 @@ bool PicProcessorHighlight::processPic() {
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

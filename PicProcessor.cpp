@@ -85,7 +85,7 @@ PicProcPanel* PicProcessor::getPanel()
 	return toolpanel;
 }
 
-bool PicProcessor::processPic() 
+bool PicProcessor::processPic(bool processnext) 
 { 	
 	if (GetId() != m_tree->GetRootItem()) {
 		if (dib) delete dib;
@@ -93,7 +93,7 @@ bool PicProcessor::processPic()
 	}
 	dirty = false;
 	
-	processNext();
+	if (processnext) processNext();
 
 	return true;
 }

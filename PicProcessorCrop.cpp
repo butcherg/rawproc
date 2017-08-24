@@ -285,7 +285,7 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorCrop::processPic() {
+bool PicProcessorCrop::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
 	int left = atoi(p[0]);
@@ -314,7 +314,7 @@ bool PicProcessorCrop::processPic() {
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

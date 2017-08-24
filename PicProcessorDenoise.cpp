@@ -143,7 +143,7 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorDenoise::processPic() {
+bool PicProcessorDenoise::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");
 	int threadcount;
 
@@ -176,7 +176,7 @@ bool PicProcessorDenoise::processPic() {
 	dirty=false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

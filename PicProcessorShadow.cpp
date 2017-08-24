@@ -118,7 +118,7 @@ void PicProcessorShadow::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorShadow::processPic() {
+bool PicProcessorShadow::processPic(bool processnext) {
 	bool result = true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("shadow...");
 
@@ -152,7 +152,7 @@ bool PicProcessorShadow::processPic() {
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

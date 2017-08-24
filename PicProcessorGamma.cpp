@@ -54,7 +54,7 @@ void PicProcessorGamma::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorGamma::processPic() 
+bool PicProcessorGamma::processPic(bool processnext) 
 {
 	Curve ctrlpts;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
@@ -86,7 +86,7 @@ bool PicProcessorGamma::processPic()
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

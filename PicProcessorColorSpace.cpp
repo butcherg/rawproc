@@ -89,7 +89,7 @@ void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorColorSpace::processPic() 
+bool PicProcessorColorSpace::processPic(bool processnext) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
@@ -124,7 +124,7 @@ bool PicProcessorColorSpace::processPic()
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

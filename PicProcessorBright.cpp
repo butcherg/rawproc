@@ -96,7 +96,7 @@ void PicProcessorBright::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorBright::processPic() {
+bool PicProcessorBright::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("bright...");
 	double bright = atof(c.c_str());
 	bool result = true;
@@ -128,7 +128,7 @@ bool PicProcessorBright::processPic() {
 	dirty=false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 	
 	return result;
 }

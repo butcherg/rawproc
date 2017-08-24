@@ -119,7 +119,7 @@ void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
 	ctrlpts = ctpts;
 }
 
-bool PicProcessorCurve::processPic() {
+bool PicProcessorCurve::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("curve...");
 	bool result = true;
 
@@ -142,7 +142,7 @@ bool PicProcessorCurve::processPic() {
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }

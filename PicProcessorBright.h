@@ -9,7 +9,7 @@ class PicProcessorBright: public PicProcessor
 	public:
 		PicProcessorBright(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		bool processPic();
+		bool processPic(bool processnext=true);
 };
 
 #endif

@@ -96,7 +96,7 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSharpen::processPic() {
+bool PicProcessorSharpen::processPic(bool processnext) {
 	double kernel[3][3] =
 	{
 		0.0, 0.0, 0.0,
@@ -138,7 +138,7 @@ bool PicProcessorSharpen::processPic() {
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	processNext();
+	if (processnext) processNext();
 
 	return result;
 }
