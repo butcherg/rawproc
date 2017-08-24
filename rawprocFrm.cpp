@@ -983,7 +983,8 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 	if (displayitem.IsOk()) commandtree->SetItemState(displayitem,0);
 	commandtree->SetItemState(item,1);
 	displayitem = item;
-	((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
+	pic->SetPic( &((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic() );
+	//((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
 
 }
 
