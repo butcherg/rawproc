@@ -228,14 +228,16 @@ END_EVENT_TABLE()
 			dc.Clear();
 			return;
 		}
+
+		GetSize(&w, &h);
             
 		if (fitmode) {
 			if (img.GetWidth() > img.GetHeight())
-				SetScaleToWidth();
+				scale = (double) w/ (double) img.GetWidth();
 			else
-				SetScaleToHeight();
+				scale = (double) h/ (double) img.GetHeight();
 		}
-		GetSize(&w, &h);
+
 		dc.Clear();
 		 if (!img.IsOk()) return;
 		dc.SetClippingRegion(0,0,w,h);
@@ -411,7 +413,6 @@ END_EVENT_TABLE()
 		FitMode(false);
 		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
 		Refresh();
-		
 	}
 
 	void PicPanel::FitMode(bool f)

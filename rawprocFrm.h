@@ -179,6 +179,7 @@ class rawprocFrm : public wxFrame
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetStartPath(wxString path);
 	void SetBackground();
+	void OnSize(wxSizeEvent& event);
 		
 	private:
 		void OnClose(wxCloseEvent& event);

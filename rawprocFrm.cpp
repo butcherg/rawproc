@@ -65,7 +65,8 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	////Manual Code Start
 	EVT_TREE_SEL_CHANGED(ID_COMMANDTREE,rawprocFrm::CommandTreeSelChanged)
 	////Manual Code End
-	
+
+	EVT_SIZE(rawprocFrm::OnSize)
 	EVT_CLOSE(rawprocFrm::OnClose)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
 	EVT_MENU(ID_MNU_REOPEN, rawprocFrm::Mnureopen1033Click)
@@ -235,7 +236,7 @@ void rawprocFrm::CreateGUIControls()
 	
 
 	//Image manipulation panels:
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE);  
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT);  
 
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
 
@@ -269,6 +270,12 @@ void rawprocFrm::CreateGUIControls()
 	mgr.Update();
 #endif
 
+}
+
+void rawprocFrm::OnSize(wxSizeEvent& event)
+{
+	event.Skip();
+	Refresh();
 }
 
 void rawprocFrm::SetBackground()
@@ -640,12 +647,13 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			pic->SetColorManagement(false);
 		}
 
-		pic->SetScaleToWidth();
-		pic->FitMode(true);
-		SetStatusText("scale: fit",2);
+
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
 		picdata->createPanel(parambook);
 		CommandTreeSetDisplay(picdata->GetId());
+		//pic->SetScaleToWidth();
+		pic->FitMode(true);
+		SetStatusText("scale: fit",2);
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
@@ -827,7 +835,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetColorManagement(false);
 			}
 
-			pic->SetScaleToWidth();
+			//pic->SetScaleToWidth();
 			pic->FitMode(true);
 			SetStatusText("scale: fit",2);
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);

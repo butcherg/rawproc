@@ -47,7 +47,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
  wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
 	blankpic = false;
-	SetDoubleBuffered(true);
+	//SetDoubleBuffered(true);
 	//t = new wxTimer(this);
 	unsigned hm = 0;
 	wscale = 1.0;
@@ -102,7 +102,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 
     	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
 	
-	Refresh();
+	//Refresh();
 }
 
 
@@ -115,9 +115,8 @@ myHistogramPane::~myHistogramPane()
 
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
-	Refresh();
-	
 	event.Skip();
+	Refresh();
 }
 
  
