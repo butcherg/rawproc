@@ -30,19 +30,15 @@ END_EVENT_TABLE()
 CurvePane::CurvePane(wxWindow* parent, wxString controlpoints) :
 wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 {
+	int r,g,b;
 	int ctstart;
 	p = parent;
 	z=1;
 	mousemotion=false;
 	SetDoubleBuffered(true);
-	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
-	if (bk == "") bk = "255,255,255";
-	wxArrayString bkgnd = split(bk,",");
-	int r = atoi(bkgnd[0].c_str());
-	int g = atoi(bkgnd[1].c_str());
-	int b = atoi(bkgnd[2].c_str());
-	SetBackgroundColour(wxColour(r,g,b));
-	
+
+	SetBackgroundColour(parent->GetBackgroundColour());
+
 	wxArrayString ctrlpts = split(controlpoints,",");
 
 	if ((ctrlpts[0] == "rgb") | (ctrlpts[0] == "red") | (ctrlpts[0] == "green") | (ctrlpts[0] == "blue")) {
