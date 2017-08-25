@@ -29,7 +29,7 @@ EXT=		#If you executable needs a file extension, specify it here (for cross-comp
 #This includes local unique configuration
 -include $(OBJDIR)/localmake.txt
 
-all: rawproc img
+all: rawproc img makedoc
 
 rawproc:  $(OBJECTS)
 	$(CXX) $(LFLAGS) $(LIBDIRS) $(OBJECTS)  $(LIBS) $(WXLIBS) -o $(OBJDIR)/rawproc$(EXT)
