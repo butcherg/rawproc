@@ -269,9 +269,6 @@ void rawprocFrm::CreateGUIControls()
 	mgr.Update();
 #endif
 
-	Refresh();
-	Update();
-
 }
 
 void rawprocFrm::SetBackground()
@@ -347,7 +344,6 @@ void rawprocFrm::SetStartPath(wxString path)
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
 	commandtree->DeleteAllItems();
-	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
 	parambook->DeleteAllPages();
@@ -368,7 +364,6 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
 	commandtree->DeleteAllItems();
-	commandtree->Update();
 	pic->BlankPic();
 	histogram->BlankPic();
 	parambook->DeleteAllPages();
@@ -497,7 +492,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	Refresh();
-	Update();
+	//Update();
 
 	return p;
 }
@@ -582,8 +577,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			return;
 		}
 
-		commandtree->DeleteAllItems();
-		commandtree->Update();
 		pic->BlankPic();
 		histogram->BlankPic();
 		parambook->DeleteAllPages();
@@ -679,8 +672,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		
 		opensource = false;
 
-		Refresh();
-		Update();
 		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
 	}
 	else {
@@ -771,8 +762,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
 			}
 
-			commandtree->DeleteAllItems();
-			commandtree->Update();
 			pic->BlankPic();
 			histogram->BlankPic();
 			parambook->DeleteAllPages();
@@ -856,8 +845,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 			opensource = true;
 
-			Refresh();
-			Update();
 			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
 		}
 			
@@ -983,9 +970,7 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 	if (displayitem.IsOk()) commandtree->SetItemState(displayitem,0);
 	commandtree->SetItemState(item,1);
 	displayitem = item;
-	pic->SetPic( &((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic() );
-	//((PicProcessor *) commandtree->GetItemData(item))->displayProcessedPic();
-
+	pic->SetPic( ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer() );
 }
 
 bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
