@@ -497,6 +497,7 @@ END_EVENT_TABLE()
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
+	event.Skip();
 	if (blank) return;
 	bool anchorx;
 	int x, y, posx, posy;
@@ -555,11 +556,11 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			}
 		}
 	}
-	event.Skip();
 }
 
 void PicPanel::OnMouseLeave(wxMouseEvent& event)
 {
+	event.Skip();
 	parentframe->SetStatusText("");
 }
         
