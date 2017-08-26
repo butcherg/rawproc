@@ -35,6 +35,7 @@ class ColorspacePanel: public PicProcPanel
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this);
+			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
 		}
 
 		~ColorspacePanel()
