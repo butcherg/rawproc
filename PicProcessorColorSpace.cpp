@@ -120,7 +120,9 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 
 	}
-	else wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
+	else if (cp[0] != "(none)") {
+		wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
+	}
 	
 	dirty = false;
 

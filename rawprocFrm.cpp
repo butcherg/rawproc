@@ -1411,7 +1411,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
 		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
 		p->createPanel(parambook);
-		if (defval != "0") p->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1428,7 +1428,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
 		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
 		p->createPanel(parambook);
-		if (defval != "0.0") p->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1450,7 +1450,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
 		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
 		p->createPanel(parambook);
-		if (sigma != "0") p->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1475,7 +1475,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
 		p->createPanel(parambook);
-		//d->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1490,6 +1490,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	try {
 		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic);
 		p->createPanel(parambook);
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
