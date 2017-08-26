@@ -28,9 +28,18 @@
 	<li>When you edit properties, use the filter to isolate the relevant ones.  For example, just type "curve" in the 
 		filter, and only the parameters with "curve" in the name will be displayed.  Makes it easier to find 
 		parameters.</li><br>
+	<li>rawproc as of 0.6 doesn't have a white balance tool, but you can use per-channel curves to do the correction.
+		You can get an approximation of a white tone by zooming to 100%, running the mouse over a known white
+		area and observing the RGB values.  It helps to have the display.rgb.scale set to 256.  Look for either
+		the red or blue channel to be observably different from the other two, then add a curve for that channel and 
+		drag the upper limit control point down the right side to reduce, across the top to add, in order to bring
+		the channel values up or down to the other two channels.  You can also usually see the channel offset in the
+		histogram; drag the upper limit control point down or accross to bring the upper part of that channel's 
+		histogram plot in line with the other two.</li><br>
 	<li>You can apply tools in any order you wish, but some orders are less beneficial than others.  This is why other
 		programs such as DarkTable and RawTherapee hard-code the order, but I am more charitable to your whims while 
 		less interested in your complaints...  :D</li><br>
+
 
 </ul>
 
