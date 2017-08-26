@@ -199,6 +199,11 @@ wxTreeCtrl *PicProcessor::getCommandTree()
 	return m_tree;
 }
 
+wxString PicProcessor::getDrawList()
+{
+	return dcList;
+}
+
 void PicProcessor::displayProcessedPic() 
 {
 	if (m_display) {

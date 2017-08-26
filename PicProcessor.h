@@ -42,6 +42,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		gImage& getProcessedPic();
 		gImage* getProcessedPicPointer();
 		PicPanel *getDisplay();
+		wxString getDrawList();
 		wxTreeCtrl *getCommandTree();
 		//void setDirty();
 		//bool isDirty();

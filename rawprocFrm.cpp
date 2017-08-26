@@ -979,6 +979,7 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 	commandtree->SetItemState(item,1);
 	displayitem = item;
 	pic->SetPic( ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer() );
+	pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
 }
 
 bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
