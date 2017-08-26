@@ -131,9 +131,6 @@ END_EVENT_TABLE()
 		if (thumbimg) thumbimg->~wxImage();
 		if (scaledimg) scaledimg->~wxImage();
 		if (pic) pic->~wxBitmap();
-		if (thumb) thumb->~wxBitmap();
-		if (scaledpic) scaledpic->~wxBitmap();
-		//if (histogram) histogram->~wxBitmap();
 
 		img = gImage2wxImage(*dib);
 		
@@ -201,7 +198,8 @@ END_EVENT_TABLE()
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
 		histogram->SetPic(*dib, scale);
-			
+
+		if (thumb) thumb->~wxBitmap();
 		thumb = new wxBitmap(thumbimg);
 
 		hsgram = wxBitmap();
