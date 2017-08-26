@@ -500,7 +500,6 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
 	event.Skip();
 	if (blank) return;
-	bool anchorx;
 	int x, y, posx, posy;
 	int iw, ih;
 	int dx, dy;
@@ -513,10 +512,6 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 		x=event.m_x; y=event.m_y;
 		dx = MouseX-x;
 		dy = MouseY-y;
-		if (abs(dx) > abs(dy))
-			anchorx = true;  //x
-		else 
-			anchorx = false;  //y
 
 
 		if (moving) {
@@ -528,8 +523,8 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 		}
 
 		if (thumbmoving) {
-			picX += (MouseX-x) * ((float) iw / (float) thumbW);
-			picY += (MouseY-y) * ((float) ih / (float) thumbH);
+			picX += (MouseX-x) * round((float) iw / (float) thumbW);
+			picY += (MouseY-y) * round((float) ih / (float) thumbH);
 			MouseX = x; MouseY = y;
 			Refresh();
 			
