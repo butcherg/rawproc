@@ -192,7 +192,7 @@ END_EVENT_TABLE()
 		thumbH = 100;
 		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 		
-		if (cmstransform == "render") {  //meaning, don't do it twice, if 'set'...
+		if (cmstransform != "set") {  //meaning, don't do it twice, if 'set'...
 		if (hImgProfile) 
 			if (hTransform) 
 				cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
