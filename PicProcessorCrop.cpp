@@ -55,6 +55,26 @@ class CropPanel: public PicProcPanel
 		~CropPanel()
 		{
 		}
+		
+		void SetPic(PicProcessor *proc)
+		{
+			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
+
+			GetSize(&ww, &wh);
+			iw = img.GetWidth();
+			ih = img.GetHeight();
+			wa = (double) ww/ (double) iw;
+			ha = (double) wh/ (double) ih;
+			aspect = wa > ha? ha : wa;
+
+			hTransform = proc->getDisplay()->GetDisplayTransform();
+			if (hTransform)
+				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
+
+			iwa = (double) img.GetWidth() / (double) img.GetHeight();
+			iha = (double) img.GetHeight() / (double) img.GetWidth();
+			Refresh();
+		}
 
 		void OnSize(wxSizeEvent& event) 
 		{
@@ -301,10 +321,13 @@ bool PicProcessorCrop::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
+
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	toolpanel->SetPic(this);
+	
+	mark();
 	dib->ApplyCrop(left, top, right, bottom, threadcount);
 	wxString d = duration();
 
