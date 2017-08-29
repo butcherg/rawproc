@@ -50,15 +50,18 @@ class CropPanel: public PicProcPanel
 			Bind(wxEVT_MOTION , &CropPanel::OnMouseMove, this);
 			Bind(wxEVT_LEFT_UP, &CropPanel::OnMouseUp, this);
 			Bind(wxEVT_LEAVE_WINDOW, &CropPanel::OnMouseUp, this);
+			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 
 		~CropPanel()
 		{
+			q->getCommandTree()->Unbind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 		
-		void SetPic(PicProcessor *proc)
+		void OnCommandtreeSelChanged(wxTreeEvent& event)
 		{
-			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
+			event.Skip();
+			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
 
 			GetSize(&ww, &wh);
 			iw = img.GetWidth();
@@ -67,7 +70,7 @@ class CropPanel: public PicProcPanel
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
 
-			hTransform = proc->getDisplay()->GetDisplayTransform();
+			hTransform = q->getDisplay()->GetDisplayTransform();
 			if (hTransform)
 				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
 
@@ -325,7 +328,7 @@ bool PicProcessorCrop::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	toolpanel->SetPic(this);
+	//toolpanel->SetPic(this);
 	
 	mark();
 	dib->ApplyCrop(left, top, right, bottom, threadcount);

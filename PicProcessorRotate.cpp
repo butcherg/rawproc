@@ -6,6 +6,7 @@
 #include "run.xpm"
 
 #include <wx/fileconf.h>
+#include <wx/treectrl.h>
 
 
 class RotatePreview: public wxPanel
@@ -40,6 +41,30 @@ class RotatePreview: public wxPanel
 		{
 			anglerad = angle * 0.01745329;
 			angledeg = angle;
+		}
+
+		void SetPic(wxImage image) 
+		{
+			wxSize size = GetSize();
+			orig = image;
+
+			haspect = (double) image.GetHeight() / (double) image.GetWidth();
+			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
+
+			if (haspect < vaspect) {
+				img = image.Scale(size.GetWidth(), size.GetWidth()* haspect);
+				aspect = haspect;
+			}
+			else {
+				img = image.Scale(size.GetHeight() * vaspect, size.GetHeight());
+				aspect = vaspect;
+			}
+
+			//hTransform = q->getDisplay()->GetDisplayTransform();
+			//if (hTransform)
+			//	cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
+
+			Refresh();
 		}
 
 		void OnSize(wxSizeEvent& event) 
@@ -109,6 +134,7 @@ class RotatePreview: public wxPanel
 		wxImage img, orig;
 		double haspect, vaspect, aspect, anglerad, angledeg;
 		bool autocrop;
+		cmsHTRANSFORM hTransform;
 
 };
 
@@ -162,12 +188,20 @@ class RotatePanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
+			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 			//Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 		}
 
 		~RotatePanel()
 		{
 			//t->~wxTimer();
+			q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
+		}
+
+		void OnCommandtreeSelChanged(wxTreeEvent& event)
+		{
+			event.Skip();
+			preview->SetPic(gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic()));
 		}
 
 		void OnSize(wxSizeEvent& event) 
