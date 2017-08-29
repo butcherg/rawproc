@@ -201,7 +201,11 @@ class RotatePanel: public PicProcPanel
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
 		{
 			event.Skip();
-			preview->SetPic(gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic()));
+			//preview->SetPic(gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic()));
+			wxImage i = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
+			//if (hTransform)
+			//	cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
+			preview->SetPic(i);
 		}
 
 		void OnSize(wxSizeEvent& event) 
