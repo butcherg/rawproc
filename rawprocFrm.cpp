@@ -117,7 +117,6 @@ void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *t
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
-	//parm app.start.path: Specify the starting directory from which to open files.
 	wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
