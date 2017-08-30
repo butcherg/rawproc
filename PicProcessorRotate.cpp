@@ -160,9 +160,9 @@ class RotatePanel: public PicProcPanel
 			btn1 = new wxBitmapButton(this, 8000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
 			g->Add(btn1, wxGBPosition(0,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
-			btn2 = new wxBitmapButton(this, 9000, wxBitmap(run_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn2->SetToolTip("Apply rotation");
-			g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			//btn2 = new wxBitmapButton(this, 9000, wxBitmap(run_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			//btn2->SetToolTip("Apply rotation");
+			//g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//g->Add(0,10, wxGBPosition(0,5), wxDefaultSpan, wxEXPAND | wxALIGN_LEFT | wxALL, 1);
 
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
@@ -230,6 +230,7 @@ class RotatePanel: public PicProcPanel
 				//t->Start(500,wxTIMER_ONE_SHOT);
 				Refresh();
 				Update();
+				q->processPic();
 			//}
 		}
 
