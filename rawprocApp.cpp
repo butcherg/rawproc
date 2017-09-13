@@ -46,6 +46,10 @@ bool rawprocFrmApp::OnInit()
 		frame->SetConfigFile(conf_configd);
 	}
 	
+	wxFileName profpath;
+	profpath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+	gImage::setProfilePath(std::string(profpath.GetPathWithSep().c_str()));
+	
 	//parm app.start.logmessage: Message to print in the log when rawproc starts. 
 	wxString startmessage = wxConfigBase::Get()->Read("app.start.logmessage","");
 	if (startmessage != "") log(startmessage);
