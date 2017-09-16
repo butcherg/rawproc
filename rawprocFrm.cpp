@@ -603,41 +603,47 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 
-			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") wxMessageBox("CMS enabled, but no display profile was found.  Image will be displayed in its working profile.");
-
-			cmsHPROFILE hImgProf;
-			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
-				hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-				pic->SetImageProfile(hImgProf);
-				pic->SetColorManagement(true);
+			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
+				wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
+				pic->SetImageProfile(NULL);
+				pic->SetColorManagement(false);
 			}
 			else {
-				if (profilepath.FileExists()) {
-					if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
-						hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-						//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
-						char * prof; cmsUInt32Number proflen;
-						if (hImgProf) {
-							gImage::makeICCProfile(hImgProf, prof, proflen);
-							dib->setProfile(prof, proflen);
-							pic->SetImageProfile(hImgProf);
-							pic->SetColorManagement(true);
+
+				cmsHPROFILE hImgProf;
+				if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
+					hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+					pic->SetImageProfile(hImgProf);
+					pic->SetColorManagement(true);
+				}
+				else {
+					if (profilepath.FileExists()) {
+						if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+							hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+							//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+							char * prof; cmsUInt32Number proflen;
+							if (hImgProf) {
+								gImage::makeICCProfile(hImgProf, prof, proflen);
+								dib->setProfile(prof, proflen);
+								pic->SetImageProfile(hImgProf);
+								pic->SetColorManagement(true);
+							}
+							else {
+								wxMessageBox("Set profile failed, disabling color management.");
+								pic->SetImageProfile(NULL);
+								pic->SetColorManagement(false);
+							}
 						}
 						else {
-							wxMessageBox("Set profile failed, disabling color management.");
 							pic->SetImageProfile(NULL);
 							pic->SetColorManagement(false);
 						}
 					}
 					else {
+						wxMessageBox("No input profile found, disabling color management.");
 						pic->SetImageProfile(NULL);
 						pic->SetColorManagement(false);
 					}
-				}
-				else {
-					wxMessageBox("No input profile found, disabling color management.");
-					pic->SetImageProfile(NULL);
-					pic->SetColorManagement(false);
 				}
 			}
 		}
@@ -792,6 +798,58 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 
+				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
+					wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
+					pic->SetImageProfile(NULL);
+					pic->SetColorManagement(false);
+				}
+				else {
+
+					cmsHPROFILE hImgProf;
+					if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
+						hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+						pic->SetImageProfile(hImgProf);
+						pic->SetColorManagement(true);
+					}
+					else {
+						if (profilepath.FileExists()) {
+							if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
+								hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+								//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
+								char * prof; cmsUInt32Number proflen;
+								if (hImgProf) {
+									gImage::makeICCProfile(hImgProf, prof, proflen);
+									dib->setProfile(prof, proflen);
+									pic->SetImageProfile(hImgProf);
+									pic->SetColorManagement(true);
+								}
+								else {
+									wxMessageBox("Set profile failed, disabling color management.");
+									pic->SetImageProfile(NULL);
+									pic->SetColorManagement(false);
+								}
+							}
+							else {
+								pic->SetImageProfile(NULL);
+								pic->SetColorManagement(false);
+							}
+						}
+						else {
+							wxMessageBox("No input profile found, disabling color management.");
+							pic->SetImageProfile(NULL);
+							pic->SetColorManagement(false);
+						}
+					}
+				}
+			}
+			else {
+				pic->SetImageProfile(NULL);
+				pic->SetColorManagement(false);
+			}
+
+/*
+			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+
 				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") wxMessageBox("CMS enabled, but no display profile was found.  Image will be displayed in its working profile.");
 				cmsHPROFILE hImgProf;
 				if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
@@ -833,6 +891,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetImageProfile(NULL);
 				pic->SetColorManagement(false);
 			}
+*/
 
 			//pic->SetScaleToWidth();
 			pic->FitMode(true);

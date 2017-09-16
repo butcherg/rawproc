@@ -140,16 +140,20 @@ END_EVENT_TABLE()
 		if (rotation == 6) img.Rotate90(true);
 		if (rotation == 8) img.Rotate90(false);
 
-		if (hImgProfile) {
+		if (colormgt) {
 
 			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
 			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
-			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") 
+			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
+				wxMessageBox("?? bad display profile, disabling color management");
+				SetColorManagement(false);
 				hDisplayProfile = NULL;
-			else
+			}
+			else {
 				hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+			}
 			if (hTransform) cmsDeleteTransform(hTransform);
 			
 			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
@@ -166,34 +170,38 @@ END_EVENT_TABLE()
 						hImgProfile, TYPE_RGB_8,
 						hDisplayProfile, TYPE_RGB_8,
 						intent, 0);
-				else printf("bad display profile...\n");
-			else printf("bad image profile...\n");
 
 			//cmsCloseProfile(hImgProfile);  //Now done from rawprocFrm with a method call...
 			cmsCloseProfile(hDisplayProfile);
 		}
+//		else {
+//			wxMessageBox("bad image profile, disabling color management");
+//			SetColorManagement(false);
+//		}
 
 		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
 		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
 		//parm display.cms.transform=set|render: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
 		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
-		if (cmstransform == "set") {
-			if (hImgProfile) 
-				if (hTransform) 
-					cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
-		}
+
+		if (colormgt)
+			if (cmstransform == "set")
+				if (hImgProfile) 
+					if (hTransform) 
+						cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+			
 		
 		//generate and store a thumbnail bitmap:
 		thumbW = 100*aspectW;
 		thumbH = 100;
 		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
 		
-		if (cmstransform != "set") {  //meaning, don't do it twice, if 'set'...
-		if (hImgProfile) 
-			if (hTransform) 
-				cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
-		}
+		if (colormgt)
+			if (cmstransform != "set")   //meaning, don't do it twice, if 'set'...
+				if (hImgProfile) 
+					if (hTransform) 
+						cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
 
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
@@ -272,12 +280,9 @@ END_EVENT_TABLE()
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
 		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
-		if (cmstransform == "render") {
-			//if (hImgProfile) 
-			//	if (hDisplayProfile)
-					if (hTransform)
+		if (colormgt)
+			if (cmstransform == "render") 
 						cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
-		}
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
