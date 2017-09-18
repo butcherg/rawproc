@@ -94,6 +94,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
+	int ret;
 	
 	wxArrayString cp = split(getParams(),",");
 
@@ -108,17 +109,48 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "apply") {
-			dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+			switch (ret) {
+				case 0:
+					result = true;
+					break;
+				case 1:
+					wxMessageBox("ColorSpace apply: no input profile in image.");
+					result = false;
+					break;
+				case 2:
+					wxMessageBox("ColorSpace apply: input profile doesn't support rendering intent.");
+					result = false;
+					break;
+				case 3:
+					wxMessageBox("ColorSpace apply: output profile doesn't support rendering intent.");
+					result = false;
+					break;
+				case 4:
+					wxMessageBox("ColorSpace apply: colorspace transform creation failed.");
+					result = false;
+					break;
+				default:
+					result = false;
+				wxString d = duration();
+
+				if (result)
+					if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+						log(wxString::Format("tool=colorspace_apply,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+			}
 		}
 		else if (cp[1] == "assign") {
-			dib->AssignColorspace(std::string(fname.GetFullPath().c_str()));
+			if (!dib->AssignColorspace(std::string(fname.GetFullPath().c_str()))) {
+				wxMessageBox("ColorSpace assign failed.");
+				result = false;
+			}
+			wxString d = duration();
+
+			if (result) 
+				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+					log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 		}
 	
-		wxString d = duration();
-
-		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
-			log(wxString::Format("tool=colorspace,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
-
 	}
 	else if (cp[0] != "(none)") {
 		wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
