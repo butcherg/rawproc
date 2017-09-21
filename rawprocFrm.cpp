@@ -1545,6 +1545,10 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
+	if (!pic->GetColorManagement()) {
+		wxMessageBox("Color management disabled, no input profile for colorspace");
+		return;
+	}
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
