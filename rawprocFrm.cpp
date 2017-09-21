@@ -635,6 +635,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 							}
 						}
 						else {
+							SetStatusText("Disabling color management");
 							pic->SetImageProfile(NULL);
 							pic->SetColorManagement(false);
 						}
@@ -830,6 +831,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 								}
 							}
 							else {
+								SetStatusText("Disabling color management");
 								pic->SetImageProfile(NULL);
 								pic->SetColorManagement(false);
 							}
