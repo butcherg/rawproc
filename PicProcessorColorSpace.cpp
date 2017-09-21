@@ -109,7 +109,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "apply") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_ABSOLUTE_COLORIMETRIC);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC);
 			switch (ret) {
 				case 0:
 					result = true;
