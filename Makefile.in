@@ -1,7 +1,7 @@
 CXX=@CXX@
 LD=@CXX@
 
-OBJECTS := util.o elapsedtime.o myEXIFDialog.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
+OBJECTS := util.o elapsedtime.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
 
 LIBS=@LIBS@
 LIBS+=@APP_LIBS@
@@ -46,6 +46,9 @@ myPropertyDialog.o: $(srcdir)/myPropertyDialog.cpp
 
 myEXIFDialog.o: $(srcdir)/myEXIFDialog.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myEXIFDialog.cpp  -o$@
+	
+myDoubleSlider.o: $(srcdir)/myDoubleSlider.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myDoubleSlider.cpp  -o$@
 
 myHistogramPane.o: $(srcdir)/myHistogramPane.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/myHistogramPane.cpp  -o$@

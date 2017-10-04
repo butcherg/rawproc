@@ -2,6 +2,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcPanel.h"
+#include "myDoubleSlider.h"
 #include "undo.xpm"
 
 #include "util.h"
@@ -44,6 +45,10 @@ class BlackWhitePointPanel: public PicProcPanel
 			btn2 = new wxBitmapButton(this, 2000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset white point to default");
 			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			
+			//g->Add(new wxStaticText(this,wxID_ANY, "b/w: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
+			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);
 
 
 			SetSizerAndFit(g);
@@ -106,6 +111,7 @@ class BlackWhitePointPanel: public PicProcPanel
 
 	private:
 		wxSlider *black, *white;
+		myDoubleSlider *bwpoint;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
 		wxTimer *t;
