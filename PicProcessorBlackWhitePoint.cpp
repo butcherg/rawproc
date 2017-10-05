@@ -27,6 +27,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			g->Add(0,10, wxGBPosition(0,0));
 
+			/*
 			g->Add(new wxStaticText(this,wxID_ANY, "black: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			black = new wxSlider(this, wxID_ANY, blk, 0, blklimit, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(black , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -44,11 +45,12 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn2 = new wxBitmapButton(this, 2000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset white point to default");
-			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			
-			//g->Add(new wxStaticText(this,wxID_ANY, "b/w: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 3);
+*/
+
+			g->Add(new wxStaticText(this,wxID_ANY, "black/white: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
-			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);
+			g->Add(bwpoint , wxGBPosition(2,0), wxGBSpan(1,4), wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM, 3);
 
 
 			SetSizerAndFit(g);
@@ -70,26 +72,28 @@ class BlackWhitePointPanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			val1->SetLabel(wxString::Format("%4d", black->GetValue()));
-			val2->SetLabel(wxString::Format("%4d", white->GetValue()));
+			//val1->SetLabel(wxString::Format("%4d", black->GetValue()));
+			//val2->SetLabel(wxString::Format("%4d", white->GetValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			val1->SetLabel(wxString::Format("%4d", black->GetValue()));
-			val2->SetLabel(wxString::Format("%4d", white->GetValue()));
+			//val1->SetLabel(wxString::Format("%4d", black->GetValue()));
+			//val2->SetLabel(wxString::Format("%4d", white->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d,%d",black->GetValue(),white->GetValue()));
+			//q->setParams(wxString::Format("%d,%d",black->GetValue(),white->GetValue()));
+			q->setParams(wxString::Format("%d,%d",bwpoint->GetLeftValue(),bwpoint->GetRightValue()));
 			q->processPic();
 			event.Skip();
 		}
 
 		void OnButton(wxCommandEvent& event)
 		{
+/*
 			int resetblackval, resetwhiteval;
 			switch (event.GetId()) {
 				case 1000:
@@ -105,6 +109,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			}
 			q->setParams(wxString::Format("%d,%d",black->GetValue(),white->GetValue()));
 			q->processPic();
+*/
 			event.Skip();
 		}
 

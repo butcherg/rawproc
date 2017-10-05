@@ -20,12 +20,14 @@ public:
 		const wxValidator& val = wxDefaultValidator,
 		const wxString& name = "myDoubleSlider");
 
-
+	int GetLeftValue();
+	int GetRightValue();
 	wxSize DoGetBestSize();	
 	void OnPaint(wxPaintEvent&);
 	void OnLeftDown(wxMouseEvent& event);
 	void OnMotion(wxMouseEvent& event);
 	void OnLeftUp(wxMouseEvent& event);
+	void OnWheel(wxMouseEvent& event);
 
 protected:
 	void paintNow();
