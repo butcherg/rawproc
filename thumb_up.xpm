@@ -1,0 +1,33 @@
+/* XPM */
+static const char *thumb_up_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"10 22 5 1",
+"X c #696969",
+". c #F0F0F0",
+"  c #FFFFFF",
+"O c #E3E3E3",
+"o c #A0A0A0",
+/* pixels */
+"   .X     ",
+"  . oX    ",
+" . O.oX   ",
+". O...oX  ",
+" O     oX ",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"O.......oX",
+"OOOOOOOOoX",
+"         X"
+};

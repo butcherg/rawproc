@@ -39,6 +39,7 @@ private:
 	int leftval, rightval, minval, maxval;
 	int selectedslider;
 	int prevx, prevy;
+	wxBitmap upthumb, downthumb;
 
 };
 

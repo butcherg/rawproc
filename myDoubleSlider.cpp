@@ -1,6 +1,8 @@
 
 
 #include "myDoubleSlider.h"
+#include "thumb_up.xpm"
+#include "thumb_down.xpm"
 
 static const int BORDER_THICKNESS = 2;
 
@@ -17,11 +19,13 @@ myDoubleSlider::myDoubleSlider(wxWindow *parent,
 		const wxSize& size,
 		long style,
 		const wxValidator& val,
-		const wxString& name): wxControl(parent, id, pos, wxSize(maxValue-minValue+(SLIDER_MARGIN*2), 40), wxBORDER_NONE)
+		const wxString& name): wxControl(parent, id, pos, wxSize(maxValue-minValue+(SLIDER_MARGIN*2), 50), wxBORDER_NONE)
 {
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
 	leftval = leftValue; rightval = rightValue; minval = minValue; maxval = maxValue;
+	upthumb = wxBitmap(thumb_up_xpm);
+	downthumb = wxBitmap(thumb_down_xpm);
 	selectedslider = 0;
 	Bind(wxEVT_PAINT, &myDoubleSlider::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN,&myDoubleSlider::OnLeftDown, this);
@@ -66,82 +70,26 @@ void myDoubleSlider::render(wxDC& dc)
 	int w, h;
 	GetSize(&w, &h);
 	wxCoord tw, th;
-	//dc.DrawLine(SLIDER_MARGIN,h/2, w-SLIDER_MARGIN, h/2);
 	
-	dc.SetPen(*wxLIGHT_GREY_PEN);
-	dc.DrawLine(SLIDER_MARGIN,h/2-1, w-SLIDER_MARGIN+1, h/2-1);
-	dc.DrawLine(SLIDER_MARGIN,h/2+1, w-SLIDER_MARGIN+1, h/2+1);
-	dc.SetPen(*wxBLACK_PEN);
-	dc.DrawLine(SLIDER_MARGIN,h/2, w-SLIDER_MARGIN, h/2);
-	
-	//left slider:
-	dc.DrawLine(SLIDER_MARGIN+leftval, h*0.8, SLIDER_MARGIN+leftval, h*0.5);
-	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
-	//dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval-(tw+2), h*0.25);
-	dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+7, h*0.5+2);
-	dc.SetPen(*wxGREY_PEN);
-	dc.DrawCircle(SLIDER_MARGIN+leftval+1, h*0.8+1, 5);
-	dc.SetPen(*wxBLACK_PEN);
-	dc.DrawCircle(SLIDER_MARGIN+leftval, h*0.8, 5);
-	
-	//right slider:
-	dc.DrawLine(SLIDER_MARGIN+rightval, h*0.5, SLIDER_MARGIN+rightval, h*0.2);
-	dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
-	//dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval+2, h*0.75-(th-2));
-	dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-6, h*0.5-th);
-	dc.SetPen(*wxGREY_PEN);
-	dc.DrawCircle(SLIDER_MARGIN+rightval+1, h*0.2+1, 5);
-	dc.SetPen(*wxBLACK_PEN);
-	dc.DrawCircle(SLIDER_MARGIN+rightval, h*0.2, 5);
-	
-	//dc.DrawText("foo",10,10);
-}
-
-
-/*
-void myDoubleSlider::render(wxDC& dc)
-{
-	int w, h;
-	GetSize(&w, &h);
-	wxCoord tw, th;
-
-	dc.SetPen(*wxLIGHT_GREY_PEN);
-	dc.DrawLine(SLIDER_MARGIN,h/2-1, w-SLIDER_MARGIN+1, h/2-1);
-	dc.DrawLine(SLIDER_MARGIN,h/2+1, w-SLIDER_MARGIN+1, h/2+1);
-	dc.SetPen(*wxBLACK_PEN);
-	dc.DrawLine(SLIDER_MARGIN,h/2, w-SLIDER_MARGIN, h/2);
-
-	//left slider:
-	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
 	dc.SetPen(*wxMEDIUM_GREY_PEN);
-	dc.DrawLine(SLIDER_MARGIN+leftval,   h*0.5,   SLIDER_MARGIN+leftval,   h*0.5+th);
-	dc.DrawLine(SLIDER_MARGIN+leftval,   h*0.5,   SLIDER_MARGIN+leftval+6, h*0.5+6);
-
-	dc.SetPen(*wxGREY_PEN);	
-	dc.DrawLine(SLIDER_MARGIN+leftval+1, h*0.5+2, SLIDER_MARGIN+leftval+1, h*0.5+th);
-	dc.DrawLine(SLIDER_MARGIN+leftval+1, h*0.5+2, SLIDER_MARGIN+leftval+6, h*0.5+7);
+	dc.DrawLine(SLIDER_MARGIN,h/2-1, w-SLIDER_MARGIN+1, h/2-1);
+	dc.SetPen(*wxGREY_PEN);
+	dc.DrawLine(SLIDER_MARGIN,h/2,   w-SLIDER_MARGIN+1, h/2);
 	dc.SetPen(*wxLIGHT_GREY_PEN);
-	dc.DrawLine(SLIDER_MARGIN+leftval+2, h*0.5+4, SLIDER_MARGIN+leftval+6, h*0.5+8);
+	dc.DrawLine(SLIDER_MARGIN,h/2+1, w-SLIDER_MARGIN+1, h/2+1);
+	
 
-	//dc.SetPen(*wxLIGHT_GREY_PEN);
-	dc.SetPen(wxColour(192,192,192));
-	dc.DrawLine(SLIDER_MARGIN+leftval+2, h*0.5+4, SLIDER_MARGIN+leftval+2, h*0.5+th);
-	dc.DrawLine(SLIDER_MARGIN+leftval+3, h*0.5+5, SLIDER_MARGIN+leftval+3, h*0.5+th);
-	dc.DrawLine(SLIDER_MARGIN+leftval+4, h*0.5+6, SLIDER_MARGIN+leftval+4, h*0.5+th);
-	dc.DrawLine(SLIDER_MARGIN+leftval+5, h*0.5+7, SLIDER_MARGIN+leftval+5, h*0.5+th);
-
-	dc.SetPen(*wxBLACK_PEN);
-	dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+7, h*0.5+2);
-	//dc.DrawCircle(SLIDER_MARGIN+leftval, h*0.75, 5);
-
+	//left slider:
+	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
+	dc.DrawBitmap(upthumb,SLIDER_MARGIN+leftval-4, h*0.5+2);
+	dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
+	
 	//right slider:
 	dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
-	dc.DrawLine(SLIDER_MARGIN+rightval, h*0.5-th, SLIDER_MARGIN+rightval, h*0.5);
-	dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-2, h*0.5-th);
-	//dc.DrawCircle(SLIDER_MARGIN+rightval, h*0.25, 5);
-	
+	dc.DrawBitmap(downthumb,SLIDER_MARGIN+rightval-4, h*0.5-th-8);
+	dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
 }
-*/
+
 
 void myDoubleSlider::OnLeftDown(wxMouseEvent& event)
 {
@@ -178,10 +126,6 @@ void myDoubleSlider::OnMotion(wxMouseEvent& event)
 			if (rightval > maxval) rightval = maxval;
 			if (rightval <= leftval) rightval = leftval+1;
 		}
-		//if (leftval < minval)  leftval = minval;
-		//if (leftval >= rightval) leftval = rightval-1;
-		//if (rightval > maxval) rightval = maxval;
-		//if (rightval <= leftval) rightval = leftval+1;
 		prevx = pos.x;
 		prevy = pos.y;
 		Refresh();
