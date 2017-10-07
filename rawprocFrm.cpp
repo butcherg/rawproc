@@ -1174,16 +1174,44 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 {
+	wxString cmdstring = AssembleCommand();
 	if (filename.IsOk() && filename.FileExists()) {
-		if (opensource)
-			OpenFileSource(sourcefilename.GetFullPath());
-		else
+		if (opensource) {
+			int result = wxMessageBox(wxString::Format("Open source file %s with the old processing?\n\nSelecting No will open the source file with current Properties parameters and the current processing chain.\n\nCancel aborts the whole thing.",filename.GetFullName()), "Confirm", wxYES_NO |wxCANCEL, this);
+			if (result == wxYES) {
+				OpenFileSource(sourcefilename.GetFullPath());
+			}
+			else if (result == wxNO) {
+				OpenFile(filename.GetFullPath());
+				wxArrayString token = split(cmdstring, " ");
+				for (int i=2; i<token.GetCount(); i++) {
+					wxArrayString cmd = split(token[i], ":");					
+					if (AddItem(cmd[0], cmd[1])) 
+						wxSafeYield(this);
+					else
+						wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+				}
+			}
+		}
+		else {
 			OpenFile(filename.GetFullPath());
+			if (wxMessageBox("Re-apply processing chain?", "Confirm", wxYES_NO, this) == wxYES) {
+				wxArrayString token = split(cmdstring, " ");
+				for (int i=2; i<token.GetCount(); i++) {
+					wxArrayString cmd = split(token[i], ":");					
+					if (AddItem(cmd[0], cmd[1])) 
+						wxSafeYield(this);
+					else
+						wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+				}
+			}
+		}
 	}
 	else {
 		wxMessageBox("No file to re-open.");
 	}
 }
+
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 {
