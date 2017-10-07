@@ -1639,8 +1639,7 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 		wxMessageBox(AssembleCommand());
 	}
 	else if (diagtype == "html") {
-		wxString cmd = AssembleCommand();
-		cmd.Replace(" ","<br>");
+		wxString cmd = "<p>" + AssembleCommand() + "</p>";
 		myEXIFDialog dlg(this, wxID_ANY, "Image Command", cmd,  wxDefaultPosition, wxSize(400,200));
 		dlg.ShowModal();
 	}
