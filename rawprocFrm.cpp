@@ -1195,14 +1195,16 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 		}
 		else {
 			OpenFile(filename.GetFullPath());
-			if (wxMessageBox("Re-apply processing chain?", "Confirm", wxYES_NO, this) == wxYES) {
-				wxArrayString token = split(cmdstring, " ");
-				for (int i=2; i<token.GetCount(); i++) {
-					wxArrayString cmd = split(token[i], ":");					
-					if (AddItem(cmd[0], cmd[1])) 
-						wxSafeYield(this);
-					else
-						wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+			wxArrayString token = split(cmdstring, " ");
+			if (token.GetCount() > 2) {
+				if (wxMessageBox("Re-apply processing chain?", "Confirm", wxYES_NO, this) == wxYES) {
+					for (int i=2; i<token.GetCount(); i++) {
+						wxArrayString cmd = split(token[i], ":");					
+						if (AddItem(cmd[0], cmd[1])) 
+							wxSafeYield(this);
+						else
+							wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+					}
 				}
 			}
 		}
