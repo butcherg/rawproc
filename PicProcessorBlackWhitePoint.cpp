@@ -140,34 +140,33 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
+		long htotal = 0;
+		
 		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.blackthreshold",&blkthresh,0.05);
 		//parm tool.blackwhitepoint.whitethreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whitethreshold",&whtthresh,0.05);
 		//parm tool.blackwhitepoint.whiteinitialvalue: The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255
 		wxConfigBase::Get()->Read("tool.blackwhitepoint.whiteinitialvalue",&whtinitial,255);
-		
-		//Compute hmax:
-		for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
-		
-		//Find black threshold:
-		for (i=1; i<blklimit; i++) if ((double)hdata[i]/(double)hmax > blkthresh) break;
-		blk = (double) i;
-		
-		
-		//find the local max in 250-255:
-		int m = 0, l=255;
-		for (i=255; i>=250; i--) if (hdata[i]>m) {m = hdata[i]; l = i;}
 
-		//start looking for the white point threshold right after the location of the local max:
-		for (i=l-1; i>=whtlimit; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
-		
-		//Find white threshold:
-		//for (i=whtinitial; i>=128; i--) if ((double)hdata[i]/(double)hmax > whtthresh) break;
-		//Alternate white threshold walk, based on cumulative pixels < original hmax.  
-		//Thought was to equalize the clipped pixel count with hmax, but it doesn't work that way...
-		//int accum = 0;
-		//for (i=whtinitial; i>=128; i--) {accum += hdata[i]; if (accum > hmax) break;}
+
+		for (i=0; i<256; i++) htotal += hdata[i];
+
+		//find black threshold:
+		long hblack = 0;
+		for (i=1; i<blklimit; i++) {
+			hblack += hdata[i];
+			if ((double) hblack / (double) htotal > blkthresh) break;
+		}
+		blk = (double) i;
+
+
+		//find white threshold:
+		long hwhite = 0;
+		for (i=255; i>whtlimit; i--) {
+			hwhite += hdata[i];
+			if ((double) hwhite / (double) htotal > whtthresh) break;
+		}
 		wht = (double) i;
 		
 		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
