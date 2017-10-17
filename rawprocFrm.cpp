@@ -494,6 +494,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else return NULL;
 	p->createPanel(parambook);
+	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	p->processPic();
 	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
@@ -604,9 +605,16 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 
 			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
-				wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
-				pic->SetImageProfile(NULL);
-				pic->SetColorManagement(false);
+				//parm display.cms.requireprofile: Enforce display profile requirement.  If 0, image will be displayed 'as-is' with no output profile transform.  Default=1
+				if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+					wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
+					pic->SetImageProfile(NULL);
+					pic->SetColorManagement(false);
+				}
+				else {
+					wxMessageBox("No display profile was found.  Image will be displayed 'as-is' with no display profile conversion.");
+					pic->SetImageProfile(NULL);
+				}
 			}
 			else {
 
