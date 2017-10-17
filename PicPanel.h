@@ -37,6 +37,7 @@ class PicPanel: public wxPanel
 		void SetPic(gImage * dib);
 		void SetColorManagement(bool b);
 		bool GetColorManagement();
+		void SetProfile(gImage * dib);
 		void SetImageProfile(cmsHPROFILE hImgProf);
 		cmsHTRANSFORM GetDisplayTransform();
 		void SetThumbMode(int mode);
