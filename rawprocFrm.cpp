@@ -808,9 +808,15 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 
 				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
-					wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
-					pic->SetImageProfile(NULL);
-					pic->SetColorManagement(false);
+					if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+						wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
+						pic->SetImageProfile(NULL);
+						pic->SetColorManagement(false);
+					}
+					else {
+						wxMessageBox("No display profile was found.  Image will be displayed 'as-is' with no display profile conversion.");
+						pic->SetImageProfile(NULL);
+					}
 				}
 				else {
 
