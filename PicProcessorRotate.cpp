@@ -121,8 +121,8 @@ class RotatePreview: public wxPanel
 
 			int x1, y1;
 			if (angledeg > 0.0) {
-				for (x1=sw-1; x1>0; x1--) if ((byte) i.GetRed(x1,2) > 0) break;
-				for (y1=0; y1<sh; y1++) if ((byte) i.GetRed(2,y1) > 0) break;
+				for (x1=sw-1; x1>0; x1--) if (i.GetRed(x1,2) > 0) break;
+				for (y1=0; y1<sh; y1++) if (i.GetRed(2,y1) > 0) break;
 				if (x1 > sw/2 & y1 < sh/2) {
 					dc.SetPen(wxPen(*wxYELLOW, 1, wxPENSTYLE_SOLID));
 					dc.DrawLine(0, y1, sw, y1);
@@ -132,8 +132,8 @@ class RotatePreview: public wxPanel
 				}
 			}
 			else {
-				for (x1=0; x1<sw-1; x1++) if ((byte) i.GetRed(x1,2) > 0) break;
-				for (y1=sh-1; y1 > 0; y1--) if ((byte) i.GetRed(2,y1) > 0) break;
+				for (x1=0; x1<sw-1; x1++) if (i.GetRed(x1,2) > 0) break;
+				for (y1=sh-1; y1 > 0; y1--) if (i.GetRed(2,y1) > 0) break;
 				if (x1 < sw/2 & y1 > sh/2) {
 					dc.SetPen(wxPen(*wxYELLOW, 1, wxPENSTYLE_SOLID));
 					dc.DrawLine(0, y1, sw, y1);
