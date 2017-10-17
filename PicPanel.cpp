@@ -364,12 +364,10 @@ END_EVENT_TABLE()
 	void PicPanel::SetProfile(gImage * dib)
 	{
 		cmsHPROFILE hImgProf;
-		//dib = p->getProcessedPicPointer();
 		if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 			hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
 			SetImageProfile(hImgProf);
 		}
-		cmsCloseProfile(hImgProf);
 	}
 
 	void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
