@@ -494,8 +494,8 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else return NULL;
 	p->createPanel(parambook);
-	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	p->processPic();
+	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
 	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	Refresh();
