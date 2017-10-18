@@ -1070,9 +1070,10 @@ bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
 	wxTreeItemId item = event.GetItem();
+	wxTreeItemId prev = displayitem;
 	CommandTreeSetDisplay(item);
-	if (isDownstream(displayitem, item)) {
-		wxTreeItemId next = commandtree->GetNextSibling(displayitem);
+	if (isDownstream(prev, item)) {
+		wxTreeItemId next = commandtree->GetNextSibling(prev);
 		if (next.IsOk()) ((PicProcessor *) commandtree->GetItemData(next))->processPic();
 	}
 	event.Skip();
