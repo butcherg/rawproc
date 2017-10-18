@@ -282,9 +282,9 @@ void rawprocFrm::SetBackground()
 	int pr, pg, pb;
 	int dr, dg, db;
 	wxString f;
-	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(255,255,255)
-	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","255,255,255");
-	if (bk == "") bk = "255,255,255";
+	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)
+	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","119,119,119");
+	if (bk == "") bk = "119,119,119";
 	wxArrayString bkgnd = split(bk,",");
 	pr = atoi(bkgnd[0].c_str());
 	if (bkgnd.GetCount() < 3) {
@@ -297,10 +297,10 @@ void rawprocFrm::SetBackground()
 	}
 	dr = pr; dg = pg; db = pb;
 	
-	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(255,255,255)
+	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)
 	if (wxConfigBase::Get()->Read("app.picpanel.backgroundcolor",&f)) {
-		wxString pbk = wxConfigBase::Get()->Read("app.picpanel.backgroundcolor","255,255,255");
-		if (pbk == "") pbk = "255,255,255";
+		wxString pbk = wxConfigBase::Get()->Read("app.picpanel.backgroundcolor","119,119,119");
+		if (pbk == "") pbk = "119,119,119";
 		wxArrayString picbkgnd = split(pbk,",");
 		pr = atoi(picbkgnd[0].c_str());
 		if (picbkgnd.GetCount() < 3) {
@@ -313,10 +313,10 @@ void rawprocFrm::SetBackground()
 		}
 	}
 	
-	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(255,255,255)
+	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)
 	if (wxConfigBase::Get()->Read("app.dock.backgroundcolor",&f)) {
-		wxString dbk = wxConfigBase::Get()->Read("app.dock.backgroundcolor","255,255,255");
-		if (dbk == "") dbk = "255,255,255";
+		wxString dbk = wxConfigBase::Get()->Read("app.dock.backgroundcolor","119,119,119");
+		if (dbk == "") dbk = "119,119,119";
 		wxArrayString dockbkgnd = split(dbk,",");
 		dr = atoi(dockbkgnd[0].c_str());
 		if (dockbkgnd.GetCount() < 3) {
