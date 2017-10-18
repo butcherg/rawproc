@@ -164,12 +164,15 @@ END_EVENT_TABLE()
 			if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
 			if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
+			cmsUInt32Number dwflags = 0;
+			//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
+			if (wxConfigBase::Get()->Read("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
 			if (hImgProfile)
 				if (hDisplayProfile)
 					hTransform = cmsCreateTransform(
 						hImgProfile, TYPE_RGB_8,
 						hDisplayProfile, TYPE_RGB_8,
-						intent, 0);
+						intent, dwflags);
 
 			//cmsCloseProfile(hImgProfile);  //Now done from rawprocFrm with a method call...
 			cmsCloseProfile(hDisplayProfile);
