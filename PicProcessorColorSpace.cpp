@@ -21,7 +21,7 @@ class ColorspacePanel: public PicProcPanel
 			b->AddSpacer(10);
 
 			wxArrayString opers;
-			opers.Add("apply");
+			opers.Add("convert");
 			opers.Add("assign");
 
 			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
@@ -108,7 +108,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	
 	if (fname.IsOk() & fname.FileExists()) {
 
-		if (cp[1] == "apply") {
+		if (cp[1] == "convert") {
 			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC);
 			switch (ret) {
 				case 0:
