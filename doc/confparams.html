@@ -1,12 +1,14 @@
 <html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>
-<li><b>app.backgroundcolor</b>: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(255,255,255)</li><br>
-<li><b>app.dock.backgroundcolor</b>: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(255,255,255)</li><br>
-<li><b>app.picpanel.backgroundcolor</b>: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(255,255,255)</li><br>
+<li><b>app.backgroundcolor</b>: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li><br>
+<li><b>app.dock.backgroundcolor</b>: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li><br>
+<li><b>app.picpanel.backgroundcolor</b>: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li><br>
 <li><b>app.start.logmessage</b>: Message to print in the log when rawproc starts. </li><br>
 <li><b>app.start.path</b>: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li><br>
 <li><b>cms.profilepath</b>: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li><br>
+<li><b>display.cms.blackpointcompensation</b>: Perform display color transform with black point compensation.  Default=1  </li><br>
 <li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
 <li><b>display.cms.renderingintent</b>: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
+<li><b>display.cms.requireprofile</b>: Enforce display profile requirement.  If 0, image will be displayed 'as-is' with no output profile transform.  Default=1</li><br>
 <li><b>display.cms.transform=set|render</b>: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set</li><br>
 <li><b>display.rgb.scale</b>: Multiplier for rgb display in status line.  Default=1</li><br>
 <li><b>display.status</b>: Write display... in status when setting the display image, 0|1.  Default=1</li><br>
