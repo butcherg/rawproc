@@ -671,7 +671,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
-		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none)
+		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
 		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
