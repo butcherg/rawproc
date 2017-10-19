@@ -32,6 +32,8 @@ public:
 protected:
 	void paintNow();
 	void render(wxDC& dc);
+	void  DrawUpThumb(wxDC& dc, wxCoord x, wxCoord y);
+	void  DrawDownThumb(wxDC& dc, wxCoord x, wxCoord y);
 	
 
 private:

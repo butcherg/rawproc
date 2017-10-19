@@ -64,6 +64,57 @@ void myDoubleSlider::paintNow()
 	render(dc);
 }
 
+void  myDoubleSlider::DrawUpThumb(wxDC& dc, wxCoord x, wxCoord y)
+{
+	dc.SetPen(wxColour("#696969"));
+	dc.DrawLine(x+1, y+4, x+6, y-1);
+	dc.DrawLine(x+0, y+5, x+0, y+22);
+	dc.DrawLine(x+3, y+4, x+8, y+4);
+
+	dc.SetPen(wxColour("#A0A0A0"));
+	dc.DrawLine(x+2, y+4, x+6, y+0);
+	dc.DrawLine(x+1, y+5, x+1, y+21);
+
+	dc.SetPen(wxColour("#E3E3E3"));
+	dc.DrawLine(x+6, y+0, x+10, y+4);
+	dc.DrawLine(x+6, y+2, x+9, y+5);
+	dc.DrawLine(x+5, y+2, x+7, y+4);
+	dc.DrawLine(x+4, y+3, x+6, y+3);
+	for (int i=2; i<=9; i++) dc.DrawLine(x+i, y+5, x+i, y+21);
+
+	dc.SetPen(wxColour("#F0F0F0"));
+	dc.DrawLine(x+1, y+21, x+11, y+21);
+	dc.DrawLine(x+10, y+21, x+10, y+4);
+	dc.DrawLine(x+10, y+5, x+5, y+0);
+}
+
+
+void  myDoubleSlider::DrawDownThumb(wxDC& dc, wxCoord x, wxCoord y)
+{
+	dc.SetPen(wxColour("#696969"));
+	dc.DrawLine(x+10, y+16, x+4, y+22);
+	dc.DrawLine(x+10, y+0, x+10, y+17);
+	dc.DrawLine(x+3, y+17, x+8, y+17);
+
+	dc.SetPen(wxColour("#A0A0A0"));
+	dc.DrawLine(x+5, y+20, x+10, y+15);
+	dc.DrawLine(x+9, y+1, x+9, y+17);
+
+	dc.SetPen(wxColour("#E3E3E3"));
+	dc.DrawLine(x+4, y+21, x+0, y+17);
+	dc.DrawLine(x+5, y+20, x+0, y+15);
+	dc.DrawLine(x+5, y+19, x+3, y+17);
+	dc.DrawLine(x+5, y+18, x+7, y+18);
+	for (int i=1; i<=8; i++) dc.DrawLine(x+i, y+1, x+i, y+17);
+
+	dc.SetPen(wxColour("#F0F0F0"));
+	dc.DrawLine(x+0, y+0, x+10, y+0);
+	dc.DrawLine(x+0, y+1, x+0, y+17);
+	dc.DrawLine(x+1, y+17, x+5, y+21);
+
+}
+
+
 
 void myDoubleSlider::render(wxDC& dc)
 {
@@ -81,12 +132,12 @@ void myDoubleSlider::render(wxDC& dc)
 
 	//left slider:
 	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
-	dc.DrawBitmap(upthumb,SLIDER_MARGIN+leftval-4, h*0.5+2);
+	DrawUpThumb(dc,SLIDER_MARGIN+leftval-4, h*0.5+2);
 	dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
 	
 	//right slider:
 	dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
-	dc.DrawBitmap(downthumb,SLIDER_MARGIN+rightval-4, h*0.5-th-8);
+	DrawDownThumb(dc,SLIDER_MARGIN+rightval-4, h*0.5-th-8);
 	dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
 }
 
