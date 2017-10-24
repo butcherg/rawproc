@@ -132,12 +132,12 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					break;
 				default:
 					result = false;
-				wxString d = duration();
-
-				if (result)
-					if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
-						log(wxString::Format("tool=colorspace_apply,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 			}
+			wxString d = duration();
+
+			if (result)
+				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 		}
 		else if (cp[1] == "assign") {
 			if (!dib->AssignColorspace(std::string(fname.GetFullPath().c_str()))) {
