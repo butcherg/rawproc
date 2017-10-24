@@ -2,7 +2,7 @@
 
 <h2 id="LayoftherawprocLand">Lay of the rawproc Land</h2>
 
-<p>When started, rawproc will present you with a window containing three panes:</p>
+<p>When started, rawproc will present you with a window containing four panes:</p>
 
 <ol>
 	<li>Display: The right-hand window, contains the image being manipulated.  There is also a thumbnail 
@@ -24,7 +24,8 @@
 	<li>Histogram: Standard RGB histogram.  It can be zoomed in with the mouse thumbwheel, and panned
 	by dragging with the mouse. The default scale is 256 bins; this can be changed with the 
 	histogram.scale parameter in the Properties list, for instance, to set 65536 for sixteen-bit 
-	scaling.</li><br>
+	scaling. Note that the default of 256 supports the curve tool, which works on a 0-255 range. 
+	if you change the histogram tool scaling, the curve tool will still work at 0-255.</li><br>
 
 	<li>Parameters: The bottom-left-hand window, contains the tools for changing the tool 
 	selected in the Commands pane.  These are mostly sliders that you can manipulate with either
