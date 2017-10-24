@@ -152,16 +152,20 @@ END_EVENT_TABLE()
 				}
 			}
 
+						//Get display profile:
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
 			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
 			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
-				wxMessageBox("?? bad display profile, disabling color management");
-				SetColorManagement(false);
+				if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+					wxMessageBox("?? bad display profile, disabling color management");
+					SetColorManagement(false);
+				}
 				hDisplayProfile = NULL;
 			}
 			else {
 				hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 			}
+
 			if (hTransform) cmsDeleteTransform(hTransform);
 			
 			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual

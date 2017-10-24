@@ -47,7 +47,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.6.1";
+wxString version = "0.6.2pre";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -1591,9 +1591,12 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
 	if (!pic->GetColorManagement()) {
-		wxMessageBox("Color management disabled, no input profile for colorspace");
-		return;
+		if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+			wxMessageBox("Color management disabled, no input profile for colorspace");
+			return;
+		}
 	}
+
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
