@@ -144,7 +144,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 
 			if (result)
 				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
-					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 		}
 		else if (cp[1] == "assign") {
 			if (!dib->AssignColorspace(std::string(fname.GetFullPath().c_str()))) {
