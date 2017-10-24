@@ -144,6 +144,14 @@ END_EVENT_TABLE()
 
 			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 
+			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
+				cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+				if (hImgProf) {
+					if (hImgProfile) cmsCloseProfile(hImgProfile);
+					hImgProfile = hImgProf;
+				}
+			}
+
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
 			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
 			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
