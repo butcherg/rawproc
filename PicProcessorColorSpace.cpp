@@ -102,6 +102,13 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 	if (cp.GetCount() > 0) fname.SetFullName(cp[0]);
 
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
+	if (threadcount == 0) 
+		threadcount = gImage::ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
@@ -109,7 +116,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "convert") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC, threadcount);
 			switch (ret) {
 				case 0:
 					result = true;
