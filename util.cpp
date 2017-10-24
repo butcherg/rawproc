@@ -280,6 +280,8 @@ bool ImageContainsRawprocCommand(wxString fname)
 	if (p.find("ImageDescription") != p.end())
 		if (p["ImageDescription"].find("rawproc") != std::string::npos)
 			return true;
+		if (p["ImageDescription"].find("gimg") != std::string::npos)
+			return true;
 	return false;
 }
 
