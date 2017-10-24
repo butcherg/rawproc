@@ -102,6 +102,13 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
 	if (cp.GetCount() > 0) fname.SetFullName(cp[0]);
 
+	int threadcount;
+	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
+	if (threadcount == 0) 
+		threadcount = gImage::ThreadCount();
+	else if (threadcount < 0) 
+		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
@@ -109,7 +116,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "convert") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC, threadcount);
 			switch (ret) {
 				case 0:
 					result = true;
@@ -132,12 +139,12 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					break;
 				default:
 					result = false;
-				wxString d = duration();
-
-				if (result)
-					if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
-						log(wxString::Format("tool=colorspace_apply,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 			}
+			wxString d = duration();
+
+			if (result)
+				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 		}
 		else if (cp[1] == "assign") {
 			if (!dib->AssignColorspace(std::string(fname.GetFullPath().c_str()))) {
