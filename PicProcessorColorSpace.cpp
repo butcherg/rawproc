@@ -12,6 +12,7 @@ class ColorspacePanel: public PicProcPanel
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 
+			s = new wxBoxSizer(wxHORIZONTAL); 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
@@ -26,7 +27,19 @@ class ColorspacePanel: public PicProcPanel
 
 			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
 			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
-			b->Add(operselect,flags);
+			s->Add(operselect,flags);
+			
+			wxArrayString intents;
+			intents.Add("perceptual");
+			intents.Add("saturation");
+			intents.Add("relative_colorimetric");
+			intents.Add("absolute_colorimetric");
+			
+			intentselect = new wxRadioBox (this, wxID_ANY, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
+			if (parms[2] != "-") intentselect->SetSelection(intentselect->FindString(parms[1]));
+			s->Add(intentselect,flags);
+			
+			b->Add(s,flags);
 			
 			SetSizerAndFit(b);
 			b->Layout();
@@ -40,7 +53,7 @@ class ColorspacePanel: public PicProcPanel
 
 		~ColorspacePanel()
 		{
-			
+			if (s) s->~wxBoxSizer();
 		}
 		
 		void selectProfile(wxCommandEvent& event)
@@ -65,15 +78,23 @@ class ColorspacePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%s,%s",edit->GetLineText(0), operselect->GetString(operselect->GetSelection())));
-			q->processPic();
+			//wxString intentstr = wxConfigBase::Get()->Read("display.cms.renderingintent","perceptual");
+			wxString profilestr = edit->GetLineText(0);
+			wxString operstr = operselect->GetString(operselect->GetSelection());
+			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
+
+			if (profilestr != "(none)") {
+				q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
+				q->processPic();
+			}
 			event.Skip();
 		}
 
 
 	private:
+		wxBoxSizer *s;
 		wxTextCtrl *edit;
-		wxRadioBox *operselect;
+		wxRadioBox *operselect, *intentselect;
 
 };
 
@@ -97,6 +118,14 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	int ret;
 	
 	wxArrayString cp = split(getParams(),",");
+	wxString intentstr;
+	if (cp.Count() >=3) intentstr = cp[2];
+	
+	cmsUInt32Number intent = INTENT_PERCEPTUAL;
+	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+	if (intentstr == "saturation") intent = INTENT_SATURATION;
+	if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+	if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
 	wxFileName fname;
 	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
@@ -116,7 +145,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "convert") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),INTENT_RELATIVE_COLORIMETRIC, threadcount);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, threadcount);
 			switch (ret) {
 				case 0:
 					result = true;
@@ -170,8 +199,6 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	
 	return result;
 }
-
-
 
 
 

@@ -1377,7 +1377,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	try {
 		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1600,9 +1600,9 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic);
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-,-", commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
