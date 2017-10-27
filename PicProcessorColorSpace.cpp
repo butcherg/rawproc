@@ -64,13 +64,16 @@ class ColorspacePanel: public PicProcPanel
 			pname.SetVolume(pname.GetVolume().MakeUpper());
 #endif
 			fname.Assign(wxFileSelector("Select profile", pname.GetPath()));
+			
+			wxString operstr = operselect->GetString(operselect->GetSelection());
+			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
 
 			if (fname.FileExists()) {
 				edit->SetValue(fname.GetFullName());
 				if (pname.GetPath() == fname.GetPath())
-					q->setParams(wxString::Format("%s,%s",fname.GetFullName(), operselect->GetString(operselect->GetSelection())));
+					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullName(), operstr,intentstr));
 				else
-					q->setParams(wxString::Format("%s,%s",fname.GetFullPath(), operselect->GetString(operselect->GetSelection())));					
+					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
 				q->processPic();
 			}
 			event.Skip();
