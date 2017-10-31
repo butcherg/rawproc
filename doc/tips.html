@@ -9,9 +9,9 @@
 	<li>While the program is named rawproc, it works well for editing JPEGs and TIFFs too.  Earlier versions handled PNG images; I didn't get
 		around to implementing them in the initial gImage, but libpng will be incorporated in a subsequent version.</li><br>
 	<li>rawproc tools are mostly multithreaded and compiled with as much optimization as is tolerable.  However, 
-		Denoise and Sharpen are slow tools that become unbearably slow with big images; consider using them 
-		after resizing the image smaller.</li><br>
-	<li>Curves work best if the change is small.  Avoid shallow slopes, as they collapse large tone (rich) ranges into very
+		Denoise is a slow tool that becomes unbearably slow with big images; consider using it 
+		after resizing the image smaller.  Alternatively, try the libraw wavelet_denoise parameter; it is pretty quick and produces quality denoise...</li><br>
+	<li>Curves work best if the change is small.  Avoid shallow slopes, as they collapse large (rich) tone ranges into very
 		small (dull) ones.</li><br>
 	<li>My personal experience with sharpening is that it is most useful after a reduction resize, as image clarity
 		is usually lost even with the best resize algorithms.  After a resize, add a sharpen tool and bump it to 1, note the
