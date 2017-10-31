@@ -1,7 +1,8 @@
 <html><head><title>Raw Parameters</title></head><body><h3>Raw Parameters</h3>
 <p>Use these parameters to tell LibRaw how to process the input raw image. In the input.raw.parameters configuration parameter, build a string of the ones you want to use, separated by semicolons, e.g., "gamma=prophoto;demosaic=prophoto".</p>
-<p>Alternatively, each libraw dcraw parameter can be specified in individual input.raw.libraw.* parameters, where "*" is the parameter name.  You can add ainput.raw.libraw parameter to the properties and not specifiy a value; if you do that, it won't be included in the constructed parameter list.  This lets youenter placeholder parameters to use when needed.</p>
+<p>Alternatively, each libraw dcraw parameter can be specified in individual input.raw.libraw.* parameters, where "*" is the parameter name.  You can add a input.raw.libraw parameter to the properties and not specifiy a value; if you do that, it won't be included in the constructed parameter list.  This lets you enter placeholder parameters to use when needed.</p>
 <p>Each of the LibRaw imgdata.params fields has a corresponding raw parameter, and there are selected parameters that have more intuitive abstractions.</p>
+<p>Each parameter with a dcraw switch is annotated thusly: 'dcraw: -x'.</p>
 <hr>
 <br>
 <b> rawdata=0|1 </b> - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color 16-bit grayscale.  Default=0.
