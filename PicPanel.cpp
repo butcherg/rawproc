@@ -152,18 +152,25 @@ END_EVENT_TABLE()
 				}
 			}
 
-						//Get display profile:
+			//Get display profile:
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
 			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
 			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
 				if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
-					wxMessageBox("?? bad display profile, disabling color management");
+					wxMessageBox("No display profile specified, and is required. Disabling color management");
 					SetColorManagement(false);
 				}
 				hDisplayProfile = NULL;
 			}
 			else {
-				hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				if (profilepath.IsOk() & profilepath.FileExists()) {
+					hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				}
+				else {
+					wxMessageBox(wxString::Format("Display profile %s not found, disabling color management", profilepath.GetFullName()));
+					SetColorManagement(false);
+					hDisplayProfile = NULL;
+				}
 			}
 
 			if (hTransform) cmsDeleteTransform(hTransform);
@@ -203,8 +210,17 @@ END_EVENT_TABLE()
 		if (colormgt)
 			if (cmstransform == "set")
 				if (hImgProfile) 
-					if (hTransform) 
-						cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+					if (hTransform) {
+						//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+						unsigned char* im = img.GetData();
+						unsigned w = img.GetWidth();
+						unsigned h = img.GetHeight();
+						#pragma omp parallel for
+						for (unsigned y=0; y<h; y++) {
+							unsigned pos = y*w*3;
+							cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+						}
+					}
 			
 		
 		//generate and store a thumbnail bitmap:
@@ -296,8 +312,17 @@ END_EVENT_TABLE()
 
 		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
 		if (colormgt)
-			if (cmstransform == "render") 
-						cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+			if (cmstransform == "render") {
+						//cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
+						unsigned char* im = spic.GetData();
+						unsigned sw = spic.GetWidth();
+						unsigned sh = spic.GetHeight();
+						#pragma omp parallel for
+						for (unsigned y=0; y<sh; y++) {
+							unsigned pos = y*sw*3;
+							cmsDoTransform(hTransform, &im[pos], &im[pos], sw);
+						}
+			}
     
 		if (scaledpic) scaledpic->~wxBitmap();
 		scaledpic = new wxBitmap(spic);
