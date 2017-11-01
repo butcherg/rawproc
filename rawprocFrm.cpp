@@ -1265,9 +1265,16 @@ void rawprocFrm::MnuEXIF(wxCommandEvent& event)
 
 void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 {
+	wxString propname = event.GetPropertyName();
 	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
-	wxConfigBase::Get()->Write(event.GetPropertyName(), event.GetPropertyValue().GetString());
+	wxConfigBase::Get()->Write(propname, event.GetPropertyValue().GetString());
 	wxConfigBase::Get()->Flush();
+
+	//check for properties that should update immediately:
+	if (propname.Find("display.cms") != wxNOT_FOUND)
+		if (!commandtree->IsEmpty())
+			pic->SetPic( ((PicProcessor *) commandtree->GetItemData(displayitem))->getProcessedPicPointer() );
+	if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
 }
 
 
@@ -1377,7 +1384,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	try {
 		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
 		p->createPanel(parambook);
-		//p->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1600,9 +1607,9 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-,-", commandtree, pic);
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic);
 		p->createPanel(parambook);
-		//p->processPic();
+		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
