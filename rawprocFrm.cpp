@@ -47,7 +47,7 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.6.2pre";
+wxString version = "0.6.2";
 
 //Do not add custom headers between
 //Header Include Start and Header Include End
@@ -1274,7 +1274,8 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 	if (propname.Find("display.cms") != wxNOT_FOUND)
 		if (!commandtree->IsEmpty())
 			pic->SetPic( ((PicProcessor *) commandtree->GetItemData(displayitem))->getProcessedPicPointer() );
-	if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
+	//not ready for prime time
+	//if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
 }
 
 
@@ -1607,7 +1608,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-", commandtree, pic);
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-,-", commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());

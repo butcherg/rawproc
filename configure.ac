@@ -1,5 +1,5 @@
 AC_PREREQ([2.68])
-AC_INIT(rawproc, 0.6Dev)
+AC_INIT(rawproc, 0.6.2)
 
 
 # MINGW_AC_WIN32_NATIVE_HOST
