@@ -135,10 +135,10 @@ END_EVENT_TABLE()
 		img = gImage2wxImage(*dib);
 		
 		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
-		if (rotation == 3) img.Rotate180();
-		if (rotation == 5) img.Rotate90(false);
-		if (rotation == 6) img.Rotate90(true);
-		if (rotation == 8) img.Rotate90(false);
+		if (rotation == 3) img = img.Rotate180();
+		if (rotation == 5) img = img.Rotate90(false);
+		if (rotation == 6) img = img.Rotate90(true);
+		if (rotation == 8) img = img.Rotate90(false);
 
 		if (colormgt) {
 
