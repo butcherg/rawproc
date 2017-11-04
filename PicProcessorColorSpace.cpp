@@ -13,7 +13,7 @@ class ColorspacePanel: public PicProcPanel
 		{
 
 			s = new wxBoxSizer(wxHORIZONTAL); 
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "colorspace", wxDefaultPosition, wxSize(100,20)), flags);
 			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
@@ -41,6 +41,10 @@ class ColorspacePanel: public PicProcPanel
 			
 			b->Add(s,flags);
 			
+			bpc = new wxCheckBox(this, wxID_ANY, "black point compensation");
+			b->Add(bpc , flags);
+			//bpc->SetValue(bpc);
+			
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
@@ -49,6 +53,7 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this);
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
+			Bind(wxEVT_CHECKBOX, &ColorspacePanel::paramChanged, this);
 		}
 
 		~ColorspacePanel()
@@ -67,6 +72,7 @@ class ColorspacePanel: public PicProcPanel
 			
 			wxString operstr = operselect->GetString(operselect->GetSelection());
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
+			if (bpc->GetValue()) intentstr.Append(",bpc");
 
 			if (fname.FileExists()) {
 				edit->SetValue(fname.GetFullName());
@@ -85,6 +91,7 @@ class ColorspacePanel: public PicProcPanel
 			wxString profilestr = edit->GetLineText(0);
 			wxString operstr = operselect->GetString(operselect->GetSelection());
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
+			if (bpc->GetValue()) intentstr.Append(",bpc");
 
 			if (profilestr != "(none)") {
 				q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
@@ -96,6 +103,7 @@ class ColorspacePanel: public PicProcPanel
 
 	private:
 		wxBoxSizer *s;
+		wxCheckBox *bpc;
 		wxTextCtrl *edit;
 		wxRadioBox *operselect, *intentselect;
 
@@ -122,7 +130,11 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	
 	wxArrayString cp = split(getParams(),",");
 	wxString intentstr;
+	bool bpc = false;
 	if (cp.Count() >=3) intentstr = cp[2];
+	if (cp.Count() >=4) if (cp[3] == "bpc") bpc =  true;
+	
+	if (bpc) ((wxFrame*) m_display->GetParent())->SetStatusText("colorspace w/bpc...");
 	
 	cmsUInt32Number intent = INTENT_PERCEPTUAL;
 	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
@@ -148,7 +160,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "convert") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, threadcount);
+			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, bpc, threadcount);
 			switch (ret) {
 				case 0:
 					result = true;
