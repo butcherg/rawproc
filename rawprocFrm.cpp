@@ -1189,6 +1189,7 @@ void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 {
+	if (commandtree->IsEmpty()) return;
 	wxString cmdstring = AssembleCommand();
 	if (filename.IsOk() && filename.FileExists()) {
 		if (opensource) {
