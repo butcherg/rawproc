@@ -150,6 +150,11 @@ END_EVENT_TABLE()
 					if (hImgProfile) cmsCloseProfile(hImgProfile);
 					hImgProfile = hImgProf;
 				}
+				else {
+					wxMessageBox(wxString::Format("Image profile not found, disabling color management"));
+					SetColorManagement(false);
+					hImgProfile = NULL;
+				}
 			}
 
 			//Get display profile:
@@ -192,6 +197,12 @@ END_EVENT_TABLE()
 						hImgProfile, TYPE_RGB_8,
 						hDisplayProfile, TYPE_RGB_8,
 						intent, dwflags);
+						
+			if (!hTransform) {
+				wxMessageBox(wxString::Format("Display transform creation failed, disabling color management"));
+				SetColorManagement(false);
+				hDisplayProfile = NULL;
+			}
 
 			//cmsCloseProfile(hImgProfile);  //Now done from rawprocFrm with a method call...
 			cmsCloseProfile(hDisplayProfile);
