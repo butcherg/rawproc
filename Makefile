@@ -3,7 +3,7 @@
 OBJDIR=build
 
 
-OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
+OBJECTS := $(addprefix $(OBJDIR)/,util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o)
 
 #localmake.txt: += any of these to add, = to replace:
 
@@ -60,6 +60,9 @@ $(OBJDIR)/myHistogramPane.o: myHistogramPane.cpp
 
 $(OBJDIR)/myHistogramDialog.o: myHistogramDialog.cpp
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -c myHistogramDialog.cpp  -o$@
+
+$(OBJDIR)/myConfig.o: myConfig.cpp
+	$(CXX) $(CFLAGS) $(INCLUDEDIRS) -c myConfig.cpp  -o$@
 
 $(OBJDIR)/CurvePane.o: CurvePane.cpp 
 	$(CXX) $(CFLAGS) $(INCLUDEDIRS) $(WXFLAGS) -w -c CurvePane.cpp  -o$@
