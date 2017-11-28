@@ -20,6 +20,8 @@ public:
 	bool exists(std::string section, std::string name);
 	std::string getValue(std::string name);
 	std::string getValue(std::string section, std::string name);
+	std::string getValueOrDefault(std::string name, std::string defaultval);
+	std::string getValueOrDefault(std::string section, std::string name, std::string defaultval);
 	void setValue(std::string section, std::string name, std::string value);
 	void setValue(std::string name, std::string value);
 	std::map<std::string, std::string> getSection(std::string section);

@@ -94,12 +94,34 @@ void myConfig::flush()
 
 std::string myConfig::getValue(std::string name)
 {
-	return defaultconfig[name];
+	if (exists(name))
+		return defaultconfig[name];
+	else
+		return "";
 }
 
 std::string myConfig::getValue(std::string section, std::string name)
 {
-	return sectionconfig[section][name];
+	if (exists(section,name))
+		return sectionconfig[section][name];
+	else
+		return "";
+}
+
+std::string myConfig::getValueOrDefault(std::string name, std::string defaultval)
+{
+	if (exists(name))
+		return defaultconfig[name];
+	else
+		return defaultval;
+}
+
+std::string myConfig::getValueOrDefault(std::string section, std::string name, std::string defaultval)
+{
+	if (exists(section,name))
+		return sectionconfig[section][name];
+	else
+		return defaultval;
 }
 
 std::map<std::string, std::string> myConfig::getSection(std::string section)
