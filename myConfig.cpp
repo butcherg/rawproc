@@ -129,6 +129,11 @@ std::map<std::string, std::string> myConfig::getSection(std::string section)
 	return sectionconfig[section];
 }
 
+std::map<std::string, std::string> myConfig::getDefault()
+{
+	return defaultconfig;
+}
+
 void myConfig::setValue(std::string section, std::string name, std::string value)
 {
 	sectionconfig[section][name] = value;

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <gimage/gimage.h>
+#include "myConfig.h"
 
 wxString hstr="";
 
@@ -36,17 +37,18 @@ wxArrayString split(wxString str, wxString delim)
 wxString paramString(wxString filter)
 {
 	wxString paramstr, name, val;
-	long dummy;
-	
-	bool bCont = wxConfigBase::Get()->GetFirstEntry(name, dummy);
-	while ( bCont ) {
+
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		name = wxString(it->first.c_str());
+		val =  wxString(it->second.c_str());
 		if (name.Find(filter) != wxNOT_FOUND) {
-			val = wxConfigBase::Get()->Read(name, "");
+			val = myConfig::getConfig().getValue((const char *) name.mb_str(), "");
 			name.Replace(filter,"");
 			if (val != "") paramstr.Append(wxString::Format("%s=%s;",name, val));
 		}
-		bCont = wxConfigBase::Get()->GetNextEntry(name, dummy);
 	}
+
 	return paramstr;
 }
 

@@ -24,6 +24,7 @@ public:
 	std::string getValueOrDefault(std::string section, std::string name, std::string defaultval);
 	void setValue(std::string section, std::string name, std::string value);
 	void setValue(std::string name, std::string value);
+	std::map<std::string, std::string> getDefault();
 	std::map<std::string, std::string> getSection(std::string section);
 
 private:

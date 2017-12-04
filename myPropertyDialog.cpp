@@ -58,10 +58,12 @@ wxDialog(parent, id, title, pos, size)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
-	pg = new wxPropertyGrid(this, wxID_ANY);
+	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
+
 	for (std::map<std::string, std::string>::iterator it=props.begin(); it!=props.end(); ++it)
 		pg->Append(new wxStringProperty(it->first.c_str(), it->first.c_str(), it->second.c_str()));
+
 	pg->Sort();
 	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
 	
@@ -73,8 +75,12 @@ wxDialog(parent, id, title, pos, size)
 	ct->Add(new wxButton(this, DELETEID, "Delete"), 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
+	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
 	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
 	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::AddProp, this, ADDID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::DelProp, this, DELETEID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::HideDialog, this, HIDEID);
 }
 
 
@@ -85,6 +91,7 @@ wxDialog(parent, id, title, pos, size)
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
 	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
+
 	wxString name, val; 
 	long dummy;
 	bool bCont = config->GetFirstEntry(name, dummy);
