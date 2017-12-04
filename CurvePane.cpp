@@ -6,6 +6,7 @@
 #include <wx/fileconf.h>
 
 #include "util.h"
+#include "myConfig.h"
 
 wxDEFINE_EVENT(myCURVE_UPDATE, wxCommandEvent);
 
@@ -114,9 +115,8 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	double x, y;
 	mousemoved = false;
 	mousemotion=true;
-	int landingradius;
 	//parm tool.curve.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5
-	wxConfigBase::Get()->Read("tool.curve.landingradius",&landingradius,5);
+	int landingradius = atoi(myConfig::getConfig().getValueOrDefault("tool.curve.landingradius", "5").c_str());
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
 	pos = event.GetLogicalPosition(dc);
@@ -178,9 +178,9 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 
 void CurvePane::mouseDclick(wxMouseEvent& event)
 {
-	int radius;
+
 	//parm tool.curve.controlpointradius: Radius of the circle displayed to indicate a control point.  Default=5
-	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
+	int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.curve.controlpointradius", "5").c_str());
 	if (c.isendpoint(selectedCP.x, selectedCP.y, radius)) return;
 	c.deletepoint(selectedCP.x, selectedCP.y);
 	selectedCP.x = -1.0;
@@ -280,9 +280,7 @@ void CurvePane::render(wxDC&  dc)
 	int w, h;
 	dc.GetSize(&w, &h);
 	int m=10;
-	int radius;
-	wxConfigBase::Get()->Read("tool.curve.controlpointradius",&radius,5);
-	
+	int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.curve.controlpointradius", "5").c_str());
 
 	
 	//center lines:

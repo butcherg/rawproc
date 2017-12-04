@@ -4,6 +4,7 @@
 #include <vector>
 #include <wx/fileconf.h>
 #include "PicProcessor.h"
+#include "myConfig.h"
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -115,7 +116,7 @@ END_EVENT_TABLE()
 		settingpic = true;
 		
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
-		if (wxConfigBase::Get()->Read("display.status","1") ==  "1")
+		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
 			parentframe->SetStatusText("display...");
 		//mark();
 		
@@ -142,7 +143,7 @@ END_EVENT_TABLE()
 
 		if (colormgt) {
 
-			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
 
 			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
 				cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
@@ -159,9 +160,9 @@ END_EVENT_TABLE()
 
 			//Get display profile:
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
-			profilepath.SetFullName(wxConfigBase::Get()->Read("display.cms.displayprofile",""));
-			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
-				if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","").c_str()));
+			if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
+				if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
 					wxMessageBox("No display profile specified, and is required. Disabling color management");
 					SetColorManagement(false);
 				}
@@ -181,7 +182,7 @@ END_EVENT_TABLE()
 			if (hTransform) cmsDeleteTransform(hTransform);
 			
 			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-			wxString intentstr = wxConfigBase::Get()->Read("display.cms.renderingintent","perceptual");
+			wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
 			cmsUInt32Number intent = INTENT_PERCEPTUAL;
 			if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
 			if (intentstr == "saturation") intent = INTENT_SATURATION;
@@ -190,7 +191,7 @@ END_EVENT_TABLE()
 
 			cmsUInt32Number dwflags = 0;
 			//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
-			if (wxConfigBase::Get()->Read("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
+			if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
 			if (hImgProfile)
 				if (hDisplayProfile)
 					hTransform = cmsCreateTransform(
@@ -216,7 +217,7 @@ END_EVENT_TABLE()
 		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
 
 		//parm display.cms.transform=set|render: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
-		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
+		wxString cmstransform = wxString(myConfig::getConfig().getValueOrDefault("display.cms.transform","set"));
 
 		if (colormgt)
 			if (cmstransform == "set")
@@ -246,7 +247,7 @@ END_EVENT_TABLE()
 						cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
 
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
-		unsigned scale = wxConfigBase::Get()->Read("histogram.scale",256);
+		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
 		histogram->SetPic(*dib, scale);
 
 		if (thumb) thumb->~wxBitmap();
@@ -321,7 +322,8 @@ END_EVENT_TABLE()
 		else
 			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
 
-		wxString cmstransform = wxConfigBase::Get()->Read("display.cms.transform","set");
+		wxString cmstransform = wxString(myConfig::getConfig().getValueOrDefault("display.cms.transform","set"));
+
 		if (colormgt)
 			if (cmstransform == "render") {
 						//cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
@@ -604,7 +606,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 						if (imgX < scaledpic->GetWidth()) {
 							if (imgY < scaledpic->GetHeight()) { 
 								//parm display.rgb.scale: Multiplier for rgb display in status line.  Default=1
-								int pscale = wxConfigBase::Get()->Read("display.rgb.scale",1);
+								int pscale = atoi(myConfig::getConfig().getValueOrDefault("display.rgb.scale","1").c_str());
 								if (pscale > 1)
 									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %0.0f,%0.0f,%0.0f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 
 								else
