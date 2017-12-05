@@ -33,18 +33,14 @@ bool rawprocFrmApp::OnInit()
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
-	
-	wxConfigBase::DontCreateOnDemand();
 
 	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	if (wxFileName::FileExists(conf_cwd)) {
-		//wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_cwd));
 		frame->SetConfigFile(conf_cwd);
 		myConfig::loadConfig(std::string(conf_cwd.c_str()));
 	}
 	else if (wxFileName::FileExists(conf_configd)) {
-		//wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_configd));
 		frame->SetConfigFile(conf_configd);
 		myConfig::loadConfig(std::string(conf_configd.c_str()));
 	}
@@ -112,7 +108,6 @@ bool rawprocFrmApp::OnInit()
  
 int rawprocFrmApp::OnExit()
 {
-	delete wxConfigBase::Get();
 	return 0;
 }
 

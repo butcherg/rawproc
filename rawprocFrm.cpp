@@ -118,7 +118,6 @@ void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *t
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
-	//wxString startpath = //wxConfigBase::Get()->Read("app.start.path","");
 	wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
@@ -330,8 +329,6 @@ void rawprocFrm::SetBackground()
 			db = atoi(dockbkgnd[2].c_str());
 		}
 	}
-
-printf("%d,%d,%d  %d,%d,%d\n", pr,pg,pb, dr,dg,db);
 
 	commandtree->SetBackgroundColour(wxColour(dr,dg,db));
 	commandtree->Refresh();

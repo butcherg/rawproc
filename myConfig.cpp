@@ -124,6 +124,18 @@ std::string myConfig::getValueOrDefault(std::string section, std::string name, s
 		return defaultval;
 }
 
+void myConfig::deleteValue(std::string section, std::string name)
+{
+	if (exists(section,name))
+		sectionconfig[section].erase(name);
+}
+
+void myConfig::deleteValue(std::string name)
+{
+	if (exists(name))
+		defaultconfig.erase(name);
+}
+
 std::map<std::string, std::string> myConfig::getSection(std::string section)
 {
 	return sectionconfig[section];

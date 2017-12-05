@@ -1,7 +1,9 @@
 #include "myPropertyDialog.h"
+#include "myConfig.h"
 #include <wx/sizer.h>
 
 #include <wx/wx.h>
+
 
 #define FILTERID 8400
 #define ADDID 8401
@@ -224,8 +226,8 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 			pg->Append(new wxStringProperty(add->GetName(), add->GetName(), add->GetValue()));
 			pg->Sort();
 			wxMessageBox(wxString::Format("Changed %s to %s.", add->GetName(), add->GetValue()));
-			wxConfigBase::Get()->Write(add->GetName(), add->GetValue());
-			wxConfigBase::Get()->Flush();
+			myConfig::getConfig().setValue((const char  *) add->GetName().mb_str(),  (const char  *) add->GetValue().mb_str());
+			myConfig::getConfig().flush();
 		}
 		else
 			wxMessageBox("Property already exists.");
@@ -242,7 +244,7 @@ void PropertyDialog::DelProp(wxCommandEvent& event)
 	int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
 	if (answer == wxYES) {
 		pg->DeleteProperty(p);
-		wxConfigBase::Get()->DeleteEntry(name);
-		wxConfigBase::Get()->Flush();
+		myConfig::getConfig().deleteValue((const char  *) name.mb_str());
+		myConfig::getConfig().flush();
 	}
 }
