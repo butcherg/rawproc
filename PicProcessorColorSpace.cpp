@@ -3,6 +3,7 @@
 #include "util.h"
 //#include "gimage/curve.h"
 #include <wx/fileconf.h>
+#include "myConfig.h"
 
 
 class ColorspacePanel: public PicProcPanel
@@ -64,7 +65,7 @@ class ColorspacePanel: public PicProcPanel
 		void selectProfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			pname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
 #ifdef WIN32
 			pname.SetVolume(pname.GetVolume().MakeUpper());
 #endif
@@ -87,7 +88,6 @@ class ColorspacePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			//wxString intentstr = wxConfigBase::Get()->Read("display.cms.renderingintent","perceptual");
 			wxString profilestr = edit->GetLineText(0);
 			wxString operstr = operselect->GetString(operselect->GetSelection());
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
@@ -143,11 +143,10 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
 	wxFileName fname;
-	fname.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+	fname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
 	if (cp.GetCount() > 0) fname.SetFullName(cp[0]);
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.contrast.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.colorspace.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -187,7 +186,8 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			wxString d = duration();
 
 			if (result)
-				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+				if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.colorspace.log","0") == "1"))
+
 					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 		}
 		else if (cp[1] == "assign") {
@@ -198,7 +198,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			wxString d = duration();
 
 			if (result) 
-				if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.colorspace.log","0") == "1"))
+				if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.colorspace.log","0") == "1"))
 					log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 		}
 	
