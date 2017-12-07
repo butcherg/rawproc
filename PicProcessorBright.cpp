@@ -1,12 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorBright.h"
 #include "PicProcPanel.h"
-//#include <gimage/gimage.h>
 #include "undo.xpm"
 
 #include "util.h"
 #include "myConfig.h"
-#include <wx/fileconf.h>
 
 class BrightPanel: public PicProcPanel
 {

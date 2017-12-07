@@ -1,10 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorExposure.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
 
-#include <wx/fileconf.h>
 
 class ExposurePanel: public PicProcPanel
 {
@@ -62,8 +62,7 @@ class ExposurePanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			double resetval;
-			wxConfigBase::Get()->Read("tool.exposure.initialvalue",&resetval,0.0);
+			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
 			ev->SetValue(50.0+(resetval*10));
 			q->setParams(wxString::Format("%2.2f",resetval));
 			val->SetLabel(wxString::Format("%2.2f", resetval));
@@ -99,8 +98,8 @@ bool PicProcessorExposure::processPic(bool processnext)
 	double ev = atof(c.c_str());
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure %2.2f...", ev));
 	bool result = true;
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.exposure.cores",&threadcount,0);
+	
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.exposure.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -113,7 +112,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 	dib->ApplyExposureCompensation(ev, threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.exposure.log","0") == "1"))
+	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.exposure.log","0") == "1"))
 		log(wxString::Format("tool=exposure,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

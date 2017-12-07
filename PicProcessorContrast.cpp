@@ -1,13 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorContrast.h"
 #include "PicProcPanel.h"
-//#include <gimage/gimage.h>
 #include "undo.xpm"
 
 #include "util.h"
 #include "myConfig.h"
-#include <wx/fileconf.h>
-
 
 class ContrastPanel: public PicProcPanel
 {

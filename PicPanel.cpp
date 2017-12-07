@@ -2,7 +2,6 @@
 #include "PicPanel.h"
 #include "util.h"
 #include <vector>
-#include <wx/fileconf.h>
 #include "PicProcessor.h"
 #include "myConfig.h"
 

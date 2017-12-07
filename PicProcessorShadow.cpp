@@ -2,10 +2,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorShadow.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "undo.xpm"
 
 #include "util.h"
-#include <wx/fileconf.h>
 
 class ShadowPanel: public PicProcPanel
 {
@@ -80,12 +80,12 @@ class ShadowPanel: public PicProcPanel
 			int resetshadowval, resetthresholdval;
 			switch (event.GetId()) {
 				case 1000:
-					wxConfigBase::Get()->Read("tool.shadow.level",&resetshadowval,0);
+					resetshadowval = atoi(myConfig::getConfig().getValueOrDefault("tool.shadow.level","0").c_str());
 					shadow->SetValue(resetshadowval);
 					val1->SetLabel(wxString::Format("%4d", resetshadowval));
 					break;
 				case 2000:
-					wxConfigBase::Get()->Read("tool.shadow.threshold",&resetthresholdval,64);
+					resetthresholdval = atoi(myConfig::getConfig().getValueOrDefault("tool.shadow.threshold","64").c_str());
 					threshold->SetValue(resetthresholdval);
 					val2->SetLabel(wxString::Format("%4d", resetthresholdval));
 					break;
@@ -133,8 +133,7 @@ bool PicProcessorShadow::processPic(bool processnext) {
 	ctrlpts.insertpoint(thr+20,thr+20);
 	ctrlpts.insertpoint(255,255);
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.highlight.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.highlight.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -146,7 +145,7 @@ bool PicProcessorShadow::processPic(bool processnext) {
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.shadow.log","0") == "1"))
+	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.shadow.log","0") == "1"))
 		log(wxString::Format("tool=shadow,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

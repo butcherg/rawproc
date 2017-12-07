@@ -2,10 +2,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorHighlight.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "undo.xpm"
 
 #include "util.h"
-#include <wx/fileconf.h>
 
 class HighlightPanel: public PicProcPanel
 {
@@ -81,12 +81,12 @@ class HighlightPanel: public PicProcPanel
 			int resethighlightval, resetthresholdval;
 			switch (event.GetId()) {
 				case 1000:
-					wxConfigBase::Get()->Read("tool.highlight.level",&resethighlightval,0);
+					resethighlightval = atoi(myConfig::getConfig().getValueOrDefault("tool.highlight.level","0").c_str());
 					highlight->SetValue(resethighlightval);
 					val1->SetLabel(wxString::Format("%4d", resethighlightval));
 					break;
 				case 2000:
-					wxConfigBase::Get()->Read("tool.highlight.threshold",&resetthresholdval,192);
+					resetthresholdval = atoi(myConfig::getConfig().getValueOrDefault("tool.highlight.threshold","192").c_str());
 					threshold->SetValue(resetthresholdval);
 					val2->SetLabel(wxString::Format("%4d", resetthresholdval));
 					break;
@@ -134,8 +134,7 @@ bool PicProcessorHighlight::processPic(bool processnext) {
 	ctrlpts.insertpoint((thr+thr/2)-shd,(thr+thr/2)+shd);
 	ctrlpts.insertpoint(255,255);
 	
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.highlight.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.highlight.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -147,7 +146,7 @@ bool PicProcessorHighlight::processPic(bool processnext) {
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.highlight.log","0") == "1"))
+	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.highlight.log","0") == "1"))
 		log(wxString::Format("tool=highlight,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

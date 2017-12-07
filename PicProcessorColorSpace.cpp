@@ -1,8 +1,6 @@
 #include "PicProcessorColorSpace.h"
 #include "PicProcPanel.h"
 #include "util.h"
-//#include "gimage/curve.h"
-#include <wx/fileconf.h>
 #include "myConfig.h"
 
 

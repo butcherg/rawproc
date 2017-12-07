@@ -11,7 +11,6 @@
 #include "rawprocFrm.h"
 
 #include <wx/filefn.h>
-#include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
 #include "wx/filesys.h"

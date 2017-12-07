@@ -1,10 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorDenoise.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "undo.xpm"
 
 #include "util.h"
-#include <wx/fileconf.h>
 
 #define SIGMASLIDER 8000
 #define LOCALSLIDER 8001
@@ -100,19 +100,19 @@ class DenoisePanel: public PicProcPanel
 		{
 			int sigmareset, localreset, patchreset;
 			if (event.GetId() == SIGMARESET) {
-				wxConfigBase::Get()->Read("tool.denoise.initialvalue",&sigmareset,0);
+				sigmareset = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
 				sigma->SetValue(sigmareset);
 				val->SetLabel(wxString::Format("%4d", sigmareset));
 				q->setParams(wxString::Format("%d,%d,%d",sigma->GetValue(),local->GetValue(),patch->GetValue()));
 				q->processPic();
 			}
 			if (event.GetId() == LOCALRESET) {
-				wxConfigBase::Get()->Read("tool.denoise.local",&localreset,3);
+				localreset = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
 				local->SetValue(localreset);
 				val1->SetLabel(wxString::Format("%4d", localreset));
 			}
 			if (event.GetId() == PATCHRESET) {
-				wxConfigBase::Get()->Read("tool.denoise.patch",&patchreset,1);
+				patchreset = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
 				patch->SetValue(patchreset);
 				val2->SetLabel(wxString::Format("%4d", patchreset));
 			}
@@ -145,7 +145,6 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDenoise::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");
-	int threadcount;
 
 	wxArrayString cp = split(getParams(),",");
 	double sigma = atof(cp[0]);
@@ -154,9 +153,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 
 	bool result = true;
 
-
-
-	wxConfigBase::Get()->Read("tool.denoise.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.denoise.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -169,7 +166,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 		dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		wxString d = duration();
 
-		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.denoise.log","0") == "1"))
+		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.denoise.log","0") == "1"))
 			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 

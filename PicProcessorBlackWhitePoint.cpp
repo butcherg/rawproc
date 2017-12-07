@@ -5,10 +5,8 @@
 #include "myDoubleSlider.h"
 #include "myConfig.h"
 #include "undo.xpm"
-
 #include "util.h"
-//#include "gimage/gimage.h"
-#include <wx/fileconf.h>
+
 
 class BlackWhitePointPanel: public PicProcPanel
 {

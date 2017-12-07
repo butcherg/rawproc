@@ -1,8 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorCrop.h"
 #include "PicProcPanel.h"
-//#include <gimage/gimage.h>
-#include <wx/fileconf.h>
+#include "myConfig.h"
 #include "util.h"
 
 class CropPanel: public PicProcPanel
@@ -14,13 +13,12 @@ class CropPanel: public PicProcPanel
 			node = 0;
 			cropmode = 1; //0=freeform; 1=maintain aspect
 			//parm tool.crop.controlpointradius: Radius of the rectangle displayed to indicate a control point.  Default=7
-			wxConfigBase::Get()->Read("tool.crop.controlpointradius",&cpradius,7);
+			cpradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.controlpointradius","7").c_str());
 			//parm tool.crop.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7
-			wxConfigBase::Get()->Read("tool.crop.landingradius",&landingradius,7);
+			landingradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
 			isaspect = true;
 
-			int indent;
-			wxConfigBase::Get()->Read("tool.crop.initialindent",&indent,0);
+			int indent = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.initialindent","0").c_str());
 
 			wxArrayString p = split(params,",");
 			left = atoi(p[0])+indent;
@@ -123,8 +121,8 @@ class CropPanel: public PicProcPanel
 		{
 			mousex = event.m_x;
 			mousey = event.m_y;
-			int radius;
-			wxConfigBase::Get()->Read("tool.crop.landingradius",&radius,7);
+
+			int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
 
 			if ((mousex > left*aspect-radius) & (mousex < left*aspect+radius)) {
 				if ((mousey > top*aspect-landingradius) & (mousey < top*aspect+landingradius)) {
@@ -317,8 +315,8 @@ bool PicProcessorCrop::processPic(bool processnext) {
 	int bottom = atoi(p[3]);
 	bool result = true;
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.crop.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.crop.cores","0").c_str());
+
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -334,7 +332,7 @@ bool PicProcessorCrop::processPic(bool processnext) {
 	dib->ApplyCrop(left, top, right, bottom, threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.crop.log","0") == "1"))
+	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.crop.log","0") == "1"))
 		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

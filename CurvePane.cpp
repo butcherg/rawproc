@@ -3,7 +3,6 @@
 #include <wx/dnd.h> 
 #include <wx/dcbuffer.h> 
 #include <string>
-#include <wx/fileconf.h>
 
 #include "util.h"
 #include "myConfig.h"

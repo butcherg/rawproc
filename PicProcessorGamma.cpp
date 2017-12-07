@@ -1,8 +1,8 @@
 #include "PicProcessorGamma.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
-#include <wx/fileconf.h>
 
 #define GAMMAID 8500
 
@@ -60,12 +60,13 @@ bool PicProcessorGamma::processPic(bool processnext)
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
 	bool result = true;
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.gamma.cores",&threadcount,0);
+
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.gamma.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+	
 	double exponent = 1 / gamma;
 	double v = 255.0 * (double)pow((double)255, -exponent);
 	for (int i = 0; i< 256; i+=1) {
@@ -80,7 +81,7 @@ bool PicProcessorGamma::processPic(bool processnext)
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gamma.log","0") == "1"))
+	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.gamma.log","0") == "1"))
 		log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

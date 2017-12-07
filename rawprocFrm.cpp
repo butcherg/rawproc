@@ -16,7 +16,6 @@
 #include <wx/imaglist.h>
 #include <wx/clipbrd.h>
 #include <wx/aboutdlg.h> 
-#include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 #include <wx/statline.h>
 

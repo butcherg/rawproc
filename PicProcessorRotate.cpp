@@ -1,11 +1,11 @@
 #include "PicProcessor.h"
 #include "PicProcessorRotate.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
 #include "run.xpm"
 
-#include <wx/fileconf.h>
 #include <wx/treectrl.h>
 
 
@@ -303,7 +303,7 @@ class RotatePanel: public PicProcPanel
 			double resetval;
 			switch(event.GetId()) {
 				case 8000:
-					wxConfigBase::Get()->Read("tool.rotate.initialvalue",&resetval,0.0);
+					resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
 					rotate->SetValue(resetval);
 					if (autocrop->GetValue())
 						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
@@ -364,8 +364,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 			autocrop = true;
 	bool result = true;
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.rotate.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValue("tool.rotate.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -378,7 +377,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 		dib->ApplyRotate(-angle, autocrop, threadcount);
 		wxString d = duration();
 
-		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.rotate.log","0") == "1"))
+		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.rotate.log","0") == "1"))
 			log(wxString::Format("tool=rotate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
