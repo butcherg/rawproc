@@ -364,7 +364,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 			autocrop = true;
 	bool result = true;
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.rotate.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.rotate.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -377,7 +377,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 		dib->ApplyRotate(-angle, autocrop, threadcount);
 		wxString d = duration();
 
-		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.rotate.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
 			log(wxString::Format("tool=rotate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 

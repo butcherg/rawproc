@@ -112,7 +112,7 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 	kernel[1][1] = sharp;
 	bool result = true;
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.sharpen.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
 
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
@@ -129,7 +129,7 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 		dib->ApplyConvolutionKernel(kernel, threadcount);
 		wxString d = duration();
 
-		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.sharpen.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
 			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}

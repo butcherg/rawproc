@@ -97,7 +97,7 @@ bool PicProcessorSaturation::processPic(bool processnext) {
 	double saturation = atof(c.c_str());
 	bool result = true;
 	
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.saturate.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturate.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -110,7 +110,7 @@ bool PicProcessorSaturation::processPic(bool processnext) {
 		dib->ApplySaturate(saturation, threadcount);
 		wxString d = duration();
 
-		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.saturate.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.saturate.log","0") == "1"))
 			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}

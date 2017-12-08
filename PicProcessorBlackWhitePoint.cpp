@@ -15,8 +15,8 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			wxArrayString p = split(params,",");
 
-			int whtlimit = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.whitelimit","128").c_str());
-			int blklimit = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.blacklimit","128").c_str());
+			int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
+			int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
 
 			int blk = atoi(p[0]);
 			int wht = atoi(p[1]);
@@ -95,12 +95,12 @@ class BlackWhitePointPanel: public PicProcPanel
 			int resetblackval, resetwhiteval;
 			switch (event.GetId()) {
 				case 1000:
-					resetblackval = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.blackinitialvalue","0").c_str());
+					resetblackval = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackinitialvalue","0").c_str());
 					black->SetValue(resetblackval);
 					val1->SetLabel(wxString::Format("%4d", resetblackval));
 					break;
 				case 2000:
-					resetwhitekval = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+					resetwhitekval = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 					white->SetValue(resetwhiteval);
 					val2->SetLabel(wxString::Format("%4d", resetwhiteval));
 					break;
@@ -128,9 +128,9 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	double blk, wht;
 	wht = 255; blk = 0;
 	//parm tool.blackwhitepoint.whitelimit: The lower whitepoint limit.  Default=128
-	int whtlimit = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.whitelimit","128").c_str());
+	int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
 	//parm tool.blackwhitepoint.blacklimit: The upper blackpoint limit.  Default=128
-	int blklimit = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.blacklimit","128").c_str());
+	int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
 
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
@@ -138,12 +138,11 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		long htotal = 0;
 		
 		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
-		double blkthresh = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.blackthreshold","0.05").c_str());
+		double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
 		//parm tool.blackwhitepoint.whitethreshold: The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
-		double whtthresh = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.whitethreshold","0.05").c_str());
+		double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
 		//parm tool.blackwhitepoint.whiteinitialvalue: The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255
-		long whtinitial = atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
-
+		long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 
 		for (i=0; i<256; i++) htotal += hdata[i];
 
@@ -193,7 +192,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	bool result = true;
 
 	//parm tool.*.cores: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.blackwhitepoint.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
 	
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
@@ -208,7 +207,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 
 	//parm tool.all.log: Turns on logging for all tools.  Default=0
 	//parm tool.*.log: Turns on logging for the specified tool.  Default=0
-	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.blackwhitepoint.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.log","0") == "1"))
 		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;

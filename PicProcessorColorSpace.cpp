@@ -144,7 +144,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	fname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
 	if (cp.GetCount() > 0) fname.SetFullName(cp[0]);
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.colorspace.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -184,7 +184,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			wxString d = duration();
 
 			if (result)
-				if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.colorspace.log","0") == "1"))
+				if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
 
 					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 		}
@@ -196,7 +196,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			wxString d = duration();
 
 			if (result) 
-				if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.colorspace.log","0") == "1"))
+				if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
 					log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 		}
 	

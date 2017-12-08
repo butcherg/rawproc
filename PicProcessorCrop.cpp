@@ -315,7 +315,7 @@ bool PicProcessorCrop::processPic(bool processnext) {
 	int bottom = atoi(p[3]);
 	bool result = true;
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.crop.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str());
 
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
@@ -332,7 +332,7 @@ bool PicProcessorCrop::processPic(bool processnext) {
 	dib->ApplyCrop(left, top, right, bottom, threadcount);
 	wxString d = duration();
 
-	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.crop.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))
 		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

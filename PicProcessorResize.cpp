@@ -101,7 +101,7 @@ bool PicProcessorResize::processPic(bool processnext) {
 	if (algo == "catmullrom") filter = FILTER_CATMULLROM;
 	if (algo == "lanczos3") filter = FILTER_LANCZOS3;
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.resize.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.resize.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -112,7 +112,7 @@ bool PicProcessorResize::processPic(bool processnext) {
 	dib->ApplyResize(width, height, filter, threadcount);
 	wxString d = duration();
 
-	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.resize.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
 		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

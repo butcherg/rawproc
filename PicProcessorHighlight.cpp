@@ -134,7 +134,7 @@ bool PicProcessorHighlight::processPic(bool processnext) {
 	ctrlpts.insertpoint((thr+thr/2)-shd,(thr+thr/2)+shd);
 	ctrlpts.insertpoint(255,255);
 	
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.highlight.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.highlight.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -146,7 +146,7 @@ bool PicProcessorHighlight::processPic(bool processnext) {
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.highlight.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.highlight.log","0") == "1"))
 		log(wxString::Format("tool=highlight,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

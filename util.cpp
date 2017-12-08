@@ -42,7 +42,7 @@ wxString paramString(wxString filter)
 		name = wxString(it->first.c_str());
 		val =  wxString(it->second.c_str());
 		if (name.Find(filter) != wxNOT_FOUND) {
-			val = myConfig::getConfig().getValue((const char *) name.mb_str(), "");
+			val = myConfig::getConfig().getValue(std::string((const char *) name.mb_str()));
 			name.Replace(filter,"");
 			if (val != "") paramstr.Append(wxString::Format("%s=%s;",name, val));
 		}
@@ -180,7 +180,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if ((myConfig::getConfig().getValue("display.all.log","0") == "1") || (myConfig::getConfig().getValue("display.wxhistogram.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("display.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,threadcount,d));
 
 	return bmp;
@@ -218,7 +218,7 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if ((myConfig::getConfig().getValue("display.all.log","0") == "1") || (myConfig::getConfig().getValue("display.wxhistogram.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("display.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,1,d));
 
 	return bmp;

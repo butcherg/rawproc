@@ -63,7 +63,7 @@ class BrightPanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			int resetval =  atoi(myConfig::getConfig().getValue("tool.bright.initialvalue","0").c_str());
+			int resetval =  atoi(myConfig::getConfig().getValueOrDefault("tool.bright.initialvalue","0").c_str());
 			bright->SetValue(resetval);
 			q->setParams(wxString::Format("%d",resetval));
 			val->SetLabel(wxString::Format("%4d", resetval));
@@ -106,7 +106,7 @@ bool PicProcessorBright::processPic(bool processnext) {
 	else
 		ctrlpts.insertpoint(255-bright,255);
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.bright.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.bright.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -119,7 +119,7 @@ bool PicProcessorBright::processPic(bool processnext) {
 	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 	wxString d = duration();
 
-	if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.bright.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.bright.log","0") == "1"))
 		log(wxString::Format("tool=bright,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;

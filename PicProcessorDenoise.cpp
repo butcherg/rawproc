@@ -153,7 +153,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 
 	bool result = true;
 
-	int threadcount =  atoi(myConfig::getConfig().getValue("tool.denoise.cores","0").c_str());
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -166,7 +166,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 		dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		wxString d = duration();
 
-		if ((myConfig::getConfig().getValue("tool.all.log","0") == "1") || (myConfig::getConfig().getValue("tool.denoise.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))
 			log(wxString::Format("tool=denoise,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
