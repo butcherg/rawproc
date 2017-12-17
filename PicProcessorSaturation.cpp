@@ -1,10 +1,9 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
-
-#include <wx/fileconf.h>
 
 class SaturationPanel: public PicProcPanel
 {
@@ -62,8 +61,7 @@ class SaturationPanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			double resetval;
-			wxConfigBase::Get()->Read("tool.saturate.initialvalue",&resetval,1.0);
+			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
 			saturate->SetValue(resetval*10.0);
 			q->setParams(wxString::Format("%2.2f",resetval));
 			val->SetLabel(wxString::Format("%2.2f", resetval));
@@ -98,8 +96,8 @@ bool PicProcessorSaturation::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
 	bool result = true;
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.saturate.cores",&threadcount,0);
+	
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturate.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -112,7 +110,7 @@ bool PicProcessorSaturation::processPic(bool processnext) {
 		dib->ApplySaturate(saturation, threadcount);
 		wxString d = duration();
 
-		if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.saturate.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.saturate.log","0") == "1"))
 			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}

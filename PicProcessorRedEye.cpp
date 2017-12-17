@@ -1,11 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorRedEye.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "undo.xpm"
-//#include "gimage/strutil.h"
 
 #include "util.h"
-#include <wx/fileconf.h>
 
 class RedEyePanel: public PicProcPanel
 {
@@ -115,10 +114,9 @@ class RedEyePanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			double resetthr; int resetrad; double desatpct;
-			wxConfigBase::Get()->Read("tool.redeye.threshold.initialvalue",&resetthr,1.5);
-			wxConfigBase::Get()->Read("tool.redeye.radius.initialvalue",&resetrad,50);
-			wxConfigBase::Get()->Read("tool.redeye.desaturatepercent.initialvalue",&desatpct,1.0);
+			double resetthr = atof(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold.initialvalue","1.5").c_str());
+			int resetrad = atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.radius.initialvalue","50").c_str());
+			double desatpct = atof(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturatepercent.initialvalue","1.0").c_str());
 			threshold->SetValue(resetthr*10);
 			radius->SetValue(resetrad);
 			desat->SetValue(100);
@@ -233,8 +231,7 @@ bool PicProcessorRedEye::processPic(bool processnext) {
 	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
 	bool result = true;
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.redeye.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -246,7 +243,7 @@ bool PicProcessorRedEye::processPic(bool processnext) {
 	dib->ApplyRedeye(points, threshold, radius, desat, desatpct, threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.redeye.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.redeye.log","0") == "1"))
 		log(wxString::Format("tool=redeye,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty=false;

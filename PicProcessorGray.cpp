@@ -2,11 +2,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorGray.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "undo.xpm"
 
 #include "util.h"
-
-#include <wx/fileconf.h>
 
 #define REDSLIDER   7000
 #define GREENSLIDER 7001
@@ -103,17 +102,15 @@ class GrayPanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-			double resetredval, resetgreenval, resetblueval;
-
-			wxConfigBase::Get()->Read("tool.gray.r",&resetredval,0.21);
+			double resetredval = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str());
 			red->SetValue(resetredval*100.0);
 			val1->SetLabel(wxString::Format("%2.2f", resetredval));
 
-			wxConfigBase::Get()->Read("tool.gray.g",&resetgreenval,0.72);
+			double resetgreenval = atof(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72").c_str());
 			green->SetValue(resetgreenval*100.0);
 			val2->SetLabel(wxString::Format("%2.2f", resetgreenval));
 
-			wxConfigBase::Get()->Read("tool.gray.b",&resetblueval,0.07);
+			double resetblueval = atof(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07").c_str());
 			blue->SetValue(resetblueval*100.0);
 			val3->SetLabel(wxString::Format("%2.2f", resetblueval));
 
@@ -157,8 +154,7 @@ bool PicProcessorGray::processPic(bool processnext) {
 	double b = atof(cp[2]);
 	bool result = true;
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.gray.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.gray.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -171,7 +167,7 @@ bool PicProcessorGray::processPic(bool processnext) {
 	dib->ApplyGray(r, g, b, threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.gray.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))
 		log(wxString::Format("tool=gray,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;

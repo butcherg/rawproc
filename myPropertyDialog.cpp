@@ -1,7 +1,9 @@
 #include "myPropertyDialog.h"
+#include "myConfig.h"
 #include <wx/sizer.h>
 
 #include <wx/wx.h>
+
 
 #define FILTERID 8400
 #define ADDID 8401
@@ -58,10 +60,12 @@ wxDialog(parent, id, title, pos, size)
 {
 	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
-	pg = new wxPropertyGrid(this, wxID_ANY);
+	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
+
 	for (std::map<std::string, std::string>::iterator it=props.begin(); it!=props.end(); ++it)
 		pg->Append(new wxStringProperty(it->first.c_str(), it->first.c_str(), it->second.c_str()));
+
 	pg->Sort();
 	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
 	
@@ -73,8 +77,12 @@ wxDialog(parent, id, title, pos, size)
 	ct->Add(new wxButton(this, DELETEID, "Delete"), 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
+	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
 	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
 	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::AddProp, this, ADDID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::DelProp, this, DELETEID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::HideDialog, this, HIDEID);
 }
 
 
@@ -85,6 +93,7 @@ wxDialog(parent, id, title, pos, size)
 	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
 	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
+
 	wxString name, val; 
 	long dummy;
 	bool bCont = config->GetFirstEntry(name, dummy);
@@ -217,8 +226,8 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 			pg->Append(new wxStringProperty(add->GetName(), add->GetName(), add->GetValue()));
 			pg->Sort();
 			wxMessageBox(wxString::Format("Changed %s to %s.", add->GetName(), add->GetValue()));
-			wxConfigBase::Get()->Write(add->GetName(), add->GetValue());
-			wxConfigBase::Get()->Flush();
+			myConfig::getConfig().setValue((const char  *) add->GetName().mb_str(),  (const char  *) add->GetValue().mb_str());
+			myConfig::getConfig().flush();
 		}
 		else
 			wxMessageBox("Property already exists.");
@@ -235,7 +244,7 @@ void PropertyDialog::DelProp(wxCommandEvent& event)
 	int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
 	if (answer == wxYES) {
 		pg->DeleteProperty(p);
-		wxConfigBase::Get()->DeleteEntry(name);
-		wxConfigBase::Get()->Flush();
+		myConfig::getConfig().deleteValue((const char  *) name.mb_str());
+		myConfig::getConfig().flush();
 	}
 }

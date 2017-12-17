@@ -11,7 +11,6 @@
 #include "rawprocFrm.h"
 
 #include <wx/filefn.h>
-#include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 
 #include "wx/filesys.h"
@@ -19,6 +18,7 @@
 
 #include "util.h"
 #include <gimage/gimage.h>
+#include "myConfig.h"
 
 IMPLEMENT_APP(rawprocFrmApp)
 
@@ -32,32 +32,29 @@ bool rawprocFrmApp::OnInit()
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
-	
-	wxConfigBase::DontCreateOnDemand();
 
 	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	if (wxFileName::FileExists(conf_cwd)) {
-		wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_cwd));
 		frame->SetConfigFile(conf_cwd);
+		myConfig::loadConfig(std::string(conf_cwd.c_str()));
 	}
 	else if (wxFileName::FileExists(conf_configd)) {
-		wxConfigBase::Set(new wxFileConfig("rawproc.conf", "", conf_configd));
 		frame->SetConfigFile(conf_configd);
+		myConfig::loadConfig(std::string(conf_configd.c_str()));
 	}
 	
 	wxFileName profpath;
-	profpath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+	profpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 	gImage::setProfilePath(std::string(profpath.GetPathWithSep().c_str()));
 	
 	//parm app.start.logmessage: Message to print in the log when rawproc starts. 
-	wxString startmessage = wxConfigBase::Get()->Read("app.start.logmessage","");
+	wxString startmessage = wxString(myConfig::getConfig().getValueOrDefault("app.start.logmessage",""));
 	if (startmessage != "") log(startmessage);
 	
 	frame->SetBackground();
 
-	int thumbmode;
-	wxConfigBase::Get()->Read("display.thumb.initialmode",&thumbmode,1);  //1=thumb, 2=histogram, 3=none
+	int thumbmode = atoi(myConfig::getConfig().getValueOrDefault("display.thumb.initialmode","1").c_str());  //1=thumb, 2=histogram, 3=none
 	frame->SetThumbMode(thumbmode);
 
 	if (wxGetApp().argc == 2) {
@@ -85,7 +82,7 @@ bool rawprocFrmApp::OnInit()
 	}
 	else {
 		//parm app.start.path: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.
-		wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
+		wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 		if (startpath != "") {
 			if (wxFileName::DirExists(startpath))
 				wxSetWorkingDirectory(startpath);
@@ -110,7 +107,6 @@ bool rawprocFrmApp::OnInit()
  
 int rawprocFrmApp::OnExit()
 {
-	delete wxConfigBase::Get();
 	return 0;
 }
 

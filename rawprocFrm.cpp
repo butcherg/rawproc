@@ -16,7 +16,6 @@
 #include <wx/imaglist.h>
 #include <wx/clipbrd.h>
 #include <wx/aboutdlg.h> 
-#include <wx/fileconf.h>
 #include <wx/stdpaths.h>
 #include <wx/statline.h>
 
@@ -39,6 +38,7 @@
 #include "PicProcessorColorSpace.h"
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
+#include "myConfig.h"
 #include "util.h"
 #include "lcms2.h"
 #include <omp.h>
@@ -117,7 +117,7 @@ void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *t
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
-	wxString startpath = wxConfigBase::Get()->Read("app.start.path","");
+	wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
 			openfilepath = startpath;
@@ -145,7 +145,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	configfile = "(none)";
 
-	help.UseConfig(wxConfig::Get());
+	//help.UseConfig(wxConfig::Get());
 	bool ret;
 	help.SetTempDir(wxStandardPaths::Get().GetTempDir());
 	wxFileName helpfile( wxStandardPaths::Get().GetExecutablePath());
@@ -283,7 +283,7 @@ void rawprocFrm::SetBackground()
 	int dr, dg, db;
 	wxString f;
 	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)
-	wxString bk = wxConfigBase::Get()->Read("app.backgroundcolor","119,119,119");
+	wxString bk = wxString(myConfig::getConfig().getValueOrDefault("app.backgroundcolor","119,119,119"));
 	if (bk == "") bk = "119,119,119";
 	wxArrayString bkgnd = split(bk,",");
 	pr = atoi(bkgnd[0].c_str());
@@ -298,8 +298,8 @@ void rawprocFrm::SetBackground()
 	dr = pr; dg = pg; db = pb;
 	
 	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)
-	if (wxConfigBase::Get()->Read("app.picpanel.backgroundcolor",&f)) {
-		wxString pbk = wxConfigBase::Get()->Read("app.picpanel.backgroundcolor","119,119,119");
+	if (myConfig::getConfig().exists("app.picpanel.backgroundcolor")) {
+		wxString pbk = wxString(myConfig::getConfig().getValueOrDefault("app.picpanel.backgroundcolor","119,119,119"));
 		if (pbk == "") pbk = "119,119,119";
 		wxArrayString picbkgnd = split(pbk,",");
 		pr = atoi(picbkgnd[0].c_str());
@@ -314,8 +314,8 @@ void rawprocFrm::SetBackground()
 	}
 	
 	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)
-	if (wxConfigBase::Get()->Read("app.dock.backgroundcolor",&f)) {
-		wxString dbk = wxConfigBase::Get()->Read("app.dock.backgroundcolor","119,119,119");
+	if (myConfig::getConfig().exists("app.dock.backgroundcolor")) {
+		wxString dbk = wxString(myConfig::getConfig().getValueOrDefault("app.dock.backgroundcolor","119,119,119"));
 		if (dbk == "") dbk = "119,119,119";
 		wxArrayString dockbkgnd = split(dbk,",");
 		dr = atoi(dockbkgnd[0].c_str());
@@ -449,13 +449,13 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 {
 	if (!filename.FileExists()) return;
 	//parm exif.command: Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.
-	wxString exifcommand = wxConfigBase::Get()->Read("exif.command","");
+	wxString exifcommand = wxString(myConfig::getConfig().getValueOrDefault("exif.command",""));
 	if (exifcommand == "") {
 		wxMessageBox("No exiftool path defined in exif.command");
 		return;
 	}
 	//parm exif.parameters: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.
-	wxString exifparameters = wxConfigBase::Get()->Read("exif.parameters","-g -h");
+	wxString exifparameters = wxString(myConfig::getConfig().getValueOrDefault("exif.parameters","-g -h"));
 
 	wxString command = wxString::Format("%s %s %s",exifcommand, exifparameters, filename.GetFullPath());
 	wxArrayString output;
@@ -544,7 +544,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 	wxFileName profilepath;
 	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
-	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 
 	if (fif != FILETYPE_UNKNOWN) {
@@ -555,25 +555,25 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.raw.libraw.*: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.
 			configparams = paramString("input.raw.libraw.");
 			//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
-			configparams.Append(wxConfigBase::Get()->Read("input.raw.parameters",""));
+			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.parameters","")));
 			//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
-			profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
 		}
 		
 
 		if (fif == FILETYPE_JPEG) {
 			//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
-			configparams = wxConfigBase::Get()->Read("input.jpeg.parameters","");
+			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.parameters",""));
 			//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
-			profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.cms.profile","")));
 		}
 
 		
 		if (fif == FILETYPE_TIFF) {
 			//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
-			configparams = wxConfigBase::Get()->Read("input.tiff.parameters","");
+			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.tiff.parameters",""));
 			//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
-			profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 		}
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
@@ -598,15 +598,15 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		}
 		//wxString flagstring(params.c_str());
 		//parm input.log: log the file input operation.  Default=0
-		if (wxConfigBase::Get()->Read("input.log","0") == "1") 
+		if (myConfig::getConfig().getValueOrDefault("input.log","0") == "1")
 			log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
-		if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
+		if (myConfig::getConfig().getValueOrDefault("input.cms","0") == "1") {
 
-			if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
+			if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
 				//parm display.cms.requireprofile: Enforce display profile requirement.  If 0, image will be displayed 'as-is' with no output profile transform.  Default=1
-				if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+				if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
 					wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
 					pic->SetImageProfile(NULL);
 					pic->SetColorManagement(false);
@@ -672,7 +672,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		SetStatusText("");
 
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
-		wxString raw_default = wxConfigBase::Get()->Read("input.raw.default","");
+		wxString raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
@@ -731,7 +731,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
 				//parm input.opensource.subdirectory: Enable search of specific directory for source file.  
-				wxString subdir = wxConfigBase::Get()->Read("input.opensource.subdirectory",""); 
+				wxString subdir = wxString(myConfig::getConfig().getValueOrDefault("input.opensource.subdirectory",""));
 				if (subdir != "") {
 					wxFileName findfilesubdir(ofilename);
 					if (findfilesubdir.Normalize()) {
@@ -743,7 +743,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					}
 					else {
 						//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 
-						if (wxConfigBase::Get()->Read("input.opensource.parentdirectory","0") == "1") {
+						if (myConfig::getConfig().getValueOrDefault("input.opensource.parentdirectory","0") == "1") {
 							wxFileName findfileparentdir(ofilename);
 							if (findfileparentdir.Normalize()) {
 								findfileparentdir.RemoveLastDir();  //see if source file is in the parent directory
@@ -771,17 +771,17 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			fif = gImage::getFileType(ofilename.c_str());
 
 			wxFileName profilepath;
-			profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 
 			if (fif == FILETYPE_RAW) {
-				profilepath.SetFullName(wxConfigBase::Get()->Read("input.raw.cms.profile",""));
+				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
 			}
 			if (fif == FILETYPE_JPEG) {
-				profilepath.SetFullName(wxConfigBase::Get()->Read("input.jpeg.cms.profile",""));
+				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.cms.profile","")));
 			}
 			if (fif == FILETYPE_TIFF) {
-				profilepath.SetFullName(wxConfigBase::Get()->Read("input.tiff.cms.profile",""));
+				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 			}
 
 			pic->BlankPic();
@@ -801,14 +801,15 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			filename.Assign(ofilename);
 			sourcefilename.Assign(fname);
 			
-			if (wxConfigBase::Get()->Read("input.log","0") == "1") 
+			if (myConfig::getConfig().getValueOrDefault("input.log","0") == "1")
 				log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
 
-			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
 
-				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") {
-					if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+			if (myConfig::getConfig().getValueOrDefault("input.cms","0") == "1") {
+
+				if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
+					if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
 						wxMessageBox("CMS enabled, but no display profile was found.  Color management is disabled.");
 						pic->SetImageProfile(NULL);
 						pic->SetColorManagement(false);
@@ -863,51 +864,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetColorManagement(false);
 			}
 
-/*
-			if (wxConfigBase::Get()->Read("input.cms","0") == "1") {
-
-				if (wxConfigBase::Get()->Read("display.cms.displayprofile","") == "") wxMessageBox("CMS enabled, but no display profile was found.  Image will be displayed in its working profile.");
-				cmsHPROFILE hImgProf;
-				if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
-					hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-					pic->SetImageProfile(hImgProf);
-					pic->SetColorManagement(true);
-				}
-				else {
-					if (profilepath.FileExists()) {
-						if (wxMessageBox(wxString::Format("Color management enabled, and no color profile was found in %s.  Assign the default input profile, %s?",filename.GetFullName(),profilepath.GetFullPath()),"foo",wxYES_NO) == wxYES) {
-							hImgProf = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-							//hImgProf = gImage::makeLCMSProfile("srgb", 2.2);
-							char * prof; cmsUInt32Number proflen;
-							if (hImgProf) {
-								gImage::makeICCProfile(hImgProf, prof, proflen);
-								dib->setProfile(prof, proflen);
-								pic->SetImageProfile(hImgProf);
-								pic->SetColorManagement(true);
-							}
-							else {
-								wxMessageBox("Set profile failed, disabling color management.");
-								pic->SetImageProfile(NULL);
-								pic->SetColorManagement(false);
-							}
-						}
-						else {
-							pic->SetImageProfile(NULL);
-							pic->SetColorManagement(false);
-						}
-					}
-					else {
-						wxMessageBox("No input profile found, disabling color management.");
-						pic->SetImageProfile(NULL);
-						pic->SetColorManagement(false);
-					}
-				}
-			}
-			else {
-				pic->SetImageProfile(NULL);
-				pic->SetColorManagement(false);
-			}
-*/
 
 			//pic->SetScaleToWidth();
 			pic->FitMode(true);
@@ -946,7 +902,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	cmsHPROFILE profile;
 
 	wxFileName profilepath;
-	profilepath.AssignDir(wxConfigBase::Get()->Read("cms.profilepath",""));
+	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif",wxFD_SAVE);  // |PNG files (*.png)|*.png
@@ -975,7 +931,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			
 			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
-			if ((wxConfigBase::Get()->Read("output.orient","0") == "1") & (rotation != 0)) {
+			if ((myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") & (rotation != 0)) {
 				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
 				if (rotation == 2) dib->ApplyHorizontalMirror();
 				if (rotation == 3) dib->ApplyRotate180();
@@ -989,9 +945,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			wxString configparams;
 			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)
-			if (filetype == FILETYPE_JPEG) configparams = wxConfigBase::Get()->Read("output.jpeg.parameters","");
+			if (filetype == FILETYPE_JPEG) configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
+
 			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)
-			if (filetype == FILETYPE_TIFF) configparams = wxConfigBase::Get()->Read("output.tiff.parameters","");
+			if (filetype == FILETYPE_TIFF) configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
 
 
 			if (pic->GetColorManagement()) {
@@ -1001,15 +958,15 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
-					profilepath.SetFullName(wxConfigBase::Get()->Read("output.jpeg.cms.profile",""));
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
 					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					intentstr = wxConfigBase::Get()->Read("output.jpeg.cms.renderingintent","perceptual");
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual"));
 				}
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
-					profilepath.SetFullName(wxConfigBase::Get()->Read("output.tiff.cms.profile",""));
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","")));
 					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					intentstr = wxConfigBase::Get()->Read("output.tiff.cms.renderingintent","perceptual");
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual"));
 				}
 				
 				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
@@ -1251,7 +1208,7 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		return;
 	}
 	if (diag == NULL) {
-		diag = new PropertyDialog(this, wxID_ANY, "Properties", (wxFileConfig *) wxConfigBase::Get());
+		diag = new PropertyDialog(this, wxID_ANY, "Properties", myConfig::getConfig().getDefault());
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}
 	diag->ClearModifiedStatus();
@@ -1268,8 +1225,9 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 {
 	wxString propname = event.GetPropertyName();
 	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
-	wxConfigBase::Get()->Write(propname, event.GetPropertyValue().GetString());
-	wxConfigBase::Get()->Flush();
+
+	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetString().mb_str());
+	myConfig::getConfig().flush();
 
 	//check for properties that should update immediately:
 	if (propname.Find("display.cms") != wxNOT_FOUND)
@@ -1289,7 +1247,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.gamma.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
-		wxString val = wxConfigBase::Get()->Read("tool.gamma.initialvalue","2.2");
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.gamma.initialvalue","2.2"));
 		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1310,7 +1268,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.bright.initialvalue: The initial (and reset button) value of the bright tool, 0=no change.  Default=0
-		wxString val = wxConfigBase::Get()->Read("tool.bright.initialvalue","0");
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.bright.initialvalue","0"));
 		PicProcessorBright *p = new PicProcessorBright("bright",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1331,7 +1289,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.contrast.initialvalue: The initial (and reset button) value of the contrast tool, 0=no change.  Default=0
-		wxString val = wxConfigBase::Get()->Read("tool.contrast.initialvalue","0");
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.contrast.initialvalue","0"));
 		PicProcessorContrast *p = new PicProcessorContrast("contrast",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1350,7 +1308,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
-		wxString val = wxConfigBase::Get()->Read("tool.saturate.initialvalue","1.0");
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
 		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1367,7 +1325,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
-		wxString val = wxConfigBase::Get()->Read("tool.exposure.initialvalue","0.0");
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
 		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1402,9 +1360,9 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.shadow.level: The initial (and reset button) value of the shadow tool, 0=no change.  Default=0
-		wxString level = wxConfigBase::Get()->Read("tool.shadow.level","0");
+		wxString level = wxString(myConfig::getConfig().getValueOrDefault("tool.shadow.level","0"));
 		//parm tool.shadow.threshold: The initial (and reset button) value of the shadow curve threshold.  Default=64
-		wxString threshold = wxConfigBase::Get()->Read("tool.shadow.threshold","64");
+		wxString threshold = wxString(myConfig::getConfig().getValueOrDefault("tool.shadow.threshold","64"));
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorShadow *p = new PicProcessorShadow("shadow",cmd, commandtree, pic);
 		p->createPanel(parambook);
@@ -1422,9 +1380,9 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.highlight.level: The initial (and reset button) value of the highlight tool, 0=no change.  Default=0
-		wxString level = wxConfigBase::Get()->Read("tool.highlight.level","0");
+		wxString level = wxString(myConfig::getConfig().getValueOrDefault("tool.highlight.level","0"));
 		//parm tool.highlight.threshold: The initial (and reset button) value of the highlight curve threshold.  Default=192
-		wxString threshold = wxConfigBase::Get()->Read("tool.highlight.threshold","192");
+		wxString threshold = wxString(myConfig::getConfig().getValueOrDefault("tool.highlight.threshold","192"));
 		wxString cmd= wxString::Format("%s,%s",level,threshold);
 		PicProcessorHighlight *p = new PicProcessorHighlight("highlight",cmd, commandtree, pic);
 		p->createPanel(parambook);
@@ -1442,11 +1400,11 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
-		wxString r = wxConfigBase::Get()->Read("tool.gray.r","0.21");
+		wxString r =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21"));
 		//parm tool.gray.g: The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72
-		wxString g = wxConfigBase::Get()->Read("tool.gray.g","0.72");
+		wxString g =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72"));
 		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
-		wxString b = wxConfigBase::Get()->Read("tool.gray.b","0.07");
+		wxString b =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07"));
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
 		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
 		p->createPanel(parambook);
@@ -1479,11 +1437,11 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.resize.x: Default resize of the width dimension.  Default=640
-		wxString x = wxConfigBase::Get()->Read("tool.resize.x","640");
+		wxString x =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.x","640"));
 		//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
-		wxString y = wxConfigBase::Get()->Read("tool.resize.y","0");
+		wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
 		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom
-		wxString algo = wxConfigBase::Get()->Read("tool.resize.algorithm","catmullrom");
+		wxString algo =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","catmullrom"));
 		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
 		PicProcessorResize *p = new PicProcessorResize("resize", cmd, commandtree, pic);
 		p->createPanel(parambook);
@@ -1503,7 +1461,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 	try {
 		PicProcessorBlackWhitePoint *p;
 		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
-		if (wxConfigBase::Get()->Read("tool.blackwhitepoint.auto","0") =="1")
+		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1")
 			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic);
 		else
 			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic);
@@ -1522,7 +1480,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
-		wxString defval = wxConfigBase::Get()->Read("tool.sharpen.initialvalue","0");
+		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0"));
 		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1539,7 +1497,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
-		wxString defval = wxConfigBase::Get()->Read("tool.rotate.initialvalue","0.0");
+		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0"));
 		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1556,11 +1514,11 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
-		wxString sigma = wxConfigBase::Get()->Read("tool.denoise.initialvalue","0.0");
+		wxString sigma =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
 		//parm tool.denoise.local: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3
-		wxString local = wxConfigBase::Get()->Read("tool.denoise.local","3");
+		wxString local =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3"));
 		//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
-		wxString patch = wxConfigBase::Get()->Read("tool.denoise.patch","1");
+		wxString patch =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1"));
 		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
 		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
 		p->createPanel(parambook);
@@ -1578,13 +1536,13 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
-		wxString threshold = wxConfigBase::Get()->Read("tool.redeye.threshold","1.5");
+		wxString threshold =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5"));
 		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
-		wxString radius = wxConfigBase::Get()->Read("tool.redeye.radius","50");
+		wxString radius =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50"));
 		//parm tool.redeye.desaturation: The initial (and reset button) desaturation toggle.  Default=0
-		wxString desat = wxConfigBase::Get()->Read("tool.redeye.desaturation","0");
+		wxString desat =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturation","0"));
 		//parm tool.redeye.desaturationpercent: The initial (and reset button) desaturation percent.  Default=1.0
-		wxString desatpct = wxConfigBase::Get()->Read("tool.redeye.desaturationpercent","1.0");
+		wxString desatpct =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturationpercent","1.0"));
 		
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
@@ -1600,7 +1558,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
 	if (!pic->GetColorManagement()) {
-		if (wxConfigBase::Get()->Read("display.cms.requireprofile","1") == "1") {
+		if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
 			wxMessageBox("Color management disabled, no input profile for colorspace");
 			return;
 		}
@@ -1663,7 +1621,7 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	//parm menu.showcommand.type: Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text
-	wxString diagtype = wxConfigBase::Get()->Read("menu.showcommand.type","text");
+	wxString diagtype = myConfig::getConfig().getValueOrDefault("menu.showcommand.type","text");
 	if (diagtype == "text") {
 		wxMessageBox(AssembleCommand());
 	}

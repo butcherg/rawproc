@@ -14,11 +14,11 @@
 #include <time.h>
 #endif
 
-#include <wx/fileconf.h>
 #include <wx/tokenzr.h>
 #include <vector>
 
 #include <gimage/gimage.h>
+#include "myConfig.h"
 
 wxString hstr="";
 
@@ -36,17 +36,18 @@ wxArrayString split(wxString str, wxString delim)
 wxString paramString(wxString filter)
 {
 	wxString paramstr, name, val;
-	long dummy;
-	
-	bool bCont = wxConfigBase::Get()->GetFirstEntry(name, dummy);
-	while ( bCont ) {
+
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		name = wxString(it->first.c_str());
+		val =  wxString(it->second.c_str());
 		if (name.Find(filter) != wxNOT_FOUND) {
-			val = wxConfigBase::Get()->Read(name, "");
+			val = myConfig::getConfig().getValue(std::string((const char *) name.mb_str()));
 			name.Replace(filter,"");
 			if (val != "") paramstr.Append(wxString::Format("%s=%s;",name, val));
 		}
-		bCont = wxConfigBase::Get()->GetNextEntry(name, dummy);
 	}
+
 	return paramstr;
 }
 
@@ -65,7 +66,7 @@ wxString duration ()
 //File logging:
 void log(wxString msg)
 {
-	wxString logfile = wxConfigBase::Get()->Read("log.filename","");
+	wxString logfile = wxString(myConfig::getConfig().getValueOrDefault("log.filename","").c_str());
 	if (logfile == "") return;
 	FILE * f = fopen(logfile.c_str(), "a");
 	if (f) {
@@ -108,8 +109,8 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 	long pos;
 	unsigned char *data = img.GetData();
 
-	int threadcount = 1;
-	wxConfigBase::Get()->Read("display.wxhistogram.cores",&threadcount,0);
+	int threadcount = atoi(myConfig::getConfig().getValueOrDefault("display.wxhistogram.cores","0").c_str());
+	
 	if (threadcount == 0)
 #if defined(_OPENMP)
 		threadcount = (long) omp_get_max_threads();
@@ -179,7 +180,7 @@ wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("display.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram,imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,threadcount,d));
 
 	return bmp;
@@ -217,7 +218,7 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 
 	dc.SelectObject(wxNullBitmap);
 	wxString d = duration();
-	if ((wxConfigBase::Get()->Read("display.all.log","0") == "1") || (wxConfigBase::Get()->Read("display.wxhistogram.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("display.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("display.wxhistogram.log","0") == "1"))
 		log(wxString::Format("tool=wxhistogram(old),imagesize=%dx%d,imagebpp=%d,threads=%d,time=%s",iw, ih,24,1,d));
 
 	return bmp;

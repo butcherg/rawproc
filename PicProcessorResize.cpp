@@ -1,10 +1,10 @@
 #include "PicProcessor.h"
 #include "PicProcessorResize.h"
 #include "PicProcPanel.h"
+#include "myConfig.h"
 #include "util.h"
 
 #include <wx/spinctrl.h>
-#include <wx/fileconf.h>
 
 class ResizePanel: public PicProcPanel
 {
@@ -101,8 +101,7 @@ bool PicProcessorResize::processPic(bool processnext) {
 	if (algo == "catmullrom") filter = FILTER_CATMULLROM;
 	if (algo == "lanczos3") filter = FILTER_LANCZOS3;
 
-	int threadcount;
-	wxConfigBase::Get()->Read("tool.resize.cores",&threadcount,0);
+	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.resize.cores","0").c_str());
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -113,7 +112,7 @@ bool PicProcessorResize::processPic(bool processnext) {
 	dib->ApplyResize(width, height, filter, threadcount);
 	wxString d = duration();
 
-	if ((wxConfigBase::Get()->Read("tool.all.log","0") == "1") || (wxConfigBase::Get()->Read("tool.resize.log","0") == "1"))
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
 		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;
