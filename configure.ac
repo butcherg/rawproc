@@ -1,7 +1,6 @@
 AC_PREREQ([2.68])
 AC_INIT(rawproc, 0.6.2)
 
-
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
 # Check if the runtime platform is a native Win32 host.
@@ -30,8 +29,10 @@ AC_ARG_ENABLE([openmp],
 )
 if test "$enable_openmp" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -fopenmp"
-        APP_LDFLAGS="$APP_LDFLAGS -fopenmp"
+        #APP_CXXFLAGS="$APP_CXXFLAGS -fopenmp"
+        #APP_LDFLAGS="$APP_LDFLAGS -fopenmp"
+	CXXFLAGS="$CXXFLAGS -fopenmp"
+        LDFLAGS="$LDFLAGS -fopenmp"
 fi
 
 AC_ARG_ENABLE([debug],
@@ -48,7 +49,7 @@ AC_ARG_ENABLE([optimization],
 )
 if test "$enable_optimization" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -O4"
+        APP_CXXFLAGS="$APP_CXXFLAGS -O3"
 else
         APP_CXXFLAGS="$APP_CXXFLAGS -O2"
 fi
@@ -94,100 +95,143 @@ then
 	APP_LDFLAGS="$APP_LDFLAGS -static"
 fi
 
-#jpeg lib doesn't do cross-build, but it still has a BUILDDIR option; you have to copy stuff by hand
-AC_ARG_WITH([jpeg],
-	AS_HELP_STRING([--with-jpeg], [=PATH, specifies path to non-standard location of the jpeg library.]),
+#libjpeg:
+AC_ARG_WITH([jpeg-include],
+	AS_HELP_STRING([--with-jpeg-include], [=PATH, specifies path to non-standard location of the libjpeg header (jpeglib.h).]),
 	[
-		echo "libjpeg: using $with_jpeg"
-		if test -d $with_jpeg 
+		echo "jpeglib.h: using $with_jpeg_include"
+		if test -f "$with_jpeg_include/jpeglib.h" 
 		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				LIBS="$with_jpeg/libjpeg.a $LIBS"
-			else
-				LIBS="$with_jpeg/$BUILDDIR/libjpeg.a $LIBS"
-			fi 
-			APP_CPPFLAGS=" -I$with_jpeg -I$with_jpeg/$BUILDDIR $APP_CPPFLAGS"
+			APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
 		else
-			AC_MSG_ERROR([no jpeg directory found.]) 
+			AC_MSG_ERROR([jpeglib.h not found in $with_jpeg_include]) 
 		fi
 	],
 	[
-		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([jpeglib.h not found.])])
+		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
+	]
+)
+
+AC_ARG_WITH([jpeg-lib],
+	AS_HELP_STRING([--with-jpeg-lib], [=PATH, specifies location of the jpeg library (libjpeg.a).]),
+	[
+		echo "libjpeg: using $with_jpeg_lib"
+		if test -f $with_jpeg_lib 
+		then
+			AC_CHECK_LIB(jpeg, jpeg_set_defaults, [AC_MSG_RESULT([$with_jpeg_lib found.])], [AC_MSG_ERROR([A working libjpeg is required.])])
+			LIBS="$with_jpeg_lib $LIBS"
+		else
+			AC_MSG_ERROR([$with_jpeg_lib not found.]) 
+		fi
+	],
+	[
 		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
 	]
 )
 
-#libtiff does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([tiff],
-	AS_HELP_STRING([--with-tiff], [=PATH, specifies path to non-standard location of the tiff library.]),
+#libtiff:
+AC_ARG_WITH([tiff-include],
+	AS_HELP_STRING([--with-tiff-include], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
 	[
-		echo "libtiff: using $with_tiff"
-		if test -d $with_tiff 
+		echo "libtiff: using $with_tiff_include"
+		if test -f "$with_tiff_include/tiffio.h"
 		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				LIBS="$with_tiff/libtiff/.libs/libtiff.a $LIBS"
-			else
-				LIBS="$with_tiff/$BUILDDIR/libtiff/.libs/libtiff.a $LIBS"
-			fi
-			APP_CPPFLAGS="-I$with_tiff/libtiff $APP_CPPFLAGS"
+			APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
 			
 		else
-			AC_MSG_ERROR([no tiff directory found.]) 
+			AC_MSG_ERROR([tiffio.h not found in $with_tiff_include.]) 
 		fi
 	],
 	[
 		AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
+	]
+)
+
+AC_ARG_WITH([tiff-lib],
+	AS_HELP_STRING([--with-tiff-lib], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
+	[
+		echo "libtiff: using $with_tiff_lib"
+		if test -f $with_tiff_lib
+		then
+			AC_CHECK_LIB(tiff, TIFFSetErrorHandler, [AC_MSG_RESULT([$with_tiff_lib found.])], [AC_MSG_ERROR([A working libtiff is required.])])
+			LIBS="$with_tiff_lib $LIBS"
+		else
+			AC_MSG_ERROR([$with_tiff_lib not found.]) 
+		fi
+	],
+	[
 		AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
 	]
 )
 
-#lcms2 does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([lcms2],
-	AS_HELP_STRING([--with-lcms2], [=PATH, specifies path to non-standard location of Little CMS2 library.]),
+
+#lcms2:
+AC_ARG_WITH([lcms2-include],
+	AS_HELP_STRING([--with-lcms2-include], [=PATH, specifies path to non-standard location of the Little CMS2 header (lcms2.h).]),
 	[
-	echo "libcms2: using $with_lcms2"
-		if test -d $with_lcms2 
+	echo "lcms2.h: using $with_lcms2_include"
+		if test -f "$with_lcms2_include/lcms2.h" 
 		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				LIBS="$with_lcms2/src/.libs/liblcms2.a $LIBS"
-			else
-				LIBS="$with_lcms2/$BUILDDIR/src/.libs/liblcms2.a $LIBS"
-			fi
-			APP_CPPFLAGS="-I$with_lcms2/include $APP_CPPFLAGS "
+			APP_CPPFLAGS="-I$with_lcms2_include $APP_CPPFLAGS "
 		else
-			AC_MSG_ERROR([no lcms2 directory found.]) 
+			AC_MSG_ERROR([lcms2.h not found in $with_lcms2_include.]) 
 		fi
 	],
 	[
 		AC_CHECK_HEADERS(lcms2.h, [], [AC_MSG_ERROR([lcms2.h not found])])
+	]
+)
+
+AC_ARG_WITH([lcms2-lib],
+	AS_HELP_STRING([--with-lcms2-lib], [=PATH, specifies location of the Little CMS2 library (liblcms2.a).]),
+	[
+	echo "lcms2.h: using $with_lcms2_lib"
+		if test -f $with_lcms2_lib 
+		then
+			AC_CHECK_LIB(lcms2, cmsSetLogErrorHandler, [AC_MSG_RESULT([$with_lcms2_lib found.])], [AC_MSG_ERROR([A working liblcms2 is required.])])
+			LIBS="$with_lcms2_lib $LIBS"
+		else
+			AC_MSG_ERROR([$with_lcms2_lib not found.]) 
+		fi
+	],
+	[
 		AC_SEARCH_LIBS(cmsSetLogErrorHandler,lcms2, [], [AC_MSG_ERROR([A working libcms2 is required])])
 	]
 )
 
 
-#libraw does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([libraw],
-	AS_HELP_STRING([--with-libraw], [=PATH, specifies path to non-standard location of the LibRaw library.]),
+
+
+#libraw:
+AC_ARG_WITH([libraw-include],
+	AS_HELP_STRING([--with-libraw-include], [=PATH, specifies path to non-standard location of the LibRaw header (libraw/libraw.h).]),
 	[
-	echo "libraw: using $with_libraw"
-		if test -d $with_libraw 
+	echo "libraw: using $with_libraw_include"
+		if test -d "$with_libraw_include/libraw/libraw.h"
 		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				LIBS="$with_libraw/lib/.libs/libraw.a $LIBS"
-			else
-				LIBS="$with_libraw/$BUILDDIR/lib/.libs/libraw.a $LIBS"
-			fi
-			APP_CPPFLAGS="-I$with_libraw $APP_CPPFLAGS"
+			APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
 		else
-			AC_MSG_ERROR([no libraw directory found.]) 
+			AC_MSG_ERROR([libraw/libraw.h not found in $with_libraw_include.]) 
 		fi
 	],
 	[
 		AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
+	]
+)
+
+AC_ARG_WITH([libraw-lib],
+	AS_HELP_STRING([--with-libraw-lib], [=PATH, specifies location of the LibRaw library (libraw.a).]),
+	[
+	echo "libraw: using $with_libraw_lib"
+		if test -f $with_libraw_lib 
+		then
+			AC_CHECK_LIB(raw, libraw_init, [AC_MSG_RESULT([$with_libraw_lib found.])], [AC_MSG_ERROR([A working libraw is required.])])
+			LIBS="$with_libraw_lib $LIBS"
+		else
+			AC_MSG_ERROR([$with_libraw_lib not found.]) 
+		fi
+	],
+	[
 		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
 	]
 )
@@ -195,26 +239,36 @@ AC_ARG_WITH([libraw],
 
 
 #gimage does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([gimage],
-	AS_HELP_STRING([--with-gimage], [=PATH, specifies path to non-standard location of gimage library.]),
+AC_ARG_WITH([gimage-include],
+	AS_HELP_STRING([--with-gimage-include], [=PATH, specifies path to non-standard location of gimage header (gimage/gimage.h).]),
 	[
-	echo "gimage: using $with_gimage"
-		if test -d $with_gimage 
+	echo "gimage: using $with_gimage_include"
+		if test -f "$with_gimage_include/gimage/gimage.h"
 		then
-			if test -z "${BUILDDIR+x}" 
-			then 
-				LIBS="$with_gimage/libgimage.a $LIBS "
-			else
-				LIBS="$with_gimage/$BUILDDIR/libgimage.a $LIBS "
-			fi
-			APP_CPPFLAGS="-I$with_gimage $APP_CPPFLAGS "
+			APP_CPPFLAGS="-I$with_gimage_include $APP_CPPFLAGS "
 		else
-			AC_MSG_ERROR([no gimage directory found.]) 
+			AC_MSG_ERROR([gimage/gimage.h not found.]) 
 		fi
 	],
 	[
-		AC_CHECK_HEADERS(gimage.h, [], [AC_MSG_ERROR([gimage.h not found])])
-		AC_SEARCH_LIBS(cmsSetLogErrorHandler,gimage, [], [AC_MSG_ERROR([A working gimage is required])])
+		AC_CHECK_HEADERS(gimage/gimage.h, [], [AC_MSG_ERROR([gimage/gimage.h not found])])
+	]
+)
+
+AC_ARG_WITH([gimage-lib],
+	AS_HELP_STRING([--with-gimage-lib], [=PATH, specifies path to non-standard location of gimage header (gimage/gimage.h).]),
+	[
+	echo "gimage: using $with_gimage_lib"
+		if test -f $with_gimage_lib
+		then
+			AC_CHECK_LIB(gimage, gImageVersion, [AC_MSG_RESULT([$with_lcms2_lib found.])], [AC_MSG_ERROR([A working liblcms2 is required.])])
+			LIBS="$with_gimage_lib $LIBS "
+		else
+			AC_MSG_ERROR([$with_gimage_lib not found.]) 
+		fi
+	],
+	[
+		AC_SEARCH_LIBS(gImageVersion,gimage, [], [AC_MSG_ERROR([A working gimage is required])])
 	]
 )
 
