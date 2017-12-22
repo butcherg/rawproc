@@ -8,7 +8,7 @@
 #endif
 
 #include <vector>
-#include <gimage/gimage.h>
+#include "gimage/gimage.h"
 
 
 void FillHistogram(unsigned *histogram);

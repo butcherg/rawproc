@@ -5,10 +5,10 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <gimage/strutil.h>
+#include "gimage/strutil.h"
 #include <libraw/libraw.h>
 #include <lcms2.h>
-#include <gimage/gimage.h>
+#include "gimage/gimage.h"
 
 const char * librawVersion()
 {

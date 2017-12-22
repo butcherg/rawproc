@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 
-#include <gimage/strutil.h>
+#include "gimage/strutil.h"
 
 
 const char * tiffVersion()

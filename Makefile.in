@@ -27,10 +27,10 @@ VPATH=@srcdir@
 
 all: rawproc img makedoc
 
-rawproc:  $(OBJECTS)
+rawproc:  $(OBJECTS) $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(LIBOBJECTS) $(LIBS) 
 
-img: img.o elapsedtime.o
+img: img.o elapsedtime.o $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
 	
 exif: gimage.o elapsedtime.o $(LIBOBJECTS)

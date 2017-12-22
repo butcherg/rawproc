@@ -17,7 +17,7 @@
 #include "wx/fs_zip.h"
 
 #include "util.h"
-#include <gimage/gimage.h>
+#include "gimage/gimage.h"
 #include "myConfig.h"
 
 IMPLEMENT_APP(rawprocFrmApp)

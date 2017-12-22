@@ -2,7 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
-#include <gimage/strutil.h>
+#include "gimage/strutil.h"
 
 #include <string>
 #include <map>

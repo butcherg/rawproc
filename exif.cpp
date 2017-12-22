@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <gimage/gimage.h>
+#include "gimage/gimage.h"
 
 void printtag(std::string name, std::string val, bool both=false)
 {
