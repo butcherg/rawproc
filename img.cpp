@@ -14,9 +14,9 @@
 #include <dirent.h>
 #include <math.h> 
 
-#include <gimage/gimage.h>
+#include "gimage/gimage.h"
 #include "elapsedtime.h"
-#include <gimage/strutil.h>
+#include "gimage/strutil.h"
 
 //matchspec: takes a file name and returns the variant part, specified by the file specification
 std::string matchspec(std::string fname, std::string fspec)
