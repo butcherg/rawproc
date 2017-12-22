@@ -1640,15 +1640,15 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetVersion(_(version));
 	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
-	wxString gImageVersion(gImage::Version().c_str());
+	//wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString libraries = wxString(gImage::LibraryVersions());
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
 #ifdef BUILDDATE
 	wxString builddate = wxString(BUILDDATE);
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\ngImage %s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s", WxWidgetsVersion, gImageVersion, libraries.c_str(),pixtype, configfile, builddate));
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s", WxWidgetsVersion, libraries.c_str(),pixtype, configfile, builddate));
 #else
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\ngImage %s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s", WxWidgetsVersion, gImageVersion, libraries.c_str(),pixtype, configfile));
+	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s", WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 #endif
 
 	wxAboutBox(info);
