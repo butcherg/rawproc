@@ -2,6 +2,7 @@ CXX=@CXX@
 LD=@CXX@
 
 OBJECTS := util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
+LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o strutil.o curve.o
 
 LIBS=@LIBS@
 LIBS+=@APP_LIBS@
@@ -27,16 +28,23 @@ VPATH=@srcdir@
 all: rawproc img makedoc
 
 rawproc:  $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS)  $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(LIBOBJECTS) $(LIBS) 
 
 img: img.o elapsedtime.o
-	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
+	
+exif: gimage.o elapsedtime.o $(LIBOBJECTS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  $(OBJECTS) $(LIBOBJECTS) $(LIBS) 
+
+
+exif.o: exifexif.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/exif.cpp -o$@
 
 img.o: $(srcdir)/img.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -std=c++11 -c $(srcdir)/img.cpp -o$@
 
-elapsedtime.o: $(srcdir)/elapsedtime.cpp
-	$(CXX) -c $(srcdir)/elapsedtime.cpp  -o$@
+#elapsedtime.o: $(srcdir)/elapsedtime.cpp
+#	$(CXX) -c $(srcdir)/elapsedtime.cpp  -o$@
 
 util.o: $(srcdir)/util.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/util.cpp  -o$@
@@ -128,6 +136,34 @@ rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
 
 rawprocApp.o: $(srcdir)/rawprocApp.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocApp.cpp  -o$@
+	
+	
+#gimage objects:
+
+gimage.o: $(srcdir)/gimage.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/gimage.cpp -o$@
+
+tiffimage.o: $(srcdir)/tiffimage.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/tiffimage.cpp -o$@
+
+rawimage.o: $(srcdir)/rawimage.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawimage.cpp -o$@
+
+jpegimage.o: $(srcdir)/jpegimage.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegimage.cpp -o$@
+
+jpegexif.o: $(srcdir)/jpegexif.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegexif.cpp -o$@
+
+elapsedtime.o: $(srcdir)/elapsedtime.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/elapsedtime.cpp -o$@
+
+strutil.o: $(srcdir)/strutil.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/strutil.cpp -o$@
+
+curve.o: $(srcdir)/curve.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c  $(srcdir)/curve.cpp -o$@
+
 
 resource.o: $(srcdir)/resource.rc
 ifneq (,$(findstring,mingw,$(SYS)))

@@ -72,7 +72,17 @@ if test "$wxWin" != 1; then
 		is in LD_LIBRARY_PATH or equivalent variable and
 		wxWidgets version is $reqwx or above.
 		])
+		
 fi
+
+AC_ARG_WITH([pixtype],
+	AS_HELP_STRING([--with-pixtype], [=half|float|double, specifies data type for pixel structure, default is float])
+)
+if test "$with_pixtype" != ""
+then
+	APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+fi
+
 
 AC_ARG_WITH([localprefix],
 	AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of lib and include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
@@ -233,42 +243,6 @@ AC_ARG_WITH([libraw-lib],
 	],
 	[
 		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
-	]
-)
-
-
-
-#gimage does cross-compile, uses BUILDDIR if declared
-AC_ARG_WITH([gimage-include],
-	AS_HELP_STRING([--with-gimage-include], [=PATH, specifies path to non-standard location of gimage header (gimage/gimage.h).]),
-	[
-	echo "gimage: using $with_gimage_include"
-		if test -f "$with_gimage_include/gimage/gimage.h"
-		then
-			APP_CPPFLAGS="-I$with_gimage_include $APP_CPPFLAGS "
-		else
-			AC_MSG_ERROR([gimage/gimage.h not found.]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(gimage/gimage.h, [], [AC_MSG_ERROR([gimage/gimage.h not found])])
-	]
-)
-
-AC_ARG_WITH([gimage-lib],
-	AS_HELP_STRING([--with-gimage-lib], [=PATH, specifies path to non-standard location of gimage header (gimage/gimage.h).]),
-	[
-	echo "gimage: using $with_gimage_lib"
-		if test -f $with_gimage_lib
-		then
-			AC_CHECK_LIB(gimage, gImageVersion, [AC_MSG_RESULT([$with_lcms2_lib found.])], [AC_MSG_ERROR([A working liblcms2 is required.])])
-			LIBS="$with_gimage_lib $LIBS "
-		else
-			AC_MSG_ERROR([$with_gimage_lib not found.]) 
-		fi
-	],
-	[
-		AC_SEARCH_LIBS(gImageVersion,gimage, [], [AC_MSG_ERROR([A working gimage is required])])
 	]
 )
 
