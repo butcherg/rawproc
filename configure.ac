@@ -129,7 +129,7 @@ AC_ARG_WITH([jpeg-lib],
 		if test "$with_jpeg_lib" == "wx" 
 		then
 			AC_MSG_NOTICE([Use wxWidgets jpeg library])	
-		elif test -f $with_jpeg_lib 
+		elif test -f "$with_jpeg_lib" 
 		then
 			AC_CHECK_LIB(jpeg, jpeg_set_defaults, [AC_MSG_RESULT([$with_jpeg_lib found.])], [AC_MSG_ERROR([A working libjpeg is required.])])
 			LIBS="$with_jpeg_lib $LIBS"
@@ -161,13 +161,13 @@ AC_ARG_WITH([tiff-include],
 )
 
 AC_ARG_WITH([tiff-lib],
-	AS_HELP_STRING([--with-tiff-lib], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
+	AS_HELP_STRING([--with-tiff-lib], [=PATH, specifies path to non-standard location of the tiff library (libtiff.a).]),
 	[
 		echo "libtiff: using $with_tiff_lib"
-		if test "$with_jpeg_lib" == "wx" 
+		if test "$with_tiff_lib" == "wx" 
 		then
-			AC_MSG_NOTICE([Use wxWidgets jpeg library])     
-		elif test -f $with_tiff_lib
+			AC_MSG_NOTICE([Use wxWidgets tiff library])     
+		elif test -f "$with_tiff_lib"
 		then
 			AC_CHECK_LIB(tiff, TIFFSetErrorHandler, [AC_MSG_RESULT([$with_tiff_lib found.])], [AC_MSG_ERROR([A working libtiff is required.])])
 			LIBS="$with_tiff_lib $LIBS"
