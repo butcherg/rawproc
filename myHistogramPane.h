@@ -11,7 +11,6 @@
 	#include <wx/wxprec.h>
 #endif
 
-#define PIXTYPE float
 #include "gimage/gimage.h"
 
 class myHistogramPane : public wxWindow
