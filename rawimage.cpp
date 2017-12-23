@@ -140,7 +140,7 @@ char * _loadRAW(const char *filename,
 
 	//#
 	//# user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-3].  Default=3 (ahd)<br>
-	//# demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. default=ahd
+	//# demosaic=linear|vng|ppg|ahd|dcb|modahd|afd|vcd|vcdahd|lmmse|amaze|dht|moddht - Alias of user_qual, with mnemonic values. default=ahd
 	//#
 	if (p.find("demosaic") != p.end()) {
 		if (p["demosaic"].compare("linear") == 0) 
@@ -153,6 +153,22 @@ char * _loadRAW(const char *filename,
 			RawProcessor.imgdata.params.user_qual = 3;
 		if (p["demosaic"].compare("dcb") == 0) 
 			RawProcessor.imgdata.params.user_qual = 4;
+		if (p["demosaic"].compare("modahd") == 0) 
+			RawProcessor.imgdata.params.user_qual = 5;
+		if (p["demosaic"].compare("afd") == 0) 
+			RawProcessor.imgdata.params.user_qual = 6;
+		if (p["demosaic"].compare("vcd") == 0) 
+			RawProcessor.imgdata.params.user_qual = 7;
+		if (p["demosaic"].compare("vcdahd") == 0) 
+			RawProcessor.imgdata.params.user_qual = 8;
+		if (p["demosaic"].compare("lmmse") == 0) 
+			RawProcessor.imgdata.params.user_qual = 9;
+		if (p["demosaic"].compare("amaze") == 0) 
+			RawProcessor.imgdata.params.user_qual = 10;
+		if (p["demosaic"].compare("dht") == 0) 
+			RawProcessor.imgdata.params.user_qual = 11;
+		if (p["demosaic"].compare("moddht") == 0) 
+			RawProcessor.imgdata.params.user_qual = 12;
 	}
 	if (p.find("user_qual") != p.end()) RawProcessor.imgdata.params.user_qual = atoi(p["user_qual"].c_str());
 
@@ -566,11 +582,16 @@ char * _loadRAW(const char *filename,
 	info["Artist"] = P2.artist; 
 	info["Make"] = P1.make;  
 	info["Model"] = P1.model;  
+	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
+		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
+	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
+		info["Lens"] = RawProcessor.imgdata.lens.Lens;
+//	else
+//		info["Lens"] = "not found."
 	if (RawProcessor.imgdata.params.user_flip == 0) 
 		info["Orientation"] = tostr(S.flip); //dcraw left the orientation alone, use the metadata
 	else
 		info["Orientation"] = "0"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
-
 	time_t rawtime = P2.timestamp;
 	struct tm * timeinfo;
 	char buffer [80];
@@ -593,6 +614,9 @@ char * _loadRAW(const char *filename,
 	
 	
 	RawProcessor.dcraw_process();
+	if (RawProcessor.imgdata.process_warnings & LIBRAW_WARN_FALLBACK_TO_AHD) {
+		info["Notice"] = "Selected demosaic algorithm not supported, AHD used";
+	}
 	RawProcessor.get_mem_image_format(&w, &h, &c, &b);
 	*width = w;
 	*height = h;
