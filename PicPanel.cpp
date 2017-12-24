@@ -599,7 +599,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			imgX = x-picX;
 			imgY = y-picY;
 			if (d) {
-				std::vector<PIXTYPE> p = d->getPixelArray(imgX, imgY);
+				std::vector<float> p = d->getPixelArray(imgX, imgY);
 				if (imgX > 1) {
 					if (imgY > 1) {
 						if (imgX < scaledpic->GetWidth()) {
