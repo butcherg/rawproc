@@ -4864,7 +4864,7 @@ fi
 if test "${with_libraw_include+set}" = set; then :
   withval=$with_libraw_include;
 	echo "libraw: using $with_libraw_include"
-		if test -d "$with_libraw_include/libraw/libraw.h"
+		if test -f "$with_libraw_include/libraw/libraw.h"
 		then
 			APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
 		else

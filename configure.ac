@@ -223,7 +223,7 @@ AC_ARG_WITH([libraw-include],
 	AS_HELP_STRING([--with-libraw-include], [=PATH, specifies path to non-standard location of the LibRaw header (libraw/libraw.h).]),
 	[
 	echo "libraw: using $with_libraw_include"
-		if test -d "$with_libraw_include/libraw/libraw.h"
+		if test -f "$with_libraw_include/libraw/libraw.h"
 		then
 			APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
 		else
