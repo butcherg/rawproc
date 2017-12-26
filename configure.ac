@@ -40,7 +40,8 @@ AC_ARG_ENABLE([debug],
 )
 if test "$enable_debug" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -g"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -g"
+	CXXFLAGS="$CXXFLAGS -g"
 fi
 
 
@@ -49,9 +50,11 @@ AC_ARG_ENABLE([optimization],
 )
 if test "$enable_optimization" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -O3"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -O3"
+	CXXFLAGS="$CXXFLAGS -O3"
 else
-        APP_CXXFLAGS="$APP_CXXFLAGS -O2"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -O2"
+	CXXFLAGS="$CXXFLAGS -O2"
 fi
 
 
@@ -80,7 +83,8 @@ AC_ARG_WITH([pixtype],
 )
 if test "$with_pixtype" != ""
 then
-	APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype"
 fi
 
 
@@ -101,8 +105,10 @@ if test "$mingw_cv_win32_host" == "yes"
 then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
-	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
-	APP_LDFLAGS="$APP_LDFLAGS -static"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
+	#APP_LDFLAGS="$APP_LDFLAGS -static"
+	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
+	LDFLAGS="$LDFLAGS -static"
 fi
 
 #libjpeg:
@@ -112,7 +118,8 @@ AC_ARG_WITH([jpeg-include],
 		echo "jpeglib.h: using $with_jpeg_include"
 		if test -f "$with_jpeg_include/jpeglib.h" 
 		then
-			APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
+			#APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_jpeg_include $CPPFLAGS"
 		else
 			AC_MSG_ERROR([jpeglib.h not found in $with_jpeg_include]) 
 		fi
@@ -149,8 +156,8 @@ AC_ARG_WITH([tiff-include],
 		echo "libtiff: using $with_tiff_include"
 		if test -f "$with_tiff_include/tiffio.h"
 		then
-			APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
-			
+			#APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_tiff_include $CPPFLAGS"
 		else
 			AC_MSG_ERROR([tiffio.h not found in $with_tiff_include.]) 
 		fi
@@ -180,6 +187,44 @@ AC_ARG_WITH([tiff-lib],
 	]
 )
 
+#libpng:
+AC_ARG_WITH([png-include],
+	AS_HELP_STRING([--with-png-include], [=PATH, specifies path to non-standard location of the png header (png.h).]),
+	[
+		echo "libpng: using $with_png_include"
+		if test -f "$with_tiff_include/png.h"
+		then
+			#APP_CPPFLAGS="-I$with_png_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_png_include $CPPFLAGS"
+		else
+			AC_MSG_ERROR([png.h not found in $with_png_include.]) 
+		fi
+	],
+	[
+		AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
+	]
+)
+
+AC_ARG_WITH([png-lib],
+	AS_HELP_STRING([--with-png-lib], [=PATH, specifies path to non-standard location of the png library (libpng.a).]),
+	[
+		echo "libpng: using $with_png_lib"
+		if test "$with_png_lib" == "wx" 
+		then
+			AC_MSG_NOTICE([Use wxWidgets png library])     
+		elif test -f "$with_png_lib"
+		then
+			AC_CHECK_LIB(png, png_get_io_ptr, [AC_MSG_RESULT([$with_png_lib found.])], [AC_MSG_ERROR([A working libpng is required.])])
+			LIBS="$with_png_lib $LIBS"
+		else
+			AC_MSG_ERROR([$with_png_lib not found.]) 
+		fi
+	],
+	[
+		AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
+	]
+)
+
 
 #lcms2:
 AC_ARG_WITH([lcms2-include],
@@ -188,7 +233,8 @@ AC_ARG_WITH([lcms2-include],
 	echo "lcms2.h: using $with_lcms2_include"
 		if test -f "$with_lcms2_include/lcms2.h" 
 		then
-			APP_CPPFLAGS="-I$with_lcms2_include $APP_CPPFLAGS "
+			#APP_CPPFLAGS="-I$with_lcms2_include $APP_CPPFLAGS "
+			CPPFLAGS="-I$with_lcms2_include $CPPFLAGS "
 		else
 			AC_MSG_ERROR([lcms2.h not found in $with_lcms2_include.]) 
 		fi
@@ -225,7 +271,8 @@ AC_ARG_WITH([libraw-include],
 	echo "libraw: using $with_libraw_include"
 		if test -f "$with_libraw_include/libraw/libraw.h"
 		then
-			APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+			#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
 		else
 			AC_MSG_ERROR([libraw/libraw.h not found in $with_libraw_include.]) 
 		fi
@@ -268,15 +315,25 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([clock_gettime floor pow sqrt])
 
-CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
-CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
-LIBS="$WX_LIBS $LIBS"
+#CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+#CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+#CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+#LIBS="$WX_LIBS $LIBS"
 
-AC_SUBST(APP_CPPFLAGS)
-AC_SUBST(APP_CXXFLAGS)
-AC_SUBST(APP_LDFLAGS)
-AC_SUBST(APP_LIBS)
+AC_SUBST(WX_CPPFLAGS)
+AC_SUBST(WX_CXXFLAGS_ONLY)
+AC_SUBST(WX_CFLAGS_ONLY)
+AC_SUBST(WX_LIBS)
+
+AC_SUBST(LIBS)
+AC_SUBST(CPP_FLAGS)
+AC_SUBST(CXX_FLAGS)
+AC_SUBST(CFLAGS)
+
+#AC_SUBST(APP_CPPFLAGS)
+#AC_SUBST(APP_CXXFLAGS)
+#AC_SUBST(APP_LDFLAGS)
+#AC_SUBST(APP_LIBS)
 
 
 AC_OUTPUT(Makefile)

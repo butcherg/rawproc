@@ -620,10 +620,8 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-APP_LIBS
-APP_LDFLAGS
-APP_CXXFLAGS
-APP_CPPFLAGS
+CXX_FLAGS
+CPP_FLAGS
 EGREP
 GREP
 CXXCPP
@@ -706,6 +704,8 @@ with_jpeg_include
 with_jpeg_lib
 with_tiff_include
 with_tiff_lib
+with_png_include
+with_png_lib
 with_lcms2_include
 with_lcms2_lib
 with_libraw_include
@@ -1377,6 +1377,10 @@ Optional Packages:
                           the tiff header (tiffio.h).
   --with-tiff-lib         =PATH, specifies path to non-standard location of
                           the tiff library (libtiff.a).
+  --with-png-include      =PATH, specifies path to non-standard location of
+                          the png header (png.h).
+  --with-png-lib          =PATH, specifies path to non-standard location of
+                          the png library (libpng.a).
   --with-lcms2-include    =PATH, specifies path to non-standard location of
                           the Little CMS2 header (lcms2.h).
   --with-lcms2-lib        =PATH, specifies location of the Little CMS2 library
@@ -3537,7 +3541,8 @@ fi
 
 if test "$enable_debug" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -g"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -g"
+	CXXFLAGS="$CXXFLAGS -g"
 fi
 
 
@@ -3548,9 +3553,11 @@ fi
 
 if test "$enable_optimization" == "yes"
 then
-        APP_CXXFLAGS="$APP_CXXFLAGS -O3"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -O3"
+	CXXFLAGS="$CXXFLAGS -O3"
 else
-        APP_CXXFLAGS="$APP_CXXFLAGS -O2"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -O2"
+	CXXFLAGS="$CXXFLAGS -O2"
 fi
 
 
@@ -3924,7 +3931,8 @@ fi
 
 if test "$with_pixtype" != ""
 then
-	APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype"
 fi
 
 
@@ -3986,8 +3994,10 @@ _ACEOF
 
 fi
 
-	APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
-	APP_LDFLAGS="$APP_LDFLAGS -static"
+	#APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
+	#APP_LDFLAGS="$APP_LDFLAGS -static"
+	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
+	LDFLAGS="$LDFLAGS -static"
 fi
 
 #libjpeg:
@@ -4391,7 +4401,8 @@ if test "${with_jpeg_include+set}" = set; then :
 		echo "jpeglib.h: using $with_jpeg_include"
 		if test -f "$with_jpeg_include/jpeglib.h"
 		then
-			APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
+			#APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_jpeg_include $CPPFLAGS"
 		else
 			as_fn_error $? "jpeglib.h not found in $with_jpeg_include" "$LINENO" 5
 		fi
@@ -4549,8 +4560,8 @@ if test "${with_tiff_include+set}" = set; then :
 		echo "libtiff: using $with_tiff_include"
 		if test -f "$with_tiff_include/tiffio.h"
 		then
-			APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
-
+			#APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_tiff_include $CPPFLAGS"
 		else
 			as_fn_error $? "tiffio.h not found in $with_tiff_include." "$LINENO" 5
 		fi
@@ -4700,6 +4711,165 @@ fi
 fi
 
 
+#libpng:
+
+# Check whether --with-png-include was given.
+if test "${with_png_include+set}" = set; then :
+  withval=$with_png_include;
+		echo "libpng: using $with_png_include"
+		if test -f "$with_tiff_include/png.h"
+		then
+			#APP_CPPFLAGS="-I$with_png_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_png_include $CPPFLAGS"
+		else
+			as_fn_error $? "png.h not found in $with_png_include." "$LINENO" 5
+		fi
+
+else
+
+		for ac_header in png.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
+if test "x$ac_cv_header_png_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PNG_H 1
+_ACEOF
+
+else
+  as_fn_error $? "png.h not found." "$LINENO" 5
+fi
+
+done
+
+
+
+fi
+
+
+
+# Check whether --with-png-lib was given.
+if test "${with_png_lib+set}" = set; then :
+  withval=$with_png_lib;
+		echo "libpng: using $with_png_lib"
+		if test "$with_png_lib" == "wx"
+		then
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: Use wxWidgets png library" >&5
+$as_echo "$as_me: Use wxWidgets png library" >&6;}
+		elif test -f "$with_png_lib"
+		then
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_get_io_ptr in -lpng" >&5
+$as_echo_n "checking for png_get_io_ptr in -lpng... " >&6; }
+if ${ac_cv_lib_png_png_get_io_ptr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpng  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char png_get_io_ptr ();
+int
+main ()
+{
+return png_get_io_ptr ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_png_png_get_io_ptr=yes
+else
+  ac_cv_lib_png_png_get_io_ptr=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_png_png_get_io_ptr" >&5
+$as_echo "$ac_cv_lib_png_png_get_io_ptr" >&6; }
+if test "x$ac_cv_lib_png_png_get_io_ptr" = xyes; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_png_lib found." >&5
+$as_echo "$with_png_lib found." >&6; }
+else
+  as_fn_error $? "A working libpng is required." "$LINENO" 5
+fi
+
+			LIBS="$with_png_lib $LIBS"
+		else
+			as_fn_error $? "$with_png_lib not found." "$LINENO" 5
+		fi
+
+else
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing png_get_io_ptr" >&5
+$as_echo_n "checking for library containing png_get_io_ptr... " >&6; }
+if ${ac_cv_search_png_get_io_ptr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char png_get_io_ptr ();
+int
+main ()
+{
+return png_get_io_ptr ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' png; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_png_get_io_ptr=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_png_get_io_ptr+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_png_get_io_ptr+:} false; then :
+
+else
+  ac_cv_search_png_get_io_ptr=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_png_get_io_ptr" >&5
+$as_echo "$ac_cv_search_png_get_io_ptr" >&6; }
+ac_res=$ac_cv_search_png_get_io_ptr
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working libpng is required." "$LINENO" 5
+fi
+
+
+
+fi
+
+
 
 #lcms2:
 
@@ -4709,7 +4879,8 @@ if test "${with_lcms2_include+set}" = set; then :
 	echo "lcms2.h: using $with_lcms2_include"
 		if test -f "$with_lcms2_include/lcms2.h"
 		then
-			APP_CPPFLAGS="-I$with_lcms2_include $APP_CPPFLAGS "
+			#APP_CPPFLAGS="-I$with_lcms2_include $APP_CPPFLAGS "
+			CPPFLAGS="-I$with_lcms2_include $CPPFLAGS "
 		else
 			as_fn_error $? "lcms2.h not found in $with_lcms2_include." "$LINENO" 5
 		fi
@@ -4866,7 +5037,8 @@ if test "${with_libraw_include+set}" = set; then :
 	echo "libraw: using $with_libraw_include"
 		if test -f "$with_libraw_include/libraw/libraw.h"
 		then
-			APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+			#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+			CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
 		else
 			as_fn_error $? "libraw/libraw.h not found in $with_libraw_include." "$LINENO" 5
 		fi
@@ -5131,15 +5303,25 @@ fi
 done
 
 
-CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
-CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
-LIBS="$WX_LIBS $LIBS"
+#CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+#CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+#CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+#LIBS="$WX_LIBS $LIBS"
 
 
 
 
 
+
+
+
+
+
+
+#AC_SUBST(APP_CPPFLAGS)
+#AC_SUBST(APP_CXXFLAGS)
+#AC_SUBST(APP_LDFLAGS)
+#AC_SUBST(APP_LIBS)
 
 
 ac_config_files="$ac_config_files Makefile"

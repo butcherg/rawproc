@@ -2,21 +2,27 @@ CXX=@CXX@
 LD=@CXX@
 
 OBJECTS := util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
-LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o strutil.o curve.o
+LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o pngimage.o strutil.o curve.o
 
 LIBS=@LIBS@
-LIBS+=@APP_LIBS@
+#LIBS+=@APP_LIBS@
 
-CPPFLAGS=@CPPFLAGS@
+#CPPFLAGS=@CPPFLAGS@   #maybe don't need?
 
 CXXFLAGS=@CXXFLAGS@
-CXXFLAGS+=@APP_CXXFLAGS@
+#CXXFLAGS+=@APP_CXXFLAGS@
 
 LDFLAGS=@LDFLAGS@
-LDFLAGS+=@APP_LDFLAGS@
+#LDFLAGS+=@APP_LDFLAGS@
 
 INCLUDEDIRS=@CPPFLAGS@
-INCLUDEDIRS+=@APP_CPPFLAGS@
+#INCLUDEDIRS+=@APP_CPPFLAGS@
+
+WX_CPPFLAGS=@WX_CPPFLAGS@
+WX_CXXFLAGS_ONLY=@WX_CXXFLAGS_ONLY@
+WX_CFLAGS_ONLY=@WX_CFLAGS_ONLY@
+WX_LIBS=@WX_LIBS@
+
 
 
 EXT=@EXEEXT@
@@ -25,19 +31,19 @@ srcdir=@srcdir@
 VPATH=@srcdir@
 
 
-all: rawproc img makedoc
+all: rawproc img exif
 
 rawproc:  $(OBJECTS) $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(LIBOBJECTS) $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(LIBOBJECTS) $(WX_LIBS) $(LIBS) 
 
 img: img.o elapsedtime.o $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
 	
-exif: gimage.o elapsedtime.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  $(OBJECTS) $(LIBOBJECTS) $(LIBS) 
+exif: exif.o $(LIBOBJECTS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(LIBS) 
 
 
-exif.o: exifexif.cpp
+exif.o: $(srcdir)/exif.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/exif.cpp -o$@
 
 img.o: $(srcdir)/img.cpp
@@ -143,6 +149,9 @@ rawprocApp.o: $(srcdir)/rawprocApp.cpp
 gimage.o: $(srcdir)/gimage.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/gimage.cpp -o$@
 
+pngimage.o: $(srcdir)/pngimage.cpp 
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/pngimage.cpp -o$@
+
 tiffimage.o: $(srcdir)/tiffimage.cpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/tiffimage.cpp -o$@
 
@@ -179,7 +188,7 @@ makedoc:
 
 .PHONY: clean
 clean:
-	rm -f *.o rawproc$(EXT) img$(EXT) 
+	rm -f *.o rawproc$(EXT) img$(EXT) exif$(EXT)
 
 .PHONY: cleandoc
 cleandoc:
