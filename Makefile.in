@@ -8,7 +8,6 @@ LIBS=@LIBS@
 CXXFLAGS=@CXXFLAGS@
 CPPFLAGS=@CPPFLAGS@
 LDFLAGS=@LDFLAGS@
-INCLUDEDIRS=@CPPFLAGS@
 
 WX_CPPFLAGS=@WX_CPPFLAGS@
 WX_CXXFLAGS_ONLY=@WX_CXXFLAGS_ONLY@
@@ -130,7 +129,7 @@ PicProcessor.o: $(srcdir)/PicProcessor.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessor.cpp -o$@
 
 rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) $(BUILDDATE) $(LIBRAWFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) $(BUILDDATE) $(LIBRAWFLAGS)  -c $(srcdir)/rawprocFrm.cpp -o$@
 
 rawprocApp.o: $(srcdir)/rawprocApp.cpp 
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/rawprocApp.cpp  -o$@
@@ -139,31 +138,31 @@ rawprocApp.o: $(srcdir)/rawprocApp.cpp
 #gimage objects:
 
 gimage.o: $(srcdir)/gimage.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/gimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/gimage.cpp -o$@
 
 pngimage.o: $(srcdir)/pngimage.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/pngimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/pngimage.cpp -o$@
 
 tiffimage.o: $(srcdir)/tiffimage.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/tiffimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/tiffimage.cpp -o$@
 
 rawimage.o: $(srcdir)/rawimage.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/rawimage.cpp -o$@
 
 jpegimage.o: $(srcdir)/jpegimage.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/jpegimage.cpp -o$@
 
 jpegexif.o: $(srcdir)/jpegexif.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegexif.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/jpegexif.cpp -o$@
 
 elapsedtime.o: $(srcdir)/elapsedtime.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/elapsedtime.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/elapsedtime.cpp -o$@
 
 strutil.o: $(srcdir)/strutil.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/strutil.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c $(srcdir)/strutil.cpp -o$@
 
 curve.o: $(srcdir)/curve.cpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c  $(srcdir)/curve.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS)  -c  $(srcdir)/curve.cpp -o$@
 
 
 resource.o: $(srcdir)/resource.rc
