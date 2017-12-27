@@ -13,6 +13,7 @@
 #include "rawimage.h"
 #include "jpegimage.h"
 #include "tiffimage.h"
+#include "pngimage.h"
 #include "gimage/strutil.h"
 
 #define PI            3.14159265358979323846
@@ -550,6 +551,7 @@ GIMAGE_FILETYPE gImage::getFileType(const char * filename)
 
 	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) if (_checkTIFF(filename)) return FILETYPE_TIFF;
 	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) if (_checkJPEG(filename)) return FILETYPE_JPEG;
+	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) if (_checkPNG(filename)) return FILETYPE_PNG;
 	if (_checkRAW(filename)) return FILETYPE_RAW;
 
 	return FILETYPE_UNKNOWN;
@@ -2387,6 +2389,7 @@ gImage gImage::loadImageFile(const char * filename, std::string params)
 
 	if (ext == FILETYPE_TIFF) return gImage::loadTIFF(filename, params);
 	else if (ext == FILETYPE_JPEG) return gImage::loadJPEG(filename, params);
+	else if (ext == FILETYPE_PNG) return gImage::loadPNG(filename, params);
 	else return gImage::loadRAW(filename, params);
 }
 
@@ -2463,6 +2466,29 @@ gImage gImage::loadTIFF(const char * filename, std::string params)
 			break;
 		case 32:
 			bits = BPP_FP;
+			break;
+		default: 
+			return gImage();
+	}
+	gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
+	delete [] image;
+	if (icclength && iccprofile != NULL) delete [] iccprofile;
+	return I;
+}
+
+gImage gImage::loadPNG(const char * filename, std::string params)
+{
+	unsigned width, height, colors, bpp, icclength;
+	BPP bits;
+	char * iccprofile;
+	std::map<std::string,std::string> imgdata;
+	char * image = _loadPNG(filename, &width, &height, &colors, &bpp, imgdata, params, &iccprofile, &icclength);
+	switch (bpp) {
+		case 8: 
+			bits = BPP_8;
+			break;
+		case 16:
+			bits = BPP_16;
 			break;
 		default: 
 			return gImage();
@@ -2574,6 +2600,44 @@ GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, cmsHPROFILE profi
 	}
 	lasterror = GIMAGE_OK; 
 	return lasterror;
+}
+
+GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+/*
+	unsigned b = 0;
+	if (bits == BPP_16) b = 16;
+	else if (bits == BPP_8)  b = 8;
+	else if (bits == BPP_FP) b = 32;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete iccprofile;
+			return lasterror;
+		}
+
+		delete iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
+		else
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+*/
 }
 
 

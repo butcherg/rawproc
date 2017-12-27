@@ -49,6 +49,7 @@ enum GIMAGE_FILETYPE {
 	FILETYPE_RAW,
 	FILETYPE_JPEG,
 	FILETYPE_TIFF,
+	FILETYPE_PNG,
 	FILETYPE_UNKNOWN
 };
 
@@ -157,6 +158,7 @@ class gImage
 		static gImage loadRAW(const char * filename, std::string params);
 		static gImage loadJPEG(const char * filename, std::string params);
 		static gImage loadTIFF(const char * filename, std::string params);
+		static gImage loadPNG(const char * filename, std::string params);
 		static gImage loadImageFile(const char * filename, std::string params);
 		static std::map<std::string,std::string> loadImageFileInfo(const char * filename);
 
@@ -164,6 +166,7 @@ class gImage
 		GIMAGE_ERROR saveImageFile(const char * filename, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		GIMAGE_ERROR saveJPEG(const char * filename, BPP bits, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		GIMAGE_ERROR saveTIFF(const char * filename, BPP bits, cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
+		GIMAGE_ERROR savePNG(const char * filename, BPP bits, cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 
 		//ICC (LittleCMS) profiles.
 		static cmsHPROFILE makeLCMSProfile(const std::string name, float gamma);

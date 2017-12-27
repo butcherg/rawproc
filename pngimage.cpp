@@ -15,7 +15,7 @@ const char * pngVersion()
 	return PNG_LIBPNG_VER_STRING;
 }
 
-#define PNG_BYTES_TO_CHECK 4
+#define PNG_BYTES_TO_CHECK 8
 bool _checkPNG(const char *filename)
 {
 	char buf[PNG_BYTES_TO_CHECK];
@@ -37,6 +37,69 @@ bool _checkPNG(const char *filename)
 
 bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info)
 {
+	png_structp png_ptr;
+	png_infop info_ptr;
+	png_byte color_type;
+	int number_of_passes;
+	png_bytep * row_pointers;
+
+	FILE *fp;
+
+	if ((fp = fopen(filename, "rb")) == NULL)
+		return false;
+
+
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (!png_ptr)
+		return false;
+
+	info_ptr = png_create_info_struct(png_ptr);
+	if (!info_ptr)
+		return false;
+
+	if (setjmp(png_jmpbuf(png_ptr)))
+		return false;
+
+	png_init_io(png_ptr, fp);
+	png_set_sig_bytes(png_ptr, 8);
+
+	png_read_info(png_ptr, info_ptr);
+
+	*width = png_get_image_width(png_ptr, info_ptr);
+	*height = png_get_image_height(png_ptr, info_ptr);
+
+	color_type = png_get_color_type(png_ptr, info_ptr);
+	switch (color_type) {
+		case PNG_COLOR_TYPE_GRAY:
+			*numcolors = 1;
+			break;
+		case PNG_COLOR_TYPE_RGB:
+			*numcolors = 3;
+			break;
+		default:
+			return false;
+	}
+
+	*numbits = png_get_bit_depth(png_ptr, info_ptr);
+
+	number_of_passes = png_set_interlace_handling(png_ptr);
+	png_read_update_info(png_ptr, info_ptr);
+
+/*
+	// read file 
+	if (setjmp(png_jmpbuf(png_ptr)))
+		return false;
+
+	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * (*height));
+	for (int y=0; y<(*height); y++)
+		row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
+
+	png_read_image(png_ptr, row_pointers);
+*/
+	fclose(fp);
+
+
 /*
 	char *img, *buf;
 	FILE * infile;
@@ -82,11 +145,124 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 
 char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
 {
+	char *img;
+	unsigned w, h, c, b;
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+	png_byte color_type;
+	int number_of_passes;
+	png_bytep * row_pointers;
+
+	FILE *fp = fopen(filename, "rb");
+
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if(!png) return NULL;
+
+	png_infop pnginfo = png_create_info_struct(png);
+	if(!pnginfo) return NULL;
+
+	if(setjmp(png_jmpbuf(png))) return NULL;
+
+	png_init_io(png, fp);
+
+	png_read_info(png, pnginfo);
+
+
+
+
+
+
+
+
+	*width = png_get_image_width(png_ptr, info_ptr);
+	*height = png_get_image_height(png_ptr, info_ptr);
+
+	color_type = png_get_color_type(png_ptr, info_ptr);
+	switch (color_type) {
+		case PNG_COLOR_TYPE_GRAY:
+			*numcolors = 1;
+			break;
+		case PNG_COLOR_TYPE_RGB:
+			*numcolors = 3;
+			break;
+		default:
+			return NULL;
+	}
+
+	*numbits = png_get_bit_depth(png_ptr, info_ptr);
+
+	number_of_passes = png_set_interlace_handling(png_ptr);
+	png_read_update_info(png_ptr, info_ptr);
+
+	// read file 
+	if (setjmp(png_jmpbuf(png_ptr)))
+		return NULL;
+
+	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * (*height));
+	for (int y=0; y<(*height); y++)
+		row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
+
+	png_read_image(png_ptr, row_pointers);
+	fclose(fp);
+	
+	w = *width;
+	h = *height;
+	c = *numcolors;
+	b = *numbits;
+	img = new char[w*h*c*(b/8)];
+
+	if (b == 8) {
+		char * dst = (char *) img;
+		for (unsigned y = 0; y < h; y++){
+			png_byte* buf = row_pointers[y];
+			char * src = (char *) buf;
+			for(unsigned x=0; x < w; x++) {
+				if (c == 1) {
+					dst[0] = (char) src[0];
+					dst+=1;
+					src+=1;
+				}
+				else if(c == 3 ){
+					dst[0] = (char) src[0];
+					dst[1] = (char) src[1];
+					dst[2] = (char) src[2];
+					dst+=3;
+					src+=3;
+				}
+			}
+		}
+	}
+	else if (b == 16) {
+		unsigned short * dst = (unsigned short *) img;
+		for (unsigned y = 0; y < h; y++){
+			png_byte* buf = row_pointers[y];
+			unsigned short * src = (unsigned short *) buf;
+			for(unsigned x=0; x < w; x++) {
+				if (c == 1) {
+					dst[0] = (unsigned short) src[0];
+					dst+=1;
+					src+=1;
+				}
+				else if(c == 3 ){
+					dst[0] = (unsigned short) src[0];
+					dst[1] = (unsigned short) src[1];
+					dst[2] = (unsigned short) src[2];
+					dst+=3;
+					src+=3;
+				}
+			}
+		}				
+	}
+	return img;
+
+
 /*
 	char *img, *buf;
 	FILE * infile;
 	uint32 w, h;
 	uint16 c, b;
+
 
 	TIFF* tif = TIFFOpen(filename, "r");
 	if (tif) {
