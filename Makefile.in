@@ -6,6 +6,7 @@ LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o pngimage.o 
 
 LIBS=@LIBS@
 CXXFLAGS=@CXXFLAGS@
+CPPFLAGS=@CPPFLAGS@
 LDFLAGS=@LDFLAGS@
 INCLUDEDIRS=@CPPFLAGS@
 
@@ -28,141 +29,141 @@ rawproc:  $(OBJECTS) $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(LIBOBJECTS) $(WX_LIBS) $(LIBS) 
 
 img: img.o elapsedtime.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(WX_LIBS) $(LIBS)
 	
 exif: exif.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(WX_LIBS) $(LIBS) 
 
 
 exif.o: $(srcdir)/exif.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/exif.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/exif.cpp -o$@
 
 img.o: $(srcdir)/img.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -std=c++11 -c $(srcdir)/img.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -std=c++11 -c $(srcdir)/img.cpp -o$@
 
 #elapsedtime.o: $(srcdir)/elapsedtime.cpp
 #	$(CXX) -c $(srcdir)/elapsedtime.cpp  -o$@
 
 util.o: $(srcdir)/util.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/util.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/util.cpp  -o$@
 
 myPropertyDialog.o: $(srcdir)/myPropertyDialog.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myPropertyDialog.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myPropertyDialog.cpp  -o$@
 
 myEXIFDialog.o: $(srcdir)/myEXIFDialog.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myEXIFDialog.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myEXIFDialog.cpp  -o$@
 	
 myDoubleSlider.o: $(srcdir)/myDoubleSlider.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myDoubleSlider.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myDoubleSlider.cpp  -o$@
 
 myHistogramPane.o: $(srcdir)/myHistogramPane.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/myHistogramPane.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/myHistogramPane.cpp  -o$@
 
 myHistogramDialog.o: $(srcdir)/myHistogramDialog.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myHistogramDialog.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/myHistogramDialog.cpp  -o$@
 
 myConfig.o: $(srcdir)/myConfig.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/myConfig.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/myConfig.cpp  -o$@
 
 CurvePane.o: $(srcdir)/CurvePane.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -w -c $(srcdir)/CurvePane.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -w -c $(srcdir)/CurvePane.cpp  -o$@
 
 PicProcPanel.o: $(srcdir)/PicProcPanel.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcPanel.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcPanel.cpp  -o$@
 
 PicPanel.o: $(srcdir)/PicPanel.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicPanel.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicPanel.cpp  -o$@
 
 PicProcessorBlackWhitePoint.o: $(srcdir)/PicProcessorBlackWhitePoint.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorBlackWhitePoint.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorBlackWhitePoint.cpp -o$@
 
 PicProcessorHighlight.o: $(srcdir)/PicProcessorHighlight.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorHighlight.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorHighlight.cpp -o$@
 
 PicProcessorShadow.o: $(srcdir)/PicProcessorShadow.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorShadow.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorShadow.cpp -o$@
 
 PicProcessorCurve.o: $(srcdir)/PicProcessorCurve.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorCurve.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorCurve.cpp -o$@
 
 PicProcessorGamma.o: $(srcdir)/PicProcessorGamma.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorGamma.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorGamma.cpp -o$@
 
 PicProcessorBright.o: $(srcdir)/PicProcessorBright.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorBright.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorBright.cpp -o$@
 
 PicProcessorContrast.o: $(srcdir)/PicProcessorContrast.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorContrast.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorContrast.cpp -o$@
 
 PicProcessorSaturation.o: $(srcdir)/PicProcessorSaturation.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorSaturation.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorSaturation.cpp -o$@
 	
 PicProcessorExposure.o: $(srcdir)/PicProcessorExposure.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorExposure.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorExposure.cpp -o$@
 	
 PicProcessorRedEye.o: $(srcdir)/PicProcessorRedEye.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorRedEye.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) -c $(srcdir)/PicProcessorRedEye.cpp -o$@
 
 PicProcessorGray.o: $(srcdir)/PicProcessorGray.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorGray.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorGray.cpp -o$@
 
 PicProcessorCrop.o: $(srcdir)/PicProcessorCrop.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorCrop.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorCrop.cpp -o$@
 
 PicProcessorResize.o: $(srcdir)/PicProcessorResize.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorResize.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorResize.cpp -o$@
 
 PicProcessorSharpen.o: $(srcdir)/PicProcessorSharpen.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorSharpen.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorSharpen.cpp -o$@
 
 PicProcessorRotate.o: $(srcdir)/PicProcessorRotate.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorRotate.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorRotate.cpp -o$@
 
 PicProcessorDenoise.o: $(srcdir)/PicProcessorDenoise.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorDenoise.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorDenoise.cpp -o$@
 	
 PicProcessorColorSpace.o: $(srcdir)/PicProcessorColorSpace.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorColorSpace.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorColorSpace.cpp -o$@
 
 
 PicProcessor.o: $(srcdir)/PicProcessor.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessor.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessor.cpp -o$@
 
 rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS) $(BUILDDATE) $(LIBRAWFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) $(BUILDDATE) $(LIBRAWFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawprocFrm.cpp -o$@
 
 rawprocApp.o: $(srcdir)/rawprocApp.cpp 
-	$(CXX) $(CXXFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/rawprocApp.cpp  -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/rawprocApp.cpp  -o$@
 	
 	
 #gimage objects:
 
 gimage.o: $(srcdir)/gimage.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/gimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/gimage.cpp -o$@
 
 pngimage.o: $(srcdir)/pngimage.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/pngimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/pngimage.cpp -o$@
 
 tiffimage.o: $(srcdir)/tiffimage.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/tiffimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/tiffimage.cpp -o$@
 
 rawimage.o: $(srcdir)/rawimage.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/rawimage.cpp -o$@
 
 jpegimage.o: $(srcdir)/jpegimage.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegimage.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegimage.cpp -o$@
 
 jpegexif.o: $(srcdir)/jpegexif.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegexif.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/jpegexif.cpp -o$@
 
 elapsedtime.o: $(srcdir)/elapsedtime.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/elapsedtime.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/elapsedtime.cpp -o$@
 
 strutil.o: $(srcdir)/strutil.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c $(srcdir)/strutil.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c $(srcdir)/strutil.cpp -o$@
 
 curve.o: $(srcdir)/curve.cpp 
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIRS) -c  $(srcdir)/curve.cpp -o$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDEDIRS) -c  $(srcdir)/curve.cpp -o$@
 
 
 resource.o: $(srcdir)/resource.rc

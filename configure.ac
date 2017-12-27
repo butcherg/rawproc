@@ -111,7 +111,18 @@ then
 	LDFLAGS="$LDFLAGS -static"
 fi
 
+
 #libjpeg:
+
+AC_ARG_WITH([wxjpeg],
+	AS_HELP_STRING([--with-wxjpeg], [Use the wxWidgets JPEG header and library])
+)
+if test "$with_wxjpeg" == "yes" 
+then
+		echo "libjpeg: Using wxWidgets libjpeg."
+		CPPFLAGS="-I$wx_config_prefix/src/jpeg $CPPFLAGS"
+fi
+
 AC_ARG_WITH([jpeg-include],
 	AS_HELP_STRING([--with-jpeg-include], [=PATH, specifies path to non-standard location of the libjpeg header (jpeglib.h).]),
 	[
@@ -125,7 +136,10 @@ AC_ARG_WITH([jpeg-include],
 		fi
 	],
 	[
-		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
+		if test "$with_wxjpeg" != "yes"
+		then
+			AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
+		fi
 	]
 )
 
@@ -145,11 +159,24 @@ AC_ARG_WITH([jpeg-lib],
 		fi
 	],
 	[
-		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
+		if test "$with_wxjpeg" != "yes"
+		then
+			AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
+		fi
 	]
 )
 
 #libtiff:
+
+AC_ARG_WITH([wxtiff],
+	AS_HELP_STRING([--with-wxtiff], [Use the wxWidgets TIFF header and library])
+)
+if test "$with_wxtiff" == "yes" 
+then
+		echo "libtiff: Using wxWidgets libtiff."
+		CPPFLAGS="-I$wx_config_prefix/src/tiff $CPPFLAGS"
+fi
+
 AC_ARG_WITH([tiff-include],
 	AS_HELP_STRING([--with-tiff-include], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
 	[
@@ -163,18 +190,18 @@ AC_ARG_WITH([tiff-include],
 		fi
 	],
 	[
-		AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
+		if test "$with_wxtiff" != "yes"
+		then
+			AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
+		fi
 	]
 )
 
 AC_ARG_WITH([tiff-lib],
 	AS_HELP_STRING([--with-tiff-lib], [=PATH, specifies path to non-standard location of the tiff library (libtiff.a).]),
 	[
-		echo "libtiff: using $with_tiff_lib"
-		if test "$with_tiff_lib" == "wx" 
-		then
-			AC_MSG_NOTICE([Use wxWidgets tiff library])     
-		elif test -f "$with_tiff_lib"
+		echo "libtiff: using $with_tiff_lib" 
+		if test -f "$with_tiff_lib"
 		then
 			AC_CHECK_LIB(tiff, TIFFSetErrorHandler, [AC_MSG_RESULT([$with_tiff_lib found.])], [AC_MSG_ERROR([A working libtiff is required.])])
 			LIBS="$with_tiff_lib $LIBS"
@@ -183,25 +210,40 @@ AC_ARG_WITH([tiff-lib],
 		fi
 	],
 	[
-		AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
+		if test "$with_wxtiff" != "yes"
+		then
+			AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
+		fi
 	]
 )
 
 #libpng:
+
+AC_ARG_WITH([wxpng],
+	AS_HELP_STRING([--with-wxpng], [Use the wxWidgets PNG header and library])
+)
+if test "$with_wxpng" == "yes" 
+then
+		echo "libpng: Using wxWidgets libpng."
+		CPPFLAGS="-I$wx_config_prefix/src/png -I$wx_config_prefix/src/zlib $CPPFLAGS"
+fi
+
 AC_ARG_WITH([png-include],
 	AS_HELP_STRING([--with-png-include], [=PATH, specifies path to non-standard location of the png header (png.h).]),
 	[
 		echo "libpng: using $with_png_include"
-		if test -f "$with_tiff_include/png.h"
+		if test -f "$with_png_include/png.h"
 		then
-			#APP_CPPFLAGS="-I$with_png_include $APP_CPPFLAGS"
 			CPPFLAGS="-I$with_png_include $CPPFLAGS"
 		else
 			AC_MSG_ERROR([png.h not found in $with_png_include.]) 
 		fi
 	],
 	[
-		AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
+		if test "$with_wxpng" != "yes"
+		then
+			AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
+		fi
 	]
 )
 
@@ -221,7 +263,10 @@ AC_ARG_WITH([png-lib],
 		fi
 	],
 	[
-		AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
+		if test "$with_wxpng" != "yes"
+		then
+			AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
+		fi
 	]
 )
 
@@ -260,8 +305,6 @@ AC_ARG_WITH([lcms2-lib],
 		AC_SEARCH_LIBS(cmsSetLogErrorHandler,lcms2, [], [AC_MSG_ERROR([A working libcms2 is required])])
 	]
 )
-
-
 
 
 #libraw:
@@ -315,10 +358,6 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([clock_gettime floor pow sqrt])
 
-#CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-#CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
-#CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
-#LIBS="$WX_LIBS $LIBS"
 
 AC_SUBST(WX_CPPFLAGS)
 AC_SUBST(WX_CXXFLAGS_ONLY)
@@ -326,14 +365,9 @@ AC_SUBST(WX_CFLAGS_ONLY)
 AC_SUBST(WX_LIBS)
 
 AC_SUBST(LIBS)
-AC_SUBST(CPP_FLAGS)
-AC_SUBST(CXX_FLAGS)
+AC_SUBST(CPPFLAGS)
+AC_SUBST(CXXFLAGS)
 AC_SUBST(CFLAGS)
-
-#AC_SUBST(APP_CPPFLAGS)
-#AC_SUBST(APP_CXXFLAGS)
-#AC_SUBST(APP_LDFLAGS)
-#AC_SUBST(APP_LIBS)
 
 
 AC_OUTPUT(Makefile)
