@@ -147,6 +147,29 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 {
 	char *img;
 	unsigned w, h, c, b;
+	
+	png_image pimage;
+	memset(&pimage, 0, (sizeof pimage));
+	pimage.version = PNG_IMAGE_VERSION;
+	
+	png_image_begin_read_from_file(&pimage, filename);
+	pimage.format = PNG_FORMAT_RGB;
+	
+	img = (char *) malloc(PNG_IMAGE_SIZE(pimage));
+	w = pimage.width;
+	h = pimage.height;
+	c = PNG_IMAGE_PIXEL_CHANNELS(pimage.format);
+	b = PNG_IMAGE_PIXEL_SIZE(pimage.format);
+	
+	png_image_finish_read(&pimage, NULL, img, 0, NULL);
+	png_image_free(&pimage);
+	
+	
+	std::map<std::string,std::string> inf;
+	info = inf;
+	
+	return img;
+/*
 
 	png_structp png_ptr;
 	png_infop info_ptr;
@@ -255,7 +278,7 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 		}				
 	}
 	return img;
-
+*/
 
 /*
 	char *img, *buf;
