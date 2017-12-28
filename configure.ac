@@ -114,14 +114,6 @@ fi
 
 #libjpeg:
 
-AC_ARG_WITH([wxjpeg],
-	AS_HELP_STRING([--with-wxjpeg], [Use the wxWidgets JPEG header and library])
-)
-if test "$with_wxjpeg" == "yes" 
-then
-		echo "libjpeg: Using wxWidgets libjpeg."
-		CPPFLAGS="-I$wx_config_prefix/src/jpeg $CPPFLAGS"
-fi
 
 AC_ARG_WITH([jpeg-include],
 	AS_HELP_STRING([--with-jpeg-include], [=PATH, specifies path to non-standard location of the libjpeg header (jpeglib.h).]),
@@ -147,10 +139,7 @@ AC_ARG_WITH([jpeg-lib],
 	AS_HELP_STRING([--with-jpeg-lib], [=PATH, specifies location of the jpeg library (libjpeg.a).]),
 	[
 		echo "libjpeg: using $with_jpeg_lib"
-		if test "$with_jpeg_lib" == "wx" 
-		then
-			AC_MSG_NOTICE([Use wxWidgets jpeg library])	
-		elif test -f "$with_jpeg_lib" 
+		if test -f "$with_jpeg_lib" 
 		then
 			AC_CHECK_LIB(jpeg, jpeg_set_defaults, [AC_MSG_RESULT([$with_jpeg_lib found.])], [AC_MSG_ERROR([A working libjpeg is required.])])
 			LIBS="$with_jpeg_lib $LIBS"
@@ -167,15 +156,6 @@ AC_ARG_WITH([jpeg-lib],
 )
 
 #libtiff:
-
-AC_ARG_WITH([wxtiff],
-	AS_HELP_STRING([--with-wxtiff], [Use the wxWidgets TIFF header and library])
-)
-if test "$with_wxtiff" == "yes" 
-then
-		echo "libtiff: Using wxWidgets libtiff."
-		CPPFLAGS="-I$wx_config_prefix/src/tiff $CPPFLAGS"
-fi
 
 AC_ARG_WITH([tiff-include],
 	AS_HELP_STRING([--with-tiff-include], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
@@ -219,15 +199,6 @@ AC_ARG_WITH([tiff-lib],
 
 #libpng:
 
-AC_ARG_WITH([wxpng],
-	AS_HELP_STRING([--with-wxpng], [Use the wxWidgets PNG header and library])
-)
-if test "$with_wxpng" == "yes" 
-then
-		echo "libpng: Using wxWidgets libpng."
-		CPPFLAGS="-I$wx_config_prefix/src/png -I$wx_config_prefix/src/zlib $CPPFLAGS"
-fi
-
 AC_ARG_WITH([png-include],
 	AS_HELP_STRING([--with-png-include], [=PATH, specifies path to non-standard location of the png header (png.h).]),
 	[
@@ -251,11 +222,9 @@ AC_ARG_WITH([png-lib],
 	AS_HELP_STRING([--with-png-lib], [=PATH, specifies path to non-standard location of the png library (libpng.a).]),
 	[
 		echo "libpng: using $with_png_lib"
-		if test "$with_png_lib" == "wx" 
+		if test -f "$with_png_lib"
 		then
-			AC_MSG_NOTICE([Use wxWidgets png library])     
-		elif test -f "$with_png_lib"
-		then
+			AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for libpng.])])
 			AC_CHECK_LIB(png, png_get_io_ptr, [AC_MSG_RESULT([$with_png_lib found.])], [AC_MSG_ERROR([A working libpng is required.])])
 			LIBS="$with_png_lib $LIBS"
 		else
@@ -265,6 +234,7 @@ AC_ARG_WITH([png-lib],
 	[
 		if test "$with_wxpng" != "yes"
 		then
+			AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for libpng.])])
 			AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
 		fi
 	]

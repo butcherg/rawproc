@@ -25,13 +25,13 @@ VPATH=@srcdir@
 all: rawproc img exif
 
 rawproc:  $(OBJECTS) $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(WX_LIBS) $(LIBOBJECTS)  $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(WX_LIBS) $(LIBOBJECTS) $(LIBS) 
 
 img: img.o elapsedtime.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(WX_LIBS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
 	
 exif: exif.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(WX_LIBS) $(LIBS) 
+	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(LIBS) 
 
 
 exif.o: $(srcdir)/exif.cpp
