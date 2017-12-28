@@ -582,6 +582,9 @@ std::string gImage::LibraryVersions()
 	verstring.append("\nTIFF: ");
 	std::string tiffver(tiffVersion());
 	verstring.append(tiffver.substr(0,tiffver.find_first_of("\n")));
+	verstring.append("\nPNG: ");
+	std::string pngver(pngVersion());
+	verstring.append(pngver);
 	verstring.append("\nLibRaw: ");
 	verstring.append(librawVersion());
 	verstring.append("\nLittleCMS2: ");
