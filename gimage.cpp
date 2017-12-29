@@ -565,7 +565,8 @@ GIMAGE_FILETYPE gImage::getFileNameType(const char * filename)
 	std::string ext = fpieces.back();
 
 	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) return FILETYPE_TIFF;
-	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) return FILETYPE_JPEG;	
+	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) return FILETYPE_JPEG;
+	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) return FILETYPE_PNG;
 	return FILETYPE_UNKNOWN;
 }
 
@@ -2487,10 +2488,10 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 	std::map<std::string,std::string> imgdata;
 	char * image = _loadPNG(filename, &width, &height, &colors, &bpp, imgdata, params, &iccprofile, &icclength);
 	switch (bpp) {
-		case 8: 
+		case 1: 
 			bits = BPP_8;
 			break;
-		case 16:
+		case 2:
 			bits = BPP_16;
 			break;
 		default: 
@@ -2529,6 +2530,12 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 			return saveJPEG(filename, bitfmt, params, profile, intent);
 		else
 			return saveJPEG(filename, bitfmt, params);
+	}
+	if (ftype == FILETYPE_PNG) {
+		if (profile)
+			return savePNG(filename, bitfmt, profile, intent);
+		else
+			return savePNG(filename, bitfmt);
 	}
 	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
 	return lasterror;
@@ -2607,11 +2614,10 @@ GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, cmsHPROFILE profi
 
 GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, cmsHPROFILE profile, cmsUInt32Number intent)
 {
-/*
+
 	unsigned b = 0;
 	if (bits == BPP_16) b = 16;
 	else if (bits == BPP_8)  b = 8;
-	else if (bits == BPP_FP) b = 32;
 	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
 
 	if (profile) {
@@ -2621,7 +2627,7 @@ GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, cmsHPROFILE profil
 
 		try {
 			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+			_writePNG(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
 			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
 		}
 		catch (std::exception &e) {
@@ -2634,13 +2640,12 @@ GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, cmsHPROFILE profil
 	}
 	else {
 		if (this->profile)
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
 		else
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo);	
 	}
 	lasterror = GIMAGE_OK; 
 	return lasterror;
-*/
 }
 
 
