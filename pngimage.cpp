@@ -91,7 +91,7 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 
 }
 
-char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
+char * _loadPNGSimple(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
 {
 	char *img;
 	unsigned w, h, c, b;
@@ -116,6 +116,55 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	*height = h;
 	*numcolors = c;
 	*numbits = b;
+	
+	std::map<std::string,std::string> inf;
+	info = inf;
+
+	*icc_m = NULL;
+	*icclength = 0;
+
+	return img;
+
+}
+
+char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
+{
+	char *img;
+	unsigned w, h, c, b;
+
+	png_byte color_type;
+	png_byte bit_depth;
+	png_bytep *row_pointers;
+
+	FILE *fp = fopen(filename, "rb");
+
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if(!png) return NULL;
+
+	png_infop pinfo = png_create_info_struct(png);
+	if(!pinfo) return NULL;
+
+	if(setjmp(png_jmpbuf(png))) return NULL;
+
+	png_init_io(png, fp);
+
+	png_read_info(png, pinfo);
+
+	*width      = png_get_image_width(png, pinfo);
+  	*height     = png_get_image_height(png, pinfo);
+	*numcolors  = png_get_channels(png, pinfo);
+	*numbits    = png_get_bit_depth(png, pinfo);
+
+	png_read_update_info(png, pinfo);
+
+	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * (*height));
+	for(int y = 0; y < (*height); y++) {
+		row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,pinfo));
+	}
+
+	png_read_image(png, row_pointers);
+
+	fclose(fp);
 	
 	std::map<std::string,std::string> inf;
 	info = inf;
