@@ -91,6 +91,7 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 
 }
 
+/*
 char * _loadPNGSimple(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
 {
 	char *img;
@@ -126,6 +127,7 @@ char * _loadPNGSimple(const char *filename, unsigned *width, unsigned *height, u
 	return img;
 
 }
+*/
 
 char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
 {
@@ -136,33 +138,59 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	png_byte bit_depth;
 	png_bytep *row_pointers;
 
+//printf("_loadPNG: open file...\n");
 	FILE *fp = fopen(filename, "rb");
 
+//printf("_loadPNG: create png read struct...\n");
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if(!png) return NULL;
 
+//printf("_loadPNG: create png info struct...\n");
 	png_infop pinfo = png_create_info_struct(png);
 	if(!pinfo) return NULL;
 
+//printf("_loadPNG: setjmp...\n");
 	if(setjmp(png_jmpbuf(png))) return NULL;
 
+//printf("_loadPNG: png_init_io...\n");
 	png_init_io(png, fp);
 
+//printf("_loadPNG: png_read_info...\n");
 	png_read_info(png, pinfo);
 
 	*width      = png_get_image_width(png, pinfo);
   	*height     = png_get_image_height(png, pinfo);
 	*numcolors  = png_get_channels(png, pinfo);
 	*numbits    = png_get_bit_depth(png, pinfo);
+	
+	img = new char[(*width)*(*height)*(*numcolors)*((*numbits)/8)];
 
+//printf("_loadPNG: png_read_update_info...\n");
 	png_read_update_info(png, pinfo);
+	
+	unsigned stride = png_get_rowbytes(png,pinfo);
 
+//printf("_loadPNG: allocate rows...\n");
 	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * (*height));
 	for(int y = 0; y < (*height); y++) {
-		row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,pinfo));
+		row_pointers[y] = (png_byte*)malloc(stride);
 	}
 
+//printf("_loadPNG: png_read_image...\n");
 	png_read_image(png, row_pointers);
+
+//printf("_loadPNG: copy to img...\n");
+	char * dst = img;
+	for(int y = 0; y < (*height); y++) {
+		memcpy(dst, row_pointers[y], stride);
+		dst += stride;
+	}
+
+//printf("_loadPNG: free rows...\n");
+	for(int y = 0; y < (*height); y++) {
+		free(row_pointers[y]);
+	}
+	free(row_pointers);
 
 	fclose(fp);
 	
@@ -171,12 +199,20 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	*icc_m = NULL;
 	*icclength = 0;
+	
+	png_destroy_read_struct(&png, &pinfo, NULL);
+	png=NULL;
+	pinfo=NULL;
+	
+	if (png && pinfo)
+	png_destroy_write_struct(&png, &pinfo);
 
 	return img;
 
 }
 
-bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned height, unsigned numcolors, unsigned numbits, std::map<std::string,std::string> info, char *iccprofile, unsigned iccprofilelength)
+/*
+bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned height, unsigned numcolors, unsigned numbits, std::map<std::string,std::string> info, std::string params, char *iccprofile, unsigned iccprofilelength)
 {
 	png_image pimage;
 	memset(&pimage, 0, (sizeof pimage));
@@ -190,4 +226,68 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 
 	return true;
 }
+*/
 
+bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned height, unsigned numcolors, unsigned numbits, std::map<std::string,std::string> info, std::string params, char *iccprofile, unsigned iccprofilelength)
+{
+	std::map<std::string,std::string> p = parseparams(params);
+
+	png_bytep *row_pointers;
+	
+	FILE *fp = fopen(filename, "wb");
+	if(!fp) return NULL;
+
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (!png) return NULL;
+
+	png_infop pinfo = png_create_info_struct(png);
+	if (!pinfo) return NULL;
+
+	if (setjmp(png_jmpbuf(png))) return NULL;
+
+	png_init_io(png, fp);
+	
+	int compression = 3;
+	if (p.find("compression") != p.end()) 
+		compression = atoi(p["compression"].c_str());
+
+	png_set_compression_level(png, compression);
+	png_set_compression_strategy(png, 2);
+	png_set_filter(png,0,PNG_FILTER_SUB);
+	
+	png_set_IHDR(
+		png,
+		pinfo,
+		width, height,
+		numbits,
+		PNG_COLOR_TYPE_RGB,
+		PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT
+	);
+
+//printf("_writePNG: writing info...\n");
+	png_write_info(png, pinfo);
+	
+	png_bytep img = (png_bytep) imagedata;
+	unsigned stride = png_get_rowbytes(png,pinfo);
+
+//printf("_writePNG: row pointers...\n");
+	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
+	for(int y = 0; y < height; y++) {
+		row_pointers[y] = img;
+		img += stride;
+	}
+
+//printf("_writePNG: writing image...\n");
+	png_write_image(png, row_pointers);
+//printf("_writePNG: writing end of file...\n");
+	png_write_end(png, NULL);
+//printf("_writePNG: free pointers...\n");
+	free(row_pointers);
+
+	fclose(fp);
+	
+	return true;
+	
+}
