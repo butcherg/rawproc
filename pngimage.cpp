@@ -37,58 +37,35 @@ bool _checkPNG(const char *filename)
 
 bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info)
 {
-	png_structp png_ptr;
-	png_infop info_ptr;
+	char *img;
+	unsigned w, h, c, b;
+
 	png_byte color_type;
-	int number_of_passes;
-	png_bytep * row_pointers;
+	png_byte bit_depth;
+	png_bytep *row_pointers;
 
-	FILE *fp;
+	FILE *fp = fopen(filename, "rb");
 
-	if ((fp = fopen(filename, "rb")) == NULL)
-		return false;
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if(!png) return NULL;
 
+	png_infop pinfo = png_create_info_struct(png);
+	if(!pinfo) return NULL;
 
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if(setjmp(png_jmpbuf(png))) return NULL;
 
-	if (!png_ptr)
-		return false;
+	png_init_io(png, fp);
 
-	info_ptr = png_create_info_struct(png_ptr);
-	if (!info_ptr)
-		return false;
+	png_read_info(png, pinfo);
 
-	if (setjmp(png_jmpbuf(png_ptr)))
-		return false;
-
-	png_init_io(png_ptr, fp);
-	png_set_sig_bytes(png_ptr, 8);
-
-	png_read_info(png_ptr, info_ptr);
-
-	*width = png_get_image_width(png_ptr, info_ptr);
-	*height = png_get_image_height(png_ptr, info_ptr);
-
-	color_type = png_get_color_type(png_ptr, info_ptr);
-	switch (color_type) {
-		case PNG_COLOR_TYPE_GRAY:
-			*numcolors = 1;
-			break;
-		case PNG_COLOR_TYPE_RGB:
-			*numcolors = 3;
-			break;
-		default:
-			return false;
-	}
-
-	*numbits = png_get_bit_depth(png_ptr, info_ptr);
-
-	number_of_passes = png_set_interlace_handling(png_ptr);
-	png_read_update_info(png_ptr, info_ptr);
+	*width      = png_get_image_width(png, pinfo);
+  	*height     = png_get_image_height(png, pinfo);
+	*numcolors  = png_get_channels(png, pinfo);
+	*numbits    = png_get_bit_depth(png, pinfo);
 
 	fclose(fp);
-	return true;
-
+	if (png && pinfo)
+		png_destroy_write_struct(&png, &pinfo);
 }
 
 /*
@@ -138,24 +115,18 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	png_byte bit_depth;
 	png_bytep *row_pointers;
 
-//printf("_loadPNG: open file...\n");
 	FILE *fp = fopen(filename, "rb");
 
-//printf("_loadPNG: create png read struct...\n");
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if(!png) return NULL;
 
-//printf("_loadPNG: create png info struct...\n");
 	png_infop pinfo = png_create_info_struct(png);
 	if(!pinfo) return NULL;
 
-//printf("_loadPNG: setjmp...\n");
 	if(setjmp(png_jmpbuf(png))) return NULL;
 
-//printf("_loadPNG: png_init_io...\n");
 	png_init_io(png, fp);
 
-//printf("_loadPNG: png_read_info...\n");
 	png_read_info(png, pinfo);
 
 	*width      = png_get_image_width(png, pinfo);
@@ -165,28 +136,23 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	
 	img = new char[(*width)*(*height)*(*numcolors)*((*numbits)/8)];
 
-//printf("_loadPNG: png_read_update_info...\n");
 	png_read_update_info(png, pinfo);
 	
 	unsigned stride = png_get_rowbytes(png,pinfo);
 
-//printf("_loadPNG: allocate rows...\n");
 	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * (*height));
 	for(int y = 0; y < (*height); y++) {
 		row_pointers[y] = (png_byte*)malloc(stride);
 	}
 
-//printf("_loadPNG: png_read_image...\n");
 	png_read_image(png, row_pointers);
 
-//printf("_loadPNG: copy to img...\n");
 	char * dst = img;
 	for(int y = 0; y < (*height); y++) {
 		memcpy(dst, row_pointers[y], stride);
 		dst += stride;
 	}
 
-//printf("_loadPNG: free rows...\n");
 	for(int y = 0; y < (*height); y++) {
 		free(row_pointers[y]);
 	}
@@ -266,24 +232,22 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 		PNG_FILTER_TYPE_DEFAULT
 	);
 
-//printf("_writePNG: writing info...\n");
+	if (iccprofile) png_set_iCCP(png, pinfo, (png_charp) "", PNG_COMPRESSION_TYPE_BASE, iccprofile, iccprofilelength);
+
+
 	png_write_info(png, pinfo);
 	
 	png_bytep img = (png_bytep) imagedata;
 	unsigned stride = png_get_rowbytes(png,pinfo);
 
-//printf("_writePNG: row pointers...\n");
 	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
 	for(int y = 0; y < height; y++) {
 		row_pointers[y] = img;
 		img += stride;
 	}
 
-//printf("_writePNG: writing image...\n");
 	png_write_image(png, row_pointers);
-//printf("_writePNG: writing end of file...\n");
 	png_write_end(png, NULL);
-//printf("_writePNG: free pointers...\n");
 	free(row_pointers);
 
 	fclose(fp);
