@@ -128,11 +128,37 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	png_init_io(png, fp);
 
 	png_read_info(png, pinfo);
+	
+	//png_get_IHDR(png, pinfo, &width, &height, &bit_depth, &color_type, NULL, NULL, NULL);
+	png_get_IHDR(png, pinfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	*width      = png_get_image_width(png, pinfo);
   	*height     = png_get_image_height(png, pinfo);
 	*numcolors  = png_get_channels(png, pinfo);
 	*numbits    = png_get_bit_depth(png, pinfo);
+
+
+	if (png_get_valid(png, pinfo, PNG_INFO_iCCP))
+	{
+		unsigned ProfileLen;
+		png_bytep ProfileData;
+		int  Compression;
+		char *ProfileName;
+
+		png_get_iCCP(png, pinfo, &ProfileName,
+			&Compression,
+			&ProfileData,
+			&ProfileLen);
+			
+		*icc_m = new char[ProfileLen];
+		memcpy(*icc_m, ProfileData, ProfileLen);
+		*icclength = ProfileLen;
+	}
+	else {
+		*icc_m = NULL;
+		*icclength = 0;
+	}
+
 	
 	img = new char[(*width)*(*height)*(*numcolors)*((*numbits)/8)];
 
@@ -162,16 +188,13 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	
 	std::map<std::string,std::string> inf;
 	info = inf;
-
-	*icc_m = NULL;
-	*icclength = 0;
 	
 	png_destroy_read_struct(&png, &pinfo, NULL);
 	png=NULL;
 	pinfo=NULL;
 	
 	if (png && pinfo)
-	png_destroy_write_struct(&png, &pinfo);
+		png_destroy_write_struct(&png, &pinfo);
 
 	return img;
 
@@ -232,7 +255,9 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 		PNG_FILTER_TYPE_DEFAULT
 	);
 
-	if (iccprofile) png_set_iCCP(png, pinfo, (png_charp) "", PNG_COMPRESSION_TYPE_BASE, iccprofile, iccprofilelength);
+	if (iccprofile) 
+		//png_set_iCCP(png, pinfo, (png_charp) "", PNG_COMPRESSION_TYPE_BASE, iccprofile, iccprofilelength);
+		png_set_iCCP(png, pinfo, "Embedded Profile", 0, (png_const_bytep)iccprofile, iccprofilelength);
 
 
 	png_write_info(png, pinfo);
