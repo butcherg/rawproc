@@ -130,12 +130,19 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	png_read_info(png, pinfo);
 	
 	//png_get_IHDR(png, pinfo, &width, &height, &bit_depth, &color_type, NULL, NULL, NULL);
-	png_get_IHDR(png, pinfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+//	png_get_IHDR(png, pinfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	*width      = png_get_image_width(png, pinfo);
   	*height     = png_get_image_height(png, pinfo);
 	*numcolors  = png_get_channels(png, pinfo);
 	*numbits    = png_get_bit_depth(png, pinfo);
+
+	color_type = png_get_color_type(png, pinfo);
+
+	if (color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+       		png_set_strip_alpha(png);
+
+		
 
 
 	if (png_get_valid(png, pinfo, PNG_INFO_iCCP))
@@ -159,10 +166,15 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 		*icclength = 0;
 	}
 
+	png_read_update_info(png, pinfo);
+
+	*width      = png_get_image_width(png, pinfo);
+  	*height     = png_get_image_height(png, pinfo);
+	*numcolors  = png_get_channels(png, pinfo);
+	*numbits    = png_get_bit_depth(png, pinfo);
+
 	
 	img = new char[(*width)*(*height)*(*numcolors)*((*numbits)/8)];
-
-	png_read_update_info(png, pinfo);
 	
 	unsigned stride = png_get_rowbytes(png,pinfo);
 
