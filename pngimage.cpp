@@ -139,11 +139,13 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	color_type = png_get_color_type(png, pinfo);
 
-	if (color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+	if (color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
        		png_set_strip_alpha(png);
-
-		
-
+	}
+	else if (color_type != PNG_COLOR_TYPE_RGB) {
+		png_destroy_read_struct(&png, &pinfo, NULL);
+		return NULL;
+	}
 
 	if (png_get_valid(png, pinfo, PNG_INFO_iCCP))
 	{
@@ -201,12 +203,9 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	std::map<std::string,std::string> inf;
 	info = inf;
 	
-	png_destroy_read_struct(&png, &pinfo, NULL);
-	png=NULL;
-	pinfo=NULL;
-	
+
 	if (png && pinfo)
-		png_destroy_write_struct(&png, &pinfo);
+		png_destroy_read_struct(&png, &pinfo, NULL);
 
 	return img;
 
@@ -288,6 +287,9 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 	free(row_pointers);
 
 	fclose(fp);
+
+	if (png && pinfo)
+		png_destroy_write_struct(&png, &pinfo);
 	
 	return true;
 	
