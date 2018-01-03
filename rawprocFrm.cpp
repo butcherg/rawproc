@@ -575,6 +575,12 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 		}
+		if (fif == FILETYPE_PNG) {
+			//parm input.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)
+			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.png.parameters",""));
+			//parm input.png.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.png.cms.profile","")));
+		}
 
 		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
 
@@ -783,6 +789,9 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			if (fif == FILETYPE_TIFF) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 			}
+			if (fif == FILETYPE_PNG) {
+				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.png.cms.profile","")));
+			}
 
 			pic->BlankPic();
 			histogram->BlankPic();
@@ -905,9 +914,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif",wxFD_SAVE);  // |PNG files (*.png)|*.png
+		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);  // 
 	else
-		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif",wxFD_SAVE);  // |PNG files (*.png)|*.png
+		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);  // 
 
 	if ( !fname.empty() )
 	{
@@ -950,6 +959,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)
 			if (filetype == FILETYPE_TIFF) configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
 
+			//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Default=(none)
+			if (filetype == FILETYPE_PNG) configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
+
 
 			if (pic->GetColorManagement()) {
 
@@ -967,6 +979,12 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","")));
 					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual"));
+				}
+				else if (filetype == FILETYPE_PNG) {
+					//parm output.png.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.profile","")));
+					//parm output.png.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual"));
 				}
 				
 				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
