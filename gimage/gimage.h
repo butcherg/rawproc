@@ -29,7 +29,7 @@ struct histogramdata {
 };
 
 struct coord {
-	unsigned x, y;
+	int x, y;
 };
 
 enum BPP {
