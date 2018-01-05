@@ -1003,7 +1003,8 @@ void gImage::ApplyRotate90(int threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
 			unsigned spos = x + y*w;
-			unsigned dpos = (dw-y-1) + (dh-x-1)*dw;
+			//unsigned dpos = (dw-y-1) + (dh-x-1)*dw;
+			unsigned dpos = (dw-y-1) + x * dw;
 			image[dpos] = src[spos];
 		}
 	}
