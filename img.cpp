@@ -243,12 +243,12 @@ for (int f=0; f<files.size(); f++)
 	if (orientation != 0) {
 		printf("Normalizing image orientation from %d...",orientation);
 		_mark();
-		if (orientation == 2) dib.ApplyHorizontalMirror();
-		if (orientation == 3) dib.ApplyRotate180();
-		if (orientation == 4) dib.ApplyVerticalMirror();
-		if (orientation == 5) {dib.ApplyHorizontalMirror(); dib.ApplyRotate270();}
-		if (orientation == 6) dib.ApplyRotate90();
-		if (orientation == 7) {dib.ApplyHorizontalMirror(); dib.ApplyRotate90();}
+		if (orientation == 2) dib.ApplyHorizontalMirror(); 
+		if (orientation == 3) dib.ApplyRotate180(); 
+		if (orientation == 4) dib.ApplyVerticalMirror(); 
+		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
+		if (orientation == 6) {dib.ApplyRotate90(); }
+		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
 		if (orientation == 8) dib.ApplyRotate270();
 		dib.setInfo("Orientation","0");
 		printf("done. (%fsec)\n",_duration());
@@ -407,6 +407,17 @@ for (int f=0; f<files.size(); f++)
 				if (hstr) h = atoi(hstr);
 				unsigned dw = dib.getWidth();
 				unsigned dh = dib.getHeight();
+
+				//if only one number is provided, put it in the largest dimension, set the other to 0
+				if (hstr == NULL) {
+					if (dh > dw) {
+						h = w;
+						w = 0;
+					}
+					else {
+						h =0;
+					}
+				}
 
 				if (h ==  0) h = dh * ((float)w/(float)dw);
 				if (w == 0)  w = dw * ((float)h/(float)dh); 

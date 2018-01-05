@@ -945,9 +945,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (rotation == 2) dib->ApplyHorizontalMirror();
 				if (rotation == 3) dib->ApplyRotate180();
 				if (rotation == 4) dib->ApplyVerticalMirror();
-				if (rotation == 5) {dib->ApplyHorizontalMirror(); dib->ApplyRotate270();}
+				if (rotation == 5) {dib->ApplyRotate90(); dib->ApplyHorizontalMirror();}
 				if (rotation == 6) dib->ApplyRotate90();
-				if (rotation == 7) {dib->ApplyHorizontalMirror(); dib->ApplyRotate90();}
+				if (rotation == 7) {dib->ApplyRotate270(); dib->ApplyHorizontalMirror(); }
 				if (rotation == 8) dib->ApplyRotate270();
 				dib->setInfo("Orientation","0");
 			}
