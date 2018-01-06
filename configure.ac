@@ -62,9 +62,9 @@ fi
 
 m4_include(wxwin.m4)
 
-AM_OPTIONS_WXCONFIG
+WX_CONFIG_OPTIONS
 reqwx=3.1.0
-AM_PATH_WXCONFIG([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
+WX_CONFIG_CHECK([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
 if test "$wxWin" != 1; then
 	AC_MSG_ERROR([
 		wxWidgets must be installed on your system.
@@ -89,7 +89,7 @@ fi
 
 
 AC_ARG_WITH([localprefix],
-	AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of lib and include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
+	AS_HELP_STRING([--with-localprefix], [=PATH, specifies path to a non-standard location of usr/local/lib and usr/local/include directories.  The lib and include paths are prepended to LDFLAGS and CPPFLAGS, respectively.  Use this to make and use alternate combinations of the supporting libraries])
 )
 if test "$with_localprefix" != "" 
 then
@@ -112,6 +112,12 @@ then
 fi
 
 
+#libz:
+
+AC_CHECK_HEADERS(zlib.h, [], [AC_MSG_ERROR([include directory for zlib.h not found.])])
+AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for some image libraries.])])
+
+
 #libjpeg:
 
 
@@ -128,10 +134,7 @@ AC_ARG_WITH([jpeg-include],
 		fi
 	],
 	[
-		if test "$with_wxjpeg" != "yes"
-		then
-			AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
-		fi
+		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
 	]
 )
 
@@ -148,10 +151,7 @@ AC_ARG_WITH([jpeg-lib],
 		fi
 	],
 	[
-		if test "$with_wxjpeg" != "yes"
-		then
-			AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
-		fi
+		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
 	]
 )
 
@@ -170,10 +170,7 @@ AC_ARG_WITH([tiff-include],
 		fi
 	],
 	[
-		if test "$with_wxtiff" != "yes"
-		then
-			AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
-		fi
+		AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
 	]
 )
 
@@ -190,10 +187,7 @@ AC_ARG_WITH([tiff-lib],
 		fi
 	],
 	[
-		if test "$with_wxtiff" != "yes"
-		then
-			AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
-		fi
+		AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
 	]
 )
 
@@ -211,10 +205,7 @@ AC_ARG_WITH([png-include],
 		fi
 	],
 	[
-		if test "$with_wxpng" != "yes"
-		then
-			AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
-		fi
+		AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
 	]
 )
 
@@ -224,7 +215,6 @@ AC_ARG_WITH([png-lib],
 		echo "libpng: using $with_png_lib"
 		if test -f "$with_png_lib"
 		then
-			AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for libpng.])])
 			AC_CHECK_LIB(png, png_get_io_ptr, [AC_MSG_RESULT([$with_png_lib found.])], [AC_MSG_ERROR([A working libpng is required.])])
 			LIBS="$with_png_lib $LIBS"
 		else
@@ -232,11 +222,7 @@ AC_ARG_WITH([png-lib],
 		fi
 	],
 	[
-		if test "$with_wxpng" != "yes"
-		then
-			AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for libpng.])])
-			AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
-		fi
+		AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
 	]
 )
 

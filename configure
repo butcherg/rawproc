@@ -1362,10 +1362,10 @@ Optional Packages:
                           structure, default is float
 
   --with-localprefix      =PATH, specifies path to a non-standard location of
-                          lib and include directories. The lib and include
-                          paths are prepended to LDFLAGS and CPPFLAGS,
-                          respectively. Use this to make and use alternate
-                          combinations of the supporting libraries
+                          usr/local/lib and usr/local/include directories. The
+                          lib and include paths are prepended to LDFLAGS and
+                          CPPFLAGS, respectively. Use this to make and use
+                          alternate combinations of the supporting libraries
 
   --with-jpeg-include     =PATH, specifies path to non-standard location of
                           the libjpeg header (jpeglib.h).
@@ -3644,7 +3644,6 @@ fi
 
 reqwx=3.1.0
 
-
     if test x${WX_CONFIG_NAME+set} != xset ; then
      WX_CONFIG_NAME=wx-config
   fi
@@ -3907,7 +3906,6 @@ $as_echo "no (version $WX_VERSION is not new enough)" >&6; }
 
 
 
-
 if test "$wxWin" != 1; then
 	as_fn_error $? "
 		wxWidgets must be installed on your system.
@@ -3999,8 +3997,7 @@ fi
 fi
 
 
-#libjpeg:
-
+#libz:
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -4395,6 +4392,83 @@ fi
 done
 
 
+for ac_header in zlib.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_zlib_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ZLIB_H 1
+_ACEOF
+
+else
+  as_fn_error $? "include directory for zlib.h not found." "$LINENO" 5
+fi
+
+done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing inflateInit2_" >&5
+$as_echo_n "checking for library containing inflateInit2_... " >&6; }
+if ${ac_cv_search_inflateInit2_+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char inflateInit2_ ();
+int
+main ()
+{
+return inflateInit2_ ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' z; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_inflateInit2_=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_inflateInit2_+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_inflateInit2_+:} false; then :
+
+else
+  ac_cv_search_inflateInit2_=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_inflateInit2_" >&5
+$as_echo "$ac_cv_search_inflateInit2_" >&6; }
+ac_res=$ac_cv_search_inflateInit2_
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working libz is required for some image libraries." "$LINENO" 5
+fi
+
+
+
+#libjpeg:
+
+
 
 # Check whether --with-jpeg-include was given.
 if test "${with_jpeg_include+set}" = set; then :
@@ -4410,9 +4484,7 @@ if test "${with_jpeg_include+set}" = set; then :
 
 else
 
-		if test "$with_wxjpeg" != "yes"
-		then
-			for ac_header in jpeglib.h
+		for ac_header in jpeglib.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
 if test "x$ac_cv_header_jpeglib_h" = xyes; then :
@@ -4426,7 +4498,6 @@ fi
 
 done
 
-		fi
 
 
 fi
@@ -4489,9 +4560,7 @@ fi
 
 else
 
-		if test "$with_wxjpeg" != "yes"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
 $as_echo_n "checking for library containing jpeg_set_defaults... " >&6; }
 if ${ac_cv_search_jpeg_set_defaults+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4549,7 +4618,6 @@ else
   as_fn_error $? "A working libjpeg is required." "$LINENO" 5
 fi
 
-		fi
 
 
 fi
@@ -4572,9 +4640,7 @@ if test "${with_tiff_include+set}" = set; then :
 
 else
 
-		if test "$with_wxtiff" != "yes"
-		then
-			for ac_header in tiffio.h
+		for ac_header in tiffio.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "tiffio.h" "ac_cv_header_tiffio_h" "$ac_includes_default"
 if test "x$ac_cv_header_tiffio_h" = xyes; then :
@@ -4588,7 +4654,6 @@ fi
 
 done
 
-		fi
 
 
 fi
@@ -4651,9 +4716,7 @@ fi
 
 else
 
-		if test "$with_wxtiff" != "yes"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
 $as_echo_n "checking for library containing TIFFSetErrorHandler... " >&6; }
 if ${ac_cv_search_TIFFSetErrorHandler+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4711,7 +4774,6 @@ else
   as_fn_error $? "A working libtiff is required." "$LINENO" 5
 fi
 
-		fi
 
 
 fi
@@ -4733,9 +4795,7 @@ if test "${with_png_include+set}" = set; then :
 
 else
 
-		if test "$with_wxpng" != "yes"
-		then
-			for ac_header in png.h
+		for ac_header in png.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
 if test "x$ac_cv_header_png_h" = xyes; then :
@@ -4749,7 +4809,6 @@ fi
 
 done
 
-		fi
 
 
 fi
@@ -4762,64 +4821,6 @@ if test "${with_png_lib+set}" = set; then :
 		echo "libpng: using $with_png_lib"
 		if test -f "$with_png_lib"
 		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing inflateInit2_" >&5
-$as_echo_n "checking for library containing inflateInit2_... " >&6; }
-if ${ac_cv_search_inflateInit2_+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inflateInit2_ ();
-int
-main ()
-{
-return inflateInit2_ ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_inflateInit2_=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_inflateInit2_+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_inflateInit2_+:} false; then :
-
-else
-  ac_cv_search_inflateInit2_=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_inflateInit2_" >&5
-$as_echo "$ac_cv_search_inflateInit2_" >&6; }
-ac_res=$ac_cv_search_inflateInit2_
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working libz is required for libpng." "$LINENO" 5
-fi
-
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_get_io_ptr in -lpng" >&5
 $as_echo_n "checking for png_get_io_ptr in -lpng... " >&6; }
 if ${ac_cv_lib_png_png_get_io_ptr+:} false; then :
@@ -4870,67 +4871,7 @@ fi
 
 else
 
-		if test "$with_wxpng" != "yes"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing inflateInit2_" >&5
-$as_echo_n "checking for library containing inflateInit2_... " >&6; }
-if ${ac_cv_search_inflateInit2_+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inflateInit2_ ();
-int
-main ()
-{
-return inflateInit2_ ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_inflateInit2_=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_inflateInit2_+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_inflateInit2_+:} false; then :
-
-else
-  ac_cv_search_inflateInit2_=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_inflateInit2_" >&5
-$as_echo "$ac_cv_search_inflateInit2_" >&6; }
-ac_res=$ac_cv_search_inflateInit2_
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working libz is required for libpng." "$LINENO" 5
-fi
-
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing png_get_io_ptr" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing png_get_io_ptr" >&5
 $as_echo_n "checking for library containing png_get_io_ptr... " >&6; }
 if ${ac_cv_search_png_get_io_ptr+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4988,7 +4929,6 @@ else
   as_fn_error $? "A working libpng is required." "$LINENO" 5
 fi
 
-		fi
 
 
 fi
