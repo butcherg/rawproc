@@ -1,0 +1,3 @@
+rawproc is a desktop program.  Usage instructions can be found in the About->Help menu entry.  rawproc can also be run from the command line.  If a desktop icon is created at startup, images can be dragged from File Explorer to it to open them in rawproc.
+
+img is a command-line program that implements a subset of the rawproc tools.  Usage instruction can be found by running img in a shell window without any parameters, e.g., "c:\img".  In order to run img from any shell window, you need to select "Add application directory to your environmental path..." during setup.

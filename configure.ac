@@ -105,10 +105,22 @@ if test "$mingw_cv_win32_host" == "yes"
 then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
-	#APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
-	#APP_LDFLAGS="$APP_LDFLAGS -static"
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
 	LDFLAGS="$LDFLAGS -static"
+	INNO_SRCDIR="$srcdir"
+	if test "$host_alias" == "x86_64-w64-mingw32"
+	then
+		INNO_SUFFIX="w64"
+		INNO_PF="{pf64}"
+		INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
+		INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
+	fi
+	if test "$host_alias" == "i686-w64-mingw32"
+	then
+		INNO_SUFFIX="w32"
+		INNO_PF="{pf32}"
+		INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
+	fi
 fi
 
 
@@ -325,5 +337,11 @@ AC_SUBST(CPPFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(CFLAGS)
 
+AC_SUBST(INNO_SRCDIR)
+AC_SUBST(INNO_ARCHITECURESALLOWED)
+AC_SUBST(INNO_ARCHITECTURESINSTALLEDIN64BITMODE)
+AC_SUBST(INNO_PF)
+AC_SUBST(INNO_SUFFIX)
 
-AC_OUTPUT(Makefile)
+
+AC_OUTPUT(Makefile winbuild/rawproc.iss)

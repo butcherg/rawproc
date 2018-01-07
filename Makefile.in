@@ -17,6 +17,7 @@ WX_LIBS=@WX_LIBS@
 BUILDDATE=-DBUILDDATE='"$(shell date)"'
 
 EXT=@EXEEXT@
+VERSION=$(shell grep 'wxString version' ../rawprocFrm.cpp |sed 's/wxString version = //' | sed 's/"//g' |sed 's/;//')
 
 srcdir=@srcdir@
 VPATH=@srcdir@
@@ -184,6 +185,12 @@ clean:
 .PHONY: cleandoc
 cleandoc:
 	rm -f rawprocdoc.zip
+
+.PHONY: wininstaller
+wininstaller:
+	echo $(VERSION)
+	$(srcdir)/winbuild/inno.sh rawproc-@INNO_SUFFIX@-$(VERSION)-install ./rawproc.iss
+
 
 print-%  : ; @echo $* = $($*)
 

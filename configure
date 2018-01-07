@@ -620,6 +620,11 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+INNO_SUFFIX
+INNO_PF
+INNO_ARCHITECTURESINSTALLEDIN64BITMODE
+INNO_ARCHITECURESALLOWED
+INNO_SRCDIR
 EGREP
 GREP
 CXXCPP
@@ -3990,10 +3995,22 @@ _ACEOF
 
 fi
 
-	#APP_CXXFLAGS="$APP_CXXFLAGS -DLIBRAW_NODLL"
-	#APP_LDFLAGS="$APP_LDFLAGS -static"
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
 	LDFLAGS="$LDFLAGS -static"
+	INNO_SRCDIR="$srcdir"
+	if test "$host_alias" == "x86_64-w64-mingw32"
+	then
+		INNO_SUFFIX="w64"
+		INNO_PF="{pf64}"
+		INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
+		INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
+	fi
+	if test "$host_alias" == "i686-w64-mingw32"
+	then
+		INNO_SUFFIX="w32"
+		INNO_PF="{pf32}"
+		INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
+	fi
 fi
 
 
@@ -5377,7 +5394,13 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile"
+
+
+
+
+
+
+ac_config_files="$ac_config_files Makefile rawproc.iss"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6085,6 +6108,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "rawproc.iss") CONFIG_FILES="$CONFIG_FILES rawproc.iss" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
