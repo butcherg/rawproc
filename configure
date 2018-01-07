@@ -625,6 +625,7 @@ INNO_PF
 INNO_ARCHITECTURESINSTALLEDIN64BITMODE
 INNO_ARCHITECURESALLOWED
 INNO_SRCDIR
+RAWPROCVERSION
 EGREP
 GREP
 CXXCPP
@@ -2406,6 +2407,8 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+
+RAWPROCVERSION=`grep 'wxString version' ../rawprocFrm.cpp |sed 's/wxString version = //' | sed 's/"//g' |sed 's/;//'`
 
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
@@ -5380,6 +5383,7 @@ _ACEOF
 
 fi
 done
+
 
 
 

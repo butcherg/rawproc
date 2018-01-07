@@ -1,6 +1,8 @@
 AC_PREREQ([2.68])
 AC_INIT(rawproc, 0.6.2)
 
+RAWPROCVERSION=`grep 'wxString version' ../rawprocFrm.cpp |sed 's/wxString version = //' | sed 's/"//g' |sed 's/;//'`
+
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
 # Check if the runtime platform is a native Win32 host.
@@ -326,6 +328,7 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([clock_gettime floor pow sqrt])
 
+AC_SUBST(RAWPROCVERSION)
 
 AC_SUBST(WX_CPPFLAGS)
 AC_SUBST(WX_CXXFLAGS_ONLY)
@@ -344,4 +347,4 @@ AC_SUBST(INNO_PF)
 AC_SUBST(INNO_SUFFIX)
 
 
-AC_OUTPUT(Makefile winbuild/rawproc.iss)
+AC_OUTPUT(Makefile rawproc.iss)

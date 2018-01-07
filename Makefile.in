@@ -189,7 +189,7 @@ cleandoc:
 .PHONY: wininstaller
 wininstaller:
 	echo $(VERSION)
-	$(srcdir)/winbuild/inno.sh rawproc-@INNO_SUFFIX@-$(VERSION)-install ./rawproc.iss
+	$(srcdir)/inno.sh rawproc-@INNO_SUFFIX@-$(VERSION)-install ./rawproc.iss
 
 
 print-%  : ; @echo $* = $($*)
