@@ -188,8 +188,11 @@ cleandoc:
 
 .PHONY: wininstaller
 wininstaller:
-	echo $(VERSION)
 	$(srcdir)/inno.sh rawproc-@INNO_SUFFIX@-$(VERSION)-install ./rawproc.iss
+
+.PHONY: zip
+zip:
+	zip "rawproc-@INNO_SUFFIX@-$(VERSION).zip" img.exe ../rawproc.conf rawprocdoc.zip rawproc.exe
 
 
 print-%  : ; @echo $* = $($*)
