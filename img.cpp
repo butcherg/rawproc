@@ -282,7 +282,7 @@ for (int f=0; f<files.size(); f++)
 
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
 			double blk=0.0, wht=255.0;
-			double blkthresh= 0.05, whtthresh=0.05;
+			double blkthresh= 0.001, whtthresh=0.001;
 			int blklimit = 32, whtlimit = 32;
 			char *b = strtok(NULL,",");
 			char *w = strtok(NULL,", ");
