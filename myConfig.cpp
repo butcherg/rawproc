@@ -23,6 +23,15 @@ std::vector<std::string> split(std::string strg, char c = ' ')
 	return result;
 }
 
+std::vector<std::string> bifurcate(std::string strg, char c = ' ')
+{
+	std::vector<std::string> result;
+	std::size_t eq = strg.find_first_of(c);
+	result.push_back(strg.substr(0,eq));
+	result.push_back(strg.substr(eq+1));
+	return result;
+}
+
 myConfig::myConfig(std::string conffile)
 {
 	std::vector<std::string> parameter;
@@ -44,7 +53,8 @@ myConfig::myConfig(std::string conffile)
 		}
 
 		if (str.find_first_of("#") != std::string::npos) {
-			parameter = split(str,'#');
+			//parameter = split(str,'#');
+			parameter = bifurcate(str,'#');
 			parm = parameter[0];
 		}
 		else
@@ -52,11 +62,14 @@ myConfig::myConfig(std::string conffile)
 
 
 		if (str.find_first_of("=") != std::string::npos) {
-			nameval = split(parm, '=');
-			if (section == "default")
-				defaultconfig[nameval[0]] = nameval[1];
-			else
-				sectionconfig[section][nameval[0]] = nameval[1];
+			//nameval = split(parm, '=');
+			nameval = bifurcate(parm, '=');
+			if (nameval[0] != "") {
+				if (section == "default")
+					defaultconfig[nameval[0]] = nameval[1];
+				else
+					sectionconfig[section][nameval[0]] = nameval[1];
+			}
 		}
 	}
 	file.close();

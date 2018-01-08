@@ -1229,9 +1229,13 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		diag = new PropertyDialog(this, wxID_ANY, "Properties", myConfig::getConfig().getDefault());
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}
-	diag->ClearModifiedStatus();
-	diag->Show();
-
+	if (diag) {
+		diag->ClearModifiedStatus();
+		diag->Show();
+	}
+	else {
+		wxMessageBox("Failed to create Properties dialog");
+	}
 }
 
 void rawprocFrm::MnuEXIF(wxCommandEvent& event)
