@@ -280,10 +280,13 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 		}
 
+
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
 			double blk=0.0, wht=255.0;
-			double blkthresh= 0.001, whtthresh=0.001;
-			int blklimit = 32, whtlimit = 32;
+			double blkthresh= 0.001, whtthresh=0.005;
+			int blklimit = 32, whtlimit = 32; 
+			long hmax = 0;
+			int maxpos;
 			char *b = strtok(NULL,",");
 			char *w = strtok(NULL,", ");
 			wht = 255; blk = 0;
@@ -293,40 +296,28 @@ for (int f=0; f<files.size(); f++)
 				long hmax=0;
 				long htotal = 0;
 				
-				for (i=0; i<256; i++) htotal += hdata[i];
+				for (i=0; i<256; i++) {
+					htotal += hdata[i];
+					if (hmax < hdata[i]) {
+						maxpos = i;
+						hmax = hdata[i];
+					}
+				}
 
 				//find black threshold:
 				long hblack = 0;
-				for (i=1; i<blklimit; i++) {
-					hblack += hdata[i];
-					if ((double) hblack / (double) htotal > blkthresh) break;
-				}
+				for (i=maxpos; i>0; i--) 
+					if ((double) hdata[i] / (double) hmax < blkthresh) break;
 				blk = (double) i;
 
 
 				//find white threshold:
 				long hwhite = 0;
-				for (i=255; i>whtlimit; i--) {
-					hwhite += hdata[i];
-					if ((double) hwhite / (double) htotal > whtthresh) break;
-				}
+				for (i=maxpos; i<255; i++) 
+					if ((double) hdata[i] / (double) hmax < whtthresh) break;
 				wht = (double) i;
 				
-/*
-				for (i=0; i<256; i++) if (hdata[i] > hmax) hmax = hdata[i];
-				
-				//find the lower threshold, the black point
-				for (i=1; i<128; i++) if ((double)hdata[i]/(double)hmax > 0.05) break;
-				blk = (double) i;
-				
-				//find the local max in 250-255:
-				int m = 0, l=255;
-				for (i=255; i>=250; i--) if (hdata[i]>m) {m = hdata[i]; l = i;}
 
-				//start looking for the white point threshold right after the location of the local max:
-				for (i=l-1; i>=128; i--) if ((double)hdata[i]/(double)hmax > 0.05) break;
-				wht = (double) i;
-*/
 			}
 			else {
 				if (w) wht = atof(w);
@@ -641,6 +632,28 @@ for (int f=0; f<files.size(); f++)
 		printf("\n");
 		exit(0);
 	}
+
+	else if (strcmp(outfilename,"histogram") == 0) {
+		std::vector<long> h = dib.Histogram();
+		printf("%ld",h[0]);
+		for (int i = 1; i < h.size(); i++)
+			printf(",%ld",h[i]);
+		printf("\n");
+		exit(0);
+	}
+
+	else if (strcmp(outfilename,"cdf") == 0) {
+		long prev = 0;
+		std::vector<long> h = dib.Histogram();
+		printf("%ld",h[0]);
+		for (int i = 1; i < h.size(); i++) {
+			prev += h[i];
+			printf(",%ld",prev);
+		}
+		printf("\n");
+		exit(0);
+	}
+
 
 	dib.deleteProfile();  //NOT color managed...
 
