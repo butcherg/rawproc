@@ -135,6 +135,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	if (command == "") {
 		std::vector<long> hdata = dib->Histogram();
 		long hmax=0;
+		int maxpos;
 		long htotal = 0;
 		
 		//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
@@ -144,23 +145,24 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		//parm tool.blackwhitepoint.whiteinitialvalue: The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255
 		long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 
-		for (i=0; i<256; i++) htotal += hdata[i];
-
-		//find black threshold:
+		for (i=0; i<256; i++) {
+			htotal += hdata[i];
+			if (hmax < hdata[i]) {
+				maxpos = i;
+				hmax = hdata[i];
+			}
+		}
+		
+		//find black threshold
 		long hblack = 0;
-		for (i=1; i<blklimit; i++) {
-			hblack += hdata[i];
-			if ((double) hblack / (double) htotal > blkthresh) break;
-		}
+		for (i = maxpos; i >0; i--) 
+			if ((double) hdata[i] /(double) hmax < blkthresh) break;
 		blk = (double) i;
-
-
-		//find white threshold:
+		
+		//find white threshold
 		long hwhite = 0;
-		for (i=255; i>whtlimit; i--) {
-			hwhite += hdata[i];
-			if ((double) hwhite / (double) htotal > whtthresh) break;
-		}
+		for (i = maxpos; i<255; i++) 
+			if ((double) hdata[i] /(double) hmax < whtthresh) break;
 		wht = (double) i;
 		
 		setParams(wxString::Format("%d,%d",(unsigned) blk, (unsigned) wht));
