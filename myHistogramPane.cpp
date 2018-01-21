@@ -21,6 +21,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
+	display_channels = CHANNEL_RGB;
 		
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
@@ -56,6 +57,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	hmax = 0;
 	hscale = 0;
 	ord = 1;
+	display_channels = CHANNEL_RGB;
 
 	//not needed, for now; renders 'c' key command inop
 	//smalldata = dib.Histogram();
@@ -172,6 +174,12 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	
 }
 
+void myHistogramPane::SetChannel(GIMAGE_CHANNEL channel)
+{
+	display_channels = channel;
+	Refresh();
+}
+
  
 void myHistogramPane::render(wxDC&  dc)
 {
@@ -195,23 +203,29 @@ void myHistogramPane::render(wxDC&  dc)
 	for (unsigned i=0; i<3; i++) {
 		if (order == 1) {
 			if (r) {
-				dc.SetPen(wxPen(wxColour(255,0,0),1));
-				dc.DrawLines(rlen,r,0,0);
-				if (i==2) frontcolor = r;
+				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_RED)) {
+					dc.SetPen(wxPen(wxColour(255,0,0),1));
+					dc.DrawLines(rlen,r,0,0);
+					if (i==2) frontcolor = r;
+				}
 			}
 		}
 		if (order == 2) {
 			if (g) {
-				dc.SetPen(wxPen(wxColour(0,255,0),1));
-				dc.DrawLines(glen,g,0,0);
-				if (i==2) frontcolor = g;
+				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_GREEN)) {
+					dc.SetPen(wxPen(wxColour(0,255,0),1));
+					dc.DrawLines(glen,g,0,0);
+					if (i==2) frontcolor = g;
+				}
 			}
 		}
 		if (order == 3) {
 			if (b) {
-				dc.SetPen(wxPen(wxColour(0,0,255),1));
-				dc.DrawLines(blen,b,0,0);
-				if (i==2) frontcolor = b;
+				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_BLUE)) {
+					dc.SetPen(wxPen(wxColour(0,0,255),1));
+					dc.DrawLines(blen,b,0,0);
+					if (i==2) frontcolor = b;
+				}
 			}
 		}
 		order++;

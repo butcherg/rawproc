@@ -27,6 +27,7 @@ public:
 	void paintNow();
 	
 	void SetPic(gImage &dib, unsigned scale=256);
+	void SetChannel(GIMAGE_CHANNEL channel);
 	void BlankPic();
  
 	void render(wxDC& dc);
@@ -48,6 +49,8 @@ private:
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
+
+	GIMAGE_CHANNEL display_channels;
 	
 	bool inwindow;
 	

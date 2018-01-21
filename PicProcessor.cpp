@@ -32,10 +32,11 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 	dcList = "";
+	channel = CHANNEL_RGB;
 
 	dib = startpic;
 	m_tree->DeleteAllItems();
-	wxTreeItemId id = m_tree->AddRoot(name, -1, -1, this);
+	id = m_tree->AddRoot(name, -1, -1, this);
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
 
@@ -50,10 +51,10 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	c = command;
 	n = name;
 	dcList = "";
+	channel = CHANNEL_RGB;
 
 	dib = new gImage(getSelectedPicProcessor(m_tree)->getProcessedPic());
 
-	wxTreeItemId id;
 	if (m_tree->IsSelected(m_tree->GetRootItem())) 
 		id = m_tree->PrependItem(m_tree->GetRootItem(), name, -1, -1, this);
 	else 
@@ -202,6 +203,11 @@ wxTreeCtrl *PicProcessor::getCommandTree()
 wxString PicProcessor::getDrawList()
 {
 	return dcList;
+}
+
+GIMAGE_CHANNEL PicProcessor::getChannel()
+{
+	return channel;
 }
 
 void PicProcessor::displayProcessedPic() 

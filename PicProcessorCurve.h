@@ -15,11 +15,12 @@ class PicProcessorCurve: public PicProcessor
 		void setChannel(wxString chan);
 		void setParams(std::vector<cp> ctpts, wxString params);
 		bool processPic(bool processnext=true);
+		void displayProcessedPic();
 
 	private:
 		std::vector<cp> ctrlpts;
 		//wxString channel;
-		GIMAGE_CHANNEL channel;
+		//GIMAGE_CHANNEL channel;
 };
 
 #endif

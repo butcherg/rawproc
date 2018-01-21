@@ -1027,7 +1027,7 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 	if (displayitem.IsOk()) commandtree->SetItemState(displayitem,0);
 	commandtree->SetItemState(item,1);
 	displayitem = item;
-	pic->SetPic( ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer() );
+	pic->SetPic( ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer(), ((PicProcessor *) commandtree->GetItemData(item))->getChannel() );
 	pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
 }
 
@@ -1044,6 +1044,7 @@ bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
 
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
+	SetStatusText("");
 	wxTreeItemId item = event.GetItem();
 	wxTreeItemId prev = displayitem;
 	CommandTreeSetDisplay(item);

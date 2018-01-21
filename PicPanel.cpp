@@ -108,7 +108,7 @@ END_EVENT_TABLE()
 		
 	}
 
-	void PicPanel::SetPic(gImage * dib)
+	void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	{
 		cmsHPROFILE hDisplayProfile;
 
@@ -247,7 +247,9 @@ END_EVENT_TABLE()
 
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
+		
 		histogram->SetPic(*dib, scale);
+		histogram->SetChannel(channel);
 
 		if (thumb) thumb->~wxBitmap();
 		thumb = new wxBitmap(thumbimg);

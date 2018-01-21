@@ -110,6 +110,7 @@ void PicProcessorCurve::setChannel(wxString chan)
 	if (chan == "red")   channel = CHANNEL_RED;
 	if (chan == "green") channel = CHANNEL_GREEN;
 	if (chan == "blue")  channel = CHANNEL_BLUE;
+	m_tree->SetItemText(id, wxString::Format("curve:%s",chan));
 }
 
 void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
@@ -144,6 +145,14 @@ bool PicProcessorCurve::processPic(bool processnext) {
 	if (processnext) processNext();
 
 	return result;
+}
+
+void PicProcessorCurve::displayProcessedPic() 
+{
+	if (m_display) {
+		m_display->SetPic(dib, channel);
+		m_display->SetDrawList(dcList);
+	}
 }
 
 

@@ -44,6 +44,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		PicPanel *getDisplay();
 		wxString getDrawList();
 		wxTreeCtrl *getCommandTree();
+		GIMAGE_CHANNEL getChannel();
 		//void setDirty();
 		//bool isDirty();
 		virtual void displayProcessedPic();
@@ -58,6 +59,9 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		
 		wxTreeCtrl *m_tree;
 		wxString n, c;
+		wxTreeItemId id;
+
+		GIMAGE_CHANNEL channel;
 
 		PicProcPanel *r, *toolpanel;
 
