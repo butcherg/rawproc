@@ -76,6 +76,15 @@ std::string string_format(const std::string fmt, ...)
     return str;
 }
 
+std::string nexttoken(std::string &strng, std::string delims)
+{
+	int pos = strng.find_first_of(delims);
+	std::string token = strng.substr(0,pos);
+	strng.erase(0,pos);
+	while (strng.find_first_of(delims) == 0) strng.erase(0,1);
+	return token;
+}
+
 
 
 
