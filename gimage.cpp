@@ -2419,6 +2419,80 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 	return imgdata;
 }
 
+
+#define USE_DCRAW
+#ifdef USE_DCRAW
+
+gImage gImage::loadRAW(const char * filename, std::string params)
+{
+	std::map<std::string,std::string> p = parseparams(params);  //, ",");
+	char magic[20];
+	size_t result;
+	unsigned char * image;
+	unsigned maxval;
+	unsigned width, height, bpp, colors, icclength;
+	BPP bits;
+	std::map<std::string,std::string> imgdata;
+	colors = 3;
+	//std::string cmd = "c:\\Users\\butchergg\\bin\\dcraw -c  ";
+	std::string cmd = "dcraw -c ";
+	if (p.find("dcrawparams") != p.end()) 
+		cmd.append(p["dcrawparams"]); 
+	//if (p["bps"] == "16") cmd.append("-6 ");
+	cmd.append(" ");
+	cmd.append(filename);
+#ifdef WIN32
+	FILE* pipe = popen(cmd.c_str(), "rb");
+#else
+	FILE* pipe = popen(cmd.c_str(), "r");
+#endif
+	if (!pipe) return gImage();
+	result = fscanf(pipe, "%s", magic);
+	result = fscanf(pipe, "%d", &width);
+	result = fscanf(pipe, "%d", &height);
+	result = fscanf(pipe, "%d", &maxval);
+	fgetc(pipe);
+	if (maxval < 256) { 
+		bits = BPP_8;
+		image = new unsigned char[width*height*3];
+		result = fread(image, 1, width*height*3, pipe);
+	}
+	else {
+		bits = BPP_16;
+		image = new unsigned char[width*height*3*2];
+		result = fread(image, 2, width*height*3, pipe);
+		unsigned short * img = (unsigned short *) image;
+		for (int i=0; i< (width*height*3); i++) img[i] = ((img[i] & 0x00ff)<<8)|((img[i] & 0xff00)>>8);
+	}
+	pclose(pipe);
+
+	unsigned char * iccprofile = NULL;
+	icclength = 0;
+	if (p.find("cameraprofile") != p.end()) {
+		if (p["cameraprofile"] != "") {
+			FILE * pf = fopen((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "rb");
+			if (pf) {
+				if (fseek(pf, 0, SEEK_END) == 0) {
+					icclength = ftell(pf);
+					if (icclength == -1) printf("file length error... ");
+					fseek(pf, 0L, SEEK_SET);
+					iccprofile = new unsigned char[icclength];
+					result = fread(iccprofile, 1, icclength, pf);
+					if (!cmsOpenProfileFromMem(iccprofile, icclength)) printf("profile is invalid... ");
+				}
+				fclose(pf);
+			}
+		}
+	}
+
+	gImage I((char* ) image, width, height, colors, bits, imgdata, (char *) iccprofile, icclength);
+	delete [] image;
+	if (icclength && iccprofile) delete [] iccprofile;
+	return I;
+}
+
+#else
+
 gImage gImage::loadRAW(const char * filename, std::string params)
 {
 	unsigned width, height, bpp, colors, icclength;
@@ -2441,6 +2515,8 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	return I;
 
 }
+
+#endif //USE_DCRAW
 
 gImage gImage::loadJPEG(const char * filename, std::string params)
 {
