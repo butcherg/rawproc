@@ -1,3 +1,5 @@
+#ifndef USE_DCRAW
+
 #ifndef _rawimage_h
 #define _rawimage_h
 
@@ -24,6 +26,8 @@ char * _loadRAW(const char *filename,
 			std::string params="",
 			char ** icc_m=NULL, 
 			unsigned  *icclength=0);
+
+#endif
 
 #endif
 
