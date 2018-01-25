@@ -17,6 +17,24 @@ std::string tostr(double t)
    return os.str(); 
 } 
 
+std::string underscore(std::string str)
+{
+	std::string s = str;
+	for (int i=0; i<s.size(); i++)
+		if (s[i] == ' ') s[i] = '_';
+	return s;
+}
+
+std::string de_underscore(std::string str)
+{
+	std::string s = str;
+	for (int i=0; i<s.size(); i++)
+		if (s[i] == '_') s[i] = ' ';
+	return s;
+}
+
+	
+
 
 
 std::vector<std::string> split(std::string s, std::string delim)

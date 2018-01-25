@@ -1,3 +1,6 @@
+#ifndef USE_DCRAW
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -700,5 +703,7 @@ char * _loadRAW(const char *filename,
 	return img;
 
 }
+
+#endif
 
 

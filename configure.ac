@@ -59,6 +59,15 @@ else
 	CXXFLAGS="$CXXFLAGS -O2"
 fi
 
+AC_ARG_ENABLE([dcraw],
+        AS_HELP_STRING([--enable-dcraw], [enables use of a dcraw executable for raw file input, in lieu of LibRaw. dcraw mus be in a directory listed in PATH, or an absolute path specified with input.raw.dcraw.programpath])
+)
+if test "$enable_dcraw" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -DUSE_DCRAW"
+fi
+
+
 
 # Checks for libraries.
 
@@ -278,39 +287,42 @@ AC_ARG_WITH([lcms2-lib],
 
 
 #libraw:
-AC_ARG_WITH([libraw-include],
-	AS_HELP_STRING([--with-libraw-include], [=PATH, specifies path to non-standard location of the LibRaw header (libraw/libraw.h).]),
-	[
-	echo "libraw: using $with_libraw_include"
-		if test -f "$with_libraw_include/libraw/libraw.h"
-		then
-			#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
-		else
-			AC_MSG_ERROR([libraw/libraw.h not found in $with_libraw_include.]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
-	]
-)
+if test "$enable_dcraw" != "yes"
+then
+	AC_ARG_WITH([libraw-include],
+		AS_HELP_STRING([--with-libraw-include], [=PATH, specifies path to non-standard location of the LibRaw header (libraw/libraw.h).]),
+		[
+		echo "libraw: using $with_libraw_include"
+			if test -f "$with_libraw_include/libraw/libraw.h"
+			then
+				#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+				CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
+			else
+				AC_MSG_ERROR([libraw/libraw.h not found in $with_libraw_include.]) 
+			fi
+		],
+		[
+			AC_CHECK_HEADERS(libraw/libraw.h, [], [AC_MSG_ERROR([libraw.h not found])])
+		]
+	)
 
-AC_ARG_WITH([libraw-lib],
-	AS_HELP_STRING([--with-libraw-lib], [=PATH, specifies location of the LibRaw library (libraw.a).]),
-	[
-	echo "libraw: using $with_libraw_lib"
-		if test -f $with_libraw_lib 
-		then
-			AC_CHECK_LIB(raw, libraw_init, [AC_MSG_RESULT([$with_libraw_lib found.])], [AC_MSG_ERROR([A working libraw is required.])])
-			LIBS="$with_libraw_lib $LIBS"
-		else
-			AC_MSG_ERROR([$with_libraw_lib not found.]) 
-		fi
-	],
-	[
-		AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
-	]
-)
+	AC_ARG_WITH([libraw-lib],
+		AS_HELP_STRING([--with-libraw-lib], [=PATH, specifies location of the LibRaw library (libraw.a).]),
+		[
+		echo "libraw: using $with_libraw_lib"
+			if test -f $with_libraw_lib 
+			then
+				AC_CHECK_LIB(raw, libraw_init, [AC_MSG_RESULT([$with_libraw_lib found.])], [AC_MSG_ERROR([A working libraw is required.])])
+				LIBS="$with_libraw_lib $LIBS"
+			else
+				AC_MSG_ERROR([$with_libraw_lib not found.]) 
+			fi
+		],
+		[
+			AC_SEARCH_LIBS(libraw_init,raw, [], [AC_MSG_ERROR([A working libraw is required])])
+		]
+	)
+fi
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])

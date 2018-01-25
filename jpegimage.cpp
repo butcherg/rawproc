@@ -446,6 +446,7 @@ bool _writeJPEG(const char *filename,
 
 	jpeg_set_defaults(&cinfo);
 
+	//$ quality=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent. 
 	if (p.find("quality") != p.end()) 
 		jpeg_set_quality(&cinfo, atoi(p["quality"].c_str()), TRUE);
 

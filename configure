@@ -698,6 +698,7 @@ enable_option_checking
 enable_openmp
 enable_debug
 enable_optimization
+enable_dcraw
 with_wxdir
 with_wx_config
 with_wx_prefix
@@ -1354,6 +1355,11 @@ Optional Features:
                           debug switch
 
   --enable-optimization   enables -O4 optimization, default is -O2
+
+  --enable-dcraw          enables use of a dcraw executable for raw file
+                          input, in lieu of LibRaw. dcraw mus be in a
+                          directory listed in PATH, or an absolute path
+                          specified with input.raw.dcraw.
 
 
 Optional Packages:
@@ -3566,6 +3572,17 @@ else
 	CXXFLAGS="$CXXFLAGS -O2"
 fi
 
+# Check whether --enable-dcraw was given.
+if test "${enable_dcraw+set}" = set; then :
+  enableval=$enable_dcraw;
+fi
+
+if test "$enable_dcraw" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -DUSE_DCRAW"
+fi
+
+
 
 # Checks for libraries.
 
@@ -5112,22 +5129,24 @@ fi
 
 
 #libraw:
+if test "$enable_dcraw" != "yes"
+then
 
 # Check whether --with-libraw-include was given.
 if test "${with_libraw_include+set}" = set; then :
   withval=$with_libraw_include;
-	echo "libraw: using $with_libraw_include"
-		if test -f "$with_libraw_include/libraw/libraw.h"
-		then
-			#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
-		else
-			as_fn_error $? "libraw/libraw.h not found in $with_libraw_include." "$LINENO" 5
-		fi
+		echo "libraw: using $with_libraw_include"
+			if test -f "$with_libraw_include/libraw/libraw.h"
+			then
+				#APP_CPPFLAGS="-I$with_libraw_include $APP_CPPFLAGS"
+				CPPFLAGS="-I$with_libraw_include $CPPFLAGS"
+			else
+				as_fn_error $? "libraw/libraw.h not found in $with_libraw_include." "$LINENO" 5
+			fi
 
 else
 
-		for ac_header in libraw/libraw.h
+			for ac_header in libraw/libraw.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "libraw/libraw.h" "ac_cv_header_libraw_libraw_h" "$ac_includes_default"
 if test "x$ac_cv_header_libraw_libraw_h" = xyes; then :
@@ -5150,10 +5169,10 @@ fi
 # Check whether --with-libraw-lib was given.
 if test "${with_libraw_lib+set}" = set; then :
   withval=$with_libraw_lib;
-	echo "libraw: using $with_libraw_lib"
-		if test -f $with_libraw_lib
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libraw_init in -lraw" >&5
+		echo "libraw: using $with_libraw_lib"
+			if test -f $with_libraw_lib
+			then
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libraw_init in -lraw" >&5
 $as_echo_n "checking for libraw_init in -lraw... " >&6; }
 if ${ac_cv_lib_raw_libraw_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5196,14 +5215,14 @@ else
   as_fn_error $? "A working libraw is required." "$LINENO" 5
 fi
 
-			LIBS="$with_libraw_lib $LIBS"
-		else
-			as_fn_error $? "$with_libraw_lib not found." "$LINENO" 5
-		fi
+				LIBS="$with_libraw_lib $LIBS"
+			else
+				as_fn_error $? "$with_libraw_lib not found." "$LINENO" 5
+			fi
 
 else
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libraw_init" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libraw_init" >&5
 $as_echo_n "checking for library containing libraw_init... " >&6; }
 if ${ac_cv_search_libraw_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5265,6 +5284,7 @@ fi
 
 fi
 
+fi
 
 # Checks for header files.
 for ac_header in inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h

@@ -10,7 +10,9 @@
 #include <omp.h>
 #include <exception>
 
+#ifndef USE_DCRAW
 #include "rawimage.h"
+#endif
 #include "jpegimage.h"
 #include "tiffimage.h"
 #include "pngimage.h"
@@ -537,7 +539,9 @@ std::map<std::string,std::string> gImage::getInfo(const char * filename)
 	GIMAGE_FILETYPE ftype = gImage::getFileType(filename);
 	
 	if (ftype == FILETYPE_TIFF) _loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata);
+#ifndef USE_DCRAW
 	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
+#endif
 	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
 	return imgdata;
 }
@@ -552,7 +556,11 @@ GIMAGE_FILETYPE gImage::getFileType(const char * filename)
 	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) if (_checkTIFF(filename)) return FILETYPE_TIFF;
 	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) if (_checkJPEG(filename)) return FILETYPE_JPEG;
 	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) if (_checkPNG(filename)) return FILETYPE_PNG;
+#ifdef USE_DCRAW  //just let dcraw try it...
+	return FILETYPE_RAW;
+#else
 	if (_checkRAW(filename)) return FILETYPE_RAW;
+#endif
 
 	return FILETYPE_UNKNOWN;
 }
@@ -586,8 +594,10 @@ std::string gImage::LibraryVersions()
 	verstring.append("\nPNG: ");
 	std::string pngver(pngVersion());
 	verstring.append(pngver);
+#ifndef USE_DCRAW
 	verstring.append("\nLibRaw: ");
 	verstring.append(librawVersion());
+#endif
 	verstring.append("\nLittleCMS2: ");
 	std::ostringstream s;
 	s << (int) cmsGetEncodedCMMversion();
@@ -2414,13 +2424,14 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 		_loadJPEGInfo(filename, &width, &height, &colors, imgdata); 
 	}
 	else {
+#ifndef USE_DCRAW
 		_loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata); 
+#endif
 	}
 	return imgdata;
 }
 
 
-#define USE_DCRAW
 #ifdef USE_DCRAW
 
 gImage gImage::loadRAW(const char * filename, std::string params)
@@ -2434,13 +2445,14 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	BPP bits;
 	std::map<std::string,std::string> imgdata;
 	colors = 3;
-	//std::string cmd = "c:\\Users\\butchergg\\bin\\dcraw -c  ";
+
 	std::string cmd = "dcraw -c ";
+	//$ dcrawparams: command line parameters for dcraw-based raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W
 	if (p.find("dcrawparams") != p.end()) 
-		cmd.append(p["dcrawparams"]); 
-	//if (p["bps"] == "16") cmd.append("-6 ");
+		cmd.append(de_underscore(p["dcrawparams"])); 
 	cmd.append(" ");
 	cmd.append(filename);
+
 #ifdef WIN32
 	FILE* pipe = popen(cmd.c_str(), "rb");
 #else
@@ -2587,6 +2599,7 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
+	//$ channelformat=8bit|16bit|float: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. 
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
 		if (p["channelformat"] == "8bit")  bitfmt = BPP_8;
