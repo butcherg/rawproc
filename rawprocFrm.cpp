@@ -559,12 +559,13 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.libraw.cameraprofile","")));
 				configparams.Append(";");
 			}
-			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.parameters","")));
+			configparams.Append("params=");
+			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.params","")));
 #else
 			configparams = paramString("input.raw.libraw.");
-#endif
 			//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
 			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.parameters","")));
+#endif
 			//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
 		}

@@ -2448,13 +2448,13 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 
 	std::string cmd = "dcraw -c ";
 	//$ dcrawparams: command line parameters for dcraw-based raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W
-	if (p.find("dcrawparams") != p.end()) 
-		cmd.append(de_underscore(p["dcrawparams"])); 
+	if (p.find("params") != p.end()) 
+		cmd.append(de_underscore(p["params"])); 
 	cmd.append(" ");
 	cmd.append(filename);
 
 #ifdef WIN32
-	FILE* pipe = popen(cmd.c_str(), "rb");
+	FILE* pipe = _popen(cmd.c_str(), "rb");
 #else
 	FILE* pipe = popen(cmd.c_str(), "r");
 #endif
