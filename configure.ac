@@ -137,9 +137,9 @@ fi
 
 #libz:
 
-AC_CHECK_HEADERS(zlib.h, [], [AC_MSG_ERROR([include directory for zlib.h not found.])])
-AC_SEARCH_LIBS(inflateInit2_,z, [], [AC_MSG_ERROR([A working libz is required for some image libraries.])])
 
+AC_SEARCH_LIBS(inflateInit2_,z, [], [])
+AC_SEARCH_LIBS(lzma_code,lzma,  [], [])
 
 #libjpeg:
 
