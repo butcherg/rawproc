@@ -135,14 +135,14 @@ then
 fi
 
 
-#libz:
+#libraries possibly needed by the primary libraries:
 
+AC_SEARCH_LIBS(inflateInit2_,z,  [], [])
+AC_SEARCH_LIBS(lzma_code,lzma,   [], [])
+AC_SEARCH_LIBS(jas_init,jasper,  [], [])
 
-AC_SEARCH_LIBS(inflateInit2_,z, [], [])
-AC_SEARCH_LIBS(lzma_code,lzma,  [], [])
 
 #libjpeg:
-
 
 AC_ARG_WITH([jpeg-include],
 	AS_HELP_STRING([--with-jpeg-include], [=PATH, specifies path to non-standard location of the libjpeg header (jpeglib.h).]),
