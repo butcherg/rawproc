@@ -296,7 +296,7 @@ for (int f=0; f<files.size(); f++)
 				long hmax=0;
 				long htotal = 0;
 				
-				for (i=0; i<256; i++) {
+				for (i=0; i<240; i++) {  //240 avoids calculating the max on clipping
 					htotal += hdata[i];
 					if (hmax < hdata[i]) {
 						maxpos = i;
