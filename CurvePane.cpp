@@ -37,6 +37,9 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	mousemotion=false;
 	SetDoubleBuffered(true);
 
+	t = new wxTimer(this);
+	Bind(wxEVT_TIMER, &CurvePane::OnTimer,  this);
+
 	SetBackgroundColour(parent->GetBackgroundColour());
 
 	wxArrayString ctrlpts = split(controlpoints,",");
@@ -58,6 +61,11 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 
 }
 
+CurvePane::~CurvePane()
+{
+	t->~wxTimer();
+}
+
 
 void CurvePane::paintEvent(wxPaintEvent & evt)
 {
@@ -71,6 +79,14 @@ void CurvePane::paintNow()
 	wxClientDC dc(this);
 	//wxBufferedDC bdc(&dc);
 	render(dc);
+}
+
+void CurvePane::OnTimer(wxTimerEvent& event)
+{
+	wxCommandEvent e(myCURVE_UPDATE);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
 }
 
 void CurvePane::OnSize(wxSizeEvent & evt)
@@ -193,11 +209,21 @@ void CurvePane::mouseDclick(wxMouseEvent& event)
 
 void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 {
+	int z;
 	if (event.GetWheelRotation() > 0)
-		z++;
+		z=1;
 	else
-		z--;
-	if (z<1) z=1;
+		z=-1;
+	if (selectedCP.x > -1.0) {
+		c.deletepoint(selectedCP.x, selectedCP.y);
+		selectedCP.x += z;
+		//selectedCP.y -= mouseCP.y - (double) pos.y;
+		if (selectedCP.x < 0.0) selectedCP.x = 0.0; if (selectedCP.x > 255.0) selectedCP.x = 255.0;
+		if (selectedCP.y < 0.0) selectedCP.y = 0.0; if (selectedCP.y > 255.0) selectedCP.y = 255.0;
+		c.insertpoint((double) selectedCP.x, (double) selectedCP.y);
+		t->Start(500,wxTIMER_ONE_SHOT);
+		paintNow();
+	}
 }
 
 void CurvePane::keyPressed(wxKeyEvent &event)

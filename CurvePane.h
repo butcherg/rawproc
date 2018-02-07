@@ -14,10 +14,11 @@ class CurvePane : public wxPanel
 {
  
 public:	
-CurvePane(wxWindow* parent, wxString controlpoints);
- 
+	CurvePane(wxWindow* parent, wxString controlpoints);
+	~CurvePane();
 	void paintEvent(wxPaintEvent & evt);	
 	void paintNow();
+	void OnTimer(wxTimerEvent& event);
 	void OnSize(wxSizeEvent & evt);
 	void render(wxDC& dc);
 	void mouseWheelMoved(wxMouseEvent& event);
@@ -56,6 +57,7 @@ private:
 	bool mousemoved;
 	wxPoint pos;
 	cp mouseCP, selectedCP;
+	wxTimer *t;
 };
 
 #endif
