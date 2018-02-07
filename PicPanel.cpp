@@ -4,6 +4,7 @@
 #include <vector>
 #include "PicProcessor.h"
 #include "myConfig.h"
+#include <wx/clipbrd.h>
 
 
 BEGIN_EVENT_TABLE(PicPanel, wxPanel)
@@ -45,6 +46,8 @@ END_EVENT_TABLE()
 		histogramcolor = wxColour(50,50,50);
 		picX = 0; picY = 0;
 		scale = 1.0;
+
+		pr = pb = pg = -1.0;
 
 		//wxImages:
 		thumbimg=NULL;
@@ -597,6 +600,8 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 			
 		}
 
+		pr = pb = pg = -1.0;
+
 		if (scale == 1.0 & scaledpic != NULL) {
 			imgX = x-picX;
 			imgY = y-picY;
@@ -606,6 +611,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 					if (imgY > 1) {
 						if (imgX < scaledpic->GetWidth()) {
 							if (imgY < scaledpic->GetHeight()) { 
+								pr = p[0]; pg = p[1]; pb = p[2];
 								//parm display.rgb.scale: Multiplier for rgb display in status line.  Default=1
 								int pscale = atoi(myConfig::getConfig().getValueOrDefault("display.rgb.scale","1").c_str());
 								if (pscale > 1)
@@ -705,6 +711,15 @@ void PicPanel::OnKey(wxKeyEvent& event)
 		case 84: //T - toggle display thumbnail
 			ToggleThumb();
 			break;
+		case 67: //c - with Ctrl-, copy RGB at the x,y
+			if (event.ControlDown()) 
+				if (pr > -1.0)
+					if (wxTheClipboard->Open()) {
+						// This data objects are held by the clipboard,
+						// so do not delete them in the app.
+						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", pr, pg, pb)) );
+						wxTheClipboard->Close();
+					}
 	}
 }
 

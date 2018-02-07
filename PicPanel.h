@@ -78,6 +78,7 @@ class PicPanel: public wxPanel
 		int imgX, imgY;
 		int thumbW, thumbH;
 		float scale, aspectW, aspectH;
+		double pr, pg, pb;
 		
 		wxString dcList;
         
