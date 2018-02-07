@@ -210,19 +210,24 @@ void CurvePane::mouseDclick(wxMouseEvent& event)
 void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 {
 	int z;
-	if (event.GetWheelRotation() > 0)
-		z=1;
-	else
-		z=-1;
-	if (selectedCP.x > -1.0) {
-		c.deletepoint(selectedCP.x, selectedCP.y);
-		selectedCP.x += z;
-		//selectedCP.y -= mouseCP.y - (double) pos.y;
-		if (selectedCP.x < 0.0) selectedCP.x = 0.0; if (selectedCP.x > 255.0) selectedCP.x = 255.0;
-		if (selectedCP.y < 0.0) selectedCP.y = 0.0; if (selectedCP.y > 255.0) selectedCP.y = 255.0;
-		c.insertpoint((double) selectedCP.x, (double) selectedCP.y);
-		t->Start(500,wxTIMER_ONE_SHOT);
-		paintNow();
+	if (event.ControlDown() | event.AltDown()) {
+		if (event.GetWheelRotation() > 0)
+			z=1;
+		else
+			z=-1;
+		if (event.ShiftDown()) z *= 10;
+		if (selectedCP.x > -1.0) {
+			c.deletepoint(selectedCP.x, selectedCP.y);
+			if (event.ControlDown())
+				selectedCP.x += z;
+			if (event.AltDown())
+				selectedCP.y += z;
+			if (selectedCP.x < 0.0) selectedCP.x = 0.0; if (selectedCP.x > 255.0) selectedCP.x = 255.0;
+			if (selectedCP.y < 0.0) selectedCP.y = 0.0; if (selectedCP.y > 255.0) selectedCP.y = 255.0;
+			c.insertpoint((double) selectedCP.x, (double) selectedCP.y);
+			t->Start(500,wxTIMER_ONE_SHOT);
+			paintNow();
+		}
 	}
 }
 
