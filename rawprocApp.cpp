@@ -12,6 +12,7 @@
 
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
+#include <wx/cmdline.h>
 
 #include "wx/filesys.h"
 #include "wx/fs_zip.h"
@@ -22,20 +23,37 @@
 
 IMPLEMENT_APP(rawprocFrmApp)
 
+static const wxCmdLineEntryDesc cmdLineDesc[] =
+{
+	{ wxCMD_LINE_SWITCH, "h", "help", "show this help message", wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+	{ wxCMD_LINE_OPTION, "s", "opensource", "looks for and executes a rawproc command line in the metadata" },
+	{ wxCMD_LINE_OPTION, "c", "conffile", "use the specified configuration file" },
+	{ wxCMD_LINE_PARAM,  "",  "", "image file to open", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
+	{ wxCMD_LINE_NONE }
+};
+
 bool rawprocFrmApp::OnInit()
 {
-
+	wxString fname;
 
 	wxInitAllImageHandlers();
 	wxFileSystem::AddHandler(new wxZipFSHandler);
+	
+	wxCmdLineParser cmdline(cmdLineDesc, wxGetApp().argc, wxGetApp().argv);
+	if (cmdline.Parse() == -1) exit(0);
 
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	SetTopWindow(frame);
 	frame->Show();
 
+	wxString configfile;
 	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
-	if (wxFileName::FileExists(conf_cwd)) {
+	if (cmdline.Found("c", &configfile)) {
+		frame->SetConfigFile(configfile);
+		myConfig::loadConfig(std::string(configfile.c_str()));
+	}
+	else if (wxFileName::FileExists(conf_cwd)) {
 		frame->SetConfigFile(conf_cwd);
 		myConfig::loadConfig(std::string(conf_cwd.c_str()));
 	}
@@ -57,8 +75,15 @@ bool rawprocFrmApp::OnInit()
 	int thumbmode = atoi(myConfig::getConfig().getValueOrDefault("display.thumb.initialmode","1").c_str());  //1=thumb, 2=histogram, 3=none
 	frame->SetThumbMode(thumbmode);
 
-	if (wxGetApp().argc == 2) {
-		wxFileName f(wxGetApp().argv[1]);
+	if (cmdline.Found("s", &fname)) {
+		wxFileName f(fname);
+		f.MakeAbsolute();
+		wxSetWorkingDirectory (f.GetPath());
+		frame->SetStartPath(f.GetPath());
+		frame->OpenFileSource(f.GetFullPath());
+	}
+	else if (cmdline.GetParamCount() > 0) {
+		wxFileName f(cmdline.GetParam());
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
 		frame->SetStartPath(f.GetPath());
@@ -69,16 +94,6 @@ bool rawprocFrmApp::OnInit()
 				frame->OpenFile(f.GetFullPath());
 		}
 		else frame->OpenFile(f.GetFullPath());
-	}
-	else if (wxGetApp().argc == 3) {
-		wxFileName f(wxGetApp().argv[2]);
-		f.MakeAbsolute();
-		wxSetWorkingDirectory (f.GetPath());
-		frame->SetStartPath(f.GetPath());
-		if (wxGetApp().argv[1] == "-s") 
-			frame->OpenFileSource(f.GetFullPath());
-		else
-			frame->OpenFile(f.GetFullPath());
 	}
 	else {
 		//parm app.start.path: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.
