@@ -35,6 +35,7 @@ END_EVENT_TABLE()
 		blank = true;
 		settingpic = false;
 		dcList = "";
+		oob = 0;
 
 		colormgt = false;
 		hTransform = NULL;
@@ -123,6 +124,7 @@ END_EVENT_TABLE()
 		//mark();
 		
 		d = dib;
+		ch = channel;
 		int w, h;
 		GetSize(&w, &h);
 		img.Destroy();
@@ -135,7 +137,7 @@ END_EVENT_TABLE()
 		if (scaledimg) scaledimg->~wxImage();
 		if (pic) pic->~wxBitmap();
 
-		img = gImage2wxImage(*dib);
+		img = gImage2wxImage(*dib, oob);
 		
 		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 		if (rotation == 3) img = img.Rotate180();
@@ -720,6 +722,12 @@ void PicPanel::OnKey(wxKeyEvent& event)
 						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", pr, pg, pb)) );
 						wxTheClipboard->Close();
 					}
+		case 79: //o oob toggle
+			oob++;
+			if (oob > 2) oob = 0;
+			SetPic(d, ch);
+			Refresh();
+			break;
 	}
 }
 

@@ -63,6 +63,7 @@ class PicPanel: public wxPanel
     private:
 
 		gImage * d;
+		GIMAGE_CHANNEL ch;
 		wxFrame *parentframe;
 		wxTreeCtrl *commandtree;
 		myHistogramPane *histogram;
@@ -79,6 +80,7 @@ class PicPanel: public wxPanel
 		int thumbW, thumbH;
 		float scale, aspectW, aspectH;
 		double pr, pg, pb;
+		int oob;
 		
 		wxString dcList;
         

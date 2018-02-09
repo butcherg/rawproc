@@ -224,27 +224,69 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	return bmp;
 }
 
-wxImage gImage2wxImage(gImage &dib)
+struct dpix { char r, g, b; };
+wxImage gImage2wxImage(gImage &dib, int oob)
 {
+	//parm display.outofbound.black=r,g,b: RGB color to use for out-of-lower-bound pixels.  Default: 255,0,255 (cyan)
+	wxString oobBlack = wxString(myConfig::getConfig().getValueOrDefault("display.outofbound.black","255,0,255"));
+	//parm display.outofbound.white=r,g,b: RGB color to use for out-of-upper-bound pixels.  Default: 0,255,255 (magenta)
+	wxString oobWhite = wxString(myConfig::getConfig().getValueOrDefault("display.outofbound.white","0,255,255"));
 	int threadcount;
 	unsigned h = dib.getHeight();
 	unsigned w =  dib.getWidth();
-	unsigned char *img = (unsigned char *) dib.getImageData(BPP_8);
+	unsigned size = w*h;
+
+	std::vector<pix> img = dib.getImageData();
 	wxImage image(w, h);
-	unsigned char *data = image.GetData();
-	//ToDo: gImage2wxImage Optimize?  not so sure...
-	//ToDo: gImage2wxImage logging
-	//unsigned s = w*h*3;
-	//#pragma omp parallel for num_threads(4)
-	//for (int i = 0; i<s; i++) {
-	//	data[i] = img[i];
-	//}
-	if (img) {
-		memcpy(data,img, w*h*3);
-		delete [] img;
+	dpix * dst = (dpix *) image.GetData();
+	
+	#pragma omp parallel for
+	for (unsigned i = 0; i<size; i++) {
+		if (oob == 1) { //average
+			double g = (img[i].r + img[i].g + img[i].b) / 3.0;
+			if (g > 1.0) {
+				dst[i].r = 255;
+				dst[i].g = 0;
+				dst[i].b = 255;
+			}
+			else if (g < 0.0) {
+				dst[i].r = 0;
+				dst[i].g = 255;
+				dst[i].b = 255;
+			}
+			else {
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+			}
+		}
+		else if (oob == 2) { ///at least one channel
+			if (img[i].r > 1.0 | img[i].g > 1.0 | img[i].b > 1.0) {
+				dst[i].r = 255;
+				dst[i].g = 0;
+				dst[i].b = 255;
+			}
+			else if (img[i].r < 0.0 | img[i].g < 0.0 | img[i].b < 0.0) {
+				dst[i].r = 0;
+				dst[i].g = 255;
+				dst[i].b = 255;
+			}
+			else {
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+			}
+		}
+		else {
+			dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
+			dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
+			dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+		}
 	}
+
 	return image;
 }
+
 
 
 
