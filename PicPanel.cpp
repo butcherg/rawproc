@@ -112,6 +112,11 @@ END_EVENT_TABLE()
 		
 	}
 
+	void PicPanel::RefreshPic()
+	{
+		SetPic(d, ch);
+	}
+
 	void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	{
 		cmsHPROFILE hDisplayProfile;
@@ -137,7 +142,11 @@ END_EVENT_TABLE()
 		if (scaledimg) scaledimg->~wxImage();
 		if (pic) pic->~wxBitmap();
 
-		img = gImage2wxImage(*dib, oob);
+		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
+			img = gImage2wxImage(*dib, oob);
+		else
+			img = gImage2wxImage(*dib);
 		
 		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 		if (rotation == 3) img = img.Rotate180();
@@ -723,10 +732,12 @@ void PicPanel::OnKey(wxKeyEvent& event)
 						wxTheClipboard->Close();
 					}
 		case 79: //o oob toggle
-			oob++;
-			if (oob > 2) oob = 0;
-			SetPic(d, ch);
-			Refresh();
+			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
+				oob++;
+				if (oob > 2) oob = 0;
+				SetPic(d, ch);
+				Refresh();
+			}
 			break;
 	}
 }

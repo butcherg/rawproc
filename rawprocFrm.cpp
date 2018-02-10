@@ -1265,7 +1265,9 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 	//check for properties that should update immediately:
 	if (propname.Find("display.cms") != wxNOT_FOUND)
 		if (!commandtree->IsEmpty())
-			pic->SetPic( ((PicProcessor *) commandtree->GetItemData(displayitem))->getProcessedPicPointer() );
+			pic->RefreshPic();
+	if (propname.Find("display.outofbound") != wxNOT_FOUND)
+		pic->RefreshPic();
 	//not ready for prime time
 	//if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
 }

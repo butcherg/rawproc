@@ -225,6 +225,27 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 }
 
 struct dpix { char r, g, b; };
+
+wxImage gImage2wxImage(gImage &dib)
+{
+	unsigned h = dib.getHeight();
+	unsigned w =  dib.getWidth();
+	unsigned size = w*h;
+
+	std::vector<pix> img = dib.getImageData();
+	wxImage image(w, h);
+	dpix * dst = (dpix *) image.GetData();
+	
+	#pragma omp parallel for
+	for (unsigned i = 0; i<size; i++) {
+		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
+		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
+		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+	}
+
+	return image;
+}
+
 wxImage gImage2wxImage(gImage &dib, int oob)
 {
 	//parm display.outofbound.black=r,g,b: RGB color to use for out-of-lower-bound pixels.  Default: 255,0,255 (cyan)

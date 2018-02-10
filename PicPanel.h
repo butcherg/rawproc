@@ -34,6 +34,7 @@ class PicPanel: public wxPanel
 		void BlankPic();
 		void render(wxDC &dc);
 		void drawBox(wxDC &dc, int x, int y, int w,int h);
+		void RefreshPic();
 		void SetPic(gImage * dib, GIMAGE_CHANNEL channel=CHANNEL_RGB);
 		void SetColorManagement(bool b);
 		bool GetColorManagement();
