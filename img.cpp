@@ -220,6 +220,7 @@ for (int i = 2; i<argc-1; i++) {
 
 int count = 0;
 
+
 for (int f=0; f<files.size(); f++)
 {
 
@@ -233,10 +234,16 @@ for (int f=0; f<files.size(); f++)
 	
 	count++;
 
+	std::string command = "rawproc-img ";
+
 	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
+
+	command += std::string(iname);
+	if (infile[1] != "") command += ":" + infile[1];
+	command += " ";
 
 	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
 	printf("Orientation: %d\n", orientation);
@@ -260,7 +267,8 @@ for (int f=0; f<files.size(); f++)
 		strncpy(c, commands[i].c_str(), 255);
 		char* cmd = strtok(c,":");
 
-		if (strcmp(cmd,"bright") == 0) {  //#bright:[-100 - 100, default=0]
+		//#bright:[-100 - 100] default: 0 (no-bright)
+		if (strcmp(cmd,"bright") == 0) {  
 			double bright=0.0;
 			char *b = strtok(NULL," ");
 			if (b) bright = atof(b);
@@ -278,10 +286,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f ",cmd, bright);
+			command += std::string(cs);
 		}
 
-
-		else if (strcmp(cmd,"blackwhitepoint") == 0) {  //#blackwhitepoint[:0-127,128-255 default=auto]
+		//#blackwhitepoint[:0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
+		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			double blk=0.0, wht=255.0;
 			double blkthresh= 0.001, whtthresh=0.005;
 			int blklimit = 32, whtlimit = 32; 
@@ -337,9 +348,11 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, blk, wht);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"contrast") == 0) {  //#contrast:[-100 - 100, default=0]
+		//#contrast:[-100 - 100] default: 0 (no-contrast)
+		else if (strcmp(cmd,"contrast") == 0) {  
 			double contrast=0.0;
 			char *c = strtok(NULL," ");
 			if (c) contrast = atof(c);
@@ -360,9 +373,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f ",cmd, contrast);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"gamma") == 0) {  //#gamma:[0.0 - 5.0, default=1.0]
+		//#gamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)
+		else if (strcmp(cmd,"gamma") == 0) {  
 			double gamma=1.0;
 			char *g = strtok(NULL," ");
 			if (g) gamma = atof(g);
@@ -382,16 +399,19 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, gamma);
+			command += std::string(cs);
 		}
 
 
-
-		else if (strcmp(cmd,"resize") == 0) {  //#resize:x,y      
+		//#resize:w[,h] If either w or h is 0, resize preserves aspect of that dimension.  If only one number is present, the image is resized to that number along the longest dimension, preserving aspect.  
+		else if (strcmp(cmd,"resize") == 0) {  
 			unsigned w, h;
 			char *wstr = strtok(NULL,", ");
 			char *hstr = strtok(NULL," ");
-			if (wstr == NULL & hstr == NULL) {
-				printf("Error: resize needs both width and height parameters.\n");
+			if (wstr == NULL) {
+				printf("Error: resize needs at least one parameter.\n");
 			}
 			else {
 				if (wstr) w = atoi(wstr);
@@ -418,10 +438,14 @@ for (int f=0; f<files.size(); f++)
 				_mark();
 				dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
 				printf("done (%fsec).\n", _duration());
+				char cs[256];
+				sprintf(cs, "%s:%d,%d ",cmd, w, h);
+				command += std::string(cs);
 			}
 		}
 
-		else if (strcmp(cmd,"rotate") == 0) {  //#rotate:[0 - 45, default=0] 
+		//#rotate:[-45.0 - 45.0] default: 0 (no-rotate)
+		else if (strcmp(cmd,"rotate") == 0) {  
 			double angle=0.0;
 			char *s = strtok(NULL," ");
 			if (s) angle = atof(s);
@@ -431,9 +455,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyRotate(angle, false, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, angle);
+			command += std::string(cs);
 		}
-		
-		else if (strcmp(cmd,"sharpen") == 0) {  //#sharpen:[0 - 10, default=0]      //add in else when other commands are uncommented
+
+		//#sharpen:[0 - 10, default: 0 (no-sharpen)
+		else if (strcmp(cmd,"sharpen") == 0) {  
 			double sharp=0.0;
 			char *s = strtok(NULL," ");
 			if (s) sharp = atof(s);
@@ -443,6 +471,9 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplySharpen(sharp, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f ",cmd, sharp);
+			command += std::string(cs);
 		}
 
 		else if (strcmp(cmd,"crop") == 0) {  //#crop:x,y,w,h      
@@ -463,9 +494,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyCrop(x,y,width,height,threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%d,%d,%d,%d ",cmd, x, y, width, height);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"saturation") == 0) {  //#saturation:[0 - 5.0, default=1.0, no change]
+		//#saturation:[0 - 5.0] default=1.0, no change
+		else if (strcmp(cmd,"saturation") == 0) {  
 			double saturation=0.0;
 			char *s = strtok(NULL," ");
 			if (s) saturation = atof(s);
@@ -476,9 +511,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplySaturate(saturation, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, saturation);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"denoise") == 0) {  //#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
+		//#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
+		else if (strcmp(cmd,"denoise") == 0) {  
 			double sigma=0.0;
 			char *s = strtok(NULL," ");
 			if (s) sigma = atof(s);
@@ -487,11 +526,15 @@ for (int f=0; f<files.size(); f++)
 			printf("denoise: %0.2f (%d threads)... ",sigma,threadcount);
 
 			_mark();
-			dib.ApplyNLMeans(sigma, 3, 1, threadcount);
+			dib.ApplyNLMeans(sigma, 3, 1, threadcount);  //local and patch hard-coded, for now...
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f,%d,%d ",cmd, sigma, 3, 1);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"tint") == 0) {  //#tint:r,g,b
+		//#tint:[r,g,b] default: 0,0,0
+		else if (strcmp(cmd,"tint") == 0) {  
 			double red=0.0; double green=0.0; double blue = 0.0;
 			char *r = strtok(NULL,", ");
 			char *g = strtok(NULL,", ");
@@ -506,9 +549,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyTint(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
+			command += std::string(cs);
 		}
-		
-		else if (strcmp(cmd,"whitebalance") == 0) {  //#whitebalance:rmult,gmult,bmult
+
+		//#whitebalance:[rmult,gmult,bmult] default: 1,1,1
+		else if (strcmp(cmd,"whitebalance") == 0) {  
 			double redmult=1.0; double greenmult = 1.0; double bluemult = 1.0;
 			char *rm = strtok(NULL,", ");
 			char *gm = strtok(NULL,", ");
@@ -523,9 +570,13 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyWhiteBalance(redmult,greenmult,bluemult, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+			command += std::string(cs);
 		}
 
-		else if (strcmp(cmd,"gray") == 0) {  //#gray:[r],[g],[b] 
+		//#gray:[r,g,b] default: 0.21,0.72,0.07 
+		else if (strcmp(cmd,"gray") == 0) {  
 			double red=0.21; double green=0.72; double blue = 0.07;
 			char *r = strtok(NULL,", ");
 			char *g = strtok(NULL,", ");
@@ -540,6 +591,9 @@ for (int f=0; f<files.size(); f++)
 			_mark();
 			dib.ApplyGray(red,green,blue, threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
+			command += std::string(cs);
 		}
 		
 		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
@@ -569,6 +623,8 @@ for (int f=0; f<files.size(); f++)
 		
 		}
 		
+		//these don't have rawproc equivalents, so they're not added to the metadata-embedded command
+		//#rotate90 - rotate 90 degrees clockwise
 		else if (strcmp(cmd,"rotate90") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate90 (%d threads)... ", threadcount);
@@ -576,15 +632,18 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyRotate90(threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-		
+
+		//#rotate180 - rotate 180 degrees
 		else if (strcmp(cmd,"rotate180") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate180 (%d threads)... ", threadcount);
 			_mark();
 			dib.ApplyRotate180(threadcount);
 			printf("done (%fsec).\n",_duration());
+			
 		}
-		
+
+		//#rotate270 - rotate 270 degrees clockwise
 		else if (strcmp(cmd,"rotate270") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate270 (%d threads)... ", threadcount);
@@ -592,7 +651,8 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyRotate270(threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-		
+
+		//#hmirror - flip horizontal	
 		else if (strcmp(cmd,"hmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("mirror horizontal (%d threads)... ", threadcount);
@@ -600,7 +660,8 @@ for (int f=0; f<files.size(); f++)
 			dib.ApplyHorizontalMirror(threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
-		
+
+		//#vmirror - flip upside down		
 		else if (strcmp(cmd,"vmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("mirror vertical (%d threads)... ", threadcount);
@@ -657,7 +718,8 @@ for (int f=0; f<files.size(); f++)
 	_mark();
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
 	printf("Saving file %s %s... ",outfilename, outfile[1].c_str());
-	dib.setInfo("Software","gimg 0.1");
+	dib.setInfo("Software","img 0.1");
+	dib.setInfo("ImageDescription", command);
 
 	if (dib.saveImageFile(outfilename, outfile[1].c_str()) == GIMAGE_OK) 
 		printf("done. (%fsec)\n\n",_duration());
