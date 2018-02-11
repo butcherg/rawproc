@@ -2317,6 +2317,40 @@ std::string gImage::Stats()
 	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax);
 }
 
+//calculate a normalized black and white point, expressed in the 0-255 range:
+std::vector<double> gImage::CalculateBlackWhitePoint(double blackthreshold, double whitethreshold, bool centerout, int whitemax)
+{
+	std::vector<double> bwpoints;
+	std::vector<long> hdata = Histogram();
+	long hmax=0;
+	int maxpos;
+	long htotal = 0;
+	int i;
+				
+	for (i=0; i<whitemax; i++) {  //240 avoids calculating the max on clipping
+		htotal += hdata[i];
+		if (hmax < hdata[i]) {
+			maxpos = i;
+			hmax = hdata[i];
+		}
+	}
+
+	if (centerout) {
+		//find black threshold:
+		long hblack = 0;
+		for (i=maxpos; i>0; i--) 
+			if ((double) hdata[i] / (double) hmax < blackthreshold) break;
+		bwpoints.push_back((double) i);
+
+		//find white threshold:
+		long hwhite = 0;
+		for (i=maxpos; i<255; i++) 
+			if ((double) hdata[i] / (double) hmax < whitethreshold) break;
+		bwpoints.push_back((double) i);
+	}
+	return bwpoints;
+}
+
 //simple grayscale histogram:
 std::vector<long> gImage::Histogram()
 {

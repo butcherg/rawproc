@@ -301,33 +301,10 @@ for (int f=0; f<files.size(); f++)
 			char *b = strtok(NULL,",");
 			char *w = strtok(NULL,", ");
 			wht = 255; blk = 0;
-			if (!b) { 	//calculate black and white points from image histogram
-				int i;
-				std::vector<long> hdata = dib.Histogram();
-				long hmax=0;
-				long htotal = 0;
-				
-				for (i=0; i<240; i++) {  //240 avoids calculating the max on clipping
-					htotal += hdata[i];
-					if (hmax < hdata[i]) {
-						maxpos = i;
-						hmax = hdata[i];
-					}
-				}
-
-				//find black threshold:
-				long hblack = 0;
-				for (i=maxpos; i>0; i--) 
-					if ((double) hdata[i] / (double) hmax < blkthresh) break;
-				blk = (double) i;
-
-
-				//find white threshold:
-				long hwhite = 0;
-				for (i=maxpos; i<255; i++) 
-					if ((double) hdata[i] / (double) hmax < whtthresh) break;
-				wht = (double) i;
-				
+			if (!b) { 
+				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(0.001, 0.005, true, 240);
+				blk = bwpts[0];
+				wht = bwpts[1];
 
 			}
 			else {

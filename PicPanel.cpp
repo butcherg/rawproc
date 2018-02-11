@@ -263,7 +263,11 @@ END_EVENT_TABLE()
 		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
 		
 		histogram->SetPic(*dib, scale);
-		histogram->SetChannel(channel);
+		//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
+		if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
+			histogram->SetChannel(channel);
+		else
+			histogram->SetChannel(CHANNEL_RGB);
 
 		if (thumb) thumb->~wxBitmap();
 		thumb = new wxBitmap(thumbimg);
