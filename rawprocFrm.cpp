@@ -1237,7 +1237,7 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		return;
 	}
 	if (diag == NULL) {
-		diag = new PropertyDialog(this, wxID_ANY, "Properties", myConfig::getConfig().getDefault());
+		diag = new PropertyDialog(this, wxID_ANY, "Properties");
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}
 	if (diag) {
@@ -1259,7 +1259,8 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 	wxString propname = event.GetPropertyName();
 	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
 
-	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetString().mb_str());
+	//myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetString().mb_str());
+	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetValueAsString().mb_str());
 	myConfig::getConfig().flush();
 
 	//check for properties that should update immediately:

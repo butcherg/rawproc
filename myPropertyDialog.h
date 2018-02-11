@@ -11,6 +11,7 @@
 class PropertyDialog: public wxDialog
 {
 	public:
+		PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);  //uses myConfig::getConfig()
 		PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::map<std::string, std::string> props, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);
 		PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxFileConfig *config, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize);
 		~PropertyDialog();

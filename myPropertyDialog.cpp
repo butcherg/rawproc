@@ -1,6 +1,8 @@
 #include "myPropertyDialog.h"
 #include "myConfig.h"
+#include "util.h"
 #include <wx/sizer.h>
+#include <wx/propgrid/advprops.h>
 
 #include <wx/wx.h>
 
@@ -55,6 +57,49 @@ class AddDialog: public wxDialog
 	
 };
 
+PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
+wxDialog(parent, id, title, pos, size)
+{
+	wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
+	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
+	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
+	
+	std::map<std::string, std::string> props = myConfig::getConfig().getDefault();
+	std::map<std::string, std::string> temps = myConfig::getConfig().getSection("Templates");
+	
+	myConfig& config = myConfig::getConfig();
+	
+	for (std::map<std::string, std::string>::iterator it=props.begin(); it!=props.end(); ++it) {
+		wxString name = it->first.c_str();
+		wxString value = it->second.c_str();
+		if (config.exists("Templates", it->first.c_str())) {
+			wxArrayString choices = split(wxString(config.getValue("Templates", it->first).c_str()), "|");
+			pg->Append(new wxEnumProperty(name, wxPG_LABEL, choices));
+		}
+		else
+			pg->Append(new wxStringProperty(name, name, value));
+	}
+	
+	pg->Sort();
+	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
+	
+	ct->Add(new wxButton(this, wxID_OK, "Dismiss"), 0, wxALL, 10);
+	ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
+	fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+	ct->Add(fil, 0, wxALL, 10);
+	ct->Add(new wxButton(this, ADDID, "Add"), 0, wxALL, 10);
+	ct->Add(new wxButton(this, DELETEID, "Delete"), 0, wxALL, 10);
+	sz->Add(ct, 0, wxALL, 10);
+	SetSizerAndFit(sz);
+	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
+	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
+	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::AddProp, this, ADDID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::DelProp, this, DELETEID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::HideDialog, this, HIDEID);
+}
+
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::map<std::string, std::string> props, const wxPoint &pos, const wxSize &size):
 wxDialog(parent, id, title, pos, size)
 {
@@ -63,8 +108,11 @@ wxDialog(parent, id, title, pos, size)
 	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
 
-	for (std::map<std::string, std::string>::iterator it=props.begin(); it!=props.end(); ++it)
-		pg->Append(new wxStringProperty(it->first.c_str(), it->first.c_str(), it->second.c_str()));
+	for (std::map<std::string, std::string>::iterator it=props.begin(); it!=props.end(); ++it) {
+		wxString name = it->first.c_str();
+		wxString value = it->second.c_str();
+		pg->Append(new wxStringProperty(name, name, value));
+	}
 
 	pg->Sort();
 	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
