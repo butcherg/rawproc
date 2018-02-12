@@ -1263,6 +1263,8 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 
 	if (ch.IsOk()) 
 		propval = ch.GetLabel(prop->GetChoiceSelection());
+	else if (myConfig::getConfig().getValue("Templates",std::string(propname.mb_str())) == "iccfile") 
+		propval = wxFileName(event.GetPropertyValue().GetString()).GetFullName();
 	else 
 		propval = event.GetPropertyValue().GetString();
 
