@@ -27,6 +27,7 @@ END_EVENT_TABLE()
 		parentframe = parent;
 		commandtree = tree;
 		histogram = hgram;
+		d = NULL;
 		//wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
 		SetDoubleBuffered(true);  //watch this one... tricksy...
@@ -114,7 +115,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::RefreshPic()
 	{
-		SetPic(d, ch);
+		if (d) SetPic(d, ch);
 	}
 
 	void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
