@@ -1256,11 +1256,18 @@ void rawprocFrm::MnuEXIF(wxCommandEvent& event)
 
 void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 {
+	wxPGProperty * prop = event.GetProperty();
 	wxString propname = event.GetPropertyName();
-	SetStatusText(wxString::Format("Changed %s to %s.", event.GetPropertyName(), event.GetPropertyValue().GetString()));
+	wxString propval;
+	wxPGChoices ch = prop->GetChoices();
 
-	//myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetString().mb_str());
-	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) event.GetPropertyValue().GetValueAsString().mb_str());
+	if (ch.IsOk()) 
+		propval = ch.GetLabel(prop->GetChoiceSelection());
+	else 
+		propval = event.GetPropertyValue().GetString();
+
+	SetStatusText(wxString::Format("Changed %s to %s.", propname, propval));
+	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) propval.mb_str());
 	myConfig::getConfig().flush();
 
 	//check for properties that should update immediately:

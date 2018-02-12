@@ -74,8 +74,19 @@ wxDialog(parent, id, title, pos, size)
 		wxString name = it->first.c_str();
 		wxString value = it->second.c_str();
 		if (config.exists("Templates", it->first.c_str())) {
-			wxArrayString choices = split(wxString(config.getValue("Templates", it->first).c_str()), "|");
-			pg->Append(new wxEnumProperty(name, wxPG_LABEL, choices));
+			std::string tplate = config.getValue("Templates", it->first);
+			if (tplate.find_first_of("|") != std::string::npos) {
+				wxArrayString choices = split(wxString(tplate.c_str()), "|");
+				wxPGChoices ch(choices);
+				pg->Append(new wxEnumProperty(name, wxPG_LABEL, ch, ch.Index(value)));
+			}
+			else if (tplate.find("iccfile") != std::string::npos) {
+				//wxArrayString parms = split(wxString(template.c_str()), ":");
+				wxString iccdirectory = config.getValue("cms.profilepath").c_str();
+				wxPGProperty* prop = pg->Append(new wxFileProperty(name, wxPG_LABEL, value));
+				pg->SetPropertyAttribute(prop,"InitialPath",iccdirectory );
+				pg->SetPropertyAttribute(prop,"ShowFullPath",0);
+			}
 		}
 		else
 			pg->Append(new wxStringProperty(name, name, value));
