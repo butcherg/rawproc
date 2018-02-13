@@ -58,7 +58,7 @@ union lensunion {
 	lensstruct lens;
 }
 */
-static const struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
+static struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
 fmountlens[] = {
 {0x01,0x58,0x50,0x50,0x14,0x14,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
 {0x01,0x58,0x50,0x50,0x14,0x14,0x05,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
@@ -724,8 +724,8 @@ std::string lens_lookup(unsigned long long id)
 	std::string lensname = "not found";
 
 	for (int i = 0; fmountlens[i].lensname != NULL; ++i) {
-		unsigned long long  lensid = fmountlens[i].lid;
-		if (lensid == id) return std::string(fmountlens[i].lensname);
+		unsigned long long * lensid = (unsigned long long *) &fmountlens[i];
+		if (*lensid == id) return std::string(fmountlens[i].lensname);
 	}
 
 	return "(not found)";
