@@ -12,6 +12,7 @@
 #include <libraw/libraw.h>
 #include <lcms2.h>
 #include "gimage/gimage.h"
+#include "nikonlensid.h"
 
 const char * librawVersion()
 {
@@ -589,8 +590,8 @@ char * _loadRAW(const char *filename,
 		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
 	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
 		info["Lens"] = RawProcessor.imgdata.lens.Lens;
-//	else
-//		info["Lens"] = "not found."
+	else
+		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 	if (RawProcessor.imgdata.params.user_flip == 0) 
 		info["Orientation"] = tostr(S.flip); //dcraw left the orientation alone, use the metadata
 	else
