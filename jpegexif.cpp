@@ -172,6 +172,7 @@ typedef struct {
 #define TAG_SHARPNESS              0xA40A
 #define TAG_DISTANCE_RANGE         0xA40C
 #define TAG_IMAGE_UNIQUE_ID        0xA420
+#define TAG_LENS                   0xFDEA
 
 
 
@@ -275,6 +276,7 @@ const TagTable_t TagTable[] = {
 {TAG_Y_CB_CR_POSITIONING,"YCbCrPositioning",FMT_USHORT},
 {TAG_Y_CB_CR_SUB_SAMPLING,"YCbCrSubSampling",FMT_USHORT},
 {TAG_Y_RESOLUTION,"YResolution",FMT_URATIONAL},
+{TAG_LENS,"Lens",FMT_STRING}
 //{TAG_USERCOMMENT,"UserComment",FMT_STRING}
 } ;
 
