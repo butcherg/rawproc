@@ -2,6 +2,7 @@
 #define NIKONLENSID_H
 
 #include <string>
+#include <arpa/inet.h>
 
 #define FMLVERSION "4.4.527.01"
 #define FMLDATE "2017-02-27"
@@ -51,15 +52,16 @@
 //------------------------------------------------------------------------------
 //
 
-/*
-struct lensstruct  {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
+
+struct lensstruct  {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;};
 union lensunion {
-	long long id;
 	lensstruct lens;
-}
-*/
-static const struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
-fmountlens[] = {
+	long long id;
+};
+
+//static const struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
+lensunion fmountlens[] = {
+//{0x8B,0x40,0x2D,0x80,0x2C,0x3C,0xFD,0x0E,0x00,0x00,0x00, "Nikon", "",         "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED II"},
 {0x01,0x58,0x50,0x50,0x14,0x14,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
 {0x01,0x58,0x50,0x50,0x14,0x14,0x05,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
 {0x02,0x42,0x44,0x5C,0x2A,0x34,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA72701", "AF Zoom-Nikkor 35-70mm f/3.3-4.5"},
@@ -719,13 +721,34 @@ fmountlens[] = {
 {0,0,0,0,0,0,0,0,0,0,0, NULL, NULL, NULL}
 };
 
+
+uint64_t htonll(uint64_t value)
+{
+    // The answer is 42
+    static const int num = 42;
+
+    // Check the endianness
+    if (*reinterpret_cast<const char*>(&num) == num)
+    {
+        const uint32_t high_part = htonl(static_cast<uint32_t>(value >> 32));
+        const uint32_t low_part = htonl(static_cast<uint32_t>(value & 0xFFFFFFFFLL));
+
+        return (static_cast<uint64_t>(low_part) << 32) | high_part;
+    } else
+    {
+        return value;
+    }
+}
+
+
 std::string lens_lookup(unsigned long long id)
 {
 	std::string lensname = "not found";
+	int i;
 
-	for (int i = 0; fmountlens[i].lensname != NULL; ++i) {
-		unsigned long long  lensid = fmountlens[i].lid;
-		if (lensid == id) return std::string(fmountlens[i].lensname);
+	for (i = 0; fmountlens[i].lens.lensname != NULL; ++i) {
+		unsigned long long * lensid = (unsigned long long *) &fmountlens[i];
+		if (htonll(*lensid) == id) return std::string(fmountlens[i].lens.lensname);
 	}
 
 	return "(not found)";
