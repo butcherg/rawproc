@@ -56,19 +56,12 @@
 struct lensstruct  {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;};
 union lensunion {
 	lensstruct lens;
-<<<<<<< HEAD
 	long long id;
 };
 
 //static const struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
 lensunion fmountlens[] = {
 //{0x8B,0x40,0x2D,0x80,0x2C,0x3C,0xFD,0x0E,0x00,0x00,0x00, "Nikon", "",         "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED II"},
-=======
-}
-*/
-static struct {unsigned char lid,stps,focs,focl,aps,apl,lfw, ltype, tcinfo, dblid, mid; const char *manuf, *lnumber, *lensname;}
-fmountlens[] = {
->>>>>>> ea8bb16d4f5fd0011d192d7b9ad54b4faa4af860
 {0x01,0x58,0x50,0x50,0x14,0x14,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
 {0x01,0x58,0x50,0x50,0x14,0x14,0x05,0x00,0x00,0x00,0x00, "Nikon", "JAA00901", "AF Nikkor 50mm f/1.8"},
 {0x02,0x42,0x44,0x5C,0x2A,0x34,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA72701", "AF Zoom-Nikkor 35-70mm f/3.3-4.5"},
@@ -753,15 +746,11 @@ std::string lens_lookup(unsigned long long id)
 	std::string lensname = "not found";
 	int i;
 
-<<<<<<< HEAD
+
 	for (i = 0; fmountlens[i].lens.lensname != NULL; ++i) {
 		unsigned long long * lensid = (unsigned long long *) &fmountlens[i];
 		if (htonll(*lensid) == id) return std::string(fmountlens[i].lens.lensname);
-=======
-	for (int i = 0; fmountlens[i].lensname != NULL; ++i) {
-		unsigned long long * lensid = (unsigned long long *) &fmountlens[i];
-		if (*lensid == id) return std::string(fmountlens[i].lensname);
->>>>>>> ea8bb16d4f5fd0011d192d7b9ad54b4faa4af860
+
 	}
 
 	return "(not found)";
