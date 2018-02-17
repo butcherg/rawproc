@@ -669,7 +669,8 @@ bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 
 
 
-void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
+//void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
+void parse_exif(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
 {
 	char exif_str[65535];
 
@@ -683,7 +684,10 @@ void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::str
 	// Check the EXIF header component:
 	{   
 		static char ExifHeader[] = "Exif\0\0";
-		if (memcmp(marker+2, ExifHeader,6)) return;
+		if (memcmp(marker+2, ExifHeader,6) != 0) { //return;
+			printf("parse_exif: bad exifheader, -%s-\n",marker+2);
+			return;
+		}
 	}
 
 	// Set the internal endian:
@@ -693,7 +697,7 @@ void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::str
 		if (memcmp(marker+8,"MM",2) == 0){
 			MotorolaOrder = 1;
 		}else{
-
+			printf("parse_exif: bad endian, -%s-\n", marker+8);
 			return;
 		}
 	}
@@ -708,6 +712,19 @@ void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::str
 	ProcessExifDir(marker+8+FirstOffset, marker+8, length-8, imageinfo);
 }
 
+
+void parse_eXIf_chunk(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
+{
+	unsigned char * exif = (unsigned char *) malloc(length+8);
+	memcpy((char *) exif, "\0\0Exif\0\0", 8);
+	memcpy(exif+8, marker, length);
+	parse_exif(exif, length+8, imageinfo);
+}
+
+void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
+{
+	parse_exif(marker, length, imageinfo);
+}
 
 
 
@@ -756,7 +773,7 @@ void addAPP1Entry(unsigned tag, unsigned format, std::string value)
 }
 
 
-unsigned char * construct_APP1marker(std::map<std::string,std::string> imageinfo, unsigned *markerlength)
+unsigned char * construct_exif(std::map<std::string,std::string> imageinfo, unsigned *exiflength, bool jpeg=true)
 {
 
 	MotorolaOrder = 0;
@@ -792,17 +809,36 @@ unsigned char * construct_APP1marker(std::map<std::string,std::string> imageinfo
 	// Remove old exif section, if there was one.
 	//RemoveSectionType(M_EXIF);
 
-	unsigned char * NewBuf = new unsigned char[DataWriteIndex]; 
-        if (NewBuf == NULL){
-            //////ErrFatal("Could not allocate memory");
-        }
-        memcpy(NewBuf, Buffer, DataWriteIndex);
-
-	*markerlength = DataWriteIndex;
+	unsigned char * NewBuf;
+	if (!jpeg) {  //offset for png eXIf chunk
+		DataWriteIndex -= 8;
+		NewBuf = new unsigned char[DataWriteIndex]; 
+	        if (NewBuf == NULL){
+	            //////ErrFatal("Could not allocate memory");
+	        }
+	        memcpy(NewBuf, Buffer+8, DataWriteIndex);
+		*exiflength = DataWriteIndex;
+	}
+	else {
+		NewBuf = new unsigned char[DataWriteIndex]; 
+	        if (NewBuf == NULL){
+	            //////ErrFatal("Could not allocate memory");
+	        }
+	        memcpy(NewBuf, Buffer, DataWriteIndex);
+		*exiflength = DataWriteIndex;
+	}
 	return NewBuf;
 }
 
+unsigned char * construct_eXIf_chunk(std::map<std::string,std::string> imageinfo, unsigned *chunklength)
+{
+	return construct_exif(imageinfo, chunklength, false);
+}
 
+unsigned char * construct_APP1marker(std::map<std::string,std::string> imageinfo, unsigned *markerlength)
+{
+	return construct_exif(imageinfo, markerlength, true);
+}
 
 
 

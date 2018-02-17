@@ -8,6 +8,7 @@
 #include <map>
 
 #include "gimage/strutil.h"
+#include "jpegexif.h"
 
 
 const char * pngVersion()
@@ -147,6 +148,15 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 		return NULL;
 	}
 
+	unsigned char * marker;
+	unsigned marker_length;
+	png_get_eXIf_1(png, pinfo, &marker_length, &marker);
+	parse_eXIf_chunk(marker, marker_length, info);
+
+	//for (std::map<std::string,std::string>::iterator it=info.begin(); it!=info.end(); ++it) {
+	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str());
+	//}
+
 	if (png_get_valid(png, pinfo, PNG_INFO_iCCP))
 	{
 		unsigned ProfileLen;
@@ -200,10 +210,6 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	fclose(fp);
 	
-	std::map<std::string,std::string> inf;
-	info = inf;
-	
-
 	if (png && pinfo)
 		png_destroy_read_struct(&png, &pinfo, NULL);
 
@@ -265,6 +271,11 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 		PNG_COMPRESSION_TYPE_DEFAULT,
 		PNG_FILTER_TYPE_DEFAULT
 	);
+
+	unsigned char * marker;
+	unsigned markerlength;
+	marker =  construct_eXIf_chunk(info, &markerlength);
+	png_set_eXIf_1(png, pinfo, markerlength, (const png_bytep) marker);
 
 	if (iccprofile) 
 		//png_set_iCCP(png, pinfo, (png_charp) "", PNG_COMPRESSION_TYPE_BASE, iccprofile, iccprofilelength);
