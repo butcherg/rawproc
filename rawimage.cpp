@@ -125,6 +125,7 @@ char * _loadRAW(const char *filename,
 	//# output_color=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)<br>
 	//# colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb
 	//#
+	//template input.raw.libraw.colorspace=raw|srgb|adobe|wide|prophoto|xyz
 	if (p.find("colorspace") != p.end()) {
 		if (p["colorspace"].compare("raw") == 0) 
 			RawProcessor.imgdata.params.output_color = 0;
@@ -650,6 +651,7 @@ char * _loadRAW(const char *filename,
 		//#
 		//# cameraprofile=iccfile - If colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.
 		//#
+		//template input.raw.libraw.cameraprofile=iccprofile
 		if (p.find("cameraprofile") != p.end()) {
 				if (p["cameraprofile"] != "") {
 					profile = cmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "r");
