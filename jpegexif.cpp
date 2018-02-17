@@ -791,13 +791,29 @@ unsigned char * construct_exif(std::map<std::string,std::string> imageinfo, unsi
 	Put16u(Buffer+DirIndex, NumEntries); // Number of entries
 	DirIndex += 2;
 
-
+/*
 	for (std::map<std::string,std::string>::iterator it=imageinfo.begin(); it!=imageinfo.end(); ++it) {
 		unsigned tag = getTag(it->first);
 		if (tag) {
 			addAPP1Entry(tag, getTagFormat(it->first), it->second);
 		}
 	}
+*/
+
+	//get tags to be written, add them in tag-sorted order using std::map ordering:
+	std::map<unsigned, std::string> tags;
+	for (std::map<std::string,std::string>::iterator it=imageinfo.begin(); it!=imageinfo.end(); ++it) {
+		unsigned tag = getTag(it->first);
+		if (tag) tags[tag] = it->first;
+	}
+	int n = 0;
+	for (std::map<unsigned, std::string>::iterator tt=tags.begin(); tt!=tags.end(); ++tt) {
+		addAPP1Entry(tt->first, getTagFormat(tt->second), imageinfo[tt->second]);
+		unsigned fmt = getTagFormat(tt->second);
+		printf("EXIF %d: tagid:%d, tagfmt:%d, tagname:%s, tagval:%s\n",n, tt->first, fmt, tt->second.c_str(), imageinfo[tt->second].c_str());
+		n++;
+	}
+
 
 	Put32u(Buffer+DirIndex, 0);
 

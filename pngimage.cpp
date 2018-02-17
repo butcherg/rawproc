@@ -64,6 +64,11 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 	*numcolors  = png_get_channels(png, pinfo);
 	*numbits    = png_get_bit_depth(png, pinfo);
 
+	unsigned char * marker;
+	unsigned marker_length;
+	png_get_eXIf_1(png, pinfo, &marker_length, &marker);
+	parse_eXIf_chunk(marker, marker_length, info);
+
 	fclose(fp);
 	if (png && pinfo)
 		png_destroy_write_struct(&png, &pinfo);

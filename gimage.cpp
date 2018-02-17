@@ -543,6 +543,7 @@ std::map<std::string,std::string> gImage::getInfo(const char * filename)
 	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
 #endif
 	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
+	if (ftype == FILETYPE_PNG) _loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata);
 	return imgdata;
 }
 
