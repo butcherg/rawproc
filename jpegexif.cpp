@@ -810,7 +810,7 @@ unsigned char * construct_exif(std::map<std::string,std::string> imageinfo, unsi
 	for (std::map<unsigned, std::string>::iterator tt=tags.begin(); tt!=tags.end(); ++tt) {
 		addAPP1Entry(tt->first, getTagFormat(tt->second), imageinfo[tt->second]);
 		unsigned fmt = getTagFormat(tt->second);
-		printf("EXIF %d: tagid:%d, tagfmt:%d, tagname:%s, tagval:%s\n",n, tt->first, fmt, tt->second.c_str(), imageinfo[tt->second].c_str());
+		//printf("EXIF %d: tagid:%d, tagfmt:%d, tagname:%s, tagval:%s\n",n, tt->first, fmt, tt->second.c_str(), imageinfo[tt->second].c_str());
 		n++;
 	}
 
