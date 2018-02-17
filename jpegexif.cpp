@@ -686,10 +686,8 @@ void parse_exif(unsigned char * marker, unsigned length, std::map<std::string,st
 	// Check the EXIF header component:
 	{   
 		static char ExifHeader[] = "Exif\0\0";
-		if (memcmp(marker+2, ExifHeader,6) != 0) { //return;
-			printf("parse_exif: bad exifheader, -%s-\n",marker+2);
-			return;
-		}
+		if (memcmp(marker+2, ExifHeader,6) != 0) return;
+
 	}
 
 	// Set the internal endian:
@@ -699,7 +697,6 @@ void parse_exif(unsigned char * marker, unsigned length, std::map<std::string,st
 		if (memcmp(marker+8,"MM",2) == 0){
 			MotorolaOrder = 1;
 		}else{
-			printf("parse_exif: bad endian, -%s-\n", marker+8);
 			return;
 		}
 	}
