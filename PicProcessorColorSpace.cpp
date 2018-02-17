@@ -124,7 +124,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
-	int ret;
+	GIMAGE_ERROR ret;
 	
 	wxArrayString cp = split(getParams(),",");
 	wxString intentstr;
@@ -159,22 +159,24 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 		if (cp[1] == "convert") {
 			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, bpc, threadcount);
 			switch (ret) {
-				case 0:
+				case GIMAGE_OK:
 					result = true;
 					break;
-				case 1:
+				case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
 					wxMessageBox("ColorSpace apply: no input profile in image.");
 					result = false;
 					break;
-				case 2:
-					wxMessageBox("ColorSpace apply: input profile doesn't support rendering intent.");
+				case GIMAGE_APPLYCOLORSPACE_BADINTENT:
+					wxMessageBox("ColorSpace apply: input/output profile doesn't support rendering intent.");
 					result = false;
 					break;
+/*
 				case 3:
 					wxMessageBox("ColorSpace apply: output profile doesn't support rendering intent.");
 					result = false;
 					break;
-				case 4:
+*/
+				case GIMAGE_APPLYCOLORSPACE_BADTRANSFORM:
 					wxMessageBox("ColorSpace apply: colorspace transform creation failed.");
 					result = false;
 					break;
@@ -189,7 +191,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 		}
 		else if (cp[1] == "assign") {
-			if (!dib->AssignColorspace(std::string(fname.GetFullPath().c_str()))) {
+			if (dib->AssignColorspace(std::string(fname.GetFullPath().c_str())) != GIMAGE_OK) {
 				wxMessageBox("ColorSpace assign failed.");
 				result = false;
 			}
