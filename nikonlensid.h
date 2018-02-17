@@ -2,7 +2,12 @@
 #define NIKONLENSID_H
 
 #include <string>
+
+#ifdef WIN32
+#include <winsock2.h> 
+#else
 #include <arpa/inet.h>
+#endif
 
 #define FMLVERSION "4.4.527.01"
 #define FMLDATE "2017-02-27"
