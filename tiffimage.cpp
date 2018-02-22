@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tiffio.h"
+#include "tif_dir.h"
 
 #include <string>
 #include <map>
@@ -51,6 +52,16 @@ bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsi
 		if (TIFFGetField(tif, TIFFTAG_LENSINFO, &infobuf))  info["LensInfo"]=infobuf; 
 		if (TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &infobuf))  info["ImageDescription"]=infobuf; 
 		if (TIFFGetField(tif, TIFFTAG_DATETIME, &infobuf)) info["DateTime"]=infobuf;
+		
+		uint32 read_dir_offset; uint32 count;
+		float fval;
+		uint16 * sval;
+		TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset );
+		TIFFReadEXIFDirectory(tif, read_dir_offset);
+		if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_EXPOSURETIME, &fval)) info["ExposureTime"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_FOCALLENGTH, &fval)) info["FocalLength"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_ISOSPEEDRATINGS, &count, &sval)) info["ISOSpeedRatings"] = tostr(*sval);
 		
 		*width = w;
 		*height = h;
@@ -184,6 +195,16 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		}
 		else return NULL;
 		
+		uint32 read_dir_offset; uint32 count;
+		float fval;
+		uint16 * sval;
+		TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset );
+		TIFFReadEXIFDirectory(tif, read_dir_offset);
+		if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_EXPOSURETIME, &fval)) info["ExposureTime"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_FOCALLENGTH, &fval)) info["FocalLength"] = tostr(fval);
+		if (TIFFGetField( tif, EXIFTAG_ISOSPEEDRATINGS, &count, &sval)) info["ISOSpeedRatings"] = tostr(*sval);
+		
 		*width = w;
 		*height = h;
 		*numcolors = c;
@@ -232,8 +253,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		if (info.find("ImageDescription") != info.end())  TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, info["ImageDescription"].c_str());
 
 		if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
-
-
+				
 		unsigned scanlinesize = TIFFScanlineSize(tif);
 		buf = (unsigned char *) _TIFFmalloc(scanlinesize);
 		img = imagedata;
@@ -249,6 +269,35 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			img+=scanlinesize;
 		}
 	}
+
+	TIFFWriteDirectory( tif );
+	
+	uint64 dir_offset = 0;
+	TIFFCreateEXIFDirectory(tif);
+
+	if (info.find("ISOSpeedRatings") != info.end())  {
+		uint16 iso = (uint16) atoi(info["ISOSpeedRatings"].c_str());
+		TIFFSetField(tif, EXIFTAG_ISOSPEEDRATINGS, 1, &iso);
+	}
+
+	if (info.find("ExposureTime") != info.end())  {
+		double extime = atof(info["ExposureTime"].c_str());
+		TIFFSetField(tif, EXIFTAG_EXPOSURETIME, extime);
+	}
+
+	if (info.find("FNumber") != info.end())  {
+		double fnbr = atof(info["FNumber"].c_str());
+		TIFFSetField(tif, EXIFTAG_FNUMBER, fnbr);
+	}
+
+	if (info.find("FocalLength") != info.end())  {
+		double flen = atof(info["FocalLength"].c_str());
+		TIFFSetField(tif, EXIFTAG_FOCALLENGTH, flen);
+	}
+
+	TIFFWriteCustomDirectory( tif, &dir_offset);
+	TIFFSetDirectory(tif, 0);
+	TIFFSetField(tif, TIFFTAG_EXIFIFD, dir_offset );
 
 	(void) TIFFClose(tif);
 	if (buf) _TIFFfree(buf);

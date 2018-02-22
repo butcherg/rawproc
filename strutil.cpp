@@ -17,6 +17,13 @@ std::string tostr(double t)
    return os.str(); 
 } 
 
+std::string tostr(unsigned short t)
+{ 
+   std::ostringstream os; 
+   os<<t; 
+   return os.str(); 
+} 
+
 std::string underscore(std::string str)
 {
 	std::string s = str;

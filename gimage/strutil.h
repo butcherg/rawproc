@@ -6,6 +6,7 @@
 #include <map>
 
 std::string tostr(double t);
+std::string tostr(unsigned short t);
 std::string underscore(std::string str);
 std::string de_underscore(std::string str);
 std::vector<std::string> split(std::string s, std::string delim);
