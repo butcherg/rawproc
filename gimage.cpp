@@ -2458,6 +2458,9 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 	else if (ext == FILETYPE_JPEG) {
 		_loadJPEGInfo(filename, &width, &height, &colors, imgdata); 
 	}
+	else if (ext == FILETYPE_PNG) {
+		_loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata); 
+	}
 	else {
 #ifndef USE_DCRAW
 		_loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata); 
