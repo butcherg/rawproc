@@ -35,7 +35,10 @@ bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsi
 		uint32* raster;
 
 		uint32 imagelength, imagewidth;
-		uint16 config, nsamples;
+		uint16 config, nsamples, uval;
+		uint32 read_dir_offset; uint32 count;
+		float fval;
+		uint16 * sval;
         
 		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
 		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
@@ -52,10 +55,9 @@ bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsi
 		if (TIFFGetField(tif, TIFFTAG_LENSINFO, &infobuf))  info["LensInfo"]=infobuf; 
 		if (TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &infobuf))  info["ImageDescription"]=infobuf; 
 		if (TIFFGetField(tif, TIFFTAG_DATETIME, &infobuf)) info["DateTime"]=infobuf;
+		if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &uval)) info["Orientation"]=tostr(uval);
 		
-		uint32 read_dir_offset; uint32 count;
-		float fval;
-		uint16 * sval;
+
 		TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset );
 		TIFFReadEXIFDirectory(tif, read_dir_offset);
 		if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
@@ -87,7 +89,7 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		uint32* raster;
 
 		uint32 imagelength, imagewidth;
-		uint16 config, nsamples, sampleformat;
+		uint16 config, nsamples, sampleformat, uval;
 
 		unsigned len;
 		char * buffer;
@@ -113,6 +115,7 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			if (sampleformat == SAMPLEFORMAT_IEEEFP) info["SampleFormat"]="float";
 			if (sampleformat == SAMPLEFORMAT_VOID) info["SampleFormat"]="void";
 		}
+		if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &uval)) info["Orientation"]=tostr(uval);
 
 		if (TIFFGetField(tif, TIFFTAG_ICCPROFILE, &len, &buffer)) {
 			*icc_m = new char[len];
@@ -251,6 +254,10 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		if (info.find("LensInfo") != info.end())  TIFFSetField(tif, TIFFTAG_LENSINFO, info["LensInfo"].c_str());
 		if (info.find("DateTime") != info.end()) TIFFSetField(tif, TIFFTAG_DATETIME, info["DateTime"].c_str());
 		if (info.find("ImageDescription") != info.end())  TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, info["ImageDescription"].c_str());
+		if (info.find("Orientation") != info.end()) {
+			uint16 orient = (uint16) atoi(info["Orientation"].c_str());
+			TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
+		}
 
 		if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
 				
