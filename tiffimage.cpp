@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tiffio.h"
-#include "tif_dir.h"
 
 #include <string>
 #include <map>
