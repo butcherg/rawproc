@@ -56,7 +56,7 @@ bool _loadRAWInfo(const char *filename,
 		info["Artist"] = P2.artist; 
 		info["Make"] = P1.make;  
 		info["Model"] = P1.model;  
-		info["Orientation"] = tostr(S.flip);
+		info["Orientation"] = tostr((unsigned short) S.flip);
 
 		time_t rawtime = P2.timestamp;
 		struct tm * timeinfo;
@@ -595,7 +595,7 @@ char * _loadRAW(const char *filename,
 	else
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 	if (RawProcessor.imgdata.params.user_flip == 0) 
-		info["Orientation"] = tostr(S.flip); //dcraw left the orientation alone, use the metadata
+		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 	else
 		info["Orientation"] = "0"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
 	time_t rawtime = P2.timestamp;
