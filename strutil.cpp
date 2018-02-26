@@ -7,7 +7,19 @@
 #include <sstream> 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h> 
+
+#ifdef WIN32
+	#include <direct.h>
+	#include <io.h> 
+	#define GetCurrentDir _getcwd
+
+	#define access    _access_s
+#else
+	#include <unistd.h>
+	#define GetCurrentDir getcwd
+#endif
 
 
 std::string tostr(double t)
@@ -41,6 +53,35 @@ std::string de_underscore(std::string str)
 }
 
 	
+std::string getAppConfigFilePath()
+{
+	std::string dir = "";
+#ifdef WIN32
+	dir = std::string(getenv("APPDATA")) + "\\rawproc\\rawproc.conf";
+#else
+	dir = std::string(getenv("HOME")) + "/.rawproc/rawproc.conf";
+#endif
+
+	if (access( dir.c_str(), 0 ) == 0)
+		return dir;
+	else
+		return "";
+
+}
+
+std::string getCwdConfigFilePath()
+{
+	char cwdpath[FILENAME_MAX];
+
+	if (!GetCurrentDir(cwdpath, sizeof(cwdpath))) {
+		return "";
+	}
+#ifdef WIN32
+	return std::string(cwdpath)+"\\rawproc.conf";
+#else
+	return std::string(cwdpath) + "/rawproc.conf";
+#endif
+}
 
 
 
