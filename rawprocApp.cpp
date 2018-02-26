@@ -19,6 +19,7 @@
 
 #include "util.h"
 #include "gimage/gimage.h"
+#include "gimage/strutil.h"
 #include "myConfig.h"
 
 IMPLEMENT_APP(rawprocFrmApp)
@@ -47,8 +48,12 @@ bool rawprocFrmApp::OnInit()
 	frame->Show();
 
 	wxString configfile;
-	wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
-	wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
+	//wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
+	//wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
+
+	wxString conf_cwd = wxString(getCwdConfigFilePath().c_str());
+	wxString conf_configd = wxString(getAppConfigFilePath().c_str());
+
 	if (cmdline.Found("c", &configfile)) {
 		frame->SetConfigFile(configfile);
 		myConfig::loadConfig(std::string(configfile.c_str()));
