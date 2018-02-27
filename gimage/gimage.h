@@ -8,8 +8,6 @@
 #include "curve.h"
 #include "half.hpp"
 
-#define VERSION "0.2"
-
 #ifndef PIXTYPE
 #define PIXTYPE float
 #endif

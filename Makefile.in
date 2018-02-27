@@ -15,9 +15,11 @@ WX_CFLAGS_ONLY=@WX_CFLAGS_ONLY@
 WX_LIBS=@WX_LIBS@
 
 BUILDDATE=-DBUILDDATE='"$(shell date)"'
+ifdef VERSION
+	VERSIONSTR=-DVERSION='"$(VERSION)"'
+endif
 
 EXT=@EXEEXT@
-VERSION=$(shell grep 'wxString version' ../rawprocFrm.cpp |sed 's/wxString version = //' | sed 's/"//g' |sed 's/;//')
 
 srcdir=@srcdir@
 VPATH=@srcdir@
@@ -36,10 +38,10 @@ exif: exif.o $(LIBOBJECTS)
 
 
 exif.o: $(srcdir)/exif.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/exif.cpp -o$@
+	$(CXX) $(VERSIONSTR) $(BUILDDATE) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/exif.cpp -o$@
 
 img.o: $(srcdir)/img.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -std=c++11 -c $(srcdir)/img.cpp -o$@
+	$(CXX) $(VERSIONSTR) $(BUILDDATE) $(CXXFLAGS) $(CPPFLAGS) -std=c++11 -c $(srcdir)/img.cpp -o$@
 
 #elapsedtime.o: $(srcdir)/elapsedtime.cpp
 #	$(CXX) -c $(srcdir)/elapsedtime.cpp  -o$@
@@ -130,7 +132,7 @@ PicProcessor.o: $(srcdir)/PicProcessor.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessor.cpp -o$@
 
 rawprocFrm.o: $(srcdir)/rawprocFrm.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) $(BUILDDATE) $(LIBRAWFLAGS)  -c $(srcdir)/rawprocFrm.cpp -o$@
+	$(CXX) $(VERSIONSTR) $(BUILDDATE) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS) $(LIBRAWFLAGS)  -c $(srcdir)/rawprocFrm.cpp -o$@
 
 rawprocApp.o: $(srcdir)/rawprocApp.cpp 
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/rawprocApp.cpp  -o$@
@@ -192,8 +194,11 @@ wininstaller:
 
 .PHONY: zip
 zip:
+ifdef VERSION
 	zip "rawproc-@INNO_SUFFIX@-$(VERSION).zip" img.exe ../rawproc.conf rawprocdoc.zip rawproc.exe
-
+else
+	zip "rawproc-@INNO_SUFFIX@.zip" img.exe ../rawproc.conf rawprocdoc.zip rawproc.exe
+endif
 
 print-%  : ; @echo $* = $($*)
 

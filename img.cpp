@@ -138,6 +138,11 @@ int main (int argc, char **argv)
 
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
+		#ifdef VERSION
+		printf("img version: %s build date: %s\n",VERSION, BUILDDATE);
+		#else
+			printf("img build date: %s\n", BUILDDATE);
+		#endif
 		printf("Usage: img inputfile [command[:parameters] ...] outputfile\n\n");
 		printf("inputfile and output file can have one wildcard each, '*', to process \n");
 		printf("multiple files, e.g., 'img *.NEF gamma:2.2 blackwhitepoint *.tif' will\n");
@@ -246,7 +251,7 @@ for (int f=0; f<files.size(); f++)
 	command += " ";
 
 	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
-	printf("Orientation: %d\n", orientation);
+	//printf("Orientation: %d\n", orientation);
 	if (orientation != 0) {
 		printf("Normalizing image orientation from %d...",orientation);
 		_mark();

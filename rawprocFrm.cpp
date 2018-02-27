@@ -47,8 +47,6 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-wxString version = "0.6.3Dev";
-
 //Do not add custom headers between
 //Header Include Start and Header Include End
 //wxDev-C++ designer will remove them
@@ -482,15 +480,15 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
 	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize") 		p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else return NULL;
 	p->createPanel(parambook);
@@ -510,8 +508,10 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 wxString rawprocFrm::AssembleCommand()
 {
 	SetStatusText("");
-	wxString cmd = "rawproc-";
-	cmd.Append(version);
+	wxString cmd = "rawproc";
+	#ifdef VERSION
+		cmd.Append(wxString::Format("-%s", VERSION));
+	#endif
 	cmd.Append(" ");
 	wxTreeItemIdValue cookie;
 	wxTreeItemId root = commandtree->GetRootItem();
@@ -946,7 +946,11 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
 
 			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
-			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",version).c_str());
+			wxString versionstr = "(dev build)";
+			#ifdef VERSION
+				versionstr = VERSION;
+			#endif
+			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",versionstr).c_str());
 			
 			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
@@ -1681,13 +1685,18 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 }
 
 void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
-{
+{	
 	wxAboutDialogInfo info;
-	info.SetName(_("rawproc"));
-	info.SetVersion(_(version));
+
+	#ifdef VERSION
+		info.SetName(_("rawproc"));
+		info.SetVersion(VERSION);
+	#else
+		info.SetName(_("rawproc\n(development build)"));
+	#endif
+
 	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
-	//wxString gImageVersion(gImage::Version().c_str());
 	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxString libraries = wxString(gImage::LibraryVersions());
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
