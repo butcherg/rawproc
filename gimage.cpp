@@ -33,7 +33,11 @@
 
 const char * gImageVersion()
 {
+	#ifdef VERSION
 	return VERSION;
+	#else 
+	return "";
+	#endif
 }
 
 std::string gImage::profilepath = "";
@@ -581,7 +585,11 @@ GIMAGE_FILETYPE gImage::getFileNameType(const char * filename)
 
 std::string gImage::Version()
 {
+	#ifdef VERSION
 	return VERSION;
+	#else 
+	return "";
+	#endif
 }
 
 std::string gImage::LibraryVersions()
