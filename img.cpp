@@ -17,6 +17,26 @@
 #include "gimage/gimage.h"
 #include "elapsedtime.h"
 #include "gimage/strutil.h"
+#include "myConfig.h"
+
+std::string param_string(std::string filter)
+{
+	std::string paramstr, name, val;
+
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		name = it->first;
+		val =  it->second;
+		if (name.find(filter) != std::string::npos) {
+			val = myConfig::getConfig().getValue(name);
+			name = name.substr(name.find_last_of(".")+1, name.size());
+			if (val != "") paramstr.append(string_format("%s=%s;",name.c_str(), val.c_str()));
+		}
+	}
+
+	return paramstr;
+}
+
 
 //matchspec: takes a file name and returns the variant part, specified by the file specification
 std::string matchspec(std::string fname, std::string fspec)
@@ -135,6 +155,21 @@ int main (int argc, char **argv)
 	int c;
 	int flags;
 	//gImage dib;
+	
+
+	std::string conf_cwd = getCwdConfigFilePath();
+	std::string conf_configd = getAppConfigFilePath();
+
+	if (access( conf_cwd.c_str(), 0 ) == 0) {
+		myConfig::loadConfig(conf_cwd);
+		printf("configuration file: %s\n", conf_cwd.c_str());
+	}
+	else if (access( conf_configd.c_str(), 0 ) == 0) {
+		myConfig::loadConfig(conf_configd);
+		printf("configuration file: %s\n", conf_configd.c_str());
+	}
+	
+	gImage::setProfilePath(myConfig::getConfig().getValue("cms.profilepath"));
 
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
@@ -186,7 +221,23 @@ int main (int argc, char **argv)
 	if (infile.size() < 2) infile.push_back("");
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
 	if (outfile.size() < 2) outfile.push_back("");
+	
+	
 
+	if (infile[1].find(".") != std::string::npos)
+		if (infile[1].find("input") != std::string::npos)
+			if (infile[1].find("parameters") != std::string::npos)
+				if (myConfig::getConfig().exists(infile[1]))
+					infile[1] = myConfig::getConfig().getValue(infile[1]);
+				else {
+					printf("Error: property %s not found.\n", infile[1].c_str());
+					exit(0);
+				}
+	else if (infile[1].find(".") != std::string::npos)
+		if (infile[1].find("input") != std::string::npos)
+			if (infile[1].find("raw") != std::string::npos)
+				if (infile[1].find("libraw") != std::string::npos)
+					infile[1] = param_string("input.raw.libraw.");
 
 
 	if (countchar(infile[0],'*') == 1) {
@@ -271,6 +322,11 @@ for (int f=0; f<files.size(); f++)
 		char c[256];
 		strncpy(c, commands[i].c_str(), 255);
 		char* cmd = strtok(c,":");
+		
+		//if (strcmp(cmd,"input.raw.default") == 0) {
+		//	std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue(cmd), " ");
+		//	for (unsigned i=0; i<cmdlist.size(); i++) commands.insert(commands.begin(), cmdlist[i]);
+		//}
 
 		//#bright:[-100 - 100] default: 0 (no-bright)
 		if (strcmp(cmd,"bright") == 0) {  

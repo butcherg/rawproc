@@ -30,8 +30,8 @@ all: rawproc img exif
 rawproc:  $(OBJECTS) $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o rawproc$(EXT) $(OBJECTS) $(WX_LIBS) $(LIBOBJECTS) $(LIBS) 
 
-img: img.o elapsedtime.o $(LIBOBJECTS)
-	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o $(LIBOBJECTS) $(LIBS)
+img: img.o elapsedtime.o myConfig.o $(LIBOBJECTS)
+	$(CXX) $(LDFLAGS) $(STATIC) -o img$(EXT) img.o elapsedtime.o myConfig.o $(LIBOBJECTS) $(LIBS)
 	
 exif: exif.o $(LIBOBJECTS)
 	$(CXX) $(LDFLAGS) $(STATIC) -o exif$(EXT)  exif.o $(LIBOBJECTS) $(LIBS) 

@@ -52,6 +52,17 @@ std::string de_underscore(std::string str)
 	return s;
 }
 
+std::string filepath_normalize(std::string str)
+{
+	int pos;
+#ifdef WIN32
+	while ((pos = str.find_first_of('/')) != std::string::npos) str.replace(pos,1,"\\");
+#else
+	while ((pos = str.find_first_of('\\')) != std::string::npos) str.replace(pos,1,"/");
+#endif
+	return str;
+}
+
 	
 std::string getAppConfigFilePath()
 {
