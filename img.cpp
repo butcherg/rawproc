@@ -143,193 +143,61 @@ struct fnames {
 	std::string infile, outfile;
 };
 
-int main (int argc, char **argv) 
+
+std::string commandstring;
+
+void do_cmd(gImage &dib, std::string commandstr)
 {
-	char * filename;
-	
-	//the corresponding input and output file names 
-	std::vector<fnames> files;
-	
-	std::string commandstring;
-	
-	int c;
-	int flags;
-	//gImage dib;
-	
-
-	std::string conf_cwd = getCwdConfigFilePath();
-	std::string conf_configd = getAppConfigFilePath();
-
-	if (access( conf_cwd.c_str(), 0 ) == 0) {
-		myConfig::loadConfig(conf_cwd);
-		printf("configuration file: %s\n", conf_cwd.c_str());
-	}
-	else if (access( conf_configd.c_str(), 0 ) == 0) {
-		myConfig::loadConfig(conf_configd);
-		printf("configuration file: %s\n", conf_configd.c_str());
-	}
-	
-	gImage::setProfilePath(myConfig::getConfig().getValue("cms.profilepath"));
-
-	if (argc < 2) {
-		//printf("Error: No input file specified.\n");
-		#ifdef VERSION
-		printf("img version: %s build date: %s\n",VERSION, BUILDDATE);
-		#else
-			printf("img build date: %s\n", BUILDDATE);
-		#endif
-		printf("Usage: img inputfile [command[:parameters] ...] outputfile\n\n");
-		printf("inputfile and output file can have one wildcard each, '*', to process \n");
-		printf("multiple files, e.g., 'img *.NEF gamma:2.2 blackwhitepoint *.tif' will\n");
-		printf("open all the .NEFs in the current directory, apply gamma and auto black/white \n");
-		printf("point correction to each,and save each as the corresponding filename.tif.\n\n");
-		printf("Available commands:\n");
-		printf("\tbright:[-100 - 100, default=0]\n");
-		printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
-		printf("\tcontrast:[-100 - 100, default=0]\n");
-		printf("\tcrop:x,y,w,h\n");
-		printf("\tdenoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3\n");
-		printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
-		printf("\tgray:r,g,b - values are the fractional (0.x) proportions with which to calculate the neutral value.\n");
-		printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
-		printf("\t\tlanczos3 (default)]\n");
-		printf("\trotate:[0 - 45, default=0]\n");
-		printf("\tsharpen:[0 - 10, default=0]\n");
-		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
-		printf("\ttint:r,g,b - add/subtract value from each channel\n\n");
-		printf("\twhitebalance:rmult,gmult,bmult\n");
-		
-		exit(1);
-	}
-
-	if (argc < 3) {
-		printf("Error: No output file specified.\n");
-		exit(1);
-	}
-
-	if (countchar(std::string(argv[1]),'*') > 1) {
-		printf("Error: Too many wildcards in input filespec.\n");
-		exit(1);
-	}
-	if (countchar(std::string(argv[argc-1]),'*') > 1) {
-		printf("Error: Too many wildcards in output filespec.\n");
-		exit(1);
-	}
-
-	//separates the parameters from the input and output file strings
-	std::vector<std::string> infile = split(std::string(argv[1]),":");
-	if (infile.size() < 2) infile.push_back("");
-	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
-	if (outfile.size() < 2) outfile.push_back("");
-	
-	
-
-	if (infile[1].find(".") != std::string::npos)
-		if (infile[1].find("input") != std::string::npos)
-			if (infile[1].find("parameters") != std::string::npos)
-				if (myConfig::getConfig().exists(infile[1]))
-					infile[1] = myConfig::getConfig().getValue(infile[1]);
-				else {
-					printf("Error: property %s not found.\n", infile[1].c_str());
-					exit(0);
-				}
-	else if (infile[1].find(".") != std::string::npos)
-		if (infile[1].find("input") != std::string::npos)
-			if (infile[1].find("raw") != std::string::npos)
-				if (infile[1].find("libraw") != std::string::npos)
-					infile[1] = param_string("input.raw.libraw.");
-
-
-	if (countchar(infile[0],'*') == 1) {
-		if (countchar(outfile[0],'*') == 1) {
-			std::vector<std::string> flist = fileglob(infile[0]);
-			for (int i=0; i<flist.size(); i++) {
-				std::string variant = matchspec(flist[i], infile[0]);
-				if (variant == "") continue;
-				fnames f;
-				f.infile = flist[i];
-				f.outfile = makename(variant,outfile[0]);
-				files.push_back(f);
-			}
-				
-		}
-		else {
-			printf("Error: If input file has a wildcard spec, the output file should have one also.\n");
-			exit(1);
-		}
-
-	}
-	else {
-		fnames f;
-		f.infile = infile[0];
-		f.outfile = outfile[0];
-		files.push_back(f);
-	}
-	
-
-//list of commands to apply to each input file
-std::vector<std::string> commands;
-for (int i = 2; i<argc-1; i++) {
-	commands.push_back(std::string(argv[i]));
-	//commandstring.append(" "+std::string(argv[i]));
-}
-
-int count = 0;
-
-
-for (int f=0; f<files.size(); f++)
-{
-
-	char iname[256];
-	strncpy(iname, files[f].infile.c_str(), 255);
-	
-	if (file_exists(files[f].outfile.c_str())) {
-		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
-		continue;
-	}
-	
-	count++;
-
-	std::string command = "rawproc-img ";
-
-	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
-	_mark();
-	gImage dib = gImage::loadImageFile(iname, infile[1]);
-	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
-
-	command += std::string(iname);
-	if (infile[1] != "") command += ":" + infile[1];
-	command += " ";
-
-	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
-	//printf("Orientation: %d\n", orientation);
-	if (orientation != 0) {
-		printf("Normalizing image orientation from %d...",orientation);
-		_mark();
-		if (orientation == 2) dib.ApplyHorizontalMirror(); 
-		if (orientation == 3) dib.ApplyRotate180(); 
-		if (orientation == 4) dib.ApplyVerticalMirror(); 
-		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
-		if (orientation == 6) {dib.ApplyRotate90(); }
-		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
-		if (orientation == 8) dib.ApplyRotate270();
-		dib.setInfo("Orientation","0");
-		printf("done. (%fsec)\n",_duration());
-	}
-	
-	
-	for (int i=0; i<commands.size(); i++) {
 		char c[256];
-		strncpy(c, commands[i].c_str(), 255);
+		strncpy(c, commandstr.c_str(), 255);
 		char* cmd = strtok(c,":");
 		
-		//if (strcmp(cmd,"input.raw.default") == 0) {
-		//	std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue(cmd), " ");
-		//	for (unsigned i=0; i<cmdlist.size(); i++) commands.insert(commands.begin(), cmdlist[i]);
-		//}
-
+		if (strcmp(cmd,"colorspace") == 0) { 
+			char *profstr = strtok(NULL, ",");
+			char *opstr = strtok(NULL, ",");
+			char *istr = strtok(NULL, ",");
+			char *bpstr = strtok(NULL, " ");
+			
+			std::string profile = "";
+			std::string profilepath =  gImage::getProfilePath(); //myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str();
+			if (profstr == NULL) {
+				printf("colorspace: no profile.\n");
+				return;
+			}
+			else profile = std::string(profstr);
+			
+			std::string operation = "convert";
+			if (opstr) operation = std::string(opstr);
+			
+			cmsUInt32Number intent = INTENT_RELATIVE_COLORIMETRIC;
+			if (istr) {
+				std::string intentstr = std::string(istr);
+				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+				if (intentstr == "saturation") intent = INTENT_SATURATION;
+				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+			}
+			
+			bool bp = false;
+			std::string bpcomp = "";
+			if (bpstr != NULL) bpcomp = std::string(bpstr);
+			if (bpcomp == "bpc") bp = true;
+			
+			int threadcount=gImage::ThreadCount();
+			printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount);
+			_mark();
+			if (operation == "convert")
+				if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
+			else
+				dib.AssignColorspace(profilepath+profile);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
+			commandstring += std::string(cs);
+		}
+		
 		//#bright:[-100 - 100] default: 0 (no-bright)
-		if (strcmp(cmd,"bright") == 0) {  
+		else if (strcmp(cmd,"bright") == 0) {  
 			double bright=0.0;
 			char *b = strtok(NULL," ");
 			if (b) bright = atof(b);
@@ -349,7 +217,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, bright);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#blackwhitepoint[:0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
@@ -386,7 +254,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, blk, wht);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#contrast:[-100 - 100] default: 0 (no-contrast)
@@ -413,7 +281,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, contrast);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#gamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)
@@ -439,7 +307,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, gamma);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 
@@ -478,7 +346,7 @@ for (int f=0; f<files.size(); f++)
 				printf("done (%fsec).\n", _duration());
 				char cs[256];
 				sprintf(cs, "%s:%d,%d ",cmd, w, h);
-				command += std::string(cs);
+				commandstring += std::string(cs);
 			}
 		}
 
@@ -495,7 +363,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, angle);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#sharpen:[0 - 10, default: 0 (no-sharpen)
@@ -511,7 +379,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, sharp);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		else if (strcmp(cmd,"crop") == 0) {  //#crop:x,y,w,h      
@@ -534,7 +402,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%d,%d,%d,%d ",cmd, x, y, width, height);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#saturation:[0 - 5.0] default=1.0, no change
@@ -551,7 +419,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, saturation);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
@@ -568,7 +436,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%d,%d ",cmd, sigma, 3, 1);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#tint:[r,g,b] default: 0,0,0
@@ -589,7 +457,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#whitebalance:[rmult,gmult,bmult] default: 1,1,1
@@ -610,7 +478,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 
 		//#gray:[r,g,b] default: 0.21,0.72,0.07 
@@ -631,7 +499,7 @@ for (int f=0; f<files.size(); f++)
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
-			command += std::string(cs);
+			commandstring += std::string(cs);
 		}
 		
 		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
@@ -710,7 +578,190 @@ for (int f=0; f<files.size(); f++)
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 
-	} //end of processing commands.
+}
+
+int main (int argc, char **argv) 
+{
+	char * filename;
+	
+	//the corresponding input and output file names 
+	std::vector<fnames> files;
+	
+	
+	int c;
+	int flags;
+	//gImage dib;
+	
+
+	std::string conf_cwd = getCwdConfigFilePath();
+	std::string conf_configd = getAppConfigFilePath();
+
+	if (access( conf_cwd.c_str(), 0 ) == 0) {
+		myConfig::loadConfig(conf_cwd);
+		printf("configuration file: %s\n", conf_cwd.c_str());
+	}
+	else if (access( conf_configd.c_str(), 0 ) == 0) {
+		myConfig::loadConfig(conf_configd);
+		printf("configuration file: %s\n", conf_configd.c_str());
+	}
+	
+	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
+
+	if (argc < 2) {
+		//printf("Error: No input file specified.\n");
+		#ifdef VERSION
+		printf("img version: %s build date: %s\n",VERSION, BUILDDATE);
+		#else
+			printf("img build date: %s\n", BUILDDATE);
+		#endif
+		printf("Usage: img inputfile [command[:parameters] ...] outputfile\n\n");
+		printf("inputfile and output file can have one wildcard each, '*', to process \n");
+		printf("multiple files, e.g., 'img *.NEF gamma:2.2 blackwhitepoint *.tif' will\n");
+		printf("open all the .NEFs in the current directory, apply gamma and auto black/white \n");
+		printf("point correction to each,and save each as the corresponding filename.tif.\n\n");
+		printf("Available commands:\n");
+		printf("\tbright:[-100 - 100, default=0]\n");
+		printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
+		printf("\tcontrast:[-100 - 100, default=0]\n");
+		printf("\tcrop:x,y,w,h\n");
+		printf("\tdenoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3\n");
+		printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
+		printf("\tgray:r,g,b - values are the fractional (0.x) proportions with which to calculate the neutral value.\n");
+		printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
+		printf("\t\tlanczos3 (default)]\n");
+		printf("\trotate:[0 - 45, default=0]\n");
+		printf("\tsharpen:[0 - 10, default=0]\n");
+		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
+		printf("\ttint:r,g,b - add/subtract value from each channel\n\n");
+		printf("\twhitebalance:rmult,gmult,bmult\n");
+		
+		exit(1);
+	}
+
+	if (argc < 3) {
+		printf("Error: No output file specified.\n");
+		exit(1);
+	}
+
+	if (countchar(std::string(argv[1]),'*') > 1) {
+		printf("Error: Too many wildcards in input filespec.\n");
+		exit(1);
+	}
+	if (countchar(std::string(argv[argc-1]),'*') > 1) {
+		printf("Error: Too many wildcards in output filespec.\n");
+		exit(1);
+	}
+
+	//separates the parameters from the input and output file strings
+	std::vector<std::string> infile = split(std::string(argv[1]),":");
+	if (infile.size() < 2) infile.push_back("");
+	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
+	if (outfile.size() < 2) outfile.push_back("");
+	
+	
+	//sets input parameter string from a input.*.parameters property:
+	if (infile[1].find(".") != std::string::npos)
+		if (infile[1].find("input") != std::string::npos)
+			if (infile[1].find("parameters") != std::string::npos)
+				if (myConfig::getConfig().exists(infile[1]))
+					infile[1] = myConfig::getConfig().getValue(infile[1]);
+				else {
+					printf("Error: property %s not found.\n", infile[1].c_str());
+					exit(0);
+				}
+
+	//builds input parameter string from input.raw.libraw.* parameters
+	else if (infile[1].find(".") != std::string::npos)
+		if (infile[1].find("input") != std::string::npos)
+			if (infile[1].find("raw") != std::string::npos)
+				if (infile[1].find("libraw") != std::string::npos)
+					infile[1] = param_string(infile[1]+".");
+
+
+	if (countchar(infile[0],'*') == 1) {
+		if (countchar(outfile[0],'*') == 1) {
+			std::vector<std::string> flist = fileglob(infile[0]);
+			for (int i=0; i<flist.size(); i++) {
+				std::string variant = matchspec(flist[i], infile[0]);
+				if (variant == "") continue;
+				fnames f;
+				f.infile = flist[i];
+				f.outfile = makename(variant,outfile[0]);
+				files.push_back(f);
+			}
+				
+		}
+		else {
+			printf("Error: If input file has a wildcard spec, the output file should have one also.\n");
+			exit(1);
+		}
+
+	}
+	else {
+		fnames f;
+		f.infile = infile[0];
+		f.outfile = outfile[0];
+		files.push_back(f);
+	}
+	
+
+//list of commands to apply to each input file
+std::vector<std::string> commands;
+for (int i = 2; i<argc-1; i++) {
+	commands.push_back(std::string(argv[i]));
+}
+
+int count = 0;
+
+
+for (int f=0; f<files.size(); f++)
+{
+
+	char iname[256];
+	strncpy(iname, files[f].infile.c_str(), 255);
+	
+	if (file_exists(files[f].outfile.c_str())) {
+		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
+		continue;
+	}
+	
+	count++;
+
+	commandstring = "rawproc-img ";
+
+	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
+	_mark();
+	gImage dib = gImage::loadImageFile(iname, infile[1]);
+	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
+
+	commandstring += std::string(iname);
+	if (infile[1] != "") commandstring += ":" + infile[1];
+	commandstring += " ";
+
+	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
+	//printf("Orientation: %d\n", orientation);
+	if (orientation != 0) {
+		printf("Normalizing image orientation from %d...",orientation);
+		_mark();
+		if (orientation == 2) dib.ApplyHorizontalMirror(); 
+		if (orientation == 3) dib.ApplyRotate180(); 
+		if (orientation == 4) dib.ApplyVerticalMirror(); 
+		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
+		if (orientation == 6) {dib.ApplyRotate90(); }
+		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
+		if (orientation == 8) dib.ApplyRotate270();
+		dib.setInfo("Orientation","0");
+		printf("done. (%fsec)\n",_duration());
+	}
+	
+	//process commands:
+	for (int i=0; i<commands.size(); i++) {
+		if (commands[i] == "input.raw.default") {
+			std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue("input.raw.default"), " ");
+			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i]);
+		}
+		else do_cmd(dib, commands[i]);
+	}
 
 
 	char outfilename[256];
@@ -757,7 +808,7 @@ for (int f=0; f<files.size(); f++)
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
 	printf("Saving file %s %s... ",outfilename, outfile[1].c_str());
 	dib.setInfo("Software","img 0.1");
-	dib.setInfo("ImageDescription", command);
+	dib.setInfo("ImageDescription", commandstring);
 
 	if (dib.saveImageFile(outfilename, outfile[1].c_str()) == GIMAGE_OK) 
 		printf("done. (%fsec)\n\n",_duration());

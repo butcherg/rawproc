@@ -2253,6 +2253,9 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 
 	cmsHPROFILE gImgProf = cmsOpenProfileFromMem(profile, profile_length);
 	cmsHPROFILE hImgProf = cmsOpenProfileFromFile(iccfile.c_str(), "r");
+	
+	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
 
 	if (!cmsIsIntentSupported(gImgProf, intent, LCMS_USED_AS_INPUT))  {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
 	if (!cmsIsIntentSupported(hImgProf, intent, LCMS_USED_AS_OUTPUT)) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
