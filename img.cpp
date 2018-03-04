@@ -192,7 +192,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 				dib.AssignColorspace(profilepath+profile);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
-			sprintf(cs, "%s:%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
+			sprintf(cs, "%s:%s,%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
 			commandstring += std::string(cs);
 		}
 		
