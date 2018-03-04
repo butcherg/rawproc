@@ -529,6 +529,107 @@ void do_cmd(gImage &dib, std::string commandstr)
 		
 		}
 		
+		else if (strcmp(cmd,"curve") == 0) {
+			Curve crv;
+			int ctstart;
+			GIMAGE_CHANNEL channel;
+			std::vector<cp> ctrlpts;
+			char *p = strtok(NULL," ");
+			std::vector<std::string> cpts = split(std::string(p), ",");
+			ctstart = 1;
+			if 		(cpts[0] == "rgb") 	channel = CHANNEL_RGB;
+			else if (cpts[0] == "red") 	channel = CHANNEL_RED;
+			else if (cpts[0] == "green")channel = CHANNEL_GREEN;
+			else if (cpts[0] == "blue") channel = CHANNEL_BLUE;
+			else {
+				channel = CHANNEL_RGB;
+				ctstart = 0;
+			}
+			for (int i=ctstart; i<cpts.size()-1; i+=2) {
+				crv.insertpoint(atof(cpts[i].c_str()), atof(cpts[i+1].c_str()));
+			}
+			ctrlpts = crv.getControlPoints();
+			
+			int threadcount=gImage::ThreadCount();
+			printf("curve: %s (%d threads)... ",p,threadcount);
+			_mark();
+			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%s ",cmd, p);
+			commandstring += std::string(cs);
+			
+		}
+		
+		//#exposure:ev default: 1.0
+		else if (strcmp(cmd,"exposure") == 0) {
+			double ev=0.0;
+			char *s = strtok(NULL," ");
+			if (s) ev = atof(s);
+
+			int threadcount=gImage::ThreadCount();
+			printf("exposure: %0.2f (%d threads)... ",ev,threadcount);
+
+			_mark();
+			dib.ApplyExposureCompensation(ev, threadcount);  //local and patch hard-coded, for now...
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, ev);
+			commandstring += std::string(cs);
+		}
+		
+		else if (strcmp(cmd,"highlight") == 0) {
+			double highlight=0.0;
+			double threshold=128.0;
+			char *h = strtok(NULL,", ");
+			char *t = strtok(NULL," ");
+			if (h) highlight = atof(h);
+			if (t) threshold = atof(t);
+
+			Curve ctrlpts;
+			ctrlpts.insertpoint(0,0);
+			ctrlpts.insertpoint(threshold-20,threshold-20);
+			ctrlpts.insertpoint(threshold,threshold);
+			ctrlpts.insertpoint((threshold+threshold/2)-highlight,(threshold+threshold/2)+highlight);
+			ctrlpts.insertpoint(255,255);
+
+			int threadcount=gImage::ThreadCount();
+			printf("highlight: %0.2f,%0.2f (%d threads)... ",highlight,threshold,threadcount);
+
+			_mark();
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, highlight,threshold);
+			commandstring += std::string(cs);
+		}
+		
+		else if (strcmp(cmd,"shadow") == 0) {
+			double shadow=0.0;
+			double threshold=128.0;
+			char *s = strtok(NULL,", ");
+			char *t = strtok(NULL," ");
+			if (s) shadow = atof(s);
+			if (t) threshold = atof(t);
+
+			Curve ctrlpts;
+			ctrlpts.insertpoint(0,0);
+			ctrlpts.insertpoint((threshold/2)-shadow,(threshold/2)+shadow);
+			ctrlpts.insertpoint(threshold,threshold);
+			ctrlpts.insertpoint(threshold+20,threshold+20);
+			ctrlpts.insertpoint(255,255);
+
+			int threadcount=gImage::ThreadCount();
+			printf("shadow: %0.2f,%0.2f (%d threads)... ",shadow,threshold,threadcount);
+
+			_mark();
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, shadow,threshold);
+			commandstring += std::string(cs);
+		}
+		
 		//these don't have rawproc equivalents, so they're not added to the metadata-embedded command
 		//#rotate90 - rotate 90 degrees clockwise
 		else if (strcmp(cmd,"rotate90") == 0) {
