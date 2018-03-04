@@ -345,7 +345,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 				dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
 				printf("done (%fsec).\n", _duration());
 				char cs[256];
-				sprintf(cs, "%s:%d,%d ",cmd, w, h);
+				sprintf(cs, "%s:%d,%d,lanczos3 ",cmd, w, h);
 				commandstring += std::string(cs);
 			}
 		}
