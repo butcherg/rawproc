@@ -57,10 +57,10 @@ std::string filepath_normalize(std::string str)
 	int pos;
 #ifdef WIN32
 	while ((pos = str.find_first_of('/')) != std::string::npos) str.replace(pos,1,"\\");
-	if (str[str.size()-1] != '\\') str[str.size()-1] = '\\';
+	if (str[str.size()-1] != '\\') str.push_back('\\');
 #else
 	while ((pos = str.find_first_of('\\')) != std::string::npos) str.replace(pos,1,"/");
-	if (str[str.size()-1] != '/') str[str.size()-1] = '/';
+	if (str[str.size()-1] != '/') str.push_back('/');
 #endif
 	return str;
 }
