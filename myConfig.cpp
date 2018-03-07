@@ -2,35 +2,12 @@
 
 #include <fstream>
 #include <vector>
+#include "gimage/strutil.h"
 
 std::map<std::string, std::string> myConfig::defaultconfig;
 std::map<std::string, std::map<std::string,std::string> > myConfig::sectionconfig;
 
 myConfig config;
-
-std::vector<std::string> split(std::string strg, char c = ' ')
-{
-	const char * str = strg.c_str();
-	std::vector<std::string> result;
-	do
-	{
-		const char *begin = str;
-		while(*str != c && *str)
-			str++;
-		result.push_back(std::string(begin, str));
-	} while (0 != *str++);
-
-	return result;
-}
-
-std::vector<std::string> bifurcate(std::string strg, char c = ' ')
-{
-	std::vector<std::string> result;
-	std::size_t eq = strg.find_first_of(c);
-	result.push_back(strg.substr(0,eq));
-	result.push_back(strg.substr(eq+1));
-	return result;
-}
 
 myConfig::myConfig(std::string conffile)
 {
@@ -53,7 +30,6 @@ myConfig::myConfig(std::string conffile)
 		}
 
 		if (str.find_first_of("#") != std::string::npos) {
-			//parameter = split(str,'#');
 			parameter = bifurcate(str,'#');
 			parm = parameter[0];
 		}
@@ -62,7 +38,6 @@ myConfig::myConfig(std::string conffile)
 
 
 		if (str.find_first_of("=") != std::string::npos) {
-			//nameval = split(parm, '=');
 			nameval = bifurcate(parm, '=');
 			if (nameval[0] != "") {
 				if (section == "default")
