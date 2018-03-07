@@ -183,7 +183,12 @@ void do_cmd(gImage &dib, std::string commandstr)
 			if (bpstr != NULL) bpcomp = std::string(bpstr);
 			if (bpcomp == "bpc") bp = true;
 			
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
 			printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount);
 			_mark();
 			if (operation == "convert")
@@ -198,7 +203,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 		
 		//#bright:[-100 - 100] default: 0 (no-bright)
 		else if (strcmp(cmd,"bright") == 0) {  
-			double bright=0.0;
+			double bright = atof(myConfig::getConfig().getValueOrDefault("tool.bright.initialvalue","0").c_str());
 			char *b = strtok(NULL," ");
 			if (b) bright = atof(b);
 
@@ -209,7 +214,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			else
 				ctrlpts.insertpoint(255-bright,255);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.bright.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("bright: %0.2f (%d threads)... ",bright,threadcount);
 
 			_mark();
@@ -223,15 +232,18 @@ void do_cmd(gImage &dib, std::string commandstr)
 		//#blackwhitepoint[:0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			double blk=0.0, wht=255.0;
-			double blkthresh= 0.001, whtthresh=0.005;
-			int blklimit = 32, whtlimit = 32; 
+			double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
+			double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
+			int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
+			int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str()); 
 			long hmax = 0;
 			int maxpos;
 			char *b = strtok(NULL,",");
 			char *w = strtok(NULL,", ");
 			wht = 255; blk = 0;
+			long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 			if (!b) { 
-				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(0.001, 0.005, true, 240);
+				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
 				blk = bwpts[0];
 				wht = bwpts[1];
 
@@ -245,7 +257,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			ctrlpts.insertpoint(blk,0);
 			ctrlpts.insertpoint(wht,255);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("blackwhitepoint: %0.2f,%0.2f (%d threads)... ",blk,wht,threadcount);
 
 			_mark();
@@ -259,7 +275,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#contrast:[-100 - 100] default: 0 (no-contrast)
 		else if (strcmp(cmd,"contrast") == 0) {  
-			double contrast=0.0;
+			double contrast=atof(myConfig::getConfig().getValueOrDefault("tool.contrast.initialvalue","0").c_str());
 			char *c = strtok(NULL," ");
 			if (c) contrast = atof(c);
 
@@ -273,7 +289,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 				ctrlpts.insertpoint(255-contrast,255);
 			}
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.contrast.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("contrast: %0.2f (%d threads)... ",contrast,threadcount);
 
 			_mark();
@@ -286,7 +306,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#gamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)
 		else if (strcmp(cmd,"gamma") == 0) {  
-			double gamma=1.0;
+			double gamma=atof(myConfig::getConfig().getValueOrDefault("tool.gamma.initialvalue","2.2").c_str());
 			char *g = strtok(NULL," ");
 			if (g) gamma = atof(g);
 
@@ -299,7 +319,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 				ctrlpts.insertpoint((double) i, color);
 			}	
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.gamma.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("gamma: %0.2f (%d threads)... ",gamma,threadcount);
 
 			_mark();
@@ -313,15 +337,18 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#resize:w[,h] If either w or h is 0, resize preserves aspect of that dimension.  If only one number is present, the image is resized to that number along the longest dimension, preserving aspect.  
 		else if (strcmp(cmd,"resize") == 0) {  
-			unsigned w, h;
+			unsigned w, h;  //don't read defaults from properties
+			std::string algo = myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","catmullrom");
 			char *wstr = strtok(NULL,", ");
-			char *hstr = strtok(NULL," ");
+			char *hstr = strtok(NULL,", ");
+			char *astr = strtok(NULL," ");
 			if (wstr == NULL) {
 				printf("Error: resize needs at least one parameter.\n");
 			}
 			else {
 				if (wstr) w = atoi(wstr);
 				if (hstr) h = atoi(hstr);
+				if (astr) algo = std::string(astr);
 				unsigned dw = dib.getWidth();
 				unsigned dh = dib.getHeight();
 
@@ -338,11 +365,24 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 				if (h ==  0) h = dh * ((float)w/(float)dw);
 				if (w == 0)  w = dw * ((float)h/(float)dh); 
-				int threadcount=gImage::ThreadCount();
-				printf("resize: %dx%d (%d threads)... ",w,h,threadcount);
+
+				RESIZE_FILTER filter = FILTER_CATMULLROM;  //must be same as default if tool.resize.algorithm is not specified
+				if (algo == "box") filter = FILTER_BOX;
+				if (algo == "bilinear") filter = FILTER_BILINEAR;
+				if (algo == "bspline") filter = FILTER_BSPLINE;
+				if (algo == "bicubic") filter = FILTER_BICUBIC;
+				if (algo == "catmullrom") filter = FILTER_CATMULLROM;
+				if (algo == "lanczos3") filter = FILTER_LANCZOS3;
+
+				int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.resize.cores","0").c_str());
+				if (threadcount == 0) 
+					threadcount = gImage::ThreadCount();
+				else if (threadcount < 0) 
+					threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+				printf("resize: %dx%d,%s (%d threads)... ",w,h,algo.c_str(), threadcount);
 
 				_mark();
-				dib.ApplyResize(w,h, FILTER_LANCZOS3, threadcount);
+				dib.ApplyResize(w,h, filter, threadcount);
 				printf("done (%fsec).\n", _duration());
 				char cs[256];
 				sprintf(cs, "%s:%d,%d,lanczos3 ",cmd, w, h);
@@ -352,10 +392,14 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#rotate:[-45.0 - 45.0] default: 0 (no-rotate)
 		else if (strcmp(cmd,"rotate") == 0) {  
-			double angle=0.0;
+			double angle= atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
 			char *s = strtok(NULL," ");
 			if (s) angle = atof(s);
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.rotate.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("rotate: %0.2f (%d threads)... ",angle,threadcount);
 
 			_mark();
@@ -368,10 +412,14 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#sharpen:[0 - 10, default: 0 (no-sharpen)
 		else if (strcmp(cmd,"sharpen") == 0) {  
-			double sharp=0.0;
+			double sharp= atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
 			char *s = strtok(NULL," ");
 			if (s) sharp = atof(s);
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount);
 
 			_mark();
@@ -394,7 +442,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			if (hstr) height = atoi(hstr);
 			width += x;
 			height += y;
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("crop: %d,%d %dx%d (%d threads)... ",x,y,width,height,threadcount);
 
 			_mark();
@@ -407,11 +459,15 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#saturation:[0 - 5.0] default=1.0, no change
 		else if (strcmp(cmd,"saturation") == 0) {  
-			double saturation=0.0;
+			double saturation= atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
 			char *s = strtok(NULL," ");
 			if (s) saturation = atof(s);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("saturate: %0.2f (%d threads)... ",saturation,threadcount);
 
 			_mark();
@@ -424,15 +480,25 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
 		else if (strcmp(cmd,"denoise") == 0) {  
-			double sigma=0.0;
-			char *s = strtok(NULL," ");
+			double sigma= atof(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
+			int local = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
+			int patch = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
+			char *s = strtok(NULL,", ");
+			char *l = strtok(NULL,", ");
+			char *p = strtok(NULL," ");
 			if (s) sigma = atof(s);
+			if (l) local = atoi(l);
+			if (p) patch = atoi(p);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("denoise: %0.2f (%d threads)... ",sigma,threadcount);
 
 			_mark();
-			dib.ApplyNLMeans(sigma, 3, 1, threadcount);  //local and patch hard-coded, for now...
+			dib.ApplyNLMeans(sigma, local, patch, threadcount);  
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%d,%d ",cmd, sigma, 3, 1);
@@ -449,7 +515,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			if (g) green = atof(g);
 			if (b) blue = atof(b);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tint.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("tint: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
 
 			_mark();
@@ -462,7 +532,10 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#whitebalance:[rmult,gmult,bmult] default: 1,1,1
 		else if (strcmp(cmd,"whitebalance") == 0) {  
-			double redmult=1.0; double greenmult = 1.0; double bluemult = 1.0;
+			//no properties yet, no whitebalance in rawproc...
+			double redmult=1.0; 
+			double greenmult = 1.0; 
+			double bluemult = 1.0;
 			char *rm = strtok(NULL,", ");
 			char *gm = strtok(NULL,", ");
 			char *bm = strtok(NULL," ");
@@ -470,7 +543,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			if (gm) greenmult = atof(gm);
 			if (bm) bluemult = atof(bm);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.whitebalance.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("whitebalance: %0.2f,%0.2f,%0.2f (%d threads)... ",redmult,greenmult,bluemult,threadcount);
 
 			_mark();
@@ -483,7 +560,9 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 		//#gray:[r,g,b] default: 0.21,0.72,0.07 
 		else if (strcmp(cmd,"gray") == 0) {  
-			double red=0.21; double green=0.72; double blue = 0.07;
+			double red   = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str()); 
+			double green = atof(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72").c_str()); 
+			double blue  = atof(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07").c_str());
 			char *r = strtok(NULL,", ");
 			char *g = strtok(NULL,", ");
 			char *b = strtok(NULL," ");
@@ -491,7 +570,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			if (g) green = atof(g);
 			if (b) blue = atof(b);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.gray.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("gray: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
 
 			_mark();
@@ -503,7 +586,8 @@ void do_cmd(gImage &dib, std::string commandstr)
 		}
 		
 		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
-			int limit = 25; double threshold = 1.5;
+			int limit = atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50").c_str()); 
+			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5").c_str());
 			char *sx = strtok(NULL,", ");
 			char *sy = strtok(NULL,", ");
 			char *st = strtok(NULL,", ");
@@ -517,7 +601,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 					std::vector<coord> pts;
 					struct coord pt; pt.x = x; pt.y = y;
 					pts.push_back(pt);
-					int threadcount = gImage::ThreadCount();
+					int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.cores","0").c_str());
+					if (threadcount == 0) 
+						threadcount = gImage::ThreadCount();
+					else if (threadcount < 0) 
+						threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 					printf("redeye (%d threads)... ", threadcount);
 					_mark();
 					dib.ApplyRedeye(pts, threshold, limit, false, 1.0,  threadcount);
@@ -537,10 +625,10 @@ void do_cmd(gImage &dib, std::string commandstr)
 			char *p = strtok(NULL," ");
 			std::vector<std::string> cpts = split(std::string(p), ",");
 			ctstart = 1;
-			if 		(cpts[0] == "rgb") 	channel = CHANNEL_RGB;
-			else if (cpts[0] == "red") 	channel = CHANNEL_RED;
-			else if (cpts[0] == "green")channel = CHANNEL_GREEN;
-			else if (cpts[0] == "blue") channel = CHANNEL_BLUE;
+			if      (cpts[0] == "rgb") 	channel = CHANNEL_RGB;
+			else if (cpts[0] == "red")	channel = CHANNEL_RED;
+			else if (cpts[0] == "green")	channel = CHANNEL_GREEN;
+			else if (cpts[0] == "blue")	channel = CHANNEL_BLUE;
 			else {
 				channel = CHANNEL_RGB;
 				ctstart = 0;
@@ -550,7 +638,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			}
 			ctrlpts = crv.getControlPoints();
 			
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("curve: %s (%d threads)... ",p,threadcount);
 			_mark();
 			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
@@ -563,11 +655,15 @@ void do_cmd(gImage &dib, std::string commandstr)
 		
 		//#exposure:ev default: 1.0
 		else if (strcmp(cmd,"exposure") == 0) {
-			double ev=0.0;
+			double ev = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
 			char *s = strtok(NULL," ");
 			if (s) ev = atof(s);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("exposure: %0.2f (%d threads)... ",ev,threadcount);
 
 			_mark();
@@ -579,8 +675,8 @@ void do_cmd(gImage &dib, std::string commandstr)
 		}
 		
 		else if (strcmp(cmd,"highlight") == 0) {
-			double highlight=0.0;
-			double threshold=128.0;
+			double highlight = atof(myConfig::getConfig().getValueOrDefault("tool.highlight.level","0").c_str());
+			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.highlight.threshold","192").c_str());
 			char *h = strtok(NULL,", ");
 			char *t = strtok(NULL," ");
 			if (h) highlight = atof(h);
@@ -593,7 +689,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			ctrlpts.insertpoint((threshold+threshold/2)-highlight,(threshold+threshold/2)+highlight);
 			ctrlpts.insertpoint(255,255);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.highlight.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("highlight: %0.2f,%0.2f (%d threads)... ",highlight,threshold,threadcount);
 
 			_mark();
@@ -605,8 +705,8 @@ void do_cmd(gImage &dib, std::string commandstr)
 		}
 		
 		else if (strcmp(cmd,"shadow") == 0) {
-			double shadow=0.0;
-			double threshold=128.0;
+			double shadow = atof(myConfig::getConfig().getValueOrDefault("tool.shadow.level","0").c_str());
+			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.shadow.threshold","64").c_str());
 			char *s = strtok(NULL,", ");
 			char *t = strtok(NULL," ");
 			if (s) shadow = atof(s);
@@ -619,7 +719,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 			ctrlpts.insertpoint(threshold+20,threshold+20);
 			ctrlpts.insertpoint(255,255);
 
-			int threadcount=gImage::ThreadCount();
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.shadow.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 			printf("shadow: %0.2f,%0.2f (%d threads)... ",shadow,threshold,threadcount);
 
 			_mark();
