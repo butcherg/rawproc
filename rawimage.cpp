@@ -597,7 +597,7 @@ char * _loadRAW(const char *filename,
 	if (RawProcessor.imgdata.params.user_flip == 0) 
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 	else
-		info["Orientation"] = "0"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
+		info["Orientation"] = "1"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
 	time_t rawtime = P2.timestamp;
 	struct tm * timeinfo;
 	char buffer [80];
