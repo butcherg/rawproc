@@ -22,6 +22,8 @@ public:
 
 	int GetLeftValue();
 	int GetRightValue();
+	void SetLeftValue(int lval);
+	void SetRightValue(int rval);
 	wxSize DoGetBestSize();	
 	void OnPaint(wxPaintEvent&);
 	void OnLeftDown(wxMouseEvent& event);

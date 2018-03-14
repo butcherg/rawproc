@@ -37,6 +37,20 @@ myDoubleSlider::myDoubleSlider(wxWindow *parent,
 	Update();
 }
 
+void myDoubleSlider::SetLeftValue(int lval)
+{
+	leftval = lval;
+	Refresh();
+	Update();
+}
+
+void myDoubleSlider::SetRightValue(int rval)
+{
+	rightval = rval;
+	Refresh();
+	Update();
+}
+
 int myDoubleSlider::GetLeftValue()
 {
 	return leftval;

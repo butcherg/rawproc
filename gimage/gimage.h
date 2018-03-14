@@ -107,8 +107,11 @@ class gImage
 		GIMAGE_ERROR getLastError();
 		std::string getLastErrorMessage();
 		std::string Stats();
-		std::vector<double> CalculateBlackWhitePoint(double blackthreshold=0.01, double whitethreshold=0.01, bool centerout=true, int whitemax=255);
+		std::vector<double> CalculateBlackWhitePoint(double blackthreshold=0.01, double whitethreshold=0.01, bool centerout=true, int whitemax=255, std::string channel="rgb");
 		std::vector<long> Histogram();
+		std::vector<long> RedHistogram();
+		std::vector<long> GreenHistogram();
+		std::vector<long> BlueHistogram();
 		std::vector<histogramdata> Histogram(unsigned scale);
 		//std::map<GIMAGE_CHANNEL,std::vector<unsigned> > Histogram(unsigned channels, unsigned scale);
 		std::vector<long> Histogram(unsigned channel, unsigned &hmax);

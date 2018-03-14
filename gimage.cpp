@@ -2330,10 +2330,14 @@ std::string gImage::Stats()
 }
 
 //calculate a normalized black and white point, expressed in the 0-255 range:
-std::vector<double> gImage::CalculateBlackWhitePoint(double blackthreshold, double whitethreshold, bool centerout, int whitemax)
+std::vector<double> gImage::CalculateBlackWhitePoint(double blackthreshold, double whitethreshold, bool centerout, int whitemax, std::string channel)
 {
 	std::vector<double> bwpoints;
-	std::vector<long> hdata = Histogram();
+	std::vector<long> hdata;
+	if (channel == "red")   hdata = RedHistogram();
+	else if (channel == "green") hdata = GreenHistogram();
+	else if (channel == "blue")  hdata = BlueHistogram();
+	else hdata = Histogram();
 	long hmax=0;
 	int maxpos;
 	long htotal = 0;
@@ -2372,6 +2376,57 @@ std::vector<long> gImage::Histogram()
 		for(unsigned x = 0; x < w; x++) {
 			unsigned pos = x + y*w;
 			double t = ((image[pos].r + image[pos].g + image[pos].b) / 3.0) * SCALE_CURVE;
+			if (t < 0.0) t = 0.0;
+			if (t > 255.0) t = 255.0;
+			histogram[floor(t+0.5)]++;
+		}
+	}
+	return histogram;
+}
+
+//simple red histogram:
+std::vector<long> gImage::RedHistogram()
+{
+	std::vector<long> histogram(256, 0);
+
+	for(unsigned y = 0; y < h; y++) {
+		for(unsigned x = 0; x < w; x++) {
+			unsigned pos = x + y*w;
+			double t = image[pos].r * SCALE_CURVE;
+			if (t < 0.0) t = 0.0;
+			if (t > 255.0) t = 255.0;
+			histogram[floor(t+0.5)]++;
+		}
+	}
+	return histogram;
+}
+
+//simple green histogram:
+std::vector<long> gImage::GreenHistogram()
+{
+	std::vector<long> histogram(256, 0);
+
+	for(unsigned y = 0; y < h; y++) {
+		for(unsigned x = 0; x < w; x++) {
+			unsigned pos = x + y*w;
+			double t = image[pos].g * SCALE_CURVE;
+			if (t < 0.0) t = 0.0;
+			if (t > 255.0) t = 255.0;
+			histogram[floor(t+0.5)]++;
+		}
+	}
+	return histogram;
+}
+
+//simple blue histogram:
+std::vector<long> gImage::BlueHistogram()
+{
+	std::vector<long> histogram(256, 0);
+
+	for(unsigned y = 0; y < h; y++) {
+		for(unsigned x = 0; x < w; x++) {
+			unsigned pos = x + y*w;
+			double t = image[pos].b * SCALE_CURVE;
 			if (t < 0.0) t = 0.0;
 			if (t > 255.0) t = 255.0;
 			histogram[floor(t+0.5)]++;
