@@ -229,29 +229,51 @@ void do_cmd(gImage &dib, std::string commandstr)
 			commandstring += std::string(cs);
 		}
 
-		//#blackwhitepoint[:0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
+		//#blackwhitepoint[:rgb|red|green|blue][;][0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
+			char *c, *b, *w;
+			GIMAGE_CHANNEL channel = CHANNEL_RGB;
+			std::string chan = "";
 			double blk=0.0, wht=255.0;
 			double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
 			double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
 			int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
 			int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str()); 
+			long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+		
 			long hmax = 0;
 			int maxpos;
-			char *b = strtok(NULL,",");
-			char *w = strtok(NULL,", ");
-			wht = 255; blk = 0;
-			long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
-			if (!b) { 
+			c = strtok(NULL,", ");
+			if (c) { //first token is a channel
+				chan = std::string(c);
+				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue") {
+					b = strtok(NULL,", ");
+					w = strtok(NULL,", ");
+					wht = 255; blk = 0;
+					if (!b) { //no black/white, compute using channel:
+						std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan);
+						blk = bwpts[0];
+						wht = bwpts[1];
+
+					}
+				}
+				else { //no channel, just black and white:
+					b = c;
+					w = strtok(NULL,", ");
+					if (w) wht = atof(w);
+					if (b) blk = atof(b);
+				}
+			}
+			else { //no tokens, do auto rgb:
 				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
 				blk = bwpts[0];
 				wht = bwpts[1];
-
 			}
-			else {
-				if (w) wht = atof(w);
-				if (b) blk = atof(b);
-			}
+			
+			if (chan == "rgb")   channel = CHANNEL_RGB;
+			if (chan == "red")   channel = CHANNEL_RED;
+			if (chan == "green") channel = CHANNEL_GREEN;
+			if (chan == "blue")  channel = CHANNEL_BLUE;
 
 			Curve ctrlpts;
 			ctrlpts.insertpoint(blk,0);
@@ -262,10 +284,10 @@ void do_cmd(gImage &dib, std::string commandstr)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("blackwhitepoint: %0.2f,%0.2f (%d threads)... ",blk,wht,threadcount);
+			printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount);
 
 			_mark();
-			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			dib.ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
 			//dib.ApplyToneLine(blk, wht, threadcount);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
