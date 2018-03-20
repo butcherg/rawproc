@@ -68,12 +68,13 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 
 			g->Add(new wxStaticText(this,wxID_ANY, "black/white: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
-			g->Add(1,10, wxGBPosition(0,0));
+			//g->Add(1,10, wxGBPosition(0,0));
 			
 			g->Add(chan, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM, 3);
-
+			recalc = new wxCheckBox(this, wxID_ANY, "ReCalculate");
+			g->Add(recalc, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -85,6 +86,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHOICE, &BlackWhitePointPanel::channelChanged, this);
+			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 		}
 
@@ -101,6 +103,12 @@ class BlackWhitePointPanel: public PicProcPanel
 		void OnThumbTrack(wxCommandEvent& event)
 		{
 
+		}
+		
+		void OnCheckBox(wxCommandEvent& event)
+		{
+			((PicProcessorBlackWhitePoint *) q)->setReCalc(recalc->GetValue());
+			q->processPic();
 		}
 
 		void OnTimer(wxTimerEvent& event)
@@ -150,6 +158,7 @@ class BlackWhitePointPanel: public PicProcPanel
 	private:
 		wxChoice *chan;
 		wxSlider *black, *white;
+		wxCheckBox *recalc;
 		myDoubleSlider *bwpoint;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
@@ -163,6 +172,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	int i;
 	double blk, wht;
 	wht = 255; blk = 0;
+	recalc = false;
 
 	//parm tool.blackwhitepoint.blackthreshold: The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05
 	double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
@@ -205,6 +215,11 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
+void PicProcessorBlackWhitePoint::setReCalc(bool r)
+{
+	recalc = r;
+}
+
 void PicProcessorBlackWhitePoint::setChannel(wxString chan)
 {
 	if (chan == "rgb")   channel = CHANNEL_RGB;
@@ -242,6 +257,16 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 		setChannel("rgb");
 		blk = atof(p[0]);
 		wht = atof(p[1]);
+	}
+
+	double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
+	double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
+	long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+
+	if (recalc) {
+		std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
+		blk = bwpts[0];
+		wht = bwpts[1];
 	}
 
 	Curve ctrlpts;

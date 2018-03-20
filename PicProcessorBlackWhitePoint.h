@@ -12,8 +12,12 @@ class PicProcessorBlackWhitePoint: public PicProcessor
 		void createPanel(wxSimplebook* parent);
 		void setChannel(wxString chan);
 		void reCalc();
+		void setReCalc(bool r);
 		bool processPic(bool processnext=true);
 		void displayProcessedPic();
+		
+	private:
+		bool recalc;
 
 };
 
