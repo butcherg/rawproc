@@ -555,9 +555,12 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.raw.libraw.*: Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.
 #ifdef USE_DCRAW
 			if (myConfig::getConfig().exists("input.raw.libraw.cameraprofile")) {
-				configparams.Append("cameraprofile=");
-				configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.libraw.cameraprofile","")));
-				configparams.Append(";");
+				wxString camprofile = wxString(myConfig::getConfig().getValueOrDefault("input.raw.libraw.cameraprofile",""));
+				if (camprofile != "") {
+					configparams.Append("cameraprofile=");
+					configparams.Append();
+					configparams.Append(";");
+				}
 			}
 			configparams.Append("params=");
 			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.params","")));
