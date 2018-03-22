@@ -117,6 +117,13 @@ class BlackWhitePointPanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
+
+		void updateSliders()
+		{
+			wxArrayString p = split(q->getParams(),",");
+			bwpoint->SetLeftValue(atoi(p[1]));
+			bwpoint->SetRightValue(atoi(p[2]));
+		}
 		
 		void channelChanged(wxCommandEvent& event)
 		{
@@ -124,10 +131,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			((PicProcessorBlackWhitePoint *) q)->setChannel(chan->GetString(chan->GetSelection()));
 			
 			((PicProcessorBlackWhitePoint *) q)->reCalc();
-			wxArrayString p = split(q->getParams(),",");
-			
-			bwpoint->SetLeftValue(atoi(p[1]));
-			bwpoint->SetRightValue(atoi(p[2]));
+			updateSliders();
 			q->processPic();
 			event.Skip();
 		}
@@ -259,14 +263,10 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 		wht = atof(p[1]);
 	}
 
-	double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
-	double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
-	long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 
 	if (recalc) {
-		std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
-		blk = bwpts[0];
-		wht = bwpts[1];
+		reCalc();
+		((BlackWhitePointPanel *) toolpanel)->updateSliders();
 	}
 
 	Curve ctrlpts;
