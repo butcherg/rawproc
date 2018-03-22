@@ -558,7 +558,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				wxString camprofile = wxString(myConfig::getConfig().getValueOrDefault("input.raw.libraw.cameraprofile",""));
 				if (camprofile != "") {
 					configparams.Append("cameraprofile=");
-					configparams.Append();
+					configparams.Append(camprofile);
 					configparams.Append(";");
 				}
 			}
