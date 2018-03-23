@@ -1611,14 +1611,19 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
-	if (!pic->GetColorManagement()) {
-		if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
-			wxMessageBox("Color management disabled, no input profile for colorspace");
-			return;
-		}
-	}
+	//if (!pic->GetColorManagement()) {
+	//	if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
+	//		wxMessageBox("Color management disabled, no input profile for colorspace");
+	//		return;
+	//	}
+	//}
 
 	if (commandtree->IsEmpty()) return;
+
+	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
+		wxMessageBox("Note: Image does not have a source profile, only 'assign' is valid");
+	}
+
 	SetStatusText("");
 	try {
 		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-,-", commandtree, pic);
