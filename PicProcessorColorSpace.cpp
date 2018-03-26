@@ -84,6 +84,12 @@ class ColorspacePanel: public PicProcPanel
 			event.Skip();
 		}
 
+		void EnableConvert(bool e)
+		{
+			operselect->Enable(0,e);
+			if (!e) operselect->SetSelection(1);
+		}
+
 		void paramChanged(wxCommandEvent& event)
 		{
 			wxString profilestr = edit->GetLineText(0);
@@ -116,6 +122,7 @@ void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new ColorspacePanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
+	if (getPreviousPicProcessor()->getProcessedPic().getProfile() == NULL) ((ColorspacePanel *) toolpanel)->EnableConvert(false);
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
