@@ -1030,14 +1030,46 @@ for (int f=0; f<files.size(); f++)
 		printf("\n");
 		exit(0);
 	}
+	
+	GIMAGE_FILETYPE filetype = gImage::getFileNameType(outfilename);
+	
+	std::string profilepath = myConfig::getConfig().getValueOrDefault("cms.profilepath","");
+	if (profilepath[profilepath.length()-1] != '/') profilepath.push_back('/');
+	
+	std::string intentstr;
+	cmsUInt32Number intent = INTENT_PERCEPTUAL;
+
+	if (filetype == FILETYPE_JPEG) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual");
+	}
+	else if (filetype == FILETYPE_TIFF) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual");
+	}
+	else if (filetype == FILETYPE_PNG) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.png.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual");
+	}
+				
+	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+	if (intentstr == "saturation") intent = INTENT_SATURATION;
+	if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+	if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
 	_mark();
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
 	printf("Saving file %s %s... ",outfilename, outfile[1].c_str());
 	dib.setInfo("Software","img 0.1");
 	dib.setInfo("ImageDescription", commandstring);
+	
+	cmsHPROFILE profile = cmsOpenProfileFromFile(profilepath.c_str(), "r");
+	if (profile)
+		dib.saveImageFile(outfilename, outfile[1].c_str(), profile, intent);
+	else
+		dib.saveImageFile(outfilename, outfile[1].c_str());
 
-	if (dib.saveImageFile(outfilename, outfile[1].c_str()) == GIMAGE_OK) 
+	if (dib.getLastError() == GIMAGE_OK) 
 		printf("done. (%fsec)\n\n",_duration());
 	else
 		printf("Error: %s: %s\n\n",dib.getLastErrorMessage().c_str(), outfile[0].c_str());
