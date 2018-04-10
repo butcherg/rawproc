@@ -1,7 +1,7 @@
 CXX=@CXX@
 LD=@CXX@
 
-OBJECTS := util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o
+OBJECTS=@objs@
 LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o pngimage.o strutil.o curve.o
 
 LIBS=@LIBS@
@@ -126,7 +126,9 @@ PicProcessorDenoise.o: $(srcdir)/PicProcessorDenoise.cpp
 	
 PicProcessorColorSpace.o: $(srcdir)/PicProcessorColorSpace.cpp 
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorColorSpace.cpp -o$@
-
+	
+PicProcessorLensCorrection.o: $(srcdir)/PicProcessorLensCorrection.cpp 
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessorLensCorrection.cpp -o$@
 
 PicProcessor.o: $(srcdir)/PicProcessor.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(WX_CPPFLAGS)  -c $(srcdir)/PicProcessor.cpp -o$@

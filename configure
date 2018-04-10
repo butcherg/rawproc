@@ -625,6 +625,7 @@ INNO_PF
 INNO_ARCHITECTURESINSTALLEDIN64BITMODE
 INNO_ARCHITECURESALLOWED
 INNO_SRCDIR
+objs
 RAWPROCVERSION
 EGREP
 GREP
@@ -672,7 +673,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -715,6 +715,7 @@ with_lcms2_include
 with_lcms2_lib
 with_libraw_include
 with_libraw_lib
+enable_lensfun
 '
       ac_precious_vars='build_alias
 host_alias
@@ -766,7 +767,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1019,15 +1019,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1165,7 +1156,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1318,7 +1309,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1360,6 +1350,8 @@ Optional Features:
                           input, in lieu of LibRaw. dcraw mus be in a
                           directory listed in PATH, or an absolute path
                           specified with input.raw.dcraw.programpath
+
+  --enable-lensfun        enables lensfun
 
 
 Optional Packages:
@@ -2411,6 +2403,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
@@ -3532,6 +3525,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $mingw_cv_win32_host" >&5
 $as_echo "$mingw_cv_win32_host" >&6; }
 
+objs="util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o"
+
 #Process enables:
 # Check whether --enable-openmp was given.
 if test "${enable_openmp+set}" = set; then :
@@ -3571,6 +3566,7 @@ else
 	#APP_CXXFLAGS="$APP_CXXFLAGS -O2"
 	CXXFLAGS="$CXXFLAGS -O2"
 fi
+
 
 # Check whether --enable-dcraw was given.
 if test "${enable_dcraw+set}" = set; then :
@@ -4016,7 +4012,7 @@ _ACEOF
 fi
 
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
-	LDFLAGS="$LDFLAGS -static"
+	#LDFLAGS="$LDFLAGS -static"
 	INNO_SRCDIR="$srcdir"
 	if test "$host_alias" == "x86_64-w64-mingw32"
 	then
@@ -4203,6 +4199,7 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 fi
+
 
 
 
@@ -5381,6 +5378,383 @@ fi
 
 fi
 
+# Check whether --enable-lensfun was given.
+if test "${enable_lensfun+set}" = set; then :
+  enableval=$enable_lensfun;
+fi
+
+if test "$enable_lensfun" == "yes"
+then
+	if test "$mingw_cv_win32_host" == "yes"
+	then
+		LIBS="-pthread -lws2_32 -lole32 -lwinmm -lshlwapi $LIBS"
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing regerror" >&5
+$as_echo_n "checking for library containing regerror... " >&6; }
+if ${ac_cv_search_regerror+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char regerror ();
+int
+main ()
+{
+return regerror ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' tre_regex; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_regerror=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_regerror+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_regerror+:} false; then :
+
+else
+  ac_cv_search_regerror=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_regerror" >&5
+$as_echo "$ac_cv_search_regerror" >&6; }
+ac_res=$ac_cv_search_regerror
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working regex is required" "$LINENO" 5
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pcre_compile" >&5
+$as_echo_n "checking for library containing pcre_compile... " >&6; }
+if ${ac_cv_search_pcre_compile+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcre_compile ();
+int
+main ()
+{
+return pcre_compile ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' pcre; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_pcre_compile=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_pcre_compile+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_pcre_compile+:} false; then :
+
+else
+  ac_cv_search_pcre_compile=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pcre_compile" >&5
+$as_echo "$ac_cv_search_pcre_compile" >&6; }
+ac_res=$ac_cv_search_pcre_compile
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working regex is required" "$LINENO" 5
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libiconv_open" >&5
+$as_echo_n "checking for library containing libiconv_open... " >&6; }
+if ${ac_cv_search_libiconv_open+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char libiconv_open ();
+int
+main ()
+{
+return libiconv_open ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' iconv; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_libiconv_open=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_libiconv_open+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_libiconv_open+:} false; then :
+
+else
+  ac_cv_search_libiconv_open=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_libiconv_open" >&5
+$as_echo "$ac_cv_search_libiconv_open" >&6; }
+ac_res=$ac_cv_search_libiconv_open
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working libiconv is required" "$LINENO" 5
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libintl_sprintf" >&5
+$as_echo_n "checking for library containing libintl_sprintf... " >&6; }
+if ${ac_cv_search_libintl_sprintf+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char libintl_sprintf ();
+int
+main ()
+{
+return libintl_sprintf ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' intl; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_libintl_sprintf=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_libintl_sprintf+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_libintl_sprintf+:} false; then :
+
+else
+  ac_cv_search_libintl_sprintf=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_libintl_sprintf" >&5
+$as_echo "$ac_cv_search_libintl_sprintf" >&6; }
+ac_res=$ac_cv_search_libintl_sprintf
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working libintl is required" "$LINENO" 5
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing g_print" >&5
+$as_echo_n "checking for library containing g_print... " >&6; }
+if ${ac_cv_search_g_print+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char g_print ();
+int
+main ()
+{
+return g_print ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' glib-2.0; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_g_print=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_g_print+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_g_print+:} false; then :
+
+else
+  ac_cv_search_g_print=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_g_print" >&5
+$as_echo "$ac_cv_search_g_print" >&6; }
+ac_res=$ac_cv_search_g_print
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working glib is required" "$LINENO" 5
+fi
+
+	for ac_header in lensfun/lensfun.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "lensfun/lensfun.h" "ac_cv_header_lensfun_lensfun_h" "$ac_includes_default"
+if test "x$ac_cv_header_lensfun_lensfun_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LENSFUN_LENSFUN_H 1
+_ACEOF
+
+else
+  as_fn_error $? "lensfun.h not found" "$LINENO" 5
+fi
+
+done
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing lf_db_new" >&5
+$as_echo_n "checking for library containing lf_db_new... " >&6; }
+if ${ac_cv_search_lf_db_new+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char lf_db_new ();
+int
+main ()
+{
+return lf_db_new ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' lensfun; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_lf_db_new=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_lf_db_new+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_lf_db_new+:} false; then :
+
+else
+  ac_cv_search_lf_db_new=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_lf_db_new" >&5
+$as_echo "$ac_cv_search_lf_db_new" >&6; }
+ac_res=$ac_cv_search_lf_db_new
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "A working lensfun is required" "$LINENO" 5
+fi
+
+	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
+	objs="$objs PicProcessorLensCorrection.o"
+fi
+
 # Checks for header files.
 for ac_header in inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h
 do :
@@ -5498,6 +5872,7 @@ _ACEOF
 
 fi
 done
+
 
 
 

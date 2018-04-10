@@ -14,6 +14,11 @@
 #include "gimage/gimage.h"
 #include "nikonlensid.h"
 
+#ifdef USE_LENSFUN
+#include <locale.h>
+#include <lensfun/lensfun.h>
+#endif
+
 
 const char * librawVersion()
 {
@@ -637,6 +642,16 @@ char * _loadRAW(const char *filename,
 
 	//icc_m = NULL;
 
+	#ifdef USE_LENSFUN
+	//const struct lfMount *const *mounts;
+	//const struct lfCamera *const *cameras;
+	//const struct lfLens *const *lenses;
+	struct lfDatabase *ldb;
+	lfError e;
+	ldb = lf_db_new ();
+	lf_db_load (ldb);
+	const lfCamera** cameras = ldb->FindCameras( info["Make"].c_str(),info["Model"].c_str() );
+	#endif
 
 	if (C.profile) {
 		*icc_m = new char[C.profile_length];

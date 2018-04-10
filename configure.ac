@@ -1,5 +1,6 @@
 AC_PREREQ([2.68])
 AC_INIT(rawproc, 0.6.2)
+AC_CONFIG_MACRO_DIR([m4])
 
 RAWPROCVERSION=`grep 'wxString version' ../rawprocFrm.cpp |sed 's/wxString version = //' | sed 's/"//g' |sed 's/;//'`
 
@@ -24,6 +25,8 @@ AC_PROG_CC
 AC_PROG_MAKE_SET
 
 MINGW_AC_WIN32_NATIVE_HOST
+
+objs="util.o elapsedtime.o myConfig.o myEXIFDialog.o myDoubleSlider.o myPropertyDialog.o myHistogramPane.o myHistogramDialog.o CurvePane.o PicProcessor.o PicProcessorBlackWhitePoint.o PicProcessorHighlight.o PicProcessorShadow.o PicProcessorCurve.o PicProcessorGamma.o PicProcessorBright.o PicProcessorContrast.o PicProcessorSaturation.o PicProcessorExposure.o PicProcessorRedEye.o PicProcessorSharpen.o PicProcessorResize.o PicProcessorDenoise.o PicProcessorRotate.o PicProcessorGray.o PicProcessorCrop.o PicProcessorColorSpace.o rawprocFrm.o rawprocApp.o PicProcPanel.o PicPanel.o"
 
 #Process enables:
 AC_ARG_ENABLE([openmp],
@@ -58,6 +61,7 @@ else
 	#APP_CXXFLAGS="$APP_CXXFLAGS -O2"
 	CXXFLAGS="$CXXFLAGS -O2"
 fi
+
 
 AC_ARG_ENABLE([dcraw],
         AS_HELP_STRING([--enable-dcraw], [enables use of a dcraw executable for raw file input, in lieu of LibRaw. dcraw mus be in a directory listed in PATH, or an absolute path specified with input.raw.dcraw.programpath])
@@ -117,7 +121,7 @@ then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
-	LDFLAGS="$LDFLAGS -static"
+	#LDFLAGS="$LDFLAGS -static"
 	INNO_SRCDIR="$srcdir"
 	if test "$host_alias" == "x86_64-w64-mingw32"
 	then
@@ -140,6 +144,7 @@ fi
 AC_SEARCH_LIBS(inflateInit2_,z,  [], [])
 AC_SEARCH_LIBS(lzma_code,lzma,   [], [])
 AC_SEARCH_LIBS(jas_init,jasper,  [], [])
+
 
 
 #libjpeg:
@@ -324,6 +329,26 @@ then
 	)
 fi
 
+AC_ARG_ENABLE([lensfun],
+        AS_HELP_STRING([--enable-lensfun], [enables lensfun])
+)
+if test "$enable_lensfun" == "yes"
+then
+	if test "$mingw_cv_win32_host" == "yes" 
+	then
+		LIBS="-pthread -lws2_32 -lole32 -lwinmm -lshlwapi $LIBS"
+	fi
+	AC_SEARCH_LIBS(regerror,tre_regex, [], [AC_MSG_ERROR([A working regex is required])])
+	AC_SEARCH_LIBS(pcre_compile,pcre, [], [AC_MSG_ERROR([A working regex is required])])
+	AC_SEARCH_LIBS(libiconv_open,iconv, [], [AC_MSG_ERROR([A working libiconv is required])])
+	AC_SEARCH_LIBS(libintl_sprintf,intl, [], [AC_MSG_ERROR([A working libintl is required])])
+	AC_SEARCH_LIBS(g_print,glib-2.0, [], [AC_MSG_ERROR([A working glib is required])])
+	AC_CHECK_HEADERS(lensfun/lensfun.h, [], [AC_MSG_ERROR([lensfun.h not found])])
+	AC_SEARCH_LIBS(lf_db_new,lensfun, [], [AC_MSG_ERROR([A working lensfun is required])])
+	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
+	objs="$objs PicProcessorLensCorrection.o"
+fi
+
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])
 
@@ -351,6 +376,7 @@ AC_SUBST(LIBS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(CFLAGS)
+AC_SUBST(objs)
 
 AC_SUBST(INNO_SRCDIR)
 AC_SUBST(INNO_ARCHITECURESALLOWED)
