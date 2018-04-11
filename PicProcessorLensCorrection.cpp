@@ -3,6 +3,9 @@
 #include "util.h"
 #include "myConfig.h"
 
+#include <locale.h>
+#include <lensfun/lensfun.h>
+
 
 class LensCorrectionPanel: public PicProcPanel
 {
@@ -11,38 +14,21 @@ class LensCorrectionPanel: public PicProcPanel
 		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 
-			s = new wxBoxSizer(wxHORIZONTAL); 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "lenscorrection", wxDefaultPosition, wxSize(100,20)), flags);
-			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+
+			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
-			b->Add(new wxButton(this, wxID_ANY, "Select profile"), flags);
+			b->Add(new wxButton(this, wxID_ANY, "Select lens"), flags);
 			b->AddSpacer(10);
-
-			wxArrayString opers;
-			opers.Add("convert");
-			opers.Add("assign");
-
-			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
-			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
-			s->Add(operselect,flags);
 			
-			wxArrayString intents;
-			intents.Add("perceptual");
-			intents.Add("saturation");
-			intents.Add("relative_colorimetric");
-			intents.Add("absolute_colorimetric");
-			
-			intentselect = new wxRadioBox (this, wxID_ANY, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
-			if (parms[2] != "-") intentselect->SetSelection(intentselect->FindString(parms[2]));
-			s->Add(intentselect,flags);
-			
-			b->Add(s,flags);
-			
-			bpc = new wxCheckBox(this, wxID_ANY, "black point compensation");
-			b->Add(bpc , flags);
-			//bpc->SetValue(bpc);
+			ca = new wxCheckBox(this, wxID_ANY, "chromatic abberation");
+			b->Add(ca , flags);
+			vig = new wxCheckBox(this, wxID_ANY, "vignetting");
+			b->Add(vig , flags);
+			dist = new wxCheckBox(this, wxID_ANY, "distortion");
+			b->Add(dist , flags);
 			
 			SetSizerAndFit(b);
 			b->Layout();
@@ -57,11 +43,13 @@ class LensCorrectionPanel: public PicProcPanel
 
 		~LensCorrectionPanel()
 		{
-			if (s) s->~wxBoxSizer();
 		}
 		
 		void selectProfile(wxCommandEvent& event)
 		{
+
+
+/*
 			wxFileName fname, pname;
 			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
 #ifdef WIN32
@@ -81,12 +69,16 @@ class LensCorrectionPanel: public PicProcPanel
 					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
 				q->processPic();
 			}
+*/
 			event.Skip();
 		}
 
 
 		void paramChanged(wxCommandEvent& event)
 		{
+
+
+/*
 			wxString profilestr = edit->GetLineText(0);
 			wxString operstr = operselect->GetString(operselect->GetSelection());
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
@@ -96,15 +88,14 @@ class LensCorrectionPanel: public PicProcPanel
 				q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
 				q->processPic();
 			}
+*/
 			event.Skip();
 		}
 
 
 	private:
-		wxBoxSizer *s;
-		wxCheckBox *bpc;
+		wxCheckBox *ca, *vig, *dist;
 		wxTextCtrl *edit;
-		wxRadioBox *operselect, *intentselect;
 
 };
 

@@ -114,6 +114,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_REDEYE = 1032,
 			ID_MNU_REOPEN = 1033,
 			ID_MNU_COLORSPACE = 1034,
+			ID_MNU_LENSCORRECTION = 1035,
 			
 			////GUI Enum Control ID End
 			ID_COMMANDTREE = 2000,
@@ -175,7 +176,9 @@ class rawprocFrm : public wxFrame
 	void MnuProperties(wxCommandEvent& event);
 	void MnuEXIF(wxCommandEvent& event);
 	void MnuColorSpace(wxCommandEvent& event);
-
+#ifdef USE_LENSFUN
+	void MnuLensCorrection(wxCommandEvent& event);
+#endif
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetStartPath(wxString path);
 	void SetBackground();

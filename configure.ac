@@ -340,8 +340,11 @@ then
 	fi
 	AC_SEARCH_LIBS(regerror,tre_regex, [], [AC_MSG_ERROR([A working regex is required])])
 	AC_SEARCH_LIBS(pcre_compile,pcre, [], [AC_MSG_ERROR([A working regex is required])])
-	AC_SEARCH_LIBS(libiconv_open,iconv, [], [AC_MSG_ERROR([A working libiconv is required])])
-	AC_SEARCH_LIBS(libintl_sprintf,intl, [], [AC_MSG_ERROR([A working libintl is required])])
+	if test "$mingw_cv_win32_host" == "yes" 
+	then
+		AC_SEARCH_LIBS(libiconv_open,iconv, [], [AC_MSG_ERROR([A working libiconv is required])])
+		AC_SEARCH_LIBS(libintl_sprintf,intl, [], [AC_MSG_ERROR([A working libintl is required])])
+	fi
 	AC_SEARCH_LIBS(g_print,glib-2.0, [], [AC_MSG_ERROR([A working glib is required])])
 	AC_CHECK_HEADERS(lensfun/lensfun.h, [], [AC_MSG_ERROR([lensfun.h not found])])
 	AC_SEARCH_LIBS(lf_db_new,lensfun, [], [AC_MSG_ERROR([A working lensfun is required])])

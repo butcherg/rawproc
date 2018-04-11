@@ -36,6 +36,9 @@
 #include "PicProcessorDenoise.h"
 #include "PicProcessorRedEye.h"
 #include "PicProcessorColorSpace.h"
+#ifdef USE_LENSFUN
+#include "PicProcessorLensCorrection.h"
+#endif
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
@@ -96,6 +99,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
 	EVT_MENU(ID_MNU_EXIF,rawprocFrm::MnuEXIF)
 	EVT_MENU(ID_MNU_COLORSPACE, rawprocFrm::MnuColorSpace)
+#ifdef USE_LENSFUN
+	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
+#endif
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -202,6 +208,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
+#ifdef USE_LENSFUN
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
@@ -480,16 +489,19 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
 	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
+	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
+#ifdef USE_LENSFUN
+	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
+#endif
 	else return NULL;
 	p->createPanel(parambook);
 	p->processPic();
@@ -1636,6 +1648,23 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	}
 }
 
+#ifdef USE_LENSFUN
+void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+
+	SetStatusText("");
+	try {
+		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", "", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding lenscorrection tool failed: %s",e.what()));
+	}
+}
+#endif
 
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
