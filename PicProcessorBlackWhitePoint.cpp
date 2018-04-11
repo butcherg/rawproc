@@ -19,6 +19,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			//int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
 			//int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
 
+			//parm tool.blackwhitepoint.autorecalcdefault: 0/1, default setting for recalc when the tool is added.  Default=0
+			int recalcdefault = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.autorecalcdefault","0").c_str());
+
 
 			
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
@@ -75,6 +78,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM, 3);
 			recalc = new wxCheckBox(this, wxID_ANY, "ReCalculate");
 			g->Add(recalc, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			if (recalcdefault) recalc->SetValue(true);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -109,6 +113,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			((PicProcessorBlackWhitePoint *) q)->setReCalc(recalc->GetValue());
 			q->processPic();
+			event.Skip();
 		}
 
 		void OnTimer(wxTimerEvent& event)
@@ -250,6 +255,11 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	double blk, wht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
+	if (recalc) {
+		reCalc();
+		((BlackWhitePointPanel *) toolpanel)->updateSliders();
+	}
+
 	wxArrayString p = split(getParams(),",");
 	
 	if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
@@ -263,11 +273,6 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 		wht = atof(p[1]);
 	}
 
-
-	if (recalc) {
-		reCalc();
-		((BlackWhitePointPanel *) toolpanel)->updateSliders();
-	}
 
 	Curve ctrlpts;
 	ctrlpts.insertpoint(blk,0);
