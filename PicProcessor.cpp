@@ -133,7 +133,7 @@ bool PicProcessor::isDirty()
 wxString PicProcessor::getCommand()
 {
 	if (c.IsEmpty())
-		return n;
+		return wxString::Format("%s ",n);
 	else
 		return wxString::Format("%s:%s ",n,c);
 }
