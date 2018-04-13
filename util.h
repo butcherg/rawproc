@@ -18,6 +18,10 @@ bool ImageContainsRawprocCommand(wxString fname);
 wxArrayString split(wxString str, wxString delim);
 wxString paramString(wxString filter);
 
+void paramAppend(wxString name, wxString value, wxString &paramstring);
+wxArrayString paramSplit(wxString paramstring);
+void opAppend(wxString name, wxString &opstring);
+
 wxBitmap HistogramFrom(wxImage img, int width, int height);
 
 wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int height);

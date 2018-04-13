@@ -51,6 +51,23 @@ wxString paramString(wxString filter)
 	return paramstr;
 }
 
+void paramAppend(wxString name, wxString value, wxString &paramstring)
+{
+	if (paramstring != "") paramstring.Append(";");
+	paramstring.Append(wxString::Format("%s=%s",name, value));
+}
+
+void opAppend(wxString name, wxString &opstring)
+{
+	if (opstring != "") opstring.Append(",");
+	opstring.Append(name);
+}
+
+wxArrayString paramSplit(wxString paramstring)
+{
+
+}
+
 void mark ()
 {
 	_mark();
