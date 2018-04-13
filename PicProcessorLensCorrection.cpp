@@ -11,8 +11,32 @@ class LensCorrectionPanel: public PicProcPanel
 {
 
 	public:
-		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
+		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, std::map<std::string,std::string> info): PicProcPanel(parent, proc, params)
 		{
+			
+			struct lfDatabase *ldb;
+			lfError e;
+			ldb = lf_db_new ();
+			lf_db_load (ldb);
+			
+			const lfCamera *cam = NULL;
+			const lfCamera ** cameras = ldb->FindCamerasExt(NULL, info["Model"].c_str());
+			if (cameras)
+				cam = cameras[0];
+			else
+				wxMessageBox("Cannot find a camera matching `%s' in database\n", info["Model"].c_str());
+			lf_free (cameras);
+
+			// try to find a matching lens in the database
+			const lfLens *lens = NULL;
+			const lfLens **lenses = ldb->FindLenses (cam, NULL, info["Lens"].c_str());
+			if (lenses)
+				lens = lenses [0];
+			else
+				wxMessageBox("Cannot find a lens matching `%s' in database\n", info["Lens"].c_str());
+			lf_free (lenses);
+			
+			wxMessageBox(wxString::Format("Lens: %s",lens->Model));
 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
@@ -106,7 +130,8 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 
 void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
 {
-	toolpanel = new LensCorrectionPanel(parent, this, c);
+	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
+	toolpanel = new LensCorrectionPanel(parent, this, c, idib.getInfo());
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
