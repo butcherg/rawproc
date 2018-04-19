@@ -3,47 +3,24 @@
 #include "util.h"
 #include "myConfig.h"
 
-#include <locale.h>
-#include <lensfun/lensfun.h>
-
-
 class LensCorrectionPanel: public PicProcPanel
 {
 
 	public:
-		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, std::map<std::string,std::string> info): PicProcPanel(parent, proc, params)
+		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, wxString metadata): PicProcPanel(parent, proc, params)
 		{
-			
-			struct lfDatabase *ldb;
-			lfError e;
-			ldb = lf_db_new ();
-			lf_db_load (ldb);
-			
-			const lfCamera *cam = NULL;
-			const lfCamera ** cameras = ldb->FindCamerasExt(NULL, info["Model"].c_str());
-			if (cameras)
-				cam = cameras[0];
-			else
-				wxMessageBox("Cannot find a camera matching `%s' in database\n", info["Model"].c_str());
-			lf_free (cameras);
-
-			// try to find a matching lens in the database
-			const lfLens *lens = NULL;
-			const lfLens **lenses = ldb->FindLenses (cam, NULL, info["Lens"].c_str());
-			if (lenses)
-				lens = lenses [0];
-			else
-				wxMessageBox("Cannot find a lens matching `%s' in database\n", info["Lens"].c_str());
-			lf_free (lenses);
-			
-			wxMessageBox(wxString::Format("Lens: %s",lens->Model));
-
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 			b->Add(new wxStaticText(this,-1, "lenscorrection", wxDefaultPosition, wxSize(100,20)), flags);
+			b->AddSpacer(5);
 
-			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
-			b->Add(edit, flags);
+			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,40)), flags);
+
+			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			b->Add(cam, flags);
+			b->Add(new wxButton(this, wxID_ANY, "Select camera"), flags);
+			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			b->Add(lens, flags);
 			b->Add(new wxButton(this, wxID_ANY, "Select lens"), flags);
 			b->AddSpacer(10);
 			
@@ -60,7 +37,7 @@ class LensCorrectionPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&LensCorrectionPanel::paramChanged, this);
-			Bind(wxEVT_BUTTON, &LensCorrectionPanel::selectProfile, this);
+			Bind(wxEVT_BUTTON, &LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this);
 		}
@@ -69,72 +46,89 @@ class LensCorrectionPanel: public PicProcPanel
 		{
 		}
 		
-		void selectProfile(wxCommandEvent& event)
+		void setAlternates(wxCommandEvent& event)
 		{
-
-
-/*
-			wxFileName fname, pname;
-			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
-#ifdef WIN32
-			pname.SetVolume(pname.GetVolume().MakeUpper());
-#endif
-			fname.Assign(wxFileSelector("Select profile", pname.GetPath()));
-			
-			wxString operstr = operselect->GetString(operselect->GetSelection());
-			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
-			if (bpc->GetValue()) intentstr.Append(",bpc");
-
-			if (fname.FileExists()) {
-				edit->SetValue(fname.GetFullName());
-				if (pname.GetPath() == fname.GetPath())
-					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullName(), operstr,intentstr));
-				else
-					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
-				q->processPic();
-			}
-*/
-			event.Skip();
+			wxString altcam = cam->GetValue();
+			wxString altlens = lens->GetValue();
+			((PicProcessorLensCorrection *) q)->setAlternates(altcam, altlens);
 		}
-
 
 		void paramChanged(wxCommandEvent& event)
 		{
+			wxString cmd = "";
+			wxString altcam = cam->GetValue();
+			if (altcam != "") paramAppend("camera", altcam, cmd);
+			wxString altlens = lens->GetValue();
+			if (altlens != "") paramAppend("lens",altlens, cmd);
 
+			wxString ops = "";
+			if (ca->GetValue()) opAppend("ca",ops);
+			if (vig->GetValue()) opAppend("vig",ops);
+			if (dist->GetValue()) opAppend("dist",ops);
 
-/*
-			wxString profilestr = edit->GetLineText(0);
-			wxString operstr = operselect->GetString(operselect->GetSelection());
-			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
-			if (bpc->GetValue()) intentstr.Append(",bpc");
+			if (ops != "") paramAppend("ops", ops, cmd);
 
-			if (profilestr != "(none)") {
-				q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
-				q->processPic();
-			}
-*/
+			q->setParams(cmd);
+			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
 		wxCheckBox *ca, *vig, *dist;
-		wxTextCtrl *edit;
+		wxTextCtrl *cam, *lens;
 
 };
 
 PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	//showParams();
+	lfok = true;
+	setlocale (LC_ALL, "");			
+	
+	lfError e;
+	ldb = lf_db_new ();
+	if (lf_db_load (ldb) != LF_NO_ERROR) {
+		wxMessageBox("Error: Cannot open lens correction database.  Delete the tool, correct the problem, and re-add the tool") ;
+		lfok = false;
+	}
+
+	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
+	std::map<std::string,std::string> info = idib.getInfo();
+
+	if (info.find("Model") != info.end())
+		metadatacamera = wxString(info["Model"].c_str());
+	else
+		metadatacamera = "(none)";
+
+	if (info.find("Lens") != info.end())
+		metadatalens = wxString(info["Lens"].c_str());
+	else
+		metadatalens = "(none)";
+
+}
+
+
+PicProcessorLensCorrection::~PicProcessorLensCorrection()
+{
+	if (ldb) lf_db_destroy (ldb);
 }
 
 void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
 {
-	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
-	toolpanel = new LensCorrectionPanel(parent, this, c, idib.getInfo());
-	parent->ShowNewPage(toolpanel);
-	toolpanel->Refresh();
-	toolpanel->Update();
+	if (lfok) {
+		gImage &idib = getPreviousPicProcessor()->getProcessedPic();
+		wxString metadata = wxString::Format("Camera: %s\nLens: %s",metadatacamera, metadatalens);
+		toolpanel = new LensCorrectionPanel(parent, this, c, metadata);
+		parent->ShowNewPage(toolpanel);
+		toolpanel->Refresh();
+		toolpanel->Update();
+	}
+}
+
+void PicProcessorLensCorrection::setAlternates(wxString acam, wxString alens)
+{
+	altcamera = acam;
+	altlens = alens;
 }
 
 bool PicProcessorLensCorrection::processPic(bool processnext) 
@@ -142,6 +136,8 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection...");
 	bool result = true;
 	GIMAGE_ERROR ret;
+
+
 	
 	wxArrayString cp = split(getParams(),",");
 
@@ -154,6 +150,28 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	std::map<std::string, std::string> info = dib->getInfo();
+
+	const lfCamera *cam = NULL;
+	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, info["Model"].c_str());
+	if (cameras)
+		cam = cameras[0];
+	else
+		wxMessageBox("Cannot find a camera matching `%s' in database\n", info["Model"].c_str());
+	lf_free (cameras);
+
+	// try to find a matching lens in the database
+	const lfLens *lens = NULL;
+	const lfLens **lenses = ldb->FindLenses (cam, NULL, info["Lens"].c_str());
+	if (lenses)
+		lens = lenses [0];
+	else
+		wxMessageBox("Cannot find a lens matching `%s' in database\n", info["Lens"].c_str());
+	lf_free (lenses);
+	wxMessageBox(wxString::Format("Lens: %s",lens->Model));
+
+
+
 	//get integer image array, lensfun it, and use it to create the new gImage dib.
 	wxString d = duration();
 
