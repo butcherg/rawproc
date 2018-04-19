@@ -121,7 +121,7 @@ then
 #	AC_MSG_NOTICE ([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
-	#LDFLAGS="$LDFLAGS -static"
+	LDFLAGS="$LDFLAGS -static"
 	INNO_SRCDIR="$srcdir"
 	if test "$host_alias" == "x86_64-w64-mingw32"
 	then
