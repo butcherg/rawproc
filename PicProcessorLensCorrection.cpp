@@ -1,6 +1,7 @@
 #include "PicProcessorLensCorrection.h"
 #include "PicProcPanel.h"
 #include "util.h"
+#include "gimage/strutil.h"
 #include "myConfig.h"
 
 class LensCorrectionPanel: public PicProcPanel
@@ -139,7 +140,8 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 
 
 	
-	wxArrayString cp = split(getParams(),",");
+	//wxArrayString cp = split(getParams(),",");
+	std::map<std::string, std::string> cp = parseparams(std::string(getParams().c_str()));
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.cores","0").c_str());
 	if (threadcount == 0) 
@@ -168,8 +170,32 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	else
 		wxMessageBox("Cannot find a lens matching `%s' in database\n", info["Lens"].c_str());
 	lf_free (lenses);
-	wxMessageBox(wxString::Format("Lens: %s",lens->Model));
-
+	//wxMessageBox(wxString::Format("Lens: %s",lens->Model));
+	
+	pix* img =  dib->getImageDataRaw();
+	
+	int ModifyFlags = 0;  //ops=ca,vig,dist 
+	if (cp.find("ops") != cp.end()) {
+		std::vector<std::string> ops = split(cp["ops"], ",");
+		for (unsigned i=0; i<ops.size(); i++) {
+			if (ops[i] == "ca")   ModifyFlags |= LF_MODIFY_TCA;
+			if (ops[i] == "vig")  ModifyFlags |= LF_MODIFY_VIGNETTING;
+			if (ops[i] == "dist") ModifyFlags |= LF_MODIFY_DISTORTION;
+		}
+	}
+	
+	lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
+	int modflags = mod->Initialize (
+        lens, 
+		LF_PF_F32, 
+		atof(info["FocalLength"].c_str()), 
+		atof(info["FNumber"].c_str()),
+        1.0f, //opts.Distance
+		1.0f, //opts.Scale, 
+		LF_RECTILINEAR, //opts.TargetGeom,
+        ModifyFlags, 
+		false //opts.Inverse
+	);
 
 
 	//get integer image array, lensfun it, and use it to create the new gImage dib.
