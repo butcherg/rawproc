@@ -152,7 +152,11 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	std::map<std::string, std::string> info = dib->getInfo();
+	pix * newimg = dib->getImageDataRaw();
+	
+	gImage * olddib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	std::map<std::string, std::string> info = olddib->getInfo();
+	pix * img = olddib->getImageDataRaw();
 
 	const lfCamera *cam = NULL;
 	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, info["Model"].c_str());
@@ -171,8 +175,6 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 		wxMessageBox("Cannot find a lens matching `%s' in database\n", info["Lens"].c_str());
 	lf_free (lenses);
 	//wxMessageBox(wxString::Format("Lens: %s",lens->Model));
-	
-	pix* img =  dib->getImageDataRaw();
 	
 	int ModifyFlags = 0;  //ops=ca,vig,dist 
 	if (cp.find("ops") != cp.end()) {
@@ -196,6 +198,115 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
         ModifyFlags, 
 		false //opts.Inverse
 	);
+	
+	unsigned w = dib->getWidth();
+	unsigned h = dib->getHeight();
+	
+	if (ModifyFlags & LF_MODIFY_TCA) {
+		bool ok = true;
+		int lwidth = w * 2;
+		float *pos = new float [lwidth];
+		for (unsigned y = 0; ok && y < h; y++) {
+			ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
+			if (ok)
+			{
+				float *src = pos;
+				for (unsigned x = 0; x < w; x++)
+				{
+					unsigned p = x + y*h;
+					newimg[p].r = img[(unsigned) (src[0] + src[1] * w)].r; //img->GetR (src [0], src [1]);
+					newimg[p].g = img[(unsigned) (src[2] + src[3] * w)].g;//img->GetG (src [2], src [3]);
+					newimg[p].b = img[(unsigned) (src[4] + src[5] * w)].b;//img->GetB (src [4], src [5]);
+					src += 2 * 3;
+					///dst++;
+				}
+			}
+		}
+	}
+	
+	
+/*	
+	
+//#ifdef COMBINE_13
+//    int lwidth = img->width * 2 * 3;
+//#else
+    int lwidth = img->width * 2;
+    if (modflags & LF_MODIFY_TCA)
+        lwidth *= 3;
+//#endif
+    float *pos = new float [lwidth];
+    int step_start = reverse ? 2 : 0;
+    int step_delta = reverse ? -1 : +1;
+    int step_finish = reverse ? -1 : 3;
+    for (int step = step_start; step != step_finish; step += step_delta)
+    {
+        RGBpixel *dst = newimg->image;
+        char *imgdata = (char *)img->image;
+        bool ok = true;
+        img->InitInterpolation (opts.Interpolation);
+        for (unsigned y = 0; ok && y < img->height; y++)
+            switch (step)
+            {
+//#ifdef COMBINE_13
+//                case 0:
+//                    ok = false;
+//                    break;
+//                case 2:
+//                    // TCA and geometry correction 
+//                    ok = mod->ApplySubpixelGeometryDistortion (0.0, y, img->width, 1, pos);
+//#else
+                case 0:
+                    // TCA correction 
+                    ok = mod->ApplySubpixelDistortion (0.0, y, img->width, 1, pos);
+//#endif
+                    if (ok)
+                    {
+                        float *src = pos;
+                        for (unsigned x = 0; x < img->width; x++)
+                        {
+                            dst->red   = img->GetR (src [0], src [1]);
+                            dst->green = img->GetG (src [2], src [3]);
+                            dst->blue  = img->GetB (src [4], src [5]);
+                            src += 2 * 3;
+                            dst++;
+                        }
+                    }
+                    break;
+                case 1:
+                    // Colour correction: vignetting 
+                    ok = mod->ApplyColorModification (imgdata, 0.0, y, img->width, 1,
+                        LF_CR_4 (RED, GREEN, BLUE, UNKNOWN), 0);
+                    imgdata += img->width * 4;
+                    break;
+#ifndef COMBINE_13
+                case 2:
+                    // Distortion and geometry correction, scaling 
+                    ok = mod->ApplyGeometryDistortion (0.0, y, newimg->width, 1, pos);
+                    if (ok)
+                    {
+                        float *src = pos;
+                        for (unsigned x = 0; x < img->width; x++)
+                        {
+                            img->Get (*dst, src [0], src [1]);
+                            src += 2;
+                            dst++;
+                        }
+                    }
+                    break;
+#endif
+            }
+        // After TCA and distortion steps switch img and newimg.
+        // This is crucial since newimg is now the input image
+        // to the next stage.
+//        if (ok && (step == 0 || step == 2))
+//        {
+//            Image *tmp = newimg;
+//            newimg = img;
+//            img = tmp;
+//        }
+    }
+	
+*/
 
 
 	//get integer image array, lensfun it, and use it to create the new gImage dib.
