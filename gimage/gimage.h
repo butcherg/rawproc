@@ -120,6 +120,13 @@ class gImage
 		void setInfo(std::string name, std::string value);
 		void setProfile(char * prof, unsigned proflength);
 		void deleteProfile();
+		
+		//Lensfun support methods
+		void initInterpolation(RESIZE_FILTER method);  //only accepts FILTER_BILINEAR and FILTER_LANCZOS3
+		PIXTYPE getR(float x, float y);
+		PIXTYPE getG(float x, float y);
+		PIXTYPE getB(float x, float y);
+		pix getRGB(float x, float y);
 
 		//Static methods
 		static std::string getRGBCharacteristics();

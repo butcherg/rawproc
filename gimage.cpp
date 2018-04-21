@@ -617,6 +617,32 @@ std::string gImage::LibraryVersions()
 
 }
 
+//Lensfun support methods
+void gImage::initInterpolation(RESIZE_FILTER method)
+{
+
+}	
+
+PIXTYPE gImage::getR(float x, float y)
+{
+	
+}
+
+PIXTYPE gImage::getG(float x, float y)
+{
+	
+}
+
+PIXTYPE gImage::getB(float x, float y)
+{
+	
+}
+
+pix getRGB(float x, float y)
+{
+
+}
+
 
 
 int gImage::ThreadCount()
