@@ -243,10 +243,11 @@ std::string gImage::getRGBCharacteristics()
 	return charac;
 }
 
+pix nullpix = {(PIXTYPE) 0.0, (PIXTYPE) 0.0, (PIXTYPE) 0.0};
 
 pix gImage::getPixel(unsigned x,  unsigned y)
 {
-	pix nullpix = {(PIXTYPE) 0.0, (PIXTYPE) 0.0, (PIXTYPE) 0.0};
+	
 	int i = x + y*w;
 	if ((x < w) && (y < h))
 		return image[i];
@@ -618,29 +619,53 @@ std::string gImage::LibraryVersions()
 }
 
 //Lensfun support methods
-void gImage::initInterpolation(RESIZE_FILTER method)
+void gImage::initInterpolation(RESIZE_FILTER interp)
 {
-
+	lensfun_interp_method = interp;  //does nothing right now, all hard-coded to nearest-neighbor
 }	
 
 PIXTYPE gImage::getR(float x, float y)
 {
-	
+	unsigned xi = unsigned (x + 0.5);
+	unsigned yi = unsigned (y + 0.5);
+	if (xi >= w || yi >= h)
+		return 0.0;
+
+	unsigned pos = yi * w + xi;
+	return image[pos].r;
 }
 
 PIXTYPE gImage::getG(float x, float y)
 {
-	
+	unsigned xi = unsigned (x + 0.5);
+	unsigned yi = unsigned (y + 0.5);
+	if (xi >= w || yi >= h)
+		return 0.0;
+
+	unsigned pos = yi * w + xi;
+	return image[pos].g;
 }
 
 PIXTYPE gImage::getB(float x, float y)
 {
-	
+	unsigned xi = unsigned (x + 0.5);
+	unsigned yi = unsigned (y + 0.5);
+	if (xi >= w || yi >= h)
+		return 0.0;
+
+	unsigned pos = yi * w + xi;
+	return image[pos].b;
 }
 
-pix getRGB(float x, float y)
+pix gImage::getRGB(float x, float y)
 {
+	unsigned xi = unsigned (x + 0.5);
+	unsigned yi = unsigned (y + 0.5);
+	if (xi >= w || yi >= h)
+		return nullpix;
 
+	unsigned pos = yi * w + xi;
+	return image[pos];
 }
 
 

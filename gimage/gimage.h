@@ -191,6 +191,36 @@ class gImage
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
 
 
+/*
+		//Lensfun internal support
+		PIXTYPE (*fGetR) (Image *This, float x, float y);
+		unsigned char (*fGetG) (Image *This, float x, float y);
+		unsigned char (*fGetB) (Image *This, float x, float y);
+		void (*fGet) (Image *This, RGBpixel &out, float x, float y);
+
+		// --- Linear interpolation --- //
+
+		/// Get interpolated red value at given position
+		static unsigned char GetR_b (Image *This, float x, float y);
+		/// Get interpolated green value at given position
+		static unsigned char GetG_b (Image *This, float x, float y);
+		/// Get interpolated blue value at given position
+		static unsigned char GetB_b (Image *This, float x, float y);
+		/// Get interpolated pixel value at given position
+		static void Get_b (Image *This, RGBpixel &out, float x, float y);
+
+		// --- Lanczos interpolation --- //
+
+		/// Get interpolated red value at given position
+		static unsigned char GetR_l (Image *This, float x, float y);
+		/// Get interpolated green value at given position
+		static unsigned char GetG_l (Image *This, float x, float y);
+		/// Get interpolated blue value at given position
+		static unsigned char GetB_l (Image *This, float x, float y);
+		/// Get interpolated pixel value at given position
+		static void Get_l (Image *This, RGBpixel &out, float x, float y);
+*/
+
 	private:
 		std::vector<pix> image;
 		unsigned w, h, c;
@@ -203,6 +233,8 @@ class gImage
 		static std::string profilepath;
 		
 		GIMAGE_ERROR lasterror;
+
+		RESIZE_FILTER lensfun_interp_method;
 		
 
 };
