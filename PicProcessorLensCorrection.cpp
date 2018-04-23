@@ -4,6 +4,34 @@
 #include "gimage/strutil.h"
 #include "myConfig.h"
 
+#include <wx/listctrl.h>
+
+
+class myLensList: public wxListCtrl
+{
+	public:
+		myLensList(wxWindow *parent, wxWindowID id, wxArrayString list, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
+			wxListCtrl(parent, id, pos, size, wxLC_REPORT)
+		{
+			filter = "";
+			lenslist = list;
+			for (long i=0; i<lenslist.GetCount(); i++)
+				InsertItem (i, lenslist[i]);
+		}
+
+		void setFilter(wxString f)
+		{
+			filter = f;
+			DeleteAllItems();
+			for (long i=0; i<lenslist.GetCount(); i++)
+				if (lenslist[i].Find(filter) != wxNOT_FOUND) InsertItem (i, lenslist[i]);
+		}
+
+	private:
+		wxString filter;
+		wxArrayString lenslist;
+};
+
 class LensCorrectionPanel: public PicProcPanel
 {
 
@@ -45,6 +73,11 @@ class LensCorrectionPanel: public PicProcPanel
 
 		~LensCorrectionPanel()
 		{
+		}
+
+		void alternateList(wxCommandEvent& event)
+		{
+
 		}
 		
 		void setAlternates(wxCommandEvent& event)
