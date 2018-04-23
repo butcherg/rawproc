@@ -5,31 +5,113 @@
 #include "myConfig.h"
 
 #include <wx/listctrl.h>
+#include <wx/editlbox.h>
+
+#define FILTERID 8500
+#define HIDEID 8503
 
 
-class myLensList: public wxListCtrl
+class myLensList: public wxEditableListBox
 {
 	public:
 		myLensList(wxWindow *parent, wxWindowID id, wxArrayString list, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
-			wxListCtrl(parent, id, pos, size, wxLC_REPORT)
+			wxEditableListBox(parent, id, "Lens", pos, size,0)
 		{
 			filter = "";
 			lenslist = list;
-			for (long i=0; i<lenslist.GetCount(); i++)
-				InsertItem (i, lenslist[i]);
+			SetStrings(lenslist);
+			Bind(wxEVT_LIST_ITEM_SELECTED,&myLensList::SetLens, this);
 		}
 
 		void setFilter(wxString f)
 		{
 			filter = f;
-			DeleteAllItems();
+			if (filter == "") {
+				SetStrings(lenslist);
+				return;
+			}
+			wxArrayString filteredlist;
 			for (long i=0; i<lenslist.GetCount(); i++)
-				if (lenslist[i].Find(filter) != wxNOT_FOUND) InsertItem (i, lenslist[i]);
+				if (lenslist[i].Find(filter) != wxNOT_FOUND) filteredlist.Add(lenslist[i]);
+			SetStrings(filteredlist);
+		}
+		
+		void SetLens(wxListEvent& event)
+		{
+			wxListItem item = event.GetItem();
+			lens = item.GetText();
+		}
+		
+		wxString GetLens()
+		{
+			return lens;
 		}
 
 	private:
 		wxString filter;
 		wxArrayString lenslist;
+		wxString lens;
+};
+
+class myLensDialog: public wxDialog
+{
+	public:
+		myLensDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
+			wxDialog(parent, id, title, pos, size)
+		{
+			wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
+			wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
+			wxArrayString lenses;
+			lenses.Add("one");
+			lenses.Add("two");
+			lenses.Add("three");
+			list = new myLensList(this, wxID_ANY, lenses);
+			sz->Add(list, 0, wxEXPAND | wxALL, 3);
+			
+			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);
+			ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
+			fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+			ct->Add(fil, 0, wxALL, 10);
+			
+			sz->Add(ct, 0, wxALL, 10);
+			SetSizerAndFit(sz);
+			
+			Bind(wxEVT_TEXT_ENTER, &myLensDialog::FilterGrid, this);
+			Bind(wxEVT_TEXT, &myLensDialog::FilterGrid, this);
+			Bind(wxEVT_BUTTON, &myLensDialog::EndDialog, this);
+			
+			
+			
+		}
+		
+		~myLensDialog()
+		{
+			if (list) list->Destroy();
+		}
+		
+		void EndDialog(wxCommandEvent& event)
+		{
+			EndModal(wxID_OK);
+		}
+		
+		void FilterGrid(wxCommandEvent& event)
+		{
+			list->setFilter(fil->GetValue());
+		}
+		
+		
+		wxString GetSelection()
+		{
+			return list->GetLens();
+		}
+		
+	private:
+		myLensList *list;
+		wxTextCtrl *fil;
+		wxString lens;
+	
+	
+	
 };
 
 class LensCorrectionPanel: public PicProcPanel
@@ -66,7 +148,7 @@ class LensCorrectionPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&LensCorrectionPanel::paramChanged, this);
-			Bind(wxEVT_BUTTON, &LensCorrectionPanel::setAlternates, this);
+			Bind(wxEVT_BUTTON, &LensCorrectionPanel::alternateDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this);
 		}
@@ -75,8 +157,11 @@ class LensCorrectionPanel: public PicProcPanel
 		{
 		}
 
-		void alternateList(wxCommandEvent& event)
+		void alternateDialog(wxCommandEvent& event)
 		{
+			myLensDialog dlg(this, wxID_ANY, "Lens", wxDefaultPosition, wxDefaultSize);
+				if ( dlg.ShowModal() == wxID_OK )
+					wxMessageBox(dlg.GetSelection());
 
 		}
 		
