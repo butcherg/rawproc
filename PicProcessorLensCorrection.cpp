@@ -90,6 +90,7 @@ class myLensDialog: public wxDialog
 			wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
 
 			wxArrayString items;
+			wxString dlgtitle = "";
 			if (title == "Camera") {
 				const struct lfCamera *const *cameras;
 				cameras = lf_db_get_cameras (ldb);
@@ -97,6 +98,7 @@ class myLensDialog: public wxDialog
 				{
 					items.Add(wxString((char *) cameras[i]->Model));
 				}
+				dlgtitle = "Cameras";
 			}
 			else if (title == "Lens") {
 				const struct lfLens *const *lenses;
@@ -105,12 +107,13 @@ class myLensDialog: public wxDialog
 				{
 					items.Add(wxString((char *) lenses[i]->Model));
 				}
+				dlgtitle = "Lenses";
 			}
 
 
 
 			//list = new myLensList(this, wxID_ANY, lenses);
-			list = new myListCtrl(this, wxID_ANY, "Foo", items, wxDefaultPosition, wxSize(400,300));
+			list = new myListCtrl(this, wxID_ANY, dlgtitle, items, wxDefaultPosition, wxSize(400,300));
 			sz->Add(list, 0, wxEXPAND | wxALL, 3);
 			
 			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);
@@ -194,7 +197,8 @@ class LensCorrectionPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			Bind(wxEVT_TEXT_ENTER,&LensCorrectionPanel::paramChanged, this);
+			//Bind(wxEVT_TEXT_ENTER,&LensCorrectionPanel::setAlternates, this);
+			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this);
@@ -210,16 +214,19 @@ class LensCorrectionPanel: public PicProcPanel
 				case LENSID: {
 					myLensDialog dlg(this, wxID_ANY, "Lens", ((PicProcessorLensCorrection *)q)->getLensDatabase(), wxDefaultPosition, wxDefaultSize);
 					if ( dlg.ShowModal() == wxID_OK )
-						wxMessageBox(dlg.GetSelection());
+						//wxMessageBox(dlg.GetSelection());
+						lens->SetValue(dlg.GetSelection());
 					break;
 				}
 				case CAMERAID: {
 					myLensDialog dlg(this, wxID_ANY, "Camera", ((PicProcessorLensCorrection *)q)->getLensDatabase(), wxDefaultPosition, wxDefaultSize);
 					if ( dlg.ShowModal() == wxID_OK )
-						wxMessageBox(dlg.GetSelection());
+						//wxMessageBox(dlg.GetSelection());
+						cam->SetValue(dlg.GetSelection());
 					break;
 				}
 			}
+			((PicProcessorLensCorrection *) q)->setAlternates(cam->GetValue(), lens->GetValue());
 		}
 		
 		void setAlternates(wxCommandEvent& event)
@@ -259,7 +266,10 @@ class LensCorrectionPanel: public PicProcPanel
 PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	lfok = true;
-	setlocale (LC_ALL, "");			
+	setlocale (LC_ALL, "");		
+
+	altcamera = "";
+	altlens = "";
 	
 	lfError e;
 	ldb = lf_db_new ();
@@ -322,6 +332,23 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	
 	//wxArrayString cp = split(getParams(),",");
 	std::map<std::string, std::string> cp = parseparams(std::string(getParams().c_str()));
+	
+	std::string camspec, lensspec;
+	
+	if (altcamera != "")
+		camspec = altcamera;
+	else if (metadatacamera != "(none)")
+		camspec = metadatacamera;
+	else
+		camspec = "";
+	
+	if (altlens != "")
+		lensspec = altlens;
+	else if (metadatalens != "(none)")
+		lensspec = metadatalens;
+	else
+		lensspec = "";
+	
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.cores","0").c_str());
 	if (threadcount == 0) 
@@ -335,37 +362,39 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	std::map<std::string, std::string> info = dib->getInfo();
 	pix * img = dib->getImageDataRaw();
 
-	bool success = true;
-	
-	//gImage * olddib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	//pix * img = olddib->getImageDataRaw();
+	bool success = false;
 
 	const lfCamera *cam = NULL;
-	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, info["Model"].c_str());
-	if (cameras)
+	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camspec.c_str());
+	if (cameras) {
 		cam = cameras[0];
+		success = true;
+	}
 	else {
-		wxMessageBox(wxString::Format("Cannot find a camera matching %s in database\n", info["Model"].c_str()));
+		wxMessageBox(wxString::Format("Cannot find a camera matching %s in database\n", camspec.c_str()));
 		success = false;
 	}
 	lf_free (cameras);
 
-
 	const lfLens *lens = NULL;
-	const lfLens **lenses = ldb->FindLenses (cam, NULL, info["Lens"].c_str());
+	const lfLens **lenses = NULL;
 	if (success) {
 		// try to find a matching lens in the database
-		lenses = ldb->FindLenses (cam, NULL, info["Lens"].c_str());
-		if (lenses)
+		lenses = ldb->FindLenses (cam, NULL, lensspec.c_str());
+		if (lenses) {
 			lens = lenses [0];
+			success = true;
+		}
 		else {
-			wxMessageBox(wxString::Format("Cannot find a lens matching %s in database\n", info["Lens"].c_str()));
+			wxMessageBox(wxString::Format("Cannot find a lens matching %s in database\n", lensspec.c_str()));
 			success = false;
 		}
 		lf_free (lenses);
 	}
 
 	if (success) {
+		
+		//wxMessageBox(wxString::Format("%s : %s",camspec,lensspec));
 	
 		int ModifyFlags = 0;  //ops=ca,vig,dist 
 		if (cp.find("ops") != cp.end()) {
@@ -395,22 +424,28 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 		unsigned h = dib->getHeight();
 
 		if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#2
-			((wxFrame*) m_display->GetParent())->SetStatusText("vignetting...");
+			((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: vignetting...");
 			pix * newimg = dib->getImageDataRaw();
 			bool ok = true;
-			for (unsigned y = 0; ok && y < h; y++) {
+			
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned y = 0; y < h; y++) {
+			//for (unsigned y = 0; ok && y < h; y++) {
 				unsigned p = y*w;
 				ok = mod->ApplyColorModification (&newimg[p], 0.0, y, w, 1, LF_CR_3 (RED, GREEN, BLUE), w);
 			}
 		}
 
 		if ((ModifyFlags & LF_MODIFY_DISTORTION) && (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
-			((wxFrame*) m_display->GetParent())->SetStatusText("chromatic abberation and distortion...");
+			((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation and distortion...");
 			gImage olddib(*dib);
 			pix * newimg = dib->getImageDataRaw();
 			bool ok = true;
 			int lwidth = w * 2 * 3;
-			for (unsigned y = 0; ok && y < h; y++) {
+			
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned y = 0; y < h; y++) {
+			//for (unsigned y = 0; ok && y < h; y++) {
 				float pos[lwidth];
 				ok = mod->ApplySubpixelGeometryDistortion (0.0, y, w, 1, pos);
 				if (ok)
@@ -431,12 +466,15 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 		else {  //#2, or #3
 	
 			if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
-				((wxFrame*) m_display->GetParent())->SetStatusText("distortion...");
+				((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: distortion...");
 				gImage olddib(*dib);
 				pix * newimg = dib->getImageDataRaw();
 				bool ok = true;
 				int lwidth = w * 2;
-				for (unsigned y = 0; ok && y < h; y++) {
+				
+				#pragma omp parallel for num_threads(threadcount)
+				for (unsigned y = 0; y < h; y++) {
+				//for (unsigned y = 0; ok && y < h; y++) {
 					float pos[lwidth];
 					ok = mod->ApplyGeometryDistortion (0.0, y, w, 1, pos);
 					if (ok)
@@ -453,12 +491,15 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 			}
 		
 			if (ModifyFlags & LF_MODIFY_TCA) {  //#3
-				((wxFrame*) m_display->GetParent())->SetStatusText("chromatic abberation...");
+				((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation...");
 				gImage olddib(*dib);
 				pix * newimg = dib->getImageDataRaw();
 				bool ok = true;
 				int lwidth = w * 2 * 3;
-				for (unsigned y = 0; ok && y < h; y++) {
+				
+				#pragma omp parallel for num_threads(threadcount)
+				for (unsigned y = 0; y < h; y++) {
+				//for (unsigned y = 0; ok && y < h; y++) {
 					float pos[lwidth];
 					ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
 					if (ok)
@@ -484,10 +525,9 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 			log(wxString::Format("tool=lenscorrection,%s,imagesize=%dx%d,time=%s",getParams(), dib->getWidth(), dib->getHeight(),d));
 	
 		dirty = false;
-
-		((wxFrame*) m_display->GetParent())->SetStatusText("");
 		if (processnext) processNext();
 	}
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	
 	return result;
 }
