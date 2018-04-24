@@ -10,62 +10,107 @@
 #define FILTERID 8500
 #define HIDEID 8503
 
+#define LENSID 8501
+#define CAMERAID 8502
 
-class myLensList: public wxEditableListBox
+
+
+class myListCtrl: public wxListCtrl
 {
 	public:
-		myLensList(wxWindow *parent, wxWindowID id, wxArrayString list, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
-			wxEditableListBox(parent, id, "Lens", pos, size,0)
+		//Constructs the list control, populated with the items passed in the listitems wxArrayString:
+		myListCtrl(wxWindow *parent, wxWindowID id, wxString listname, wxArrayString listitems, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
+			wxListCtrl(parent, id, pos, size, wxLC_REPORT | wxLC_NO_HEADER | wxLC_HRULES, wxDefaultValidator, listname)
 		{
+			SetDoubleBuffered(true);
+			wxListItem col0;
+			col0.SetId(0);
+			col0.SetText( _(listname) );
+			col0.SetWidth(size.x);
+			InsertColumn(0, col0);
+
+			itemlist = listitems;
+
+			for (int i=0; i<itemlist.GetCount(); i++) {
+				wxListItem item;
+				item.SetId(i);
+				item.SetText( itemlist[i] );
+				InsertItem( item );
+			}
+
 			filter = "";
-			lenslist = list;
-			SetStrings(lenslist);
-			Bind(wxEVT_LIST_ITEM_SELECTED,&myLensList::SetLens, this);
+			selected = "";
+
+			Bind(wxEVT_LIST_ITEM_SELECTED, &myListCtrl::Selected, this);
 		}
 
+		//Filters the list to include only entries that contain the specified string:
 		void setFilter(wxString f)
 		{
 			filter = f;
-			if (filter == "") {
-				SetStrings(lenslist);
-				return;
+			DeleteAllItems();
+			
+			for (int i=0; i<itemlist.GetCount(); i++) {
+				if (itemlist[i].Find(filter) != wxNOT_FOUND) {
+					wxListItem item;
+					item.SetId(i);
+					item.SetText( itemlist[i] );
+					InsertItem( item );
+				}
 			}
-			wxArrayString filteredlist;
-			for (long i=0; i<lenslist.GetCount(); i++)
-				if (lenslist[i].Find(filter) != wxNOT_FOUND) filteredlist.Add(lenslist[i]);
-			SetStrings(filteredlist);
-		}
-		
-		void SetLens(wxListEvent& event)
-		{
-			wxListItem item = event.GetItem();
-			lens = item.GetText();
-		}
-		
-		wxString GetLens()
-		{
-			return lens;
 		}
 
+		//Captures the entry selected, at selection:
+		void Selected(wxListEvent& event)
+		{
+			selected = event.GetText();
+			event.Skip();
+		}
+
+		//Returns the selected entry, as populated by the wxListEvent method:
+		wxString GetSelected()
+		{
+			return selected;
+		}
+
+
 	private:
-		wxString filter;
-		wxArrayString lenslist;
-		wxString lens;
+		wxArrayString itemlist;
+		wxString filter, selected;
 };
+ 
 
 class myLensDialog: public wxDialog
 {
 	public:
-		myLensDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
+		myLensDialog(wxWindow *parent, wxWindowID id, const wxString &title, struct lfDatabase * ldb, const wxPoint &pos, const wxSize &size):
 			wxDialog(parent, id, title, pos, size)
 		{
 			wxBoxSizer *sz = new wxBoxSizer(wxVERTICAL);
 			wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
-			wxArrayString lenses;
-			lenses.Add("one");
-			lenses.Add("two");
-			lenses.Add("three");
-			list = new myLensList(this, wxID_ANY, lenses);
+
+			wxArrayString items;
+			if (title == "Camera") {
+				const struct lfCamera *const *cameras;
+				cameras = lf_db_get_cameras (ldb);
+				for (int i = 0; cameras [i]; i++)
+				{
+					items.Add(wxString((char *) cameras[i]->Model));
+				}
+			}
+			else if (title == "Lens") {
+				const struct lfLens *const *lenses;
+				lenses = lf_db_get_lenses (ldb);
+				for (int i = 0; lenses [i]; i++)
+				{
+					items.Add(wxString((char *) lenses[i]->Model));
+				}
+			}
+
+
+
+			//list = new myLensList(this, wxID_ANY, lenses);
+			list = new myListCtrl(this, wxID_ANY, "Foo", items, wxDefaultPosition, wxSize(400,300));
 			sz->Add(list, 0, wxEXPAND | wxALL, 3);
 			
 			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);
@@ -102,11 +147,13 @@ class myLensDialog: public wxDialog
 		
 		wxString GetSelection()
 		{
-			return list->GetLens();
+			//return list->GetLens();
+			return list->GetSelected();
 		}
 		
 	private:
-		myLensList *list;
+		//myLensList *list;
+		myListCtrl *list;
 		wxTextCtrl *fil;
 		wxString lens;
 	
@@ -129,10 +176,10 @@ class LensCorrectionPanel: public PicProcPanel
 
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(cam, flags);
-			b->Add(new wxButton(this, wxID_ANY, "Select camera"), flags);
+			b->Add(new wxButton(this, CAMERAID, "Select camera"), flags);
 			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
 			b->Add(lens, flags);
-			b->Add(new wxButton(this, wxID_ANY, "Select lens"), flags);
+			b->Add(new wxButton(this, LENSID, "Select lens"), flags);
 			b->AddSpacer(10);
 			
 			ca = new wxCheckBox(this, wxID_ANY, "chromatic abberation");
@@ -148,7 +195,7 @@ class LensCorrectionPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&LensCorrectionPanel::paramChanged, this);
-			Bind(wxEVT_BUTTON, &LensCorrectionPanel::alternateDialog, this);
+			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this);
 		}
@@ -157,12 +204,22 @@ class LensCorrectionPanel: public PicProcPanel
 		{
 		}
 
-		void alternateDialog(wxCommandEvent& event)
+		void lensDialog(wxCommandEvent& event)
 		{
-			myLensDialog dlg(this, wxID_ANY, "Lens", wxDefaultPosition, wxDefaultSize);
-				if ( dlg.ShowModal() == wxID_OK )
-					wxMessageBox(dlg.GetSelection());
-
+			switch (event.GetId()) {
+				case LENSID: {
+					myLensDialog dlg(this, wxID_ANY, "Lens", ((PicProcessorLensCorrection *)q)->getLensDatabase(), wxDefaultPosition, wxDefaultSize);
+					if ( dlg.ShowModal() == wxID_OK )
+						wxMessageBox(dlg.GetSelection());
+					break;
+				}
+				case CAMERAID: {
+					myLensDialog dlg(this, wxID_ANY, "Camera", ((PicProcessorLensCorrection *)q)->getLensDatabase(), wxDefaultPosition, wxDefaultSize);
+					if ( dlg.ShowModal() == wxID_OK )
+						wxMessageBox(dlg.GetSelection());
+					break;
+				}
+			}
 		}
 		
 		void setAlternates(wxCommandEvent& event)
@@ -248,6 +305,11 @@ void PicProcessorLensCorrection::setAlternates(wxString acam, wxString alens)
 {
 	altcamera = acam;
 	altlens = alens;
+}
+
+lfDatabase * PicProcessorLensCorrection::getLensDatabase()
+{
+	return ldb;
 }
 
 bool PicProcessorLensCorrection::processPic(bool processnext) 

@@ -14,6 +14,7 @@ class PicProcessorLensCorrection: public PicProcessor
 		~PicProcessorLensCorrection();
 		void createPanel(wxSimplebook* parent);
 		void setAlternates(wxString acam, wxString alens);
+		lfDatabase * getLensDatabase();
 		bool processPic(bool processnext=true);
 
 	private:
