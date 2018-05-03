@@ -112,7 +112,7 @@ setup_read_icc_profile (j_decompress_ptr cinfo)
  * Handy subroutine to test whether a saved marker is an ICC profile marker.
  */
 
-static boolean
+static bool
 marker_is_icc (jpeg_saved_marker_ptr marker)
 {
   return
