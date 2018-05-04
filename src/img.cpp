@@ -837,9 +837,9 @@ int main (int argc, char **argv)
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
 		#ifdef VERSION
-		printf("img version: %s build date: %s\n",VERSION, BUILDDATE);
+//		printf("img version: %s build date: %s\n",VERSION, BUILDDATE);
 		#else
-			printf("img build date: %s\n", BUILDDATE);
+//		printf("img build date: %s\n", BUILDDATE);
 		#endif
 		printf("Usage: img inputfile [command[:parameters] ...] outputfile\n\n");
 		printf("inputfile and output file can have one wildcard each, '*', to process \n");
