@@ -5,6 +5,7 @@ OBJECTS=@objs@
 LIBOBJECTS := gimage.o jpegimage.o jpegexif.o rawimage.o tiffimage.o pngimage.o strutil.o curve.o
 
 LIBS=@LIBS@
+LDFLAGS=@LDFLAGS@
 CXXFLAGS=@CXXFLAGS@
 CPPFLAGS=@CPPFLAGS@
 LDFLAGS=@LDFLAGS@

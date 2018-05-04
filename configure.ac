@@ -145,114 +145,73 @@ AC_SEARCH_LIBS(inflateInit2_,z,  [], [])
 AC_SEARCH_LIBS(lzma_code,lzma,   [], [])
 AC_SEARCH_LIBS(jas_init,jasper,  [], [])
 
-
+if test "$host_alias" != ""
+then
+	PKG_CONFIG_SYSROOT_DIR="/usr/$host_alias"
+fi
 
 #libjpeg:
 
-AC_ARG_WITH([jpeg-include],
-	AS_HELP_STRING([--with-jpeg-include], [=PATH, specifies path to non-standard location of the libjpeg header (jpeglib.h).]),
-	[
-		echo "jpeglib.h: using $with_jpeg_include"
-		if test -f "$with_jpeg_include/jpeglib.h" 
-		then
-			#APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_jpeg_include $CPPFLAGS"
-		else
-			AC_MSG_ERROR([jpeglib.h not found in $with_jpeg_include]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([include directory for jpeglib.h not found.])])
-	]
-)
+AC_MSG_CHECKING([for libjpeg library])
+libjpeg="libjpeg"
+LIBJPEG_EXISTS=`pkg-config $libjpeg --exists`
+if test "$?" == "0"
+then
+	LIBJPEG_CFLAGS=`pkg-config $libjpeg --cflags`
+	LIBJPEG_LIBS=`pkg-config $libjpeg --static --libs-only-l`
+	LIBJPEG_LIBDIRS=`pkg-config $libjpeg --libs-only-L`
+	LIBS="$LIBJPEG_LIBS $LIBS"
+	LDFLAGS="$LIBJPEG_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBJPEG_CFLAGS $CPPFLAGS"
+	AC_MSG_RESULT([installed library: $LIBJPEG_CFLAGS $LIBJPEG_LIBS])
+else
+	AC_CHECK_HEADERS(jpeglib.h, [], [AC_MSG_ERROR([jpeglib.h not found.])])
+	AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
+fi
 
-AC_ARG_WITH([jpeg-lib],
-	AS_HELP_STRING([--with-jpeg-lib], [=PATH, specifies location of the jpeg library (libjpeg.a).]),
-	[
-		echo "libjpeg: using $with_jpeg_lib"
-		if test -f "$with_jpeg_lib" 
-		then
-			AC_CHECK_LIB(jpeg, jpeg_set_defaults, [AC_MSG_RESULT([$with_jpeg_lib found.])], [AC_MSG_ERROR([A working libjpeg is required.])])
-			LIBS="$with_jpeg_lib $LIBS"
-		else
-			AC_MSG_ERROR([$with_jpeg_lib not found.]) 
-		fi
-	],
-	[
-		AC_SEARCH_LIBS(jpeg_set_defaults,jpeg, [], [AC_MSG_ERROR([A working libjpeg is required.])])
-	]
-)
 
 #libtiff:
 
-AC_ARG_WITH([tiff-include],
-	AS_HELP_STRING([--with-tiff-include], [=PATH, specifies path to non-standard location of the tiff header (tiffio.h).]),
-	[
-		echo "libtiff: using $with_tiff_include"
-		if test -f "$with_tiff_include/tiffio.h"
-		then
-			#APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_tiff_include $CPPFLAGS"
-		else
-			AC_MSG_ERROR([tiffio.h not found in $with_tiff_include.]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
-	]
-)
+AC_MSG_CHECKING([for libtiff library])
+libtiff=libtiff-4
+LIBTIFF_EXISTS=`pkg-config $libtiff --exists`
+if test "$?" == "0"
+then
+	LIBTIFF_CFLAGS=`pkg-config $libtiff --cflags`
+	LIBTIFF_LIBS=`pkg-config $libtiff --static --libs-only-l`
+	LIBTIFF_LIBDIRS=`pkg-config $libtiff --libs-only-L`
+	LIBS="$LIBTIFF_LIBS $LIBS"
+	#m4_append_uniq_w([LIBS], [LIBTIFF_LIBS])dnl
+	LDFLAGS="$LIBTIFF_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBTIFF_CFLAGS $CPPFLAGS"
+	AC_MSG_RESULT([installed library: $LIBTIFF_CFLAGS $LIBTIFF_LIBS])
+else
+	AC_CHECK_HEADERS(tiffio.h, [], [AC_MSG_ERROR([tiffio.h not found.])])
+	AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
+#	AC_MSG_ERROR([libtiff not found.])
+fi
 
-AC_ARG_WITH([tiff-lib],
-	AS_HELP_STRING([--with-tiff-lib], [=PATH, specifies path to non-standard location of the tiff library (libtiff.a).]),
-	[
-		echo "libtiff: using $with_tiff_lib" 
-		if test -f "$with_tiff_lib"
-		then
-			AC_CHECK_LIB(tiff, TIFFSetErrorHandler, [AC_MSG_RESULT([$with_tiff_lib found.])], [AC_MSG_ERROR([A working libtiff is required.])])
-			LIBS="$with_tiff_lib $LIBS"
-		else
-			AC_MSG_ERROR([$with_tiff_lib not found.]) 
-		fi
-	],
-	[
-		AC_SEARCH_LIBS(TIFFSetErrorHandler,tiff, [], [AC_MSG_ERROR([A working libtiff is required.])])
-	]
-)
 
 #libpng:
 
-AC_ARG_WITH([png-include],
-	AS_HELP_STRING([--with-png-include], [=PATH, specifies path to non-standard location of the png header (png.h).]),
-	[
-		echo "libpng: using $with_png_include"
-		if test -f "$with_png_include/png.h"
-		then
-			CPPFLAGS="-I$with_png_include $CPPFLAGS"
-		else
-			AC_MSG_ERROR([png.h not found in $with_png_include.]) 
-		fi
-	],
-	[
-		AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
-	]
-)
+AC_MSG_CHECKING([for libpng library])
+libpng="libpng"
+LIBPNG_EXISTS=`pkg-config $libpng --exists`
+if test "$?" == "0"
+then
+	LIBPNG_CFLAGS=`pkg-config $libpng --cflags`
+	LIBPNG_LIBS=`pkg-config $libpng --static --libs-only-l`
+	LIBPNG_LIBDIRS=`pkg-config $libpng --libs-only-L`
+	LIBS="$LIBPNG_LIBS $LIBS"
+	LDFLAGS="$LIBPNG_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBPNG_CFLAGS $CPPFLAGS"
+	AC_MSG_RESULT([installed library: $LIBPNG_CFLAGS $LIBPNG_LIBS])
+else
+	AC_CHECK_HEADERS(png.h, [], [AC_MSG_ERROR([png.h not found.])])
+	AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
+fi
 
-AC_ARG_WITH([png-lib],
-	AS_HELP_STRING([--with-png-lib], [=PATH, specifies path to non-standard location of the png library (libpng.a).]),
-	[
-		echo "libpng: using $with_png_lib"
-		if test -f "$with_png_lib"
-		then
-			AC_CHECK_LIB(png, png_get_io_ptr, [AC_MSG_RESULT([$with_png_lib found.])], [AC_MSG_ERROR([A working libpng is required.])])
-			LIBS="$with_png_lib $LIBS"
-		else
-			AC_MSG_ERROR([$with_png_lib not found.]) 
-		fi
-	],
-	[
-		AC_SEARCH_LIBS(png_get_io_ptr,png, [], [AC_MSG_ERROR([A working libpng is required.])])
-	]
-)
+
 
 
 #lcms2:
@@ -334,20 +293,22 @@ AC_ARG_ENABLE([lensfun],
 )
 if test "$enable_lensfun" == "yes"
 then
-	if test "$mingw_cv_win32_host" == "yes" 
+	AC_MSG_CHECKING([for lensfun library])
+	lensfun="lensfun"
+	LENSFUN_EXISTS=`pkg-config $lensfun --exists`
+	if test "$?" == "0"
 	then
-		LIBS="-pthread -lws2_32 -lole32 -lwinmm -lshlwapi $LIBS"
+		LENSFUN_CFLAGS=`pkg-config $lensfun --cflags`
+		LENSFUN_LIBS=`pkg-config $lensfun --static --libs-only-l`
+		LENSFUN_LDFLAGS=`pkg-config $lensfun --libs-only-L`
+		LIBS="$LENSFUN_LIBS $LIBS"
+		CPPFLAGS="$LENSFUN_CFLAGS $CPPFLAGS"
+		LDFLAGS="$LENSFUN_LDFLAGS $LDFLAGS"
+		AC_MSG_RESULT([$LENSFUN_LIBS])
+	else
+		AC_MSG_ERROR([lensfun not found.])
+
 	fi
-	AC_SEARCH_LIBS(regerror,tre_regex, [], [AC_MSG_ERROR([A working regex is required])])
-	AC_SEARCH_LIBS(pcre_compile,pcre, [], [AC_MSG_ERROR([A working regex is required])])
-	if test "$mingw_cv_win32_host" == "yes" 
-	then
-		AC_SEARCH_LIBS(libiconv_open,iconv, [], [AC_MSG_ERROR([A working libiconv is required])])
-		AC_SEARCH_LIBS(libintl_sprintf,intl, [], [AC_MSG_ERROR([A working libintl is required])])
-	fi
-	AC_SEARCH_LIBS(g_print,glib-2.0, [], [AC_MSG_ERROR([A working glib is required])])
-	AC_CHECK_HEADERS(lensfun/lensfun.h, [], [AC_MSG_ERROR([lensfun.h not found])])
-	AC_SEARCH_LIBS(lf_db_new,lensfun, [], [AC_MSG_ERROR([A working lensfun is required])])
 	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
 	objs="$objs PicProcessorLensCorrection.o"
 fi
@@ -376,6 +337,7 @@ AC_SUBST(WX_CFLAGS_ONLY)
 AC_SUBST(WX_LIBS)
 
 AC_SUBST(LIBS)
+AC_SUBST(LDFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(CFLAGS)

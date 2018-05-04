@@ -706,12 +706,6 @@ with_wx_prefix
 with_wx_exec_prefix
 with_pixtype
 with_localprefix
-with_jpeg_include
-with_jpeg_lib
-with_tiff_include
-with_tiff_lib
-with_png_include
-with_png_lib
 with_lcms2_include
 with_lcms2_lib
 with_libraw_include
@@ -1383,18 +1377,6 @@ Optional Packages:
                           CPPFLAGS, respectively. Use this to make and use
                           alternate combinations of the supporting libraries
 
-  --with-jpeg-include     =PATH, specifies path to non-standard location of
-                          the libjpeg header (jpeglib.h).
-  --with-jpeg-lib         =PATH, specifies location of the jpeg library
-                          (libjpeg.a).
-  --with-tiff-include     =PATH, specifies path to non-standard location of
-                          the tiff header (tiffio.h).
-  --with-tiff-lib         =PATH, specifies path to non-standard location of
-                          the tiff library (libtiff.a).
-  --with-png-include      =PATH, specifies path to non-standard location of
-                          the png header (png.h).
-  --with-png-lib          =PATH, specifies path to non-standard location of
-                          the png library (libpng.a).
   --with-lcms2-include    =PATH, specifies path to non-standard location of
                           the Little CMS2 header (lcms2.h).
   --with-lcms2-lib        =PATH, specifies location of the Little CMS2 library
@@ -4213,11 +4195,29 @@ if test "$ac_res" != no; then :
 fi
 
 
-
+if test "$host_alias" != ""
+then
+	PKG_CONFIG_SYSROOT_DIR="/usr/$host_alias"
+fi
 
 #libjpeg:
 
-ac_ext=cpp
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libjpeg library" >&5
+$as_echo_n "checking for libjpeg library... " >&6; }
+libjpeg="libjpeg"
+LIBJPEG_EXISTS=`pkg-config $libjpeg --exists`
+if test "$?" == "0"
+then
+	LIBJPEG_CFLAGS=`pkg-config $libjpeg --cflags`
+	LIBJPEG_LIBS=`pkg-config $libjpeg --static --libs-only-l`
+	LIBJPEG_LIBDIRS=`pkg-config $libjpeg --libs-only-L`
+	LIBS="$LIBJPEG_LIBS $LIBS"
+	LDFLAGS="$LIBJPEG_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBJPEG_CFLAGS $CPPFLAGS"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: installed library: $LIBJPEG_CFLAGS $LIBJPEG_LIBS" >&5
+$as_echo "installed library: $LIBJPEG_CFLAGS $LIBJPEG_LIBS" >&6; }
+else
+	ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -4610,22 +4610,7 @@ fi
 done
 
 
-
-# Check whether --with-jpeg-include was given.
-if test "${with_jpeg_include+set}" = set; then :
-  withval=$with_jpeg_include;
-		echo "jpeglib.h: using $with_jpeg_include"
-		if test -f "$with_jpeg_include/jpeglib.h"
-		then
-			#APP_CPPFLAGS="-I$with_jpeg_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_jpeg_include $CPPFLAGS"
-		else
-			as_fn_error $? "jpeglib.h not found in $with_jpeg_include" "$LINENO" 5
-		fi
-
-else
-
-		for ac_header in jpeglib.h
+for ac_header in jpeglib.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
 if test "x$ac_cv_header_jpeglib_h" = xyes; then :
@@ -4634,74 +4619,12 @@ if test "x$ac_cv_header_jpeglib_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "include directory for jpeglib.h not found." "$LINENO" 5
+  as_fn_error $? "jpeglib.h not found." "$LINENO" 5
 fi
 
 done
 
-
-
-fi
-
-
-
-# Check whether --with-jpeg-lib was given.
-if test "${with_jpeg_lib+set}" = set; then :
-  withval=$with_jpeg_lib;
-		echo "libjpeg: using $with_jpeg_lib"
-		if test -f "$with_jpeg_lib"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for jpeg_set_defaults in -ljpeg" >&5
-$as_echo_n "checking for jpeg_set_defaults in -ljpeg... " >&6; }
-if ${ac_cv_lib_jpeg_jpeg_set_defaults+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ljpeg  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char jpeg_set_defaults ();
-int
-main ()
-{
-return jpeg_set_defaults ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_jpeg_jpeg_set_defaults=yes
-else
-  ac_cv_lib_jpeg_jpeg_set_defaults=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_jpeg_jpeg_set_defaults" >&5
-$as_echo "$ac_cv_lib_jpeg_jpeg_set_defaults" >&6; }
-if test "x$ac_cv_lib_jpeg_jpeg_set_defaults" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_jpeg_lib found." >&5
-$as_echo "$with_jpeg_lib found." >&6; }
-else
-  as_fn_error $? "A working libjpeg is required." "$LINENO" 5
-fi
-
-			LIBS="$with_jpeg_lib $LIBS"
-		else
-			as_fn_error $? "$with_jpeg_lib not found." "$LINENO" 5
-		fi
-
-else
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_set_defaults" >&5
 $as_echo_n "checking for library containing jpeg_set_defaults... " >&6; }
 if ${ac_cv_search_jpeg_set_defaults+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4759,29 +4682,28 @@ else
   as_fn_error $? "A working libjpeg is required." "$LINENO" 5
 fi
 
-
-
 fi
 
 
 #libtiff:
 
-
-# Check whether --with-tiff-include was given.
-if test "${with_tiff_include+set}" = set; then :
-  withval=$with_tiff_include;
-		echo "libtiff: using $with_tiff_include"
-		if test -f "$with_tiff_include/tiffio.h"
-		then
-			#APP_CPPFLAGS="-I$with_tiff_include $APP_CPPFLAGS"
-			CPPFLAGS="-I$with_tiff_include $CPPFLAGS"
-		else
-			as_fn_error $? "tiffio.h not found in $with_tiff_include." "$LINENO" 5
-		fi
-
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libtiff library" >&5
+$as_echo_n "checking for libtiff library... " >&6; }
+libtiff=libtiff-4
+LIBTIFF_EXISTS=`pkg-config $libtiff --exists`
+if test "$?" == "0"
+then
+	LIBTIFF_CFLAGS=`pkg-config $libtiff --cflags`
+	LIBTIFF_LIBS=`pkg-config $libtiff --static --libs-only-l`
+	LIBTIFF_LIBDIRS=`pkg-config $libtiff --libs-only-L`
+	LIBS="$LIBTIFF_LIBS $LIBS"
+	#m4_append_uniq_w([LIBS], [LIBTIFF_LIBS])dnl
+	LDFLAGS="$LIBTIFF_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBTIFF_CFLAGS $CPPFLAGS"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: installed library: $LIBTIFF_CFLAGS $LIBTIFF_LIBS" >&5
+$as_echo "installed library: $LIBTIFF_CFLAGS $LIBTIFF_LIBS" >&6; }
 else
-
-		for ac_header in tiffio.h
+	for ac_header in tiffio.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "tiffio.h" "ac_cv_header_tiffio_h" "$ac_includes_default"
 if test "x$ac_cv_header_tiffio_h" = xyes; then :
@@ -4795,69 +4717,7 @@ fi
 
 done
 
-
-
-fi
-
-
-
-# Check whether --with-tiff-lib was given.
-if test "${with_tiff_lib+set}" = set; then :
-  withval=$with_tiff_lib;
-		echo "libtiff: using $with_tiff_lib"
-		if test -f "$with_tiff_lib"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for TIFFSetErrorHandler in -ltiff" >&5
-$as_echo_n "checking for TIFFSetErrorHandler in -ltiff... " >&6; }
-if ${ac_cv_lib_tiff_TIFFSetErrorHandler+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ltiff  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char TIFFSetErrorHandler ();
-int
-main ()
-{
-return TIFFSetErrorHandler ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_tiff_TIFFSetErrorHandler=yes
-else
-  ac_cv_lib_tiff_TIFFSetErrorHandler=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tiff_TIFFSetErrorHandler" >&5
-$as_echo "$ac_cv_lib_tiff_TIFFSetErrorHandler" >&6; }
-if test "x$ac_cv_lib_tiff_TIFFSetErrorHandler" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_tiff_lib found." >&5
-$as_echo "$with_tiff_lib found." >&6; }
-else
-  as_fn_error $? "A working libtiff is required." "$LINENO" 5
-fi
-
-			LIBS="$with_tiff_lib $LIBS"
-		else
-			as_fn_error $? "$with_tiff_lib not found." "$LINENO" 5
-		fi
-
-else
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing TIFFSetErrorHandler" >&5
 $as_echo_n "checking for library containing TIFFSetErrorHandler... " >&6; }
 if ${ac_cv_search_TIFFSetErrorHandler+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -4915,28 +4775,28 @@ else
   as_fn_error $? "A working libtiff is required." "$LINENO" 5
 fi
 
-
-
+#	AC_MSG_ERROR([libtiff not found.])
 fi
 
 
 #libpng:
 
-
-# Check whether --with-png-include was given.
-if test "${with_png_include+set}" = set; then :
-  withval=$with_png_include;
-		echo "libpng: using $with_png_include"
-		if test -f "$with_png_include/png.h"
-		then
-			CPPFLAGS="-I$with_png_include $CPPFLAGS"
-		else
-			as_fn_error $? "png.h not found in $with_png_include." "$LINENO" 5
-		fi
-
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libpng library" >&5
+$as_echo_n "checking for libpng library... " >&6; }
+libpng="libpng"
+LIBPNG_EXISTS=`pkg-config $libpng --exists`
+if test "$?" == "0"
+then
+	LIBPNG_CFLAGS=`pkg-config $libpng --cflags`
+	LIBPNG_LIBS=`pkg-config $libpng --static --libs-only-l`
+	LIBPNG_LIBDIRS=`pkg-config $libpng --libs-only-L`
+	LIBS="$LIBPNG_LIBS $LIBS"
+	LDFLAGS="$LIBPNG_LIBDIRS $LDFLAGS"
+	CPPFLAGS="$LIBPNG_CFLAGS $CPPFLAGS"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: installed library: $LIBPNG_CFLAGS $LIBPNG_LIBS" >&5
+$as_echo "installed library: $LIBPNG_CFLAGS $LIBPNG_LIBS" >&6; }
 else
-
-		for ac_header in png.h
+	for ac_header in png.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
 if test "x$ac_cv_header_png_h" = xyes; then :
@@ -4950,69 +4810,7 @@ fi
 
 done
 
-
-
-fi
-
-
-
-# Check whether --with-png-lib was given.
-if test "${with_png_lib+set}" = set; then :
-  withval=$with_png_lib;
-		echo "libpng: using $with_png_lib"
-		if test -f "$with_png_lib"
-		then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_get_io_ptr in -lpng" >&5
-$as_echo_n "checking for png_get_io_ptr in -lpng... " >&6; }
-if ${ac_cv_lib_png_png_get_io_ptr+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpng  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char png_get_io_ptr ();
-int
-main ()
-{
-return png_get_io_ptr ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_png_png_get_io_ptr=yes
-else
-  ac_cv_lib_png_png_get_io_ptr=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_png_png_get_io_ptr" >&5
-$as_echo "$ac_cv_lib_png_png_get_io_ptr" >&6; }
-if test "x$ac_cv_lib_png_png_get_io_ptr" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_png_lib found." >&5
-$as_echo "$with_png_lib found." >&6; }
-else
-  as_fn_error $? "A working libpng is required." "$LINENO" 5
-fi
-
-			LIBS="$with_png_lib $LIBS"
-		else
-			as_fn_error $? "$with_png_lib not found." "$LINENO" 5
-		fi
-
-else
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing png_get_io_ptr" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing png_get_io_ptr" >&5
 $as_echo_n "checking for library containing png_get_io_ptr... " >&6; }
 if ${ac_cv_search_png_get_io_ptr+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5070,9 +4868,8 @@ else
   as_fn_error $? "A working libpng is required." "$LINENO" 5
 fi
 
-
-
 fi
+
 
 
 
@@ -5397,375 +5194,24 @@ fi
 
 if test "$enable_lensfun" == "yes"
 then
-	if test "$mingw_cv_win32_host" == "yes"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for lensfun library" >&5
+$as_echo_n "checking for lensfun library... " >&6; }
+	lensfun="lensfun"
+	LENSFUN_EXISTS=`pkg-config $lensfun --exists`
+	if test "$?" == "0"
 	then
-		LIBS="-pthread -lws2_32 -lole32 -lwinmm -lshlwapi $LIBS"
-	fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing regerror" >&5
-$as_echo_n "checking for library containing regerror... " >&6; }
-if ${ac_cv_search_regerror+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char regerror ();
-int
-main ()
-{
-return regerror ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' tre_regex; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_regerror=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_regerror+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_regerror+:} false; then :
-
-else
-  ac_cv_search_regerror=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_regerror" >&5
-$as_echo "$ac_cv_search_regerror" >&6; }
-ac_res=$ac_cv_search_regerror
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working regex is required" "$LINENO" 5
-fi
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pcre_compile" >&5
-$as_echo_n "checking for library containing pcre_compile... " >&6; }
-if ${ac_cv_search_pcre_compile+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pcre_compile ();
-int
-main ()
-{
-return pcre_compile ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' pcre; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_pcre_compile=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_pcre_compile+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_pcre_compile+:} false; then :
-
-else
-  ac_cv_search_pcre_compile=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pcre_compile" >&5
-$as_echo "$ac_cv_search_pcre_compile" >&6; }
-ac_res=$ac_cv_search_pcre_compile
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working regex is required" "$LINENO" 5
-fi
-
-	if test "$mingw_cv_win32_host" == "yes"
-	then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libiconv_open" >&5
-$as_echo_n "checking for library containing libiconv_open... " >&6; }
-if ${ac_cv_search_libiconv_open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char libiconv_open ();
-int
-main ()
-{
-return libiconv_open ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' iconv; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_libiconv_open=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_libiconv_open+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_libiconv_open+:} false; then :
-
-else
-  ac_cv_search_libiconv_open=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_libiconv_open" >&5
-$as_echo "$ac_cv_search_libiconv_open" >&6; }
-ac_res=$ac_cv_search_libiconv_open
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working libiconv is required" "$LINENO" 5
-fi
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing libintl_sprintf" >&5
-$as_echo_n "checking for library containing libintl_sprintf... " >&6; }
-if ${ac_cv_search_libintl_sprintf+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char libintl_sprintf ();
-int
-main ()
-{
-return libintl_sprintf ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' intl; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_libintl_sprintf=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_libintl_sprintf+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_libintl_sprintf+:} false; then :
-
-else
-  ac_cv_search_libintl_sprintf=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_libintl_sprintf" >&5
-$as_echo "$ac_cv_search_libintl_sprintf" >&6; }
-ac_res=$ac_cv_search_libintl_sprintf
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working libintl is required" "$LINENO" 5
-fi
+		LENSFUN_CFLAGS=`pkg-config $lensfun --cflags`
+		LENSFUN_LIBS=`pkg-config $lensfun --static --libs-only-l`
+		LENSFUN_LDFLAGS=`pkg-config $lensfun --libs-only-L`
+		LIBS="$LENSFUN_LIBS $LIBS"
+		CPPFLAGS="$LENSFUN_CFLAGS $CPPFLAGS"
+		LDFLAGS="$LENSFUN_LDFLAGS $LDFLAGS"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $LENSFUN_LIBS" >&5
+$as_echo "$LENSFUN_LIBS" >&6; }
+	else
+		as_fn_error $? "lensfun not found." "$LINENO" 5
 
 	fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing g_print" >&5
-$as_echo_n "checking for library containing g_print... " >&6; }
-if ${ac_cv_search_g_print+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char g_print ();
-int
-main ()
-{
-return g_print ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' glib-2.0; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_g_print=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_g_print+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_g_print+:} false; then :
-
-else
-  ac_cv_search_g_print=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_g_print" >&5
-$as_echo "$ac_cv_search_g_print" >&6; }
-ac_res=$ac_cv_search_g_print
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working glib is required" "$LINENO" 5
-fi
-
-	for ac_header in lensfun/lensfun.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "lensfun/lensfun.h" "ac_cv_header_lensfun_lensfun_h" "$ac_includes_default"
-if test "x$ac_cv_header_lensfun_lensfun_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LENSFUN_LENSFUN_H 1
-_ACEOF
-
-else
-  as_fn_error $? "lensfun.h not found" "$LINENO" 5
-fi
-
-done
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing lf_db_new" >&5
-$as_echo_n "checking for library containing lf_db_new... " >&6; }
-if ${ac_cv_search_lf_db_new+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char lf_db_new ();
-int
-main ()
-{
-return lf_db_new ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' lensfun; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_search_lf_db_new=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_lf_db_new+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_lf_db_new+:} false; then :
-
-else
-  ac_cv_search_lf_db_new=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_lf_db_new" >&5
-$as_echo "$ac_cv_search_lf_db_new" >&6; }
-ac_res=$ac_cv_search_lf_db_new
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else
-  as_fn_error $? "A working lensfun is required" "$LINENO" 5
-fi
-
 	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
 	objs="$objs PicProcessorLensCorrection.o"
 fi
@@ -5887,6 +5333,7 @@ _ACEOF
 
 fi
 done
+
 
 
 
