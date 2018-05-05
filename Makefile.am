@@ -8,3 +8,4 @@ makedoc:
 .PHONY: makezip
 makezip:
 	zip -j rawproc.zip src/rawproc$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
+

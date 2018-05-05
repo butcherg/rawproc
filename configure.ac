@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([rawproc], [0.7], [glenn.butcher@gmail.com])
+#AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -12,15 +13,74 @@ m4_include(wxwin.m4)
 AC_PROG_CXX
 AC_PROG_CC
 
+
+#Process enables:
+AC_ARG_ENABLE([openmp],
+        AS_HELP_STRING([--enable-openmp], [enables OpenMP threading (-fopenmp in compile and link)])
+)
+if test "$enable_openmp" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -fopenmp"
+        LDFLAGS="$LDFLAGS -fopenmp"
+fi
+
+AC_ARG_ENABLE([debug],
+        AS_HELP_STRING([--enable-debug], [enables debug compilation with -g, default is no debug switch])
+)
+if test "$enable_debug" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -g"
+fi
+
+
+AC_ARG_ENABLE([optimization],
+        AS_HELP_STRING([--enable-optimization], [enables -O4 optimization, default is -O2])
+)
+if test "$enable_optimization" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -O3"
+else
+	CXXFLAGS="$CXXFLAGS -O2"
+fi
+
+
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lgimage':   (or, replace this with the missing png check...)
-AC_CHECK_LIB([gimage], [main])
-AC_CHECK_LIB([m], [pow])
-AC_CHECK_LIB([jpeg], [jpeg_set_defaults])
-AC_CHECK_LIB([tiff], [TIFFSetErrorHandler])
-AC_CHECK_LIB([lcms2], [cmsSetLogErrorHandler])
+
+#libjpeg:
+PKG_CHECK_MODULES([JPEG],[libjpeg], [
+	CPPFLAGS="$JPEG_CFLAGS $CPPFLAGS"
+	LIBS="$JPEG_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
+
+#AC_CHECK_LIB([tiff], [TIFFSetErrorHandler])
+#libtiff:
+PKG_CHECK_MODULES([TIFF],[libtiff-4], [
+	CPPFLAGS="$TIFF_CFLAGS $CPPFLAGS"
+	LIBS="$TIFF_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
+
+#libpng:
+PKG_CHECK_MODULES([PNG],[libpng], [
+	CPPFLAGS="$PNG_CFLAGS $CPPFLAGS"
+	LIBS="$PNG_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
+
+#littlecms2:
+PKG_CHECK_MODULES([LCMS2],[lcms2], [
+	CPPFLAGS="$LCMS2_CFLAGS $CPPFLAGS"
+	LIBS="$LCMS2_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
 
 
+#libraw-dcraw:
 AC_ARG_ENABLE([dcraw],
         AS_HELP_STRING([--enable-dcraw], [enables use of a dcraw executable for 
 raw file input, in lieu of LibRaw. dcraw mus be in a directory listed in PATH, o
@@ -30,21 +90,28 @@ if test "$enable_dcraw" == "yes"
 then
 	CXXFLAGS="$CXXFLAGS -DUSE_DCRAW"
 else
-	AC_CHECK_LIB([raw], [libraw_init])
+	PKG_CHECK_MODULES([LIBRAW],[libraw], [
+		CPPFLAGS="$LIBRAW_CFLAGS $CPPFLAGS"
+		LIBS="$LIBRAW_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
 fi
 
-
-
-
-
+#lensfun:
 AC_ARG_ENABLE([lensfun],
-        AS_HELP_STRING([--enable-lensfun], [enables lensfun])
+        AS_HELP_STRING([--enable-lensfun], [enables lensfun.])
 )
 if test "$enable_lensfun" == "yes"
 then
-	#do the lensfun package check...
+	PKG_CHECK_MODULES([LENSFUN],[lensfun], [
+		CPPFLAGS="$LENSFUN_CFLAGS $CPPFLAGS"
+		LIBS="$LENSFUN_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
 	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
-	RAWPROC_SOURCEFILES="$RAWPROC_SOURCEFILES PicProcessorLensCorrection.cpp"
+	
 fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
 
@@ -88,5 +155,4 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([clock_gettime floor modf pow rint setlocale sqrt strtol])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
-AC_SUBST(RAWPROC_SOURCEFILES)
 AC_OUTPUT

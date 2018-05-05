@@ -1,4 +1,7 @@
-AM_CPPFLAGS=-DBUILDDATE=foo
+AUTOMAKE_OPTIONS = -Wno-portability
+
+bdate='"$(shell date)"'
+AM_CPPFLAGS=-DBUILDDATE='"$bdate"'
 
 bin_PROGRAMS = rawproc img exif
 
