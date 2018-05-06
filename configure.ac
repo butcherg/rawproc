@@ -9,9 +9,29 @@ AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 #AC_CONFIG_HEADERS([config.h])
 m4_include(wxwin.m4)
 
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+
+
+# MINGW_AC_WIN32_NATIVE_HOST
+# --------------------------
+# Check if the runtime platform is a native Win32 host.
+#
+AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
+[AC_CACHE_CHECK([whether we are building for a Win32 host], 
+                [mingw_cv_win32_host],
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#ifdef _WIN32
+choke me
+#endif
+])
+], [mingw_cv_win32_host=no], [mingw_cv_win32_host=yes]))])
+
+#run the win32 check macro:
+MINGW_AC_WIN32_NATIVE_HOST
+
 
 
 #Process enables:
@@ -41,6 +61,38 @@ then
 	CXXFLAGS="$CXXFLAGS -O3"
 else
 	CXXFLAGS="$CXXFLAGS -O2"
+fi
+
+AC_ARG_WITH([pixtype],
+	AS_HELP_STRING([--with-pixtype], [=half|float|double, specifies data type for pixel structure, default is float])
+)
+if test "$with_pixtype" != ""
+then
+	#APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
+	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype"
+fi
+
+#do a bunch of stuff if win32:
+if test "$mingw_cv_win32_host" == "yes" 
+then
+	AC_MSG_NOTICE([adding win32 libs and flags])
+#	AC_CHECK_LIB([ws2_32],[main])
+	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
+	LDFLAGS="$LDFLAGS -static"
+	INNO_SRCDIR="$srcdir"
+	if test "$host_alias" == "x86_64-w64-mingw32"
+	then
+		INNO_SUFFIX="w64"
+		INNO_PF="{pf64}"
+		INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
+		INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
+	fi
+	if test "$host_alias" == "i686-w64-mingw32"
+	then
+		INNO_SUFFIX="w32"
+		INNO_PF="{pf32}"
+		INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
+	fi
 fi
 
 
@@ -151,8 +203,9 @@ AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_CHECK_FUNCS([clock_gettime floor modf pow rint setlocale sqrt strtol])
+#AC_FUNC_MALLOC
+#AC_CHECK_FUNCS([clock_gettime floor modf pow rint setlocale sqrt strtol])
+
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
