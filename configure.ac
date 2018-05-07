@@ -12,7 +12,7 @@ m4_include(wxwin.m4)
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_CC
+AC_OPENMP
 
 
 # MINGW_AC_WIN32_NATIVE_HOST
@@ -35,40 +35,12 @@ MINGW_AC_WIN32_NATIVE_HOST
 
 
 #Process enables:
-AC_ARG_ENABLE([openmp],
-        AS_HELP_STRING([--enable-openmp], [enables OpenMP threading (-fopenmp in compile and link)])
-)
-if test "$enable_openmp" == "yes"
-then
-	CXXFLAGS="$CXXFLAGS -fopenmp"
-        LDFLAGS="$LDFLAGS -fopenmp"
-fi
-
-AC_ARG_ENABLE([debug],
-        AS_HELP_STRING([--enable-debug], [enables debug compilation with -g, default is no debug switch])
-)
-if test "$enable_debug" == "yes"
-then
-	CXXFLAGS="$CXXFLAGS -g"
-fi
-
-
-AC_ARG_ENABLE([optimization],
-        AS_HELP_STRING([--enable-optimization], [enables -O4 optimization, default is -O2])
-)
-if test "$enable_optimization" == "yes"
-then
-	CXXFLAGS="$CXXFLAGS -O3"
-else
-	CXXFLAGS="$CXXFLAGS -O2"
-fi
 
 AC_ARG_WITH([pixtype],
 	AS_HELP_STRING([--with-pixtype], [=half|float|double, specifies data type for pixel structure, default is float])
 )
 if test "$with_pixtype" != ""
 then
-	#APP_CXXFLAGS="$APP_CXXFLAGS -DPIXTYPE=$with_pixtype"
 	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype"
 fi
 
@@ -97,6 +69,26 @@ fi
 
 
 # Checks for libraries.
+
+# Check for wxWidgets.
+#AM_OPTIONS_WXCONFIG
+WX_CONFIG_OPTIONS
+reqwx=3.1.0
+#AM_PATH_WXCONFIG($reqwx, wxWin=1)
+WX_CONFIG_CHECK([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
+if test "$wxWin" != 1; then
+	AC_MSG_ERROR([
+		wxWidgets must be installed on your system.
+ 
+		Please check that wx-config is in path, the directory
+		where wxWidgets libraries are installed (returned by
+		'wx-config --libs' or 'wx-config --static --libs' command)
+		is in LD_LIBRARY_PATH or equivalent variable and
+		wxWidgets version is $reqwx or above.
+		])
+fi
+
+
 
 #libjpeg:
 PKG_CHECK_MODULES([JPEG],[libjpeg], [
@@ -168,23 +160,6 @@ fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
 
 
-# Check for wxWidgets.
-#AM_OPTIONS_WXCONFIG
-WX_CONFIG_OPTIONS
-reqwx=3.1.0
-#AM_PATH_WXCONFIG($reqwx, wxWin=1)
-WX_CONFIG_CHECK([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
-if test "$wxWin" != 1; then
-	AC_MSG_ERROR([
-		wxWidgets must be installed on your system.
- 
-		Please check that wx-config is in path, the directory
-		where wxWidgets libraries are installed (returned by
-		'wx-config --libs' or 'wx-config --static --libs' command)
-		is in LD_LIBRARY_PATH or equivalent variable and
-		wxWidgets version is $reqwx or above.
-		])
-fi
  
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
@@ -205,6 +180,9 @@ AC_TYPE_UINT64_T
 # Checks for library functions.
 #AC_FUNC_MALLOC
 #AC_CHECK_FUNCS([clock_gettime floor modf pow rint setlocale sqrt strtol])
+
+CXXFLAGS="$OPENMP_CFLAGS $CXXFLAGS"
+LIBS="$OPENMP_CFLAGS $LIBS"
 
 
 AC_CONFIG_FILES([Makefile src/Makefile])
