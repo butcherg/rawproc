@@ -629,7 +629,7 @@ PIXTYPE gImage::getR(float x, float y)
 	unsigned xi = unsigned (x + 0.5);
 	unsigned yi = unsigned (y + 0.5);
 	if (xi >= w || yi >= h)
-		return 0.0;
+		return (PIXTYPE) 0.0;
 
 	unsigned pos = yi * w + xi;
 	return image[pos].r;
@@ -640,7 +640,7 @@ PIXTYPE gImage::getG(float x, float y)
 	unsigned xi = unsigned (x + 0.5);
 	unsigned yi = unsigned (y + 0.5);
 	if (xi >= w || yi >= h)
-		return 0.0;
+		return (PIXTYPE) 0.0;
 
 	unsigned pos = yi * w + xi;
 	return image[pos].g;
@@ -651,7 +651,7 @@ PIXTYPE gImage::getB(float x, float y)
 	unsigned xi = unsigned (x + 0.5);
 	unsigned yi = unsigned (y + 0.5);
 	if (xi >= w || yi >= h)
-		return 0.0;
+		return (PIXTYPE) 0.0;
 
 	unsigned pos = yi * w + xi;
 	return image[pos].b;
