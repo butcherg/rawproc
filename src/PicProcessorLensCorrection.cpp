@@ -22,11 +22,13 @@ class myListCtrl: public wxListCtrl
 		myListCtrl(wxWindow *parent, wxWindowID id, wxString listname, wxArrayString listitems, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
 			wxListCtrl(parent, id, pos, size, wxLC_REPORT | wxLC_NO_HEADER | wxLC_HRULES, wxDefaultValidator, listname)
 		{
-			SetDoubleBuffered(true);
+			//SetDoubleBuffered(true);
+			name = listname;
+			width = size.x;
 			wxListItem col0;
 			col0.SetId(0);
-			col0.SetText( _(listname) );
-			col0.SetWidth(size.x);
+			col0.SetText(name );
+			col0.SetWidth(width);
 			InsertColumn(0, col0);
 
 			itemlist = listitems;
@@ -47,18 +49,38 @@ class myListCtrl: public wxListCtrl
 		//Filters the list to include only entries that contain the specified string:
 		void setFilter(wxString f)
 		{
+			wxArrayString filteredlist;
 			filter = f;
-			DeleteAllItems();
+			//DeleteAllItems();
+			
+			ClearAll();
+			wxListItem col0;
+			col0.SetId(0);
+			col0.SetText(name);
+			col0.SetWidth(width);
+			InsertColumn(0, col0);
+			
 			
 			for (int i=0; i<itemlist.GetCount(); i++) {
-				if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) {
-					wxListItem item;
-					item.SetId(i);
-					item.SetText( itemlist[i] );
-					InsertItem( item );
+				//if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) {
+				if (itemlist[i].Find(filter) != wxNOT_FOUND) {
+					//wxListItem item;
+					//item.SetId(j);
+					//item.SetText( itemlist[i] );
+					//InsertItem( item );
+					//j++;
+					filteredlist.Add(itemlist[i]);
 				}
 			}
+			for (int i=0; i<filteredlist.GetCount(); i++) {
+				wxListItem item;
+                                item.SetId(i);
+                                item.SetText( filteredlist[i] );
+                                InsertItem( item );
+			}
+			Refresh();
 		}
+		
 
 		//Captures the entry selected, at selection:
 		void Selected(wxListEvent& event)
@@ -76,8 +98,9 @@ class myListCtrl: public wxListCtrl
 
 
 	private:
+		int width;
 		wxArrayString itemlist;
-		wxString filter, selected;
+		wxString filter, selected, name;
 };
  
 
