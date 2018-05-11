@@ -1,3 +1,7 @@
+AUTOMAKE_OPTIONS = -Wno-portability
+
+dtime="$(shell date +%Y%m%d-%H%M%S)"
+
 SUBDIRS = src
 dist_doc_DATA = README.md
 
@@ -7,5 +11,5 @@ makedoc:
 
 .PHONY: makezip
 makezip:
-	zip -j rawproc.zip src/rawproc$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
+	zip -j rawproc-@VERSION@-$(dtime).zip src/rawproc$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
 
