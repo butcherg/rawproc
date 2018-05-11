@@ -38,6 +38,8 @@
 #include "PicProcessorColorSpace.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
+#include <locale.h>
+#include <lensfun/lensfun.h>
 #endif
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
@@ -1652,6 +1654,15 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	
+	lfError e;
+	struct lfDatabase *ldb = lf_db_new ();
+	if (lf_db_load (ldb) != LF_NO_ERROR) {
+		wxMessageBox("Error: Cannot open lens correction database.") ;
+		if (ldb) lf_db_destroy (ldb);
+		return;
+	}
+	if (ldb) lf_db_destroy (ldb);
 
 	SetStatusText("");
 	try {
