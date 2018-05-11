@@ -53,7 +53,7 @@ class CropPanel: public PicProcPanel
 
 		~CropPanel()
 		{
-			q->getCommandTree()->Unbind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
+			//q->getCommandTree()->Unbind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 		
 		void OnCommandtreeSelChanged(wxTreeEvent& event)

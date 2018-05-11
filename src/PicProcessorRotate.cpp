@@ -227,7 +227,7 @@ class RotatePanel: public PicProcPanel
 		~RotatePanel()
 		{
 			t->~wxTimer();
-			q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
+			//q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 		}
 
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
