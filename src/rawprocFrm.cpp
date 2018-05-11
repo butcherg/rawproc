@@ -1745,7 +1745,10 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 
 	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
-	wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
+	//wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
+	wxVersionInfo wxversion = wxGetLibraryVersionInfo();
+
+	wxString WxWidgetsVersion = wxString::Format("%s %d.%d.%d", wxversion.GetName(), wxversion.GetMajor(), wxversion.GetMinor(), wxversion.GetMicro());
 	wxString libraries = wxString(gImage::LibraryVersions());
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
 #ifdef BUILDDATE
