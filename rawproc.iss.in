@@ -46,10 +46,10 @@ Name: "{userappdata}\rawproc"
 
 
 [Files]
-Source: ".\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: ".\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: ".\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: "..\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
+Source: "src\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
+Source: "src\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
+Source: "src\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
+Source: "@INNO_SRCDIR@\src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

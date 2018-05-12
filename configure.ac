@@ -52,19 +52,19 @@ then
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
 	LDFLAGS="$LDFLAGS -static"
 	INNO_SRCDIR="$srcdir"
-	if test "$host_alias" == "x86_64-w64-mingw32"
-	then
-		INNO_SUFFIX="w64"
-		INNO_PF="{pf64}"
-		INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
-		INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
-	fi
-	if test "$host_alias" == "i686-w64-mingw32"
-	then
-		INNO_SUFFIX="w32"
-		INNO_PF="{pf32}"
-		INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
-	fi
+	case "$host_alias" in
+		x86_64-w64-mingw32* )
+			INNO_SUFFIX="w64"
+			INNO_PF="{pf64}"
+			INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
+			INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
+		;;
+		i686-w64-mingw32* )
+			INNO_SUFFIX="w32"
+			INNO_PF="{pf32}"
+			INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
+		;;
+	esac
 fi
 
 
@@ -184,6 +184,15 @@ AC_TYPE_UINT64_T
 CXXFLAGS="$OPENMP_CFLAGS $CXXFLAGS"
 LIBS="$OPENMP_CFLAGS $LIBS"
 
+AC_SUBST(INNO_SRCDIR)
+AC_SUBST(INNO_ARCHITECURESALLOWED)
+AC_SUBST(INNO_ARCHITECTURESINSTALLEDIN64BITMODE)
+AC_SUBST(INNO_PF)
+AC_SUBST(INNO_SUFFIX)
 
 AC_CONFIG_FILES([Makefile src/Makefile])
+if test "$mingw_cv_win32_host" == "yes"
+then
+	AC_CONFIG_FILES([rawproc.iss])
+fi
 AC_OUTPUT
