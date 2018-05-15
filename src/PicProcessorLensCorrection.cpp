@@ -204,7 +204,8 @@ class LensCorrectionPanel: public PicProcPanel
 		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, wxString metadata): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
-			wxArrayString parms = split(params, ",");
+			wxArrayString parms = split(params, ";");
+
 			b->Add(new wxStaticText(this,-1, "lenscorrection", wxDefaultPosition, wxSize(100,20)), flags);
 			b->AddSpacer(3);
 
@@ -233,7 +234,31 @@ class LensCorrectionPanel: public PicProcPanel
 			b->AddSpacer(1);
 			crop = new wxCheckBox(this, wxID_ANY, "autocrop");
 			b->Add(crop , flags);
+
+			for (int i=0; i<parms.GetCount(); i++) {
+				wxArrayString nameval = split(parms[i], "=");
+				if (nameval[0] == "camera") {
+					cam->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
+				}
+				if (nameval[0] == "lens") {
+					lens->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
+				}
+				if (nameval[0] == "ops") {
+					wxArrayString ops = split(nameval[1],",");
+					for (int j=0; j<ops.GetCount(); j++) {
+						if (ops[j] == "ca") ca->SetValue(true);
+						if (ops[j] == "vig") vig->SetValue(true);
+						if (ops[j] == "dist") dist->SetValue(true);
+						if (ops[j] == "autocrop") crop->SetValue(true);
+					}
+				}
+			}
+
+			wxString altcam = cam->GetValue();
+			wxString altlens = lens->GetValue();
+			((PicProcessorLensCorrection *) q)->setAlternates(altcam, altlens);
 			
+
 			SetSizerAndFit(b);
 			b->Layout();
 			Refresh();
@@ -281,9 +306,9 @@ class LensCorrectionPanel: public PicProcPanel
 		{
 			wxString cmd = "";
 			wxString altcam = cam->GetValue();
-			if (altcam != "") paramAppend("camera", altcam, cmd);
+			if (altcam != "") paramAppend("camera", wxString(underscore(std::string(altcam.c_str())).c_str()), cmd);
 			wxString altlens = lens->GetValue();
-			if (altlens != "") paramAppend("lens",altlens, cmd);
+			if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
 
 			wxString ops = "";
 			if (ca->GetValue()) opAppend("ca",ops);
@@ -375,14 +400,14 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	std::string camspec, lensspec;
 	
 	if (altcamera != "")
-		camspec = altcamera;
+		camspec = de_underscore(std::string(altcamera));
 	else if (metadatacamera != "(none)")
 		camspec = metadatacamera;
 	else
 		camspec = "(none)";
 	
 	if (altlens != "")
-		lensspec = altlens;
+		lensspec = de_underscore(std::string(altlens));
 	else if (metadatalens != "(none)")
 		lensspec = metadatalens;
 	else
