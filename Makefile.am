@@ -11,7 +11,7 @@ makedoc:
 
 .PHONY: makezip
 makezip:
-	zip -j rawproc-@VERSION@-$(dtime).zip src/rawproc$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
+	zip -j rawproc-@INNO_SUFFIX@-@VERSION@-$(dtime).zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
 
 .PHONY: wininstaller
 wininstaller:
