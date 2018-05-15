@@ -14,6 +14,9 @@ if LENSFUN
 rawproc_SOURCES += PicProcessorLensCorrection.cpp PicProcessorLensCorrection.h
 endif
 
+rawproc_LDADD = @WX_LIBS@
+
+
 img_SOURCES = img.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp tiffimage.cpp
 
 exif_SOURCES = exif.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp tiffimage.cpp
