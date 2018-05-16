@@ -1745,13 +1745,16 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 		info.SetName(_("rawproc\n(development build)"));
 	#endif
 
-	info.SetCopyright(wxT("(C) 2017 Glenn Butcher <glenn.butcher@gmail.com>"));
+	info.SetCopyright(wxT("(C) 2016-2018 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
 	//wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxVersionInfo wxversion = wxGetLibraryVersionInfo();
 
 	wxString WxWidgetsVersion = wxString::Format("%s %d.%d.%d", wxversion.GetName(), wxversion.GetMajor(), wxversion.GetMinor(), wxversion.GetMicro());
 	wxString libraries = wxString(gImage::LibraryVersions());
+#ifdef USE_LENSFUN
+	libraries.Append(wxString::Format("\nLensfun: %d.%d.%d",LF_VERSION_MAJOR,LF_VERSION_MINOR,LF_VERSION_MICRO));
+#endif
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
 #ifdef BUILDDATE
 	wxString builddate = wxString(BUILDDATE);
