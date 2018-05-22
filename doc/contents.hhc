@@ -114,6 +114,11 @@
 				</OBJECT>
 				
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Lens Correction">
+				<param name="Local" value="lenscorrection.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Redeye">
 				<param name="Local" value="redeye.html">
 				</OBJECT>
