@@ -1,6 +1,6 @@
 <html><body>
 
-<h2 id="Installingrawproc">Installing rawproc in Windows</h2>
+<h2 id="InstallingrawprocWin">Installing rawproc in Windows</h2>
 
 <p>Just run the .exe file you downloaded.  The installer will install rawproc just 
 like any other program.  It'll also put a rawproc.conf file in your c:\Users\<user>\AppData\Roaming\rawproc\ 
@@ -8,11 +8,23 @@ directory; you can change various configuration particulars in this file before 
 presented for you to keep your previous rawproc.conf; however, please review the Configuration topic for 
 information on new configuration parameters.  And, if you chose 
 to do so in the install process, it'll put a shortcut on your desktop.  I recommend doing this, as you can quickly open pictures 
-by dragging them from your Explorer window to the rawproc icon.</p>
+by dragging them from your Explorer window to the rawproc icon.  And, with the -c switch you can 
+now make multiple desktop shortcuts, all pointing to the same rawproc but to different configuration files.</p>
 
 <p><b>Note:</b> If  you're reinstalling rawproc and you want to keep your old settings, it would be a good idea to 
 copy rawproc.conf from the APDDATA directory, let the installer install the new rawproc.conf, and hand-edit in your
 previous settings.  One day, I'll implement a .conf merge function...</p>
+
+<h2 id="InstallingrawprocLinux">Installing rawproc in Linux</h2>
+<p>The AppImage of rawproc available on the github Releases page should run on most mainstream Linux distributions.  Just
+download it to a convenient location, and run it as you would any other program.  The AppRun script I'm now
+using seems to allow the executable to find the configuration and help files just as if the application were 
+running natively.</p>
+
+<h2 id="Compilingrawproc">Compiling rawproc</h2>
+
+<p>If you want to try compiling rawproc, there's a wiki page on the topic in the github repo.  It's not 
+a trivial exercise, especially if you're either compiling it on Windows, or just including LensFun</p>
 
 
 </body></html>
