@@ -1,0 +1,26 @@
+<html><body>
+
+<h3 id="LensCorrection">Lens Correction</h3>
+<p>The lens correction tool offers the corrections implemented by the lensfun library: chromatic abberation,
+vignetting, and distortion.  Additionally, autocropping is provided to select the largest proper rectangular
+image from distortion correction.
+<p>
+
+<p align=center><img src=lenscorrection1.png></p>
+
+<p>The lensfun database is expected at its standard locations.  If the database is not found when the tool
+is added, an error dialog informs of the fact and the tool is not added to the chain.</p>
+
+<p>The tool's default is to use the image metadata vaules for camera and lens, if found.  If either cannot
+be found, values can be selected manually by clicking the "Select Camera" or "Select Lens" buttons; a dialog 
+is provided to select from the available database entries.  The list can be culled with the Filter entry; if
+a string is typed in the entry, the list is filtered to display only the database records that contain the 
+string.</p>
+
+<p align=center><img src=lenscorrection2.png></p>
+
+<p>Note: The processing command stored in the output image metadata will only contain camera or lens names 
+if they're selected manually; otherwise, the original image metadata is the assumed source.
+</p>
+
+</body></html>

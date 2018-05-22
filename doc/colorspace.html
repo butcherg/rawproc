@@ -2,11 +2,18 @@
 
 <h3 id="Colorspace">Colorspace</h3>
 <p>The edit box accepts a .icc file name, which is then used either to transform the image from the 
-previous colorspace to the new one (apply) or to attach the profile to the image as a representation of its current colorspace (assign).</p>
+previous colorspace to the new one (convert) or to attach the profile to the image as a representation 
+of its current colorspace (assign).  Either a full file path name can be specified, or just a filename, 
+in which case the cms.profilepath property is consulted for the path.</p>
 
 <p>The "Select Profile" button opens a file selector on the directory specified in cms.profilepath.  If a profile is selected
 from this directory, the command will include only the filename; if the selector is switched to a different directory, the command
 will include the full path of the profile.</p>
+
+<p>The Rendering Intent selection allows one to choose the algorithm used to handle conversion of 
+out-of-gamut colors.  Note that not all profiles allow use of all rendering intents; the LittleCMS 
+documentation should be consulted for guidance on an informed selection.
+</p>
 
 <p align=center><img src=colorspace.png></p>
 

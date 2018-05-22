@@ -55,8 +55,10 @@ bool rawprocFrmApp::OnInit()
 	wxString conf_configd = wxString(getAppConfigFilePath().c_str());
 
 	if (cmdline.Found("c", &configfile)) {
-		frame->SetConfigFile(configfile);
-		myConfig::loadConfig(std::string(configfile.c_str()));
+		if (wxFileName::FileExists(configfile)) {
+			frame->SetConfigFile(configfile);
+			myConfig::loadConfig(std::string(configfile.c_str()));
+		}
 	}
 	else if (wxFileName::FileExists(conf_cwd)) {
 		frame->SetConfigFile(conf_cwd);
