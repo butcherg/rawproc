@@ -150,9 +150,9 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	
 	std::vector<histogramdata> histogram = dib.Histogram(scale);
 	
-	if (r) delete r;
-	if (g) delete g;
-	if (b) delete b;
+	if (r) delete[] r;
+	if (g) delete[] g;
+	if (b) delete[] b;
 	r = new wxPoint[scale];
 	g = new wxPoint[scale];
 	b = new wxPoint[scale];
