@@ -1069,10 +1069,14 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		do  {
 			wxArrayString cmd = split(token, ":");	
 			if (cmd.GetCount() >=2) {
-				if (AddItem(cmd[0], cmd[1])) 
+				if (AddItem(cmd[0], cmd[1])) {
 					wxSafeYield(this);
-				else
-					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+				}
+				else {
+					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+					toolfile.Close();
+					return;
+				}
 			}
 			token = toolfile.GetNextLine();
 		} while (!toolfile.Eof());

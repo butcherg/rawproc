@@ -44,6 +44,17 @@ pop-up menu.  A path to exiftool must be present in exif.command in the Properti
 <li><b>Add->(tool):</b> Selecting one of the tools from this menu adds it to the Commands list,
 after the selected tool.  See the sub-topics for more enlightenment on the various image tools.</li><br>
 
+<li><b>Add->Tool List:</b> Opens a file selector on the directory specified in app.toollistpath (or the 
+current working directory if app.toollistpath is empty) to allow selection of a file containing a list
+of tools to be inserted in the processing chain below the currently selected tool.  The list in the file
+has one tool per line, like this:
+<pre>
+resize:800
+sharpen:1
+</pre>
+The insertion of the tools cannot be undone.  Make sure you have the right tool selected before inserting
+the tool list.  Tool list files can be created with any text editor.</li><br>
+
 <li><b>Help->Show Command:</b> Brings up a dialog box showing the command list that would be saved
 to the image EXIF if you saved the file at that point.</li><br>
 
