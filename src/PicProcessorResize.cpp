@@ -67,7 +67,29 @@ class ResizePanel: public PicProcPanel
 
 PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
-	//showParams();
+	//parm tool.resize.x: Default resize of the width dimension.  Default=640
+	wxString x =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.x","640"));
+	//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
+	wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
+	//parm tool.resize.algorithm: Interpolation algorithm to use when none is specified.  Default=lanczos3  
+	wxString algo = wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"));
+
+	// resize:[x],[y],[algorithm]
+	wxArrayString cp = split(getParams(),",");
+	if (cp.size() == 3) { 
+		x = cp[0];
+		y = cp[1];
+		algo  = cp[2];
+	}
+	if (cp.size() == 2) { 
+		x = cp[0];
+		y = cp[1];
+	}
+	if (cp.size() == 1) {
+		setParams(wxString::Format("%s",cp[0]));
+		return;
+	} 
+	setParams(wxString::Format("%s,%s,%s",x,y,algo));
 }
 
 void PicProcessorResize::createPanel(wxSimplebook* parent)
