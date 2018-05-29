@@ -1540,13 +1540,6 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-//		//parm tool.resize.x: Default resize of the width dimension.  Default=640
-//		wxString x =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.x","640"));
-//		//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
-//		wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
-//		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=lanczos3
-//		wxString algo =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"));
-//		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
 		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();

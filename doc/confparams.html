@@ -4,6 +4,7 @@
 <li><b>app.picpanel.backgroundcolor</b>: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li><br>
 <li><b>app.start.logmessage</b>: Message to print in the log when rawproc starts. </li><br>
 <li><b>app.start.path</b>: Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li><br>
+<li><b>app.toollistpath</b>: Directory path where tool list files can be found.  Default: (none, implies current working directory)</li><br>
 <li><b>cms.profilepath</b>: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li><br>
 <li><b>display.cms.blackpointcompensation</b>: Perform display color transform with black point compensation.  Default=1  </li><br>
 <li><b>display.cms.displayprofile</b>: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li><br>
@@ -73,7 +74,7 @@
 <li><b>tool.redeye.desaturationpercent</b>: The initial (and reset button) desaturation percent.  Default=1.0</li><br>
 <li><b>tool.redeye.radius</b>: Defines the initial (and reset button) limit of the patch size.  Default=50</li><br>
 <li><b>tool.redeye.threshold</b>: The initial (and reset button) red intensity threshold.  Default=1.5</li><br>
-<li><b>tool.resize.algorithm</b>: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom</li><br>
+<li><b>tool.resize.algorithm</b>: Interpolation algorithm to use when none is specified.  Default=lanczos3  </li><br>
 <li><b>tool.resize.x</b>: Default resize of the width dimension.  Default=640</li><br>
 <li><b>tool.resize.y</b>: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li><br>
 <li><b>tool.rotate.initialvalue</b>: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li><br>
