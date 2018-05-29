@@ -104,6 +104,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
+	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
@@ -219,6 +220,8 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->AppendSeparator();
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
 	
 	
 	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, _("Add"));
@@ -1051,6 +1054,35 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	}
 }
 
+void rawprocFrm::MnuToolList(wxCommandEvent& event)
+{
+	wxFileName toollistpath;
+	//parm app.toollistpath: Directory path where tool list files can be found.  Default: (none, implies current working directory)
+	toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
+
+	wxString fname = wxFileSelector("Open Tool List...", toollistpath.GetPath());
+	if (fname == "") return;
+
+	wxTextFile toolfile(fname);
+	if (toolfile.Open()) {
+		wxString token = toolfile.GetFirstLine();
+		do  {
+			wxArrayString cmd = split(token, ":");	
+			if (cmd.GetCount() >=2) {
+				if (AddItem(cmd[0], cmd[1])) 
+					wxSafeYield(this);
+				else
+					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+			}
+			token = toolfile.GetNextLine();
+		} while (!toolfile.Eof());
+		toolfile.Close();
+	}
+	else wxMessageBox("Error: tool file not found.");
+
+}
+
+
 void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
 {
 	SetStatusText("");
@@ -1504,14 +1536,14 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.resize.x: Default resize of the width dimension.  Default=640
-		wxString x =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.x","640"));
-		//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
-		wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
-		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=catmullrom
-		wxString algo =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","catmullrom"));
-		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
-		PicProcessorResize *p = new PicProcessorResize("resize", cmd, commandtree, pic);
+//		//parm tool.resize.x: Default resize of the width dimension.  Default=640
+//		wxString x =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.x","640"));
+//		//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
+//		wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
+//		//parm tool.resize.algorithm: Sets the algorithm used to interpolate resized pixels. Available algorithms are box, bilinear, bspline, bicubic, catmullrom, lanczos3.  Default=lanczos3
+//		wxString algo =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"));
+//		wxString cmd= wxString::Format("%s,%s,%s",x,y,algo);
+		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		pic->SetScale(1.0);
