@@ -2694,10 +2694,13 @@ gImage gImage::loadJPEG(const char * filename, std::string params)
 	char * iccprofile;
 	std::map<std::string,std::string> imgdata;
 	char * image = _loadJPEG(filename, &width, &height, &colors, imgdata, "", &iccprofile, &icclength);
-	gImage I(image, width, height, colors, BPP_8, imgdata, iccprofile, icclength);
-	delete [] image;
-	if (icclength && iccprofile != NULL) delete [] iccprofile;
-	return I;
+	if (image) {
+		gImage I(image, width, height, colors, BPP_8, imgdata, iccprofile, icclength);
+		delete [] image;
+		if (icclength && iccprofile != NULL) delete [] iccprofile;
+		return I;
+	}
+	else return gImage();
 }
 
 
@@ -2708,23 +2711,26 @@ gImage gImage::loadTIFF(const char * filename, std::string params)
 	char * iccprofile;
 	std::map<std::string,std::string> imgdata;
 	char * image = _loadTIFF(filename, &width, &height, &colors, &bpp, imgdata, params, &iccprofile, &icclength);
-	switch (bpp) {
-		case 8: 
-			bits = BPP_8;
-			break;
-		case 16:
-			bits = BPP_16;
-			break;
-		case 32:
-			bits = BPP_FP;
-			break;
-		default: 
-			return gImage();
+	if (image) {
+		switch (bpp) {
+			case 8: 
+				bits = BPP_8;
+				break;
+			case 16:
+				bits = BPP_16;
+				break;
+			case 32:
+				bits = BPP_FP;
+				break;
+			default: 
+				return gImage();
+		}
+		gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
+		delete [] image;
+		if (icclength && iccprofile != NULL) delete [] iccprofile;
+		return I;
 	}
-	gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
-	delete [] image;
-	if (icclength && iccprofile != NULL) delete [] iccprofile;
-	return I;
+	else return gImage();
 }
 
 gImage gImage::loadPNG(const char * filename, std::string params)
@@ -2734,20 +2740,23 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 	char * iccprofile;
 	std::map<std::string,std::string> imgdata;
 	char * image = _loadPNG(filename, &width, &height, &colors, &bpp, imgdata, params, &iccprofile, &icclength);
-	switch (bpp) {
-		case 8: //1 for simplified
-			bits = BPP_8;
-			break;
-		case 16: //2 for simplified
-			bits = BPP_16;
-			break;
-		default: 
-			return gImage();
+	if (image) {
+		switch (bpp) {
+			case 8: //1 for simplified
+				bits = BPP_8;
+				break;
+			case 16: //2 for simplified
+				bits = BPP_16;
+				break;
+			default: 
+				return gImage();
+		}
+		gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
+		delete [] image;
+		if (icclength && iccprofile != NULL) delete [] iccprofile;
+		return I;
 	}
-	gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
-	delete [] image;
-	if (icclength && iccprofile != NULL) delete [] iccprofile;
-	return I;
+	else return gImage();
 }
 
 
