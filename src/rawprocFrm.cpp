@@ -163,7 +163,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	cmsSetLogErrorHandler(MyLogErrorHandler);
 
-	diag == NULL;
+	propdiag = nullptr;
 	
 }
 
@@ -1293,13 +1293,14 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		wxMessageBox("No configuration file found.");
 		return;
 	}
-	if (diag == NULL) {
-		diag = new PropertyDialog(this, wxID_ANY, "Properties");
+	if (propdiag == nullptr) {
+		propdiag = new PropertyDialog(this, wxID_ANY, "Properties");
+		propdiag->LoadConfig();
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}
-	if (diag) {
-		diag->ClearModifiedStatus();
-		diag->Show();
+	if (propdiag != nullptr) {
+		propdiag->ClearModifiedStatus();
+		propdiag->Show();
 	}
 	else {
 		wxMessageBox("Failed to create Properties dialog");
