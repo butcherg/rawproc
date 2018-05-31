@@ -332,17 +332,35 @@ class LensCorrectionPanel: public PicProcPanel
 
 PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	lfok = true;
+	lfok = false;
 	setlocale (LC_ALL, "");		
 
 	altcamera = "";
 	altlens = "";
 	
 	lfError e;
-	ldb = lf_db_new ();
-	if (lf_db_load (ldb) != LF_NO_ERROR) {
-		wxMessageBox("Error: Cannot open lens correction database.  Delete the tool, correct the problem, and re-add the tool") ;
-		lfok = false;
+	//ldb = lf_db_new ();
+	//if (lf_db_load (ldb) != LF_NO_ERROR) {
+
+	ldb = lfDatabase::Create();
+	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
+	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	if (lensfundatadir != "") {
+		if (ldb->LoadDirectory(lensfundatadir.c_str())) {
+			e = LF_NO_ERROR;
+			lfok = true;
+		}
+		else {
+			wxMessageBox(wxString::Format("Error: Cannot open lens correction database at %s, trying standard directories...",wxString(lensfundatadir)));
+			lfok = false;
+		}
+	}
+	if (!lfok) {
+		if (ldb->Load() != LF_NO_ERROR) {
+			wxMessageBox("Error: Cannot open lens correction database at any standard directory") ;
+			lfok = false;
+		}
+		else lfok = true;
 	}
 
 	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
