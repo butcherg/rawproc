@@ -203,7 +203,7 @@ class rawprocFrm : public wxFrame
 		wxPanel *preview;
 		wxSimplebook* parambook;
 		myHistogramPane *histogram;
-		PropertyDialog *diag;
+		PropertyDialog *propdiag;
 
 		gImage *d;
 		wxImage *img;
