@@ -58,7 +58,7 @@ class AddDialog: public wxDialog
 };
 
 PropertyDialog::PropertyDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
-wxDialog(parent, id, title, pos, size)
+wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 {
 	sz = new wxBoxSizer(wxVERTICAL);
 	ct = new wxBoxSizer(wxHORIZONTAL);
@@ -67,7 +67,7 @@ wxDialog(parent, id, title, pos, size)
  wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
 	
-	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
+	sz->Add(pg, 1, wxEXPAND | wxALL, 3);
 	
 	ct->Add(new wxButton(this, wxID_OK, "Dismiss"), 0, wxALL, 10);
 	ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
