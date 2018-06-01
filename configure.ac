@@ -3,17 +3,17 @@
 
 AC_PREREQ([2.69])
 AC_INIT([rawproc], [0.7dev], [glenn.butcher@gmail.com])
-#AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 #AC_CONFIG_HEADERS([config.h])
 m4_include(wxwin.m4)
+m4_include(ax_cxx_compile_stdcxx.m4)
 
 
 # Checks for programs.
 AC_PROG_CXX
 AC_OPENMP
-
+AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
