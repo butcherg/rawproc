@@ -1793,7 +1793,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s", WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 #endif
 
-	wxAboutBox(info);
+	wxAboutBox(info, this);
 
 }
 
