@@ -987,13 +987,13 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			}
 
 			wxString configparams;
-			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)
+			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
 			if (filetype == FILETYPE_JPEG) configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
 
-			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)
+			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0.</li></ul>
 			if (filetype == FILETYPE_TIFF) configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
 
-			//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Default=(none)
+			//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul>
 			if (filetype == FILETYPE_PNG) configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
 
 

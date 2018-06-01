@@ -62,12 +62,11 @@ wxDialog(parent, id, title, pos, size)
 {
 	sz = new wxBoxSizer(wxVERTICAL);
 	ct = new wxBoxSizer(wxHORIZONTAL);
-//try {
+
 	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition,
  wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
 	
-
 	sz->Add(pg, 0, wxEXPAND | wxALL, 3);
 	
 	ct->Add(new wxButton(this, wxID_OK, "Dismiss"), 0, wxALL, 10);

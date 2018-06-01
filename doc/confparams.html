@@ -37,14 +37,14 @@
 <li><b>menu.showcommand.type</b>: Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text</li><br>
 <li><b>output.jpeg.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li><br>
 <li><b>output.jpeg.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
-<li><b>output.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Default=(none)</li><br>
+<li><b>output.jpeg.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul></li><br>
 <li><b>output.orient</b>: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0</li><br>
 <li><b>output.png.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
 <li><b>output.png.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
-<li><b>output.png.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Default=(none)</li><br>
+<li><b>output.png.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul></li><br>
 <li><b>output.tiff.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
 <li><b>output.tiff.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
-<li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer.  Default=(none)</li><br>
+<li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0.</li></ul></li><br>
 <li><b>tool.*.cores</b>: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li><br>
 <li><b>tool.*.log</b>: Turns on logging for the specified tool.  Default=0</li><br>
 <li><b>tool.all.log</b>: Turns on logging for all tools.  Default=0</li><br>
