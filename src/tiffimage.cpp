@@ -200,12 +200,14 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		uint32 read_dir_offset; uint32 count;
 		float fval;
 		uint16 * sval;
-		TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset );
-		TIFFReadEXIFDirectory(tif, read_dir_offset);
-		if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
-		if (TIFFGetField( tif, EXIFTAG_EXPOSURETIME, &fval)) info["ExposureTime"] = tostr(fval);
-		if (TIFFGetField( tif, EXIFTAG_FOCALLENGTH, &fval)) info["FocalLength"] = tostr(fval);
-		if (TIFFGetField( tif, EXIFTAG_ISOSPEEDRATINGS, &count, &sval)) info["ISOSpeedRatings"] = tostr(*sval);
+		if (TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset )) {
+			if (TIFFReadEXIFDirectory(tif, read_dir_offset)) {
+				if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
+				if (TIFFGetField( tif, EXIFTAG_EXPOSURETIME, &fval)) info["ExposureTime"] = tostr(fval);
+				if (TIFFGetField( tif, EXIFTAG_FOCALLENGTH, &fval)) info["FocalLength"] = tostr(fval);
+				if (TIFFGetField( tif, EXIFTAG_ISOSPEEDRATINGS, &count, &sval)) info["ISOSpeedRatings"] = tostr(*sval);
+			}
+		}
 		
 		*width = w;
 		*height = h;
