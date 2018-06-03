@@ -13,7 +13,7 @@
 AppId={{9CB72E7D-54E7-43D3-BBA8-1C329A6A3B7B}
 AppName={#MyAppName}                              
 ;AppVersion={#MyAppVersion}
-AppVersion=@RAWPROCVERSION@
+AppVersion=@VERSION@
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={pf}\{#MyAppName}
@@ -27,7 +27,7 @@ SolidCompression=yes
 ;SourceDir=.\
 OutputDir=.
 VersionInfoDescription=rawproc and img are simple raw and image processors.
-VersionInfoCopyright=Copyright (C) 2015-2017 Glenn Butcher.
+VersionInfoCopyright=Copyright (C) 2015-2018 Glenn Butcher.
 ChangesEnvironment=true
 InfoBeforeFile=@INNO_SRCDIR@\winreadme.txt
 
@@ -49,7 +49,7 @@ Name: "{userappdata}\rawproc"
 Source: "src\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: "@INNO_SRCDIR@\src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
+Source: "@INNO_SRCDIR@\src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
