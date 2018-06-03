@@ -52,6 +52,8 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
+#define nullptr 0
+
 //Do not add custom headers between
 //Header Include Start and Header Include End
 //wxDev-C++ designer will remove them
