@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([rawproc], [0.7dev], [glenn.butcher@gmail.com])
+AC_INIT([rawproc], [0.7], [glenn.butcher@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 #AC_CONFIG_HEADERS([config.h])
@@ -50,7 +50,7 @@ then
 	AC_MSG_NOTICE([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
-#	LDFLAGS="$LDFLAGS -static"
+#	LDFLAGS="$LDFLAGS -static"  #commented out when I switched to mxe.static...
 	INNO_SRCDIR="$srcdir"
 	case "$host_alias" in
 		x86_64-w64-mingw32* )
