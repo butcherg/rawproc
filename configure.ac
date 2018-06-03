@@ -13,7 +13,7 @@ m4_include(ax_cxx_compile_stdcxx.m4)
 # Checks for programs.
 AC_PROG_CXX
 AC_OPENMP
-AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
+#AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 
 # MINGW_AC_WIN32_NATIVE_HOST
 # --------------------------
@@ -50,7 +50,7 @@ then
 	AC_MSG_NOTICE([adding win32 libs and flags])
 	AC_CHECK_LIB([ws2_32],[main])
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
-	LDFLAGS="$LDFLAGS -static"
+#	LDFLAGS="$LDFLAGS -static"
 	INNO_SRCDIR="$srcdir"
 	case "$host_alias" in
 		x86_64-w64-mingw32* )
