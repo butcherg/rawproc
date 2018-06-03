@@ -4,7 +4,7 @@
 #make-appimage.pl: constructs an AppImage using the AppImageTooKit
 #
 #Usage:
-#	$ ./make-appimage.pl path/to/app path/to/nextfileinbin path/to/nextfileinbin ...
+#	$ ./make-appimage.pl version path/to/app path/to/nextfileinbin [path/to/nextfileinbin ...]
 #
 #Dependencies (must be in $PATH):
 #	wget
@@ -15,9 +15,11 @@ use File::Spec;
 use File::Copy "cp";
 
 $arch = "x86_64";
+$version = shift @ARGV;
+$program = $ARGV[0];
 
-#get application name, from first parameter
-($volume,$directory,$file) = File::Spec->splitpath($ARGV[0]);
+#get application name, from $program:
+($volume,$directory,$file) = File::Spec->splitpath($program);
 
 $rootdir = "$file-$arch.AppDir";
 
@@ -58,7 +60,7 @@ $result = `rm excludelist`;
 
 print "\n";
 
-@lines = `ldd $ARGV[0]`;
+@lines = `ldd $program`;
 
 foreach $line (@lines) {
 	@items = split /\s/, $line;
@@ -111,7 +113,7 @@ print OUTFILE $ICON;
 close OUTFILE;
 
 
-$result = `appimagetool-x86_64.AppImage $rootdir $file-$arch.AppImage`;
+$result = `appimagetool-x86_64.AppImage $rootdir $file$version-$arch.AppImage`;
 $result = `rm -rf $rootdir`;
 
 
