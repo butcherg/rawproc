@@ -81,6 +81,8 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 	uint32 w, h;
 	uint16 c, b;
 
+	TIFFSetErrorHandler(0);
+
 	TIFF* tif = TIFFOpen(filename, "r");
 	if (tif) {
 
