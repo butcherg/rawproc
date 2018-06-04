@@ -44,7 +44,7 @@
 <li><b>output.png.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul></li><br>
 <li><b>output.tiff.cms.profile</b>: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li><br>
 <li><b>output.tiff.cms.renderingintent</b>: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li><br>
-<li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0.</li></ul></li><br>
+<li><b>output.tiff.parameters</b>: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul></li><br>
 <li><b>tool.*.cores</b>: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li><br>
 <li><b>tool.*.log</b>: Turns on logging for the specified tool.  Default=0</li><br>
 <li><b>tool.all.log</b>: Turns on logging for all tools.  Default=0</li><br>
