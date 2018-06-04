@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = -Wno-portability
 
-dtime="$(shell date +%Y%m%d-%H%M%S)"
+dtime=$(shell date +%Y%m%d-%H%M%S)
 
 SUBDIRS = src
 dist_doc_DATA = README.md
@@ -11,7 +11,7 @@ makedoc:
 
 .PHONY: makezip
 makezip:
-	zip -j rawproc-@INNO_SUFFIX@-@VERSION@-$(dtime).zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
+	zip -j rawproc@VERSION@-@INNO_SUFFIX@-$(dtime).zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
 
 .PHONY: wininstaller
 wininstaller:
