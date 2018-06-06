@@ -18,6 +18,7 @@
 #include "tiffimage.h"
 #include "pngimage.h"
 #include "gimage/strutil.h"
+#include "cJSON.h"
 
 #define PI            3.14159265358979323846
 
@@ -2333,6 +2334,49 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	{lasterror = GIMAGE_OK; return lasterror;}
 }
 
+GIMAGE_ERROR gImage::ApplyColorspace(cmsHPROFILE hImgProf, cmsUInt32Number intent, bool blackpointcomp, int threadcount)
+{
+	cmsUInt32Number format;
+	cmsHTRANSFORM hTransform;
+	cmsUInt32Number dwFlags = 0;
+
+	if (profile == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+	
+	if (blackpointcomp) dwFlags = cmsFLAGS_BLACKPOINTCOMPENSATION;
+
+	if (sizeof(PIXTYPE) == 2) format = TYPE_RGB_HALF_FLT; 
+	if (sizeof(PIXTYPE) == 4) format = TYPE_RGB_FLT;
+	if (sizeof(PIXTYPE) == 8) format = TYPE_RGB_DBL;
+
+	cmsHPROFILE gImgProf = cmsOpenProfileFromMem(profile, profile_length);
+	
+	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+
+	if (!cmsIsIntentSupported(gImgProf, intent, LCMS_USED_AS_INPUT))  {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
+	if (!cmsIsIntentSupported(hImgProf, intent, LCMS_USED_AS_OUTPUT)) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
+
+	if (gImgProf) {
+		if (hImgProf) {
+			hTransform = cmsCreateTransform(gImgProf, format, hImgProf, format, intent, dwFlags);
+			if (hTransform == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADTRANSFORM; return lasterror;}
+			
+			pix* img = image.data();
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = y*w;
+				cmsDoTransform(hTransform, &img[pos], &img[pos], w);
+
+			}
+			
+			char * prof; cmsUInt32Number proflen;	
+			gImage::makeICCProfile(hImgProf, prof, proflen);
+			setProfile(prof, proflen);
+		}
+	}
+	{lasterror = GIMAGE_OK; return lasterror;}
+}
+
 bool gImage::AssignColorspace(std::string iccfile)
 {
 	cmsHPROFILE hImgProf = cmsOpenProfileFromFile(iccfile.c_str(), "r");
@@ -2953,6 +2997,56 @@ cmsCIExyYTRIPLE identity_primaries = {
 {0.0, 0.0, 1.0}
 };
 
+
+//make a profile for a dcamprof json string:
+cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
+{
+	cmsHPROFILE profile;
+	cmsCIExyYTRIPLE c;
+	cmsCIEXYZ w;
+	cmsToneCurve *curve[3];
+
+
+	cJSON *pentry;
+	cJSON *prof = cJSON_Parse(json.c_str());
+	if (prof == NULL) return NULL;
+
+	pentry == NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "CalibrationIlluminat1");
+	if (pentry) 
+		if (cJSON_IsString(pentry))
+			if (std::string(pentry->valuestring) == "D50")
+				w = {0.964295676, 1.0, 0.825104603};
+			else
+				return NULL;
+		else
+			return NULL;
+	else
+		return NULL;
+
+	pentry == NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "ForwardMatrix");
+	if (pentry) {
+		cJSON *X = cJSON_GetArrayItem(pentry, 0); 
+		c.Red.x = cJSON_GetArrayItem(X, 0)->valuedouble;
+		c.Red.y = cJSON_GetArrayItem(X, 1)->valuedouble;
+		c.Red.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
+		cJSON *Y = cJSON_GetArrayItem(pentry, 1); 
+		c.Green.x = cJSON_GetArrayItem(X, 0)->valuedouble;
+		c.Green.y = cJSON_GetArrayItem(X, 1)->valuedouble;
+		c.Green.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
+		cJSON *Z = cJSON_GetArrayItem(pentry, 2); 
+		c.Blue.x = cJSON_GetArrayItem(X, 0)->valuedouble;
+		c.Blue.y = cJSON_GetArrayItem(X, 1)->valuedouble;
+		c.Blue.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
+
+	}
+	else return NULL;
+
+}
+
+
+//make a profile for one of the dcraw colorspace names:
 cmsHPROFILE gImage::makeLCMSProfile(const std::string name, float gamma)
 {
 	cmsHPROFILE profile;
