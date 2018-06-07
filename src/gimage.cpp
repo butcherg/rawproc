@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <exception>
 #include <algorithm> 
+#include <fstream>
 #include <sstream>
 #include <omp.h>
 #include <exception>
@@ -2305,7 +2306,7 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	if (sizeof(PIXTYPE) == 8) format = TYPE_RGB_DBL;
 
 	cmsHPROFILE gImgProf = cmsOpenProfileFromMem(profile, profile_length);
-	cmsHPROFILE hImgProf = cmsOpenProfileFromFile(iccfile.c_str(), "r");
+	cmsHPROFILE hImgProf = myCmsOpenProfileFromFile(iccfile);
 	
 	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
 	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
@@ -2334,52 +2335,10 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	{lasterror = GIMAGE_OK; return lasterror;}
 }
 
-GIMAGE_ERROR gImage::ApplyColorspace(cmsHPROFILE hImgProf, cmsUInt32Number intent, bool blackpointcomp, int threadcount)
+
+GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 {
-	cmsUInt32Number format;
-	cmsHTRANSFORM hTransform;
-	cmsUInt32Number dwFlags = 0;
-
-	if (profile == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
-	
-	if (blackpointcomp) dwFlags = cmsFLAGS_BLACKPOINTCOMPENSATION;
-
-	if (sizeof(PIXTYPE) == 2) format = TYPE_RGB_HALF_FLT; 
-	if (sizeof(PIXTYPE) == 4) format = TYPE_RGB_FLT;
-	if (sizeof(PIXTYPE) == 8) format = TYPE_RGB_DBL;
-
-	cmsHPROFILE gImgProf = cmsOpenProfileFromMem(profile, profile_length);
-	
-	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
-	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
-
-	if (!cmsIsIntentSupported(gImgProf, intent, LCMS_USED_AS_INPUT))  {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
-	if (!cmsIsIntentSupported(hImgProf, intent, LCMS_USED_AS_OUTPUT)) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
-
-	if (gImgProf) {
-		if (hImgProf) {
-			hTransform = cmsCreateTransform(gImgProf, format, hImgProf, format, intent, dwFlags);
-			if (hTransform == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADTRANSFORM; return lasterror;}
-			
-			pix* img = image.data();
-			#pragma omp parallel for num_threads(threadcount)
-			for (unsigned y=0; y<h; y++) {
-				unsigned pos = y*w;
-				cmsDoTransform(hTransform, &img[pos], &img[pos], w);
-
-			}
-			
-			char * prof; cmsUInt32Number proflen;	
-			gImage::makeICCProfile(hImgProf, prof, proflen);
-			setProfile(prof, proflen);
-		}
-	}
-	{lasterror = GIMAGE_OK; return lasterror;}
-}
-
-bool gImage::AssignColorspace(std::string iccfile)
-{
-	cmsHPROFILE hImgProf = cmsOpenProfileFromFile(iccfile.c_str(), "r");
+	cmsHPROFILE hImgProf = myCmsOpenProfileFromFile(iccfile);
 	if (hImgProf) {
 		char * prof; cmsUInt32Number proflen;	
 		gImage::makeICCProfile(hImgProf, prof, proflen);
@@ -3008,6 +2967,25 @@ const cmsCIExyY cmsCIEXYZ2cmsCIExyY(cmsCIEXYZ in)
 	return out;
 }
 
+//use in place of cmsOpenProfileFromFile() to include .json files:
+cmsHPROFILE gImage::myCmsOpenProfileFromFile(const std::string filename)
+{
+	size_t pos = filename.find_last_of(".");
+	if (pos != std::string::npos) {
+		if (filename.substr(pos+1) == "json") {
+			std::ifstream j(filename.c_str(), std::ifstream::in);
+			std::stringstream json;
+			json << j.rdbuf();
+			return makeLCMSProfile(json.str());
+		}			
+		else {
+			return cmsOpenProfileFromFile(filename.c_str(), "r");
+		}
+	}
+	else return NULL;
+}
+
+
 //make a profile for a dcamprof json string:
 cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 {
@@ -3018,13 +2996,12 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 
 	cmsToneCurve *curve[3], *tonecurve;
 
-
 	cJSON *pentry;
 	cJSON *prof = cJSON_Parse(json.c_str());
 	if (prof == NULL) return NULL;
 
 	pentry == NULL;
-	pentry = cJSON_GetObjectItemCaseSensitive(prof, "CalibrationIlluminat1");
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "CalibrationIlluminant1");
 	if (pentry) 
 		if (cJSON_IsString(pentry))
 			if (std::string(pentry->valuestring) == "D50")
@@ -3076,10 +3053,7 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 		curve[2] = cmsBuildGamma (NULL, pentry->valuedouble);
 	else return NULL;
 
-	
-
 	return cmsCreateRGBProfile (&cw, &c, curve);
-
 }
 
 
