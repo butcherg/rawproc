@@ -2998,13 +2998,25 @@ cmsCIExyYTRIPLE identity_primaries = {
 };
 
 
+const cmsCIExyY cmsCIEXYZ2cmsCIExyY(cmsCIEXYZ in)
+{
+	cmsCIExyY out;
+	double s = in.X+in.Y+in.Z;
+	out.x = in.X/s;
+	out.y = in.Y/s;
+	out.Y = in.Y;
+	return out;
+}
+
 //make a profile for a dcamprof json string:
 cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 {
 	cmsHPROFILE profile;
 	cmsCIExyYTRIPLE c;
-	cmsCIEXYZ w;
-	cmsToneCurve *curve[3];
+	cmsCIExyY cw;
+	cmsCIEXYZ p, w;
+
+	cmsToneCurve *curve[3], *tonecurve;
 
 
 	cJSON *pentry;
@@ -3016,32 +3028,57 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 	if (pentry) 
 		if (cJSON_IsString(pentry))
 			if (std::string(pentry->valuestring) == "D50")
-				w = {0.964295676, 1.0, 0.825104603};
+				w = d50_romm_spec_media_whitepoint;
 			else
 				return NULL;
 		else
 			return NULL;
 	else
 		return NULL;
+	cw = cmsCIEXYZ2cmsCIExyY(w);
 
 	pentry == NULL;
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "ForwardMatrix");
 	if (pentry) {
 		cJSON *X = cJSON_GetArrayItem(pentry, 0); 
-		c.Red.x = cJSON_GetArrayItem(X, 0)->valuedouble;
-		c.Red.y = cJSON_GetArrayItem(X, 1)->valuedouble;
-		c.Red.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
+		p.X = cJSON_GetArrayItem(X, 0)->valuedouble;
+		p.Y = cJSON_GetArrayItem(X, 1)->valuedouble;
+		p.Z = cJSON_GetArrayItem(X, 2)->valuedouble;
+		c.Red = cmsCIEXYZ2cmsCIExyY(p);
 		cJSON *Y = cJSON_GetArrayItem(pentry, 1); 
-		c.Green.x = cJSON_GetArrayItem(X, 0)->valuedouble;
-		c.Green.y = cJSON_GetArrayItem(X, 1)->valuedouble;
-		c.Green.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
+		p.X = cJSON_GetArrayItem(Y, 0)->valuedouble;
+		p.Y = cJSON_GetArrayItem(Y, 1)->valuedouble;
+		p.Z = cJSON_GetArrayItem(Y, 2)->valuedouble;
+		c.Green = cmsCIEXYZ2cmsCIExyY(p);
 		cJSON *Z = cJSON_GetArrayItem(pentry, 2); 
-		c.Blue.x = cJSON_GetArrayItem(X, 0)->valuedouble;
-		c.Blue.y = cJSON_GetArrayItem(X, 1)->valuedouble;
-		c.Blue.Y = cJSON_GetArrayItem(X, 2)->valuedouble;
-
+		p.X = cJSON_GetArrayItem(Z, 0)->valuedouble;
+		p.Y = cJSON_GetArrayItem(Z, 1)->valuedouble;
+		p.Z = cJSON_GetArrayItem(Z, 2)->valuedouble;
+		c.Blue = cmsCIEXYZ2cmsCIExyY(p);
 	}
 	else return NULL;
+
+	pentry == NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "RedTRC");
+	if (pentry) 
+		curve[0] = cmsBuildGamma (NULL, pentry->valuedouble);
+	else return NULL;
+
+	pentry == NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "GreenTRC");
+	if (pentry) 
+		curve[1] = cmsBuildGamma (NULL, pentry->valuedouble);
+	else return NULL;
+
+	pentry == NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "BlueTRC");
+	if (pentry) 
+		curve[2] = cmsBuildGamma (NULL, pentry->valuedouble);
+	else return NULL;
+
+	
+
+	return cmsCreateRGBProfile (&cw, &c, curve);
 
 }
 

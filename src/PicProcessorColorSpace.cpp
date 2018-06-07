@@ -164,7 +164,22 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	if (fname.IsOk() & fname.FileExists()) {
 
 		if (cp[1] == "convert") {
-			ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, bpc, threadcount);
+			if (fname.GetExt() == "json") {
+				FILE* f = fopen(fname.GetFullPath().c_str(), "r");
+
+				fseek(f, 0, SEEK_END);
+				size_t size = ftell(f);
+
+				char* jsonprof = new char[size];
+
+				rewind(f);
+				size_t result = fread(jsonprof, sizeof(char), size, f);
+				ret = dib->ApplyColorspace(std::string(jsonprof),intent, bpc, threadcount);
+				delete[] jsonprof;
+			}
+			else {
+				ret = dib->ApplyColorspace(std::string(fname.GetFullPath().c_str()),intent, bpc, threadcount);
+			}
 			switch (ret) {
 				case GIMAGE_OK:
 					result = true;
