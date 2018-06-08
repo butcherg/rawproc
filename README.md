@@ -109,3 +109,15 @@ processing in Raw Therapee and GIMP.
 
 If  you want to gripe or comment about rawproc, I'll be occasionally monitoring the pixels.us forums.  If I subsequently 
 commit anything interesting to the respository, I'll shout it out there.
+
+# Building a github Checkout
+
+If you clone the github repository, do these things first:
+
+<pre>
+aclocal
+autoconf
+automake --add-missing
+</pre>
+
+Now, you have the files to proceed with ./configure... make... etc.
