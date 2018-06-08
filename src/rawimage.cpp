@@ -654,7 +654,8 @@ char * _loadRAW(const char *filename,
 		//template input.raw.libraw.cameraprofile=iccprofile
 		if (p.find("cameraprofile") != p.end()) {
 				if (p["cameraprofile"] != "") {
-					profile = cmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "r");
+					//profile = cmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "r");
+					profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
 					if (profile) {
 						cmsSaveProfileToMem(profile, NULL, &size);
 						*icclength = size;
