@@ -100,6 +100,8 @@ $DESKTOP = <<"END_DESKTOP";
 Name=$file
 Exec=$file
 Icon=$file
+Type=Application
+Categories=Graphics;
 END_DESKTOP
 
 open OUTFILE, ">$file-$arch.AppDir/$file.desktop";
