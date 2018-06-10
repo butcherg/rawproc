@@ -107,7 +107,12 @@ class gImage
 		GIMAGE_ERROR getLastError();
 		std::string getLastErrorMessage();
 		std::string Stats();
+
+		//calculators:
+		std::vector<double> CalculateChannelMeans();
 		std::vector<double> CalculateBlackWhitePoint(double blackthreshold=0.01, double whitethreshold=0.01, bool centerout=true, int whitemax=255, std::string channel="rgb");
+
+		//histograms:
 		std::vector<long> Histogram();
 		std::vector<long> RedHistogram();
 		std::vector<long> GreenHistogram();

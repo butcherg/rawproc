@@ -2362,7 +2362,8 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 
 std::string gImage::Stats()
 {
-	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax;
+	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
+	long pcount = 0;
 	rmin = image[0].r; rmax = image[0].r; gmin=image[0].g; gmax = image[0].g; bmin = image[0].b; bmax = image[0].b;
 	tmin = SCALE_CURVE; tmax = 0.0;
 	int iter = 0;
@@ -2370,6 +2371,8 @@ std::string gImage::Stats()
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
 			unsigned pos = x + y*w;
+			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
+			pcount++;
 			if (image[pos].r > rmax) rmax = image[pos].r;
 			if (image[pos].g > gmax) gmax = image[pos].g;
 			if (image[pos].b > bmax) bmax = image[pos].b;
@@ -2381,7 +2384,26 @@ std::string gImage::Stats()
 			iter++;
 		}
 	}
-	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax);
+	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n\nrmean: %f\tgmean: %f\tbmean: %f", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax,rsum/pcount, gsum/pcount, bsum/pcount);
+}
+
+//calculate averages of red, green, and blue channels:
+std::vector<double> gImage::CalculateChannelMeans()
+{
+	std::vector<double> rgbmeans;
+	double rsum=0.0, gsum=0.0, bsum=0.0;
+	long pcount = 0;
+	for(unsigned y = 1; y < h; y++) {
+		for(unsigned x = 1; x < w; x++) {
+			unsigned pos = x + y*w;
+			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
+			pcount++;
+		}
+	}
+	rgbmeans.push_back(rsum/pcount);
+	rgbmeans.push_back(gsum/pcount);
+	rgbmeans.push_back(bsum/pcount);
+	return rgbmeans;
 }
 
 //calculate a normalized black and white point, expressed in the 0-255 range:
