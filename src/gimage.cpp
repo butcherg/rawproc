@@ -2384,7 +2384,7 @@ std::string gImage::Stats()
 			iter++;
 		}
 	}
-	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n\nrmean: %f\tgmean: %f\tbmean: %f", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax,rsum/pcount, gsum/pcount, bsum/pcount);
+	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n\nrmean: %f\tgmean: %f\tbmean: %f", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount);
 }
 
 //calculate averages of red, green, and blue channels:
@@ -2400,9 +2400,9 @@ std::vector<double> gImage::CalculateChannelMeans()
 			pcount++;
 		}
 	}
-	rgbmeans.push_back(rsum/pcount);
-	rgbmeans.push_back(gsum/pcount);
-	rgbmeans.push_back(bsum/pcount);
+	rgbmeans.push_back(rsum / (double) pcount);
+	rgbmeans.push_back(gsum / (double) pcount);
+	rgbmeans.push_back(bsum / (double) pcount);
 	return rgbmeans;
 }
 

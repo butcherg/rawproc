@@ -552,7 +552,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 			commandstring += std::string(cs);
 		}
 
-		//#whitebalance:[rmult,gmult,bmult] default: 1,1,1
+		//#whitebalance:[rmult,gmult,bmult] default: automatic, based on "gray world"
 		else if (strcmp(cmd,"whitebalance") == 0) {  
 			//no properties yet, no whitebalance in rawproc...
 			double redmult=1.0; 
@@ -561,22 +561,33 @@ void do_cmd(gImage &dib, std::string commandstr)
 			char *rm = strtok(NULL,", ");
 			char *gm = strtok(NULL,", ");
 			char *bm = strtok(NULL," ");
-			if (rm) redmult = atof(rm);
-			if (gm) greenmult = atof(gm);
-			if (bm) bluemult = atof(bm);
+			if (rm && strcmp(rm, "auto") != 0) {
+				redmult = atof(rm);
+				if (gm) greenmult = atof(gm);
+				if (bm) bluemult = atof(bm);
+			}
+			else { 
+				std::vector<double> rgbmeans = dib.CalculateChannelMeans();
+				redmult = rgbmeans[1] / rgbmeans[0];
+				bluemult = rgbmeans[1] / rgbmeans[2];
+			}
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.whitebalance.cores","0").c_str());
 			if (threadcount == 0) 
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+
 			printf("whitebalance: %0.2f,%0.2f,%0.2f (%d threads)... ",redmult,greenmult,bluemult,threadcount);
 
 			_mark();
 			dib.ApplyWhiteBalance(redmult,greenmult,bluemult, threadcount);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
-			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+			if (rm)
+				sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+			else
+				sprintf(cs, "auto");
 			commandstring += std::string(cs);
 		}
 
