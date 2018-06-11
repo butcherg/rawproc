@@ -568,8 +568,8 @@ void do_cmd(gImage &dib, std::string commandstr)
 			}
 			else { 
 				std::vector<double> rgbmeans = dib.CalculateChannelMeans();
-				redmult = rgbmeans[1] / rgbmeans[0];
-				bluemult = rgbmeans[1] / rgbmeans[2];
+				redmult = rgbmeans[0] / rgbmeans[1];
+				bluemult = rgbmeans[2] / rgbmeans[1];
 			}
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.whitebalance.cores","0").c_str());

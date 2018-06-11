@@ -2396,7 +2396,9 @@ std::vector<double> gImage::CalculateChannelMeans()
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
 			unsigned pos = x + y*w;
-			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
+			rsum += image[pos].r; 
+			gsum += image[pos].g; 
+			bsum += image[pos].b;
 			pcount++;
 		}
 	}
