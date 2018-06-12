@@ -36,6 +36,7 @@
 #include "PicProcessorDenoise.h"
 #include "PicProcessorRedEye.h"
 #include "PicProcessorColorSpace.h"
+#include "PicProcessorWhiteBalance.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -103,6 +104,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
 	EVT_MENU(ID_MNU_EXIF,rawprocFrm::MnuEXIF)
 	EVT_MENU(ID_MNU_COLORSPACE, rawprocFrm::MnuColorSpace)
+	EVT_MENU(ID_MNU_WHITEBALANCE, rawprocFrm::MnuWhiteBalance)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
@@ -222,6 +224,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->AppendSeparator();
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
 	
@@ -496,16 +499,17 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
 	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
+	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
@@ -1069,17 +1073,19 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 	if (toolfile.Open()) {
 		wxString token = toolfile.GetFirstLine();
 		do  {
+			wxString params = "";
 			wxArrayString cmd = split(token, ":");	
-			if (cmd.GetCount() >=2) {
-				if (AddItem(cmd[0], cmd[1])) {
-					wxSafeYield(this);
-				}
-				else {
-					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
-					toolfile.Close();
-					return;
-				}
+			if (cmd.GetCount() >=2) params = cmd[1];
+				
+			if (AddItem(cmd[0], params)) {
+				wxSafeYield(this);
 			}
+			else {
+				wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+				toolfile.Close();
+				return;
+			}
+
 			token = toolfile.GetNextLine();
 		} while (!toolfile.Eof());
 		toolfile.Close();
@@ -1710,6 +1716,21 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	}
 }
 #endif
+
+void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
+	}
+}
 
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
