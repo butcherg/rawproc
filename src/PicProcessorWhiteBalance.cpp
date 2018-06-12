@@ -4,8 +4,10 @@
 #include "util.h"
 #include "gimage/curve.h"
 #include <wx/spinctrl.h>
+#include <wx/clipbrd.h>
 
-#define GAMMAID 8500
+#define WBAUTO 8600
+#define WBPATCH 8700
 
 class WhiteBalancePanel: public PicProcPanel
 {
@@ -13,41 +15,137 @@ class WhiteBalancePanel: public PicProcPanel
 	public:
 		WhiteBalancePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			double rm, gm, bm;
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			b->Add(new wxStaticText(this,-1, "white balance", wxDefaultPosition, wxSize(100,20)), flags);
+			wxArrayString p = split(params,",");
+			rm = atof(p[0]);
+			gm = atof(p[1]);
+			bm = atof(p[2]);
+
+			g->Add(new wxStaticText(this,wxID_ANY, "red mult:"), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			rmult->SetValue(rm);
+			rmult->SetDigits(3);
+			rmult->SetRange(0.001,3.0);
+			rmult->SetIncrement(0.001);
+			g->Add(rmult, wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+
+			g->Add(new wxStaticText(this,wxID_ANY, "green mult:"), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			gmult->SetValue(gm);
+			gmult->SetDigits(3);
+			gmult->SetRange(0.001,3.0);
+			gmult->SetIncrement(0.001);
+			g->Add(gmult, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+
+			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			bmult->SetValue(bm);
+			bmult->SetDigits(3);
+			bmult->SetRange(0.001,3.0);
+			bmult->SetIncrement(0.001);
+			g->Add(bmult, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+
+			g->Add(0,10, wxGBPosition(3,0));
+
+			g->Add(new wxButton(this, WBAUTO, "Auto"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxButton(this, WBPATCH, "Patch"), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			
-			edit = new wxTextCtrl(this, wxID_ANY, p, wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
-			b->Add(edit, flags);
-			
-			SetSizerAndFit(b);
-			b->Layout();
+			SetSizerAndFit(g);
+			g->Layout();
 			SetFocus();
-			Bind(wxEVT_TEXT_ENTER,&WhiteBalancePanel::paramChanged, this);
+			t = new wxTimer(this);
+			Bind(wxEVT_SPINCTRLDOUBLE,&WhiteBalancePanel::paramChanged, this);
+			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
+			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnButton, this);
 			Refresh();
 			Update();
 		}
 
 		~WhiteBalancePanel()
 		{
-			
+			t->~wxTimer();
+		}
+
+		void setMultipliers(double rm, double gm, double bm)
+		{
+			rmult->SetValue(rm);
+			gmult->SetValue(gm);
+			bmult->SetValue(bm);
+			Refresh();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(edit->GetLineText(0));
+			//
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%f,%f,%f",rmult->GetValue(), gmult->GetValue(), bmult->GetValue()));
 			q->processPic();
+			event.Skip();
+		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			switch (event.GetId()) {
+				case WBAUTO:
+					q->setParams("");
+					q->processPic();
+					break;
+				case WBPATCH:
+					//wxMessageBox("Not yet!!");
+					wxTextDataObject cb;
+					double rm=1.0, gm=1.0, bm=1.0;
+					double ra, ga, ba;
+					if (wxTheClipboard->Open()) {
+						wxTheClipboard->GetData(cb);
+						wxArrayString p = split(cb.GetText(),",");
+
+						if (p.GetCount() == 3) {
+							ra = atof(p[0]);
+							ga = atof(p[1]);
+							ba = atof(p[2]);
+							if (ra > 1.0) ra = 1.0;
+							if (ga > 1.0) ga = 1.0;
+							if (ba > 1.0) ba = 1.0;
+							rm = ra / ga;
+							bm = ba / ga;
+							rmult->SetValue(rm);
+							gmult->SetValue(gm);
+							bmult->SetValue(bm);
+							q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
+							q->processPic();
+							Refresh();
+						}
+						//wxMessageBox(cb.GetText());
+						wxTheClipboard->Close();
+					}
+					break;
+			}
+			//q->processPic();
 			event.Skip();
 		}
 
 	private:
 		wxTextCtrl *edit;
-		//wxSpinCtrlDouble *r,*g,*b;
+		wxSpinCtrlDouble *rmult,*gmult,*bmult;
+		wxTimer *t;
 
 };
 
 PicProcessorWhiteBalance::PicProcessorWhiteBalance(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	//showParams();
+	
+	double redmult=1.0, greenmult=1.0, bluemult=1.0;
+	if (command == "") {
+		std::vector<double> rgbmeans = 	getPreviousPicProcessor()->getProcessedPic().CalculateChannelMeans();
+		redmult = rgbmeans[0] / rgbmeans[1];
+		bluemult = rgbmeans[2] / rgbmeans[1];
+		c = wxString::Format("%f,%f,%f",redmult, greenmult, bluemult);
+	}
 }
 
 void PicProcessorWhiteBalance::createPanel(wxSimplebook* parent)
@@ -64,6 +162,20 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	((wxFrame*) m_display->GetParent())->SetStatusText("white balance...");
 
 
+	if (c == "") {
+		std::vector<double> rgbmeans = 	getPreviousPicProcessor()->getProcessedPic().CalculateChannelMeans();
+		redmult = rgbmeans[0] / rgbmeans[1];
+		bluemult = rgbmeans[2] / rgbmeans[1];
+		setParams(wxString::Format("%f,%f,%f",redmult, greenmult, bluemult));
+		((WhiteBalancePanel *) toolpanel)->setMultipliers(redmult, greenmult, bluemult);
+	}
+	else {
+		wxArrayString p = split(c, ",");
+		redmult = atof(p[0]);
+		greenmult = atof(p[1]);
+		bluemult = atof(p[2]);
+	}
+
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.whitebalance.cores","0").c_str());
@@ -75,11 +187,6 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (c == "") {
-		std::vector<double> rgbmeans = dib->CalculateChannelMeans();
-		redmult = rgbmeans[0] / rgbmeans[1];
-		bluemult = rgbmeans[2] / rgbmeans[1];
-	}
 	dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 	wxString d = duration();
 
