@@ -10,6 +10,7 @@ class PicProcessorWhiteBalance: public PicProcessor
 		PicProcessorWhiteBalance(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
 		bool processPic(bool processnext=true);
+		std::vector<double> getPatchMeans(int x, int y, float radius);
 };
 
 #endif

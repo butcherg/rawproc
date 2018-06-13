@@ -156,6 +156,27 @@ void PicProcessorWhiteBalance::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
+std::vector<double> PicProcessorWhiteBalance::getPatchMeans(int x, int y, float radius)
+{
+	std::vector<double> means;
+	double rsum=0.0, gsum=0.0, bsum=0.0;
+	gImage prev = getPreviousPicProcessor()->getProcessedPic();
+	int count = 0;
+	for (int i=x-radius; i<x+radius; i++) {
+		for (int j=y-radius; j<y+radius; j++) {
+			pix p = prev.getRGB(i,j);
+			rsum += p.r;
+			gsum += p.g;
+			bsum += p.b;
+			count++;
+		}
+	}
+	means.push_back(rsum/(double)count);
+	means.push_back(gsum/(double)count);
+	means.push_back(bsum/(double)count);
+	return means;
+}
+
 bool PicProcessorWhiteBalance::processPic(bool processnext) 
 {
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
