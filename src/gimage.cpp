@@ -1661,19 +1661,14 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 //
 
 void gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
-{
-	double rslope = 255.0 / (255.0*redmult);
-	double gslope = 255.0 / (255.0*greenmult);
-	double bslope = 255.0 / (255.0*bluemult);
-	
-	
+{	
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			image[pos].r = image[pos].r * rslope;
-			image[pos].g = image[pos].g * gslope;
-			image[pos].b = image[pos].b * bslope;
+			image[pos].r *= redmult; 
+			image[pos].g *= greenmult; 
+			image[pos].b *= bluemult; 
 		}
 	}
 }
