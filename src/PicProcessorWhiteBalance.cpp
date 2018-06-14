@@ -9,6 +9,88 @@
 #define WBAUTO 8600
 #define WBPATCH 8700
 
+/*
+class myDoubleCtrl: public wxTextCtrl
+{
+public:
+	myDoubleCtrl(wxWindow *parent, wxWindowID id, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=0): wxTextCtrl(parent, id, "", pos, size, wxTE_PROCESS_ENTER)
+
+	{
+		dig = 2;
+		wxTextCtrl::SetValue(wxString::Format("%0.2f", 0.0).c_str());
+		Bind(wxEVT_TEXT_ENTER, &myDoubleCtrl::paramChanged, this);
+		Bind(wxEVT_MOUSEWHEEL, &myDoubleCtrl::onWheel, this);
+		Refresh();
+	}
+
+	void paramChanged(wxCommandEvent& event)
+	{
+		val = atof(wxTextCtrl::GetValue().c_str());
+		wxCommandEvent e(wxEVT_SPINCTRLDOUBLE);
+		e.SetEventObject(this);
+		e.SetString("update");
+		ProcessWindowEvent(e);
+		Refresh();
+		event.Skip();
+	}
+
+	void onWheel(wxMouseEvent& event)
+	{
+printf("Mousewheel...\n");
+		if (event.GetWheelRotation() > 0)
+			val += inc;
+		else
+			val -= inc;
+		if (val > up) val = up;
+		if (val < low) val = low;
+		wxTextCtrl::SetValue(wxString::Format("%0.2f", val).c_str());
+		wxCommandEvent e(wxEVT_SPINCTRLDOUBLE);
+		e.SetEventObject(this);
+		e.SetString("update");
+		ProcessWindowEvent(e);
+		event.Skip();
+	}
+
+	double GetValue()
+	{
+		val = atof(GetLineText(0).c_str());
+		return val;
+	}
+
+	void SetValue(double value)
+	{
+		val = value;
+		if (val > up) val = up;
+		if (val < low) val = low;
+		wxTextCtrl::SetValue(wxString::Format("%0.2f", val).c_str());
+		Refresh();
+	}
+
+	void SetDigits(int digits)
+	{
+		dig = digits;
+	}
+
+	void SetRange(double lower, double upper)
+	{
+		up = upper;
+		low = lower;
+	}
+
+	void SetIncrement(double increment)
+	{
+		inc = increment;
+	}
+
+private:
+	double val;
+	unsigned dig;
+	double up, low, inc;
+
+
+};
+*/
+
 class WhiteBalancePanel: public PicProcPanel
 {
 
@@ -40,6 +122,7 @@ class WhiteBalancePanel: public PicProcPanel
 
 			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			//bmult = new myDoubleCtrl(this, wxID_ANY);
 			bmult->SetValue(bm);
 			bmult->SetDigits(3);
 			bmult->SetRange(0.001,3.0);
@@ -58,6 +141,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_SPINCTRLDOUBLE,&WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnButton, this);
+			//Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
 			Refresh();
 			Update();
 		}
@@ -77,7 +161,6 @@ class WhiteBalancePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			//
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -108,11 +191,11 @@ class WhiteBalancePanel: public PicProcPanel
 							ra = atof(p[0]);
 							ga = atof(p[1]);
 							ba = atof(p[2]);
-							if (ra > 1.0) ra = 1.0;
-							if (ga > 1.0) ga = 1.0;
-							if (ba > 1.0) ba = 1.0;
-							rm = ra / ga;
-							bm = ba / ga;
+							//if (ra > 1.0) ra = 1.0;
+							//if (ga > 1.0) ga = 1.0;
+							//if (ba > 1.0) ba = 1.0;
+							rm = ga / ra;
+							bm = ga / ba;
 							rmult->SetValue(rm);
 							gmult->SetValue(gm);
 							bmult->SetValue(bm);
@@ -131,7 +214,8 @@ class WhiteBalancePanel: public PicProcPanel
 
 	private:
 		wxTextCtrl *edit;
-		wxSpinCtrlDouble *rmult,*gmult,*bmult;
+		wxSpinCtrlDouble *rmult, *gmult ,*bmult;
+		//myDoubleCtrl *bmult;
 		wxTimer *t;
 
 };
@@ -142,8 +226,10 @@ PicProcessorWhiteBalance::PicProcessorWhiteBalance(wxString name, wxString comma
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	if (command == "") {
 		std::vector<double> rgbmeans = 	getPreviousPicProcessor()->getProcessedPic().CalculateChannelMeans();
-		redmult = rgbmeans[0] / rgbmeans[1];
-		bluemult = rgbmeans[2] / rgbmeans[1];
+		//redmult = rgbmeans[0] / rgbmeans[1];
+		//bluemult = rgbmeans[2] / rgbmeans[1];
+		redmult = rgbmeans[1] / rgbmeans[0];
+		bluemult = rgbmeans[1] / rgbmeans[2];
 		c = wxString::Format("%f,%f,%f",redmult, greenmult, bluemult);
 	}
 }
@@ -185,8 +271,10 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 
 	if (c == "") {
 		std::vector<double> rgbmeans = 	getPreviousPicProcessor()->getProcessedPic().CalculateChannelMeans();
-		redmult = rgbmeans[0] / rgbmeans[1];
-		bluemult = rgbmeans[2] / rgbmeans[1];
+		//redmult = rgbmeans[0] / rgbmeans[1];
+		//bluemult = rgbmeans[2] / rgbmeans[1];
+		redmult = rgbmeans[1] / rgbmeans[0];
+		bluemult = rgbmeans[1] / rgbmeans[2];
 		setParams(wxString::Format("%f,%f,%f",redmult, greenmult, bluemult));
 		((WhiteBalancePanel *) toolpanel)->setMultipliers(redmult, greenmult, bluemult);
 	}
