@@ -1072,11 +1072,10 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 	wxTextFile toolfile(fname);
 	if (toolfile.Open()) {
 		wxString token = toolfile.GetFirstLine();
-		do  {
+		while (!toolfile.Eof())  {
 			wxString params = "";
 			wxArrayString cmd = split(token, ":");	
 			if (cmd.GetCount() >=2) params = cmd[1];
-				
 			if (AddItem(cmd[0], params)) {
 				wxSafeYield(this);
 			}
@@ -1087,7 +1086,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 			}
 
 			token = toolfile.GetNextLine();
-		} while (!toolfile.Eof());
+		}
 		toolfile.Close();
 	}
 	else wxMessageBox("Error: tool file not found.");
