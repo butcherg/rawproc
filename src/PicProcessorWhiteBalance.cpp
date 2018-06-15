@@ -110,25 +110,20 @@ class WhiteBalancePanel: public PicProcPanel
 			rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max, 0, 0.001);
 			rmult->SetValue(rm);
 			rmult->SetDigits(3);
-			//rmult->SetRange(0.001,3.0);
-			//rmult->SetIncrement(0.001);
+
 			g->Add(rmult, wxGBPosition(0,1), wxGBSpan(1,2), wxEXPAND | wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "green mult:"), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max, 0, 0.001);
 			gmult->SetValue(gm);
 			gmult->SetDigits(3);
-			gmult->SetRange(0.001,3.0);
-			gmult->SetIncrement(0.001);
 			g->Add(gmult, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
-			//bmult = new myDoubleCtrl(this, wxID_ANY);
+			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max, 0, 0.001);
+
 			bmult->SetValue(bm);
 			bmult->SetDigits(3);
-			bmult->SetRange(0.001,3.0);
-			bmult->SetIncrement(0.001);
 			g->Add(bmult, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(0,10, wxGBPosition(3,0));
