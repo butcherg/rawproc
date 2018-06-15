@@ -734,7 +734,8 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					if (wxTheClipboard->Open()) {
 						// This data objects are held by the clipboard,
 						// so do not delete them in the app.
-						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", pr, pg, pb)) );
+						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%d,%d", imgX, imgY)));
+						//wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", pr, pg, pb)) );
 						wxTheClipboard->Close();
 					}
 		case 79: //o oob toggle
