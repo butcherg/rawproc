@@ -375,10 +375,7 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef SIZERLAYOUT
-	if (vs) vs->~wxBoxSizer();
-	if (hs) hs->~wxBoxSizer();
-#else
+#ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
 	Destroy();
@@ -395,10 +392,7 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef SIZERLAYOUT
-	if (vs) vs->~wxBoxSizer();
-	if (hs) hs->~wxBoxSizer();
-#else
+#ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
 	Destroy();

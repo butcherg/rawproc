@@ -57,7 +57,7 @@ class ColorspacePanel: public PicProcPanel
 
 		~ColorspacePanel()
 		{
-			if (s) s->~wxBoxSizer();
+
 		}
 		
 		void selectProfile(wxCommandEvent& event)
