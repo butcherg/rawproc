@@ -499,9 +499,10 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 #ifdef USE_LENSFUN
