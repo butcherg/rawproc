@@ -1070,14 +1070,16 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		while (!toolfile.Eof())  {
 			wxString params = "";
 			wxArrayString cmd = split(token, ":");	
-			if (cmd.GetCount() >=2) params = cmd[1];
-			if (AddItem(cmd[0], params)) {
-				wxSafeYield(this);
-			}
-			else {
-				wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
-				toolfile.Close();
-				return;
+			if (cmd.GetCount() > 0) {
+				if (cmd.GetCount() >=2) params = cmd[1];
+				if (AddItem(cmd[0], params)) {
+					wxSafeYield(this);
+				}
+				else {
+					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+					toolfile.Close();
+					return;
+				}
 			}
 
 			token = toolfile.GetNextLine();
