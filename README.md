@@ -34,8 +34,7 @@ And, in doing so, you'll learn valuable things about digital images.
 In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, 
 a 255-value histogram, and no thumbnail.
 
-So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  
-you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list 
+So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list 
 saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata.  This is my take on 'non-destructive' editing.
 
 rawproc also implements what I call 'incremental processing', in that each added manipulation does its thing against the 
