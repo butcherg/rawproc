@@ -8,17 +8,23 @@ with floating point pixel values.  Here's a list of the implemented manipulation
 
 - Black/White Point
 - Bright
+- Colorspace
 - Contrast
 - Crop
 - Curve
 - Denoise
+- Exposure
 - Gamma
-- Gray
+- Grayscale Conversion
 - Highlight
+- Lens Correction
+- Redeye Correction
 - Resize
+- Rotate
 - Saturation
 - Shadow
 - Sharpen
+- White Balance
 
 You open an image, add whatever manipulations you want to apply to the list, then save the result.   You determine
 the order of the manipulations.  Also, you have to deal with the raw image, in that the choices regarding white balance,
@@ -79,18 +85,11 @@ I offer no promise of support or enhancement, past offering the code on Github f
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
 on Ubuntu x86_64 and Windows 7, 8, and 10.
 
-To compile in a Linux OS,  you need to have wxWidgets, gimage, LibRaw, libjpeg, libtiff, and LittleCMS installed, with the associated development headers.  
+To compile in a Linux OS,  you need to have wxWidgets, gimage, LibRaw, libjpeg, libpng, libtiff, and LittleCMS installed, with the associated development headers.  Lensfun is needed for lens correction, but needs to be enabled at ./configure with --enable-lensfun.
 Basically the same thing applies to compiling in Windows, except you'll probably have to spend more time figuring where 
-you put wxWidgets.  The wx-config utility that comes with wxWidgets helps substantially; I ran:
+you put wxWidgets.  
 
-wx-config --libs --cxxflags
-
-and copied the results to Makefile.txt.  You apparently should be able to run wx-config in the Makefile script, but I 
-couldn't get it to work right in the Windows/Mingw32 environment.  Once you have the Makefile.txt set up properly, 
-you should be able to run 'make -f Makefile.txt' in the directory containing the rawproc source code.  Oh, make sure
-you make a 'linux' or 'win' subdirectory in the rawproc directory to hold the object and executable files.
-
-A late add is 'img', a command line program that uses the same image processing routines as rawproc. The only 
+'img' is a command line program that uses the same image processing routines as rawproc. The only 
 comprehensive documentation is the img.cpp source file.  You use it like this:
 
 <pre>
@@ -98,7 +97,7 @@ img input.jpg resize:640,0 sharpen:1 output.jpg
 </pre>
 
 img will allow wildcards in the input and output filespecifications, so you can use it to apply processing to all 
-images in a directory.
+images in a directory.  It will also read rawproc configuration files, so a workflow that starts with batch-produced JPEGs and continues with re-editing selected images in rawproc is seamless.
 
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
