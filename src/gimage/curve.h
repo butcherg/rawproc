@@ -33,6 +33,7 @@ class Curve
 {
 	public:
 		Curve();
+		Curve(double lx, double ly, double hx, double hy);
 		std::vector<cp> getControlPoints();
 		void setControlPoints(std::vector<cp> pts);
 		void clearpoints();

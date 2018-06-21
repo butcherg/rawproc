@@ -12,6 +12,21 @@ Curve::Curve() {
 	mx=-1.0;
 }
 
+Curve::Curve(double lx, double ly, double hx, double hy)
+{
+	struct cp p;
+	controlpts.reserve(7);
+	mn=-1.0;
+	mx=-1.0;
+	p.x = lx;
+	p.y = ly;
+	controlpts.push_back(p);
+	p.x = hx;
+	p.y = hy;
+	controlpts.push_back(p);
+	setpoints();
+}
+
 std::vector<cp> Curve::getControlPoints()
 {
 	return controlpts;
@@ -35,7 +50,7 @@ void Curve::insertpoint(double x, double y)
 	p.x = x;
 	p.y = y;
 	controlpts.push_back(p);
-	setpoints();
+	if (controlpts.size() > 1) setpoints();
 }
 
 bool Curve::deletepoint(double x, double y)
@@ -61,7 +76,7 @@ void Curve::scalepoints(double s)
 		controlpts[i].x *= s;
 		controlpts[i].y *= s;
 	}
-	setpoints();
+	if (controlpts.size() > 1) setpoints();
 }
 
 double Curve::getpoint(double x)
@@ -85,7 +100,7 @@ cp Curve::getctrlpoint(int i)
 void Curve::setctrlpoint(int i, cp p)
 {
 	controlpts[i] = p;
-	setpoints();
+	if (controlpts.size() > 1) setpoints();
 }
 
 
