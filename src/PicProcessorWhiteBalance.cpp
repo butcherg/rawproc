@@ -115,8 +115,7 @@ class WhiteBalancePanel: public PicProcPanel
 			bm = atof(p[2]);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "red mult:"), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			//rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max, 0, 0.001);
-			rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
 			rmult->SetDigits(digits);
 			rmult->SetRange(min,max);
 			rmult->SetIncrement(increment);
@@ -124,7 +123,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(rmult, wxGBPosition(0,1), wxGBSpan(1,2), wxEXPAND | wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "green mult:"), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
 			gmult->SetDigits(digits);
 			gmult->SetRange(min,max);
 			gmult->SetIncrement(increment);
@@ -132,7 +131,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(gmult, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0");
+			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
 			//bmult = new myDoubleCtrl(this, wxID_ANY);
 			bmult->SetDigits(digits);
 			bmult->SetRange(min,max);
@@ -152,7 +151,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_SPINCTRLDOUBLE,&WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnButton, this);
-			//Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
+			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
 			Refresh();
 			Update();
 		}
