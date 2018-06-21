@@ -375,10 +375,7 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef SIZERLAYOUT
-	if (vs) vs->~wxBoxSizer();
-	if (hs) hs->~wxBoxSizer();
-#else
+#ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
 	Destroy();
@@ -395,10 +392,7 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	// now we can safely delete the config pointer
 	event.Skip();
 	delete wxConfig::Set(NULL);
-#ifdef SIZERLAYOUT
-	if (vs) vs->~wxBoxSizer();
-	if (hs) hs->~wxBoxSizer();
-#else
+#ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
 	Destroy();
@@ -505,9 +499,10 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 #ifdef USE_LENSFUN
@@ -1075,14 +1070,16 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		while (!toolfile.Eof())  {
 			wxString params = "";
 			wxArrayString cmd = split(token, ":");	
-			if (cmd.GetCount() >=2) params = cmd[1];
-			if (AddItem(cmd[0], params)) {
-				wxSafeYield(this);
-			}
-			else {
-				wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
-				toolfile.Close();
-				return;
+			if (cmd.GetCount() > 0) {
+				if (cmd.GetCount() >=2) params = cmd[1];
+				if (AddItem(cmd[0], params)) {
+					wxSafeYield(this);
+				}
+				else {
+					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+					toolfile.Close();
+					return;
+				}
 			}
 
 			token = toolfile.GetNextLine();
