@@ -3,6 +3,7 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
+#include "myFloatSlider.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
 
@@ -13,6 +14,7 @@
 #define WBGREEN 8703
 #define WBBLUE 8704
 
+/* now in myFloatSlider.h, myFloatSlider.cpp
 class myFloatSlider: public wxSlider
 {
 	public:
@@ -64,7 +66,7 @@ class myFloatSlider: public wxSlider
 		int sliderlength;
 	
 };
-
+*/
 
 class WhiteBalancePanel: public PicProcPanel
 {
