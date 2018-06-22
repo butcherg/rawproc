@@ -703,8 +703,13 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		picdata->createPanel(parambook);
 		CommandTreeSetDisplay(picdata->GetId());
 		//pic->SetScaleToWidth();
-		pic->FitMode(true);
-		SetStatusText("scale: fit",2);
+		if (pic->GetSize().GetWidth() > dib->getWidth()) {
+			pic->SetScale(1.0);
+		}
+		else {
+			pic->FitMode(true);
+			SetStatusText("scale: fit",2);
+		}
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
@@ -906,8 +911,13 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 
 			//pic->SetScaleToWidth();
-			pic->FitMode(true);
-			SetStatusText("scale: fit",2);
+			if (pic->GetSize().GetWidth() > dib->getWidth()) {
+				pic->SetScale(1.0);
+			}
+			else {
+				pic->FitMode(true);
+				SetStatusText("scale: fit",2);
+			}
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
 			picdata->createPanel(parambook);
 			CommandTreeSetDisplay(picdata->GetId());
