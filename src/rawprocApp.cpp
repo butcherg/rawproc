@@ -132,6 +132,12 @@ int rawprocFrmApp::OnExit()
 	return 0;
 }
 
+int rawprocFrmApp::OnRun()
+{
+	wxApp::OnRun();
+	return 0;
+}
+
 void rawprocFrmApp::OnFatalException()
 {
 	wxMessageBox("rawprocFrmApp::OnFatalException...");

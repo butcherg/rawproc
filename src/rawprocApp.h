@@ -25,6 +25,7 @@ class rawprocFrmApp : public wxApp
 	public:
 		bool OnInit();
 		int OnExit();
+		int OnRun();
 		void OnFatalException();
 };
 
