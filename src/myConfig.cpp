@@ -98,18 +98,20 @@ std::string myConfig::getValue(std::string section, std::string name)
 
 std::string myConfig::getValueOrDefault(std::string name, std::string defaultval)
 {
+	std::string defval = defaultval;
 	if (exists(name))
 		return defaultconfig[name];
 	else
-		return defaultval;
+		return defval;
 }
 
 std::string myConfig::getValueOrDefault(std::string section, std::string name, std::string defaultval)
 {
+	std::string defval = defaultval;
 	if (exists(section,name))
 		return sectionconfig[section][name];
 	else
-		return defaultval;
+		return defval;
 }
 
 void myConfig::deleteValue(std::string section, std::string name)
