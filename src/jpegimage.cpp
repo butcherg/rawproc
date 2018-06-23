@@ -454,7 +454,7 @@ bool _writeJPEG(const char *filename,
 
 	marker =  construct_APP1marker(info, &markerlength);
 	jpeg_write_marker(&cinfo, JPEG_APP0+1, marker+2, markerlength);
-	delete marker;
+	delete [] marker;
 
 	if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
 
