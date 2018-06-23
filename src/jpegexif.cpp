@@ -731,7 +731,7 @@ void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::str
 //Globals for constructing the APP1 marker:
 
 //unsigned char Buffer[512];
-unsigned char Buffer[1024];
+unsigned char Buffer[8192];
 
 unsigned short NumEntries;
 int DataWriteIndex;
