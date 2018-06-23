@@ -148,7 +148,9 @@ void myConfig::setValue(std::string name, std::string value)
 
 bool myConfig::exists(std::string name)
 {
-	if (defaultconfig.find(name) == defaultconfig.end()) return false;
+	std::string n = name;
+	if (defaultconfig.empty()) return false; 
+	if (defaultconfig.count(n) == 0) return false;
 	return true;
 }
 
