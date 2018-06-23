@@ -125,7 +125,11 @@ class WhiteBalancePanel: public PicProcPanel
 	
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnButton, this);
-			Bind(wxEVT_SLIDER, &WhiteBalancePanel::paramChanged, this);
+			//Bind(wxEVT_SLIDER, &WhiteBalancePanel::paramChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &WhiteBalancePanel::valChanged, this);
+			Bind(wxEVT_SCROLL_THUMBRELEASE, &WhiteBalancePanel::paramChanged, this);
+
+
 			Refresh();
 			Update();
 		}
@@ -146,7 +150,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Refresh();
 		}
 
-		void paramChanged(wxCommandEvent& event)
+		void valChanged(wxCommandEvent& event)
 		{
 			switch (event.GetId()) {
 				case WBRED:
@@ -159,6 +163,11 @@ class WhiteBalancePanel: public PicProcPanel
 					btxt->SetLabel(wxString::Format(nbrformat,bmult->GetFloatValue()));
 					break;
 			}
+			//t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void paramChanged(wxCommandEvent& event)
+		{
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
