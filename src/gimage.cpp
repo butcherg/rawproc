@@ -2143,7 +2143,7 @@ void gImage::ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, 
 
 	//delete the memory allocated for horizontal filter weights:
 	for(i = 0; i < width; ++i) {
-		delete contrib[i].p;
+		delete [] contrib[i].p;
 	}
 	delete[] contrib;
 
@@ -2225,7 +2225,7 @@ void gImage::ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, 
 
 	//delete the memory allocated for vertical filter weights:
 	for(i = 0; i < height; ++i) {
-		delete contrib[i].p;
+		delete [] contrib[i].p;
 	}
 	delete[] contrib;
 	delete t;
