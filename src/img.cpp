@@ -1075,7 +1075,7 @@ for (int f=0; f<files.size(); f++)
 	dib.setInfo("ImageDescription", commandstring);
 	
 	cmsHPROFILE profile = cmsOpenProfileFromFile(profilepath.c_str(), "r");
-	if (profile)
+	if (dib.getProfile() && profile)
 		dib.saveImageFile(outfilename, outfile[1].c_str(), profile, intent);
 	else
 		dib.saveImageFile(outfilename, outfile[1].c_str());
