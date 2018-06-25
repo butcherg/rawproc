@@ -8,6 +8,7 @@ myFloatSlider::myFloatSlider(wxWindow *parent, wxWindowID id, float value, float
 	min = minValue;
 	max = maxValue;
 	inc = increment;
+	SetLineSize(1);
 	SetValue(float2int());
 			
 	Bind(wxEVT_SLIDER, &myFloatSlider::OnChange, this);

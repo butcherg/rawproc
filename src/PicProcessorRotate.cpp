@@ -7,6 +7,7 @@
 #include "run.xpm"
 
 #include <wx/treectrl.h>
+#include "myFloatSlider.h"
 
 
 class RotatePreview: public wxPanel
@@ -179,6 +180,7 @@ class RotatePanel: public PicProcPanel
 			//g->Add(0,10, wxGBPosition(0,0));
 			g->Add(new wxStaticText(this,wxID_ANY, "rotate: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(140, -1));
+			//rotate = new myFloatSlider(this, wxID_ANY, 0.0, -45.0, 45.0, 0.1, wxDefaultPosition, wxSize(100, 20));
 			g->Add(rotate , wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			val = new wxStaticText(this,wxID_ANY, tok[0], wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(0,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
@@ -216,7 +218,9 @@ class RotatePanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
 			Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
-			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
+			//Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
+			Bind(wxEVT_MOUSEWHEEL, &RotatePanel::OnWheel, this);
+			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnThumbTrack, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
 			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this);
@@ -254,6 +258,12 @@ class RotatePanel: public PicProcPanel
 
 		}
 
+		void OnWheel(wxMouseEvent &event)
+		{
+			t->Start(500,wxTIMER_ONE_SHOT);
+			event.Skip();
+		}
+
 		void OnChanged(wxCommandEvent& event)
 		{
 			//if (!thumb) {
@@ -262,7 +272,7 @@ class RotatePanel: public PicProcPanel
 				preview->Rotate(rotate->GetValue()/10.0);
 				t->Start(500,wxTIMER_ONE_SHOT);
 				Refresh();
-				Update();
+				//Update();
 				//q->processPic();
 			//}
 		}
@@ -272,8 +282,9 @@ class RotatePanel: public PicProcPanel
 			thumb = true;
 			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
 			preview->Rotate(rotate->GetValue()/10.0);
-			Refresh();
-			Update();
+			preview->Refresh();
+			t->Start(500,wxTIMER_ONE_SHOT);
+			//Update();
 		}
 
 		void OnThumbRelease(wxCommandEvent& event)
@@ -282,7 +293,8 @@ class RotatePanel: public PicProcPanel
 				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
 			else
 				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
-			q->processPic();
+			t->Start(500,wxTIMER_ONE_SHOT);
+			//q->processPic();
 			thumb = false;
 		}
 
@@ -328,6 +340,7 @@ class RotatePanel: public PicProcPanel
 	private:
 		wxCheckBox *autocrop;
 		wxSlider *rotate;
+		//myFloatSlider *rotate;
 		wxStaticText *val;
 		wxBitmapButton *btn1;
 		wxButton *btn2;
