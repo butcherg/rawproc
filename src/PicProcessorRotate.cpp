@@ -248,11 +248,7 @@ class RotatePanel: public PicProcPanel
 		{
 			wxSize s = GetParent()->GetSize();
 			SetSize(s);
-
 			preview->SetSize(g->GetCellSize(2,0));
-
-			//g->RecalcSizes();
-			//g->Layout();
 			event.Skip();
 			Refresh();
 
@@ -266,15 +262,11 @@ class RotatePanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			//if (!thumb) {
-				val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
-				preview->setAutocrop(autocrop->GetValue());
-				preview->Rotate(rotate->GetValue()/10.0);
-				t->Start(500,wxTIMER_ONE_SHOT);
-				Refresh();
-				//Update();
-				//q->processPic();
-			//}
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
+			preview->setAutocrop(autocrop->GetValue());
+			preview->Rotate(rotate->GetValue()/10.0);
+			t->Start(500,wxTIMER_ONE_SHOT);
+			Refresh();
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -283,8 +275,6 @@ class RotatePanel: public PicProcPanel
 			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
 			preview->Rotate(rotate->GetValue()/10.0);
 			preview->Refresh();
-			t->Start(500,wxTIMER_ONE_SHOT);
-			//Update();
 		}
 
 		void OnThumbRelease(wxCommandEvent& event)
@@ -294,7 +284,6 @@ class RotatePanel: public PicProcPanel
 			else
 				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
 			t->Start(500,wxTIMER_ONE_SHOT);
-			//q->processPic();
 			thumb = false;
 		}
 
