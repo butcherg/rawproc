@@ -3,6 +3,9 @@
 #include "util.h"
 #include "myConfig.h"
 
+#define COLOROP 6500
+#define COLORINTENT 6501
+
 
 class ColorspacePanel: public PicProcPanel
 {
@@ -24,7 +27,7 @@ class ColorspacePanel: public PicProcPanel
 			opers.Add("convert");
 			opers.Add("assign");
 
-			operselect = new wxRadioBox (this, wxID_ANY, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			operselect = new wxRadioBox (this, COLOROP, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
 			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
 			s->Add(operselect,flags);
 			
@@ -34,7 +37,7 @@ class ColorspacePanel: public PicProcPanel
 			intents.Add("relative_colorimetric");
 			intents.Add("absolute_colorimetric");
 			
-			intentselect = new wxRadioBox (this, wxID_ANY, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
+			intentselect = new wxRadioBox (this, COLORINTENT, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
 			if (parms[2] != "-") intentselect->SetSelection(intentselect->FindString(parms[2]));
 			s->Add(intentselect,flags);
 			
@@ -92,8 +95,19 @@ class ColorspacePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
+
 			wxString profilestr = edit->GetLineText(0);
 			wxString operstr = operselect->GetString(operselect->GetSelection());
+			if (event.GetId() == COLOROP) {
+				if (operstr == "convert") {
+					intentselect->Enable(true);
+					bpc->Enable(true);
+				}
+				else {
+					intentselect->Enable(false);
+					bpc->Enable(false);
+				}	
+			}
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
 			if (bpc->GetValue()) intentstr.Append(",bpc");
 
