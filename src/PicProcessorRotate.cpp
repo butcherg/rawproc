@@ -296,7 +296,7 @@ class RotatePanel: public PicProcPanel
 			switch(event.GetId()) {
 				case 8000:
 					resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
-					rotate->SetValue(resetval);
+					rotate->SetFloatValue(resetval);
 					if (autocrop->GetValue())
 						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 					else
