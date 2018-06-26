@@ -6,13 +6,13 @@
 
 #include "util.h"
 
-#define SIGMASLIDER 8000
-#define LOCALSLIDER 8001
-#define PATCHSLIDER 8002
+#define SIGMASLIDER 6000
+#define LOCALSLIDER 6001
+#define PATCHSLIDER 6002
 
-#define SIGMARESET 8010
-#define LOCALRESET 8011
-#define PATCHRESET 8012
+#define SIGMARESET 6010
+#define LOCALRESET 6011
+#define PATCHRESET 6012
 
 class DenoisePanel: public PicProcPanel
 {

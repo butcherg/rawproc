@@ -7,9 +7,9 @@
 
 #include "util.h"
 
-#define REDSLIDER   7000
-#define GREENSLIDER 7001
-#define BLUESLIDER  7002
+#define REDSLIDER   6200
+#define GREENSLIDER 6201
+#define BLUESLIDER  6202
 
 class GrayPanel: public PicProcPanel
 {

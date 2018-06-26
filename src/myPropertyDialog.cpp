@@ -7,10 +7,10 @@
 #include <wx/wx.h>
 
 
-#define FILTERID 8400
-#define ADDID 8401
-#define DELETEID 8402
-#define HIDEID 8403
+#define FILTERID 3100
+#define ADDID 3101
+#define DELETEID 3102
+#define HIDEID 3103
 
 class AddDialog: public wxDialog
 {

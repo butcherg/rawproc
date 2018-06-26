@@ -7,12 +7,12 @@
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
 
-#define WBAUTO 8700
-#define WBPATCH 8701
+#define WBAUTO 6400
+#define WBPATCH 6401
 
-#define WBRED 8702
-#define WBGREEN 8703
-#define WBBLUE 8704
+#define WBRED 6402
+#define WBGREEN 6403
+#define WBBLUE 6404
 
 /* now in myFloatSlider.h, myFloatSlider.cpp
 class myFloatSlider: public wxSlider

@@ -7,11 +7,11 @@
 #include <wx/listctrl.h>
 #include <wx/editlbox.h>
 
-#define FILTERID 8500
-#define HIDEID 8503
+#define FILTERID 6300
+#define HIDEID 6303
 
-#define LENSID 8501
-#define CAMERAID 8502
+#define LENSID 6301
+#define CAMERAID 6302
 
 
 
