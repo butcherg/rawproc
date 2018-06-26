@@ -4,6 +4,7 @@
 #include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
+#include "myFloatSlider.h"
 
 
 class ExposurePanel: public PicProcPanel
@@ -18,7 +19,8 @@ class ExposurePanel: public PicProcPanel
 
 			g->Add(0,10, wxGBPosition(0,0));
 			g->Add(new wxStaticText(this,wxID_ANY, "exposure:"), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			ev = new wxSlider(this, wxID_ANY, 50.0+(initialvalue*10.0), 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			//ev = new wxSlider(this, wxID_ANY, 50.0+(initialvalue*10.0), 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			ev = new myFloatSlider(this, wxID_ANY, 0.0, -5.0, 5.0, 0.1, wxDefaultPosition, wxSize(100, -1));
 			g->Add(ev, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -33,8 +35,11 @@ class ExposurePanel: public PicProcPanel
 			SetFocus();
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this);
-			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
-			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
+//			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
+//			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
+
+			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::valChanged, this);
+			Bind(wxEVT_SCROLL_THUMBRELEASE, &ExposurePanel::paramChanged, this);
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);		}
 
 		~ExposurePanel()
@@ -42,20 +47,33 @@ class ExposurePanel: public PicProcPanel
 			t->~wxTimer();
 		}
 
+		void valChanged(wxCommandEvent &event)
+		{
+			val->SetLabel(wxString::Format("%2.2f", ev->GetFloatValue()));
+		}
+
+		void paramChanged(wxCommandEvent &event)
+		{
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+			//val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+			val->SetLabel(wxString::Format("%2.2f", ev->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+			//val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+			val->SetLabel(wxString::Format("%2.2f", ev->GetFloatValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
+			//q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
+			q->setParams(wxString::Format("%2.2f",ev->GetFloatValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -63,7 +81,8 @@ class ExposurePanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
-			ev->SetValue(50.0+(resetval*10));
+			//ev->SetValue(50.0+(resetval*10));
+			ev->SetFloatValue(resetval);
 			q->setParams(wxString::Format("%2.2f",resetval));
 			val->SetLabel(wxString::Format("%2.2f", resetval));
 			q->processPic();
@@ -72,7 +91,8 @@ class ExposurePanel: public PicProcPanel
 
 
 	private:
-		wxSlider *ev;
+		//wxSlider *ev;
+		myFloatSlider *ev;
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxTimer *t;
