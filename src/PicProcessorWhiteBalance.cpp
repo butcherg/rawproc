@@ -24,7 +24,7 @@ class WhiteBalancePanel: public PicProcPanel
 		{
 			double rm, gm, bm;
 
-			wxSize spinsize(150, -1);
+			wxSize spinsize(130, -1);
 
 			//parm tool.whitebalance.min: (float), minimum multiplier value.  Default=0.001
 			double min = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.min","0.001").c_str());
@@ -69,6 +69,8 @@ class WhiteBalancePanel: public PicProcPanel
 
 			g->Add(new wxButton(this, WBAUTO, "Auto"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxButton(this, WBPATCH, "Patch"), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			patch = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
+			g->Add(patch, wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			
 			SetSizerAndFit(g);
 			g->Layout();
@@ -129,6 +131,7 @@ class WhiteBalancePanel: public PicProcPanel
 						if (p.GetCount() == 2) {
 							x = atoi(p[0]);
 							y = atoi(p[1]);
+							patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",x, y, radius));
 							std::vector<double> a = ((PicProcessorWhiteBalance *)q)->getPatchMeans(x, y, radius);
 							ra = a[0];
 							ga = a[1];
@@ -150,7 +153,7 @@ class WhiteBalancePanel: public PicProcPanel
 		}
 
 	private:
-		wxTextCtrl *edit;
+		wxStaticText *patch;
 		wxSpinCtrlDouble *rmult, *gmult ,*bmult;
 		wxTimer *t;
 
@@ -167,6 +170,35 @@ PicProcessorWhiteBalance::PicProcessorWhiteBalance(wxString name, wxString comma
 		bluemult = rgbmeans[1] / rgbmeans[2];
 		c = wxString::Format("%f,%f,%f",redmult, greenmult, bluemult);
 	}
+	patch.x=0;
+	patch.y=0;
+	m_display->Bind(wxEVT_LEFT_DOWN, &PicProcessorWhiteBalance::OnLeftDown, this);
+}
+
+PicProcessorWhiteBalance::~PicProcessorWhiteBalance()
+{
+	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorWhiteBalance::OnLeftDown, this);
+	m_display->SetDrawList("");
+}
+
+void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
+{
+	if (m_tree->GetItemState(GetId()) != 1) {
+		event.Skip();
+		return;
+	}
+	if (m_display->GetScale() == 1.0) {
+		patch = m_display->GetImgCoords();
+	}
+	else {
+		event.Skip();
+		return;
+	}
+	dcList = wxString::Format("cross,%d,%d;",patch.x, patch.y);
+	m_display->SetDrawList(dcList);
+	processPic();
+	m_display->Refresh();
+	event.Skip();
 }
 
 void PicProcessorWhiteBalance::createPanel(wxSimplebook* parent)
