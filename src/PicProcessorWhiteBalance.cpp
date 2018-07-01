@@ -95,6 +95,14 @@ class WhiteBalancePanel: public PicProcPanel
 			bmult->SetValue(bm);
 			Refresh();
 		}
+		
+		void setPatch(coord p)
+		{
+			ptch = p;
+			//patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",p.x, p.y, radius));
+			patch->SetLabel(wxString::Format("x:%d y:%d",p.x, p.y));
+			Refresh();
+		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
@@ -119,32 +127,25 @@ class WhiteBalancePanel: public PicProcPanel
 					//parm tool.whitebalance.patchradius: (float), radius of patch.  Default=1.5
 					double radius = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.patchradius","1.5").c_str());
 
-					wxTextDataObject cb;
+//					wxTextDataObject cb;
 					unsigned x, y;
 					double rm=1.0, gm=1.0, bm=1.0;
 					double ra, ga, ba;
-					if (wxTheClipboard->Open()) {
-						wxTheClipboard->GetData(cb);
-						wxArrayString p = split(cb.GetText(),",");
 
-						if (p.GetCount() == 2) {
-							x = atoi(p[0]);
-							y = atoi(p[1]);
-							patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",x, y, radius));
-							std::vector<double> a = ((PicProcessorWhiteBalance *)q)->getPatchMeans(x, y, radius);
-							ra = a[0];
-							ga = a[1];
-							ba = a[2];
-							rm = ga / ra;
-							bm = ga / ba;
-							rmult->SetValue(rm);
-							gmult->SetValue(gm);
-							bmult->SetValue(bm);
-							q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
-							q->processPic();
-							Refresh();
-						}
-						wxTheClipboard->Close();
+					if (ptch.x != -1 & ptch.y !=-1) {
+						patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",ptch.x, ptch.y, radius));
+						std::vector<double> a = ((PicProcessorWhiteBalance *)q)->getPatchMeans(ptch.x, ptch.y, radius);
+						ra = a[0];
+						ga = a[1];
+						ba = a[2];
+						rm = ga / ra;
+						bm = ga / ba;
+						rmult->SetValue(rm);
+						gmult->SetValue(gm);
+						bmult->SetValue(bm);
+						q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
+						q->processPic();
+						Refresh();
 					}
 					break;
 			}
@@ -155,6 +156,7 @@ class WhiteBalancePanel: public PicProcPanel
 		wxStaticText *patch;
 		wxSpinCtrlDouble *rmult, *gmult ,*bmult;
 		wxTimer *t;
+		coord ptch;
 
 };
 
@@ -195,8 +197,9 @@ void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
 	}
 	dcList = wxString::Format("cross,%d,%d;",patch.x, patch.y);
 	m_display->SetDrawList(dcList);
-	processPic();
+	//processPic();
 	m_display->Refresh();
+	((WhiteBalancePanel *) toolpanel)->setPatch(patch);
 	event.Skip();
 }
 
