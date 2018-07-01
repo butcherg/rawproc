@@ -4,7 +4,7 @@
 #include "util.h"
 #include "gimage/curve.h"
 
-#define GAMMAID 8500
+#define GAMMAID 6100
 
 class GammaPanel: public PicProcPanel
 {

@@ -176,11 +176,10 @@ class RotatePanel: public PicProcPanel
 				if (tok[1] == "autocrop")
 					acrop = true;
 
-//with gridbagsizer:
 			//g->Add(0,10, wxGBPosition(0,0));
 			g->Add(new wxStaticText(this,wxID_ANY, "rotate: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
-			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(140, -1));
-			//rotate = new myFloatSlider(this, wxID_ANY, 0.0, -45.0, 45.0, 0.1, wxDefaultPosition, wxSize(100, 20));
+			//rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(140, -1));
+			rotate = new myFloatSlider(this, wxID_ANY, 0.0, -45.0, 45.0, 0.1, wxDefaultPosition, wxSize(100, 20));
 			g->Add(rotate , wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			val = new wxStaticText(this,wxID_ANY, tok[0], wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(0,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
@@ -219,8 +218,7 @@ class RotatePanel: public PicProcPanel
 			Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
 			Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
 			//Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
-			Bind(wxEVT_MOUSEWHEEL, &RotatePanel::OnWheel, this);
-			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnThumbTrack, this);
+			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnThumbRelease, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
 			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this);
@@ -231,16 +229,12 @@ class RotatePanel: public PicProcPanel
 		~RotatePanel()
 		{
 			t->~wxTimer();
-			//q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 		}
 
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
 		{
 			event.Skip();
-			//preview->SetPic(gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic()));
 			wxImage i = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
-			//if (hTransform)
-			//	cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
 			preview->SetPic(i);
 		}
 
@@ -254,17 +248,11 @@ class RotatePanel: public PicProcPanel
 
 		}
 
-		void OnWheel(wxMouseEvent &event)
-		{
-			t->Start(500,wxTIMER_ONE_SHOT);
-			event.Skip();
-		}
-
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetFloatValue()));
 			preview->setAutocrop(autocrop->GetValue());
-			preview->Rotate(rotate->GetValue()/10.0);
+			preview->Rotate(rotate->GetFloatValue());
 			t->Start(500,wxTIMER_ONE_SHOT);
 			Refresh();
 		}
@@ -272,17 +260,20 @@ class RotatePanel: public PicProcPanel
 		void OnThumbTrack(wxCommandEvent& event)
 		{
 			thumb = true;
-			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
-			preview->Rotate(rotate->GetValue()/10.0);
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetFloatValue()));
+			preview->Rotate(rotate->GetFloatValue());
 			preview->Refresh();
 		}
 
 		void OnThumbRelease(wxCommandEvent& event)
 		{
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetFloatValue()));
+			preview->Rotate(rotate->GetFloatValue());
+			preview->Refresh();
 			if (autocrop->GetValue())
-				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 			else
-				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 			thumb = false;
 		}
@@ -290,9 +281,9 @@ class RotatePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (autocrop->GetValue())
-				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 			else
-				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 			q->processPic();
 			DeletePendingEvents();
 			t->Stop();
@@ -305,19 +296,19 @@ class RotatePanel: public PicProcPanel
 			switch(event.GetId()) {
 				case 8000:
 					resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
-					rotate->SetValue(resetval);
+					rotate->SetFloatValue(resetval);
 					if (autocrop->GetValue())
-						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 					else
-						q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+						q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 					val->SetLabel(wxString::Format("%2.1f", resetval));
 					preview->Rotate(0.0);
 					break;
 				case 9000:
 					if (autocrop->GetValue())
-						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+						q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 					else
-						q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+						q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 					break;
 			}
 			Refresh();
@@ -328,8 +319,7 @@ class RotatePanel: public PicProcPanel
 
 	private:
 		wxCheckBox *autocrop;
-		wxSlider *rotate;
-		//myFloatSlider *rotate;
+		myFloatSlider *rotate;
 		wxStaticText *val;
 		wxBitmapButton *btn1;
 		wxButton *btn2;
