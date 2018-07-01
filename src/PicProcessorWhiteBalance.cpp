@@ -3,7 +3,6 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
-#include "myFloatSlider.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
 
