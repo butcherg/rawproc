@@ -61,7 +61,7 @@ class RedEyePanel: public PicProcPanel
 			g->Add(btn3, wxGBPosition(5,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			g->Add(0,10, wxGBPosition(6,0));
-			wxString help = "Double-click in the display to toggle to scale 100%.\nShift-Click the center of the red eye to apply.\nCtrl-Click near the cross to remove application.\n\nOperation can only be done in display scale 100%.";
+			wxString help = "Shift-Click the center of the red eye to apply.\nCtrl-Click near the cross to remove application.";
 			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(7,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
 			
 			SetSizerAndFit(g);
@@ -270,11 +270,11 @@ void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 		event.Skip();
 		return;
 	}
-	if (event.ShiftDown() & m_display->GetScale() == 1.0) {
+	if (event.ShiftDown()) {
 		coord c = m_display->GetImgCoords();
 		points.push_back(c);
 	}
-	else if (event.ControlDown() & m_display->GetScale() == 1.0) {
+	else if (event.ControlDown()) {
 		coord co = m_display->GetImgCoords();
 		std::vector<coord> n;
 		for (unsigned i=0; i<points.size(); i++) {
