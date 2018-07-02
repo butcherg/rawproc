@@ -618,15 +618,16 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 
 		pr = pb = pg = -1.0;
 
-		if (scale == 1.0 & scaledpic != NULL) {
-			imgX = x-picX;
-			imgY = y-picY;
+		imgX = (x-picX)/scale;
+		imgY = (y-picY)/scale;
+
+		if (scale > 0.0 & scaledpic != NULL) {
 			if (d) {
 				std::vector<float> p = d->getPixelArray(imgX, imgY);
 				if (imgX > 1) {
 					if (imgY > 1) {
-						if (imgX < scaledpic->GetWidth()) {
-							if (imgY < scaledpic->GetHeight()) { 
+						if (imgX < d->getWidth()) { 
+							if (imgY < d->getHeight()) {
 								pr = p[0]; pg = p[1]; pb = p[2];
 								//parm display.rgb.scale: Multiplier for rgb display in status line.  Default=1
 								int pscale = strtol(myConfig::getConfig().getValueOrDefault("display.rgb.scale","1").c_str(),NULL,0);
