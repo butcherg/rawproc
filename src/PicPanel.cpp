@@ -363,15 +363,16 @@ END_EVENT_TABLE()
 		dc.SetBrush(wxBrush(wxColour(50,50,50)));
 		dc.DrawBitmap(*scaledpic, picX, picY, false);
 
-		if (dcList != "" & scale == 1.0) {
+//		if (dcList != "" & scale == 1.0) {
+		if (dcList != "") {
 			dc.SetPen(*wxYELLOW_PEN);
 			wxArrayString l = split(dcList, ";");
 			for (unsigned i=0; i<l.GetCount(); i++) {
 				wxArrayString c = split(l[i],",");
 				if (c[0] == "cross") {
 					if (c.GetCount() < 3) continue;
-					int px = atoi(c[1].c_str())+picX;
-					int py = atoi(c[2].c_str())+picY;
+					int px = (atoi(c[1].c_str())*scale)+picX;
+					int py = (atoi(c[2].c_str())*scale)+picY;
 					dc.DrawLine(px-10, py, px+10, py);
 					dc.DrawLine(px, py-10, px, py+10);
 				}
