@@ -2274,12 +2274,13 @@ void gImage::ApplyRedeye(std::vector<coord> points, double threshold, unsigned l
 				double ri = image[pos].r / ((image[pos].g + image[pos].b) /2.0);
 				if (ri > threshold) {
 					image[pos].r = (image[pos].g + image[pos].b) / 2.0;
-					if (desaturate) {
-						double d = ((image[pos].r +image[pos].g +image[pos].b)/3) * desaturatepercent;
-						image[pos].r = d;
-						image[pos].g = d;
-						image[pos].b = d;
-					}
+
+				}
+				if (desaturate) {
+					double d = ((image[pos].r +image[pos].g +image[pos].b)/3) * desaturatepercent;
+					image[pos].r = d;
+					image[pos].g = d;
+					image[pos].b = d;
 				}
 			}
 		}
