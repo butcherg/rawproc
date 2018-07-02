@@ -188,7 +188,7 @@ void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
 		event.Skip();
 		return;
 	}
-	if (m_display->GetScale() == 1.0) {
+	if (event.ShiftDown()) {
 		patch = m_display->GetImgCoords();
 	}
 	else {
