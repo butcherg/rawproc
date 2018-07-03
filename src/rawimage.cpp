@@ -588,19 +588,27 @@ char * _loadRAW(const char *filename,
 	info["Artist"] = P2.artist; 
 	info["Make"] = P1.make;  
 	info["Model"] = P1.model;  
+
+	//used for subsequent metadata collection:
+	char buffer [80];
+
+	snprintf(buffer, 80, "%f,%f,%f,%f", C.cam_mul[0], C.cam_mul[1], C.cam_mul[2], C.cam_mul[3]);
+	info["LibrawWhiteBalance"] = buffer;
+
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
 		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
 	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
 		info["Lens"] = RawProcessor.imgdata.lens.Lens;
 	else
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
+
 	if (RawProcessor.imgdata.params.user_flip == 0) 
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 	else
 		info["Orientation"] = "1"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
+
 	time_t rawtime = P2.timestamp;
 	struct tm * timeinfo;
-	char buffer [80];
 	timeinfo = localtime (&rawtime);
 	strftime (buffer,80,"%Y:%m:%d %H:%M:%S",timeinfo);
 	info["DateTime"] = buffer;  
