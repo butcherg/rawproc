@@ -5,13 +5,16 @@
 #include "gimage/curve.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
+#include "unchecked.xpm"
+#include "checked.xpm"
 
 #define WBAUTO 6400
 #define WBPATCH 6401
+#define WBCAMERA 6402
 
-#define WBRED 6402
-#define WBGREEN 6403
-#define WBBLUE 6404
+#define WBRED 6403
+#define WBGREEN 6404
+#define WBBLUE 6405
 
 
 
@@ -22,6 +25,7 @@ class WhiteBalancePanel: public PicProcPanel
 		WhiteBalancePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			double rm, gm, bm;
+			ptch.x = -1; ptch.y - 1;
 
 			wxSize spinsize(130, -1);
 
@@ -66,10 +70,14 @@ class WhiteBalancePanel: public PicProcPanel
 
 			g->Add(0,10, wxGBPosition(3,0));
 
-			g->Add(new wxButton(this, WBAUTO, "Auto"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxButton(this, WBPATCH, "Patch"), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			g->Add(new wxRadioButton(this, WBAUTO, "Auto", wxDefaultPosition, wxDefaultSize, wxRB_GROUP), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxRadioButton(this, WBPATCH, "Patch:"), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxRadioButton(this, WBCAMERA, "Camera:"), wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			patch = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
 			g->Add(patch, wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
+			g->Add(camera, wxGBPosition(6,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			
 			SetSizerAndFit(g);
 			g->Layout();
@@ -77,7 +85,7 @@ class WhiteBalancePanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_SPINCTRLDOUBLE,&WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
-			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnButton, this);
+			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
 			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
 			Refresh();
 			Update();
@@ -88,11 +96,13 @@ class WhiteBalancePanel: public PicProcPanel
 			t->~wxTimer();
 		}
 
+		//used by PicProcessorWhiteBalance to initialize panel:
 		void setMultipliers(double rm, double gm, double bm)
 		{
 			rmult->SetValue(rm);
 			gmult->SetValue(gm);
 			bmult->SetValue(bm);
+			//patch->SetLabel(wxString::Format("%f,%f,%f",rm, gm, bm));
 			Refresh();
 		}
 		
@@ -101,6 +111,12 @@ class WhiteBalancePanel: public PicProcPanel
 			ptch = p;
 			//patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",p.x, p.y, radius));
 			patch->SetLabel(wxString::Format("x:%d y:%d",p.x, p.y));
+			Refresh();
+		}
+
+		void setCamera(float rm, float gm, float bm) 
+		{
+			camera->SetLabel(wxString::Format("%f,%f,%f",rm,gm,bm));
 			Refresh();
 		}
 
@@ -127,7 +143,6 @@ class WhiteBalancePanel: public PicProcPanel
 					//parm tool.whitebalance.patchradius: (float), radius of patch.  Default=1.5
 					double radius = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.patchradius","1.5").c_str());
 
-//					wxTextDataObject cb;
 					unsigned x, y;
 					double rm=1.0, gm=1.0, bm=1.0;
 					double ra, ga, ba;
@@ -143,17 +158,21 @@ class WhiteBalancePanel: public PicProcPanel
 						rmult->SetValue(rm);
 						gmult->SetValue(gm);
 						bmult->SetValue(bm);
+						//patch->SetLabel(wxString::Format("%f,%f,%f",rm, gm, bm));
 						q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
 						q->processPic();
 						Refresh();
 					}
 					break;
+				//case WBCAMERA:
+				//	break;
 			}
 			event.Skip();
 		}
 
 	private:
-		wxStaticText *patch;
+		wxStaticText *patch, *camera;
+		wxRadioButton *ab, *pb, *cb;
 		wxSpinCtrlDouble *rmult, *gmult ,*bmult;
 		wxTimer *t;
 		coord ptch;
