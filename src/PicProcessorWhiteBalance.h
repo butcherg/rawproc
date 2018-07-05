@@ -12,6 +12,7 @@ class PicProcessorWhiteBalance: public PicProcessor
 		void createPanel(wxSimplebook* parent);
 		bool processPic(bool processnext=true);
 		std::vector<double> getPatchMeans(int x, int y, float radius);
+		std::vector<double> getCameraMultipliers();
 		void OnLeftDown(wxMouseEvent& event);
 
 	private:
