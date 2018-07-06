@@ -592,9 +592,11 @@ char * _loadRAW(const char *filename,
 	//used for subsequent metadata collection:
 	char buffer [80];
 
-	snprintf(buffer, 80, "%f,%f,%f,%f", C.cam_mul[0], C.cam_mul[1], C.cam_mul[2], C.cam_mul[3]);
+	//Normalized libraw white balance:
+	snprintf(buffer, 80, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
 	info["LibrawWhiteBalance"] = buffer;
 
+	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
 		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
 	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
@@ -602,6 +604,7 @@ char * _loadRAW(const char *filename,
 	else
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 
+	//Normalize libraw orientation:
 	if (RawProcessor.imgdata.params.user_flip == 0) 
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 	else
