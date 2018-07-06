@@ -9,9 +9,10 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-#define WBAUTO 6400
-#define WBPATCH 6401
-#define WBCAMERA 6402
+#define WBMANUAL 6400
+#define WBAUTO 6401
+#define WBPATCH 6402
+#define WBCAMERA 6403
 
 #define WBRED 6403
 #define WBGREEN 6404
@@ -72,9 +73,13 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(0,10, wxGBPosition(3,0));
 
 			//Operator radio buttons:
-			g->Add(new wxRadioButton(this, WBAUTO, "Auto:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxRadioButton(this, WBPATCH, "Patch:"), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxRadioButton(this, WBCAMERA, "Camera:"), wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			ab = new wxRadioButton(this, WBAUTO, "Auto:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			pb = new wxRadioButton(this, WBPATCH, "Patch:");
+			cb = new wxRadioButton(this, WBCAMERA, "Camera:");
+			g->Add(ab, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(pb, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(cb, wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			selected = WBAUTO;
 
 			//Operator parameters:
 			g->Add(new wxStaticText(this, wxID_ANY, "Whole image average (\"gray world\")"), wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -118,12 +123,41 @@ class WhiteBalancePanel: public PicProcPanel
 			Refresh();
 		}
 		
+		void processPatch()
+		{
+			//parm tool.whitebalance.patchradius: (float), radius of patch.  Default=1.5
+			double radius = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.patchradius","1.5").c_str());
+
+			unsigned x, y;
+			double rm=1.0, gm=1.0, bm=1.0;
+			double ra, ga, ba;
+
+			if (ptch.x != -1 & ptch.y !=-1) {
+				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",ptch.x, ptch.y, radius));
+				std::vector<double> a = ((PicProcessorWhiteBalance *)q)->getPatchMeans(ptch.x, ptch.y, radius);
+				ra = a[0];
+				ga = a[1];
+				ba = a[2];
+				rm = ga / ra;
+				bm = ga / ba;
+				rmult->SetValue(rm);
+				gmult->SetValue(gm);
+				bmult->SetValue(bm);
+				//patch->SetLabel(wxString::Format("%f,%f,%f",rm, gm, bm));
+				q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
+				q->processPic();
+				Refresh();
+			}
+		}
+		
 		void setPatch(coord p)
 		{
 			ptch = p;
-			//patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",p.x, p.y, radius));
 			patch->SetLabel(wxString::Format("x:%d y:%d",p.x, p.y));
-			Refresh();
+			if (selected == WBPATCH)
+				processPatch();
+			else
+				Refresh();
 		}
 
 		void setCamera(float rm, float gm, float bm) 
@@ -131,8 +165,17 @@ class WhiteBalancePanel: public PicProcPanel
 			camera->SetLabel(wxString::Format("%f,%f,%f",rm,gm,bm));
 			Refresh();
 		}
-
+		
 		void paramChanged(wxCommandEvent& event)
+		{
+			if (selected == WBAUTO) ab->SetValue(false);
+			if (selected == WBPATCH) pb->SetValue(false);
+			if (selected == WBCAMERA) cb->SetValue(false);
+			selected = WBMANUAL;
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void fooChanged(wxCommandEvent& event)
 		{
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
@@ -152,31 +195,12 @@ class WhiteBalancePanel: public PicProcPanel
 					q->processPic();
 					break;
 				case WBPATCH:
-					{
-						//parm tool.whitebalance.patchradius: (float), radius of patch.  Default=1.5
-						double radius = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.patchradius","1.5").c_str());
-
-						unsigned x, y;
-						double rm=1.0, gm=1.0, bm=1.0;
-						double ra, ga, ba;
-
-						if (ptch.x != -1 & ptch.y !=-1) {
-							patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",ptch.x, ptch.y, radius));
-							std::vector<double> a = ((PicProcessorWhiteBalance *)q)->getPatchMeans(ptch.x, ptch.y, radius);
-							ra = a[0];
-							ga = a[1];
-							ba = a[2];
-							rm = ga / ra;
-							bm = ga / ba;
-							rmult->SetValue(rm);
-							gmult->SetValue(gm);
-							bmult->SetValue(bm);
-							//patch->SetLabel(wxString::Format("%f,%f,%f",rm, gm, bm));
-							q->setParams(wxString::Format("%f,%f,%f",rm, gm, bm));
-							q->processPic();
-							Refresh();
-						}
+					if (patch->GetLabel() == "(none)") {
+						if (selected == WBAUTO) ab->SetValue(true);
+						if (selected == WBCAMERA) cb->SetValue(true);
+						return;
 					}
+					processPatch();
 					break;
 				case WBCAMERA:
 					if (camera->GetLabel() != "(none") {
@@ -189,6 +213,7 @@ class WhiteBalancePanel: public PicProcPanel
 					}
 					break;
 			}
+			selected = event.GetId();
 			event.Skip();
 		}
 
@@ -199,6 +224,7 @@ class WhiteBalancePanel: public PicProcPanel
 		wxTimer *t;
 		coord ptch;
 		double camr, camg, camb;
+		int selected;
 
 };
 
@@ -239,8 +265,8 @@ void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
 	}
 	dcList = wxString::Format("cross,%d,%d;",patch.x, patch.y);
 	m_display->SetDrawList(dcList);
-	//processPic();
 	m_display->Refresh();
+	m_display->Update();
 	((WhiteBalancePanel *) toolpanel)->setPatch(patch);
 	event.Skip();
 }
