@@ -2,7 +2,7 @@
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "util.h"
-#include "gimage/strutil.h"
+//#include "gimage/strutil.h"
 #include "gimage/curve.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
@@ -84,7 +84,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(camera, wxGBPosition(6,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			std::vector<double> cam_mults = ((PicProcessorWhiteBalance *)proc)->getCameraMultipliers();
-			if (cam_mults.size()>0) {
+			if (cam_mults.size() >= 2) {
 				camr = cam_mults[0];
 				camg = cam_mults[1];
 				camb = cam_mults[2];
@@ -205,7 +205,7 @@ class WhiteBalancePanel: public PicProcPanel
 
 PicProcessorWhiteBalance::PicProcessorWhiteBalance(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	
+	dib = NULL;
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	if (command == "") {
 		std::vector<double> rgbmeans = 	getPreviousPicProcessor()->getProcessedPic().CalculateChannelMeans();
@@ -277,11 +277,11 @@ std::vector<double> PicProcessorWhiteBalance::getPatchMeans(int x, int y, float 
 std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 {
 	std::vector<double> multipliers;
-	if (dib) {
-		std::string cameraWBstring = dib->getInfoValue("LibrawWhiteBalance");
-		std::vector<std::string>multstrings = split(cameraWBstring, ",");
-		for (int i = 0; i < multstrings.size(); i++) {
-			multipliers[i] = atof(multstrings[i].c_str());
+	std::string cameraWBstring = getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawWhiteBalance");
+	if (cameraWBstring != "") {
+		wxArrayString multstrings = split(wxString(cameraWBstring.c_str()), ",");
+		for (int i = 0; i < multstrings.GetCount(); i++) {
+			multipliers.push_back(atof(multstrings[i].c_str()));
 		}
 	}
 	return multipliers;
