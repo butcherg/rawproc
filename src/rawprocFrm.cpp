@@ -1076,17 +1076,23 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 
 	wxTextFile toolfile(fname);
 	if (toolfile.Open()) {
+		myConfig::getConfig().enableTempConfig(true);
 		wxString token = toolfile.GetFirstLine();
 		while (!toolfile.Eof())  {
-			wxString params = "";
 			wxArrayString cmd = split(token, ":");	
 			if (cmd.GetCount() > 0) {
+				wxString params = "";
 				if (cmd.GetCount() >=2) params = cmd[1];
-				if (AddItem(cmd[0], params)) {
+				if (cmd[0] == "set") {
+					wxArrayString prop = split(params,"=");
+					if (prop.GetCount() >=2) myConfig::getConfig().setValue(std::string(prop[0].c_str()),std::string(prop[1].c_str()));
+				}
+				else if (AddItem(cmd[0], params)) {
 					wxSafeYield(this);
 				}
 				else {
 					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+					myConfig::getConfig().enableTempConfig(false);
 					toolfile.Close();
 					return;
 				}
@@ -1094,6 +1100,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 
 			token = toolfile.GetNextLine();
 		}
+		myConfig::getConfig().enableTempConfig(false);
 		toolfile.Close();
 	}
 	else wxMessageBox("Error: tool file not found.");
