@@ -29,10 +29,16 @@ public:
 	std::map<std::string, std::string> getDefault();
 	std::map<std::string, std::string> getSection(std::string section);
 
+	void enableTempConfig(bool e);
+	bool getTempConfig();
+
 private:
 	std::string configfile;
 	static std::map<std::string, std::string> defaultconfig;
 	static std::map<std::string, std::map<std::string,std::string> > sectionconfig;
+
+	bool temp;
+	std::map<std::string, std::string> tempconfig;
 
 
 };

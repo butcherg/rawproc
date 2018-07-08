@@ -82,6 +82,10 @@ void myConfig::flush()
 
 std::string myConfig::getValue(std::string name)
 {
+	if (temp) {
+		if (tempconfig.count(name) != 0)
+			return tempconfig[name];
+	}
 	if (exists(name))
 		return defaultconfig[name];
 	else
@@ -99,6 +103,10 @@ std::string myConfig::getValue(std::string section, std::string name)
 std::string myConfig::getValueOrDefault(std::string name, std::string defaultval)
 {
 	std::string defval = defaultval;
+	if (temp) {
+		if (tempconfig.count(name) != 0)
+			return tempconfig[name];
+	}
 	if (exists(name))
 		return defaultconfig[name];
 	else
@@ -122,6 +130,11 @@ void myConfig::deleteValue(std::string section, std::string name)
 
 void myConfig::deleteValue(std::string name)
 {
+	if (temp) {
+		if (tempconfig.count(name) != 0)
+			tempconfig.erase(name);
+		return;
+	}
 	if (exists(name))
 		defaultconfig.erase(name);
 }
@@ -143,12 +156,18 @@ void myConfig::setValue(std::string section, std::string name, std::string value
 
 void myConfig::setValue(std::string name, std::string value)
 {
+	if (temp) {
+		tempconfig[name] = value;
+		return;
+	}
 	defaultconfig[name] = value;
 }
 
 bool myConfig::exists(std::string name)
 {
 	std::string n = name;
+	if (temp)
+		if (tempconfig.count(n) != 0) return true;
 	if (defaultconfig.empty()) return false; 
 	if (defaultconfig.count(n) == 0) return false;
 	return true;
@@ -162,6 +181,22 @@ bool myConfig::exists(std::string section, std::string name)
 	return false;
 }
 
+
+void myConfig::enableTempConfig(bool e)
+{
+	if (e) {
+		temp = true;
+	}
+	else {
+		temp = false;
+		tempconfig.clear();
+	}
+}
+
+bool myConfig::getTempConfig()
+{
+	return temp;
+}
 
 
 
