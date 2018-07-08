@@ -714,10 +714,12 @@ void parse_exif(unsigned char * marker, unsigned length, std::map<std::string,st
 
 void parse_eXIf_chunk(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)
 {
-	unsigned char * exif = (unsigned char *) malloc(length+8);
-	memcpy((char *) exif, "\0\0Exif\0\0", 8);
-	memcpy(exif+8, marker, length);
-	parse_exif(exif, length+8, imageinfo);
+	if (marker && length > 0) {
+		unsigned char * exif = (unsigned char *) malloc(length+8);
+		memcpy((char *) exif, "\0\0Exif\0\0", 8);
+		memcpy(exif+7, marker, length);
+		parse_exif(exif, length+8, imageinfo);
+	}
 }
 
 void parse_APP1marker(unsigned char * marker, unsigned length, std::map<std::string,std::string> &imageinfo)

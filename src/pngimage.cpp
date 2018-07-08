@@ -155,8 +155,8 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	unsigned char * marker;
 	unsigned marker_length;
-	png_get_eXIf_1(png, pinfo, &marker_length, &marker);
-	parse_eXIf_chunk(marker, marker_length, info);
+	if (png_get_eXIf_1(png, pinfo, &marker_length, &marker))
+		parse_eXIf_chunk(marker, marker_length, info);
 
 	//for (std::map<std::string,std::string>::iterator it=info.begin(); it!=info.end(); ++it) {
 	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str());
