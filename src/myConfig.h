@@ -15,7 +15,7 @@ public:
 	static void loadConfig(std::string conffile);
 	static myConfig & getConfig();
 
-	void flush();
+	bool flush();
 	bool exists(std::string name);
 	bool exists(std::string section, std::string name);
 	std::string getValue(std::string name);

@@ -61,9 +61,10 @@ myConfig & myConfig::getConfig()
 	return config;
 }
 
-void myConfig::flush()
+bool myConfig::flush()
 {
 	std::ofstream file(configfile.c_str());
+	if (!file.good()) return false;
 	for (std::map<std::string, std::string>::iterator it=defaultconfig.begin(); it!=defaultconfig.end(); ++it)
 		file << it->first << "=" << it->second << '\n';
 
@@ -77,6 +78,7 @@ void myConfig::flush()
 	}
 
 	file.close();
+	return true;
 }
 
 

@@ -225,7 +225,7 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 			pg->Sort();
 			wxMessageBox(wxString::Format("Changed %s to %s.", add->GetName(), add->GetValue()));
 			myConfig::getConfig().setValue((const char  *) add->GetName().mb_str(),  (const char  *) add->GetValue().mb_str());
-			myConfig::getConfig().flush();
+			if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
 		}
 		else
 			wxMessageBox("Property already exists.");
@@ -243,6 +243,6 @@ void PropertyDialog::DelProp(wxCommandEvent& event)
 	if (answer == wxYES) {
 		pg->DeleteProperty(p);
 		myConfig::getConfig().deleteValue((const char  *) name.mb_str());
-		myConfig::getConfig().flush();
+		if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
 	}
 }
