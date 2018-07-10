@@ -79,7 +79,10 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(ab, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(pb, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(cb, wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			selected = WBAUTO;
+
+			ab->SetValue(true);
+			pb->Enable(false);
+			cb->Enable(false);
 
 			//Operator parameters:
 			g->Add(new wxStaticText(this, wxID_ANY, "Whole image average (\"gray world\")"), wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -94,6 +97,7 @@ class WhiteBalancePanel: public PicProcPanel
 				camg = cam_mults[1];
 				camb = cam_mults[2];
 				camera->SetLabel(wxString::Format("%f,%f,%f",camr,camg,camb));
+				cb->Enable(true);
 			}
 			
 			SetSizerAndFit(g);
@@ -154,7 +158,8 @@ class WhiteBalancePanel: public PicProcPanel
 		{
 			ptch = p;
 			patch->SetLabel(wxString::Format("x:%d y:%d",p.x, p.y));
-			if (selected == WBPATCH)
+			pb->Enable(true);
+			if (pb->GetValue() == true)
 				processPatch();
 			else
 				Refresh();
@@ -163,15 +168,15 @@ class WhiteBalancePanel: public PicProcPanel
 		void setCamera(float rm, float gm, float bm) 
 		{
 			camera->SetLabel(wxString::Format("%f,%f,%f",rm,gm,bm));
+			cb->Enable(true);
 			Refresh();
 		}
 		
 		void paramChanged(wxCommandEvent& event)
 		{
-			if (selected == WBAUTO) ab->SetValue(false);
-			if (selected == WBPATCH) pb->SetValue(false);
-			if (selected == WBCAMERA) cb->SetValue(false);
-			selected = WBMANUAL;
+			ab->SetValue(false);
+			pb->SetValue(false);
+			cb->SetValue(false);
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -193,27 +198,21 @@ class WhiteBalancePanel: public PicProcPanel
 				case WBAUTO:
 					q->setParams("");
 					q->processPic();
+					Refresh();
 					break;
 				case WBPATCH:
-					if (patch->GetLabel() == "(none)") {
-						if (selected == WBAUTO) ab->SetValue(true);
-						if (selected == WBCAMERA) cb->SetValue(true);
-						return;
-					}
 					processPatch();
+					Refresh();
 					break;
 				case WBCAMERA:
-					if (camera->GetLabel() != "(none") {
-						rmult->SetValue(camr);
-						gmult->SetValue(camg);
-						bmult->SetValue(camb);
-						q->setParams(wxString::Format("%f,%f,%f",camr, camg, camb));
-						q->processPic();
-						Refresh();
-					}
+					rmult->SetValue(camr);
+					gmult->SetValue(camg);
+					bmult->SetValue(camb);
+					q->setParams(wxString::Format("%f,%f,%f",camr, camg, camb));
+					q->processPic();
+					Refresh();
 					break;
 			}
-			selected = event.GetId();
 			event.Skip();
 		}
 
@@ -224,7 +223,6 @@ class WhiteBalancePanel: public PicProcPanel
 		wxTimer *t;
 		coord ptch;
 		double camr, camg, camb;
-		int selected;
 
 };
 
