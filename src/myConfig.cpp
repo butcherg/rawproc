@@ -11,6 +11,7 @@ myConfig config;
 
 myConfig::myConfig(std::string conffile)
 {
+	temp = false;
 	std::vector<std::string> parameter;
 	std::vector<std::string> nameval;
 	std::string parm;
