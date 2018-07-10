@@ -168,6 +168,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	cmsSetLogErrorHandler(MyLogErrorHandler);
 
 	propdiag = nullptr;
+
 	
 }
 
@@ -550,6 +551,9 @@ wxString rawprocFrm::AssembleCommand()
 
 void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 {
+#ifdef USE_DCRAW
+	gImage::setdcrawPath(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.path","foo"));
+#endif
 	filename.Assign(fname);
 	if (!filename.FileExists()) {
 		wxMessageBox(wxString::Format("Error: %s not found.",filename.GetFullName()));
@@ -745,6 +749,9 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 void rawprocFrm::OpenFileSource(wxString fname)
 {
+#ifdef USE_DCRAW
+	gImage::setdcrawPath(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.path","foo"));
+#endif
 	gImage *dib;
 	wxString ofilename, inputprofile;
 	wxString oparams = "";

@@ -2631,9 +2631,10 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	std::map<std::string,std::string> imgdata;
 	colors = 3;
 
-	if (access ("dcraw", X_OK)) return gImage();
+	if (access (dcrawpath.c_str(), X_OK)) return gImage();
 
-	std::string cmd = "dcraw -c ";
+	std::string cmd = dcrawpath;
+	cmd.append(" -c ");
 	//$ dcrawparams: command line parameters for dcraw-based raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W
 	if (p.find("params") != p.end()) 
 		cmd.append(de_underscore(p["params"])); 
