@@ -44,7 +44,9 @@ const char * gImageVersion()
 }
 
 std::string gImage::profilepath = "";
-
+#ifdef USE_DCRAW
+std::string gImage::dcrawpath = "";
+#endif
 
 //Constructors/Destructor:
 
@@ -2612,6 +2614,10 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 
 
 #ifdef USE_DCRAW
+void gImage::setdcrawPath(std::string path)
+{
+	dcrawpath = path;
+}
 
 gImage gImage::loadRAW(const char * filename, std::string params)
 {

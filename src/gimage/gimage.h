@@ -176,6 +176,10 @@ class gImage
 		static gImage loadImageFile(const char * filename, std::string params);
 		static std::map<std::string,std::string> loadImageFileInfo(const char * filename);
 
+#ifdef USE_DCRAW
+		static void setdcrawPath(std::string path);
+#endif
+
 		//Image savers. 
 		GIMAGE_ERROR saveImageFile(const char * filename, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		GIMAGE_ERROR saveJPEG(const char * filename, BPP bits, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
@@ -242,6 +246,10 @@ class gImage
 		GIMAGE_ERROR lasterror;
 
 		RESIZE_FILTER lensfun_interp_method;
+
+#ifdef USE_DCRAW
+		static std::string dcrawpath;
+#endif
 		
 
 };
