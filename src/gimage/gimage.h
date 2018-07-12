@@ -110,6 +110,7 @@ class gImage
 
 		//calculators:
 		std::vector<double> CalculateChannelMeans();
+		std::vector<double> CalculatePatchMeans(int x, int y, float radius);
 		std::vector<double> CalculateBlackWhitePoint(double blackthreshold=0.01, double whitethreshold=0.01, bool centerout=true, int whitemax=255, std::string channel="rgb");
 
 		//histograms:
@@ -161,7 +162,10 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);
-		void ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount);
+		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount);
+		std::vector<double> ApplyWhiteBalance(unsigned x, unsigned y, double radius, int threadcount);
+		std::vector<double> ApplyWhiteBalance(int threadcount);
+
 		void ApplyNLMeans(double sigma, int local, int patch, int threadcount=0);
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);
 		GIMAGE_ERROR ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp=false, int threadcount=0);

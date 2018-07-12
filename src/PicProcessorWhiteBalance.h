@@ -16,6 +16,7 @@ class PicProcessorWhiteBalance: public PicProcessor
 		void OnLeftDown(wxMouseEvent& event);
 
 	private:
+		void SetPatchCoord(int x, int y);
 		coord patch;
 };
 

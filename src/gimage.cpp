@@ -1662,8 +1662,9 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 //165,172,204, the RGB multipliers should be 0.8088,0.8431,1.00
 //
 
-void gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
-{	
+std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
+{
+	std::vector<double> a;
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
@@ -1673,6 +1674,57 @@ void gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult
 			image[pos].b *= bluemult; 
 		}
 	}
+	a.push_back(redmult);
+	a.push_back(greenmult);
+	a.push_back(bluemult);	
+	return a;
+}
+
+//uses a patch from the image presumed to represent neutral or white:
+std::vector<double>  gImage::ApplyWhiteBalance(unsigned x, unsigned y, double radius, int threadcount)
+{	
+	double redmult = 1.0, greenmult = 1.0, bluemult = 1.0;
+	std::vector<double> a = CalculatePatchMeans(x, y, radius);
+	redmult = a[1] / a[0]; // gm/rm
+	bluemult = a[1] / a[2]; // gm/bm
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			image[pos].r *= redmult; 
+			image[pos].g *= greenmult; 
+			image[pos].b *= bluemult; 
+		}
+	}
+	a[0] = redmult;
+	a[1] = greenmult;
+	a[2] = bluemult;	
+	return a;
+}
+
+//automatically adjusts WB based on 'gray world' image average:
+std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
+{	
+	double redmult = 1.0, greenmult = 1.0, bluemult = 1.0;
+
+	std::vector<double> a = CalculateChannelMeans();
+	redmult = a[1] / a[0]; // gm/rm
+	bluemult = a[1] / a[2]; // gm/bm
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			image[pos].r *= redmult; 
+			image[pos].g *= greenmult; 
+			image[pos].b *= bluemult; 
+		}
+	}
+	a[0] = redmult;
+	a[1] = greenmult;
+	a[2] = bluemult;	
+	return a;
 }
 
 
@@ -2404,6 +2456,26 @@ std::vector<double> gImage::CalculateChannelMeans()
 	rgbmeans.push_back(gsum / (double) pcount);
 	rgbmeans.push_back(bsum / (double) pcount);
 	return rgbmeans;
+}
+
+std::vector<double> gImage::CalculatePatchMeans(int x, int y, float radius)
+{
+	std::vector<double> means;
+	double rsum=0.0, gsum=0.0, bsum=0.0;
+	int count = 0;
+	for (int i=x-radius; i<x+radius; i++) {
+		for (int j=y-radius; j<y+radius; j++) {
+			pix p = getRGB(i,j);
+			rsum += p.r;
+			gsum += p.g;
+			bsum += p.b;
+			count++;
+		}
+	}
+	means.push_back(rsum/(double)count);
+	means.push_back(gsum/(double)count);
+	means.push_back(bsum/(double)count);
+	return means;
 }
 
 //calculate a normalized black and white point, expressed in the 0-255 range:
