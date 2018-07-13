@@ -114,7 +114,6 @@ class WhiteBalancePanel: public PicProcPanel
 
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
-				//wxArrayString p = split(params,",");
 				orgr = atof(p[0]);
 				orgg = atof(p[1]);
 				orgb = atof(p[2]);
@@ -229,6 +228,7 @@ class WhiteBalancePanel: public PicProcPanel
 		
 		void paramChanged(wxCommandEvent& event)
 		{
+			ob->SetValue(false);
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
@@ -244,6 +244,8 @@ class WhiteBalancePanel: public PicProcPanel
 		{
 			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetValue
 (), gmult->GetValue(), bmult->GetValue()));
+			q->processPic();
+			Refresh();
 			event.Skip();
 		}
 
