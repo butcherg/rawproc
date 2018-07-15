@@ -352,25 +352,25 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	optypes optype = automatic; 
 	wxArrayString p = split(c, ",");
 	if (p.GetCount() > 0) {
-		if (p[0].Find(".") != wxNOT_FOUND) {
+		if (p[0].Find(".") != wxNOT_FOUND) {  //float multipliers
 			redmult = atof(p[0]);
 			greenmult = atof(p[1]);
 			bluemult = atof(p[2]);
 			optype = multipliers;
 		}
-		else if (p[0].IsNumber()) {
+		else if (p[0].IsNumber()) { //patch, without 'patch'
 			patchx = atoi(p[0]);
 			patchy = atoi(p[1]);
 			patchrad =  atof(p[2]);
 			optype = imgpatch;
 		}
-		else if (p[0] == "patch"){
-			patchx = atoi(p[0]);
-			patchy = atoi(p[1]);
-			patchrad =  atof(p[2]);
+		else if (p[0] == "patch"){  //patch, with 'patch' parameter
+			patchx = atoi(p[1]);
+			patchy = atoi(p[2]);
+			patchrad =  atof(p[3]);
 			optype = imgpatch;
 		}
-		else if (p[0] == "auto") {
+		else if (p[0] == "auto") { //auto 
 			optype = automatic;
 		}
 	}
@@ -394,22 +394,25 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (optype == multipliers) {
 		wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+		//wxMessageBox("wb: multipliers");
 	}
 	else if (optype == imgpatch) {
 		wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+		//wxMessageBox("wb: patch");
 	}
 	else {
 		wbmults = dib->ApplyWhiteBalance(threadcount);
+		//wxMessageBox("wb: auto");
 	}
 	((WhiteBalancePanel *) toolpanel)->setMultipliers(wbmults);
 	wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gamma.log","0") == "1"))
-		log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.whitebalance.log","0") == "1"))
+		log(wxString::Format("tool=whitebalance,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	dirty = false;
 
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	//((wxFrame*) m_display->GetParent())->SetStatusText("");
 	if (processnext) processNext();
 	
 	return result;
