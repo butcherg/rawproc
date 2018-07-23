@@ -813,6 +813,14 @@ void do_cmd(gImage &dib, std::string commandstr)
 			dib.ApplyVerticalMirror(threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
+		
+		else if (strcmp(cmd,"demosaic") == 0) {
+			int threadcount = gImage::ThreadCount();
+			printf("demosaic (%d threads)... ", threadcount);
+			_mark();
+			dib.ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+			printf("done (%fsec).\n",_duration());
+		}
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 

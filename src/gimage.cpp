@@ -1,4 +1,4 @@
-﻿
+
 #include "gimage/gimage.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -1721,10 +1721,39 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 			image[pos].b *= bluemult; 
 		}
 	}
+	
 	a[0] = redmult;
 	a[1] = greenmult;
-	a[2] = bluemult;	
+	a[2] = bluemult;
 	return a;
+}
+
+void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
+{
+	std::vector<pix> halfimage;
+	halfimage.resize((h/2)*(w/2));
+	
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y+=2) {
+		for (unsigned x=0; x<w; x+=2) {
+			unsigned Hpos = (x/2) + (y/2)*(w/2);
+			unsigned Rpos = x + y*w;
+			unsigned G1pos = (x+1) + y*w;
+			unsigned G2pos = x + (y+1)*w;
+			unsigned Bpos = (x+1) + (y+1)*w;
+			double gval = (image[G1pos].g + image[G2pos].g) / 2.0;
+			double rval = image[Rpos].r;
+			double bval = image[Bpos].b;
+					
+			halfimage[Hpos].r = rval;
+			halfimage[Hpos].g = gval;
+			halfimage[Hpos].b = bval;
+		}
+	}
+	
+	image = halfimage;
+	w /=2;
+	h /=2;
 }
 
 
