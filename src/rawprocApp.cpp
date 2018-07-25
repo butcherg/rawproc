@@ -56,8 +56,10 @@ bool rawprocFrmApp::OnInit()
 
 	if (cmdline.Found("c", &configfile)) {
 		if (wxFileName::FileExists(configfile)) {
-			frame->SetConfigFile(configfile);
-			myConfig::loadConfig(std::string(configfile.c_str()));
+			wxFileName cfile(configfile);
+			cfile.Normalize();
+			frame->SetConfigFile(cfile.GetFullPath());
+			myConfig::loadConfig(std::string(cfile.GetFullPath().c_str()));
 		}
 	}
 	else if (wxFileName::FileExists(conf_cwd)) {
