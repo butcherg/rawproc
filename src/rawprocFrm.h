@@ -116,6 +116,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_COLORSPACE = 1034,
 			ID_MNU_LENSCORRECTION = 1035,
 			ID_MNU_WHITEBALANCE = 1036,
+			ID_MNU_DEMOSAIC = 1037,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -182,6 +183,9 @@ class rawprocFrm : public wxFrame
 	void MnuToolList(wxCommandEvent& event);
 #ifdef USE_LENSFUN
 	void MnuLensCorrection(wxCommandEvent& event);
+#endif
+#ifdef USE_DEMOSAIC
+	void MnuDemosaic(wxCommandEvent& event);
 #endif
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetStartPath(wxString path);

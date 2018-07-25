@@ -42,6 +42,9 @@
 #include <locale.h>
 #include <lensfun/lensfun.h>
 #endif
+#ifdef USE_DEMOSAIC
+#include "PicProcessorDemosaic.h"
+#endif
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
@@ -107,6 +110,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_WHITEBALANCE, rawprocFrm::MnuWhiteBalance)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
+#endif
+#ifdef USE_DEMOSAIC
+	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 #endif
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
@@ -211,6 +217,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CONTRAST,	_("Contrast"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
+#ifdef USE_DEMOSAIC
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DEMOSAIC,		_("Demosaic"), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
@@ -500,14 +509,17 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
+#endif
+#ifdef USE_DEMOSAIC
+	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 #endif
 	else return NULL;
 	p->createPanel(parambook);
@@ -1733,6 +1745,23 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding lenscorrection tool failed: %s",e.what()));
+	}
+}
+#endif
+
+#ifdef USE_DEMOSAIC
+void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", "", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
 	}
 }
 #endif

@@ -159,6 +159,16 @@ then
 fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
 
+#demosaic:
+AC_ARG_ENABLE([demosaic],
+        AS_HELP_STRING([--enable-demosaic], [enables demosaic.])
+)
+if test "$enable_demosaic" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -DUSE_DEMOSAIC"
+	
+fi
+AM_CONDITIONAL(DEMOSAIC, test x$enable_demosaic = xyes)
 
  
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"

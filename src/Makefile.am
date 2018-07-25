@@ -16,6 +16,10 @@ if LENSFUN
 rawproc_SOURCES += PicProcessorLensCorrection.cpp PicProcessorLensCorrection.h
 endif
 
+if DEMOSAIC
+rawproc_SOURCES += PicProcessorDemosaic.cpp PicProcessorDemosaic.h
+endif
+
 rawproc_LDADD = @WX_LIBS@
 
 
