@@ -822,6 +822,55 @@ void do_cmd(gImage &dib, std::string commandstr)
 			printf("done (%fsec).\n",_duration());
 		}
 
+		else if (strcmp(cmd,"tonescale") == 0) {  
+			double red   = atof(myConfig::getConfig().getValueOrDefault("tool.tonescale.r","0.21").c_str()); 
+			double green = atof(myConfig::getConfig().getValueOrDefault("tool.tonescale.g","0.72").c_str()); 
+			double blue  = atof(myConfig::getConfig().getValueOrDefault("tool.tonescale.b","0.07").c_str());
+			char *r = strtok(NULL,", ");
+			char *g = strtok(NULL,", ");
+			char *b = strtok(NULL," ");
+			if (r) red = atof(r);
+			if (g) green = atof(g);
+			if (b) blue = atof(b);
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tonescale.cores","0").c_str());
+			if (threadcount == 0) 
+                                threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			printf("tonescale: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
+			_mark();
+
+			gImage mask = gImage(dib);
+			mask.ApplyGray(red, green, blue, threadcount);
+			std::vector<pix>& m = mask.getImageData();
+
+			std::vector<pix>& image = dib.getImageData();
+			unsigned w = dib.getWidth();
+			unsigned h = dib.getHeight();
+
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned x=0; x<w; x++) {
+				for (unsigned y=0; y<h; y++) {
+					unsigned pos = x + y*w;
+					double pct = ((image[pos].r*0.21)+(image[pos].g*0.72)+(image[pos].b*0.07)) / m[pos].r;
+					image[pos].r *= pct;
+					image[pos].g *= pct;
+					image[pos].b *= pct;
+				}
+			}
+
+
+
+
+			//dib.ApplyToneGrayMask(red,green,blue, threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
+			commandstring += std::string(cs);
+		}
+
+
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 
 }
