@@ -2769,10 +2769,16 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	}
 	pclose(pipe);
 
-	unsigned char * iccprofile = NULL;
+	char * iccprofile = NULL;
 	icclength = 0;
 	if (p.find("cameraprofile") != p.end()) {
 		if (p["cameraprofile"] != "") {
+
+
+			cmsHPROFILE profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
+			if (profile)
+				gImage::makeICCProfile(profile, iccprofile, icclength);
+/*
 			FILE * pf = fopen((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "rb");
 			if (pf) {
 				if (fseek(pf, 0, SEEK_END) == 0) {
@@ -2785,6 +2791,7 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 				}
 				fclose(pf);
 			}
+*/
 		}
 	}
 
@@ -3103,12 +3110,14 @@ cmsHPROFILE gImage::myCmsOpenProfileFromFile(const std::string filename)
 	size_t pos = filename.find_last_of(".");
 	if (pos != std::string::npos) {
 		if (filename.substr(pos+1) == "json") {
+printf("myCmsOpenProfileFromFile: creating profile from json...\n");
 			std::ifstream j(filename.c_str(), std::ifstream::in);
 			std::stringstream json;
 			json << j.rdbuf();
 			return makeLCMSProfile(json.str());
 		}			
 		else {
+printf("myCmsOpenProfileFromFile: creating profile from icc...\n");
 			return cmsOpenProfileFromFile(filename.c_str(), "r");
 		}
 	}
@@ -3123,28 +3132,24 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 	cmsCIExyYTRIPLE c;
 	cmsCIExyY cw;
 	cmsCIEXYZ p, w;
-
 	cmsToneCurve *curve[3], *tonecurve;
 
 	cJSON *pentry;
 	cJSON *prof = cJSON_Parse(json.c_str());
 	if (prof == NULL) return NULL;
 
-	pentry == NULL;
-	pentry = cJSON_GetObjectItemCaseSensitive(prof, "CalibrationIlluminant1");
-	if (pentry) 
-		if (cJSON_IsString(pentry))
-			if (std::string(pentry->valuestring) == "D50")
-				w = d50_romm_spec_media_whitepoint;
-			else
-				return NULL;
-		else
-			return NULL;
-	else
-		return NULL;
+	pentry = NULL;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "Whitepoint");
+	if (pentry) {
+		w.X = cJSON_GetArrayItem(pentry, 0)->valuedouble;
+		w.Y = cJSON_GetArrayItem(pentry, 1)->valuedouble;
+		w.Z = cJSON_GetArrayItem(pentry, 2)->valuedouble;
+	}
+	else return NULL;
+
 	cw = cmsCIEXYZ2cmsCIExyY(w);
 
-	pentry == NULL;
+	pentry = NULL;
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "ForwardMatrix");
 	if (pentry) {
 		cJSON *X = cJSON_GetArrayItem(pentry, 0); 
@@ -3165,25 +3170,43 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 	}
 	else return NULL;
 
-	pentry == NULL;
+	pentry = NULL;
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "RedTRC");
 	if (pentry) 
 		curve[0] = cmsBuildGamma (NULL, pentry->valuedouble);
 	else return NULL;
 
-	pentry == NULL;
+	pentry = NULL;
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "GreenTRC");
 	if (pentry) 
 		curve[1] = cmsBuildGamma (NULL, pentry->valuedouble);
 	else return NULL;
 
-	pentry == NULL;
+	pentry = NULL;
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "BlueTRC");
 	if (pentry) 
 		curve[2] = cmsBuildGamma (NULL, pentry->valuedouble);
 	else return NULL;
 
-	return cmsCreateRGBProfile (&cw, &c, curve);
+	profile = cmsCreateRGBProfile (&cw, &c, curve);
+
+	pentry = NULL;
+	std::string descr;
+	pentry = cJSON_GetObjectItemCaseSensitive(prof, "Description");
+	if (pentry) 
+		if (cJSON_IsString(pentry))
+			descr = std::string(pentry->valuestring);
+		else
+			descr = "unreadable profile description";
+	else 
+		descr = "no profile description";
+	cmsMLU *description;
+	description = cmsMLUalloc(NULL, 1);
+	cmsMLUsetASCII(description, "en", "US", descr.c_str());
+	cmsWriteTag(profile, cmsSigProfileDescriptionTag, description);
+	cmsMLUfree(description);
+	
+	return profile;
 }
 
 

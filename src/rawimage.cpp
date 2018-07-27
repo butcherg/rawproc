@@ -668,10 +668,12 @@ char * _loadRAW(const char *filename,
 					//profile = cmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "r");
 					profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
 					if (profile) {
-						cmsSaveProfileToMem(profile, NULL, &size);
-						*icclength = size;
-						*icc_m = new char[size];
-						cmsSaveProfileToMem(profile, *icc_m, &size);
+						gImage::makeICCProfile(profile, icc_m, size);
+						//delete if the above works: 
+						//cmsSaveProfileToMem(profile, NULL, &size);
+						//*icclength = size;
+						//*icc_m = new char[size];
+						//cmsSaveProfileToMem(profile, *icc_m, &size);
 					}
 				}
 			}
