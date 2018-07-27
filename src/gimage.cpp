@@ -2773,25 +2773,9 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	icclength = 0;
 	if (p.find("cameraprofile") != p.end()) {
 		if (p["cameraprofile"] != "") {
-
-
 			cmsHPROFILE profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
 			if (profile)
 				gImage::makeICCProfile(profile, iccprofile, icclength);
-/*
-			FILE * pf = fopen((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "rb");
-			if (pf) {
-				if (fseek(pf, 0, SEEK_END) == 0) {
-					icclength = ftell(pf);
-					if (icclength == -1) printf("file length error... ");
-					fseek(pf, 0L, SEEK_SET);
-					iccprofile = new unsigned char[icclength];
-					result = fread(iccprofile, 1, icclength, pf);
-					if (!cmsOpenProfileFromMem(iccprofile, icclength)) printf("profile is invalid... ");
-				}
-				fclose(pf);
-			}
-*/
 		}
 	}
 
@@ -3122,6 +3106,62 @@ printf("myCmsOpenProfileFromFile: creating profile from icc...\n");
 		}
 	}
 	else return NULL;
+}
+
+//make a profile from a camconst.json entry
+
+void pseudoinverse (double (*in)[3], double (*out)[3], int size)
+{
+ double work[3][6], num;
+  int i, j, k;
+
+  for (i=0; i < 3; i++) {
+    for (j=0; j < 6; j++)
+      work[i][j] = j == i+3;
+    for (j=0; j < 3; j++)
+      for (k=0; k < size; k++)
+        work[i][j] += in[k][i] * in[k][j];
+  }
+  for (i=0; i < 3; i++) {
+    num = work[i][i];
+    for (j=0; j < 6; j++)
+      work[i][j] /= num;
+    for (k=0; k < 3; k++) {
+      if (k==i) continue;
+      num = work[k][i];
+      for (j=0; j < 6; j++)
+        work[k][j] -= work[i][j] * num;
+    }
+  }
+  for (i=0; i < size; i++)
+    for (j=0; j < 3; j++)
+      for (out[i][j]=k=0; k < 3; k++)
+        out[i][j] += work[j][k+3] * in[i][k];
+}
+
+
+cmsHPROFILE gImage::makeLCMSCamConstProfile(std::string camconstfile, std::string camera)
+{
+        FILE *f = NULL;
+        long len = 0;
+        char *data = NULL;
+
+        /* open in read binary mode */
+        f = fopen(camconstfile.c_str(),"rb");
+        /* get the length */
+        fseek(f, 0, SEEK_END);
+        len = ftell(f);
+        fseek(f, 0, SEEK_SET);
+
+        data = (char*)malloc(len + 1);
+
+        fread(data, 1, len, f);
+        data[len] = '\0';
+        fclose(f);
+
+	cJSON *prof = cJSON_Parse(data);
+	if (prof == NULL) return NULL;
+
 }
 
 
