@@ -201,6 +201,7 @@ class gImage
 		static cmsHPROFILE makeLCMSProfile(const std::string json);
 		static cmsHPROFILE makeLCMSProfile(const std::string name, float gamma);
 		static cmsHPROFILE makeLCMSCamConstProfile(std::string camconstfile, std::string camera);
+		static cmsHPROFILE makeLCMSAdobeCoeffProfile(std::string adobecoeff);
 		static cmsHPROFILE makeLCMSdcrawProfile(const std::string name, float gamma);
 		static void makeICCProfile(cmsHPROFILE hProfile, char *& profile, cmsUInt32Number  &profilesize);
 

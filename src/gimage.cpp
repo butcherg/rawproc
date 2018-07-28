@@ -3108,8 +3108,8 @@ printf("myCmsOpenProfileFromFile: creating profile from icc...\n");
 	else return NULL;
 }
 
-//make a profile from a camconst.json entry
 
+//psuedoinverse, from dcraw.c:
 void pseudoinverse (double (*in)[3], double (*out)[3], int size)
 {
  double work[3][6], num;
@@ -3139,12 +3139,13 @@ void pseudoinverse (double (*in)[3], double (*out)[3], int size)
         out[i][j] += work[j][k+3] * in[i][k];
 }
 
-
+//make a profile from a camconst.json entry
 cmsHPROFILE gImage::makeLCMSCamConstProfile(std::string camconstfile, std::string camera)
 {
         FILE *f = NULL;
         long len = 0;
         char *data = NULL;
+	int result;
 
         /* open in read binary mode */
         f = fopen(camconstfile.c_str(),"rb");
@@ -3155,13 +3156,35 @@ cmsHPROFILE gImage::makeLCMSCamConstProfile(std::string camconstfile, std::strin
 
         data = (char*)malloc(len + 1);
 
-        fread(data, 1, len, f);
+        result = fread(data, 1, len, f);
         data[len] = '\0';
         fclose(f);
 
 	cJSON *prof = cJSON_Parse(data);
 	if (prof == NULL) return NULL;
 
+	//todo:  look up coeff based on camera profile
+	//call makeLCMSAdobeCoeffProfile(coeff)
+
+}
+
+cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
+{
+	double in[3][3], out[3][3];
+	char buf[128];
+	strncpy(buf, adobecoeff.c_str(), 127);
+	char * v = strtok(buf, ",");
+
+	for (unsigned i=0; i<3; i++) {
+		for (unsigned j=0; j<3; i++) {
+			if (v)
+				in[i][j] = atof(v)/10000.0;
+			else
+				in[i][j] = 0.0;
+			v = strtok(NULL, ",");
+		}
+	}
+	pseudoinverse(in, out, 3);
 }
 
 
