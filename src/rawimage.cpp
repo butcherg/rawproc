@@ -655,29 +655,32 @@ char * _loadRAW(const char *filename,
 		*icclength = C.profile_length;
 	}
 	else {  //because apparently libraw doesn't pass along the dcraw-generated profiles
-		cmsHPROFILE profile;
+		cmsHPROFILE profile = NULL;
 		cmsUInt32Number size;
 		float gamma = 1.0/RawProcessor.imgdata.params.gamm[0];
 		if (RawProcessor.imgdata.params.output_color == 0) {  //raw image, check for cameraprofile and assign if found
 		//#
-		//# cameraprofile=iccfile - If colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.
+		//# cameraprofile=iccfile|adobe_coeff - If colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.  Trick: Instead of a filename, paste a set of dcraw-style primaries here and a linear gamma D65 whitepoint profile will be built and assigned to the raw image.
 		//#
-		//template input.raw.libraw.cameraprofile=iccprofile
-		if (p.find("cameraprofile") != p.end()) {
+			if (p.find("cameraprofile") != p.end()) {
 				if (p["cameraprofile"] != "") {
-					//profile = cmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]).c_str(), "r");
-					profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
-					if (profile) {
-						//gImage::makeICCProfile(profile, icc_m, size);
-						//delete if the above works: 
-						cmsSaveProfileToMem(profile, NULL, &size);
-						*icclength = size;
-						*icc_m = new char[size];
-						cmsSaveProfileToMem(profile, *icc_m, &size);
-					}
+						if (p["cameraprofile"].find_first_of(",") != std::string::npos) 
+							profile = gImage::makeLCMSAdobeCoeffProfile(p["cameraprofile"]);
+						else
+							profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
 				}
 			}
 		}
+		if (profile) {
+			//gImage::makeICCProfile(profile, icc_m, size);
+			//delete if the above works: 
+			cmsSaveProfileToMem(profile, NULL, &size);
+			*icclength = size;
+			*icc_m = new char[size];
+			cmsSaveProfileToMem(profile, *icc_m, &size);
+		}
+		
+		
 		if (RawProcessor.imgdata.params.output_color == 1) {
 			profile = gImage::makeLCMSdcrawProfile("srgb", gamma);
 			cmsSaveProfileToMem(profile, NULL, &size);

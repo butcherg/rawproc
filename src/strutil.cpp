@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h> 
+#include <sys/stat.h>
 
 #ifdef WIN32
 	#include <direct.h>
@@ -171,6 +172,12 @@ std::string nexttoken(std::string &strng, std::string delims)
 	strng.erase(0,pos);
 	while (strng.find_first_of(delims) == 0) strng.erase(0,1);
 	return token;
+}
+
+bool file_exists(const std::string& filename) 
+{
+  struct stat buffer;   
+  return (stat (filename.c_str(), &buffer) == 0); 
 }
 
 

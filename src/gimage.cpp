@@ -3091,17 +3091,17 @@ const cmsCIExyY cmsCIEXYZ2cmsCIExyY(cmsCIEXYZ in)
 //use in place of cmsOpenProfileFromFile() to include .json files:
 cmsHPROFILE gImage::myCmsOpenProfileFromFile(const std::string filename)
 {
+	if (!file_exists(filename)) return NULL;
+
 	size_t pos = filename.find_last_of(".");
 	if (pos != std::string::npos) {
 		if (filename.substr(pos+1) == "json") {
-printf("myCmsOpenProfileFromFile: creating profile from json...\n");
 			std::ifstream j(filename.c_str(), std::ifstream::in);
 			std::stringstream json;
 			json << j.rdbuf();
 			return makeLCMSProfile(json.str());
 		}			
 		else {
-printf("myCmsOpenProfileFromFile: creating profile from icc...\n");
 			return cmsOpenProfileFromFile(filename.c_str(), "r");
 		}
 	}
@@ -3168,23 +3168,73 @@ cmsHPROFILE gImage::makeLCMSCamConstProfile(std::string camconstfile, std::strin
 
 }
 
+void printrgb(double (*p)[3])
+{
+	int i, j;
+	for (i=0; i<3; i++) {
+		for (j=0; j<3; j++) {
+			printf("%f ",p[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+//make a linear D65 profile from a dcraw adobe_coeff entry, 
+//e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181
 cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 {
-	double in[3][3], out[3][3];
-	char buf[128];
-	strncpy(buf, adobecoeff.c_str(), 127);
-	char * v = strtok(buf, ",");
-
+	double in_XYZ[3][3], out_XYZ[3][3];
+	
+	std::vector<std::string> mat = split(adobecoeff, ",");
 	for (unsigned i=0; i<3; i++) {
-		for (unsigned j=0; j<3; i++) {
-			if (v)
-				in[i][j] = atof(v)/10000.0;
+		for (unsigned j=0; j<3; j++) {
+			unsigned pos = i*3+j;
+			if (pos < mat.size()) printf("%d:%s ",pos,mat[pos].c_str());
+			if (pos < mat.size())
+				in_XYZ[i][j] = atof(mat[pos].c_str())/10000.0;
 			else
-				in[i][j] = 0.0;
-			v = strtok(NULL, ",");
+				in_XYZ[i][j] = 0.0;
 		}
+		printf("\n");
 	}
-	pseudoinverse(in, out, 3);
+
+	pseudoinverse(in_XYZ, out_XYZ, 3);
+	
+	printrgb(in_XYZ);
+	printf("\n");
+	printrgb(out_XYZ);
+	
+	cmsHPROFILE profile;
+	cmsCIExyYTRIPLE c;
+	cmsCIExyY cw;
+	cmsCIEXYZ p, w;
+	cmsToneCurve *curve[3], *tonecurve;
+
+	cw = cmsCIEXYZ2cmsCIExyY(d65_media_whitepoint);
+	
+	p.X = out_XYZ[0][0]; p.Y = out_XYZ[1][0]; p.Z = out_XYZ[2][0]; 
+	c.Red = cmsCIEXYZ2cmsCIExyY(p);
+	p.X = out_XYZ[1][0]; p.Y = out_XYZ[1][1]; p.Z = out_XYZ[1][2]; 
+	c.Green = cmsCIEXYZ2cmsCIExyY(p);
+	p.X = out_XYZ[2][0]; p.Y = out_XYZ[2][1]; p.Z = out_XYZ[2][2]; 
+	c.Blue = cmsCIEXYZ2cmsCIExyY(p);
+
+	tonecurve = cmsBuildGamma (NULL, 1.0);  //hardcoded linear, for now...
+	curve[0] = curve[1] = curve[2] = tonecurve;
+
+	profile = cmsCreateRGBProfile (&cw, &c, curve);
+	
+	if (profile) {
+		std::string descr = "adobe_coeff linear profile";
+		cmsMLU *description;
+		description = cmsMLUalloc(NULL, 1);
+		cmsMLUsetASCII(description, "en", "US", descr.c_str());
+		cmsWriteTag(profile, cmsSigProfileDescriptionTag, description);
+		cmsMLUfree(description);
+	}
+
+	return profile;
 }
 
 
@@ -3216,18 +3266,20 @@ cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
 	pentry = cJSON_GetObjectItemCaseSensitive(prof, "ForwardMatrix");
 	if (pentry) {
 		cJSON *X = cJSON_GetArrayItem(pentry, 0); 
-		p.X = cJSON_GetArrayItem(X, 0)->valuedouble;
-		p.Y = cJSON_GetArrayItem(X, 1)->valuedouble;
-		p.Z = cJSON_GetArrayItem(X, 2)->valuedouble;
-		c.Red = cmsCIEXYZ2cmsCIExyY(p);
 		cJSON *Y = cJSON_GetArrayItem(pentry, 1); 
-		p.X = cJSON_GetArrayItem(Y, 0)->valuedouble;
+		cJSON *Z = cJSON_GetArrayItem(pentry, 2);
+		p.X = cJSON_GetArrayItem(X, 0)->valuedouble;
+		p.Y = cJSON_GetArrayItem(Y, 0)->valuedouble;
+		p.Z = cJSON_GetArrayItem(Z, 0)->valuedouble;
+		c.Red = cmsCIEXYZ2cmsCIExyY(p);
+
+		p.X = cJSON_GetArrayItem(X, 1)->valuedouble;
 		p.Y = cJSON_GetArrayItem(Y, 1)->valuedouble;
-		p.Z = cJSON_GetArrayItem(Y, 2)->valuedouble;
+		p.Z = cJSON_GetArrayItem(Z, 1)->valuedouble;
 		c.Green = cmsCIEXYZ2cmsCIExyY(p);
-		cJSON *Z = cJSON_GetArrayItem(pentry, 2); 
-		p.X = cJSON_GetArrayItem(Z, 0)->valuedouble;
-		p.Y = cJSON_GetArrayItem(Z, 1)->valuedouble;
+		 
+		p.X = cJSON_GetArrayItem(X, 2)->valuedouble;
+		p.Y = cJSON_GetArrayItem(Y, 2)->valuedouble;
 		p.Z = cJSON_GetArrayItem(Z, 2)->valuedouble;
 		c.Blue = cmsCIEXYZ2cmsCIExyY(p);
 	}

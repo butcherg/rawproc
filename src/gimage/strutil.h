@@ -11,6 +11,7 @@ std::string tostr(unsigned short t);
 std::string underscore(std::string str);
 std::string de_underscore(std::string str);
 std::string filepath_normalize(std::string str);
+bool file_exists(const std::string& filename);
 
 std::string getAppConfigFilePath();
 std::string getCwdConfigFilePath();
