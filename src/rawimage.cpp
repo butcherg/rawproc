@@ -625,26 +625,28 @@ char * _loadRAW(const char *filename,
 		img = new char[imgsize];
 		memcpy(img, RawProcessor.imgdata.rawdata.raw_image, imgsize);
 
-		RawProcessor.recycle();
-		return img;
+		//RawProcessor.recycle();
+		//return img;
 	}
+	else {
 	
-	
-	RawProcessor.dcraw_process();
-	if (RawProcessor.imgdata.process_warnings & LIBRAW_WARN_FALLBACK_TO_AHD) {
-		info["Notice"] = "Selected demosaic algorithm not supported, AHD used";
-	}
-	RawProcessor.get_mem_image_format(&w, &h, &c, &b);
-	*width = w;
-	*height = h;
-	*numcolors = c;
-	*numbits = b;
+		RawProcessor.dcraw_process();
+		if (RawProcessor.imgdata.process_warnings & LIBRAW_WARN_FALLBACK_TO_AHD) {
+			info["Notice"] = "Selected demosaic algorithm not supported, AHD used";
+		}
+		RawProcessor.get_mem_image_format(&w, &h, &c, &b);
+		*width = w;
+		*height = h;
+		*numcolors = c;
+		*numbits = b;
 
-	img = new char[w*h*c*(b/8)];
+		img = new char[w*h*c*(b/8)];
 	
-	libraw_processed_image_t *image = RawProcessor.dcraw_make_mem_image();
-	memcpy(img, image->data, image->data_size);
-	LibRaw::dcraw_clear_mem(image);
+		libraw_processed_image_t *image = RawProcessor.dcraw_make_mem_image();
+		memcpy(img, image->data, image->data_size);
+		LibRaw::dcraw_clear_mem(image);
+
+	}
 
 	//icc_m = NULL;
 
