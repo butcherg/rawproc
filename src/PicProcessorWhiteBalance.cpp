@@ -19,6 +19,55 @@
 #define WBGREEN 6404
 #define WBBLUE 6405
 
+class myFloatCtrl: public wxTextCtrl
+{
+	public:
+		myFloatCtrl(wxWindow *parent, wxWindowID id, float value=0.0, unsigned precision=1, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
+			wxTextCtrl(parent, id, wxString::Format("%0.1f",value), pos, size, wxTE_PROCESS_ENTER)
+		{
+			v = value;
+			p = precision;
+			fmt = "%0.";
+			fmt.Append(wxString::Format("%d",p));
+			fmt.Append("f");
+			Bind(wxEVT_MOUSEWHEEL, myFloatCtrl::OnWheel, this);
+		}
+		
+		float GetFloatValue()
+		{
+			return atof(GetValue().c_str());
+		}
+		
+		void SetFloatValue(double value)
+		{
+			SetValue(wxString::Format(fmt,value));
+		}
+		
+		void OnWheel(wxMouseEvent& event)
+		{
+			double val = atof(GetValue().c_str());
+			double inc = pow(10,-((float)p));
+			if (event.ShiftDown()) inc *= 10.0;
+			if (event.ControlDown()) inc *= 100.0;
+			if (event.GetWheelRotation() > 0) { 
+				val += inc;
+			}
+			else {
+				val -= inc;
+			}
+			
+			SetValue(wxString::Format(fmt,val));
+
+			Refresh();
+			event.Skip();
+		}
+		
+	private:
+			double v;
+			unsigned p;
+			wxString fmt;
+	
+};
 
 
 class WhiteBalancePanel: public PicProcPanel
@@ -29,6 +78,8 @@ class WhiteBalancePanel: public PicProcPanel
 		{
 			double rm, gm, bm;
 			wxSize spinsize(130, -1);
+			
+			wxArrayString parm = split(params, ",");
 
 			//parm tool.whitebalance.min: (float), minimum multiplier value.  Default=0.001
 			double min = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.min","0.001").c_str());
@@ -45,27 +96,15 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(1,10, wxGBPosition(0,0));
 
 			g->Add(new wxStaticText(this,wxID_ANY, "red mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			rmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, spinsize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
-			rmult->SetDigits(digits);
-			rmult->SetRange(min,max);
-			rmult->SetIncrement(increment);
-			rmult->SetValue(rm);
+			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			g->Add(rmult, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "green mult:"), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			gmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, spinsize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
-			gmult->SetDigits(digits);
-			gmult->SetRange(min,max);
-			gmult->SetIncrement(increment);
-			gmult->SetValue(gm);
+			gmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			g->Add(gmult, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			bmult = new wxSpinCtrlDouble(this, wxID_ANY,"1.0",wxDefaultPosition, spinsize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER);
-			bmult->SetDigits(digits);
-			bmult->SetRange(min,max);
-			bmult->SetIncrement(increment);
-			bmult->SetValue(bm);
+			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			g->Add(bmult, wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			g->Add(0,10, wxGBPosition(5,0));
@@ -148,7 +187,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Layout();
 			SetFocus();
 			t = new wxTimer(this);
-			Bind(wxEVT_SPINCTRLDOUBLE,&WhiteBalancePanel::paramChanged, this);
+			Bind(wxEVT_MOUSEWHEEL,&WhiteBalancePanel::onWheel, this);
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
 			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
@@ -164,17 +203,17 @@ class WhiteBalancePanel: public PicProcPanel
 		//used by PicProcessorWhiteBalance to initialize panel:
 		void setMultipliers(double rm, double gm, double bm)
 		{
-			rmult->SetValue(rm);
-			gmult->SetValue(gm);
-			bmult->SetValue(bm);
+			rmult->SetFloatValue(rm);
+			gmult->SetFloatValue(gm);
+			bmult->SetFloatValue(bm);
 			Refresh();
 		}
 
 		void setMultipliers(std::vector<double> mults)
 		{
-			rmult->SetValue(mults[0]);
-			gmult->SetValue(mults[1]);
-			bmult->SetValue(mults[2]);
+			rmult->SetFloatValue(mults[0]);
+			gmult->SetFloatValue(mults[1]);
+			bmult->SetFloatValue(mults[2]);
 			Refresh();
 		}
 
@@ -234,16 +273,20 @@ class WhiteBalancePanel: public PicProcPanel
 			cb->SetValue(false);
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
-
-		void fooChanged(wxCommandEvent& event)
+		
+		void onWheel(wxMouseEvent& event)
 		{
+			ob->SetValue(false);
+			ab->SetValue(false);
+			pb->SetValue(false);
+			cb->SetValue(false);
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetValue
-(), gmult->GetValue(), bmult->GetValue()));
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
+(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			q->processPic();
 			Refresh();
 			event.Skip();
@@ -258,7 +301,7 @@ class WhiteBalancePanel: public PicProcPanel
 	private:
 		wxStaticText *origwb, *autowb, *patch, *camera;
 		wxRadioButton *ob, *ab, *pb, *cb;
-		wxSpinCtrlDouble *rmult, *gmult ,*bmult;
+		myFloatCtrl *rmult, *gmult ,*bmult;;
 		wxTimer *t;
 		//coord ptch;
 		unsigned patx, paty;
