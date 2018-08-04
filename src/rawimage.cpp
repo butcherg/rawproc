@@ -9,25 +9,60 @@
 #include <map>
 #include <vector>
 #include "gimage/strutil.h"
+#ifndef USE_DCRAW
 #include <libraw/libraw.h>
+#endif
 #include <lcms2.h>
 #include "gimage/gimage.h"
 #include "nikonlensid.h"
 
 
+#ifdef USE_DCRAW
+char dcrawversion[128] = "dcraw";
+std::string dcrawpath;
+#endif
+
+
+#ifdef USE_DCRAW
 const char * librawVersion()
 {
+	return &dcrawversion;
+}
+#else
+const char * librawVersion()
+{
+
 	return LibRaw::version();
 }
+#endif  //USE_DCRAW
 
+
+#ifdef USE_DCRAW
 bool _checkRAW(const char *filename)
 {
+	return true;
+}
+#else
+bool _checkRAW(const char *filename)
+{
+
 	LibRaw RawProcessor;
 	if (RawProcessor.open_file(filename) == LIBRAW_SUCCESS) return true;
 	return false;
 }
+#endif
 
-
+#ifdef USE_DCRAW
+bool _loadRAWInfo(const char *filename, 
+			unsigned *width, 
+			unsigned *height, 
+			unsigned *numcolors, 
+			unsigned *numbits, 
+			std::map<std::string,std::string> &info)
+{
+	return false;
+}
+#else
 bool _loadRAWInfo(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
@@ -71,8 +106,79 @@ bool _loadRAWInfo(const char *filename,
 		RawProcessor.recycle();
 		return false;
 	}
-}
 
+}
+#endif //USE_DCRAW
+
+
+#ifdef USE_DCRAW
+char * _loadRAW(const char *filename, 
+			unsigned *width, 
+			unsigned *height, 
+			unsigned *numcolors, 
+			unsigned *numbits, 
+			std::map<std::string,std::string> &info, 
+			std::string params="",
+			char ** icc_m=NULL, 
+			unsigned  *icclength=0)
+{
+
+	int w, h, c, b;
+	char * img;
+	char imgdata[4096];
+	
+	int rawdata = 0;
+
+	std::map<std::string,std::string> p = parseparams(params);
+
+	char magic[20];
+	size_t result;
+	unsigned char * image;
+	unsigned maxval;
+	unsigned width, height, bpp, colors, icclength;
+	BPP bits;
+	std::map<std::string,std::string> imgdata;
+	colors = 3;
+
+	if (access (dcrawpath.c_str(), X_OK)) return gImage();
+
+	std::string cmd = dcrawpath;
+	cmd.append(" -c ");
+	//$ dcrawparams: command line parameters for dcraw-based raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W
+	if (p.find("params") != p.end()) 
+		cmd.append(de_underscore(p["params"])); 
+	cmd.append(" ");
+	cmd.append(filename);
+
+#ifdef WIN32
+	FILE* pipe = _popen(cmd.c_str(), "rb");
+#else
+	FILE* pipe = popen(cmd.c_str(), "r");
+#endif
+	if (!pipe) return gImage();
+	result = fscanf(pipe, "%s", magic);
+	result = fscanf(pipe, "%d", &width);
+	result = fscanf(pipe, "%d", &height);
+	result = fscanf(pipe, "%d", &maxval);
+	fgetc(pipe);
+	if (maxval < 256) { 
+		bits = BPP_8;
+		image = new unsigned char[width*height*3];
+		result = fread(image, 1, width*height*3, pipe);
+	}
+	else {
+		bits = BPP_16;
+		image = new unsigned char[width*height*3*2];
+		result = fread(image, 2, width*height*3, pipe);
+		unsigned short * img = (unsigned short *) image;
+		for (int i=0; i< (width*height*3); i++) img[i] = ((img[i] & 0x00ff)<<8)|((img[i] & 0xff00)>>8);
+	}
+	pclose(pipe);
+
+
+	return image;
+}
+#else
 char * _loadRAW(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
@@ -726,6 +832,7 @@ char * _loadRAW(const char *filename,
 	return img;
 
 }
+#endif //USE_DCRAW
 
 #endif
 

@@ -259,11 +259,6 @@ class gImage
 
 		RESIZE_FILTER lensfun_interp_method;
 
-#ifdef USE_DCRAW
-		static std::string dcrawpath;
-#endif
-		
-
 };
 
 

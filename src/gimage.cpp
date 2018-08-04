@@ -11,10 +11,7 @@
 #include <sstream>
 #include <omp.h>
 #include <exception>
-
-#ifndef USE_DCRAW
 #include "rawimage.h"
-#endif
 #include "jpegimage.h"
 #include "tiffimage.h"
 #include "pngimage.h"
@@ -44,9 +41,7 @@ const char * gImageVersion()
 }
 
 std::string gImage::profilepath = "";
-#ifdef USE_DCRAW
-std::string gImage::dcrawpath = "";
-#endif
+
 
 //Constructors/Destructor:
 
@@ -549,9 +544,7 @@ std::map<std::string,std::string> gImage::getInfo(const char * filename)
 	GIMAGE_FILETYPE ftype = gImage::getFileType(filename);
 	
 	if (ftype == FILETYPE_TIFF) _loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata);
-#ifndef USE_DCRAW
 	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
-#endif
 	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
 	if (ftype == FILETYPE_PNG) _loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata);
 	return imgdata;
@@ -567,11 +560,7 @@ GIMAGE_FILETYPE gImage::getFileType(const char * filename)
 	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) if (_checkTIFF(filename)) return FILETYPE_TIFF;
 	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) if (_checkJPEG(filename)) return FILETYPE_JPEG;
 	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) if (_checkPNG(filename)) return FILETYPE_PNG;
-#ifdef USE_DCRAW  //just let dcraw try it...
-	return FILETYPE_RAW;
-#else
 	if (_checkRAW(filename)) return FILETYPE_RAW;
-#endif
 
 	return FILETYPE_UNKNOWN;
 }
@@ -609,10 +598,8 @@ std::string gImage::LibraryVersions()
 	verstring.append("\nPNG: ");
 	std::string pngver(pngVersion());
 	verstring.append(pngver);
-#ifndef USE_DCRAW
 	verstring.append("\nLibRaw: ");
 	verstring.append(librawVersion());
-#endif
 	verstring.append("\nLittleCMS2: ");
 	std::ostringstream s;
 	s << (int) cmsGetEncodedCMMversion();
@@ -2708,9 +2695,7 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 		_loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata); 
 	}
 	else {
-#ifndef USE_DCRAW
 		_loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata); 
-#endif
 	}
 	return imgdata;
 }
@@ -2721,7 +2706,10 @@ void gImage::setdcrawPath(std::string path)
 {
 	dcrawpath = path;
 }
+#endif
 
+
+/*
 gImage gImage::loadRAW(const char * filename, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);  //, ",");
@@ -2784,8 +2772,7 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	if (icclength && iccprofile) delete [] iccprofile;
 	return I;
 }
-
-#else
+*/
 
 gImage gImage::loadRAW(const char * filename, std::string params)
 {
@@ -2809,8 +2796,6 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 	return I;
 
 }
-
-#endif //USE_DCRAW
 
 gImage gImage::loadJPEG(const char * filename, std::string params)
 {
