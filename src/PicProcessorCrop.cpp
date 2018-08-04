@@ -42,12 +42,16 @@ class CropPanel: public PicProcPanel
 			iwa = (double) img.GetWidth() / (double) img.GetHeight();
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
 
+			t = new wxTimer(this);
+
 			Bind(wxEVT_SIZE,&CropPanel::OnSize, this);
 			Bind(wxEVT_PAINT,&CropPanel::OnPaint, this);
 			Bind(wxEVT_LEFT_DOWN, &CropPanel::OnMouseDown, this);
 			Bind(wxEVT_MOTION , &CropPanel::OnMouseMove, this);
 			Bind(wxEVT_LEFT_UP, &CropPanel::OnMouseUp, this);
 			Bind(wxEVT_LEAVE_WINDOW, &CropPanel::OnMouseUp, this);
+			Bind(wxEVT_CHAR, &CropPanel::OnKey, this);
+			Bind(wxEVT_TIMER, &CropPanel::OnTimer,  this);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 
@@ -128,12 +132,14 @@ class CropPanel: public PicProcPanel
 				if ((mousey > top*aspect-landingradius) & (mousey < top*aspect+landingradius)) {
 					node = 1;  //top left
 					cropmode = 1;
+					isaspect = true;
 				}
 			}
 			else if ((mousex > right*aspect-landingradius) & (mousex < right*aspect+landingradius)) {
 				if ((mousey > bottom*aspect-landingradius) & (mousey < bottom*aspect+landingradius)) {
 					node = 2; //bottom right
 					cropmode = 0;
+					isaspect = false;
 				}
 			}
 			else if ((mousex > left*aspect) * (mousex < right*aspect)) {
@@ -141,6 +147,7 @@ class CropPanel: public PicProcPanel
 					node = 3; //move
 				}
 			}
+			mousemoved = false;
 			Refresh();
 			Update();
 			event.Skip();
@@ -256,6 +263,7 @@ class CropPanel: public PicProcPanel
 				if (top < 0) top = 0;
 				if (bottom > ih) bottom = ih;
 			}
+			mousemoved = true;
 			mousex = event.m_x;
 			mousey = event.m_y;
 			Refresh();
@@ -268,9 +276,76 @@ class CropPanel: public PicProcPanel
 			if (node != 0) {
 				node = 0;
 				q->setParams(wxString::Format("%d,%d,%d,%d",left,top,right,bottom));
-				q->processPic();
+				if (mousemoved) q->processPic();
 			}
 			event.Skip();
+		}
+
+		void OnKey(wxKeyEvent& event)
+		{
+			int inc = 1;
+			if (event.ShiftDown()) inc = 10;
+			if (event.ControlDown()) inc = 100;
+			if (isaspect) {  //change left, top
+				int width = left - right;
+				int height = bottom - top;
+				double haspect = (double) height / (double) width;
+				double waspect = (double) width / (double) height;
+				switch ( event.GetKeyCode() )
+				{
+					case WXK_LEFT:
+						if (!(left-inc < 0)) {
+							left-=inc;
+							bottom-=inc*haspect;
+						}
+						break;
+					case WXK_RIGHT:
+						left+=inc;
+						bottom+=inc*haspect;
+						break;
+					case WXK_UP:
+						if (!(top-inc < 0)) {
+							top-=inc;
+							right-=inc*waspect;
+						}
+						break;
+					case WXK_DOWN:
+						top+=inc;
+						right+= inc*waspect;
+						break;
+				}
+				Refresh();
+				Update();
+				t->Start(500,wxTIMER_ONE_SHOT);
+			}
+			else {  //change right, bottom
+				switch ( event.GetKeyCode() )
+				{
+					case WXK_LEFT:
+						right-=inc;
+						break;
+					case WXK_RIGHT:
+						right+=inc;
+						if (right > iw) right = iw;
+						break;
+					case WXK_UP:
+						bottom-=inc;
+						break;
+					case WXK_DOWN:
+						bottom+=inc;
+						if (bottom > ih) bottom = ih;
+						break;
+				}
+				Refresh();
+				Update();
+				t->Start(500,wxTIMER_ONE_SHOT);
+			}
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			q->setParams(wxString::Format("%d,%d,%d,%d",left,top,right,bottom));
+			q->processPic();
 		}
 
 
@@ -281,8 +356,9 @@ class CropPanel: public PicProcPanel
 		int node, cropmode, mousex, mousey;
 		double aspect, wa, ha, iwa, iha;
 		int left, top , bottom, right, cpradius, landingradius;
-		bool isaspect;
+		bool isaspect, mousemoved;
 		cmsHTRANSFORM hTransform;
+		wxTimer *t;
 
 };
 
