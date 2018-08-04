@@ -30,7 +30,7 @@ class myFloatCtrl: public wxTextCtrl
 			fmt = "%0.";
 			fmt.Append(wxString::Format("%d",p));
 			fmt.Append("f");
-			Bind(wxEVT_MOUSEWHEEL, myFloatCtrl::OnWheel, this);
+			Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 		}
 		
 		float GetFloatValue()
