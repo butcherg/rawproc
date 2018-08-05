@@ -123,9 +123,11 @@ class CropPanel: public PicProcPanel
 			dc.SetBrush(*wxYELLOW_BRUSH);
 			dc.SetPen(*wxYELLOW_PEN);
 			dc.DrawRectangle(left*aspect-cpradius, top*aspect-cpradius,cpradius*2,cpradius*2);
+			//dc.DrawRectangle(left*aspect, top*aspect,cpradius*2,cpradius*2);
 			dc.SetBrush(*wxRED_BRUSH);
 			dc.SetPen(*wxRED_PEN);
 			dc.DrawCircle(right*aspect-1, bottom*aspect, cpradius);
+			//dc.DrawRectangle(right*aspect-cpradius*2, bottom*aspect-cpradius*2,cpradius*2,cpradius*2);
 			//DrawRectangle (right*aspect-1-cpradius, bottom*aspect-cpradius, right*aspect-1+cpradius, bottom*aspect+cpradius)
 		}
 
@@ -292,65 +294,125 @@ class CropPanel: public PicProcPanel
 
 		void OnKey(wxKeyEvent& event)
 		{
+			int newleft, newright, newtop, newbottom;
 			int k = event.GetKeyCode();
-			if (k!=WXK_LEFT & k!=WXK_RIGHT & k!=WXK_UP & k!=WXK_DOWN) return;
-			//wxMessageBox("Key Event!!!");
+
 			int inc = 1;
 			if (event.ShiftDown()) inc = 10;
 			if (event.ControlDown()) inc = 100;
-			if (isaspect) {  //change left, top
-				int width = left - right;
-				int height = bottom - top;
-				double haspect = (double) height / (double) width;
-				double waspect = (double) width / (double) height;
-				switch (k)
+
+			if (event.AltDown()) {   //move
+				switch ( event.GetKeyCode() )
 				{
 					case WXK_LEFT:
-						if (!(left-inc < 0)) {
+						if (left-inc > 0) {
 							left-=inc;
-							bottom-=inc*haspect;
+							right-=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
 						}
 						break;
 					case WXK_RIGHT:
-						left+=inc;
-						bottom+=inc*haspect;
+						if (right+inc < iw) {
+							left+=inc;
+							right+=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 					case WXK_UP:
-						if (!(top-inc < 0)) {
+						if (top-inc > 0) {
 							top-=inc;
-							right-=inc*waspect;
+							bottom-=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
 						}
 						break;
 					case WXK_DOWN:
-						top+=inc;
-						right+= inc*waspect;
+						if (bottom+inc < ih) {
+							top+=inc;
+							bottom+=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 				}
 				Refresh();
 				Update();
 				t->Start(500,wxTIMER_ONE_SHOT);
 			}
+			else if (isaspect) {  //change left, top
+				//int width = left - right;
+				//int height = bottom - top;
+				//double haspect = (double) height / (double) width;
+				//double waspect = (double) width / (double) height;
+				double haspect = iha;
+				double waspect = iwa;
+				switch (k)
+				{
+					case WXK_LEFT:
+						newleft = left-inc;
+						newbottom = top + ((right - newleft)*haspect); 
+						if (!(newleft<0) & !(newbottom>ih) ) {
+							left=newleft;
+							bottom=newbottom;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
+						break;
+					case WXK_RIGHT:
+						newleft = left+inc;
+						newbottom = top + ((right - newleft)*haspect); 
+						if (!(newleft<0) & !(newbottom>ih) ) {
+							left=newleft;
+							bottom=newbottom;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
+						break;
+					case WXK_UP:
+						newtop = top-inc;
+						newright = left + ((bottom-newtop)*waspect);
+						if (!(newtop<0) & !(newright>iw) ) {
+							top = newtop;
+							right = newright;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
+						break;
+					case WXK_DOWN:
+						newtop = top+inc;
+						newright = left + ((bottom-newtop)*waspect);
+						if (!(newtop<0) & !(newright>iw) ) {
+							top = newtop;
+							right = newright;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
+						break;
+				}
+
+			}
 			else {  //change right, bottom
 				switch ( event.GetKeyCode() )
 				{
 					case WXK_LEFT:
-						right-=inc;
+						if (right-inc > left) {
+							right-=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 					case WXK_RIGHT:
-						right+=inc;
-						if (right > iw) right = iw;
+						if (right+inc < iw) {
+							right+=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 					case WXK_UP:
-						bottom-=inc;
+						if (bottom-inc > top) {
+							bottom-=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 					case WXK_DOWN:
-						bottom+=inc;
-						if (bottom > ih) bottom = ih;
+						if (bottom+inc < ih) {
+							bottom+=inc;
+							Refresh(); Update(); t->Start(500,wxTIMER_ONE_SHOT);
+						}
 						break;
 				}
-				Refresh();
-				Update();
-				t->Start(500,wxTIMER_ONE_SHOT);
 			}
 		}
 
