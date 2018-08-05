@@ -58,15 +58,9 @@ class CropPanel: public PicProcPanel
 
 		~CropPanel()
 		{
-			//q->getCommandTree()->Unbind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
+
 		}
 		
-		void OnTestKey(wxKeyEvent& event)
-		{
-			int k = event.GetKeyCode();
-			//int k = event.GetUnicodeKey();
-			wxMessageBox(wxString::Format("%d",k));
-		}
 		
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
 		{
@@ -122,13 +116,10 @@ class CropPanel: public PicProcPanel
 			dc.DrawLine(left*aspect, bottom*aspect, left*aspect, top*aspect);
 			dc.SetBrush(*wxYELLOW_BRUSH);
 			dc.SetPen(*wxYELLOW_PEN);
-			dc.DrawRectangle(left*aspect-cpradius, top*aspect-cpradius,cpradius*2,cpradius*2);
-			//dc.DrawRectangle(left*aspect, top*aspect,cpradius*2,cpradius*2);
+			dc.DrawRectangle(left*aspect+1, top*aspect+1,cpradius*2,cpradius*2);
 			dc.SetBrush(*wxRED_BRUSH);
 			dc.SetPen(*wxRED_PEN);
-			dc.DrawCircle(right*aspect-1, bottom*aspect, cpradius);
-			//dc.DrawRectangle(right*aspect-cpradius*2, bottom*aspect-cpradius*2,cpradius*2,cpradius*2);
-			//DrawRectangle (right*aspect-1-cpradius, bottom*aspect-cpradius, right*aspect-1+cpradius, bottom*aspect+cpradius)
+			dc.DrawRectangle((right*aspect-cpradius*2)-1, (bottom*aspect-cpradius*2),cpradius*2,cpradius*2);
 		}
 
 		void OnMouseDown(wxMouseEvent& event)
@@ -138,15 +129,15 @@ class CropPanel: public PicProcPanel
 
 			int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
 
-			if ((mousex > left*aspect-radius) & (mousex < left*aspect+radius)) {
-				if ((mousey > top*aspect-landingradius) & (mousey < top*aspect+landingradius)) {
+			if ((mousex > left*aspect) & (mousex < left*aspect+radius*2)) {
+				if ((mousey > top*aspect) & (mousey < top*aspect+landingradius*2)) {
 					node = 1;  //top left
 					cropmode = 1;
 					isaspect = true;
 				}
 			}
-			else if ((mousex > right*aspect-landingradius) & (mousex < right*aspect+landingradius)) {
-				if ((mousey > bottom*aspect-landingradius) & (mousey < bottom*aspect+landingradius)) {
+			else if ((mousex > right*aspect-landingradius*2) & (mousex < right*aspect)) {
+				if ((mousey > bottom*aspect-landingradius*2) & (mousey < bottom*aspect)) {
 					node = 2; //bottom right
 					cropmode = 0;
 					isaspect = false;
@@ -244,9 +235,6 @@ class CropPanel: public PicProcPanel
 								right = iw;
 							}
 							int width = right-left;
-							//if (top+(dx/aspect)*iha > 0)
-							//	top = top+(dx/aspect)*iha;
-							//else, do something to preserve aspect...
 						}
 						else {
 							if (bottom - dy/aspect >top) bottom -= dy/aspect;
@@ -255,9 +243,6 @@ class CropPanel: public PicProcPanel
 								bottom = ih;
 							}
 							int height = bottom-top;
-							//if (right + height*iwa < iw)
-							//	right = left + height*iwa;
-							//else, do something to preserve aspect...
 						}
 						break;
 					case 3:
@@ -338,17 +323,11 @@ class CropPanel: public PicProcPanel
 				t->Start(500,wxTIMER_ONE_SHOT);
 			}
 			else if (isaspect) {  //change left, top
-				//int width = left - right;
-				//int height = bottom - top;
-				//double haspect = (double) height / (double) width;
-				//double waspect = (double) width / (double) height;
-				double haspect = iha;
-				double waspect = iwa;
 				switch (k)
 				{
 					case WXK_LEFT:
 						newleft = left-inc;
-						newbottom = top + ((right - newleft)*haspect); 
+						newbottom = top + ((right - newleft)*iha); 
 						if (!(newleft<0) & !(newbottom>ih) ) {
 							left=newleft;
 							bottom=newbottom;
@@ -357,7 +336,7 @@ class CropPanel: public PicProcPanel
 						break;
 					case WXK_RIGHT:
 						newleft = left+inc;
-						newbottom = top + ((right - newleft)*haspect); 
+						newbottom = top + ((right - newleft)*iha); 
 						if (!(newleft<0) & !(newbottom>ih) ) {
 							left=newleft;
 							bottom=newbottom;
@@ -366,7 +345,7 @@ class CropPanel: public PicProcPanel
 						break;
 					case WXK_UP:
 						newtop = top-inc;
-						newright = left + ((bottom-newtop)*waspect);
+						newright = left + ((bottom-newtop)*iwa);
 						if (!(newtop<0) & !(newright>iw) ) {
 							top = newtop;
 							right = newright;
@@ -375,7 +354,7 @@ class CropPanel: public PicProcPanel
 						break;
 					case WXK_DOWN:
 						newtop = top+inc;
-						newright = left + ((bottom-newtop)*waspect);
+						newright = left + ((bottom-newtop)*iwa);
 						if (!(newtop<0) & !(newright>iw) ) {
 							top = newtop;
 							right = newright;
