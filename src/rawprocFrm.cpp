@@ -1702,15 +1702,18 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	//	}
 	//}
 
+	wxString cmd = "(none),-,-";
+
 	if (commandtree->IsEmpty()) return;
 
 	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
 		wxMessageBox("Note: Image does not have a source profile, only 'assign' is valid");
+		cmd = "(none),assign,-";
 	}
 
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", "(none),-,-", commandtree, pic);
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
