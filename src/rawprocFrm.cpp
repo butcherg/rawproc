@@ -428,11 +428,15 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 
+	//parm imageinfo.libraw: Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)
+	int librawinclude = atoi(wxString(myConfig::getConfig().getValueOrDefault("imageinfo.libraw","0")).c_str());
+
 	exif.Append(wxString::Format("<b>Image Information:</b><br>\nWidth: %d Height: %d<br>\nColors: %d Original Image Bits: %s<br>\n<br>\n",dib.getWidth(), dib.getHeight(), dib.getColors(), dib.getBitsStr()));
 
 	std::map<std::string,std::string> e =  dib.getInfo();
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
 		if (it->first == "ExifTag") continue;
+		if (it->first.find("Libraw") != std::string::npos) if (librawinclude == 0) continue;
 		if (it->first == "ExposureTime") {
 			float exp = atof(it->second.c_str());
 			if (exp > 1.0)
