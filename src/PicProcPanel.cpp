@@ -2,7 +2,8 @@
 #include "PicProcPanel.h"
 
 
-PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params): wxPanel(parent) 
+PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params): 
+	wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, !wxTAB_TRAVERSAL) 
 {
 	q = proc;
 	p = params;

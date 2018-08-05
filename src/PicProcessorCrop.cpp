@@ -43,6 +43,7 @@ class CropPanel: public PicProcPanel
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
 
 			t = new wxTimer(this);
+			SetFocus();
 
 			Bind(wxEVT_SIZE,&CropPanel::OnSize, this);
 			Bind(wxEVT_PAINT,&CropPanel::OnPaint, this);
@@ -58,6 +59,13 @@ class CropPanel: public PicProcPanel
 		~CropPanel()
 		{
 			//q->getCommandTree()->Unbind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
+		}
+		
+		void OnTestKey(wxKeyEvent& event)
+		{
+			int k = event.GetKeyCode();
+			//int k = event.GetUnicodeKey();
+			wxMessageBox(wxString::Format("%d",k));
 		}
 		
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
@@ -148,6 +156,7 @@ class CropPanel: public PicProcPanel
 				}
 			}
 			mousemoved = false;
+			SetFocus();
 			Refresh();
 			Update();
 			event.Skip();
@@ -283,6 +292,9 @@ class CropPanel: public PicProcPanel
 
 		void OnKey(wxKeyEvent& event)
 		{
+			int k = event.GetKeyCode();
+			if (k!=WXK_LEFT & k!=WXK_RIGHT & k!=WXK_UP & k!=WXK_DOWN) return;
+			//wxMessageBox("Key Event!!!");
 			int inc = 1;
 			if (event.ShiftDown()) inc = 10;
 			if (event.ControlDown()) inc = 100;
@@ -291,7 +303,7 @@ class CropPanel: public PicProcPanel
 				int height = bottom - top;
 				double haspect = (double) height / (double) width;
 				double waspect = (double) width / (double) height;
-				switch ( event.GetKeyCode() )
+				switch (k)
 				{
 					case WXK_LEFT:
 						if (!(left-inc < 0)) {
