@@ -38,8 +38,10 @@ class ColorspacePanel: public PicProcPanel
 			intents.Add("absolute_colorimetric");
 			
 			intentselect = new wxRadioBox (this, COLORINTENT, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
+			intentselect->SetSelection(intentselect->FindString("relative_colorimetric"));  //default
 			if (parms[2] != "-") intentselect->SetSelection(intentselect->FindString(parms[2]));
 			s->Add(intentselect,flags);
+			if (parms[1] == "assign") intentselect->Enable(false);
 			
 			b->Add(s,flags);
 			
