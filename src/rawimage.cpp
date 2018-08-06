@@ -1,6 +1,3 @@
-#ifndef USE_DCRAW
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -9,30 +6,36 @@
 #include <map>
 #include <vector>
 #include "gimage/strutil.h"
+
 #ifndef USE_DCRAW
 #include <libraw/libraw.h>
+#else
+#include <unistd.h>
 #endif
+
 #include <lcms2.h>
 #include "gimage/gimage.h"
 #include "nikonlensid.h"
 
 
 #ifdef USE_DCRAW
-char dcrawversion[128] = "dcraw";
+//char dcrawversion[128] = "dcraw";
 std::string dcrawpath;
+void setdcrawpath(std::string path) {dcrawpath = path;}
+std::string getdcrawpath() {return dcrawpath;}
 #endif
 
 
 #ifdef USE_DCRAW
-const char * librawVersion()
+std::string librawVersion()
 {
-	return &dcrawversion;
+	return "dcraw";
 }
 #else
-const char * librawVersion()
+std::string librawVersion()
 {
 
-	return LibRaw::version();
+	return std::string(LibRaw::version());
 }
 #endif  //USE_DCRAW
 
@@ -123,7 +126,7 @@ char * _loadRAW(const char *filename,
 			unsigned  *icclength=0)
 {
 
-	int w, h, c, b;
+	//int w, h, c, b;
 	char * img;
 	char imgdata[4096];
 	
@@ -135,12 +138,13 @@ char * _loadRAW(const char *filename,
 	size_t result;
 	unsigned char * image;
 	unsigned maxval;
-	unsigned width, height, bpp, colors, icclength;
+	//unsigned width, height, bpp, colors, icclength;
+	unsigned w, h, b, c, iccl;
 	BPP bits;
-	std::map<std::string,std::string> imgdata;
-	colors = 3;
+	//std::map<std::string,std::string> imgdata;
+	//*numcolors = 3;
 
-	if (access (dcrawpath.c_str(), X_OK)) return gImage();
+	if (access (dcrawpath.c_str(), X_OK)) return NULL;
 
 	std::string cmd = dcrawpath;
 	cmd.append(" -c ");
@@ -155,28 +159,58 @@ char * _loadRAW(const char *filename,
 #else
 	FILE* pipe = popen(cmd.c_str(), "r");
 #endif
-	if (!pipe) return gImage();
+	if (!pipe) return NULL;
 	result = fscanf(pipe, "%s", magic);
-	result = fscanf(pipe, "%d", &width);
-	result = fscanf(pipe, "%d", &height);
+	result = fscanf(pipe, "%d", &w);
+	result = fscanf(pipe, "%d", &h);
 	result = fscanf(pipe, "%d", &maxval);
 	fgetc(pipe);
 	if (maxval < 256) { 
 		bits = BPP_8;
-		image = new unsigned char[width*height*3];
-		result = fread(image, 1, width*height*3, pipe);
+		*numbits = 8;
+		image = new unsigned char[w*h*3];
+		result = fread(image, 1, w*h*3, pipe);
 	}
 	else {
 		bits = BPP_16;
-		image = new unsigned char[width*height*3*2];
-		result = fread(image, 2, width*height*3, pipe);
+		*numbits = 16;
+		image = new unsigned char[w*h*3*2];
+		result = fread(image, 2, w*h*3, pipe);
 		unsigned short * img = (unsigned short *) image;
-		for (int i=0; i< (width*height*3); i++) img[i] = ((img[i] & 0x00ff)<<8)|((img[i] & 0xff00)>>8);
+		for (int i=0; i< (w*h*3); i++) img[i] = ((img[i] & 0x00ff)<<8)|((img[i] & 0xff00)>>8);
 	}
 	pclose(pipe);
 
+	*width = w;
+	*height = h;
+	*numcolors = 3;
 
-	return image;
+
+	cmsHPROFILE profile = NULL;
+	cmsUInt32Number size;
+	if (p.find("cameraprofile") != p.end()) {
+		if (p["cameraprofile"] != "") {
+			if (p["cameraprofile"].find_first_of(",") != std::string::npos) 
+				profile = gImage::makeLCMSAdobeCoeffProfile(p["cameraprofile"]);
+			else
+				profile = gImage::myCmsOpenProfileFromFile((gImage::getProfilePath()+p["cameraprofile"]));
+		}
+	}
+	if (profile) {
+		//gImage::makeICCProfile(profile, icc_m, size);
+		//delete if the above works: 
+		cmsSaveProfileToMem(profile, NULL, &size);
+		*icclength = size;
+		*icc_m = new char[size];
+		cmsSaveProfileToMem(profile, *icc_m, &size);
+	}
+	else {
+		icc_m=NULL;
+		*icclength = 0;
+	}
+
+
+	return (char *) image;
 }
 #else
 char * _loadRAW(const char *filename, 
@@ -846,6 +880,5 @@ char * _loadRAW(const char *filename,
 }
 #endif //USE_DCRAW
 
-#endif
 
 

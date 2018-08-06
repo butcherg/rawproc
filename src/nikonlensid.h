@@ -2,6 +2,7 @@
 #define NIKONLENSID_H
 
 #include <string>
+#include <stdint.h>
 
 #ifdef WIN32
 #include <winsock2.h> 

@@ -2704,7 +2704,7 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 #ifdef USE_DCRAW
 void gImage::setdcrawPath(std::string path)
 {
-	dcrawpath = path;
+	setdcrawpath(path);
 }
 #endif
 
