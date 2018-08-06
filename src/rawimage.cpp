@@ -134,7 +134,7 @@ char * _loadRAW(const char *filename,
 
 	std::map<std::string,std::string> p = parseparams(params);
 
-	char magic[20];
+	char m[20];
 	size_t result;
 	unsigned char * image;
 	unsigned maxval;
@@ -160,10 +160,17 @@ char * _loadRAW(const char *filename,
 	FILE* pipe = popen(cmd.c_str(), "r");
 #endif
 	if (!pipe) return NULL;
-	result = fscanf(pipe, "%s", magic);
+	result = fscanf(pipe, "%s", m);
 	result = fscanf(pipe, "%d", &w);
 	result = fscanf(pipe, "%d", &h);
 	result = fscanf(pipe, "%d", &maxval);
+
+	std::string magic = std::string(m);
+	if (magic == "P5")
+		*numcolors = 1;
+	else
+		*numcolors = 3;
+
 	fgetc(pipe);
 	if (maxval < 256) { 
 		bits = BPP_8;
@@ -183,7 +190,7 @@ char * _loadRAW(const char *filename,
 
 	*width = w;
 	*height = h;
-	*numcolors = 3;
+	
 
 
 	cmsHPROFILE profile = NULL;
