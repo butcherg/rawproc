@@ -1338,7 +1338,7 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		return;
 	}
 	if (propdiag == nullptr) {
-		propdiag = new PropertyDialog(this, wxID_ANY, "Properties");
+		propdiag = new PropertyDialog(this, wxID_ANY, "Properties", wxDefaultPosition, wxSize(640,480));
 		propdiag->LoadConfig();
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}

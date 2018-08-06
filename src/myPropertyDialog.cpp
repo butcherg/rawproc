@@ -63,8 +63,7 @@ wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 	sz = new wxBoxSizer(wxVERTICAL);
 	ct = new wxBoxSizer(wxHORIZONTAL);
 
-	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition,
- wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
+	pg = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, size, wxPG_BOLD_MODIFIED | wxPG_HIDE_MARGIN);
 	SetExtraStyle(GetExtraStyle() & ~wxWS_EX_BLOCK_EVENTS);
 	
 	sz->Add(pg, 1, wxEXPAND | wxALL, 3);
