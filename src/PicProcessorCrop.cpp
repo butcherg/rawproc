@@ -286,7 +286,16 @@ class CropPanel: public PicProcPanel
 			if (event.ShiftDown()) inc = 10;
 			if (event.ControlDown()) inc = 100;
 
-			if (event.AltDown()) {   //move
+			if (k == WXK_SPACE) {  //toggle aspect
+				//node = 1;  //top left
+				//cropmode = 1;
+				if (isaspect)
+					isaspect = false;
+				else
+					isaspect = true;
+				Refresh(); Update();
+			}
+			else if (event.AltDown()) {   //move
 				switch ( event.GetKeyCode() )
 				{
 					case WXK_LEFT:
