@@ -64,6 +64,15 @@ class ColorspacePanel: public PicProcPanel
 		{
 
 		}
+
+		void setParams(wxString profile, wxString oper, wxString intent)
+		{
+			if  (oper == "assign")
+				q->setParams(wxString::Format("%s,%s",profile, oper));
+			else
+				q->setParams(wxString::Format("%s,%s,%s",profile, oper, intent));
+
+		}
 		
 		void selectProfile(wxCommandEvent& event)
 		{
@@ -81,9 +90,11 @@ class ColorspacePanel: public PicProcPanel
 			if (fname.FileExists()) {
 				edit->SetValue(fname.GetFullName());
 				if (pname.GetPath() == fname.GetPath())
-					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullName(), operstr,intentstr));
+					setParams(fname.GetFullName(), operstr,intentstr);
+					//q->setParams(wxString::Format("%s,%s,%s",fname.GetFullName(), operstr,intentstr));
 				else
-					q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
+					setParams(fname.GetFullPath(), operstr,intentstr);
+					//q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
 				q->processPic();
 			}
 			event.Skip();
@@ -114,7 +125,13 @@ class ColorspacePanel: public PicProcPanel
 			if (bpc->GetValue()) intentstr.Append(",bpc");
 
 			if (profilestr != "(none)") {
-				q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
+				setParams(profilestr, operstr, intentstr);
+/*
+				if  (operstr == "assign")
+					q->setParams(wxString::Format("%s,%s",profilestr, operstr));
+				else
+					q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
+*/
 				q->processPic();
 			}
 			event.Skip();
@@ -154,8 +171,6 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	bool bpc = false;
 	if (cp.Count() >=3) intentstr = cp[2];
 	if (cp.Count() >=4) if (cp[3] == "bpc") bpc =  true;
-	
-	if (bpc) ((wxFrame*) m_display->GetParent())->SetStatusText("colorspace w/bpc...");
 	
 	cmsUInt32Number intent = INTENT_PERCEPTUAL;
 	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
