@@ -19,53 +19,67 @@
 #define WBGREEN 6404
 #define WBBLUE 6405
 
-class myFloatCtrl: public wxTextCtrl
+
+class myFloatCtrl: public wxControl
 {
 	public:
 		myFloatCtrl(wxWindow *parent, wxWindowID id, float value=0.0, unsigned precision=1, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
-			wxTextCtrl(parent, id, wxString::Format("%0.1f",value), pos, size, wxTE_PROCESS_ENTER)
+			wxControl(parent, id, pos, size, wxBORDER_NONE)
 		{
 			v = value;
 			p = precision;
 			fmt = "%0.";
 			fmt.Append(wxString::Format("%d",p));
 			fmt.Append("f");
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
+			textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
+			b->Add(textbox,0,wxALL,0);
+			SetSizerAndFit(b);
 			Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
+			Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
 		}
 		
 		float GetFloatValue()
 		{
-			return atof(GetValue().c_str());
+			return v;
 		}
 		
 		void SetFloatValue(double value)
 		{
-			SetValue(wxString::Format(fmt,value));
+			v = value;
+			textbox->SetValue(wxString::Format(fmt,value));
 		}
 		
 		void OnWheel(wxMouseEvent& event)
 		{
-			double val = atof(GetValue().c_str());
+			v = atof(textbox->GetValue().c_str());
 			double inc = pow(10,-((float)p));
 			if (event.ShiftDown()) inc *= 10.0;
 			if (event.ControlDown()) inc *= 100.0;
 			if (event.GetWheelRotation() > 0) { 
-				val += inc;
+				v += inc;
 			}
 			else {
-				val -= inc;
+				v -= inc;
 			}
 			
-			SetValue(wxString::Format(fmt,val));
+			textbox->SetValue(wxString::Format(fmt,v));
 
 			Refresh();
 			event.Skip();
 		}
+
+		void OnEnter(wxCommandEvent& event)
+		{
+			v = atof(textbox->GetValue().c_str());
+			event.Skip();
+		}
 		
 	private:
-			double v;
-			unsigned p;
-			wxString fmt;
+		double v;
+		unsigned p;
+		wxString fmt;
+		wxTextCtrl *textbox;
 	
 };
 
