@@ -63,7 +63,34 @@ bool _loadRAWInfo(const char *filename,
 			unsigned *numbits, 
 			std::map<std::string,std::string> &info)
 {
-	return false;
+	std::string exif;
+
+	std::string cmd = dcrawpath;
+	cmd.append(" -i -v ");
+	cmd.append(filename);
+
+#ifdef WIN32
+	FILE* pipe = _popen(cmd.c_str(), "rb");
+#else
+	FILE* pipe = popen(cmd.c_str(), "r");
+#endif
+	if (!pipe) return false;
+
+	while (!feof(pipe)) {
+		char c = (char) fgetc(pipe);
+		if (c == '\r') continue;
+		exif.append(&c);
+	}
+	pclose(pipe);
+
+	std::vector<std::string> lines = split(exif,"\n");
+	//for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
+	for (unsigned i=0; i<lines.size(); i++) {
+printf("line: %s\n",lines[i].c_str());
+		std::vector<std::string> nvpair = split(lines[i], ":");
+		info[nvpair[0]] = nvpair[1]; 
+	}
+	return true;
 }
 #else
 bool _loadRAWInfo(const char *filename, 
@@ -190,8 +217,112 @@ char * _loadRAW(const char *filename,
 
 	*width = w;
 	*height = h;
-	
 
+//exif:
+	
+	std::string exif;
+
+	cmd = dcrawpath;
+	cmd.append(" -i -v ");
+	cmd.append(filename);
+
+#ifdef WIN32
+	FILE* epipe = _popen(cmd.c_str(), "rb");
+#else
+	FILE* epipe = popen(cmd.c_str(), "r");
+#endif
+	if (!epipe) return NULL;
+
+	while (!feof(epipe)) {
+		char charac = (char) fgetc(epipe);
+		if (charac == '\r') continue;
+		exif.append(&charac,1);
+	}
+	pclose(epipe);
+
+	std::vector<std::string> lines = split(exif,"\n");
+	
+	for (unsigned i=0; i<lines.size(); i++) {
+		std::vector<std::string> nvpair = bifurcate(lines[i], ':');
+		if (nvpair.size() < 2) continue;
+		if (nvpair[1][0] == ' ') nvpair[1].erase(0,1);
+		if (nvpair[0] == "Camera") {
+			std::vector<std::string> makemodel = bifurcate(nvpair[1],' ');
+			if (makemodel.size() == 2) {
+				info["Make"] = makemodel[0];
+				info["Model"] = makemodel[1];
+			}
+		}
+		if (nvpair[0] == "ISO speed") {
+			info["ISOSpeedRatings"] = nvpair[1];
+		}
+		if (nvpair[0] == "Owner") {
+			info["Artist"] = nvpair[1];
+		}
+		if (nvpair[0] == "Focal length") {
+			std::vector<std::string> focal = bifurcate(nvpair[1],' '); //remove 'mm'
+			if (focal.size() == 2) info["FocalLength"] = focal[0];
+		}
+		if (nvpair[0] == "Aperture") {
+			std::vector<std::string> aperture = bifurcate(nvpair[1],'/'); //remove 'f/'
+			if (aperture.size() == 2) info["FNumber"] = aperture[1];
+		}
+		if (nvpair[0] == "Shutter") {
+			std::vector<std::string> ss = bifurcate(nvpair[1],' '); //remove 'sec'
+			std::vector<std::string> sr = split(ss[0],"/"); //parse fraction
+			if (sr.size() >= 2) 
+				info["ExposureTime"] = tostr(1.0/atof(sr[1].c_str()));
+			else
+				info["ExposureTime"] = sr[0];
+		}
+		if (nvpair[0] == "Timestamp") {
+			std::vector<std::string> ts = split(nvpair[1]," "); //parse dcraw timestamp
+			if (ts.size() >= 5) {
+				std::string month;
+				if (ts[1] == "Jan") month = "01";
+				if (ts[1] == "Feb") month = "02";
+				if (ts[1] == "Mar") month = "03";
+				if (ts[1] == "Apr") month = "04";
+				if (ts[1] == "May") month = "05";
+				if (ts[1] == "Jun") month = "06";
+				if (ts[1] == "Jul") month = "07";
+				if (ts[1] == "Aug") month = "08";
+				if (ts[1] == "Sep") month = "09";
+				if (ts[1] == "Oct") month = "10";
+				if (ts[1] == "Nov") month = "11";
+				if (ts[1] == "Dec") month = "12";
+				info["DateTime"].append(ts[4]);
+				info["DateTime"].append(":");
+				info["DateTime"].append(month);
+				info["DateTime"].append(":");
+				info["DateTime"].append(ts[2]);
+				info["DateTime"].append(" ");
+				info["DateTime"].append(ts[3]);
+			}
+			else info["dcrawTimestamp"] = nvpair[1];
+		}
+		if (nvpair[0] == "Daylight multipliers") {
+			//for (unsigned i=0; i<nvpair[1].size(); i++) if (nvpair[1][i] == ' ') nvpair[1][i] = ',';
+			//info["LibrawWhiteBalance"] = nvpair[1];
+			std::vector<std::string> mults = split(nvpair[1], " ");
+			if (mults.size() >=3) {
+				double rmult = atof(mults[0].c_str());
+				double gmult = atof(mults[1].c_str());
+				double bmult = atof(mults[2].c_str());
+				rmult /= gmult;
+				bmult /= gmult;
+				gmult = 1.0;
+				info["LibrawWhiteBalance"] = tostr(rmult);
+				info["LibrawWhiteBalance"].append(",");
+				info["LibrawWhiteBalance"].append(tostr(gmult));
+				info["LibrawWhiteBalance"].append(",");
+				info["LibrawWhiteBalance"].append(tostr(bmult));
+			}
+		}
+		info["Orientation"] = "1";
+	}
+
+//end exif.
 
 	cmsHPROFILE profile = NULL;
 	cmsUInt32Number size;

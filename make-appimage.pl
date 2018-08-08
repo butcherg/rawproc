@@ -33,7 +33,15 @@ mkdir "$rootdir/usr/lib";
 #copy each arg to bin:
 foreach $arg (@ARGV) {
 	($vol,$dir,$fil) = File::Spec->splitpath($arg);
-	cp $arg, "$rootdir/usr/bin/";
+	if (-d $arg) {
+		mkdir "$rootdir/usr/bin/$fil";
+		for my $file (glob "$arg/*") {
+			cp $file, "$rootdir/usr/bin/$fil/";
+		}
+	}
+	else {
+		cp  $arg, "$rootdir/usr/bin/";
+	}
 }
 chmod 0775, "$rootdir/usr/bin/$file";
 

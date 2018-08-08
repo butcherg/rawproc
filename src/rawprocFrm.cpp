@@ -1372,7 +1372,7 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 
 	SetStatusText(wxString::Format("Changed %s to %s.", propname, propval));
 	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) propval.mb_str());
-	if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
+	if (!myConfig::getConfig().flush()) SetStatusText("Write to configuration file failed.");
 
 	//check for properties that should update immediately:
 	if (propname.Find("display.cms") != wxNOT_FOUND)

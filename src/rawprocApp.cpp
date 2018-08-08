@@ -48,12 +48,17 @@ bool rawprocFrmApp::OnInit()
 	frame->Show();
 
 	wxString configfile;
-	//wxString conf_cwd = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
+	wxString conf_exe = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	//wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
 
 	wxString conf_cwd = wxString(getCwdConfigFilePath().c_str());
 	wxString conf_configd = wxString(getAppConfigFilePath().c_str());
 
+	//config file search order: 
+	//	1) path specified in the -c parameter; 
+	//	2) current working directory; 
+	//	3) executable directory; 
+	//	4) OS-defined user data directory 
 	if (cmdline.Found("c", &configfile)) {
 		if (wxFileName::FileExists(configfile)) {
 			wxFileName cfile(configfile);
@@ -61,6 +66,10 @@ bool rawprocFrmApp::OnInit()
 			frame->SetConfigFile(cfile.GetFullPath());
 			myConfig::loadConfig(std::string(cfile.GetFullPath().c_str()));
 		}
+	}
+	else if (wxFileName::FileExists(conf_exe)) {
+		frame->SetConfigFile(conf_exe);
+		myConfig::loadConfig(std::string(conf_exe.c_str()));
 	}
 	else if (wxFileName::FileExists(conf_cwd)) {
 		frame->SetConfigFile(conf_cwd);
