@@ -103,10 +103,10 @@ std::string myConfig::getValue(std::string name)
 {
 	if (temp) {
 		if (tempconfig.count(name) != 0)
-			return tempconfig[name];
+			return replace_variables(tempconfig[name]);
 	}
 	if (exists(name))
-		return defaultconfig[name];
+		return replace_variables(defaultconfig[name]);
 	else
 		return "";
 }
@@ -114,7 +114,7 @@ std::string myConfig::getValue(std::string name)
 std::string myConfig::getValue(std::string section, std::string name)
 {
 	if (exists(section,name))
-		return sectionconfig[section][name];
+		return replace_variables(sectionconfig[section][name]);
 	else
 		return "";
 }
@@ -124,10 +124,10 @@ std::string myConfig::getValueOrDefault(std::string name, std::string defaultval
 	std::string defval = defaultval;
 	if (temp) {
 		if (tempconfig.count(name) != 0)
-			return tempconfig[name];
+			return replace_variables(tempconfig[name]);
 	}
 	if (exists(name))
-		return defaultconfig[name];
+		return replace_variables(defaultconfig[name]);
 	else
 		return defval;
 }
@@ -136,7 +136,7 @@ std::string myConfig::getValueOrDefault(std::string section, std::string name, s
 {
 	std::string defval = defaultval;
 	if (exists(section,name))
-		return sectionconfig[section][name];
+		return replace_variables(sectionconfig[section][name]);
 	else
 		return defval;
 }
