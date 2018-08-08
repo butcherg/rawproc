@@ -2431,10 +2431,15 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 std::string gImage::Stats()
 {
 	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
+	pix maxpix, minpix;
 	long pcount = 0;
 	rmin = image[0].r; rmax = image[0].r; gmin=image[0].g; gmax = image[0].g; bmin = image[0].b; bmax = image[0].b;
 	tmin = SCALE_CURVE; tmax = 0.0;
 	int iter = 0;
+
+	std::string stats_string;
+	double toneupperthreshold = 0.95; 
+	double tonelowerthreshold = 0.0;
 
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
@@ -2448,11 +2453,23 @@ std::string gImage::Stats()
 			if (image[pos].g < gmin) gmin = image[pos].g;
 			if (image[pos].b < bmin) bmin = image[pos].b;
 			double tone = (image[pos].r + image[pos].g + image[pos].b) / 3.0; 
-			if (tone > tmax) tmax = tone; if (tone < tmin) tmin = tone;
+			if (tone > tmax & tone < toneupperthreshold) {tmax = tone; maxpix = image[pos];}
+			if (tone < tmin & tone > tonelowerthreshold) {tmin = tone; minpix = image[pos];}
 			iter++;
 		}
 	}
-	return string_format("rmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\ntonemin: %f\ttonemax: %f\n\nrmean: %f\tgmean: %f\tbmean: %f", rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount);
+
+	stats_string = string_format("channels:\nrmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\n", 
+		rmin, rmax, gmin, gmax, bmin, bmax);
+
+	stats_string.append(string_format("tones:\nmin: %f\tmax: %f\nrmean: %f\ngmean: %f\nbmean: %f\n\n", 
+		tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount));
+
+	stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
+		tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
+
+	return stats_string;
+
 }
 
 //calculate averages of red, green, and blue channels:

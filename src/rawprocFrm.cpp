@@ -448,9 +448,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
 	}
 	char buff[4096];
-	exif.Append("<br><b>Image Stats:</b><br><pre>\n");
-	exif.Append(dib.Stats().c_str());
-	exif.Append("</pre><br>\n");
+
 
 	char *profile = dib.getProfile();
 	unsigned profile_length = dib.getProfileLength();
@@ -465,6 +463,10 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		else exif.Append(wxString::Format("<br>\nICC Profile: failed (%d)<br>\n",profile_length));
 	}
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
+
+	exif.Append("<hr><b>Image Stats:</b><pre>\n");
+	exif.Append(dib.Stats().c_str());
+	exif.Append("</pre>\n");
 
 	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxSize(400,500));
 	dlg.ShowModal();
