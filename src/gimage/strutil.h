@@ -16,6 +16,7 @@ bool file_exists(const std::string& filename);
 std::string getAppConfigFilePath();
 std::string getCwdConfigFilePath();
 
+void replace_all(std::string& str, const std::string& from, const std::string& to);
 std::vector<std::string> split(std::string s, std::string delim);
 std::vector<std::string> bifurcate(std::string strg, char c = ' ');
 std::map<std::string, std::string> parseparams(std::string params);

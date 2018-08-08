@@ -28,6 +28,9 @@ public:
 	void deleteValue(std::string name);
 	std::map<std::string, std::string> getDefault();
 	std::map<std::string, std::string> getSection(std::string section);
+	
+	//builds a list of variables to replace in property values where $(name) is found:
+	void set_variable(std::string name, std::string value);
 
 	void enableTempConfig(bool e);
 	bool getTempConfig();
@@ -36,6 +39,9 @@ private:
 	std::string configfile;
 	static std::map<std::string, std::string> defaultconfig;
 	static std::map<std::string, std::map<std::string,std::string> > sectionconfig;
+	
+	std::string replace_variables(std::string str);
+	std::map<std::string, std::string> variables;
 
 	bool temp;
 	std::map<std::string, std::string> tempconfig;

@@ -142,6 +142,24 @@ std::map<std::string, std::string> parseparams(std::string params)
 	return p;
 }
 
+//https://stackoverflow.com/questions/5343190/how-do-i-replace-all-instances-of-a-string-with-another-string/
+void replace_all(std::string& str, const std::string& from, const std::string& to) 
+{
+    if(from.empty())
+        return;
+    std::string wsRet;
+    wsRet.reserve(str.length());
+    size_t start_pos = 0, pos;
+    while((pos = str.find(from, start_pos)) != std::string::npos) {
+        wsRet += str.substr(start_pos, pos - start_pos);
+        wsRet += to;
+        pos += from.length();
+        start_pos = pos;
+    }
+    wsRet += str.substr(start_pos);
+    str.swap(wsRet); // faster than str = wsRet;
+}
+
 
 std::string string_format(const std::string fmt, ...) 
 {

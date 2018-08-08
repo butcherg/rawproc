@@ -82,6 +82,22 @@ bool myConfig::flush()
 	return true;
 }
 
+std::string myConfig::replace_variables(std::string str)
+{
+	std::string strng = str;
+	for (std::map<std::string, std::string>::iterator it=variables.begin(); it!=variables.end(); ++it) {
+		std::string var = "$(";
+		var.append(it->first);
+		var.append(")");
+		replace_all(strng, var, it->second);
+	}
+	return strng;
+}
+
+void myConfig::set_variable(std::string name, std::string value)
+{
+	variables[name] = value;
+}
 
 std::string myConfig::getValue(std::string name)
 {
