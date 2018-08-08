@@ -79,6 +79,9 @@ bool rawprocFrmApp::OnInit()
 		frame->SetConfigFile(conf_configd);
 		myConfig::loadConfig(std::string(conf_configd.c_str()));
 	}
+
+	//propvar EXEDIR: Use to substitute the path to the running executable in path properties
+	myConfig::getConfig().setVariable("EXEDIR", std::string(wxFileName(conf_exe).GetPath().c_str()));
 	
 	wxFileName profpath;
 	profpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
