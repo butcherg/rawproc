@@ -30,8 +30,12 @@ public:
 	std::map<std::string, std::string> getSection(std::string section);
 	
 	//builds a list of variables to replace in property values where $(name) is found:
-	void set_variable(std::string name, std::string value);
+	void setVariable(std::string name, std::string value);
+	void clearVariables();
 
+	//TempConfig turns on a cache where subsequent setValues store to, and subsequent
+	//getValues will query before going to the persistent data.  enableTempConfig(true); 
+	//turns it on, enableTempConfig(false); turns it off and clears the cache.
 	void enableTempConfig(bool e);
 	bool getTempConfig();
 
