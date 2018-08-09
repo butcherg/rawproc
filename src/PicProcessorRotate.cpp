@@ -8,6 +8,8 @@
 
 #include <wx/treectrl.h>
 
+#define ROTATEENABLE 7500
+#define ROTATEAUTOCROP 7501
 
 class RotatePreview: public wxPanel
 {
@@ -175,23 +177,25 @@ class RotatePanel: public PicProcPanel
 				if (tok[1] == "autocrop")
 					acrop = true;
 
-//with gridbagsizer:
-			//g->Add(0,10, wxGBPosition(0,0));
-			g->Add(new wxStaticText(this,wxID_ANY, "rotate: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			enablebox = new wxCheckBox(this, ROTATEENABLE, "rotate:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
 			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(rotate , wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(rotate , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			val = new wxStaticText(this,wxID_ANY, tok[0], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(0,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			btn1 = new wxBitmapButton(this, 8000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
-			g->Add(btn1, wxGBPosition(0,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(btn1, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//btn2 = new wxBitmapButton(this, 9000, wxBitmap(run_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			//btn2->SetToolTip("Apply rotation");
 			//g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//g->Add(0,10, wxGBPosition(0,5), wxDefaultSpan, wxEXPAND | wxALIGN_LEFT | wxALL, 1);
 			
 			autocrop = new wxCheckBox(this, wxID_ANY, "autocrop");
-			g->Add(autocrop , wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(autocrop , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
@@ -203,7 +207,7 @@ class RotatePanel: public PicProcPanel
 				cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
 
 			preview = new RotatePreview(this,i,initialvalue, acrop, wxSize(pw, ph));
-			g->Add(preview , wxGBPosition(2,0), wxGBSpan(1,5), wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 1);
+			g->Add(preview , wxGBPosition(4,0), wxGBSpan(1,5), wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 1);
 
 			preview->setAutocrop(autocrop->GetValue());
 			
@@ -219,7 +223,8 @@ class RotatePanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
-			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this);
+			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this, ROTATEAUTOCROP);
+			Bind(wxEVT_CHECKBOX, &RotatePanel::onEnable, this, ROTATEENABLE);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 		}
@@ -228,6 +233,18 @@ class RotatePanel: public PicProcPanel
 		{
 			t->~wxTimer();
 			q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
@@ -326,7 +343,7 @@ class RotatePanel: public PicProcPanel
 
 
 	private:
-		wxCheckBox *autocrop;
+		wxCheckBox *autocrop, *enablebox;
 		wxSlider *rotate;
 		wxStaticText *val;
 		wxBitmapButton *btn1;
@@ -372,7 +389,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (angle != 0.0) {
+	if (processingenabled & angle != 0.0) {
 		mark();
 		dib->ApplyRotate(-angle, autocrop, threadcount);
 		wxString d = duration();

@@ -7,6 +7,8 @@
 #include "undo.xpm"
 #include "util.h"
 
+#define BLACKWHITEENABLE 6100
+#define BLACKWHITERECALC 6101
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -68,10 +70,12 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 3);
 			*/
 			
-			
+			enablebox = new wxCheckBox(this, wxID_ANY, "black/white:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "black/white: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
-			//g->Add(1,10, wxGBPosition(0,0));
+
 			
 			g->Add(chan, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
@@ -90,7 +94,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHOICE, &BlackWhitePointPanel::channelChanged, this);
-			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this);
+			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this, BLACKWHITERECALC);
+			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::onEnable, this, BLACKWHITEENABLE);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 		}
 
@@ -98,6 +103,19 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			t->~wxTimer();
 		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -167,7 +185,7 @@ class BlackWhitePointPanel: public PicProcPanel
 	private:
 		wxChoice *chan;
 		wxSlider *black, *white;
-		wxCheckBox *recalc;
+		wxCheckBox *recalc,*enablebox;
 		myDoubleSlider *bwpoint;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
@@ -287,16 +305,18 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		dib->ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
+		wxString d = duration();
 
-	//parm tool.all.log: Turns on logging for all tools.  Default=0
-	//parm tool.*.log: Turns on logging for the specified tool.  Default=0
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.log","0") == "1"))
-		log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		//parm tool.all.log: Turns on logging for all tools.  Default=0
+		//parm tool.*.log: Turns on logging for the specified tool.  Default=0
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.log","0") == "1"))
+			log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty=false;
 	

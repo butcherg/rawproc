@@ -6,6 +6,8 @@
 #include "util.h"
 #include "myConfig.h"
 
+#define CONTRASTENABLE 6700
+
 class ContrastPanel: public PicProcPanel
 {
 	public:
@@ -17,15 +19,19 @@ class ContrastPanel: public PicProcPanel
 
 			int initialvalue = atoi(params.c_str());
 
-			g->Add(0,10, wxGBPosition(0,0));
-			g->Add(new wxStaticText(this,wxID_ANY, "contrast: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			enablebox = new wxCheckBox(this, CONTRASTENABLE, "contrast:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
+
 			contrast = new wxSlider(this, wxID_ANY, initialvalue, -100, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(contrast , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(contrast , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
-			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -36,6 +42,7 @@ class ContrastPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &ContrastPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ContrastPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ContrastPanel::OnThumbTrack, this);
+			Bind(wxEVT_CHECKBOX, &ContrastPanel::onEnable, this, CONTRASTENABLE);
 			Bind(wxEVT_TIMER, &ContrastPanel::OnTimer,  this);
 		}
 
@@ -51,6 +58,19 @@ class ContrastPanel: public PicProcPanel
 			event.Skip();
 		}
 */
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", contrast->GetValue()));
@@ -84,6 +104,7 @@ class ContrastPanel: public PicProcPanel
 		wxSlider *contrast;
 		wxStaticText *val;
 		wxBitmapButton *btn;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -124,14 +145,17 @@ bool PicProcessorContrast::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-	wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.contrast.log","0") == "1"))
-		log(wxString::Format("tool=contrast,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	if (processingenabled) {
+		mark();
+		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		wxString d = duration();
+
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.contrast.log","0") == "1"))
+			log(wxString::Format("tool=contrast,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 

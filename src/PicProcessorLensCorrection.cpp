@@ -7,11 +7,14 @@
 #include <wx/listctrl.h>
 #include <wx/editlbox.h>
 
-#define FILTERID 6300
-#define HIDEID 6303
+#define LENSCORRECTIONENABLE 6300
+#define FILTERID 6301
+#define HIDEID 6302
 
-#define LENSID 6301
-#define CAMERAID 6302
+#define LENSID 6303
+#define CAMERAID 6304
+
+#define LENSCORRECTIONS 6305
 
 
 
@@ -203,13 +206,17 @@ class LensCorrectionPanel: public PicProcPanel
 	public:
 		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, wxString metadata): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ";");
 
-			b->Add(new wxStaticText(this,-1, "lenscorrection", wxDefaultPosition, wxSize(100,20)), flags);
-			b->AddSpacer(3);
+			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, "lenscorrection:");
+			enablebox->SetValue(true);
+			b->Add(enablebox, flags);
+			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			b->AddSpacer(10);
 
-			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,50)), flags);
+			b->Add(new wxStaticText(this,-1, "metadata:", wxDefaultPosition, wxDefaultSize), flags);
+			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,40)), flags);
 			b->AddSpacer(5);
 
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
@@ -221,7 +228,7 @@ class LensCorrectionPanel: public PicProcPanel
 			b->Add(lens, flags);
 			b->AddSpacer(2);
 			b->Add(new wxButton(this, LENSID, "Select lens"), flags);
-			b->AddSpacer(3);
+			b->AddSpacer(2);
 			
 			ca = new wxCheckBox(this, wxID_ANY, "chromatic abberation");
 			b->Add(ca , flags);
@@ -267,12 +274,26 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
-			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this);
+			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this, LENSCORRECTIONS);
+			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
 		}
 
 		~LensCorrectionPanel()
 		{
 		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 
 		void lensDialog(wxCommandEvent& event)
 		{
@@ -327,6 +348,7 @@ class LensCorrectionPanel: public PicProcPanel
 	private:
 		wxCheckBox *ca, *vig, *dist, *crop;
 		wxTextCtrl *cam, *lens;
+		wxCheckBox *enablebox;
 
 };
 
@@ -448,13 +470,12 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	std::map<std::string, std::string> info = dib->getInfo();
 
-	if (ModifyFlags) {
-
+	if (processingenabled & ModifyFlags) {
+		mark();
 		bool success = false;
 
 		const lfCamera *cam = NULL;

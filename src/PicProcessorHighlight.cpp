@@ -7,6 +7,8 @@
 
 #include "util.h"
 
+#define HIGHLIGHTENABLE 7200
+
 class HighlightPanel: public PicProcPanel
 {
 	public:
@@ -18,26 +20,29 @@ class HighlightPanel: public PicProcPanel
 			int thr = atoi(p[1]);
 
 			SetSize(parent->GetSize());
-			g->Add(0,10, wxGBPosition(0,0));
 
-			g->Add(new wxStaticText(this,wxID_ANY, "highlight: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			enablebox = new wxCheckBox(this, HIGHLIGHTENABLE, "highlight:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
 			highlight = new wxSlider(this, wxID_ANY, hlt, -50, +50, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(highlight , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(highlight , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",hlt), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val1 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn1 = new wxBitmapButton(this, 1000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset highlight to default");
-			g->Add(btn1, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn1, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
 			g->Add(new wxStaticText(this,wxID_ANY, "threshold: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			threshold = new wxSlider(this, wxID_ANY, thr, 128, 255, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(threshold , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(threshold , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",thr), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val2 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn2 = new wxBitmapButton(this, 2000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset threshold to default");
-			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn2, wxGBPosition(3,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -48,6 +53,7 @@ class HighlightPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &HighlightPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &HighlightPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &HighlightPanel::OnThumbTrack, this);
+			Bind(wxEVT_CHECKBOX, &HighlightPanel::onEnable, this, HIGHLIGHTENABLE);
 			Bind(wxEVT_TIMER, &HighlightPanel::OnTimer,  this);
 		}
 
@@ -55,6 +61,19 @@ class HighlightPanel: public PicProcPanel
 		{
 			t->~wxTimer();
 		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -101,6 +120,7 @@ class HighlightPanel: public PicProcPanel
 		wxSlider *highlight, *threshold;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -140,14 +160,16 @@ bool PicProcessorHighlight::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.highlight.log","0") == "1"))
-		log(wxString::Format("tool=highlight,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.highlight.log","0") == "1"))
+			log(wxString::Format("tool=highlight,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 	

@@ -7,9 +7,10 @@
 
 #include "util.h"
 
-#define REDSLIDER   6200
-#define GREENSLIDER 6201
-#define BLUESLIDER  6202
+#define GRAYENABLE  6200
+#define REDSLIDER   6201
+#define GREENSLIDER 6202
+#define BLUESLIDER  6203
 
 class GrayPanel: public PicProcPanel
 {
@@ -25,33 +26,36 @@ class GrayPanel: public PicProcPanel
 			gr = atof(p[1]);
 			bl = atof(p[2]);
 
-			g->Add(0,10, wxGBPosition(0,0));
+			enablebox = new wxCheckBox(this, GRAYENABLE, "gray:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "red: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "red: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			red = new wxSlider(this, wxID_ANY, rd*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(red , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(red , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",rd), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val1 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "green: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "green: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			green = new wxSlider(this, wxID_ANY, gr*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(green , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(green , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",gr), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val2 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
-			g->Add(new wxStaticText(this,wxID_ANY, "blue: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "blue: "), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			blue = new wxSlider(this, wxID_ANY, bl*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(blue , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(blue , wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val3 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",bl), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val3 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val3 , wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			val4 = new wxStaticText(this,wxID_ANY, wxString::Format("Total: %2.2f", rd+gr+bl), wxDefaultPosition, wxSize(-1,-1));
-			g->Add(val4, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val4, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset RGB proportions to defaults");
-			g->Add(btn, wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
 			SetSizerAndFit(g);
@@ -63,12 +67,26 @@ class GrayPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &GrayPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &GrayPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &GrayPanel::OnThumbTrack, this);
+			Bind(wxEVT_CHECKBOX, &GrayPanel::onEnable, this, GRAYENABLE);
 			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);		}
 
 		~GrayPanel()
 		{
 			t->~wxTimer();
 		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -128,6 +146,7 @@ class GrayPanel: public PicProcPanel
 		wxSlider *red, *green, *blue;
 		wxStaticText *val1, *val2, *val3, *val4;
 		wxBitmapButton *btn;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -160,15 +179,16 @@ bool PicProcessorGray::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
-
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyGray(r, g, b, threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		dib->ApplyGray(r, g, b, threadcount);
+		wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))
-		log(wxString::Format("tool=gray,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))
+			log(wxString::Format("tool=gray,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 

@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#define SHARPENENABLE 7800
+
 class SharpenPanel: public PicProcPanel
 {
 	public:
@@ -17,15 +19,18 @@ class SharpenPanel: public PicProcPanel
 
 			int initialvalue = atoi(params.c_str());
 
-			g->Add(0,10, wxGBPosition(0,0));
-			g->Add(new wxStaticText(this,wxID_ANY, "sharpen: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			enablebox = new wxCheckBox(this, SHARPENENABLE, "sharpen:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
 			sharp = new wxSlider(this, wxID_ANY, initialvalue, 0, 10, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(sharp , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(sharp , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
-			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -36,11 +41,25 @@ class SharpenPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &SharpenPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &SharpenPanel::OnThumbTrack, this);
-			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);		}
+			Bind(wxEVT_CHECKBOX, &SharpenPanel::onEnable, this, SHARPENENABLE);
+			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);
+		}
 
 		~SharpenPanel()
 		{
 			t->~wxTimer();
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void OnChanged(wxCommandEvent& event)
@@ -76,6 +95,7 @@ class SharpenPanel: public PicProcPanel
 		wxSlider *sharp;
 		wxStaticText *val;
 		wxBitmapButton *btn;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 
@@ -124,7 +144,7 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (sharp > 1.0) {
+	if (processingenabled & sharp > 1.0) {
 		mark();
 		dib->ApplyConvolutionKernel(kernel, threadcount);
 		wxString d = duration();
@@ -133,6 +153,7 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
+
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

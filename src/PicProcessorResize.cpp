@@ -6,6 +6,8 @@
 
 #include <wx/spinctrl.h>
 
+#define RESIZEENABLE 7400
+
 class ResizePanel: public PicProcPanel
 {
 	public:
@@ -20,21 +22,27 @@ class ResizePanel: public PicProcPanel
 			algos.Add("catmullrom");
 			algos.Add("lanczos3");
 			wxArrayString p = split(params,",");
-			g->Add(new wxStaticText(this,wxID_ANY, "width: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+
+			enablebox = new wxCheckBox(this, RESIZEENABLE, "resize:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
+			g->Add(new wxStaticText(this,wxID_ANY, "width: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			widthedit = new wxSpinCtrl(this, wxID_ANY, p[0], wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
 			widthedit->SetToolTip("width in pixels, 0 preserves aspect.\nIf you use the spin arrows, type Enter to update the image.");
-			g->Add(widthedit, wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticText(this,-1, "height: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(widthedit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,-1, "height: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			heightedit = new wxSpinCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
 			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
-			g->Add(heightedit, wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
+			g->Add(heightedit, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
 			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
 			if (p.size() >=3) {
 				for (int i=0; i<algos.size(); i++) {
 					if (p[2] == algos[i]) algoselect->SetSelection(i);
 				}
 			}
-			g->Add(algoselect, wxGBPosition(2,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);	
+			g->Add(algoselect, wxGBPosition(4,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);	
 			SetSizerAndFit(g);
 			g->Layout();
 			Refresh();
@@ -43,11 +51,24 @@ class ResizePanel: public PicProcPanel
 			Bind(wxEVT_TEXT_ENTER,&ResizePanel::paramChanged, this);
 			//Bind(wxEVT_SPINCTRL,&ResizePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBOX,&ResizePanel::paramChanged, this);	
+			Bind(wxEVT_CHECKBOX, &ResizePanel::onEnable, this, RESIZEENABLE);
 		}
 
 		~ResizePanel()
 		{
 
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -61,6 +82,7 @@ class ResizePanel: public PicProcPanel
 	private:
 		wxSpinCtrl *widthedit, *heightedit;
 		wxRadioBox *algoselect;
+		wxCheckBox *enablebox;
 
 };
 
@@ -110,6 +132,7 @@ bool PicProcessorResize::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+
 	bool result = true;
 	unsigned dw = dib->getWidth();
 	unsigned dh = dib->getHeight();
@@ -129,13 +152,14 @@ bool PicProcessorResize::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
+	if (processingenabled) {
+		mark();
+		dib->ApplyResize(width, height, filter, threadcount);
+		wxString d = duration();
 
-	dib->ApplyResize(width, height, filter, threadcount);
-	wxString d = duration();
-
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
-		log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
+			log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 

@@ -6,9 +6,11 @@
 
 #include "util.h"
 
-#define SIGMASLIDER 6000
-#define LOCALSLIDER 6001
-#define PATCHSLIDER 6002
+#define DENOISEENABLE 6000
+
+#define SIGMASLIDER 6001
+#define LOCALSLIDER 6002
+#define PATCHSLIDER 6003
 
 #define SIGMARESET 6010
 #define LOCALRESET 6011
@@ -26,35 +28,42 @@ class DenoisePanel: public PicProcPanel
 			int localval = atoi(p[1]);
 			int patchval = atoi(p[2]);
 
-			g->Add(0,10, wxGBPosition(0,0));
-			g->Add(new wxStaticText(this,wxID_ANY, "sigma: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			enablebox = new wxCheckBox(this, DENOISEENABLE, "denoise:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
+			//g->Add(new wxStaticText(this,wxID_ANY, "denoise"), wxGBPosition(0,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			//g->Add(0,10, wxGBPosition(1,0));
+
+			g->Add(new wxStaticText(this,wxID_ANY, "sigma: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			sigma = new wxSlider(this, SIGMASLIDER, initialvalue, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(sigma , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(sigma , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val = new wxStaticText(this,wxID_ANY, p[0], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, SIGMARESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
-			g->Add(btn, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(0,20, wxGBPosition(2,0));
+			g->Add(0,20, wxGBPosition(3,0));
 
-			g->Add(new wxStaticText(this,wxID_ANY, "local: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "local: "), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			local = new wxSlider(this, LOCALSLIDER, localval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(local , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(local , wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, p[1], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val1 , wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn1 = new wxBitmapButton(this, LOCALRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
-			g->Add(btn1, wxGBPosition(3,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn1, wxGBPosition(4,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "patch: "), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "patch: "), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			patch = new wxSlider(this, PATCHSLIDER, patchval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(patch , wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(patch , wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, p[2], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2 , wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val2 , wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn2 = new wxBitmapButton(this, PATCHRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset to default");
-			g->Add(btn2, wxGBPosition(4,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn2, wxGBPosition(5,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
 			SetSizerAndFit(g);
@@ -67,11 +76,24 @@ class DenoisePanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &DenoisePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &DenoisePanel::OnThumbTrack, this);
 			Bind(wxEVT_TIMER, &DenoisePanel::OnTimer,  this);
+			Bind(wxEVT_CHECKBOX, &DenoisePanel::onEnable, this, DENOISEENABLE);
 		}
 
 		~DenoisePanel()
 		{
 			t->~wxTimer();
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void OnChanged(wxCommandEvent& event)
@@ -125,6 +147,7 @@ class DenoisePanel: public PicProcPanel
 		wxSlider *sigma, *local, *patch;
 		wxStaticText *val, *val1, *val2;
 		wxBitmapButton *btn, *btn1, *btn2;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -161,7 +184,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (sigma > 0.0) {
+	if (processingenabled & sigma > 0.0) {
 		mark();
 		dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		wxString d = duration();

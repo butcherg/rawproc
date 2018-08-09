@@ -9,15 +9,16 @@
 #include "unchecked.xpm"
 #include "checked.xpm"
 
-#define WBMANUAL 6400
-#define WBAUTO 6401
-#define WBPATCH 6402
-#define WBCAMERA 6403
-#define WBORIGINAL 6404
+#define WBENABLE 6400
+#define WBMANUAL 6401
+#define WBAUTO 6402
+#define WBPATCH 6403
+#define WBCAMERA 6404
+#define WBORIGINAL 6405
 
-#define WBRED 6403
-#define WBGREEN 6404
-#define WBBLUE 6405
+#define WBRED 6406
+#define WBGREEN 6407
+#define WBBLUE 6408
 
 
 class myFloatCtrl: public wxControl
@@ -108,6 +109,11 @@ class WhiteBalancePanel: public PicProcPanel
 
 			g->Add(new wxStaticText(this,wxID_ANY, "white balance: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(1,10, wxGBPosition(0,0));
+
+			enablebox = new wxCheckBox(this, WBENABLE, "white balance:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "red mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
@@ -205,6 +211,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
 			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
+			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::onEnable, this, WBENABLE);
 			Refresh();
 			Update();
 		}
@@ -212,6 +219,18 @@ class WhiteBalancePanel: public PicProcPanel
 		~WhiteBalancePanel()
 		{
 			t->~wxTimer();
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		//used by PicProcessorWhiteBalance to initialize panel:
@@ -315,6 +334,7 @@ class WhiteBalancePanel: public PicProcPanel
 	private:
 		wxStaticText *origwb, *autowb, *patch, *camera;
 		wxRadioButton *ob, *ab, *pb, *cb;
+		wxCheckBox *enablebox;
 		myFloatCtrl *rmult, *gmult ,*bmult;;
 		wxTimer *t;
 		//coord ptch;
@@ -446,26 +466,29 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (optype == multipliers) {
-		wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
-		//wxMessageBox("wb: multipliers");
-	}
-	else if (optype == imgpatch) {
-		wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
-		//wxMessageBox("wb: patch");
-	}
-	else {
-		wbmults = dib->ApplyWhiteBalance(threadcount);
-		//wxMessageBox("wb: auto");
-	}
-	((WhiteBalancePanel *) toolpanel)->setMultipliers(wbmults);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		if (optype == multipliers) {
+			wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			//wxMessageBox("wb: multipliers");
+		}
+		else if (optype == imgpatch) {
+			wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+			//wxMessageBox("wb: patch");
+		}
+		else {
+			wbmults = dib->ApplyWhiteBalance(threadcount);
+			//wxMessageBox("wb: auto");
+		}
+		wxString d = duration();
+		((WhiteBalancePanel *) toolpanel)->setMultipliers(wbmults);
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.whitebalance.log","0") == "1"))
-		log(wxString::Format("tool=whitebalance,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.whitebalance.log","0") == "1"))
+			log(wxString::Format("tool=whitebalance,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 

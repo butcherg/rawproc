@@ -4,7 +4,8 @@
 #include "util.h"
 #include "gimage/curve.h"
 
-#define GAMMAID 6100
+#define GAMMAENABLE 7100
+#define GAMMAID 7101
 
 class GammaPanel: public PicProcPanel
 {
@@ -12,14 +13,22 @@ class GammaPanel: public PicProcPanel
 	public:
 		GammaPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			b->Add(new wxStaticText(this,-1, "gamma", wxDefaultPosition, wxSize(100,20)), flags);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+
+			enablebox = new wxCheckBox(this, GAMMAENABLE, "gamma:");
+			enablebox->SetValue(true);
+			b->Add(enablebox, flags);
+			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			b->AddSpacer(10);
+
 			edit = new wxTextCtrl(this, GAMMAID, p, wxDefaultPosition, wxSize(100,20),wxTE_PROCESS_ENTER);
+
 			b->Add(edit, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this, GAMMAID);
+			Bind(wxEVT_CHECKBOX, &GammaPanel::onEnable, this, GAMMAENABLE);
 			Refresh();
 			Update();
 		}
@@ -27,6 +36,18 @@ class GammaPanel: public PicProcPanel
 		~GammaPanel()
 		{
 			
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -38,6 +59,7 @@ class GammaPanel: public PicProcPanel
 
 	private:
 		wxTextCtrl *edit;
+		wxCheckBox *enablebox;
 
 };
 
@@ -75,14 +97,17 @@ bool PicProcessorGamma::processPic(bool processnext)
 		ctrlpts.insertpoint((double) i, color);
 	}	
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-	wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gamma.log","0") == "1"))
-		log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	if (processingenabled) {
+		mark();
+		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		wxString d = duration();
+
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gamma.log","0") == "1"))
+			log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 

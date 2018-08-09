@@ -13,6 +13,7 @@
 #endif
 
 #include <wx/gbsizer.h>
+#include <wx/statline.h>
 
 #include "PicProcessor.h"
 #define SLIDERWIDTH 70

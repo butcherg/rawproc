@@ -39,9 +39,11 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	id = m_tree->AddRoot(name, -1, -1, this);
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
+	m_tree->SetItemBold(id,true);
 
 	m_tree->ExpandAll();
 	dirty = true;
+	processingenabled = true;
 }
 
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) 
@@ -62,8 +64,10 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	m_tree->SetItemState(id,0);
 	m_tree->SelectItem(id);
+	m_tree->SetItemBold(id,true);
 
 	dirty = true;
+	processingenabled = true;
 }
 
 
@@ -79,6 +83,15 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessor::enableProcessing(bool e)
+{
+	if (e) 
+		m_tree->SetItemBold(id,true);
+	else
+		m_tree->SetItemBold(id,false);
+	processingenabled = e;
 }
 
 PicProcPanel* PicProcessor::getPanel()

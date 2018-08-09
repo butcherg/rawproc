@@ -6,6 +6,9 @@
 
 #include "util.h"
 
+#define REDEYEENABLE 7300
+#define REDEYEDESAT 7301
+
 class RedEyePanel: public PicProcPanel
 {
 	public:
@@ -22,47 +25,50 @@ class RedEyePanel: public PicProcPanel
 			double dpct = atof(p[3].c_str());
 			
 
-			g->Add(0,10, wxGBPosition(0,0));
+			enablebox = new wxCheckBox(this, REDEYEENABLE, "redeye:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
 			//Threshold slider
-			g->Add(new wxStaticText(this,wxID_ANY, "threshold: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "threshold: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			threshold = new wxSlider(this, wxID_ANY, thr*10, 0, 50, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(threshold , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(threshold , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, p[0], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val1 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn1 = new wxBitmapButton(this, 9000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
-			g->Add(btn1, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn1, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			
 			//Limit, or radius, slider
-			g->Add(new wxStaticText(this,wxID_ANY, "radius: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "radius: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			radius = new wxSlider(this, wxID_ANY, rad, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(radius , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(radius , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, p[1], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2, wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val2, wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn2 = new wxBitmapButton(this, 9001, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset to default");
-			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn2, wxGBPosition(3,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			
-			g->Add(0,10, wxGBPosition(3,0));
+			g->Add(0,10, wxGBPosition(4,0));
 			
-			desat = new wxCheckBox(this, wxID_ANY, "desaturate");
-			g->Add(desat, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			desat = new wxCheckBox(this, REDEYEDESAT, "desaturate");
+			g->Add(desat, wxGBPosition(5,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 			if (desatbool == 1) desat->SetValue(true);
 
 			//desaturate adjustment
-			g->Add(new wxStaticText(this,wxID_ANY, "percent: "), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "percent: "), wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			desatpct = new wxSlider(this, wxID_ANY, dpct*100, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(desatpct , wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(desatpct , wxGBPosition(6,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val3 = new wxStaticText(this,wxID_ANY, p[3], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val3, wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(val3, wxGBPosition(6,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn3 = new wxBitmapButton(this, 9002, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn3->SetToolTip("Reset to default");
-			g->Add(btn3, wxGBPosition(5,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn3, wxGBPosition(6,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(0,10, wxGBPosition(6,0));
+			g->Add(0,10, wxGBPosition(7,0));
 			wxString help = "Shift-Click the center of the red eye to apply.\nCtrl-Click near the cross to remove application.";
-			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(7,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
+			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(8,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
 			
 			SetSizerAndFit(g);
 			g->Layout();
@@ -73,13 +79,26 @@ class RedEyePanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &RedEyePanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &RedEyePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RedEyePanel::OnThumbTrack, this);
-			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnCheckBox, this);
+			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnCheckBox, this, REDEYEDESAT);
+			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnEnable, this, REDEYEENABLE);
 			Bind(wxEVT_TIMER, &RedEyePanel::OnTimer,  this);
 		}
 
 		~RedEyePanel()
 		{
 			t->~wxTimer();
+		}
+
+		void OnEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void OnChanged(wxCommandEvent& event)
@@ -134,7 +153,7 @@ class RedEyePanel: public PicProcPanel
 
 	private:
 		wxSlider *threshold, *radius, *desatpct;
-		wxCheckBox *desat;
+		wxCheckBox *desat, *enablebox;
 		wxStaticText *val1, *val2, *val3;
 		wxBitmapButton *btn1, *btn2, *btn3;
 		wxTimer *t;
@@ -237,14 +256,16 @@ bool PicProcessorRedEye::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyRedeye(points, threshold, radius, desat, desatpct, threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		dib->ApplyRedeye(points, threshold, radius, desat, desatpct, threadcount);
+		wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.redeye.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.redeye.log","0") == "1"))
 		log(wxString::Format("tool=redeye,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty=false;
 

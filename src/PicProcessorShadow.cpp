@@ -7,6 +7,8 @@
 
 #include "util.h"
 
+#define SHADOWENABLE 7700
+
 class ShadowPanel: public PicProcPanel
 {
 	public:
@@ -18,9 +20,12 @@ class ShadowPanel: public PicProcPanel
 			int thr = atoi(p[1]);
 
 			SetSize(parent->GetSize());
-			g->Add(0,10, wxGBPosition(0,0));
 
-			g->Add(new wxStaticText(this,wxID_ANY, "shadow: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			enablebox = new wxCheckBox(this, SHADOWENABLE, "shadow:");
+			enablebox->SetValue(true);
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
 			shadow = new wxSlider(this, wxID_ANY, shd, -50, +50, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(shadow , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",shd), wxDefaultPosition, wxSize(30, -1));
@@ -48,6 +53,7 @@ class ShadowPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &ShadowPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ShadowPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ShadowPanel::OnThumbTrack, this);
+			Bind(wxEVT_CHECKBOX, &ShadowPanel::onEnable, this, SHADOWENABLE);
 			Bind(wxEVT_TIMER, &ShadowPanel::OnTimer,  this);
 		}
 
@@ -55,6 +61,19 @@ class ShadowPanel: public PicProcPanel
 		{
 			t->~wxTimer();
 		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
 		void OnChanged(wxCommandEvent& event)
 		{
 			val1->SetLabel(wxString::Format("%4d", shadow->GetValue()));
@@ -100,6 +119,7 @@ class ShadowPanel: public PicProcPanel
 		wxSlider *shadow, *threshold;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -139,14 +159,16 @@ bool PicProcessorShadow::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+	mark();
+		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.shadow.log","0") == "1"))
-		log(wxString::Format("tool=shadow,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.shadow.log","0") == "1"))
+			log(wxString::Format("tool=shadow,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
 	

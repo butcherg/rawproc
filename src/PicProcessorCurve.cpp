@@ -8,6 +8,8 @@
 
 #include <wx/choice.h>
 
+#define CURVEENABLE 6800
+
 class CurvePanel: public PicProcPanel
 {
 	public:
@@ -20,6 +22,12 @@ class CurvePanel: public PicProcPanel
 			str.Add("green");
 			str.Add("blue");
 			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+
+			enablebox = new wxCheckBox(this, CURVEENABLE, "curve:");
+			enablebox->SetValue(true);
+			b->Add(enablebox, flags);
+			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			b->AddSpacer(10);
 
 			b->Add(chan, flags);
 			curve = new CurvePane(this, params);
@@ -34,12 +42,25 @@ class CurvePanel: public PicProcPanel
 				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
 			Bind(myCURVE_UPDATE, &CurvePanel::paramChanged, this);
+			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
 			Refresh();
 		}
 
 		~CurvePanel()
 		{
 			curve->~CurvePane();
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -67,6 +88,7 @@ class CurvePanel: public PicProcPanel
 	private:
 		CurvePane *curve;
 		wxChoice *chan;
+		wxCheckBox *enablebox;
 
 };
 
@@ -130,14 +152,16 @@ bool PicProcessorCurve::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	mark();
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	dib->ApplyToneCurve(ctrlpts, channel, threadcount);
-	wxString d = duration();
+	if (processingenabled) {
+		mark();
+		dib->ApplyToneCurve(ctrlpts, channel, threadcount);
+		wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.curve.log","0") == "1"))
-		log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(), threadcount, d));
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.curve.log","0") == "1"))
+			log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(), threadcount, d));
+	}
 
 	dirty = false;
 	
