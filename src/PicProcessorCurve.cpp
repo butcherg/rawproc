@@ -7,15 +7,46 @@
 #include "util.h"
 
 #include <wx/choice.h>
+#include <wx/gbsizer.h>
 
 #define CURVEENABLE 6800
+
+class myRowColumnSizer: public wxGridBagSizer
+{
+	public:
+		myRowColumnSizer(int vgap=0, int hgap=0): wxGridBagSizer(vgap, hgap) 
+		{
+			r=0;
+			c=0;
+		}
+
+		wxSizerItem * AddItem(wxWindow *window, int flags, int colspan=1)
+		{
+			wxSizerItem * i = Add(window, wxGBPosition(r,c), wxGBSpan(1,colspan), flags);
+			c += colspan;
+			return i;
+		}
+
+		void NextRow()
+		{
+			r++;
+			c=0;
+		}
+		
+
+	private:
+		unsigned r, c;
+		int f;
+};
 
 class CurvePanel: public PicProcPanel
 {
 	public:
+
 		CurvePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxTOP, 2); //.Expand();
+			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxTOP, 2); //.Expand();
+			myRowColumnSizer *m = new myRowColumnSizer(3,3);
 			wxArrayString str;
 			str.Add("rgb");
 			str.Add("red");
@@ -25,15 +56,18 @@ class CurvePanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, CURVEENABLE, "curve:");
 			enablebox->SetValue(true);
-			b->Add(enablebox, flags);
-			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			//b->AddSpacer(10);
-
-			b->Add(chan, flags);
 			curve = new CurvePane(this, params);
-			b->Add(curve, flags);
-			SetSizerAndFit(b);
-			b->Layout();
+
+			m->AddItem(enablebox, wxALIGN_LEFT);
+			m->AddItem(chan, wxALIGN_RIGHT);
+			m->NextRow();
+			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),
+					wxALIGN_LEFT, 2);
+			m->NextRow();
+			m->AddItem(curve, wxALIGN_LEFT, 2);
+
+			SetSizerAndFit(m);
+			m->Layout();
 			SetFocus();
 			wxArrayString cpts = split(params,",");
 			if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) 
@@ -45,6 +79,7 @@ class CurvePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
 			Refresh();
 		}
+
 
 		~CurvePanel()
 		{
