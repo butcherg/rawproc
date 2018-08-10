@@ -4,40 +4,13 @@
 #include "PicProcPanel.h"
 #include "CurvePane.h"
 #include "myConfig.h"
+#include "myRowColumnSizer.h"
 #include "util.h"
 
 #include <wx/choice.h>
-#include <wx/gbsizer.h>
 
 #define CURVEENABLE 6800
 
-class myRowColumnSizer: public wxGridBagSizer
-{
-	public:
-		myRowColumnSizer(int vgap=0, int hgap=0): wxGridBagSizer(vgap, hgap) 
-		{
-			r=0;
-			c=0;
-		}
-
-		wxSizerItem * AddItem(wxWindow *window, int flags, int colspan=1)
-		{
-			wxSizerItem * i = Add(window, wxGBPosition(r,c), wxGBSpan(1,colspan), flags);
-			c += colspan;
-			return i;
-		}
-
-		void NextRow()
-		{
-			r++;
-			c=0;
-		}
-		
-
-	private:
-		unsigned r, c;
-		int f;
-};
 
 class CurvePanel: public PicProcPanel
 {
@@ -45,8 +18,6 @@ class CurvePanel: public PicProcPanel
 
 		CurvePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxTOP, 2); //.Expand();
-			myRowColumnSizer *m = new myRowColumnSizer(3,3);
 			wxArrayString str;
 			str.Add("rgb");
 			str.Add("red");
@@ -58,11 +29,11 @@ class CurvePanel: public PicProcPanel
 			enablebox->SetValue(true);
 			curve = new CurvePane(this, params);
 
+			myRowColumnSizer *m = new myRowColumnSizer(3,3);
 			m->AddItem(enablebox, wxALIGN_LEFT);
 			m->AddItem(chan, wxALIGN_RIGHT);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),
-					wxALIGN_LEFT, 2);
+			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
 			m->NextRow();
 			m->AddItem(curve, wxALIGN_LEFT, 2);
 
