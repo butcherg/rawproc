@@ -66,7 +66,7 @@ class myFloatCtrl: public wxControl
 			
 			textbox->SetValue(wxString::Format(fmt,v));
 
-			Refresh();
+			textbox->Refresh();
 			event.Skip();
 		}
 
@@ -106,9 +106,6 @@ class WhiteBalancePanel: public PicProcPanel
 			double increment = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.increment","0.001").c_str());
 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-
-			g->Add(new wxStaticText(this,wxID_ANY, "white balance: "), wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(1,10, wxGBPosition(0,0));
 
 			enablebox = new wxCheckBox(this, WBENABLE, "white balance:");
 			enablebox->SetValue(true);

@@ -70,7 +70,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 3);
 			*/
 			
-			enablebox = new wxCheckBox(this, wxID_ANY, "black/white:");
+			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
 			enablebox->SetValue(true);
 			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
@@ -80,7 +80,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			g->Add(chan, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM, 3);
-			recalc = new wxCheckBox(this, wxID_ANY, "ReCalculate");
+			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
 			g->Add(recalc, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			if (recalcdefault) recalc->SetValue(true);
 

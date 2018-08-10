@@ -194,7 +194,7 @@ class RotatePanel: public PicProcPanel
 			//g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//g->Add(0,10, wxGBPosition(0,5), wxDefaultSpan, wxEXPAND | wxALIGN_LEFT | wxALL, 1);
 			
-			autocrop = new wxCheckBox(this, wxID_ANY, "autocrop");
+			autocrop = new wxCheckBox(this, ROTATEAUTOCROP, "autocrop");
 			g->Add(autocrop , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 

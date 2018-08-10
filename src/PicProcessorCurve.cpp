@@ -15,7 +15,7 @@ class CurvePanel: public PicProcPanel
 	public:
 		CurvePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxTOP, 2); //.Expand();
 			wxArrayString str;
 			str.Add("rgb");
 			str.Add("red");
@@ -27,7 +27,7 @@ class CurvePanel: public PicProcPanel
 			enablebox->SetValue(true);
 			b->Add(enablebox, flags);
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(10);
+			//b->AddSpacer(10);
 
 			b->Add(chan, flags);
 			curve = new CurvePane(this, params);

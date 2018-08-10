@@ -266,7 +266,7 @@ void rawprocFrm::CreateGUIControls()
 
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
 
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,320), wxBORDER_SUNKEN);
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,350), wxBORDER_SUNKEN);
 
 
 	//Main picture panel:
