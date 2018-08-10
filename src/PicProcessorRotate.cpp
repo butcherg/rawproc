@@ -182,20 +182,20 @@ class RotatePanel: public PicProcPanel
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(rotate , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxPoint(10, 30), wxSize(200, -1));
+			g->Add(rotate , wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			val = new wxStaticText(this,wxID_ANY, tok[0], wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(val , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			btn1 = new wxBitmapButton(this, 8000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
-			g->Add(btn1, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(btn1, wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//btn2 = new wxBitmapButton(this, 9000, wxBitmap(run_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			//btn2->SetToolTip("Apply rotation");
 			//g->Add(btn2, wxGBPosition(0,4), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			//g->Add(0,10, wxGBPosition(0,5), wxDefaultSpan, wxEXPAND | wxALIGN_LEFT | wxALL, 1);
 			
 			autocrop = new wxCheckBox(this, ROTATEAUTOCROP, "autocrop");
-			g->Add(autocrop , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
+			g->Add(autocrop , wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
