@@ -1717,32 +1717,66 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 	return a;
 }
 
+
+//Demosaic
+//
+//This is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB quad and 
+//turns it into a single RGGB pixel.  "COLOR" doesn't demosaic, it zeros out the other 
+//channels in the RGGB quad pixels so the unmosaiced image can be regarded as what was recorded
+//through the color filter array
+//
 void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 {
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
 	
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h; y+=2) {
-		for (unsigned x=0; x<w; x+=2) {
-			unsigned Hpos = (x/2) + (y/2)*(w/2);
-			unsigned Rpos = x + y*w;
-			unsigned G1pos = (x+1) + y*w;
-			unsigned G2pos = x + (y+1)*w;
-			unsigned Bpos = (x+1) + (y+1)*w;
-			double gval = (image[G1pos].g + image[G2pos].g) / 2.0;
-			double rval = image[Rpos].r;
-			double bval = image[Bpos].b;
+	if (algorithm == DEMOSAIC_HALF) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y+=2) {
+			for (unsigned x=0; x<w; x+=2) {
+				unsigned Hpos = (x/2) + (y/2)*(w/2);
+				unsigned Rpos = x + y*w;
+				unsigned G1pos = (x+1) + y*w;
+				unsigned G2pos = x + (y+1)*w;
+				unsigned Bpos = (x+1) + (y+1)*w;
+				double gval = (image[G1pos].g + image[G2pos].g) / 2.0;
+				double rval = image[Rpos].r;
+				double bval = image[Bpos].b;
 					
-			halfimage[Hpos].r = rval;
-			halfimage[Hpos].g = gval;
-			halfimage[Hpos].b = bval;
+				halfimage[Hpos].r = rval;
+				halfimage[Hpos].g = gval;
+				halfimage[Hpos].b = bval;
+			}
+		}
+		image = halfimage;
+		w /=2;
+		h /=2;
+	}
+	else if (algorithm == DEMOSAIC_COLOR) {
+		for (unsigned y=0; y<h; y+=2) {
+			for (unsigned x=0; x<w; x+=2) {
+				unsigned Hpos = (x/2) + (y/2)*(w/2);
+				unsigned Rpos = x + y*w;
+				unsigned G1pos = (x+1) + y*w;
+				unsigned G2pos = x + (y+1)*w;
+				unsigned Bpos = (x+1) + (y+1)*w;
+				image[Rpos].g = 0.0;
+				image[Rpos].b = 0.0;
+
+				image[G1pos].r = 0.0;
+				image[G1pos].b = 0.0;
+
+				image[G2pos].r = 0.0;
+				image[G2pos].b = 0.0;
+
+				image[Bpos].r = 0.0;
+				image[Bpos].g = 0.0;
+
+			}
 		}
 	}
 	
-	image = halfimage;
-	w /=2;
-	h /=2;
+
 }
 
 

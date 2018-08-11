@@ -5,6 +5,7 @@
 #include "gimage/curve.h"
 
 #define DEMOSAICENABLE 6900
+#define DEMOSAICOP 6901
 
 class DemosaicPanel: public PicProcPanel
 {
@@ -21,6 +22,14 @@ class DemosaicPanel: public PicProcPanel
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			b->AddSpacer(10);
 
+			wxArrayString opers;
+			opers.Add("half");
+			opers.Add("color");
+
+			operselect = new wxRadioBox (this, DEMOSAICOP, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			if (params != "") operselect->SetSelection(operselect->FindString(params));
+			b->Add(operselect,flags);
+
 			SetSizerAndFit(b);
 			b->Layout();
 			SetFocus();
@@ -28,6 +37,7 @@ class DemosaicPanel: public PicProcPanel
 			Update();
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
+			Bind(wxEVT_RADIOBOX, &DemosaicPanel::paramChanged, this, DEMOSAICOP);
 		}
 
 		~DemosaicPanel()
@@ -49,12 +59,14 @@ class DemosaicPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
+			q->setParams(operselect->GetString(operselect->GetSelection()));
 			q->processPic();
 			event.Skip();
 		}
 
 	private:
 		wxCheckBox *enablebox;
+		wxRadioBox *operselect;
 
 };
 
@@ -73,7 +85,7 @@ void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDemosaic::processPic(bool processnext) 
 {
-	Curve ctrlpts;
+
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
 	bool result = true;
 
@@ -88,11 +100,14 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled) {
 		mark();
-		dib->ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+		if (c == "color")
+			dib->ApplyDemosaic(DEMOSAIC_COLOR, threadcount);
+		else if (c == "half")
+			dib->ApplyDemosaic(DEMOSAIC_HALF, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
-			log(wxString::Format("tool=gamma,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;
