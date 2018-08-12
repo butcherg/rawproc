@@ -4,6 +4,7 @@
 #include "PicProcPanel.h"
 #include "myDoubleSlider.h"
 #include "myConfig.h"
+#include "myRowColumnSizer.h"
 #include "undo.xpm"
 #include "util.h"
 
@@ -46,46 +47,26 @@ class BlackWhitePointPanel: public PicProcPanel
 			}
 
 			SetSize(parent->GetSize());
-			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-
-
-			/*  Old sliders:
-			g->Add(new wxStaticText(this,wxID_ANY, "black: "), wxGBPosition(1,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			black = new wxSlider(this, wxID_ANY, blk, 0, blklimit, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(black , wxGBPosition(1,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",blk), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(1,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			btn1 = new wxBitmapButton(this, 1000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn1->SetToolTip("Reset black point to default");
-			g->Add(btn1, wxGBPosition(1,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-
-
-			g->Add(new wxStaticText(this,wxID_ANY, "white: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			white = new wxSlider(this, wxID_ANY, wht, whtlimit, 255, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(white , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%4d",wht), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			btn2 = new wxBitmapButton(this, 2000, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn2->SetToolTip("Reset white point to default");
-			g->Add(btn2, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 3);
-			*/
 			
 			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
-
-
 			
-			g->Add(chan, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxLEFT | wxTOP, 3);
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
-			g->Add(bwpoint , wxGBPosition(3,0), wxGBSpan(1,4), wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM, 3);
 			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
-			g->Add(recalc, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			if (recalcdefault) recalc->SetValue(true);
+			
+			myRowColumnSizer *m = new myRowColumnSizer(3,3);
+			m->AddItem(enablebox, wxALIGN_LEFT);
+			m->AddItem(chan, wxALIGN_RIGHT);
+			m->NextRow();
+			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
+			m->NextRow();
+			m->AddItem(bwpoint, wxALIGN_LEFT, 2);
+			m->NextRow();
+			m->AddItem(recalc, wxALIGN_LEFT);
 
-			SetSizerAndFit(g);
-			g->Layout();
+			SetSizerAndFit(m);
+			m->Layout();
 			Refresh();
 			Update();
 			SetFocus();
