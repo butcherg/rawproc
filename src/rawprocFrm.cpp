@@ -1764,7 +1764,9 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", "", commandtree, pic);
+		//parm tool.demosaic.default: Demosaic algorithm default.  Default=half
+		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half"));
+		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
