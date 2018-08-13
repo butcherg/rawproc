@@ -24,6 +24,7 @@ class DemosaicPanel: public PicProcPanel
 
 			wxArrayString opers;
 			opers.Add("half");
+			opers.Add("half_resize");
 			opers.Add("color");
 
 			operselect = new wxRadioBox (this, DEMOSAICOP, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
@@ -104,6 +105,8 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			dib->ApplyDemosaic(DEMOSAIC_COLOR, threadcount);
 		else if (c == "half")
 			dib->ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+		else if (c == "half_resize")
+			dib->ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
