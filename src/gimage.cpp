@@ -1730,7 +1730,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
 	
-	if (algorithm == DEMOSAIC_HALF) {
+	if (algorithm == DEMOSAIC_HALF | algorithm == DEMOSAIC_HALF_RESIZE) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y+=2) {
 			for (unsigned x=0; x<w; x+=2) {
@@ -1751,6 +1751,8 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		image = halfimage;
 		w /=2;
 		h /=2;
+		if (algorithm == DEMOSAIC_HALF_RESIZE) 
+			ApplyResize(w*2, h*2, FILTER_LANCZOS3, threadcount);
 	}
 	else if (algorithm == DEMOSAIC_COLOR) {
 		for (unsigned y=0; y<h; y+=2) {
