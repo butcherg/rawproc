@@ -1723,10 +1723,11 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 //This is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB quad and 
 //turns it into a single RGGB pixel.  "COLOR" doesn't demosaic, it zeros out the other 
 //channels in the RGGB quad pixels so the unmosaiced image can be regarded as what was recorded
-//through the color filter array
+//through the color filter array, in color
 //
 void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 {
+	if (imginfo["LibrawCFAPattern"] != "RGGB") return;  //remove when algorithm recognizes other CFA patterns
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
 	
@@ -1735,10 +1736,10 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		for (unsigned y=0; y<h; y+=2) {
 			for (unsigned x=0; x<w; x+=2) {
 				unsigned Hpos = (x/2) + (y/2)*(w/2);
-				unsigned Rpos = x + y*w;
-				unsigned G1pos = (x+1) + y*w;
-				unsigned G2pos = x + (y+1)*w;
-				unsigned Bpos = (x+1) + (y+1)*w;
+				unsigned Rpos = x + y*w;  //upper left
+				unsigned G1pos = (x+1) + y*w; //upper right
+				unsigned G2pos = x + (y+1)*w; //lower left
+				unsigned Bpos = (x+1) + (y+1)*w;  //lower right
 				double gval = (image[G1pos].g + image[G2pos].g) / 2.0;
 				double rval = image[Rpos].r;
 				double bval = image[Bpos].b;
