@@ -120,7 +120,7 @@ END_EVENT_TABLE()
 
 	void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	{
-		cmsHPROFILE hDisplayProfile;
+		cmsHPROFILE hDisplayProfile, hSoftProofProfile;
 
 		settingpic = true;
 		
@@ -192,6 +192,8 @@ END_EVENT_TABLE()
 					hDisplayProfile = NULL;
 				}
 			}
+			
+			cmsUInt32Number dwflags = 0;
 
 			if (hTransform) cmsDeleteTransform(hTransform);
 			
@@ -202,12 +204,42 @@ END_EVENT_TABLE()
 			if (intentstr == "saturation") intent = INTENT_SATURATION;
 			if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
 			if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
-
-			cmsUInt32Number dwflags = 0;
+			
 			//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
 			if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
+
+			cmsUInt32Number proofintent;
+			//parm display.cms.softproof: Perform softproofing color transform.  Default=0  
+			if (myConfig::getConfig().getValueOrDefault("display.cms.softproof","0") == "1") { 
+				dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
+				//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
+				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") {			
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
+					hSoftProofProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				}
+				else hSoftProofProfile = NULL;
+				//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+				wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
+				proofintent = INTENT_PERCEPTUAL;
+				if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
+				if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
+				if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
+				if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
+				//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
+				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
+			}
+			
 			if (hImgProfile)
 				if (hDisplayProfile)
+					if (hSoftProofProfile)
+						hTransform = cmsCreateProofingTransform(
+							hImgProfile, TYPE_RGB_8,
+							hDisplayProfile, TYPE_RGB_8,
+							hSoftProofProfile,
+							intent,
+							proofintent,
+							dwflags);
+					else
 					hTransform = cmsCreateTransform(
 						hImgProfile, TYPE_RGB_8,
 						hDisplayProfile, TYPE_RGB_8,
@@ -563,11 +595,26 @@ END_EVENT_TABLE()
 		else
 			moving=true;
 	}
-        
+      
+#define ID_SOFTPROOF 3000
+#define ID_ZOOM 3001	  
 	void PicPanel::OnRightDown(wxMouseEvent& event)
 	{
 		event.Skip();
 		if (blank) return;
+		wxMenu mnu;
+		mnu.Append(ID_SOFTPROOF, "Soft Proof...");
+		mnu.Append(ID_ZOOM, "Zoom");
+		switch (GetPopupMenuSelectionFromUser(mnu)) {
+			case ID_SOFTPROOF:
+				//InfoDialog(event.GetItem());
+				wxMessageBox("ID_SOFTPROOF");
+				break;
+			case ID_ZOOM:
+				//CommandTreeDeleteItem(event.GetItem());
+				wxGetTextFromUser ("zoom", "Zoom to:", "(empty)", this);
+				break;
+		}
 		picX = 0; picY = 0;
 		Refresh();
 		
