@@ -275,6 +275,10 @@ char * _loadRAW(const char *filename,
 			else
 				info["ExposureTime"] = sr[0];
 		}
+		if (nvpair[0] == "Filter pattern") {
+			nvpair[1].erase(nvpair[1].find("/"),1);
+			info["LibrawCFAPattern"] =  nvpair[1];
+		}
 		if (nvpair[0] == "Timestamp") {
 			std::vector<std::string> ts = split(nvpair[1]," "); //parse dcraw timestamp
 			if (ts.size() >= 5) {
@@ -885,6 +889,8 @@ char * _loadRAW(const char *filename,
 		C.rgb_cam[1][0],C.rgb_cam[1][1],C.rgb_cam[1][2],
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
 	info["LibrawRGBCam"] = buffer;
+
+	info["LibrawCFAPattern"] =  P1.cdesc;
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
