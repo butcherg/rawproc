@@ -2980,11 +2980,11 @@ GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string param
 		}
 		catch (std::exception &e) {
 			lasterror = GIMAGE_EXCEPTION;
-			delete iccprofile;
+			delete [] iccprofile;
 			return lasterror;
 		}
 
-		delete iccprofile;
+		delete [] iccprofile;
 	}
 	else {
 		if (this->profile)
@@ -3016,11 +3016,11 @@ GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string param
 		}
 		catch (std::exception &e) {
 			lasterror = GIMAGE_EXCEPTION;
-			delete iccprofile;
+			delete [] iccprofile;
 			return lasterror;
 		}
 
-		delete iccprofile;
+		delete [] iccprofile;
 	}
 	else {
 		if (this->profile)
@@ -3052,11 +3052,11 @@ GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, std::string params
 		}
 		catch (std::exception &e) {
 			lasterror = GIMAGE_EXCEPTION;
-			delete iccprofile;
+			delete [] iccprofile;
 			return lasterror;
 		}
 
-		delete iccprofile;
+		delete [] iccprofile;
 	}
 	else {
 		if (this->profile)
