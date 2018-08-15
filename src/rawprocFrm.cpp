@@ -1205,6 +1205,7 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
 
 void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 {
+	wxString cmd;
 	SetStatusText("");
 	//wxTreeItemId item, prev, next, newitem;
 	switch (event.GetKeyCode()) {
@@ -1224,21 +1225,59 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		pic->FitMode(true);
 		SetStatusText("scale: fit",2);
 		break;
-	case 67: //c - test cropmode
-		//pic->ToggleCropMode();
+	case 67: //c - copy selected command and its parameters to the clipboard
+		if (commandtree->IsEmpty()) return;
+		if (event.GetKeyEvent().ControlDown()) {
+			cmd = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand();
+			if (wxTheClipboard->Open()) {
+				wxTheClipboard->SetData( new wxTextDataObject(cmd) );
+				wxTheClipboard->Close();
+				SetStatusText(wxString::Format("%s copied to clipboard.",cmd));
+			}
+		}
+		break;
+	case 86: //v - paste command and its parameters from the clipboard
+		if (commandtree->IsEmpty()) return;
+		if (event.GetKeyEvent().ControlDown()) {
+			if (wxTheClipboard->Open()) {
+				if (wxTheClipboard->IsSupported( wxDF_TEXT )) {
+					wxTextDataObject data;
+					wxTheClipboard->GetData( data );
+					wxArrayString s = split(data.GetText(), ":");
+					if (AddItem(s[0], s[1]) != NULL)
+						SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
+					else
+						SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
+				}
+				wxTheClipboard->Close();
+			}
+		}
+		break;
+	case 88: //x - cut command from tree and copy to clipboard
+		if (commandtree->IsEmpty()) return;
+		if (commandtree->GetSelection() == commandtree->GetRootItem()) return;
+		if (event.GetKeyEvent().ControlDown()) {
+			cmd = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand();
+			if (wxTheClipboard->Open()) {
+				wxTheClipboard->SetData( new wxTextDataObject(cmd) );
+				wxTheClipboard->Close();
+				commandtree->Delete(commandtree->GetSelection());
+				SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
+			}
+		}
 		break;
 	case 80: //p - process command
 		WxStatusBar1->SetStatusText("processing...");
 		((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->processPic();
 		WxStatusBar1->SetStatusText("");
 		break;
-	case 116: //t
-	case 84: //T - toggle display thumbnail
+	case 116: //T
+	case 84: //t - toggle display thumbnail
 		pic->ToggleThumb();
 		break;
     	}
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
-	event.Skip();
+	//event.Skip();
 }
 
 void rawprocFrm::CommandTreeDeleteItem(wxTreeEvent& event)
@@ -1797,21 +1836,25 @@ void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	if (commandtree->GetSelection() == commandtree->GetRootItem()) return;
+	wxString cmd = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand();
 	if (wxTheClipboard->Open())
 	{
-		wxTheClipboard->SetData( new wxTextDataObject(((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand() ) );
+		wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 		wxTheClipboard->Close();
 		commandtree->Delete(commandtree->GetSelection());
+		SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
 	}
 }
 
 void rawprocFrm::MnuCopy1202Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	wxString cmd = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand();
 	if (wxTheClipboard->Open())
 	{
-		wxTheClipboard->SetData( new wxTextDataObject(((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand() ) );
+		wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 		wxTheClipboard->Close();
+		SetStatusText(wxString::Format("%s copied to clipboard.",cmd));
 	}
 }
 
@@ -1825,7 +1868,10 @@ void rawprocFrm::MnuPaste1203Click(wxCommandEvent& event)
 			wxTextDataObject data;
 			wxTheClipboard->GetData( data );
 			wxArrayString s = split(data.GetText(), ":");
-			AddItem(s[0], s[1]);
+			if (AddItem(s[0], s[1]) != NULL)
+				SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
+			else
+				SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
 		}
 		wxTheClipboard->Close();
 	}
