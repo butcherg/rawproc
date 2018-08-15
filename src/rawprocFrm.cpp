@@ -116,6 +116,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 #endif
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
+	EVT_CHAR(rawprocFrm::CharEvent)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
@@ -1970,6 +1971,11 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 void rawprocFrm::SetConfigFile(wxString cfile)
 {
 	configfile = cfile;
+}
+
+void rawprocFrm::CharEvent(wxKeyEvent& event)
+{
+	
 }
 
 
