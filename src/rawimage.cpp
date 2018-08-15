@@ -890,7 +890,12 @@ char * _loadRAW(const char *filename,
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
 	info["LibrawRGBCam"] = buffer;
 
-	info["LibrawCFAPattern"] =  P1.cdesc;
+	buffer[0] = P1.cdesc[RawProcessor.COLOR(0,0)];
+	buffer[1] = P1.cdesc[RawProcessor.COLOR(0,1)];
+	buffer[2] = P1.cdesc[RawProcessor.COLOR(1,0)];
+	buffer[3] = P1.cdesc[RawProcessor.COLOR(1,1)];
+	buffer[4] = '\0';
+	info["LibrawCFAPattern"] =  buffer;
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
