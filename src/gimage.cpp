@@ -146,7 +146,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 		}
 	}
 
-	else if (bits == BPP_FP) {
+	else if (bits == BPP_FP | bits == BPP_UFP) {
 		float * src = (float *) imagedata;
 		if (colors == 1) {  //turn into a three-color grayscale
 			for (unsigned y=0; y<h; y++) {
@@ -205,7 +205,7 @@ gImage::gImage(unsigned width, unsigned height, unsigned colors, std::map<std::s
 	w=width;
 	h=height;
 	c=colors;
-	b=BPP_FP;
+	b=BPP_UFP;
 	lasterror = GIMAGE_OK;
 
 	for (unsigned y=0; y<height; y++) {
@@ -320,7 +320,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32N
 				cmsDoTransform(hTransform, &img[pos], &imgdata[pos], w);
 			}
 		}
-		else if (bits == BPP_FP) {
+		else if (bits == BPP_FP | bits == BPP_UFP) {
 			imagedata = new char[w*h*c*sizeof(float)];
 			outformat = TYPE_RGB_FLT;
 			fpix * imgdata = (fpix *) imagedata;
@@ -386,7 +386,7 @@ char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number inten
 	char * imagedata;
 	if (bits == BPP_16)
 		imagedata = new char[w*h*c*sizeof(unsigned short)];
-	else if (bits == BPP_FP)
+	else if (bits == BPP_FP | bits == BPP_UFP)
 		imagedata = new char[w*h*c*sizeof(float)];
 	else if (bits == BPP_8)
 		imagedata = new char[w*h*c];
@@ -430,6 +430,20 @@ char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number inten
 				dst[pos].r = fmin(fmax(image[pos].r,0.0),1.0); 
 				dst[pos].g = fmin(fmax(image[pos].g,0.0),1.0); 
 				dst[pos].b = fmin(fmax(image[pos].b,0.0),1.0); 
+			}
+		}
+		format = TYPE_RGB_FLT;
+	}
+	
+	if (bits == BPP_UFP) {
+		fpix * dst = (fpix *) imagedata;
+		#pragma omp parallel for
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				dst[pos].r = image[pos].r; 
+				dst[pos].g = image[pos].g; 
+				dst[pos].b = image[pos].b; 
 			}
 		}
 		format = TYPE_RGB_FLT;
@@ -481,7 +495,9 @@ BPP gImage::getBits()
 std::string gImage::getBitsStr()
 {
 	switch (b) {
-		case BPP_FP: return "internal floating point";
+		case BPP_FP: 
+		case BPP_UFP:
+			return "internal floating point";
 		case BPP_8: return "8";
 		case BPP_16: return "16";
 	}
@@ -2929,12 +2945,13 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
-	//$ channelformat=8bit|16bit|float: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. 
+	//$ channelformat=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. 
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
 		if (p["channelformat"] == "8bit")  bitfmt = BPP_8;
 		if (p["channelformat"] == "16bit") bitfmt = BPP_16;
 		if (p["channelformat"] == "float") bitfmt = BPP_FP;
+		if (p["channelformat"] == "unboundedfloat") bitfmt = BPP_UFP;
 	}
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
@@ -3001,7 +3018,7 @@ GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string param
 	unsigned b = 0;
 	if (bits == BPP_16) b = 16;
 	else if (bits == BPP_8)  b = 8;
-	else if (bits == BPP_FP) b = 32;
+	else if (bits == BPP_FP | bits == BPP_UFP) b = 32;
 	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
 
 	if (profile) {

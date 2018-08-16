@@ -32,6 +32,7 @@ struct coord {
 
 enum BPP {
 	BPP_FP,
+	BPP_UFP,
 	BPP_8,
 	BPP_16
 };
