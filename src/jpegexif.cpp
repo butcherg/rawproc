@@ -717,7 +717,7 @@ void parse_eXIf_chunk(unsigned char * marker, unsigned length, std::map<std::str
 	if (marker && length > 0) {
 		unsigned char * exif = (unsigned char *) malloc(length+8);
 		memcpy((char *) exif, "\0\0Exif\0\0", 8);
-		memcpy(exif+7, marker, length);
+		memcpy(exif+8, marker, length);
 		parse_exif(exif, length+8, imageinfo);
 	}
 }
