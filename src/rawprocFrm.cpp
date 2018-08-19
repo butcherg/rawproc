@@ -1535,7 +1535,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	try {
 		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();  //comment out, don't need to process new tool
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1614,7 +1614,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	try {
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1684,7 +1684,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0"));
 		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();  //not sure why rotate has an initial value.....
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1731,7 +1731,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1824,7 +1824,7 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 	try {
 		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
