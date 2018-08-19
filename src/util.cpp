@@ -51,6 +51,55 @@ wxString paramString(wxString filter)
 	return paramstr;
 }
 
+wxString rawParamString(wxString filter)
+{
+	wxString paramstr, name, val;
+	bool rawimage = false;
+
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	if (c.find(std::string((filter+wxString("rawdata")).c_str())) != c.end())
+			if (c[std::string((filter+wxString("rawdata")).c_str())] == "1")
+				rawimage = true;
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		name = wxString(it->first.c_str());
+		val =  wxString(it->second.c_str());
+		if (name.Find(filter) != wxNOT_FOUND) {
+			val = myConfig::getConfig().getValue(std::string((const char *) name.mb_str()));
+			name.Replace(filter,"");
+			if (val != "") {
+				if (!rawimage) {
+					paramstr.Append(wxString::Format("%s=%s;",name, val));
+				}
+				else {
+					if (name == "rawdata" | name == "cameraprofile") 
+						paramstr.Append(wxString::Format("%s=%s;",name, val));
+				}
+			}
+		}
+	}
+
+	return paramstr;
+}
+
+wxArrayString paramList(wxString filter)
+{
+	wxArrayString paramlist;
+	wxString name, val;
+
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		name = wxString(it->first.c_str());
+		val =  wxString(it->second.c_str());
+		if (name.Find(filter) != wxNOT_FOUND) {
+			val = myConfig::getConfig().getValue(std::string((const char *) name.mb_str()));
+			name.Replace(filter,"");
+			if (val != "") paramlist.Add(wxString::Format("%s=%s;",name, val));
+		}
+	}
+
+	return paramlist;
+}
+
 void paramAppend(wxString name, wxString value, wxString &paramstring)
 {
 	if (paramstring != "") paramstring.Append(";");

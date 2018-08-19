@@ -606,7 +606,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			configparams.Append("params=");
 			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.params","")));
 #else
-			configparams = paramString("input.raw.libraw.");
+			//rawParamString removes all but rawdata and cameraprofile if rawdata=1:
+			configparams = rawParamString("input.raw.libraw.");
 			//parm input.raw.parameters: name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)
 			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.parameters","")));
 #endif

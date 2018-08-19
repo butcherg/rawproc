@@ -17,6 +17,8 @@ bool ImageContainsRawprocCommand(wxString fname);
 
 wxArrayString split(wxString str, wxString delim);
 wxString paramString(wxString filter);
+wxString rawParamString(wxString filter);
+wxArrayString paramList(wxString filter);
 
 void paramAppend(wxString name, wxString value, wxString &paramstring);
 wxArrayString paramSplit(wxString paramstring);
