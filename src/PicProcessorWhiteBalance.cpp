@@ -94,7 +94,7 @@ class WhiteBalancePanel: public PicProcPanel
 			double rm, gm, bm;
 			wxSize spinsize(130, -1);
 			
-			wxArrayString parm = split(params, ",");
+			//wxArrayString parm = split(params, ",");
 
 			//parm tool.whitebalance.min: (float), minimum multiplier value.  Default=0.001
 			double min = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.min","0.001").c_str());
@@ -167,7 +167,16 @@ class WhiteBalancePanel: public PicProcPanel
 				ab->SetValue(true);
 			}
 			else if (p[0] == "camera") {
-
+				camr = 1.0; camg = 1.0; camb = 1.0;
+				std::vector<double> cam_mults = ((PicProcessorWhiteBalance *)proc)->getCameraMultipliers();
+				if (cam_mults.size() >= 2) {
+					camr = cam_mults[0];
+					camg = cam_mults[1];
+					camb = cam_mults[2];
+					camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",camr,camg,camb));
+					cb->Enable(true);
+					cb->SetValue(true);
+				}
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
 				orgr = atof(p[0]);
@@ -184,21 +193,13 @@ class WhiteBalancePanel: public PicProcPanel
 				paty = atoi(p[1]);
 				patrad = atof(p[2]);
 				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
-				cb->SetValue(true);
+				pb->SetValue(true);
 			}
 			else 
 				wxMessageBox("Error: ill-formed param string");
 
 
-			camr = 1.0; camg = 1.0; camb = 1.0;
-			std::vector<double> cam_mults = ((PicProcessorWhiteBalance *)proc)->getCameraMultipliers();
-			if (cam_mults.size() >= 2) {
-				camr = cam_mults[0];
-				camg = cam_mults[1];
-				camb = cam_mults[2];
-				camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",camr,camg,camb));
-				cb->Enable(true);
-			}
+
 		
 			SetSizerAndFit(g);
 			g->Layout();
@@ -422,7 +423,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	std::vector<double> wbmults;
 	int patchx, patchy; double patchrad;
 	((wxFrame*) m_display->GetParent())->SetStatusText("white balance...");
-
+	
 	optypes optype = automatic; 
 	wxArrayString p = split(c, ",");
 	if (p.GetCount() > 0) {
@@ -446,6 +447,13 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		}
 		else if (p[0] == "auto") { //auto 
 			optype = automatic;
+		}
+		else if (p[0] == "camera") { //camera, to mults
+			std::vector<double> mults =  PicProcessorWhiteBalance::getCameraMultipliers();
+			redmult = mults[0];
+			greenmult = mults[1];
+			bluemult = mults[2];
+			optype = multipliers;
 		}
 	}
 	else {
