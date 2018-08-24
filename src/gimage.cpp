@@ -377,7 +377,8 @@ char * gImage::getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32N
 float * gImage::getImageDataFloat(bool unbounded, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	cmsHPROFILE hImgProfile;
-	cmsUInt32Number format;
+	//cmsUInt32Number format;
+	cmsUInt32Number informat;
 	cmsHTRANSFORM hTransform;
 	//float * imagedata;
 	unsigned imagesize = w*h;
@@ -410,9 +411,12 @@ float * gImage::getImageDataFloat(bool unbounded, cmsHPROFILE profile, cmsUInt32
 		}
 
 	if (profile) {
+		if (sizeof(PIXTYPE) == 2) informat = TYPE_RGB_HALF_FLT; 
+		if (sizeof(PIXTYPE) == 4) informat = TYPE_RGB_FLT;
+		if (sizeof(PIXTYPE) == 8) informat = TYPE_RGB_DBL;
 		hImgProfile = cmsOpenProfileFromMem(getProfile(), getProfileLength());
 		if (hImgProfile != NULL & profile != NULL) {
-			hTransform = cmsCreateTransform(hImgProfile, TYPE_RGB_FLT, profile, TYPE_RGB_FLT, intent, 0);
+			hTransform = cmsCreateTransform(hImgProfile, informat, profile, TYPE_RGB_FLT, intent, 0);
 			cmsCloseProfile(hImgProfile);
 			cmsDoTransform(hTransform, imagedata, imagedata, imagesize);
 		}
