@@ -25,10 +25,43 @@
 //#define SCALE_8BIT 1.0
 //#define SCALE_CURVE 1.0
 
+
+#if defined PIXhalf
+#define PIXHALF
+using half_float::half;
+using namespace half_float::literal;
+#define fmin half_float::fmin
+#define fmax half_float::fmax
+#elif defined PIXfloat
+#define PIXFLOAT
+#define fmin std::fmin
+#define fmax std::fmax
+#else
+#define PIXDOUBLE
+#define fmin std::fmin
+#define fmax std::fmax
+#endif
+
 //Range 0.0-1.0 constants
+#if defined PIXHALF
+#define SCALE_16BIT 65536.0
+#define SCALE_8BIT 256.0_h
+#define SCALE_CURVE 256.0_h
+#elif defined PIXFLOAT
+#define SCALE_16BIT 65536.0f
+#define SCALE_8BIT 256.0f
+#define SCALE_CURVE 256.0f
+#else
 #define SCALE_16BIT 65536.0
 #define SCALE_8BIT 256.0
 #define SCALE_CURVE 256.0
+#endif
+
+
+//Range 0.0-1.0 constants
+//#define SCALE_16BIT 65536.0
+//#define SCALE_8BIT 256.0
+//#define SCALE_CURVE 256.0
 
 
 const char * gImageVersion()
@@ -88,9 +121,12 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 			for (unsigned y=0; y<h; y++) {
 				for (unsigned x=0; x<w; x++) {
 					unsigned pos = x + y*w;
-					image[pos].r = (unsigned short) src[0]/SCALE_16BIT;
-					image[pos].g = (unsigned short) src[0]/SCALE_16BIT;
-					image[pos].b = (unsigned short) src[0]/SCALE_16BIT;
+					//image[pos].r = (unsigned short) src[0]/SCALE_16BIT;
+					//image[pos].g = (unsigned short) src[0]/SCALE_16BIT;
+					//image[pos].b = (unsigned short) src[0]/SCALE_16BIT;
+					image[pos].r = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
+					image[pos].g = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
+					image[pos].b = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
 					src += 1;
 				}
 			}
@@ -100,9 +136,9 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 			for (unsigned y=0; y<h; y++) {
 				for (unsigned x=0; x<w; x++) {
 					unsigned pos = x + y*w;
-					image[pos].r = (unsigned short) src[0]/SCALE_16BIT;
-					image[pos].g = (unsigned short) src[1]/SCALE_16BIT;
-					image[pos].b = (unsigned short) src[2]/SCALE_16BIT;
+					image[pos].r = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
+					image[pos].g = (PIXTYPE) ((unsigned short) src[1]/SCALE_16BIT);
+					image[pos].b = (PIXTYPE) ((unsigned short) src[2]/SCALE_16BIT);
 					src += 3;
 				}
 			}
@@ -120,9 +156,9 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 			for (unsigned y=0; y<h; y++) {
 				for (unsigned x=0; x<w; x++) {
 					unsigned pos = x + y*w;
-					image[pos].r = (unsigned char) src[0]/SCALE_8BIT;
-					image[pos].g = (unsigned char) src[0]/SCALE_8BIT;
-					image[pos].b = (unsigned char) src[0]/SCALE_8BIT;
+					image[pos].r = (PIXTYPE) ((unsigned char) src[0]/SCALE_8BIT);
+					image[pos].g = (PIXTYPE) ((unsigned char) src[0]/SCALE_8BIT);
+					image[pos].b = (PIXTYPE) ((unsigned char) src[0]/SCALE_8BIT);
 					src += 1;
 				}
 			}
@@ -132,9 +168,9 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 			for (unsigned y=0; y<height; y++) {
 				for (unsigned x=0; x<width; x++) {
 					unsigned pos = x + y*w;
-					image[pos].r = (unsigned char) src[0]/SCALE_8BIT;
-					image[pos].g = (unsigned char) src[1]/SCALE_8BIT;
-					image[pos].b = (unsigned char) src[2]/SCALE_8BIT;
+					image[pos].r = (PIXTYPE) ((unsigned char) src[0]/SCALE_8BIT);
+					image[pos].g = (PIXTYPE) ((unsigned char) src[1]/SCALE_8BIT);
+					image[pos].b = (PIXTYPE) ((unsigned char) src[2]/SCALE_8BIT);
 					src += 3;
 				}
 			}
@@ -351,16 +387,26 @@ float * gImage::getImageDataFloat(bool unbounded, cmsHPROFILE profile, cmsUInt32
 	if (unbounded)
 		#pragma omp parallel for
 		for (unsigned i=0; i<imagesize; i++) {
-			imagedata[i].r = (float) img[i].r;
-			imagedata[i].g = (float) img[i].g;
-			imagedata[i].b = (float) img[i].b;
+			imagedata[i].r = (PIXTYPE) img[i].r;
+			imagedata[i].g = (PIXTYPE) img[i].g;
+			imagedata[i].b = (PIXTYPE) img[i].b;
 		}
 	else
 		#pragma omp parallel for
 		for (unsigned i=0; i<imagesize; i++) {
-			imagedata[i].r = fmin(fmax(img[i].r,0.0),1.0); 
-			imagedata[i].g = fmin(fmax(img[i].g,0.0),1.0); 
-			imagedata[i].b = fmin(fmax(img[i].b,0.0),1.0); 
+			#if defined PIXHALF
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0_h),1.0_h); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0_h),1.0_h); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0_h),1.0_h); 
+			#elif defined PIXFLOAT
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0f),1.0f); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0f),1.0f); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0f),1.0f); 
+			#else
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0),1.0); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0),1.0); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0),1.0); 
+			#endif
 		}
 
 	if (profile) {
@@ -399,10 +445,20 @@ char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number inten
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				dst[pos].r = (unsigned short) lrint(fmin(fmax(image[pos].r*SCALE_16BIT,0.0),65535.0)); 
-				dst[pos].g = (unsigned short) lrint(fmin(fmax(image[pos].g*SCALE_16BIT,0.0),65535.0));
-				dst[pos].b = (unsigned short) lrint(fmin(fmax(image[pos].b*SCALE_16BIT,0.0),65535.0)); 
-			}
+				#if defined PIXHALF
+				dst[pos].r = (unsigned short) lrint(fmin(fmax(image[pos].r*(half_float::half) SCALE_16BIT,0.0_h),65535.0_h)); 
+				dst[pos].g = (unsigned short) lrint(fmin(fmax(image[pos].g*(half_float::half) SCALE_16BIT,0.0_h),65535.0_h));
+				dst[pos].b = (unsigned short) lrint(fmin(fmax(image[pos].b*(half_float::half) SCALE_16BIT,0.0_h),65535.0_h)); 
+				#elif PIXTYPE == float
+				dst[pos].r = (unsigned short) lrint(fmin(fmax(image[pos].r*(float) SCALE_16BIT,0.0f),65535.0f)); 
+				dst[pos].g = (unsigned short) lrint(fmin(fmax(image[pos].g*(float) SCALE_16BIT,0.0f),65535.0f));
+				dst[pos].b = (unsigned short) lrint(fmin(fmax(image[pos].b*(float) SCALE_16BIT,0.0f),65535.0f)); 
+				#else
+				dst[pos].r = (unsigned short) lrint(fmin(fmax(image[pos].r*(double) SCALE_16BIT,0.0),65535.0)); 
+				dst[pos].g = (unsigned short) lrint(fmin(fmax(image[pos].g*(double) SCALE_16BIT,0.0),65535.0));
+				dst[pos].b = (unsigned short) lrint(fmin(fmax(image[pos].b*(double) SCALE_16BIT,0.0),65535.0)); 
+				#endif
+				}
 		}
 		format = TYPE_RGB_16;
 	}
@@ -413,9 +469,19 @@ char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number inten
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				dst[pos].r = (unsigned char) lrint(fmin(fmax(image[pos].r*SCALE_8BIT,0.0),255.0)); 
-				dst[pos].g = (unsigned char) lrint(fmin(fmax(image[pos].g*SCALE_8BIT,0.0),255.0));
-				dst[pos].b = (unsigned char) lrint(fmin(fmax(image[pos].b*SCALE_8BIT,0.0),255.0)); 
+				#if defined PIXHALF
+				dst[pos].r = (unsigned char) lrint(fmin(fmax(image[pos].r*(half_float::half) SCALE_8BIT,0.0_h),255.0_h)); 
+				dst[pos].g = (unsigned char) lrint(fmin(fmax(image[pos].g*(half_float::half) SCALE_8BIT,0.0_h),255.0_h));
+				dst[pos].b = (unsigned char) lrint(fmin(fmax(image[pos].b*(half_float::half) SCALE_8BIT,0.0_h),255.0_h)); 
+				#elif defined PIXFLOAT
+				dst[pos].r = (unsigned char) lrint(fmin(fmax(image[pos].r*(float) SCALE_8BIT,0.0f),255.0f)); 
+				dst[pos].g = (unsigned char) lrint(fmin(fmax(image[pos].g*(float) SCALE_8BIT,0.0f),255.0f));
+				dst[pos].b = (unsigned char) lrint(fmin(fmax(image[pos].b*(float) SCALE_8BIT,0.0f),255.0f)); 
+				#else
+				dst[pos].r = (unsigned char) lrint(fmin(fmax(image[pos].r*(double) SCALE_8BIT,0.0),255.0)); 
+				dst[pos].g = (unsigned char) lrint(fmin(fmax(image[pos].g*(double) SCALE_8BIT,0.0),255.0));
+				dst[pos].b = (unsigned char) lrint(fmin(fmax(image[pos].b*(double) SCALE_8BIT,0.0),255.0)); 
+				#endif
 			}
 		}
 		format = TYPE_RGB_8;
@@ -427,10 +493,20 @@ char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number inten
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
+				#if defined PIXHALF
+				dst[pos].r = fmin(fmax(image[pos].r,0.0_h),1.0_h); 
+				dst[pos].g = fmin(fmax(image[pos].g,0.0_h),1.0_h); 
+				dst[pos].b = fmin(fmax(image[pos].b,0.0_h),1.0_h); 
+				#elif defined PIXFLOAT
+				dst[pos].r = fmin(fmax(image[pos].r,0.0f),1.0f); 
+				dst[pos].g = fmin(fmax(image[pos].g,0.0f),1.0f); 
+				dst[pos].b = fmin(fmax(image[pos].b,0.0f),1.0f); 
+				#else
 				dst[pos].r = fmin(fmax(image[pos].r,0.0),1.0); 
 				dst[pos].g = fmin(fmax(image[pos].g,0.0),1.0); 
 				dst[pos].b = fmin(fmax(image[pos].b,0.0),1.0); 
-			}
+				#endif
+				}
 		}
 		format = TYPE_RGB_FLT;
 	}
@@ -2675,6 +2751,14 @@ std::vector<long> gImage::BlueHistogram()
 //rgb histogram, scale=number of buckets, 256 or 65536...
 std::vector<histogramdata> gImage::Histogram(unsigned scale)
 {
+	#if defined PIXHALF
+	half s = (half_float::half) scale;
+	#elif defined PIXFLOAT
+	float s = (float) scale;
+	#else
+	double s = (double) scale;
+	#endif
+	
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
 	
@@ -2688,9 +2772,19 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				unsigned pos = x + y*w;
-				pr[(unsigned) lrint(fmin(fmax(image[pos].r*scale,0.0),scale-1))]++;
-				pg[(unsigned) lrint(fmin(fmax(image[pos].g*scale,0.0),scale-1))]++;
-				pb[(unsigned) lrint(fmin(fmax(image[pos].b*scale,0.0),scale-1))]++;
+				#if defined PIXHALF
+				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0_h),s-1.0_h))]++;
+				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0_h),s-1.0_h))]++;
+				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0_h),s-1.0_h))]++;
+				#elif defined PIXFLOAT
+				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0f),s-1.0f))]++;
+				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0f),s-1.0f))]++;
+				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0f),s-1.0f))]++;
+				#else
+				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0),s-1.0))]++;
+				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0),s-1.0))]++;
+				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0),s-1.0))]++;
+				#endif
 			}
 		}
 		
@@ -2710,21 +2804,43 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 //single-channel histogram, OBE...
 std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 {
-	unsigned scale;
-	if (b == BPP_16) scale = 65536;
-	else scale = 256;
+	#if defined PIXHALF
+	half s;
+	if (b == BPP_16) s = 65536.0_h;
+	else s = 256.0_h;
+	#elif defined PIXFLOAT
+	float s;
+	if (b == BPP_16) s = 65536.0f;
+	else s = 256.0f;
+	#else
+	double s;
+	if (b == BPP_16) s = 65536.0;
+	else s = 256.0;
+	#endif
+	
 	hmax = 0;
 	
-	std::vector<long> hdata(scale,0);
+	std::vector<long> hdata(s,0);
 
 	//#pragma omp parallel for
 	for(unsigned y = 0; y < h; y++) {
 		for(unsigned x = 0; x < w; x++) {
 			unsigned pos = x + y*w;
 			unsigned d; 
-			if (channel == CHANNEL_RED)   d = (unsigned) fmin(fmax(image[pos].r*scale,0.0),scale-1);
-			if (channel == CHANNEL_GREEN) d = (unsigned) fmin(fmax(image[pos].g*scale,0.0),scale-1);
-			if (channel == CHANNEL_BLUE)  d = (unsigned) fmin(fmax(image[pos].b*scale,0.0),scale-1);
+			#if defined PIXHALF
+			if (channel == CHANNEL_RED)   d = (unsigned) fmin(fmax(image[pos].r*s,0.0_h),s-1.0_h);
+			if (channel == CHANNEL_GREEN) d = (unsigned) fmin(fmax(image[pos].g*s,0.0_h),s-1.0_h);
+			if (channel == CHANNEL_BLUE)  d = (unsigned) fmin(fmax(image[pos].b*s,0.0_h),s-1.0_h);
+			#elif defined PIXFLOAT
+			if (channel == CHANNEL_RED)   d = (unsigned) fmin(fmax(image[pos].r*s,0.0f),s-1.0f);
+			if (channel == CHANNEL_GREEN) d = (unsigned) fmin(fmax(image[pos].g*s,0.0f),s-1.0f);
+			if (channel == CHANNEL_BLUE)  d = (unsigned) fmin(fmax(image[pos].b*s,0.0f),s-1.0f);
+			#else
+			if (channel == CHANNEL_RED)   d = (unsigned) fmin(fmax(image[pos].r*s,0.0),s-1.0);
+			if (channel == CHANNEL_GREEN) d = (unsigned) fmin(fmax(image[pos].g*s,0.0),s-1.0);
+			if (channel == CHANNEL_BLUE)  d = (unsigned) fmin(fmax(image[pos].b*s,0.0),s-1.0);
+			#endif
+			
 			hdata[d]++;
 			if (hmax < hdata[d]) hmax = hdata[d];
 		}
