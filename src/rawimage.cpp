@@ -925,6 +925,7 @@ char * _loadRAW(const char *filename,
 		unsigned imgsize = (*width) * (*height) * (*numcolors) * ((*numbits)/8);
 		img = new char[imgsize];
 		memcpy(img, RawProcessor.imgdata.rawdata.raw_image, imgsize);
+		RawProcessor.imgdata.params.output_color = 0;
 
 		//RawProcessor.recycle();
 		//return img;
@@ -974,6 +975,7 @@ char * _loadRAW(const char *filename,
 				}
 			}
 		}
+		
 		if (profile) {
 			//gImage::makeICCProfile(profile, icc_m, size);
 			//delete if the above works: 
@@ -982,42 +984,42 @@ char * _loadRAW(const char *filename,
 			*icc_m = new char[size];
 			cmsSaveProfileToMem(profile, *icc_m, &size);
 		}
-		
-		
-		if (RawProcessor.imgdata.params.output_color == 1) {
-			profile = gImage::makeLCMSdcrawProfile("srgb", gamma);
-			cmsSaveProfileToMem(profile, NULL, &size);
-			*icclength = size;
-			*icc_m = new char[size];
-			cmsSaveProfileToMem(profile, *icc_m, &size);
-		}
-		if (RawProcessor.imgdata.params.output_color == 2) {
-			profile = gImage::makeLCMSdcrawProfile("adobe", gamma);
-			cmsSaveProfileToMem(profile, NULL, &size);
-			*icclength = size;
-			*icc_m = new char[size];
-			cmsSaveProfileToMem(profile, *icc_m, &size);
-		}
-		if (RawProcessor.imgdata.params.output_color == 3) {
-			profile = gImage::makeLCMSdcrawProfile("wide", gamma);
-			cmsSaveProfileToMem(profile, NULL, &size);
-			*icclength = size;
-			*icc_m = new char[size];
-			cmsSaveProfileToMem(profile, *icc_m, &size);
-		}
-		if (RawProcessor.imgdata.params.output_color == 4) {
-			profile = gImage::makeLCMSdcrawProfile("prophoto", gamma);
-			cmsSaveProfileToMem(profile, NULL, &size);
-			*icclength = size;
-			*icc_m = new char[size];
-			cmsSaveProfileToMem(profile, *icc_m, &size);
-		}
-		if (RawProcessor.imgdata.params.output_color == 5) {
-			profile = cmsCreateXYZProfile();
-			cmsSaveProfileToMem(profile, NULL, &size);
-			*icclength = size;
-			*icc_m = new char[size];
-			cmsSaveProfileToMem(profile, *icc_m, &size);
+		else if ((p.find("colorspace") != p.end()) | (p.find("output_color") != p.end())) {
+			if (RawProcessor.imgdata.params.output_color == 1) {
+				profile = gImage::makeLCMSdcrawProfile("srgb", gamma);
+				cmsSaveProfileToMem(profile, NULL, &size);
+				*icclength = size;
+				*icc_m = new char[size];
+				cmsSaveProfileToMem(profile, *icc_m, &size);
+			}
+			else if (RawProcessor.imgdata.params.output_color == 2) {
+				profile = gImage::makeLCMSdcrawProfile("adobe", gamma);
+				cmsSaveProfileToMem(profile, NULL, &size);
+				*icclength = size;
+				*icc_m = new char[size];
+				cmsSaveProfileToMem(profile, *icc_m, &size);
+			}
+			else if (RawProcessor.imgdata.params.output_color == 3) {
+				profile = gImage::makeLCMSdcrawProfile("wide", gamma);
+				cmsSaveProfileToMem(profile, NULL, &size);
+				*icclength = size;
+				*icc_m = new char[size];
+				cmsSaveProfileToMem(profile, *icc_m, &size);
+			}
+			else if (RawProcessor.imgdata.params.output_color == 4) {
+				profile = gImage::makeLCMSdcrawProfile("prophoto", gamma);
+				cmsSaveProfileToMem(profile, NULL, &size);
+				*icclength = size;
+				*icc_m = new char[size];
+				cmsSaveProfileToMem(profile, *icc_m, &size);
+			}
+			else if (RawProcessor.imgdata.params.output_color == 5) {
+				profile = cmsCreateXYZProfile();
+				cmsSaveProfileToMem(profile, NULL, &size);
+				*icclength = size;
+				*icc_m = new char[size];
+				cmsSaveProfileToMem(profile, *icc_m, &size);
+			}
 		}
 	}
 
