@@ -20,11 +20,6 @@
 
 #define PI            3.14159265358979323846
 
-//Range 0.0-255.0 constants
-//#define SCALE_16BIT 256.0
-//#define SCALE_8BIT 1.0
-//#define SCALE_CURVE 1.0
-
 
 #if defined PIXhalf
 #define PIXHALF
@@ -56,12 +51,6 @@ using namespace half_float::literal;
 #define SCALE_8BIT 256.0
 #define SCALE_CURVE 256.0
 #endif
-
-
-//Range 0.0-1.0 constants
-//#define SCALE_16BIT 65536.0
-//#define SCALE_8BIT 256.0
-//#define SCALE_CURVE 256.0
 
 
 const char * gImageVersion()
@@ -121,9 +110,6 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 			for (unsigned y=0; y<h; y++) {
 				for (unsigned x=0; x<w; x++) {
 					unsigned pos = x + y*w;
-					//image[pos].r = (unsigned short) src[0]/SCALE_16BIT;
-					//image[pos].g = (unsigned short) src[0]/SCALE_16BIT;
-					//image[pos].b = (unsigned short) src[0]/SCALE_16BIT;
 					image[pos].r = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
 					image[pos].g = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
 					image[pos].b = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
@@ -247,9 +233,9 @@ gImage::gImage(unsigned width, unsigned height, unsigned colors, std::map<std::s
 	for (unsigned y=0; y<height; y++) {
 		for (unsigned x=0; x<width; x++) {
 			unsigned pos = x + y*w;
-			image[pos].r = 0.0;
-			image[pos].g = 0.0;
-			image[pos].b = 0.0;
+			image[pos].r = (PIXTYPE) 0.0;
+			image[pos].g = (PIXTYPE) 0.0;
+			image[pos].b = (PIXTYPE) 0.0;
 		}
 	}
 
