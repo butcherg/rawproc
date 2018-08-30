@@ -10,6 +10,7 @@
 
 #ifndef PIXTYPE
 #define PIXTYPE float
+#define PIXFLOAT
 #endif
 
 extern "C" {

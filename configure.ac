@@ -41,7 +41,7 @@ AC_ARG_WITH([pixtype],
 )
 if test "$with_pixtype" != ""
 then
-	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype"
+	CXXFLAGS="$CXXFLAGS -DPIXTYPE=$with_pixtype -DPIX$with_pixtype"
 fi
 
 #do a bunch of stuff if win32:
