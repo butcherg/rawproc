@@ -10,13 +10,13 @@ class PicProcessorWhiteBalance: public PicProcessor
 		PicProcessorWhiteBalance(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		~PicProcessorWhiteBalance();
 		void createPanel(wxSimplebook* parent);
+		void SetPatchCoord(int x, int y);
 		bool processPic(bool processnext=true);
 		std::vector<double> getPatchMeans(int x, int y, float radius);
 		std::vector<double> getCameraMultipliers();
 		void OnLeftDown(wxMouseEvent& event);
 
 	private:
-		void SetPatchCoord(int x, int y);
 		coord patch;
 };
 

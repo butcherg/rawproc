@@ -151,6 +151,16 @@ class WhiteBalancePanel: public PicProcPanel
 			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
 			g->Add(camera, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
+			//if camera multipliers are available in the metadata:
+			camr = 1.0; camg = 1.0; camb = 1.0;
+			std::vector<double> cam_mults = ((PicProcessorWhiteBalance *)proc)->getCameraMultipliers();
+			if (cam_mults.size() >= 2) {
+				camr = cam_mults[0];
+				camg = cam_mults[1];
+				camb = cam_mults[2];
+				camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",camr,camg,camb));
+			}
+
 			//parse parameters:
 			wxArrayString p = split(params,",");
 
@@ -164,19 +174,12 @@ class WhiteBalancePanel: public PicProcPanel
 				ob->SetValue(true);
 			}
 			else if (p[0] == "auto") {
+				ab->Enable(true);
 				ab->SetValue(true);
 			}
 			else if (p[0] == "camera") {
-				camr = 1.0; camg = 1.0; camb = 1.0;
-				std::vector<double> cam_mults = ((PicProcessorWhiteBalance *)proc)->getCameraMultipliers();
-				if (cam_mults.size() >= 2) {
-					camr = cam_mults[0];
-					camg = cam_mults[1];
-					camb = cam_mults[2];
-					camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",camr,camg,camb));
-					cb->Enable(true);
-					cb->SetValue(true);
-				}
+				cb->Enable(true);
+				cb->SetValue(true);
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
 				orgr = atof(p[0]);
@@ -188,11 +191,12 @@ class WhiteBalancePanel: public PicProcPanel
 				ob->SetValue(true);
 				
 			}
-			else if (p[0].IsNumber()) { //int patch coordinates, float radius
-				patx = atoi(p[0]);
-				paty = atoi(p[1]);
-				patrad = atof(p[2]);
+			else if (p[0] == "patch") {
+				patx = atoi(p[1]);
+				paty = atoi(p[2]);
+				patrad = atof(p[3]);
 				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
+				((PicProcessorWhiteBalance *)proc)->SetPatchCoord(patx, paty);
 				pb->SetValue(true);
 			}
 			else 
@@ -261,17 +265,18 @@ class WhiteBalancePanel: public PicProcPanel
 					break;
 				case WBORIGINAL:
 					q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
-					setMultipliers(orgr, orgg, orgb);
+					//setMultipliers(orgr, orgg, orgb);
 					break;
 				case WBCAMERA:
-					q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",camr, camg, camb));
-					setMultipliers(camr, camg, camb);
+					//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",camr, camg, camb));
+					q->setParams("camera");
+					//setMultipliers(camr, camg, camb);
 					break;
 			}
 			q->processPic();
 			Refresh();
 		}
-	
+
 		void setPatch(coord p)
 		{
 			//parm tool.whitebalance.patchradius: (float), radius of patch.  Default=1.5
@@ -287,7 +292,7 @@ class WhiteBalancePanel: public PicProcPanel
 			else
 				Refresh();
 		}
-
+/*
 		void setCamera(double rm, double gm, double bm) 
 		{
 			camr = rm; camg = gm; camb = bm;
@@ -295,7 +300,8 @@ class WhiteBalancePanel: public PicProcPanel
 			cb->Enable(true);
 			Refresh();
 		}
-		
+*/
+
 		void paramChanged(wxCommandEvent& event)
 		{
 			ob->SetValue(false);
