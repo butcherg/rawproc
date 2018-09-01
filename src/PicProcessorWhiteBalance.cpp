@@ -159,6 +159,7 @@ class WhiteBalancePanel: public PicProcPanel
 				camg = cam_mults[1];
 				camb = cam_mults[2];
 				camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",camr,camg,camb));
+				cb->Enable(true);
 			}
 
 			//parse parameters:
@@ -178,7 +179,6 @@ class WhiteBalancePanel: public PicProcPanel
 				ab->SetValue(true);
 			}
 			else if (p[0] == "camera") {
-				cb->Enable(true);
 				cb->SetValue(true);
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
