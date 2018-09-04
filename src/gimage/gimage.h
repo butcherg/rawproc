@@ -6,7 +6,10 @@
 #include <map>
 #include <lcms2.h>
 #include "curve.h"
+
+#if defined PIXhalf
 #include "half.hpp"
+#endif
 
 #ifndef PIXTYPE
 #define PIXTYPE float
@@ -17,7 +20,10 @@ extern "C" {
 	const char * gImageVersion();
 }
 
+#if defined PIXhalf
 using half_float::half;
+#endif
+
 
 struct pix {
 	PIXTYPE r, g, b;
