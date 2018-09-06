@@ -71,23 +71,25 @@ fi
 # Checks for libraries.
 
 # Check for wxWidgets.
-#AM_OPTIONS_WXCONFIG
-WX_CONFIG_OPTIONS
-reqwx=3.1.0
-#AM_PATH_WXCONFIG($reqwx, wxWin=1)
-WX_CONFIG_CHECK([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
-if test "$wxWin" != 1; then
-	AC_MSG_ERROR([
-		wxWidgets must be installed on your system.
- 
-		Please check that wx-config is in path, the directory
-		where wxWidgets libraries are installed (returned by
-		'wx-config --libs' or 'wx-config --static --libs' command)
-		is in LD_LIBRARY_PATH or equivalent variable and
-		wxWidgets version is $reqwx or above.
-		])
-fi
+AC_ARG_ENABLE([wxwidgets],
+	AS_HELP_STRING([--disable-wxwidgets], [Bypasses wxWidgets checks, use for only compiling the img or exif command line programs.]))
 
+AS_IF([test "x$enable_wxwidgets" != "xno"], [
+	WX_CONFIG_OPTIONS
+	reqwx=3.1.0
+	WX_CONFIG_CHECK([$reqwx], [wxWin=1], [wxWin=0], [std,aui,propgrid], [])
+	if test "$wxWin" != 1; then
+		AC_MSG_ERROR([
+			wxWidgets must be installed on your system.
+	 
+			Please check that wx-config is in path, the directory
+			where wxWidgets libraries are installed (returned by
+			'wx-config --libs' or 'wx-config --static --libs' command)
+			is in LD_LIBRARY_PATH or equivalent variable and
+			wxWidgets version is $reqwx or above.
+			])
+	fi
+])
 
 
 #libjpeg:
