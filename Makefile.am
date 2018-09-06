@@ -19,5 +19,5 @@ wininstaller:
 
 .PHONY: appimage
 appimage:
-	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip
+	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif
 	
