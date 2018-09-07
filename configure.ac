@@ -172,6 +172,16 @@ then
 fi
 AM_CONDITIONAL(DEMOSAIC, test x$enable_demosaic = xyes)
 
+#old LibRaw dcraw params, pre 0.18.7:
+AC_ARG_ENABLE([old-libraw],
+        AS_HELP_STRING([--enable-old-libraw], [enables old LibRaw demosaic parameters.])
+)
+if test "$enable_old_libraw" == "yes"
+then
+	CXXFLAGS="$CXXFLAGS -DOLD_LIBRAW"
+	
+fi
+
  
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
