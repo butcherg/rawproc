@@ -753,69 +753,6 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.fbdd_noiserd = atoi(p["fbdd_denoise"].c_str());
 
 	//#
-	//# eeci_refine=n - non-zero for ECCI refine for VCD interpolation
-	//#
-	if (p.find("eeci_refine") != p.end()) 
-		RawProcessor.imgdata.params.eeci_refine = atoi(p["eeci_refine"].c_str());
-
-	//#
-	//# es_med_passes=n - number of edge-sensitive median filter passes after VCD+AHD demosaic
-	//#
-	if (p.find("es_med_passes") != p.end()) 
-		RawProcessor.imgdata.params.es_med_passes = atoi(p["es_med_passes"].c_str());
-
-	//#
-	//# ca_correc=0|1 - chromatic aberration suppression
-	//#
-	if (p.find("ca_correc") != p.end()) 
-		RawProcessor.imgdata.params.ca_correc = atoi(p["ca_correc"].c_str());
-
-	//#
-	//# cared=0.01 - chromatic aberration suppression red correction
-	//#
-	if (p.find("cared") != p.end()) 
-		RawProcessor.imgdata.params.cared = atof(p["cared"].c_str());
-
-	//#
-	//# cablue=0.01 - chromatic aberration suppression blue correction
-	//#
-	if (p.find("cablue") != p.end()) 
-		RawProcessor.imgdata.params.cablue = atof(p["cablue"].c_str());
-
-	//#
-	//# cfaline=0|1 - banding reduction
-	//#
-	if (p.find("cfaline") != p.end()) 
-		RawProcessor.imgdata.params.cfaline = atoi(p["cfaline"].c_str());
-
-	//#
-	//# linenoise=0.01 - banding reduction amount
-	//#
-	if (p.find("linenoise") != p.end()) 
-		RawProcessor.imgdata.params.linenoise = atof(p["linenoise"].c_str());
-
-	//#
-	//# cfa_clean=0|1 - Turns on impulse noise and Gaussian high frequency reduction<br>
-	//# lclean=0.005 to 0.05 - Amount of luminance reduction, 0.01 is a common value<br>
-	//# cclean=0.005 to 0.05 - Amount of color reduction, 0.01 is a common value
-	//#
-	if (p.find("cfa_clean") != p.end()) 
-		RawProcessor.imgdata.params.cfa_clean = atoi(p["cfa_clean"].c_str());
-	if (p.find("lclean") != p.end()) 
-		RawProcessor.imgdata.params.lclean = atof(p["lclean"].c_str());
-	if (p.find("cclean") != p.end()) 
-		RawProcessor.imgdata.params.cclean = atof(p["cclean"].c_str());
-
-	//#
-	//# cfa_green=0|1 - Turns on reduction of maze artifacts produced by bad balance of green channels<br>
-	//# green_thresh=0.01 to 0.1 - Max difference between channels allowed for equalization 
-	//#
-	if (p.find("cfa_green") != p.end()) 
-		RawProcessor.imgdata.params.cfa_green = atoi(p["cfa_green"].c_str());
-	if (p.find("green_thresh") != p.end()) 
-		RawProcessor.imgdata.params.green_thresh = atof(p["green_thresh"].c_str());
-
-	//#
 	//# exp_correc=0|1 - Turns on exposure correction before demosaic<br>
 	//# exp_shift=1.0 - From 0.25 (2 stops darken) to 8.0 (3 stops lighten), default 1.0=no shift<br>
 	//# exp_preser=0.0 to 1.0 - Preserve hightlights when lightening the image
@@ -828,9 +765,87 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.exp_preser = atof(p["exp_preser"].c_str());
 
 	//#
-	//# wf_debanding=0|1 - Turns on banding suppression<br>
-	//# wf_deband_threshold=tr,tg,tb,tg - Per-channel debanding thresholds
+	//# no_auto_scale=0|1 - Disables pixel scaling, dcraw: -D.  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.
 	//#
+	if (p.find("no_auto_scale") != p.end()) 
+		RawProcessor.imgdata.params.no_auto_scale = atoi(p["no_auto_scale"].c_str());
+
+	//#
+	//# no_interpolation=0|1 - Disables demosaic. dcraw: -d  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.
+	//#
+	if (p.find("no_interpolation") != p.end()) 
+		RawProcessor.imgdata.params.no_interpolation = atoi(p["no_interpolation"].c_str());
+
+#ifdef OLD_LIBRAW
+	//These processing parameters were deleted when LibRaw removed the demosaic packs.  '&' flags the doc extracts.
+
+	//&
+	//& eeci_refine=n - non-zero for ECCI refine for VCD interpolation
+	//&
+	if (p.find("eeci_refine") != p.end()) 
+		RawProcessor.imgdata.params.eeci_refine = atoi(p["eeci_refine"].c_str());
+
+	//&
+	//& es_med_passes=n - number of edge-sensitive median filter passes after VCD+AHD demosaic
+	//&
+	if (p.find("es_med_passes") != p.end()) 
+		RawProcessor.imgdata.params.es_med_passes = atoi(p["es_med_passes"].c_str());
+
+	//&
+	//& ca_correc=0|1 - chromatic aberration suppression
+	//&
+	if (p.find("ca_correc") != p.end()) 
+		RawProcessor.imgdata.params.ca_correc = atoi(p["ca_correc"].c_str());
+
+	//&
+	//& cared=0.01 - chromatic aberration suppression red correction
+	//&
+	if (p.find("cared") != p.end()) 
+		RawProcessor.imgdata.params.cared = atof(p["cared"].c_str());
+
+	//&
+	//& cablue=0.01 - chromatic aberration suppression blue correction
+	//&
+	if (p.find("cablue") != p.end()) 
+		RawProcessor.imgdata.params.cablue = atof(p["cablue"].c_str());
+
+	//&
+	//& cfaline=0|1 - banding reduction
+	//&
+	if (p.find("cfaline") != p.end()) 
+		RawProcessor.imgdata.params.cfaline = atoi(p["cfaline"].c_str());
+
+	//&
+	//& linenoise=0.01 - banding reduction amount
+	//&
+	if (p.find("linenoise") != p.end()) 
+		RawProcessor.imgdata.params.linenoise = atof(p["linenoise"].c_str());
+
+	//&
+	//& cfa_clean=0|1 - Turns on impulse noise and Gaussian high frequency reduction<br>
+	//& lclean=0.005 to 0.05 - Amount of luminance reduction, 0.01 is a common value<br>
+	//& cclean=0.005 to 0.05 - Amount of color reduction, 0.01 is a common value
+	//&
+	if (p.find("cfa_clean") != p.end()) 
+		RawProcessor.imgdata.params.cfa_clean = atoi(p["cfa_clean"].c_str());
+	if (p.find("lclean") != p.end()) 
+		RawProcessor.imgdata.params.lclean = atof(p["lclean"].c_str());
+	if (p.find("cclean") != p.end()) 
+		RawProcessor.imgdata.params.cclean = atof(p["cclean"].c_str());
+
+	//&
+	//& cfa_green=0|1 - Turns on reduction of maze artifacts produced by bad balance of green channels<br>
+	//& green_thresh=0.01 to 0.1 - Max difference between channels allowed for equalization 
+	//&
+	if (p.find("cfa_green") != p.end()) 
+		RawProcessor.imgdata.params.cfa_green = atoi(p["cfa_green"].c_str());
+	if (p.find("green_thresh") != p.end()) 
+		RawProcessor.imgdata.params.green_thresh = atof(p["green_thresh"].c_str());
+
+	//&
+	//& wf_debanding=0|1 - Turns on banding suppression<br>
+	//& wf_deband_threshold=tr,tg,tb,tg - Per-channel debanding thresholds
+	//&
 	if (p.find("wf_debanding") != p.end()) 
 		RawProcessor.imgdata.params.wf_debanding = atoi(p["wf_debanding"].c_str());
 	if (p.find("wf_deband_treshold") != p.end()) {
@@ -843,17 +858,10 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//#
-	//# no_auto_scale=0|1 - Disables pixel scaling, dcraw: -D.  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.
-	//#
-	if (p.find("no_auto_scale") != p.end()) 
-		RawProcessor.imgdata.params.no_auto_scale = atoi(p["no_auto_scale"].c_str());
+#endif
 
-	//#
-	//# no_interpolation=0|1 - Disables demosaic. dcraw: -d  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.
-	//#
-	if (p.find("no_interpolation") != p.end()) 
-		RawProcessor.imgdata.params.no_interpolation = atoi(p["no_interpolation"].c_str());
+
+
 
 
 
