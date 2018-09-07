@@ -41,13 +41,19 @@ foreach $arg (@ARGV) {
 	}
 	else {
 		cp  $arg, "$rootdir/usr/bin/";
-		$result=`file $rootdir/usr/bin/$arg |grep -c ELF`;
-		if ($result != 0) {
-			chmod 0775, "$rootdir/usr/bin/$arg";
-		}
 	}
 }
-chmod 0775, "$rootdir/usr/bin/$file";
+
+#set executable permissions for each application in $rootdir/usr/bin/
+foreach $fname (<$rootdir/usr/bin/*>) {
+	$result=`file $fname |grep -c \"ELF\"`;
+	chomp $result;
+
+	if ($result ne "0") {
+		chmod 0775, $fname;
+	}
+}
+
 
 
 
