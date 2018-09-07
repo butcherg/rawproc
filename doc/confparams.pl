@@ -16,9 +16,9 @@ foreach $file (@files) {
 
 @conf = sort @conflines;
 foreach $line (@conf) {
-	print "<li>$line</li><br>\n";
-	#my ($parm,$stuff) = split /:/, $line;
-	#print "$parm\n";
+	#print "<li>$line</li><br>\n";
+	my ($parm,$stuff) = split /:/, $line;
+	print "<li><b>$parm</b>: $stuff</li><br>\n";
 }
 
 print "</ul></body></html>\n";
