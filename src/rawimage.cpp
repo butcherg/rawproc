@@ -1039,6 +1039,10 @@ char * _loadRAW(const char *filename,
 					*icc_m = new char[size];
 					cmsSaveProfileToMem(profile, *icc_m, &size);
 				}
+				else {
+					icc_m=NULL;
+					*icclength = 0;
+				}
 			}
 		}
 	}
