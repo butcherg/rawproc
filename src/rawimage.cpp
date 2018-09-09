@@ -397,16 +397,13 @@ char * _loadRAW(const char *filename,
 	RawProcessor.imgdata.params.gamm[0] = 1/2.4;  //1/1.0
 	RawProcessor.imgdata.params.gamm[1] = 12.92; //1.0
 
-	//#
-	//# rawdata=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color 16-bit grayscale.  Default=0.
-	//#
+
+	//raw rawdata=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color 16-bit grayscale.  Default=0.
+
 	if (p.find("rawdata") != p.end()) 
 		rawdata = atoi(p["rawdata"].c_str());
 	
-	//#
-	//# output_color=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)<br>
-	//# colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb
-	//#
+	//raw Output Colorspace:<ul><li><b>output_color</b>=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)</li><li>colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb</li></ul>
 	//template input.raw.libraw.colorspace=raw|srgb|adobe|wide|prophoto|xyz
 	if (p.find("colorspace") != p.end()) {
 		if (p["colorspace"].compare("raw") == 0) 
@@ -426,10 +423,8 @@ char * _loadRAW(const char *filename,
 	if (p.find("output_color") != p.end()) 
 		RawProcessor.imgdata.params.output_color = atoi(p["output_color"].c_str());
 
-	//#
-	//# user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-3].  Default=3 (ahd)<br>
-	//# demosaic=linear|vng|ppg|ahd|dcb|modahd|afd|vcd|vcdahd|lmmse|amaze|dht|moddht - Alias of user_qual, with mnemonic values. default=ahd
-	//#
+
+	//raw Demosaic:<ul><li>user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-3].  Default=3 (ahd)</li><li>demosaic=linear|vng|ppg|ahd|dcb|modahd|afd|vcd|vcdahd|lmmse|amaze|dht|moddht - Alias of user_qual, with mnemonic values. default=ahd</li></ul>
 	if (p.find("demosaic") != p.end()) {
 		if (p["demosaic"].compare("linear") == 0) 
 			RawProcessor.imgdata.params.user_qual = 0;
@@ -460,9 +455,9 @@ char * _loadRAW(const char *filename,
 	}
 	if (p.find("user_qual") != p.end()) RawProcessor.imgdata.params.user_qual = atoi(p["user_qual"].c_str());
 
-	//#
-	//# output_bps=8|16 - bits per sample, dcraw: -4 (16-bit).  Default=16
-	//#
+
+	//raw output_bps=8|16 - bits per sample, dcraw: -4 (16-bit).  Default=16
+
 	if (p.find("output_bps") != p.end()) 
 		if (p["output_bps"] == "8")
 			RawProcessor.imgdata.params.output_bps = 8;
@@ -924,6 +919,7 @@ char * _loadRAW(const char *filename,
 	timeinfo = localtime (&rawtime);
 	strftime (buffer,80,"%Y:%m:%d %H:%M:%S",timeinfo);
 	info["DateTime"] = buffer;  
+
 	
 	cmsHPROFILE profile = NULL;
 	cmsUInt32Number size;
@@ -953,6 +949,10 @@ char * _loadRAW(const char *filename,
 			*icclength = size;
 			*icc_m = new char[size];
 			cmsSaveProfileToMem(profile, *icc_m, &size);
+		}
+		else {
+			icc_m=NULL;
+			*icclength = 0;
 		}
 	}
 	else {
