@@ -7,6 +7,7 @@ dist_doc_DATA = README.md
 
 .PHONY: makedoc
 makedoc:
+	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*
 
 .PHONY: makezip

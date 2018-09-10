@@ -1064,6 +1064,10 @@ for (int f=0; f<files.size(); f++)
 	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
+	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
+		printf("error: (%fsec) - Image not loaded correctly\n",_duration());
+		continue;
+	}
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
 
 	commandstring += std::string(iname);

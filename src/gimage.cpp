@@ -87,12 +87,15 @@ gImage::gImage(const gImage &o)
 	
 	lasterror = GIMAGE_OK;
 
-	if (o.profile) {
+	if (o.profile && o.profile_length !=0) {
 		profile = new char[o.profile_length];
 		memcpy(profile, o.profile, o.profile_length);
 		profile_length = o.profile_length;
 	}
-	else profile = NULL;
+	else {
+		profile = NULL;
+		profile_length = 0;
+	}
 }
 
 gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors, BPP bits, std::map<std::string,std::string> imageinfo, char * icc_profile, unsigned icc_profile_length)
