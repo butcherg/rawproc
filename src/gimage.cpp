@@ -29,12 +29,12 @@ using namespace half_float::literal;
 #define fmax half_float::fmax
 #elif defined PIXfloat
 #define PIXFLOAT
-#define fmin std::fmin
-#define fmax std::fmax
+//#define fmin std::fmin
+//#define fmax std::fmax
 #else
 #define PIXDOUBLE
-#define fmin std::fmin
-#define fmax std::fmax
+//#define fmin std::fmin
+//#define fmax std::fmax
 #endif
 
 //Range 0.0-1.0 constants
