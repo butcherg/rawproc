@@ -939,6 +939,10 @@ int main (int argc, char **argv)
 	
 	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
 
+	#ifdef USE_DCRAW
+	gImage::setdcrawPath(filepath_normalize(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.path","dcraw")))
+	#endif
+
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
 		#ifdef VERSION
