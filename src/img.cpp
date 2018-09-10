@@ -1057,6 +1057,11 @@ for (int f=0; f<files.size(); f++)
 		continue;
 	}
 	
+	if (!file_exists(iname)) {
+		printf("Input file %s doesn't exist...\n", iname);
+		continue;
+	}
+
 	count++;
 
 	commandstring = "rawproc-img ";
