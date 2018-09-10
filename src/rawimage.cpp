@@ -951,7 +951,7 @@ char * _loadRAW(const char *filename,
 			cmsSaveProfileToMem(profile, *icc_m, &size);
 		}
 		else {
-			icc_m=NULL;
+			*icc_m=NULL;
 			*icclength = 0;
 		}
 	}
@@ -1040,7 +1040,7 @@ char * _loadRAW(const char *filename,
 					cmsSaveProfileToMem(profile, *icc_m, &size);
 				}
 				else {
-					icc_m=NULL;
+					*icc_m=NULL;
 					*icclength = 0;
 				}
 			}
