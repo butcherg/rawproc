@@ -20,7 +20,7 @@
 
 #ifdef USE_DCRAW
 //char dcrawversion[128] = "dcraw";
-std::string dcrawpath;
+std::string dcrawpath="dcraw";
 void setdcrawpath(std::string path) {dcrawpath = path;}
 std::string getdcrawpath() {return dcrawpath;}
 #endif
