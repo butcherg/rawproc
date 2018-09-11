@@ -355,6 +355,7 @@ char * _loadRAW(const char *filename,
 	return (char *) image;
 }
 #else
+
 char * _loadRAW(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
@@ -875,20 +876,20 @@ char * _loadRAW(const char *filename,
 	info["Model"] = P1.model;  
 
 	//used for subsequent metadata collection:
-	char buffer [80];
+	char buffer [4096];
 
 	//Normalized libraw white balance:
-	snprintf(buffer, 80, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
+	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
 	info["LibrawWhiteBalance"] = buffer;
 
 	//cam_xyz matrix:
-	snprintf(buffer, 80, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cam_xyz[0][0],C.cam_xyz[0][1],C.cam_xyz[0][2],
+	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cam_xyz[0][0],C.cam_xyz[0][1],C.cam_xyz[0][2],
 		C.cam_xyz[1][0],C.cam_xyz[1][1],C.cam_xyz[1][2],
 		C.cam_xyz[2][0],C.cam_xyz[2][1],C.cam_xyz[2][2]);
 	info["LibrawCamXYZ"] = buffer;
 
 	//rgb_cam matrix:
-	snprintf(buffer, 80, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.rgb_cam[0][0],C.rgb_cam[0][1],C.rgb_cam[0][2],
+	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.rgb_cam[0][0],C.rgb_cam[0][1],C.rgb_cam[0][2],
 		C.rgb_cam[1][0],C.rgb_cam[1][1],C.rgb_cam[1][2],
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
 	info["LibrawRGBCam"] = buffer;
