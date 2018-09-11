@@ -347,7 +347,7 @@ char * _loadRAW(const char *filename,
 		cmsSaveProfileToMem(profile, *icc_m, &size);
 	}
 	else {
-		icc_m=NULL;
+		*icc_m=NULL;
 		*icclength = 0;
 	}
 
@@ -861,7 +861,10 @@ char * _loadRAW(const char *filename,
 
 
 
-	if (RawProcessor.open_file(filename) != LIBRAW_SUCCESS) return NULL;
+	if (RawProcessor.open_file(filename) != LIBRAW_SUCCESS) {
+		printf("loadRAW: RawProcessor.open_file failed...\n"); 
+		return NULL;
+	}
 	RawProcessor.unpack();
 	
 	*icclength = 0;
@@ -924,6 +927,8 @@ char * _loadRAW(const char *filename,
 	
 	cmsHPROFILE profile = NULL;
 	cmsUInt32Number size;
+	*icc_m=NULL;
+	*icclength = 0;
 	
 	if (rawdata) {
 		*width = S.raw_width;
@@ -958,7 +963,8 @@ char * _loadRAW(const char *filename,
 	}
 	else {
 	
-		RawProcessor.dcraw_process();
+		int result = RawProcessor.dcraw_process();
+		printf("%s\n",LibRaw::strerror(result));
 		if (RawProcessor.imgdata.process_warnings & LIBRAW_WARN_FALLBACK_TO_AHD) {
 			info["Notice"] = "Selected demosaic algorithm not supported, AHD used";
 		}
@@ -967,7 +973,6 @@ char * _loadRAW(const char *filename,
 		*height = h;
 		*numcolors = c;
 		*numbits = b;
-
 		img = new char[w*h*c*(b/8)];
 	
 		libraw_processed_image_t *image = RawProcessor.dcraw_make_mem_image();

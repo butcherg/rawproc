@@ -105,6 +105,8 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 	h=height;
 	c=colors;
 	b=bits;
+	profile=NULL;
+	profile_length=0;
 	lasterror = GIMAGE_OK;
 
 	if (bits ==BPP_16) {
@@ -1755,12 +1757,10 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 //uses a patch from the image presumed to represent neutral or white:
 std::vector<double>  gImage::ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount)
 {	
-printf("patch: %d,%d  %0.1f\n",patchx,patchy,patchradius);
 	double redmult = 1.0, greenmult = 1.0, bluemult = 1.0;
 	std::vector<double> a = CalculatePatchMeans(patchx, patchy, patchradius);
 	redmult = a[1] / a[0]; // gm/rm
 	bluemult = a[1] / a[2]; // gm/bm
-printf("patch: %f,%f,%f\n",redmult,greenmult,bluemult);
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
