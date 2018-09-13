@@ -160,6 +160,7 @@ class gImage
 		//Image operations.  
 		//threadcount=0 uses all available CPUs, n uses precisely n CPUs, and -n uses available-n CPUs
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
+		void ApplyConvolutionKernel(std::vector<double> kernel, int kerneldimension, int threadcount);
 		void ApplySharpen(int strength, int threadcount=0);
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
 		void ApplyRotate(double angle, bool crop, int threadcount=0);

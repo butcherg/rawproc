@@ -864,6 +864,35 @@ void gImage::ApplyConvolutionKernel(double kernel[3][3], int threadcount)
 	} 
 }
 
+//arbitrarily-dimensioned kernels, access with p = x + y*kerneldimension :
+void gImage::ApplyConvolutionKernel(std::vector<double> kernel, int kerneldimension, int threadcount)
+{
+	
+	std::vector<pix> src = image;
+	unsigned offset = floor(kerneldimension/2.0);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for(int y = offset; y < h-offset; y++) {
+		for(int x = offset; x < w-offset; x++) {
+			int pos = x + y*w;
+			double R=0.0; double G=0.0; double B=0.0;
+			for (int kx=0; kx<kerneldimension; kx++) {
+				for (int ky=0; ky<kerneldimension; ky++) {
+					int k = kx + ky * kerneldimension;
+					int kpos = w*(y-offset+ky) + (x-offset+kx);
+					R += src[kpos].r * kernel[k];
+					G += src[kpos].g * kernel[k];
+					B += src[kpos].b * kernel[k];
+				}
+			}
+
+			image[pos].r = R;
+			image[pos].g = G;
+			image[pos].b = B;
+		}
+	} 
+}
+
 void gImage::ApplySharpen(int strength, int threadcount)
 {
 	double kernel[3][3] =

@@ -975,6 +975,45 @@ void do_cmd(gImage &dib, std::string commandstr)
 			commandstring += std::string(cs);
 		}
 
+		else if (strcmp(cmd,"blur") == 0) {  
+			double kernel1[5][5] = 
+			{
+				0.003765,	0.015019,	0.023792,	0.015019,	0.003765,
+				0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+				0.023792,	0.094907,	0.150342,	0.094907,	0.023792,
+				0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+				0.003765,	0.015019,	0.023792,	0.015019,	0.003765
+			};
+			double kernel3[5][5] = 
+			{
+				0.031827,	0.037541,	0.039665,	0.037541,	0.031827,
+				0.037541,	0.044281,	0.046787,	0.044281,	0.037541,
+				0.039665,	0.046787,	0.049434,	0.046787,	0.039665,
+				0.037541,	0.044281,	0.046787,	0.044281,	0.037541,
+				0.031827,	0.037541,	0.039665,	0.037541,	0.031827
+			};
+
+			double * karray = (double *) kernel3;  //default
+			char * k = strtok(NULL, " ");
+			if (k)
+				if (strcmp(k,"1") == 0)
+					karray = (double *) kernel1;
+
+			std::vector<double> kdata;
+			for (unsigned i=0; i<25; i++) kdata.push_back(karray[i]);
+
+			int threadcount = gImage::ThreadCount();
+			printf("blur: %s (%d threads)... ",k, threadcount);
+			_mark();
+			dib.ApplyConvolutionKernel(kdata, 5, threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			if (k)
+				sprintf(cs, "%s:%s ",cmd, k);
+			else
+				sprintf(cs, "%s ",cmd);
+			commandstring += std::string(cs);
+		}
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 
