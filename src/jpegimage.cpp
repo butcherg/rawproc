@@ -446,17 +446,23 @@ bool _writeJPEG(const char *filename,
 
 	jpeg_set_defaults(&cinfo);
 
-	//$ quality=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent. 
+	//$ quality=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 
 	if (p.find("quality") != p.end()) 
 		jpeg_set_quality(&cinfo, atoi(p["quality"].c_str()), TRUE);
 
 	jpeg_start_compress(&cinfo, TRUE);
 
-	marker =  construct_APP1marker(info, &markerlength);
-	jpeg_write_marker(&cinfo, JPEG_APP0+1, marker+2, markerlength);
-	delete [] marker;
+	//$ excludeexif: Applies to JPEG and PNG output, if present, output image doesn't include metadata
+	if (p.find("excludeexif") != p.end()) {
+		marker =  construct_APP1marker(info, &markerlength);
+		jpeg_write_marker(&cinfo, JPEG_APP0+1, marker+2, markerlength);
+		delete [] marker;
+	}
 
-	if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
+	//$ excludeicc: Applies to JPEG and PNG output, if present, output image doesn't include icc profile
+	if (p.find("excludeicc") != p.end()) {
+		if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
+	}
 
 	row_stride = cinfo.image_width * cinfo.input_components;
 	dst = (JSAMPROW) imagedata;

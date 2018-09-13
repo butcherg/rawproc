@@ -7,6 +7,7 @@ dist_doc_DATA = README.md
 
 .PHONY: makedoc
 makedoc:
+	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*
 
 .PHONY: makezip
@@ -19,5 +20,5 @@ wininstaller:
 
 .PHONY: appimage
 appimage:
-	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip
+	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif
 	

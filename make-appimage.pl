@@ -43,7 +43,17 @@ foreach $arg (@ARGV) {
 		cp  $arg, "$rootdir/usr/bin/";
 	}
 }
-chmod 0775, "$rootdir/usr/bin/$file";
+
+#set executable permissions for each application in $rootdir/usr/bin/
+foreach $fname (<$rootdir/usr/bin/*>) {
+	$result=`file $fname |grep -c \"ELF\"`;
+	chomp $result;
+
+	if ($result ne "0") {
+		chmod 0775, $fname;
+	}
+}
+
 
 
 
@@ -88,13 +98,23 @@ $APPRUN = <<'END_APPRUN';
 HERE="$(dirname "$(readlink -f "${0}")")"
 export PATH="${HERE}"/usr/bin/:"${HERE}"/usr/sbin/:"${HERE}"/usr/games/:"${HERE}"/bin/:"${HERE}"/sbin/:"${PATH}"
 export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/usr/lib32/:"${HERE}"/usr/lib64/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${HERE}"/lib32/:"${HERE}"/lib64/:"${LD_LIBRARY_PATH}"
-export PYTHONPATH="${HERE}"/usr/share/pyshared/:"${PYTHONPATH}"
-export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
-export PERLLIB="${HERE}"/usr/share/perl5/:"${HERE}"/usr/lib/perl5/:"${PERLLIB}"
-export GSETTINGS_SCHEMA_DIR="${HERE}"/usr/share/glib-2.0/schemas/:"${GSETTINGS_SCHEMA_DIR}"
-export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
-EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
-exec "${EXEC}" "$@"
+#export PYTHONPATH="${HERE}"/usr/share/pyshared/:"${PYTHONPATH}"
+#export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
+#export PERLLIB="${HERE}"/usr/share/perl5/:"${HERE}"/usr/lib/perl5/:"${PERLLIB}"
+#export GSETTINGS_SCHEMA_DIR="${HERE}"/usr/share/glib-2.0/schemas/:"${GSETTINGS_SCHEMA_DIR}"
+#export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
+#EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
+#exec "${EXEC}" "$@"
+if [ ! -z $APPIMAGE ] ; then
+	BINARY_NAME=$(basename "$ARGV0")
+	if [ -e "$HERE/usr/bin/$BINARY_NAME" ] ; then
+		exec "$HERE/usr/bin/$BINARY_NAME" "$@"
+	else
+		exec "$HERE/usr/bin/rawproc" "$@"
+	fi
+else
+	exec "$HERE/usr/bin/rawproc" "$@"
+fi
 END_APPRUN
 
 open OUTFILE, ">$file-$arch.AppDir/AppRun";

@@ -229,6 +229,43 @@ void do_cmd(gImage &dib, std::string commandstr)
 			commandstring += std::string(cs);
 		}
 
+		//#demosaic:[half|half_resize|color] default: half
+		else if (strcmp(cmd,"demosaic") == 0) {  
+			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half").c_str();
+			char *d = strtok(NULL," ");
+			if (d) demosaic = d;
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			printf("demosaic: %s (%d threads)... ",demosaic.c_str(),threadcount);
+
+			_mark();
+			if (demosaic == "color")
+				dib.ApplyDemosaic(DEMOSAIC_COLOR, threadcount);
+			else if (demosaic == "half")
+				dib.ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+			else if (demosaic == "half_resize")
+				dib.ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
+			else printf("no-op... ");
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%s ",cmd, demosaic.c_str());
+			commandstring += std::string(cs);
+		}
+
+		//#addexif:tagname,value - tagname must be valid EXIF tag for it to survive the file save...
+		else if (strcmp(cmd,"addexif") == 0) {  
+			char *name = strtok(NULL, ",");
+			char *value = strtok(NULL, " ");
+			
+			printf("addexif: %s=%s ... ",name,value);
+
+			dib.setInfo(std::string(name),std::string(value));
+		}
+
 		//#blackwhitepoint[:rgb|red|green|blue][;][0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			char *c, *b, *w;
@@ -970,6 +1007,10 @@ int main (int argc, char **argv)
 	
 	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
 
+	#ifdef USE_DCRAW
+	gImage::setdcrawPath(filepath_normalize(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.path","dcraw")))
+	#endif
+
 	if (argc < 2) {
 		//printf("Error: No input file specified.\n");
 		#ifdef VERSION
@@ -1088,6 +1129,11 @@ for (int f=0; f<files.size(); f++)
 		continue;
 	}
 	
+	if (!file_exists(iname)) {
+		printf("Input file %s doesn't exist...\n", iname);
+		continue;
+	}
+
 	count++;
 
 	commandstring = "rawproc-img ";
@@ -1095,6 +1141,10 @@ for (int f=0; f<files.size(); f++)
 	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
+	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
+		printf("error: (%fsec) - Image not loaded correctly\n",_duration());
+		continue;
+	}
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
 
 	commandstring += std::string(iname);
