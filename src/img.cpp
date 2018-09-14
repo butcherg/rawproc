@@ -609,7 +609,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 				std::vector<std::string> parm = split(std::string(p),",");
 				if (parm[0] == "auto") {
 					op = "auto";
-					printf("whitebalance: %s (%d threads)... ",op,threadcount);
+					printf("whitebalance: %s (%d threads)... ",op.c_str(),threadcount);
 					_mark();
 					dib.ApplyWhiteBalance(threadcount);
 					printf("done (%fsec).\n",_duration());
@@ -620,7 +620,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 					patchx   = atoi(parm[1].c_str());
 					patchy   = atoi(parm[2].c_str());
 					patchrad = atof(parm[3].c_str());
-					printf("whitebalance: %s,%d,%d,%0.1f (%d threads)... ",op,patchx,patchy,patchrad,threadcount);
+					printf("whitebalance: %s,%d,%d,%0.1f (%d threads)... ",op.c_str(),patchx,patchy,patchrad,threadcount);
 					_mark();
 					dib.ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
 					printf("done (%fsec).\n",_duration());
@@ -634,7 +634,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 						redmult   = atof(m[0].c_str());
 						greenmult = atof(m[1].c_str());
 						bluemult  = atof(m[2].c_str());
-						printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op,redmult,greenmult,bluemult,threadcount);
+						printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op.c_str(),redmult,greenmult,bluemult,threadcount);
 						_mark();
 						dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 						printf("done (%fsec).\n",_duration());
@@ -649,52 +649,11 @@ void do_cmd(gImage &dib, std::string commandstr)
 					_mark();
 					dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					printf("done (%fsec).\n",_duration());
-					sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, op.c_str(), redmult, greenmult, bluemult);
+					sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
 				}
 				commandstring += std::string(cs);
 			}
 		}
-
-/*
-		//#whitebalance:[rmult,gmult,bmult] default: automatic, based on "gray world"
-		else if (strcmp(cmd,"whitebalance") == 0) {  
-			//no properties yet, no whitebalance in rawproc...
-			double redmult=1.0; 
-			double greenmult = 1.0; 
-			double bluemult = 1.0;
-			char *rm = strtok(NULL,", ");
-			char *gm = strtok(NULL,", ");
-			char *bm = strtok(NULL," ");
-			if (rm && strcmp(rm, "auto") != 0) {
-				redmult = atof(rm);
-				if (gm) greenmult = atof(gm);
-				if (bm) bluemult = atof(bm);
-			}
-			else { 
-				std::vector<double> rgbmeans = dib.CalculateChannelMeans();
-				redmult = rgbmeans[0] / rgbmeans[1];
-				bluemult = rgbmeans[2] / rgbmeans[1];
-			}
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.whitebalance.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-			printf("whitebalance: %0.2f,%0.2f,%0.2f (%d threads)... ",redmult,greenmult,bluemult,threadcount);
-
-			_mark();
-			dib.ApplyWhiteBalance(redmult,greenmult,bluemult, threadcount);
-			printf("done (%fsec).\n",_duration());
-			char cs[256];
-			if (rm)
-				sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
-			else
-				sprintf(cs, "auto");
-			commandstring += std::string(cs);
-		}
-*/
 
 		//#gray:[r,g,b] default: 0.21,0.72,0.07 
 		else if (strcmp(cmd,"gray") == 0) {  
@@ -754,7 +713,8 @@ void do_cmd(gImage &dib, std::string commandstr)
 			else printf("redeye: bad x coord\n");
 		
 		}
-		
+
+		//#curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb
 		else if (strcmp(cmd,"curve") == 0) {
 			Curve crv;
 			int ctstart;
@@ -975,6 +935,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 			commandstring += std::string(cs);
 		}
 
+/*
 		else if (strcmp(cmd,"blur") == 0) {  
 			double kernel1[5][5] = 
 			{
@@ -1003,17 +964,41 @@ void do_cmd(gImage &dib, std::string commandstr)
 			for (unsigned i=0; i<25; i++) kdata.push_back(karray[i]);
 
 			int threadcount = gImage::ThreadCount();
-			printf("blur: %s (%d threads)... ",k, threadcount);
+			printf("blur, 2Dkernel: %s (%d threads)... ",k, threadcount);
 			_mark();
-			dib.ApplyConvolutionKernel(kdata, 5, threadcount);
+			dib.Apply2DConvolutionKernel(kdata, 5, threadcount);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
 			if (k)
 				sprintf(cs, "%s:%s ",cmd, k);
 			else
 				sprintf(cs, "%s ",cmd);
-			commandstring += std::string(cs);
+			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
 		}
+*/
+		else if (strcmp(cmd,"blur") == 0) { 
+			double radius = 1.5; 
+			double sigma = 1.0;
+			char * r = strtok(NULL, ", ");
+			char * s = strtok(NULL, " ");
+			
+			if (r) radius = atof(r);
+			if (s) sigma = atof(s);
+
+			int threadcount = gImage::ThreadCount();
+
+			printf("blur, 1Dkernel: %0.1f (%d threads)... ", radius, threadcount);
+			_mark();
+			dib.ApplyGaussianBlur(radius, sigma, threadcount);
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			if (r)
+				sprintf(cs, "%s:%0.1f ",cmd, radius);
+			else
+				sprintf(cs, "%s ",cmd);
+			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
+		}
+
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 

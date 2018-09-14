@@ -864,10 +864,88 @@ void gImage::ApplyConvolutionKernel(double kernel[3][3], int threadcount)
 	} 
 }
 
-//arbitrarily-dimensioned kernels, access with p = x + y*kerneldimension :
-void gImage::ApplyConvolutionKernel(std::vector<double> kernel, int kerneldimension, int threadcount)
+//http://www.apileofgrains.nl/blur-filters-c/
+std::vector<float> ComputeGaussianKernel(const int inRadius, const float inWeight)
 {
-	
+    //int mem_amount = (inRadius*2)+1;
+    //float* gaussian_kernel = (float*)malloc(mem_amount*sizeof(float));
+    std::vector<float> gaussian_kernel((inRadius*2)+1);
+
+    float twoRadiusSquaredRecip = 1.0 / (2.0 * inRadius * inRadius);
+    float sqrtTwoPiTimesRadiusRecip = 1.0 / (sqrt(2.0 * M_PI) * inRadius);
+    float radiusModifier = inWeight;
+
+    // Create Gaussian Kernel
+    int r = -inRadius;
+    float sum = 0.0f;
+    for (int i = 0; i < gaussian_kernel.size(); i++)
+    {
+        float x = r * radiusModifier;
+        x *= x;
+        float v = sqrtTwoPiTimesRadiusRecip * exp(-x * twoRadiusSquaredRecip);
+        gaussian_kernel[i] = v;
+            
+        sum+=v;
+        r++;
+    }
+
+    // Normalize distribution
+    float div = sum;
+    for (int i = 0; i < gaussian_kernel.size(); i++)
+        gaussian_kernel[i] /= div;
+
+    return gaussian_kernel;
+}
+
+//arbitrarily-dimensioned 1D kernels, applied in two passes:
+void gImage::Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount)
+{
+	std::vector<pix> src = image;
+	int kerneldimension = kernel.size();
+	unsigned offset = floor(kerneldimension/2.0);
+
+
+	#pragma omp parallel for num_threads(threadcount)
+	for(int y = offset; y < h-offset; y++) {
+		for(int x = offset; x < w-offset; x++) {
+			int pos = x + y*w;
+			double R=0.0; double G=0.0; double B=0.0;
+			for (int k=0; k<kerneldimension; k++) {
+				int kpos = x-offset+k + y*w;  //left-to-right, from offset
+				R += src[kpos].r * kernel[k];
+				G += src[kpos].g * kernel[k];
+				B += src[kpos].b * kernel[k];
+			}
+			image[pos].r = R;
+			image[pos].g = G;
+			image[pos].b = B;
+		}
+	}
+
+	src = image;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for(int y = offset; y < h-offset; y++) {
+		for(int x = offset; x < w-offset; x++) {
+			int pos = x + y*w;
+			double R=0.0; double G=0.0; double B=0.0;
+			for (int k=0; k<kerneldimension; k++) {
+				int kpos = x + (y-offset+k)*w;  //top-to-bottom, from offset
+				R += src[kpos].r * kernel[k];
+				G += src[kpos].g * kernel[k];
+				B += src[kpos].b * kernel[k];
+
+			}
+			image[pos].r = R;
+			image[pos].g = G;
+			image[pos].b = B;
+		}
+	}
+}
+
+//arbitrarily-dimensioned 2D kernels, access with p = x + y*kerneldimension :
+void gImage::Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount)
+{
 	std::vector<pix> src = image;
 	unsigned offset = floor(kerneldimension/2.0);
 
@@ -892,6 +970,13 @@ void gImage::ApplyConvolutionKernel(std::vector<double> kernel, int kerneldimens
 		}
 	} 
 }
+
+void gImage::ApplyGaussianBlur(double radius, double sigma, int threadcount)
+{
+	std::vector<float> kernel =  ComputeGaussianKernel(radius, sigma);
+	Apply1DConvolutionKernel(kernel, threadcount);
+}
+
 
 void gImage::ApplySharpen(int strength, int threadcount)
 {
