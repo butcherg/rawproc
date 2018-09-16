@@ -864,6 +864,40 @@ void gImage::ApplyConvolutionKernel(double kernel[3][3], int threadcount)
 	} 
 }
 
+void gImage::ApplySharpen(int strength, int threadcount)
+{
+	double kernel[3][3] =
+	{
+		0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0
+	};
+
+	//build a kernel corresponding to the specified strength
+	double x = -((strength)/4.0);
+	kernel[0][1] = x;
+	kernel[1][0] = x;
+	kernel[1][2] = x;
+	kernel[2][1] = x;
+	kernel[1][1] = strength+1;
+
+	ApplyConvolutionKernel(kernel, threadcount);
+}
+
+
+//Convolution Kernels and Blurring
+//
+//Credit: Various
+//
+//It was recently brought to my attention (https://discuss.pixls.us/t/sharpening-opinions-please/9007/6)
+//that for down-size resizing various noises can be mitigated by first blurring the full-sized
+//image with a kernel sized based on the reduction, e.g., 3x3 kernel if downsizing 3x, as the
+//interpolation to the resized pixels are going to lose that information anyway.  So, here are
+//some gaussian blur methods.  There are two new Apply*ConvolutionKernel methods that both use
+//std::vector<float> for the kernel, a regular 2D method and a 1D method usable with the 
+//"regular" gaussian blur kernel.  A kernel compute function is specified, not part of the gImage
+//class because I'm not yet ready to settle on it.
+
 //http://www.apileofgrains.nl/blur-filters-c/
 std::vector<float> ComputeGaussianKernel(const int inRadius, const float inWeight)
 {
@@ -978,25 +1012,7 @@ void gImage::ApplyGaussianBlur(double radius, double sigma, int threadcount)
 }
 
 
-void gImage::ApplySharpen(int strength, int threadcount)
-{
-	double kernel[3][3] =
-	{
-		0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0
-	};
 
-	//build a kernel corresponding to the specified strength
-	double x = -((strength)/4.0);
-	kernel[0][1] = x;
-	kernel[1][0] = x;
-	kernel[1][2] = x;
-	kernel[2][1] = x;
-	kernel[1][1] = strength+1;
-
-	ApplyConvolutionKernel(kernel, threadcount);
-}
 
 
 //Rotate
