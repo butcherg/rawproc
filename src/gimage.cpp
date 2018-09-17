@@ -2720,6 +2720,59 @@ std::string gImage::Stats()
 
 }
 
+std::map<std::string,std::string> gImage::StatsMap()
+{
+	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
+	pix maxpix, minpix;
+	long pcount = 0;
+	rmin = image[0].r; rmax = image[0].r; gmin=image[0].g; gmax = image[0].g; bmin = image[0].b; bmax = image[0].b;
+	tmin = SCALE_CURVE; tmax = 0.0;
+	int iter = 0;
+
+	std::map<std::string, std::string> stats_map;
+	double toneupperthreshold = 0.95; 
+	double tonelowerthreshold = 0.0;
+
+	for(unsigned y = 1; y < h; y++) {
+		for(unsigned x = 1; x < w; x++) {
+			unsigned pos = x + y*w;
+			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
+			pcount++;
+			if (image[pos].r > rmax) rmax = image[pos].r;
+			if (image[pos].g > gmax) gmax = image[pos].g;
+			if (image[pos].b > bmax) bmax = image[pos].b;
+			if (image[pos].r < rmin) rmin = image[pos].r;
+			if (image[pos].g < gmin) gmin = image[pos].g;
+			if (image[pos].b < bmin) bmin = image[pos].b;
+			double tone = (image[pos].r + image[pos].g + image[pos].b) / 3.0; 
+			if (tone > tmax & tone < toneupperthreshold) {tmax = tone; maxpix = image[pos];}
+			if (tone < tmin & tone > tonelowerthreshold) {tmin = tone; minpix = image[pos];}
+			iter++;
+		}
+	}
+
+	//channel mins/maxs:
+	stats_map["rmin"] = tostr(rmin); stats_map["rmax"] = tostr(rmax);
+	stats_map["gmin"] = tostr(gmin); stats_map["gmax"] = tostr(gmax);
+	stats_map["bmin"] = tostr(bmin); stats_map["bmax"] = tostr(bmax);
+
+	//tone min/max:
+	stats_map["tmin"] = tostr(tmin); stats_map["tmax"] = tostr(tmax);
+
+	//channel means:
+	stats_map["rmean"] = tostr(rsum/(double)pcount);
+	stats_map["gmean"] = tostr(gsum/(double)pcount);
+	stats_map["bmean"] = tostr(bsum/(double)pcount);
+
+	stats_map["bmean"] = tostr(bsum/(double)pcount);
+
+	//stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
+	//	tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
+
+	return stats_map;
+
+}
+
 //calculate averages of red, green, and blue channels:
 std::vector<double> gImage::CalculateChannelMeans()
 {

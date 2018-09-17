@@ -121,6 +121,7 @@ class gImage
 		GIMAGE_ERROR getLastError();
 		std::string getLastErrorMessage();
 		std::string Stats();
+		std::map<std::string,std::string> StatsMap();
 
 		//calculators:
 		std::vector<double> CalculateChannelMeans();
