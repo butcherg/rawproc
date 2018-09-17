@@ -898,38 +898,33 @@ void gImage::ApplySharpen(int strength, int threadcount)
 //"regular" gaussian blur kernel.  A kernel compute function is specified, not part of the gImage
 //class because I'm not yet ready to settle on it.
 
-//http://www.apileofgrains.nl/blur-filters-c/
-std::vector<float> ComputeGaussianKernel(const int inRadius, const float inWeight)
+
+std::vector<float> gImage::Compute1DGaussianKernel(const int kernelsize, const float sigma)
 {
-    //int mem_amount = (inRadius*2)+1;
-    //float* gaussian_kernel = (float*)malloc(mem_amount*sizeof(float));
-    std::vector<float> gaussian_kernel((inRadius*2)+1);
+	int ksize = kernelsize;
+	if ((kernelsize % 2) == 0) ksize++;
+	std::vector<float> kernel; //+1);
+	float sum = 0.0f;
+	float x = -(ksize/2);
 
-    float twoRadiusSquaredRecip = 1.0 / (2.0 * inRadius * inRadius);
-    float sqrtTwoPiTimesRadiusRecip = 1.0 / (sqrt(2.0 * M_PI) * inRadius);
-    float radiusModifier = inWeight;
+	//computes the kernel using the one-dimensional function from https://en.wikipedia.org/wiki/Gaussian_blur
+	float denominator = sqrt(2.0*M_PI*sigma*sigma);
+	for (int i=0; i<ksize; i++) {
+		float e_val = exp(-(x*x)/(2.0*sigma*sigma));
+		float k = (1.0/denominator)*e_val; //per the Wikipedia function
+		kernel.push_back(k);
+		sum += k;
+		x++;  //distance in terms of whole pixels, so center-to-center
+	}
 
-    // Create Gaussian Kernel
-    int r = -inRadius;
-    float sum = 0.0f;
-    for (int i = 0; i < gaussian_kernel.size(); i++)
-    {
-        float x = r * radiusModifier;
-        x *= x;
-        float v = sqrtTwoPiTimesRadiusRecip * exp(-x * twoRadiusSquaredRecip);
-        gaussian_kernel[i] = v;
-            
-        sum+=v;
-        r++;
-    }
+	//normalize kernel:
+	for (int i=0; i<ksize; i++)
+		kernel[i] /= sum;
 
-    // Normalize distribution
-    float div = sum;
-    for (int i = 0; i < gaussian_kernel.size(); i++)
-        gaussian_kernel[i] /= div;
-
-    return gaussian_kernel;
+	return kernel;
 }
+
+
 
 //arbitrarily-dimensioned 1D kernels, applied in two passes:
 void gImage::Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount)
@@ -1005,9 +1000,10 @@ void gImage::Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimen
 	} 
 }
 
-void gImage::ApplyGaussianBlur(double radius, double sigma, int threadcount)
+void gImage::ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount)
 {
-	std::vector<float> kernel =  ComputeGaussianKernel(radius, sigma);
+	std::vector<float> kernel;
+	kernel =  Compute1DGaussianKernel(sigma, kernelsize);
 	Apply1DConvolutionKernel(kernel, threadcount);
 }
 

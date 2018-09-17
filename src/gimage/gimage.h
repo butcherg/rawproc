@@ -162,7 +162,7 @@ class gImage
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
 		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount);
 		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount);
-		void ApplyGaussianBlur(double radius, double sigma, int threadcount);
+		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount);
 		void ApplySharpen(int strength, int threadcount=0);
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
 		void ApplyRotate(double angle, bool crop, int threadcount=0);
@@ -218,7 +218,7 @@ class gImage
 		static void makeICCProfile(cmsHPROFILE hProfile, char *& profile, cmsUInt32Number  &profilesize);
 
 	protected:
-
+		std::vector<float> Compute1DGaussianKernel(const int kernelsize, const float sigma);
 		//void ImageBounds(unsigned *x1, unsigned *x2, unsigned *y1, unsigned *y2, bool cropbounds=false);
 		//void ApplyXShear(double rangle, int threadcount);
 		//void ApplyYShear(double rangle, int threadcount);

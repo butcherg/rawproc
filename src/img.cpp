@@ -444,7 +444,14 @@ void do_cmd(gImage &dib, std::string commandstr)
 				dib.ApplyResize(w,h, filter, threadcount);
 				printf("done (%fsec).\n", _duration());
 				char cs[256];
-				sprintf(cs, "%s:%d,%d,lanczos3 ",cmd, w, h);
+				if (wstr)
+					if (hstr)
+						if (astr)
+							sprintf(cs, "%s:%s,%s,%s ",cmd, wstr, hstr, astr);
+						else
+							sprintf(cs, "%s:%s,%s ",cmd, wstr, hstr);
+					else
+						sprintf(cs, "%s:%s ",cmd, wstr);
 				commandstring += std::string(cs);
 			}
 		}
@@ -977,23 +984,26 @@ void do_cmd(gImage &dib, std::string commandstr)
 		}
 */
 		else if (strcmp(cmd,"blur") == 0) { 
-			double radius = 1.5; 
+			unsigned kernelsize = 3; 
 			double sigma = 1.0;
-			char * r = strtok(NULL, ", ");
-			char * s = strtok(NULL, " ");
+			char * s = strtok(NULL, ", ");
+			char * k = strtok(NULL, ", ");
 			
-			if (r) radius = atof(r);
 			if (s) sigma = atof(s);
+			if (k) kernelsize = atoi(k);
 
 			int threadcount = gImage::ThreadCount();
 
-			printf("blur, 1Dkernel: %0.1f (%d threads)... ", radius, threadcount);
+			printf("blur: sigma=%0.1f, kernelsize=%d (%d threads)... ", sigma, kernelsize, threadcount);
 			_mark();
-			dib.ApplyGaussianBlur(radius, sigma, threadcount);
+			dib.ApplyGaussianBlur(sigma, kernelsize, threadcount);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
-			if (r)
-				sprintf(cs, "%s:%0.1f ",cmd, radius);
+			if (s)
+				if (k)
+					sprintf(cs, "%s:%0.1f,%d ",cmd, sigma, kernelsize);
+				else
+					sprintf(cs, "%s:%0.1f ",cmd, sigma);
 			else
 				sprintf(cs, "%s ",cmd);
 			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
