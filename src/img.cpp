@@ -1125,9 +1125,12 @@ int main (int argc, char **argv)
 	std::string conf_configd = getAppConfigFilePath();
 
 	if (!noconf) {
-		if (conffile != "" && access(conffile.c_str(), 0 ) == 0) {
-			myConfig::loadConfig(conffile);
-			printf("configuration file: %s\n", conffile.c_str());
+		if (conffile != "") {
+			if (access(conffile.c_str(), 0 ) == 0) {
+				myConfig::loadConfig(conffile);
+				printf("configuration file: %s\n", conffile.c_str());
+			}
+			else printf("configuration file %s not found.\n", conffile.c_str());
 		}
 		else if (access( conf_cwd.c_str(), 0 ) == 0) {
 			myConfig::loadConfig(conf_cwd);
