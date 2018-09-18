@@ -1014,13 +1014,107 @@ void do_cmd(gImage &dib, std::string commandstr)
 
 }
 
+
+//https://github.com/ccxvii/asstools/blob/master/getopt.c
+/*
+ * This is a version of the public domain getopt implementation by
+ * Henry Spencer originally posted to net.sources.
+ *
+ * This file is in the public domain.
+ */
+
+
+#define getopt xgetopt
+#define optarg xoptarg
+#define optind xoptind
+
+char *optarg; /* Global argument pointer. */
+int optind = 0; /* Global argv index. */
+
+static char *scan = NULL; /* Private scan pointer. */
+
+int
+getopt(int argc, char *argv[], char *optstring)
+{
+	char c;
+	char *place;
+
+	optarg = NULL;
+
+	if (!scan || *scan == '\0') {
+		if (optind == 0)
+			optind++;
+
+		if (optind >= argc || argv[optind][0] != '-' || argv[optind][1] == '\0')
+			return EOF;
+		if (argv[optind][1] == '-' && argv[optind][2] == '\0') {
+			optind++;
+			return EOF;
+		}
+
+		scan = argv[optind]+1;
+		optind++;
+	}
+
+	c = *scan++;
+	place = strchr(optstring, c);
+
+	if (!place || c == ':') {
+		fprintf(stderr, "%s: unknown option -%c\n", argv[0], c);
+		return '?';
+	}
+
+	place++;
+	if (*place == ':') {
+		if (*scan != '\0') {
+			optarg = scan;
+			scan = NULL;
+		} else if( optind < argc ) {
+			optarg = argv[optind];
+			optind++;
+		} else {
+			fprintf(stderr, "%s: option requires argument -%c\n", argv[0], c);
+			return ':';
+		}
+	}
+
+	return c;
+}
+
+//end getopt.c
+
+
+
 int main (int argc, char **argv) 
 {
 	char * filename;
+
+	std::string conffile = "";
+	bool force = false;
+	bool noconf = false;
+	int f;
+	opterr = 0;
+
+	while ((f = getopt(argc, argv, (char *) "fnc:")) != -1)
+		switch(f) {
+			case 'f':  //force processing even if output file exists
+				force = true;
+				break;
+			case 'n': //no config file is used
+				noconf = true;
+				break;
+			case 'c': //use the specified config file
+				conffile = std::string(optarg);
+				break;
+			case '?':
+				exit(-1);
+			default:
+				exit(-1);
+
+		}
 	
 	//the corresponding input and output file names 
 	std::vector<fnames> files;
-	
 	
 	int c;
 	int flags;
@@ -1030,13 +1124,19 @@ int main (int argc, char **argv)
 	std::string conf_cwd = getCwdConfigFilePath();
 	std::string conf_configd = getAppConfigFilePath();
 
-	if (access( conf_cwd.c_str(), 0 ) == 0) {
-		myConfig::loadConfig(conf_cwd);
-		printf("configuration file: %s\n", conf_cwd.c_str());
-	}
-	else if (access( conf_configd.c_str(), 0 ) == 0) {
-		myConfig::loadConfig(conf_configd);
-		printf("configuration file: %s\n", conf_configd.c_str());
+	if (!noconf) {
+		if (conffile != "" && access(conffile.c_str(), 0 ) == 0) {
+			myConfig::loadConfig(conffile);
+			printf("configuration file: %s\n", conffile.c_str());
+		}
+		else if (access( conf_cwd.c_str(), 0 ) == 0) {
+			myConfig::loadConfig(conf_cwd);
+			printf("configuration file: %s\n", conf_cwd.c_str());
+		}
+		else if (access( conf_configd.c_str(), 0 ) == 0) {
+			myConfig::loadConfig(conf_configd);
+			printf("configuration file: %s\n", conf_configd.c_str());
+		}
 	}
 	
 	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
@@ -1081,7 +1181,7 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
-	if (countchar(std::string(argv[1]),'*') > 1) {
+	if (countchar(std::string(argv[optind]),'*') > 1) {
 		printf("Error: Too many wildcards in input filespec.\n");
 		exit(1);
 	}
@@ -1091,8 +1191,9 @@ int main (int argc, char **argv)
 	}
 
 	//separates the parameters from the input and output file strings
-	std::vector<std::string> infile = split(std::string(argv[1]),":");
+	std::vector<std::string> infile = split(std::string(argv[optind]),":");
 	if (infile.size() < 2) infile.push_back("");
+	optind++;
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
 	if (outfile.size() < 2) outfile.push_back("");
 	
@@ -1145,7 +1246,7 @@ int main (int argc, char **argv)
 
 //list of commands to apply to each input file
 std::vector<std::string> commands;
-for (int i = 2; i<argc-1; i++) {
+for (int i = optind; i<argc-1; i++) {
 	commands.push_back(std::string(argv[i]));
 }
 
@@ -1158,7 +1259,7 @@ for (int f=0; f<files.size(); f++)
 	char iname[256];
 	strncpy(iname, files[f].infile.c_str(), 255);
 	
-	if (file_exists(files[f].outfile.c_str())) {
+	if (!force && file_exists(files[f].outfile.c_str())) {
 		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
 		continue;
 	}
