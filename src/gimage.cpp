@@ -3528,7 +3528,7 @@ void printrgb(double (*p)[3])
 //e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181
 cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 {
-	double in_XYZ[3][3], out_XYZ[3][3];
+	double in_XYZ[3][3], inverse[3][3], out_XYZ[3][3];
 	
 	std::vector<std::string> mat = split(adobecoeff, ",");
 	for (unsigned i=0; i<3; i++) {
@@ -3543,7 +3543,12 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 		printf("\n");
 	}
 
-	pseudoinverse(in_XYZ, out_XYZ, 3);
+	pseudoinverse(in_XYZ, inverse, 3);
+	//because pseudoinverse delivers it rotated:
+	for (unsigned i=0; i<3; i++)
+		for (unsigned j=0; j<3; j++)
+			out_XYZ[i][j] = inverse[j][i];
+
 	
 	printrgb(in_XYZ);
 	printf("\n");
