@@ -644,9 +644,19 @@ GIMAGE_FILETYPE gImage::getFileType(const char * filename)
 	std::vector<std::string> fpieces =  split(fname, ".");
 	std::string ext = fpieces.back();
 
-	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) if (_checkTIFF(filename)) return FILETYPE_TIFF;
-	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) if (_checkJPEG(filename)) return FILETYPE_JPEG;
-	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) if (_checkPNG(filename)) return FILETYPE_PNG;
+	if (	(ext.compare("tif")  == 0) | 
+		(ext.compare("TIF")  == 0) |
+		(ext.compare("TIFF") == 0) |
+		(ext.compare("tiff") == 0)) 
+			if (_checkTIFF(filename)) return FILETYPE_TIFF;
+	if (	(ext.compare("jpg")  == 0) | 
+		(ext.compare("jpeg") == 0) | 
+		(ext.compare("JPEG") == 0) |
+		(ext.compare("JPG")  == 0)) 
+			if (_checkJPEG(filename)) return FILETYPE_JPEG;
+	if (	(ext.compare("png")  == 0) | 
+		(ext.compare("PNG")  == 0)) 
+			if (_checkPNG(filename)) return FILETYPE_PNG;
 	if (_checkRAW(filename)) return FILETYPE_RAW;
 
 	return FILETYPE_UNKNOWN;
