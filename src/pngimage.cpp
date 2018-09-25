@@ -277,14 +277,14 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 		PNG_FILTER_TYPE_DEFAULT
 	);
 
-	if (p.find("excludeexif") != p.end()) {
+	if (p.find("excludeexif") == p.end()) {
 		unsigned char * marker;
 		unsigned markerlength;
 		marker =  construct_eXIf_chunk(info, &markerlength);
 		png_set_eXIf_1(png, pinfo, markerlength, (const png_bytep) marker);
 	}
 
-	if (p.find("excludeicc") != p.end()) 
+	if (p.find("excludeicc") == p.end()) 
 		if (iccprofile) 
 			png_set_iCCP(png, pinfo, "Embedded Profile", 0, (png_const_bytep)iccprofile, iccprofilelength);
 
