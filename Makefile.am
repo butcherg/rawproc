@@ -17,7 +17,7 @@ conf:
 
 .PHONY: zip
 zip:
-	zip -j rawproc@VERSION@-@INNO_SUFFIX@-$(dtime).zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip $(srcdir)/src/rawproc.conf
+	zip -j rawproc@VERSION@-@INNO_SUFFIX@-$(dtime).zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip src/rawproc.conf
 
 .PHONY: wininstaller
 wininstaller:
