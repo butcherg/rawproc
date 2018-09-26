@@ -1,5 +1,4 @@
 <html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>
-<li><b>				else { //parms are just three multipliers</b>: </li><br>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li><br>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li><br>
 <li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li><br>
@@ -95,4 +94,9 @@
 <li><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li><br>
 <li><b>tool.whitebalance.min</b>:  (float), minimum multiplier value.  Default=0.001</li><br>
 <li><b>tool.whitebalance.patchradius</b>:  (float), radius of patch.  Default=1.5</li><br>
-</ul></body></html>
+</ul>
+<h3>Output Parameters</h3>
+<p>For the output.*.parameters properties, the following are available.  Specify them
+as name=value pairs, separated by semicolons.</p>
+<ul>
+<li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><br><li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li><br><li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br><li><b>excludeicc</b>: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li><br><li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li><br></ul></body></html>

@@ -175,7 +175,7 @@ char * _loadRAW(const char *filename,
 
 	std::string cmd = dcrawpath;
 	cmd.append(" -c ");
-	//$ <li>dcrawparams: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li>
+	//$ <li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li><br>
 	if (p.find("params") != p.end()) 
 		cmd.append(de_underscore(p["params"])); 
 	cmd.append(" ");

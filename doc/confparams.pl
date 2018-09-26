@@ -21,5 +21,27 @@ foreach $line (@conf) {
 	print "<li><b>$parm</b>: $stuff</li><br>\n";
 }
 
+print "</ul>\n";
+
+$outputparams = <<OUTPUTPARAMS;
+<h3>Output Parameters</h3>
+<p>For the output.*.parameters properties, the following are available.  Specify them
+as name=value pairs, separated by semicolons.</p>
+<ul>
+OUTPUTPARAMS
+
+my @parmlines;
+foreach $file (@files) {
+	@lines = `grep -F \"//\$\" $file`;
+	foreach $line (@lines) {
+		chomp $line;
+		$line =~ s/\r//;
+		$line =~ s/^\s+\/\/\$ //;
+		push @parmlines, $line;
+	}
+}
+print $outputparams;
+print @parmlines;
+
 print "</ul></body></html>\n";
 
