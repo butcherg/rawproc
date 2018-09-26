@@ -446,20 +446,20 @@ bool _writeJPEG(const char *filename,
 
 	jpeg_set_defaults(&cinfo);
 
-	//$ quality=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 
+	//$ <li>quality=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li>
 	if (p.find("quality") != p.end()) 
 		jpeg_set_quality(&cinfo, atoi(p["quality"].c_str()), TRUE);
 
 	jpeg_start_compress(&cinfo, TRUE);
 
-	//$ excludeexif: Applies to JPEG and PNG output, if present, output image doesn't include metadata
+	//$ <li>excludeexif: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li>
 	if (p.find("excludeexif") == p.end()) {
 		marker =  construct_APP1marker(info, &markerlength);
 		jpeg_write_marker(&cinfo, JPEG_APP0+1, marker+2, markerlength);
 		delete [] marker;
 	}
 
-	//$ excludeicc: Applies to JPEG and PNG output, if present, output image doesn't include icc profile
+	//$ <li>excludeicc: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li>
 	if (p.find("excludeicc") == p.end()) {
 		if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
 	}
