@@ -612,6 +612,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			configparams.Append(wxString(myConfig::getConfig().getValueOrDefault("input.raw.parameters","")));
 #endif
 			//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			//template input.raw.cms.profile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
 		}
 		
@@ -620,6 +621,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)
 			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.parameters",""));
 			//parm input.jpeg.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			//template input.jpeg.cms.profile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.cms.profile","")));
 		}
 
@@ -628,12 +630,14 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
 			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.tiff.parameters",""));
 			//parm input.tiff.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			//template input.tiff.cms.profile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 		}
 		if (fif == FILETYPE_PNG) {
 			//parm input.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)
 			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.png.parameters",""));
 			//parm input.png.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
+			//template input.png.cms.profile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.png.cms.profile","")));
 		}
 
@@ -1042,21 +1046,29 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
-					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual"));
+					//template output.jpeg.cms.profile=iccfile
+profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
+
+					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.jpeg.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","relative_colorimetric"));
+
 				}
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					//template output.tiff.cms.profile=iccfile
 					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","")));
-					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual"));
+					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.tiff.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","relative_colorimetric"));
 				}
 				else if (filetype == FILETYPE_PNG) {
 					//parm output.png.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					//template output.png.cms.profile=iccfile
 					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.profile","")));
-					//parm output.png.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual"));
+					//parm output.png.cms.renderingintent: Specify the rendering intent for the PNG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.png.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","relative_colorimetric"));
 				}
 				
 				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;

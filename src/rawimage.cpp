@@ -426,6 +426,8 @@ char * _loadRAW(const char *filename,
 
 
 	//raw <li><b>Demosaic:</b><ul><li>user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-4].  Default=3 (ahd)</li><li>demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. Default=ahd</li></ul></li><br>
+	//template input.raw.libraw.demosaic=linear|vng|ppg|ahd|dcb
+	// these algorithms not available in LibRaw 0.19.x: |modahd|afd|vcd|vcdahd|lmmse|amaze|dht|moddht
 	if (p.find("demosaic") != p.end()) {
 		if (p["demosaic"].compare("linear") == 0) 
 			RawProcessor.imgdata.params.user_qual = 0;
@@ -437,6 +439,8 @@ char * _loadRAW(const char *filename,
 			RawProcessor.imgdata.params.user_qual = 3;
 		if (p["demosaic"].compare("dcb") == 0) 
 			RawProcessor.imgdata.params.user_qual = 4;
+
+/*
 		if (p["demosaic"].compare("modahd") == 0) 
 			RawProcessor.imgdata.params.user_qual = 5;
 		if (p["demosaic"].compare("afd") == 0) 
@@ -453,6 +457,7 @@ char * _loadRAW(const char *filename,
 			RawProcessor.imgdata.params.user_qual = 11;
 		if (p["demosaic"].compare("moddht") == 0) 
 			RawProcessor.imgdata.params.user_qual = 12;
+*/
 	}
 	if (p.find("user_qual") != p.end()) RawProcessor.imgdata.params.user_qual = atoi(p["user_qual"].c_str());
 
@@ -466,6 +471,7 @@ char * _loadRAW(const char *filename,
 
 
 	//raw <li><b>Gamma</b>:  three ways to set it:<ol><li>gamma=preset, where preset=bt709|srgb|linear|prophoto.  In slope/toe, bt709 is 2.2/4.5, srgb is 2.4/4.5, prophoto is 1.8/0, and linear is 1.0/1.0</li><li>gammaval=2.222;gammatoe=4.5, where the slope and toe are specified in val and toe, respectively. Libraw alias.</li><li>gamm=2.222,4.5, where slope and toe are specified with a comma delimiter. dcraw: -g &lt;p ts&gt;</li></ol></li><br>
+	//template input.raw.libraw.gamma=bt709|srgb|linear|prophoto
 
 	if (p.find("gamma") != p.end()) {
 		if (p["gamma"].compare("bt709") == 0) {
@@ -904,6 +910,7 @@ char * _loadRAW(const char *filename,
 			if (RawProcessor.imgdata.params.output_color == 0) {  // raw image, check for cameraprofile and assign if found
 
 				//raw <li><b>cameraprofile</b>=iccfile|adobe_coeff - If (and only if) colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.  Trick: Instead of a filename, paste a comma-delimited set of dcraw-style (adobe_coeff) primaries here and a linear gamma D65 whitepoint profile will be built and assigned to the raw image.</li><br>
+				//template input.raw.libraw.cameraprofile=iccfile
 				if (p.find("cameraprofile") != p.end()) {
 					if (p["cameraprofile"] != "") {
 						if (p["cameraprofile"].find_first_of(",") != std::string::npos) 

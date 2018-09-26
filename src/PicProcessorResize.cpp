@@ -94,6 +94,7 @@ PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCt
 	//parm tool.resize.y: Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)
 	wxString y =  wxString(myConfig::getConfig().getValueOrDefault("tool.resize.y","0"));
 	//parm tool.resize.algorithm: Interpolation algorithm to use when none is specified.  Default=lanczos3  
+	//template tool.resize.algorithm=box|bilinear|bspline|bicubic|catmullrom|lanczos3
 	wxString algo = wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"));
 
 	// resize:[x],[y],[algorithm]

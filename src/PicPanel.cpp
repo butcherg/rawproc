@@ -174,6 +174,7 @@ END_EVENT_TABLE()
 
 			//Get display profile:
 			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
+			//template display.cms.displayprofile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","").c_str()));
 			if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
 				if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
