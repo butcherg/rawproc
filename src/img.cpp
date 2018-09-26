@@ -648,7 +648,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 						sprintf(cs, "%s:%s",cmd, op.c_str());
 					}
 				}
-				else { //parms are just three multipliers
+				else { // parameters are just three multipliers
 					redmult   = atof(parm[0].c_str());
 					greenmult = atof(parm[1].c_str());
 					bluemult  = atof(parm[2].c_str());
