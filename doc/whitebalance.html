@@ -1,0 +1,21 @@
+<html><body>
+
+<h3 id="White Balance">White Balance</h3>
+<p>Provides a selection of methods to white-balance the image:</p>
+<ul>
+<li><b>Auto:</b> Computes red and blue multipliers based on the "gray world" algorithm, which
+assumes an image tones average to middle gray.</li><br>
+<li><b>Patch:</b> A point in the image can be selected by holding the shift key and clicking
+on a point in the picture panel.  The patch size used to compute the multpliers is specified
+in tool.whitebalance.patchradius.</li><br>
+<li><b>Camera:</b> Applies the multipliers retrieved from the raw file's metadata.  These multipliers
+are relevant to the raw image, and won't work well on a processed image.</li><br>
+<li><b>Original:</b> The channel multipliers, if no other method is specified.  These can be
+changed in the multiplier edit boxes.  The edit boxes support mousewheel changes, where 
+shift-mousehwheel changes in 0.01 increments, ctrl-mousewheel changes in 0.1 increments, and 
+plain mouswheel changes in 0.001 increments.  If Auto, Patch, or Camera is selected and a 
+multiplier is manually altered, the tool is de-selected.</li><br>
+</ul>
+<p align=center><img src=whitebalance.png></p>
+
+</body></html>

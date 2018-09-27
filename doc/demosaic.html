@@ -1,0 +1,52 @@
+<html><body>
+
+<h3 id="Demosaic">Demosaic</h3>
+<p>This tool should not be considered "production quality"; use the input.raw.libraw 
+parameters to invoke/control quality demosaic of raw images.</p>
+<p>The demosaic tool has been included to support a tutorial on raw processing.  To use it,
+open a raw file with the input.raw.libraw.rawdata property set to 1, which pre-empts all of
+the other raw processing and delivers the raw image array for processing.  The demosaic tool
+can then be applied to develop a RGB image from the raw measurements.  The available options as of 0.8 are:  
+</p>
+<ul>
+<li><b>half:</b> Ummosaiced images are single-channel measurements of the light at the pixel
+locations, made through either a red, green, or blue filter.  The measurements are usually arranged
+in a quad, like this:</p>
+
+<table border=1>
+<tr><td bgcolor=red>R</td><td bgcolor=green>G</td></tr>
+<tr><td bgcolor=green>G</td><td bgcolor=blue>B</td></tr>
+</table>
+
+<p>Regular demosaic algorithms will interpolate values for the other channels for each R, G, or B
+measurement; half simply takes the RGGB quad and makes a single RGB pixel. The resulting image 
+is half the size of the original.</p>
+
+</li><br>
+<li><b>half_resize:</b> This variation does the standard 'half', then resizes the image back
+to the original size.</li><br>
+<li><b>color:</b> This selection is not a demosaic; rather, it turns the monochrome raw image into
+a color image, showing the R, G, or B color for each pixel.  Zoom in to see the individual
+colors, particularly at a light or white part of the image.</li><br>
+</ul>
+<p align=center><img src=demosaic.png></p>
+
+<p>To develop a raw image using the demosaic tool, do the following:</p>
+<ol>
+<li>Set the following properties:
+	<ul>
+		<li>input.raw.libraw.rawdata=1</li>
+		<li>input.raw.libraw.cameraprofile: Specify either an ICC file that is the profile of the camera, or you can 
+		paste the dcraw.c adobe_coeff color primaries for the camera and rawproc will create an internal D65 profile.
+		For example, the Nikon D7000 adobe_coeff primaries are 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181.
+		This is the profile assigned to the camera image, representing the camera's color resolution.</li>
+	</ul></li>
+<li>Open the raw image.</li>
+<li>Add the demosaic tool, make sure 'half' is selected.</li>
+<li>Add the whitebalance tool, select 'Camera' to apply the camera-recorded whitebalance 
+multipliers.</li>
+<li>Add the colorspace tool, and select a suitable working or output profile. </li> 	
+
+</ol>
+
+</body></html>

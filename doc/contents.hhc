@@ -87,6 +87,11 @@
 				<param name="Name" value="Curve">
 				<param name="Local" value="curve.html">
 				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Demosaic">
+				<param name="Local" value="demosaic.html">
+				</OBJECT>
 
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Denoise">
@@ -146,6 +151,11 @@
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Sharpen">
 				<param name="Local" value="sharpen.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="White Balance">
+				<param name="Local" value="whitebalance.html">
 				</OBJECT>
 
 		</UL>
