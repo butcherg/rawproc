@@ -7,9 +7,12 @@ dist_doc_DATA = README.md
 
 .PHONY: doc
 doc:
+	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*
+	
+.PHONY: docpages
+docpages:
 	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	$(srcdir)/doc/rawparams.pl $(srcdir)/src/rawimage.cpp > $(srcdir)/doc/rawparams.html
-	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*
 
 .PHONY: conf
 conf:
