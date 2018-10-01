@@ -399,7 +399,7 @@ char * _loadRAW(const char *filename,
 	RawProcessor.imgdata.params.gamm[1] = 12.92; //1.0
 
 
-	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color 16-bit grayscale.  Default=0.</li><br>
+	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans.  Default=0.</li><br>
 
 	if (p.find("rawdata") != p.end()) 
 		rawdata = atoi(p["rawdata"].c_str());
