@@ -37,6 +37,7 @@ class ResizePanel: public PicProcPanel
 			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
 			g->Add(heightedit, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
 			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
+			algoselect->SetSelection(algoselect->FindString(wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"))));
 			if (p.size() >=3) {
 				for (int i=0; i<algos.size(); i++) {
 					if (p[2] == algos[i]) algoselect->SetSelection(i);

@@ -108,7 +108,8 @@ bool rawprocFrmApp::OnInit()
 		f.MakeAbsolute();
 		wxSetWorkingDirectory (f.GetPath());
 		frame->SetStartPath(f.GetPath());
-		if (ImageContainsRawprocCommand(wxGetApp().argv[1])) {
+		//if (ImageContainsRawprocCommand(wxGetApp().argv[1])) {
+		if (ImageContainsRawprocCommand(f.GetFullPath())) {
 			if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
 				frame->OpenFileSource(f.GetFullPath());
 			else	
