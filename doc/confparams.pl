@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-print "<html><head><title>Configuration Parameters</title></head><body><h3>Configuration Parameters</h3><ul>\n";
+print "<html><head><title>Configuration Parameters</title><link rel=\"stylesheet\" type=\"text/css\" href=\"rawprocdoc.css\"></head><body><h3>Configuration Parameters</h3><ul>\n";
 
 my @conflines;
 my @files = <$ARGV[0]/*.cpp>;
@@ -18,7 +18,7 @@ foreach $file (@files) {
 foreach $line (@conf) {
 	#print "<li>$line</li><br>\n";
 	my ($parm,$stuff) = split /:/, $line;
-	print "<li><b>$parm</b>: $stuff</li><br>\n";
+	print "<li><b>$parm</b>: $stuff</li>\n";
 }
 
 print "</ul>\n";

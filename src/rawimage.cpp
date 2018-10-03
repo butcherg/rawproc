@@ -175,7 +175,7 @@ char * _loadRAW(const char *filename,
 
 	std::string cmd = dcrawpath;
 	cmd.append(" -c ");
-	//$ <li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li><br>
+	//$ <li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li>
 	if (p.find("params") != p.end()) 
 		cmd.append(de_underscore(p["params"])); 
 	cmd.append(" ");
@@ -399,12 +399,12 @@ char * _loadRAW(const char *filename,
 	RawProcessor.imgdata.params.gamm[1] = 12.92; //1.0
 
 
-	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans.  Default=0.</li><br>
+	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans.  Default=0.</li>
 
 	if (p.find("rawdata") != p.end()) 
 		rawdata = atoi(p["rawdata"].c_str());
 	
-	//raw <li><b>Output Colorspace</b>:<ul><li>output_color=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)</li><li>colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb</li></ul></li><br>
+	//raw <li><b>Output Colorspace</b>:<ul><li>output_color=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)</li><li>colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb</li></ul></li>
 	//template input.raw.libraw.colorspace=raw|srgb|adobe|wide|prophoto|xyz
 	if (p.find("colorspace") != p.end()) {
 		if (p["colorspace"].compare("raw") == 0) 
@@ -425,7 +425,7 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.output_color = atoi(p["output_color"].c_str());
 
 
-	//raw <li><b>Demosaic:</b><ul><li>user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-4].  Default=3 (ahd)</li><li>demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. Default=ahd</li></ul></li><br>
+	//raw <li><b>Demosaic:</b><ul><li>user_qual=0|1|2|3|4 - Demosaic algorithm, dcraw: -q [0-4].  Default=3 (ahd)</li><li>demosaic=linear|vng|ppg|ahd|dcb - Alias of user_qual, with mnemonic values. Default=ahd</li></ul></li>
 	//template input.raw.libraw.demosaic=linear|vng|ppg|ahd|dcb
 	// these algorithms not available in LibRaw 0.19.x: |modahd|afd|vcd|vcdahd|lmmse|amaze|dht|moddht
 	if (p.find("demosaic") != p.end()) {
@@ -462,7 +462,7 @@ char * _loadRAW(const char *filename,
 	if (p.find("user_qual") != p.end()) RawProcessor.imgdata.params.user_qual = atoi(p["user_qual"].c_str());
 
 
-	//raw <li><b>output_bps</b>=8|16 - bits per sample, dcraw: -4 (16-bit).  Default=16</li><br>
+	//raw <li><b>output_bps</b>=8|16 - bits per sample, dcraw: -4 (16-bit).  Default=16</li>
 
 	if (p.find("output_bps") != p.end()) 
 		if (p["output_bps"] == "8")
@@ -470,7 +470,7 @@ char * _loadRAW(const char *filename,
 	
 
 
-	//raw <li><b>Gamma</b>:  three ways to set it:<ol><li>gamma=preset, where preset=bt709|srgb|linear|prophoto.  In slope/toe, bt709 is 2.2/4.5, srgb is 2.4/4.5, prophoto is 1.8/0, and linear is 1.0/1.0</li><li>gammaval=2.222;gammatoe=4.5, where the slope and toe are specified in val and toe, respectively. Libraw alias.</li><li>gamm=2.222,4.5, where slope and toe are specified with a comma delimiter. dcraw: -g &lt;p ts&gt;</li></ol></li><br>
+	//raw <li><b>Gamma</b>:  three ways to set it:<ol><li>gamma=preset, where preset=bt709|srgb|linear|prophoto.  In slope/toe, bt709 is 2.2/4.5, srgb is 2.4/4.5, prophoto is 1.8/0, and linear is 1.0/1.0</li><li>gammaval=2.222;gammatoe=4.5, where the slope and toe are specified in val and toe, respectively. Libraw alias.</li><li>gamm=2.222,4.5, where slope and toe are specified with a comma delimiter. dcraw: -g &lt;p ts&gt;</li></ol></li>
 	//template input.raw.libraw.gamma=bt709|srgb|linear|prophoto
 
 	if (p.find("gamma") != p.end()) {
@@ -504,13 +504,13 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.gamm[1] = atof(g[1].c_str());
 	}
 
-	//raw <li><b>autobright</b>=0|1 -  - Use dcraw automatic brightness (note the difference from libraw's no_auto_bright). Default=0, don't brighten image.  This is a scaling operation, expands the image histogram to the black/white limits. dcraw: the opposite of -W</li><br>
+	//raw <li><b>autobright</b>=0|1 -  - Use dcraw automatic brightness (note the difference from libraw's no_auto_bright). Default=0, don't brighten image.  This is a scaling operation, expands the image histogram to the black/white limits. dcraw: the opposite of -W</li>
 	if (p.find("autobright") != p.end()) {
 		if (p["autobright"] == "1")
 			RawProcessor.imgdata.params.no_auto_bright = 0; 
 	}
 
-	//raw <li><b>greybox</b>=x,y,w,h - coordinates of a rectangle used for white balance. dcraw: -A &lt;x y w h&gt;</li><br>
+	//raw <li><b>greybox</b>=x,y,w,h - coordinates of a rectangle used for white balance. dcraw: -A &lt;x y w h&gt;</li>
 	if (p.find("greybox") != p.end()) {
 		std::vector<std::string> g = split(p["greybox"],",");
 		if (g.size() == 4) {
@@ -521,7 +521,7 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//raw <li><b>cropbox</b>=x,y,w,h - coordinates of a rectangle used for crop. </li><br>
+	//raw <li><b>cropbox</b>=x,y,w,h - coordinates of a rectangle used for crop. </li>
 	if (p.find("cropbox") != p.end()) {
 		std::vector<std::string> c = split(p["cropbox"],",");
 		if (c.size() == 4) {
@@ -532,7 +532,7 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//raw <li><b>aber</b>=rmult,gmult - chromatic aberration correction. dcraw: -C &lt;r b&gt;</li><br>
+	//raw <li><b>aber</b>=rmult,gmult - chromatic aberration correction. dcraw: -C &lt;r b&gt;</li>
 	if (p.find("aber") != p.end()) {
 		std::vector<std::string> c = split(p["aber"],",");
 		if (c.size() == 2) {
@@ -541,7 +541,7 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//raw <li><b>user_mul</b>=mul0,mul1,mul2,mul3 - user white balance multipliers, r,g,b,g. dcraw: -r &lt;r g b g&gt;</li><br>
+	//raw <li><b>user_mul</b>=mul0,mul1,mul2,mul3 - user white balance multipliers, r,g,b,g. dcraw: -r &lt;r g b g&gt;</li>
 	if (p.find("user_mul") != p.end()) {
 		std::vector<std::string> c = split(p["user_mul"],",");
 		if (c.size() == 4) {
@@ -552,74 +552,74 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//raw <li><b>shot_select</b>=n - select image number for processing.  dcraw: -s [0..N-1]</li><br>
+	//raw <li><b>shot_select</b>=n - select image number for processing.  dcraw: -s [0..N-1]</li>
 	if (p.find("shot_select") != p.end()) 
 		RawProcessor.imgdata.params.shot_select = atoi(p["shot_select"].c_str());
 
-	//raw <li><b>bright</b>=1.0 - brighten image. Default=1.0, no brighten.  dcraw: -b &lt;num&gt;</li><br>
+	//raw <li><b>bright</b>=1.0 - brighten image. Default=1.0, no brighten.  dcraw: -b &lt;num&gt;</li>
 	if (p.find("bright") != p.end()) 
 		RawProcessor.imgdata.params.bright = atof(p["bright"].c_str());
 
-	//raw <li><b>Wavelet Denoise:</b><ul><li>threshold=100-1000 - wavelet denoising threshold. dcraw: -n &lt;num&gt;<br></li><li>wavelet_denoise - alias for threshold<br></li></ul>From the dcraw manpage: "Use wavelets to erase noise while preserving real detail. The best threshold should be somewhere between 100 and 1000."</li><br>
+	//raw <li><b>Wavelet Denoise:</b><ul><li>threshold=100-1000 - wavelet denoising threshold. dcraw: -n &lt;num&gt;</li><li>wavelet_denoise - alias for threshold</li></ul>From the dcraw manpage: "Use wavelets to erase noise while preserving real detail. The best threshold should be somewhere between 100 and 1000."</li>
 	if (p.find("threshold") != p.end()) 
 		RawProcessor.imgdata.params.threshold = atof(p["threshold"].c_str());
 
 	if (p.find("wavelet_denoise") != p.end()) 
 		RawProcessor.imgdata.params.threshold = atof(p["wavelet_denoise"].c_str());
 
-	//raw <li><b>half_size</b>=0|1 - demosaic with the 'half' algorithm, which just produces a single pixel from each quad. dcraw: -h</li><br>
+	//raw <li><b>half_size</b>=0|1 - demosaic with the 'half' algorithm, which just produces a single pixel from each quad. dcraw: -h</li>
 	if (p.find("half_size") != p.end()) 
 		RawProcessor.imgdata.params.half_size = atoi(p["half_size"].c_str());
 
-	//raw <li><b>four_color_rgb</b>=0|1 - separate interpolations for the two green components. dcraw: -f</li><br>
+	//raw <li><b>four_color_rgb</b>=0|1 - separate interpolations for the two green components. dcraw: -f</li>
 	if (p.find("four_color_rgb") != p.end()) 
 		RawProcessor.imgdata.params.four_color_rgb = atoi(p["four_color_rgb"].c_str());
 
-	//raw <li><b>highlight</b>=0|1|2|3+ - deal with image highlights, clip=0, 1=unclip, 2=blend, 3+=rebuild. dcraw: -H [0-9]</li><br>
+	//raw <li><b>highlight</b>=0|1|2|3+ - deal with image highlights, clip=0, 1=unclip, 2=blend, 3+=rebuild. dcraw: -H [0-9]</li>
 	if (p.find("highlight") != p.end()) 
 		RawProcessor.imgdata.params.highlight = atoi(p["highlight"].c_str());
 
-	//raw <li><b>use_auto_wb</b>=0|1 - use auto white balance, averaging over entire image. dcraw: -a</li><br>
+	//raw <li><b>use_auto_wb</b>=0|1 - use auto white balance, averaging over entire image. dcraw: -a</li>
 	if (p.find("use_auto_wb") != p.end()) 
 		RawProcessor.imgdata.params.use_auto_wb = atoi(p["use_auto_wb"].c_str());
 
-	//raw <li><b>use_camera_wb</b>=0|1 - use camera white balance, if available. dcraw: -w.  Note: If no white balance option is specified, this is the default.  Further, you need to set it to 0 to use any of the others.</li><br>
+	//raw <li><b>use_camera_wb</b>=0|1 - use camera white balance, if available. dcraw: -w.  Note: If no white balance option is specified, this is the default.  Further, you need to set it to 0 to use any of the others.</li>
 	if (p.find("use_camera_wb") != p.end()) 
 		RawProcessor.imgdata.params.use_camera_wb = atoi(p["use_camera_wb"].c_str());
 
-	//raw <li><b>use_camera_matrix</b>=0|1 - use camera color matrix. dcraw: +M/-M.  From the libraw docs:<ul><li>0: do not use embedded color profile<li>1 (default): use embedded color profile (if present) for DNG files (always); for other files only if use_camera_wb is set;<li>3: use embedded color data (if present) regardless of white balance setting.</ul></li><br>
+	//raw <li><b>use_camera_matrix</b>=0|1 - use camera color matrix. dcraw: +M/-M.  From the libraw docs:<ul><li>0: do not use embedded color profile<li>1 (default): use embedded color profile (if present) for DNG files (always); for other files only if use_camera_wb is set;<li>3: use embedded color data (if present) regardless of white balance setting.</ul></li>
 	if (p.find("use_camera_matrix") != p.end()) 
 		RawProcessor.imgdata.params.use_camera_matrix = atoi(p["use_camera_matrix"].c_str());
 
-	//raw <li><b>output_profile</b>=filepath - use ICC profile from the file. dcraw: -o &lt;file&gt;</li><br>
+	//raw <li><b>output_profile</b>=filepath - use ICC profile from the file. dcraw: -o &lt;file&gt;</li>
 	if (p.find("output_profile") != p.end()) 
 		RawProcessor.imgdata.params.output_profile = (char *) p["output_profile"].c_str();
 
-	//raw <li><b>camera_profile</b>=filepath|embed - use ICC profile from the file. dcraw: -p &lt;file&gt; Note: use cameraprofile instead.</li><br>
+	//raw <li><b>camera_profile</b>=filepath|embed - use ICC profile from the file. dcraw: -p &lt;file&gt; Note: use cameraprofile instead.</li>
 	if (p.find("camera_profile") != p.end()) 
 		RawProcessor.imgdata.params.camera_profile = (char *) p["camera_profile"].c_str();
 
-	//raw <li><b>bad_pixels</b>=filepath - use bad pixel map. dcraw: -P &lt;file&gt;</li><br>
+	//raw <li><b>bad_pixels</b>=filepath - use bad pixel map. dcraw: -P &lt;file&gt;</li>
 	if (p.find("bad_pixels") != p.end()) 
 		RawProcessor.imgdata.params.bad_pixels = (char *) p["bad_pixels"].c_str();
 
-	//raw <li><b>dark_frame</b>=filepath - use dark frame map, 16-bit PGM format. dcraw: -K &lt;file&gt;</li><br>
+	//raw <li><b>dark_frame</b>=filepath - use dark frame map, 16-bit PGM format. dcraw: -K &lt;file&gt;</li>
 	if (p.find("dark_frame") != p.end()) 
 		RawProcessor.imgdata.params.dark_frame = (char *) p["dark_frame"].c_str();
 
-	//raw <li><b>output_tiff</b>=0|1 - 0=output PPM, 1=output TIFF. Default=0.  dcraw: -T.  gImage actually doesn't do anything with this parameter.</li><br>
+	//raw <li><b>output_tiff</b>=0|1 - 0=output PPM, 1=output TIFF. Default=0.  dcraw: -T.  gImage actually doesn't do anything with this parameter.</li>
 	if (p.find("output_tiff") != p.end()) 
 		RawProcessor.imgdata.params.output_tiff = atoi(p["output_tiff"].c_str());
 
-	//raw <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li><br>
+	//raw <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li>
 	if (p.find("user_flip") != p.end()) 
 		RawProcessor.imgdata.params.user_flip = atoi(p["user_flip"].c_str());
 
-	//raw <li><b>user_black</b>=n - User black level. dcraw: -k &lt;num&gt;</li><br>
+	//raw <li><b>user_black</b>=n - User black level. dcraw: -k &lt;num&gt;</li>
 	if (p.find("user_black") != p.end()) 
 		RawProcessor.imgdata.params.user_black = atoi(p["user_black"].c_str());
 
-	//raw <li><b>user_cblack</b>=rb,gb,bb,gb - user per-channel black levels, r,g,b,g</li><br>
+	//raw <li><b>user_cblack</b>=rb,gb,bb,gb - user per-channel black levels, r,g,b,g</li>
 	if (p.find("user_cblack") != p.end()) {
 		std::vector<std::string> c = split(p["user_cblack"],",");
 		if (c.size() == 4) {
@@ -637,46 +637,46 @@ char * _loadRAW(const char *filename,
 	//	RawProcessor.imgdata.params.sony_arw2_hack = atoi(p["sony_arw2_hack"].c_str());
 
 
-	//raw <li><b>user_sat</b>=n - saturation. dcraw: -S &lt;num&gt;</li><br>
+	//raw <li><b>user_sat</b>=n - saturation. dcraw: -S &lt;num&gt;</li>
 	if (p.find("user_sat") != p.end()) 
 		RawProcessor.imgdata.params.user_sat = atoi(p["user_sat"].c_str());
 
-	//raw <li><b>med_passes</b>=n - number of median filter passes. dcraw: -m &lt;num&gt;</li><br>
+	//raw <li><b>med_passes</b>=n - number of median filter passes. dcraw: -m &lt;num&gt;</li>
 	if (p.find("med_passes") != p.end()) 
 		RawProcessor.imgdata.params.med_passes = atoi(p["med_passes"].c_str());
 
-	//raw <li><b>auto_bright_thr</b>=0.01 - portion of clipped pixel with autobright.</li><br>
+	//raw <li><b>auto_bright_thr</b>=0.01 - portion of clipped pixel with autobright.</li>
 	if (p.find("auto_bright_thr") != p.end()) 
 		RawProcessor.imgdata.params.auto_bright_thr = atof(p["auto_bright_thr"].c_str());
 
-	//raw <li><b>adjust_maximum_thr</b>=0.01 - portion of clipped pixel with autobright</li><br>
+	//raw <li><b>adjust_maximum_thr</b>=0.01 - portion of clipped pixel with autobright</li>
 	if (p.find("adjust_maximum_thr") != p.end()) 
 		RawProcessor.imgdata.params.adjust_maximum_thr = atof(p["adjust_maximum_thr"].c_str());
 
-	//raw <li><b>use_fuji_rotate</b>=0|1 - rotation for cameras with Fuji sensor. dcraw: -j</li><br>
+	//raw <li><b>use_fuji_rotate</b>=0|1 - rotation for cameras with Fuji sensor. dcraw: -j</li>
 	if (p.find("use_fuji_rotate") != p.end()) 
 		RawProcessor.imgdata.params.use_fuji_rotate = atoi(p["use_fuji_rotate"].c_str());
 
-	//raw <li><b>green_matching</b>=0|1 - fix green channel disbalance</li><br>
+	//raw <li><b>green_matching</b>=0|1 - fix green channel disbalance</li>
 	if (p.find("green_matching") != p.end()) 
 		RawProcessor.imgdata.params.green_matching = atoi(p["green_matching"].c_str());
 
-	//raw <li><b>dcb_iterations</b>=n - number of DCB correction passes, -1 is no correction, and is also the default.</li><br>
+	//raw <li><b>dcb_iterations</b>=n - number of DCB correction passes, -1 is no correction, and is also the default.</li>
 	if (p.find("dcb_iterations") != p.end()) 
 		RawProcessor.imgdata.params.dcb_iterations = atoi(p["dcb_iterations"].c_str());
 
-	//raw <li><b>dcb_enhance_fl</b>=n - DCB interpolation with enhanced interpolated colors.</li><br>
+	//raw <li><b>dcb_enhance_fl</b>=n - DCB interpolation with enhanced interpolated colors.</li>
 	//#
 	if (p.find("dcb_enhance_fl") != p.end()) 
 		RawProcessor.imgdata.params.dcb_enhance_fl = atoi(p["dcb_enhance_fl"].c_str());
 
-	//raw <li><b>FBDD Denoise:</b><ul><li>fbdd_noiserd=n - FBDD noise reduction, before demosaic<br><li>fbdd_denoise - alias for fbdd_noiserd</li></ul></li><br>
+	//raw <li><b>FBDD Denoise:</b><ul><li>fbdd_noiserd=n - FBDD noise reduction, before demosaic<li>fbdd_denoise - alias for fbdd_noiserd</li></ul></li>
 	if (p.find("fbdd_noiserd") != p.end()) 
 		RawProcessor.imgdata.params.fbdd_noiserd = atoi(p["fbdd_noiserd"].c_str());
 	if (p.find("fbdd_denoise") != p.end()) 
 		RawProcessor.imgdata.params.fbdd_noiserd = atoi(p["fbdd_denoise"].c_str());
 
-	//raw <li><b>Exposure Compensation:</b><ul><li>exp_correc=0|1 - Turns on exposure correction before demosaic</li><li>exp_shift=1.0 - From 0.25 (2 stops darken) to 8.0 (3 stops lighten), default 1.0=no shift</li><li>exp_preser=0.0 to 1.0 - Preserve hightlights when lightening the image</li></ul></li><br>
+	//raw <li><b>Exposure Compensation:</b><ul><li>exp_correc=0|1 - Turns on exposure correction before demosaic</li><li>exp_shift=1.0 - From 0.25 (2 stops darken) to 8.0 (3 stops lighten), default 1.0=no shift</li><li>exp_preser=0.0 to 1.0 - Preserve hightlights when lightening the image</li></ul></li>
 	if (p.find("exp_correc") != p.end()) 
 		RawProcessor.imgdata.params.exp_correc = atoi(p["exp_correc"].c_str());
 	if (p.find("exp_shift") != p.end()) 
@@ -684,11 +684,11 @@ char * _loadRAW(const char *filename,
 	if (p.find("exp_preser") != p.end()) 
 		RawProcessor.imgdata.params.exp_preser = atof(p["exp_preser"].c_str());
 
-	//raw <li><b>no_auto_scale</b>=0|1 - Disables pixel scaling, dcraw: -D.  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.</li><br>
+	//raw <li><b>no_auto_scale</b>=0|1 - Disables pixel scaling, dcraw: -D.  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.</li>
 	if (p.find("no_auto_scale") != p.end()) 
 		RawProcessor.imgdata.params.no_auto_scale = atoi(p["no_auto_scale"].c_str());
 
-	//raw <li><b>no_interpolation</b>=0|1 - Disables demosaic. dcraw: -d  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.  Use input.raw.libraw.rawdata=1 for unprocessed raw array.</li><br>
+	//raw <li><b>no_interpolation</b>=0|1 - Disables demosaic. dcraw: -d  Default=0. Note: Behavior is not the same as dcraw; image is 3-color.  Use input.raw.libraw.rawdata=1 for unprocessed raw array.</li>
 	if (p.find("no_interpolation") != p.end()) 
 		RawProcessor.imgdata.params.no_interpolation = atoi(p["no_interpolation"].c_str());
 
@@ -738,8 +738,8 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.linenoise = atof(p["linenoise"].c_str());
 
 	//&
-	//& cfa_clean=0|1 - Turns on impulse noise and Gaussian high frequency reduction<br>
-	//& lclean=0.005 to 0.05 - Amount of luminance reduction, 0.01 is a common value<br>
+	//& cfa_clean=0|1 - Turns on impulse noise and Gaussian high frequency reduction
+	//& lclean=0.005 to 0.05 - Amount of luminance reduction, 0.01 is a common value
 	//& cclean=0.005 to 0.05 - Amount of color reduction, 0.01 is a common value
 	//&
 	if (p.find("cfa_clean") != p.end()) 
@@ -750,7 +750,7 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.cclean = atof(p["cclean"].c_str());
 
 	//&
-	//& cfa_green=0|1 - Turns on reduction of maze artifacts produced by bad balance of green channels<br>
+	//& cfa_green=0|1 - Turns on reduction of maze artifacts produced by bad balance of green channels
 	//& green_thresh=0.01 to 0.1 - Max difference between channels allowed for equalization 
 	//&
 	if (p.find("cfa_green") != p.end()) 
@@ -759,7 +759,7 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.green_thresh = atof(p["green_thresh"].c_str());
 
 	//&
-	//& wf_debanding=0|1 - Turns on banding suppression<br>
+	//& wf_debanding=0|1 - Turns on banding suppression
 	//& wf_deband_threshold=tr,tg,tb,tg - Per-channel debanding thresholds
 	//&
 	if (p.find("wf_debanding") != p.end()) 
@@ -909,7 +909,7 @@ char * _loadRAW(const char *filename,
 			float gamma = 1.0/RawProcessor.imgdata.params.gamm[0];
 			if (RawProcessor.imgdata.params.output_color == 0) {  // raw image, check for cameraprofile and assign if found
 
-				//raw <li><b>cameraprofile</b>=iccfile|adobe_coeff - If (and only if) colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.  Trick: Instead of a filename, paste a comma-delimited set of dcraw-style (adobe_coeff) primaries here and a linear gamma D65 whitepoint profile will be built and assigned to the raw image.</li><br>
+				//raw <li><b>cameraprofile</b>=iccfile|adobe_coeff - If (and only if) colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.  Trick: Instead of a filename, paste a comma-delimited set of dcraw-style (adobe_coeff) primaries here and a linear gamma D65 whitepoint profile will be built and assigned to the raw image.</li>
 				//template input.raw.libraw.cameraprofile=iccfile
 				if (p.find("cameraprofile") != p.end()) {
 					if (p["cameraprofile"] != "") {

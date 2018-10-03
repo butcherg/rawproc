@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-print "<html><head><title>Raw Parameters</title></head><body><h3>Raw Parameters</h3>\n";
+print "<html><head><title>Raw Parameters</title><link rel=\"stylesheet\" type=\"text/css\" href=\"rawprocdoc.css\"></head><body><h3>Raw Parameters</h3>\n";
 
 $frontpiece = <<FRONT;
 <p>Use these parameters to tell LibRaw how to process the input raw image. In the input.raw.parameters configuration parameter, build a string of the ones you want to use, separated by semicolons, e.g., "gamma=prophoto;demosaic=prophoto".</p> 

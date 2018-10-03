@@ -7,7 +7,7 @@ dist_doc_DATA = README.md
 
 .PHONY: doc
 doc:
-	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*.html $(srcdir)/doc/*.png $(srcdir)/doc/*.hh*
+	zip -r -j src/rawprocdoc.zip $(srcdir)/doc/*.html $(srcdir)/doc/*.css $(srcdir)/doc/*.png $(srcdir)/doc/*.hh*
 	
 .PHONY: docpages
 docpages:

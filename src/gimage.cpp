@@ -3179,7 +3179,7 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
-	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><br>
+	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
 		if (p["channelformat"] == "8bit")  bitfmt = BPP_8;
