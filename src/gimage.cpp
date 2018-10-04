@@ -3507,12 +3507,19 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 	cmsToneCurve *curve[3], *tonecurve;
 
 	cw = cmsCIEXYZ2cmsCIExyY(d65_media_whitepoint);
-	
-	p.X = out_XYZ[0][0]; p.Y = out_XYZ[1][0]; p.Z = out_XYZ[2][0]; 
+/*
+	p.X = out_XYZ[0][0]; p.Y = out_XYZ[0][1]; p.Z = out_XYZ[0][2]; 
 	c.Red = cmsCIEXYZ2cmsCIExyY(p);
 	p.X = out_XYZ[1][0]; p.Y = out_XYZ[1][1]; p.Z = out_XYZ[1][2]; 
 	c.Green = cmsCIEXYZ2cmsCIExyY(p);
 	p.X = out_XYZ[2][0]; p.Y = out_XYZ[2][1]; p.Z = out_XYZ[2][2]; 
+	c.Blue = cmsCIEXYZ2cmsCIExyY(p);
+*/
+	p.X = out_XYZ[0][0]; p.Y = out_XYZ[1][0]; p.Z = out_XYZ[2][0]; 
+	c.Red = cmsCIEXYZ2cmsCIExyY(p);
+	p.X = out_XYZ[0][1]; p.Y = out_XYZ[1][1]; p.Z = out_XYZ[2][1]; 
+	c.Green = cmsCIEXYZ2cmsCIExyY(p);
+	p.X = out_XYZ[0][2]; p.Y = out_XYZ[1][2]; p.Z = out_XYZ[2][2]; 
 	c.Blue = cmsCIEXYZ2cmsCIExyY(p);
 
 	tonecurve = cmsBuildGamma (NULL, 1.0);  //hardcoded linear, for now...
