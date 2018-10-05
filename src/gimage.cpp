@@ -3480,13 +3480,11 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 	for (unsigned i=0; i<3; i++) {
 		for (unsigned j=0; j<3; j++) {
 			unsigned pos = i*3+j;
-			if (pos < mat.size()) printf("%d:%s ",pos,mat[pos].c_str());
 			if (pos < mat.size())
 				in_XYZ[i][j] = atof(mat[pos].c_str())/10000.0;
 			else
 				in_XYZ[i][j] = 0.0;
 		}
-		printf("\n");
 	}
 
 	pseudoinverse(in_XYZ, inverse, 3);
@@ -3496,9 +3494,9 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 			out_XYZ[i][j] = inverse[j][i];
 
 	
-	printrgb(in_XYZ);
-	printf("\n");
-	printrgb(out_XYZ);
+	//printrgb(in_XYZ);
+	//printf("\n");
+	//printrgb(out_XYZ);
 	
 	cmsHPROFILE profile;
 	cmsCIExyYTRIPLE c;
@@ -3507,14 +3505,7 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 	cmsToneCurve *curve[3], *tonecurve;
 
 	cw = cmsCIEXYZ2cmsCIExyY(d65_media_whitepoint);
-/*
-	p.X = out_XYZ[0][0]; p.Y = out_XYZ[0][1]; p.Z = out_XYZ[0][2]; 
-	c.Red = cmsCIEXYZ2cmsCIExyY(p);
-	p.X = out_XYZ[1][0]; p.Y = out_XYZ[1][1]; p.Z = out_XYZ[1][2]; 
-	c.Green = cmsCIEXYZ2cmsCIExyY(p);
-	p.X = out_XYZ[2][0]; p.Y = out_XYZ[2][1]; p.Z = out_XYZ[2][2]; 
-	c.Blue = cmsCIEXYZ2cmsCIExyY(p);
-*/
+
 	p.X = out_XYZ[0][0]; p.Y = out_XYZ[1][0]; p.Z = out_XYZ[2][0]; 
 	c.Red = cmsCIEXYZ2cmsCIExyY(p);
 	p.X = out_XYZ[0][1]; p.Y = out_XYZ[1][1]; p.Z = out_XYZ[2][1]; 
