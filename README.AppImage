@@ -1,0 +1,41 @@
+README.AppImage
+
+Instructions on using the rawproc AppImage.  This README is effective as of
+rawproc v0.8, these instructions will not work with earlier versions.
+
+The rawproc AppImage is built with the make-appimage.pl perl script, and is 
+executed with the configure-generated make in the selected build directory
+like this:
+
+$ make appimage
+
+Its success depends on a previously successful rawproc build.
+
+Alternatively, an AppImage is made available with each major release 
+at the github release page.
+
+Once built/downloaded, the AppImage can be executed in the normal way:
+
+$ rawproc0.8Dev-x86_64.AppImage
+
+Any rawproc command line parameters can be specified after the AppImage name.
+The executable in the AppImage will look in all the standard places for a 
+configuration file.  A rawproc.conf is not packaged in the AppImage, in order
+for you to maintain a configuration to your taste through successive AppImage
+downloads.  You can either put one in ~/.rawproc/rawproc.conf, or specify one 
+when you run the AppImage with the -c parameter.  Use the rawproc.conf file in 
+
+The AppImage also includes the img and exif command line programs; you can 
+access them by making symbolic links to the AppImage like this:
+
+$ ln -s rawproc0.8Dev-x86_64.AppImage img
+
+The above command line assumes you're in the same directory as the AppImage, 
+and you want to make the img link in the same directory.  With that link, 
+you can now run img as follows:
+
+$ ./img DSG_0001.NEF ..... 
+
+Access to exif works the same way.
+
+While the production AppImage won't contain a .conf file, demonstration
