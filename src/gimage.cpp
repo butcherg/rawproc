@@ -19,7 +19,9 @@
 #include "cJSON.h"
 
 #define PI            3.14159265358979323846
-
+#ifndef M_PI
+#define M_PI PI
+#endif
 
 #if defined PIXhalf
 #define PIXHALF
