@@ -2,11 +2,14 @@
 #include "PicProcessorResize.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "myFloatCtrl.h"
+#include "myIntegerCtrl.h"
 #include "util.h"
 
 #include <wx/spinctrl.h>
 
 #define RESIZEENABLE 7400
+#define BLURENABLE  7401
 
 class ResizePanel: public PicProcPanel
 {
@@ -28,14 +31,15 @@ class ResizePanel: public PicProcPanel
 			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "width: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			widthedit = new wxSpinCtrl(this, wxID_ANY, p[0], wxDefaultPosition, wxSize(150,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
+			g->Add(new wxStaticText(this,wxID_ANY, "width: ", wxDefaultPosition, wxSize(50,20)), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			widthedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[0].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,25));
 			widthedit->SetToolTip("width in pixels, 0 preserves aspect.\nIf you use the spin arrows, type Enter to update the image.");
 			g->Add(widthedit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticText(this,-1, "height: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			heightedit = new wxSpinCtrl(this, wxID_ANY, p[1], wxDefaultPosition, wxSize(150,25),wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS,0,10000);
+
+			g->Add(new wxStaticText(this,-1, "height: "), wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			heightedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[1].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,25));
 			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
-			g->Add(heightedit, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
+			g->Add(heightedit, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
 			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
 			algoselect->SetSelection(algoselect->FindString(wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"))));
 			if (p.size() >=3) {
@@ -43,47 +47,79 @@ class ResizePanel: public PicProcPanel
 					if (p[2] == algos[i]) algoselect->SetSelection(i);
 				}
 			}
-			g->Add(algoselect, wxGBPosition(4,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);	
+			g->Add(algoselect, wxGBPosition(4,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);	
+
+			//g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(5,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+			blurbox = new wxCheckBox(this, BLURENABLE, "enable pre-blur:");
+			blurbox->SetValue(false);
+			g->Add(blurbox, wxGBPosition(5,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);
+			//blursigma
+			//blurkernelsize
+
 			SetSizerAndFit(g);
 			g->Layout();
-			Refresh();
-			Update();
+
 			SetFocus();
+			t = new wxTimer(this);
 			Bind(wxEVT_TEXT_ENTER,&ResizePanel::paramChanged, this);
+			Bind(wxEVT_MOUSEWHEEL,&ResizePanel::onWheel, this);
+			Bind(wxEVT_TIMER, &ResizePanel::OnTimer, this);
 			//Bind(wxEVT_SPINCTRL,&ResizePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBOX,&ResizePanel::paramChanged, this);	
 			Bind(wxEVT_CHECKBOX, &ResizePanel::onEnable, this, RESIZEENABLE);
+			Bind(wxEVT_CHECKBOX, &ResizePanel::paramChanged, this, BLURENABLE);
+			Refresh();
+			Update();
 		}
 
 		~ResizePanel()
 		{
-
+			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
 		{
-			if (enablebox->GetValue()) {
+			if (enablebox->GetValue()) 
 				q->enableProcessing(true);
-				q->processPic();
-			}
-			else {
+				
+			else 
 				q->enableProcessing(false);
-				q->processPic();
-			}
+			process();
+		}
+
+		void onWheel(wxMouseEvent& event)
+		{
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			process();
+			event.Skip();
 		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d,%d,%s",widthedit->GetValue(),heightedit->GetValue(),algoselect->GetString(algoselect->GetSelection())));
-			q->processPic();
+			process();
 			event.Skip();
 		}
 
+		void process()
+		{
+			if (blurbox->GetValue()) 
+				q->setParams(wxString::Format("%d,%d,%s,%s,%f,%d",widthedit->GetIntegerValue(),heightedit->GetIntegerValue(),algoselect->GetString(algoselect->GetSelection()),"blur",1.5,6));
+			else
+				q->setParams(wxString::Format("%d,%d,%s",widthedit->GetIntegerValue(),heightedit->GetIntegerValue(),algoselect->GetString(algoselect->GetSelection())));
+			q->processPic();
+		}
 
-	private:
-		wxSpinCtrl *widthedit, *heightedit;
+
+	private: 
+		myIntegerCtrl *widthedit, *heightedit;
+		myFloatCtrl *blursigma, *blurkernel;
 		wxRadioBox *algoselect;
-		wxCheckBox *enablebox;
+		wxCheckBox *enablebox, *blurbox;
+		wxTimer *t;
 
 };
 
@@ -126,11 +162,21 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 
 bool PicProcessorResize::processPic(bool processnext) {
 	wxString algo = "";
+	bool blur = false;
+	float sigma = 1.0;
+	unsigned kernelsize = 3;
 	((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
 	wxArrayString cp = split(getParams(),",");
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
 	if (cp.size() >2) algo  = cp[2];
+	if (cp.size() >=6) {
+		if (cp[3] == "blur") {
+			blur = true;
+			sigma = atof(cp[4]);
+			kernelsize = atoi(cp[5]);
+		}
+	}
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
@@ -156,6 +202,11 @@ bool PicProcessorResize::processPic(bool processnext) {
 
 	if (processingenabled) {
 		mark();
+		if (blur) {
+			((wxFrame*) m_display->GetParent())->SetStatusText("resize... with pre-blur...");
+			dib->ApplyGaussianBlur(sigma, kernelsize, threadcount);
+			((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
+		}
 		dib->ApplyResize(width, height, filter, threadcount);
 		wxString d = duration();
 
