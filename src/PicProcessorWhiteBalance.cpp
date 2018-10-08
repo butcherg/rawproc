@@ -4,6 +4,7 @@
 #include "util.h"
 //#include "gimage/strutil.h"
 #include "gimage/curve.h"
+#include "myFloatCtrl.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
 #include "unchecked.xpm"
@@ -19,70 +20,6 @@
 #define WBRED 6406
 #define WBGREEN 6407
 #define WBBLUE 6408
-
-
-class myFloatCtrl: public wxControl
-{
-	public:
-		myFloatCtrl(wxWindow *parent, wxWindowID id, float value=0.0, unsigned precision=1, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
-			wxControl(parent, id, pos, size, wxBORDER_NONE)
-		{
-			v = value;
-			p = precision;
-			fmt = "%0.";
-			fmt.Append(wxString::Format("%d",p));
-			fmt.Append("f");
-			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
-			textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
-			b->Add(textbox,0,wxALL,0);
-			SetSizerAndFit(b);
-			Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
-			Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
-		}
-		
-		float GetFloatValue()
-		{
-			return v;
-		}
-		
-		void SetFloatValue(double value)
-		{
-			v = value;
-			textbox->SetValue(wxString::Format(fmt,value));
-		}
-		
-		void OnWheel(wxMouseEvent& event)
-		{
-			v = atof(textbox->GetValue().c_str());
-			double inc = pow(10,-((float)p));
-			if (event.ShiftDown()) inc *= 10.0;
-			if (event.ControlDown()) inc *= 100.0;
-			if (event.GetWheelRotation() > 0) { 
-				v += inc;
-			}
-			else {
-				v -= inc;
-			}
-			
-			textbox->SetValue(wxString::Format(fmt,v));
-
-			textbox->Refresh();
-			event.Skip();
-		}
-
-		void OnEnter(wxCommandEvent& event)
-		{
-			v = atof(textbox->GetValue().c_str());
-			event.Skip();
-		}
-		
-	private:
-		double v;
-		unsigned p;
-		wxString fmt;
-		wxTextCtrl *textbox;
-	
-};
 
 
 class WhiteBalancePanel: public PicProcPanel
