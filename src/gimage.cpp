@@ -574,6 +574,7 @@ std::string gImage::getBitsStr()
 		case BPP_8: return "8";
 		case BPP_16: return "16";
 	}
+	return "";
 }
 
 GIMAGE_ERROR gImage::getLastError()
@@ -3457,7 +3458,7 @@ cmsHPROFILE gImage::makeLCMSCamConstProfile(std::string camconstfile, std::strin
 
 	//todo:  look up coeff based on camera profile
 	//call makeLCMSAdobeCoeffProfile(coeff)
-
+	return NULL;
 }
 
 void printrgb(double (*p)[3])

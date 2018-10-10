@@ -48,12 +48,12 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 	FILE *fp = fopen(filename, "rb");
 
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-	if(!png) return NULL;
+	if(!png) return false;
 
 	png_infop pinfo = png_create_info_struct(png);
-	if(!pinfo) return NULL;
+	if(!pinfo) return false;
 
-	if(setjmp(png_jmpbuf(png))) return NULL;
+	if(setjmp(png_jmpbuf(png))) return false;
 
 	png_init_io(png, fp);
 
@@ -66,12 +66,13 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 
 	unsigned char * marker;
 	unsigned marker_length;
-	png_get_eXIf_1(png, pinfo, &marker_length, &marker);
-	parse_eXIf_chunk(marker, marker_length, info);
+	if (png_get_eXIf_1(png, pinfo, &marker_length, &marker));
+		parse_eXIf_chunk(marker, marker_length, info);
 
 	fclose(fp);
 	if (png && pinfo)
 		png_destroy_write_struct(&png, &pinfo);
+	return true;
 }
 
 /*

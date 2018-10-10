@@ -663,7 +663,7 @@ bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 
         }
     }
-
+    return true;
 }
 
 

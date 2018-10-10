@@ -416,10 +416,13 @@ void rawprocFrm::SetThumbMode(int mode)
 
 PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 {
-	if (item.IsOk())
+	if (item.IsOk()) {
 		return (PicProcessor *) commandtree->GetItemData(item);
-	else
+	}
+	else {
 		wxMessageBox("bad item");
+		return NULL;
+	}
 }
 
 

@@ -62,6 +62,7 @@ bool Curve::deletepoint(double x, double y)
 			return true;
 		}
 	}
+	return false;
 }
 
 void Curve::clampto(double min, double max)

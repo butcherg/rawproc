@@ -114,7 +114,9 @@ void opAppend(wxString name, wxString &opstring)
 
 wxArrayString paramSplit(wxString paramstring)
 {
-
+	wxArrayString parms;
+	//to-do: logic to parse name=val;name=val strings into  wxArrayString of name=val
+	return parms;
 }
 
 void mark ()
