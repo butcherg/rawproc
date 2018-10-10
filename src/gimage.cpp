@@ -64,7 +64,7 @@ const char * gImageVersion()
 	#endif
 }
 
-std::string gImage::profilepath = "";
+std::string gImage::profilepath;
 
 
 //Constructors/Destructor:
@@ -3053,7 +3053,7 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 	BPP bits;
 	char * iccprofile;
 	std::map<std::string,std::string> imgdata;
-	std::string params = "";
+	std::string params;
 	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
 
 	if (ext == FILETYPE_TIFF) {

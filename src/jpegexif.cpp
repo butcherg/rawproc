@@ -525,8 +525,9 @@ bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 		if (Tag == TAG_MAKER_NOTE) continue;
 
 		// Show tag name
-		std::string tagname = "";
-		std::string tagvalue = "";
+		std::string tagname;
+		std::string tagvalue;
+
 		for (a=0;;a++){
 			if (a >= TAG_TABLE_SIZE){
 				//printf("%04x=", Tag);

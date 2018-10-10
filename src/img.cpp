@@ -158,7 +158,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 			char *istr = strtok(NULL, ",");
 			char *bpstr = strtok(NULL, " ");
 			
-			std::string profile = "";
+			std::string profile;
 			std::string profilepath =  gImage::getProfilePath(); //myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str();
 			if (profstr == NULL) {
 				printf("colorspace: no profile.\n");
@@ -179,7 +179,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 			}
 			
 			bool bp = false;
-			std::string bpcomp = "";
+			std::string bpcomp;
 			if (bpstr != NULL) bpcomp = std::string(bpstr);
 			if (bpcomp == "bpc") bp = true;
 			
@@ -270,7 +270,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			char *c, *b, *w;
 			GIMAGE_CHANNEL channel = CHANNEL_RGB;
-			std::string chan = "";
+			std::string chan;
 			double blk=0.0, wht=255.0;
 			double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
 			double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
@@ -598,7 +598,7 @@ void do_cmd(gImage &dib, std::string commandstr)
 		
 		//#whitebalance:[rmult,gmult,bmult] default: automatic, based on "gray world"
 		else if (strcmp(cmd,"whitebalance") == 0) {  
-			std::string op = "";
+			std::string op;
 			double redmult=1.0; 
 			double greenmult = 1.0; 
 			double bluemult = 1.0;
@@ -1089,7 +1089,7 @@ int main (int argc, char **argv)
 {
 	char * filename;
 
-	std::string conffile = "";
+	std::string conffile;
 	bool force = false;
 	bool noconf = false;
 	int f;
