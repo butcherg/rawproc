@@ -51,6 +51,7 @@ class ResizePanel: public PicProcPanel
 			}
 			g->Add(algoselect, wxGBPosition(4,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);	
 
+#ifdef PREBLUR
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(5,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 			blurbox = new wxCheckBox(this, BLURENABLE, "enable pre-blur:");
 			blurbox->SetValue(false);
@@ -59,6 +60,7 @@ class ResizePanel: public PicProcPanel
 			g->Add(new wxStaticText(this,wxID_ANY, "sigma:"), wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(blursigma, wxGBPosition(7,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			//blurkernel= ...
+#endif
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -70,7 +72,9 @@ class ResizePanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &ResizePanel::OnTimer, this);
 			Bind(wxEVT_RADIOBOX,&ResizePanel::paramChanged, this);	
 			Bind(wxEVT_CHECKBOX, &ResizePanel::onEnable, this, RESIZEENABLE);
+#ifdef PREBLUR
 			Bind(wxEVT_CHECKBOX, &ResizePanel::paramChanged, this, BLURENABLE);
+#endif
 			Refresh();
 			Update();
 		}
@@ -92,12 +96,16 @@ class ResizePanel: public PicProcPanel
 
 		void onWheel(wxMouseEvent& event)
 		{
+#ifdef PREBLUR
 			if (event.GetId() == BLURSIGMA) {
 				if (blurbox->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
 			}
 			else {
 				t->Start(500,wxTIMER_ONE_SHOT);
 			}
+#else
+			t->Start(500,wxTIMER_ONE_SHOT);
+#endif
 		}
 
 
@@ -115,9 +123,11 @@ class ResizePanel: public PicProcPanel
 
 		void process()
 		{
+#ifdef PREBLUR
 			if (blurbox->GetValue()) 
 				q->setParams(wxString::Format("%d,%d,%s,%s,%f,%d",widthedit->GetIntegerValue(),heightedit->GetIntegerValue(),algoselect->GetString(algoselect->GetSelection()),"blur",blursigma->GetFloatValue(),6));
 			else
+#endif
 				q->setParams(wxString::Format("%d,%d,%s",widthedit->GetIntegerValue(),heightedit->GetIntegerValue(),algoselect->GetString(algoselect->GetSelection())));
 			q->processPic();
 		}
@@ -125,9 +135,12 @@ class ResizePanel: public PicProcPanel
 
 	private: 
 		myIntegerCtrl *widthedit, *heightedit;
+#ifdef PREBLUR
 		myFloatCtrl *blursigma, *blurkernel;
+		wxCheckBox *blurbox;
+#endif
 		wxRadioBox *algoselect;
-		wxCheckBox *enablebox, *blurbox;
+		wxCheckBox *enablebox;
 		wxTimer *t;
 
 };
@@ -211,11 +224,13 @@ bool PicProcessorResize::processPic(bool processnext) {
 
 	if (processingenabled) {
 		mark();
+#ifdef PREBLUR
 		if (blur) {
 			((wxFrame*) m_display->GetParent())->SetStatusText("resize... with pre-blur...");
 			dib->ApplyGaussianBlur(sigma, kernelsize, threadcount);
 			((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
 		}
+#endif
 		dib->ApplyResize(width, height, filter, threadcount);
 		wxString d = duration();
 
