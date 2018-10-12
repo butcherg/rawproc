@@ -136,12 +136,23 @@ if test "$enable_dcraw" == "yes"
 then
 	CXXFLAGS="$CXXFLAGS -DUSE_DCRAW"
 else
-	PKG_CHECK_MODULES([LIBRAW],[libraw], [
-		CPPFLAGS="$LIBRAW_CFLAGS $CPPFLAGS"
-		LIBS="$LIBRAW_LIBS $LIBS"
-	],[
-		AC_MSG_ERROR([not found.])
-	])
+	if test "$OPENMP_CFLAGS" == ""
+	then
+		PKG_CHECK_MODULES([LIBRAW],[libraw], [
+			CPPFLAGS="$LIBRAW_CFLAGS $CPPFLAGS"
+			LIBS="$LIBRAW_LIBS $LIBS"
+		],[
+			AC_MSG_ERROR([not found.])
+		])
+	else
+		PKG_CHECK_MODULES([LIBRAW],[libraw_r], [
+			CPPFLAGS="$LIBRAW_CFLAGS $CPPFLAGS"
+			LIBS="$LIBRAW_LIBS $LIBS"
+		],[
+			AC_MSG_ERROR([not found.])
+		])
+	fi
+
 fi
 
 #lensfun:
