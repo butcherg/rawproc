@@ -198,7 +198,7 @@ struct fnames {
 
 std::string commandstring;
 
-void do_cmd(gImage &dib, std::string commandstr)
+void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 {
 		char c[256];
 		strncpy(c, commandstr.c_str(), 255);
@@ -1062,17 +1062,21 @@ void do_cmd(gImage &dib, std::string commandstr)
 		}
 
 		else if (strcmp(cmd,"save") == 0) {
-			char *outfilename = strtok(NULL, ", ");
+			char *of = strtok(NULL, ", ");
 			char *params = strtok(NULL, ", ");
 
-			if (!force && file_exists(outfilename)) {
-				printf("save: file %s exists, skipping...\n",outfilename);
+			std::string outfilename = std::string(of);
+			if (countchar(outfilename,'*') == 1) outfilename = makename(outfile, outfilename);
+
+			if (!force && file_exists(outfilename.c_str())) {
+				printf("save: file %s exists, skipping...\n",outfilename.c_str());
 			}
 			else {
+
 				if (params)
-					saveFile (dib, std::string(outfilename), std::string(params), std::string(commandstring));
+					saveFile (dib, outfilename, std::string(params), std::string(commandstring));
 				else
-					saveFile (dib, std::string(outfilename), "", std::string(commandstring));
+					saveFile (dib, outfilename, "", std::string(commandstring));
 			} 
 		}
 
@@ -1375,9 +1379,9 @@ for (int f=0; f<files.size(); f++)
 	for (int i=0; i<commands.size(); i++) {
 		if (commands[i] == "input.raw.default") {
 			std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue("input.raw.default"), " ");
-			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i]);
+			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i], files[f].variant);
 		}
-		else do_cmd(dib, commands[i]);
+		else do_cmd(dib, commands[i], files[f].variant);
 	}
 
 
