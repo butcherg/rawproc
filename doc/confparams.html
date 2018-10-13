@@ -50,50 +50,50 @@
 <li><b>output.tiff.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li>
 <li><b>output.tiff.cms.renderingintent</b>:  Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.tiff.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters</li>
-<li><b>tool.*.cores</b>:  Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li>
-<li><b>tool.*.log</b>:  Turns on logging for the specified tool.  Default=0</li>
-<li><b>tool.all.log</b>:  Turns on logging for all tools.  Default=0</li>
-<li><b>tool.blackwhitepoint.auto</b>:  Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0</li>
-<li><b>tool.blackwhitepoint.autorecalcdefault</b>:  0/1, default setting for recalc when the tool is added.  Default=0</li>
-<li><b>tool.blackwhitepoint.blackthreshold</b>:  The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
-<li><b>tool.blackwhitepoint.whiteinitialvalue</b>:  The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255</li>
-<li><b>tool.blackwhitepoint.whitethreshold</b>:  The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
-<li><b>tool.bright.initialvalue</b>:  The initial (and reset button) value of the bright tool, 0=no change.  Default=0</li>
-<li><b>tool.contrast.initialvalue</b>:  The initial (and reset button) value of the contrast tool, 0=no change.  Default=0</li>
-<li><b>tool.crop.controlpointradius</b>:  Radius of the rectangle displayed to indicate a control point.  Default=7</li>
-<li><b>tool.crop.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7</li>
-<li><b>tool.curve.controlpointradius</b>:  Radius of the circle displayed to indicate a control point.  Default=5</li>
-<li><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
-<li><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=half</li>
-<li><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
-<li><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
-<li><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
-<li><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0</li>
-<li><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
-<li><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
-<li><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
-<li><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
-<li><b>tool.highlight.level</b>:  The initial (and reset button) value of the highlight tool, 0=no change.  Default=0</li>
-<li><b>tool.highlight.threshold</b>:  The initial (and reset button) value of the highlight curve threshold.  Default=192</li>
-<li><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.</li>
-<li><b>tool.lenscorrection.default</b>:  The initial (and reset button) red intensity threshold.  Default=1.5</li>
-<li><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
-<li><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>
-<li><b>tool.redeye.radius</b>:  Defines the initial (and reset button) limit of the patch size.  Default=50</li>
-<li><b>tool.redeye.threshold</b>:  The initial (and reset button) red intensity threshold.  Default=1.5</li>
-<li><b>tool.resize.algorithm</b>:  Interpolation algorithm to use when none is specified.  Default=lanczos3  </li>
-<li><b>tool.resize.x</b>:  Default resize of the width dimension.  Default=640</li>
-<li><b>tool.resize.y</b>:  Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li>
-<li><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
-<li><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
-<li><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
-<li><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
-<li><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
-<li><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
-<li><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
-<li><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li>
-<li><b>tool.whitebalance.min</b>:  (float), minimum multiplier value.  Default=0.001</li>
-<li><b>tool.whitebalance.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
+<li><a name="tool.*"><b>tool.*.cores</b>:  Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li>
+<li><a name="tool.*"><b>tool.*.log</b>:  Turns on logging for the specified tool.  Default=0</li>
+<li><a name="tool.all"><b>tool.all.log</b>:  Turns on logging for all tools.  Default=0</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.auto</b>:  Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.autorecalcdefault</b>:  0/1, default setting for recalc when the tool is added.  Default=0</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.blackthreshold</b>:  The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.whiteinitialvalue</b>:  The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.whitethreshold</b>:  The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
+<li><a name="tool.bright"><b>tool.bright.initialvalue</b>:  The initial (and reset button) value of the bright tool, 0=no change.  Default=0</li>
+<li><a name="tool.contrast"><b>tool.contrast.initialvalue</b>:  The initial (and reset button) value of the contrast tool, 0=no change.  Default=0</li>
+<li><a name="tool.crop"><b>tool.crop.controlpointradius</b>:  Radius of the rectangle displayed to indicate a control point.  Default=7</li>
+<li><a name="tool.crop"><b>tool.crop.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7</li>
+<li><a name="tool.curve"><b>tool.curve.controlpointradius</b>:  Radius of the circle displayed to indicate a control point.  Default=5</li>
+<li><a name="tool.curve"><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
+<li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=half</li>
+<li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
+<li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
+<li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
+<li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0</li>
+<li><a name="tool.gamma"><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
+<li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
+<li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
+<li><a name="tool.gray"><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
+<li><a name="tool.highlight"><b>tool.highlight.level</b>:  The initial (and reset button) value of the highlight tool, 0=no change.  Default=0</li>
+<li><a name="tool.highlight"><b>tool.highlight.threshold</b>:  The initial (and reset button) value of the highlight curve threshold.  Default=192</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The initial (and reset button) red intensity threshold.  Default=1.5</li>
+<li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
+<li><a name="tool.redeye"><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>
+<li><a name="tool.redeye"><b>tool.redeye.radius</b>:  Defines the initial (and reset button) limit of the patch size.  Default=50</li>
+<li><a name="tool.redeye"><b>tool.redeye.threshold</b>:  The initial (and reset button) red intensity threshold.  Default=1.5</li>
+<li><a name="tool.resize"><b>tool.resize.algorithm</b>:  Interpolation algorithm to use when none is specified.  Default=lanczos3  </li>
+<li><a name="tool.resize"><b>tool.resize.x</b>:  Default resize of the width dimension.  Default=640</li>
+<li><a name="tool.resize"><b>tool.resize.y</b>:  Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li>
+<li><a name="tool.rotate"><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
+<li><a name="tool.saturate"><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
+<li><a name="tool.shadow"><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
+<li><a name="tool.shadow"><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
+<li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
+<li><a name="tool.whitebalance"><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
+<li><a name="tool.whitebalance"><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
+<li><a name="tool.whitebalance"><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li>
+<li><a name="tool.whitebalance"><b>tool.whitebalance.min</b>:  (float), minimum multiplier value.  Default=0.001</li>
+<li><a name="tool.whitebalance"><b>tool.whitebalance.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
 </ul>
 <h3>Output Parameters</h3>
 <p>For the output.*.parameters properties, the following are available.  Specify them

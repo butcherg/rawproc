@@ -18,7 +18,13 @@ foreach $file (@files) {
 foreach $line (@conf) {
 	#print "<li>$line</li><br>\n";
 	my ($parm,$stuff) = split /:/, $line;
-	print "<li><b>$parm</b>: $stuff</li>\n";
+	my @terms = split /\./, $parm;
+	if ($terms[0] eq 'tool') {
+		print "<li><a name=\"$terms[0].$terms[1]\"><b>$parm</b>: $stuff</li>\n";
+	}
+	else {
+		print "<li><b>$parm</b>: $stuff</li>\n";
+	}
 }
 
 print "</ul>\n";
