@@ -136,13 +136,65 @@ void strappend(char* s, char c)
 }
 
 int _CRT_glob = 0;
+bool force = false;
+
+bool saveFile (gImage &savedib, std::string outfilename, std::string params, std::string commandstring)
+{
+
+	gImage dib = savedib;
+	GIMAGE_FILETYPE filetype = gImage::getFileNameType(outfilename.c_str());
+	
+	std::string profilepath = myConfig::getConfig().getValueOrDefault("cms.profilepath","");
+	if (profilepath[profilepath.length()-1] != '/') profilepath.push_back('/');
+	
+	std::string intentstr;
+	cmsUInt32Number intent = INTENT_PERCEPTUAL;
+
+	if (filetype == FILETYPE_JPEG) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual");
+	}
+	else if (filetype == FILETYPE_TIFF) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual");
+	}
+	else if (filetype == FILETYPE_PNG) {
+		profilepath.append(myConfig::getConfig().getValueOrDefault("output.png.cms.profile",""));
+		intentstr = myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual");
+	}
+				
+	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+	if (intentstr == "saturation") intent = INTENT_SATURATION;
+	if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+	if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+
+	_mark();
+	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
+	printf("Saving file %s %s... ",outfilename.c_str(), params.c_str());
+	dib.setInfo("Software","img 0.1");
+	dib.setInfo("ImageDescription", commandstring);
+	
+	cmsHPROFILE profile = cmsOpenProfileFromFile(profilepath.c_str(), "r");
+	if (dib.getProfile() && profile)
+		dib.saveImageFile(outfilename.c_str(), params.c_str(), profile, intent);
+	else
+		dib.saveImageFile(outfilename.c_str(), params.c_str());
+
+	if (dib.getLastError() == GIMAGE_OK) {
+		printf("done. (%fsec)\n",_duration());
+		return true;
+	}
+	else {
+		printf("Error: %s: %s\n",dib.getLastErrorMessage().c_str(), outfilename.c_str());
+		return false;
+	}
+}
 
 //used to contain a list of corresponding input and output file names,
 //constructed from the input and output file specifications
 struct fnames {
-	std::string infile, outfile;
+	std::string infile, outfile, variant;
 };
-
 
 std::string commandstring;
 
@@ -1009,6 +1061,20 @@ void do_cmd(gImage &dib, std::string commandstr)
 			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
 		}
 
+		else if (strcmp(cmd,"save") == 0) {
+			char *outfilename = strtok(NULL, ", ");
+			char *params = strtok(NULL, ", ");
+
+			if (!force && file_exists(outfilename)) {
+				printf("save: file %s exists, skipping...\n",outfilename);
+			}
+			else {
+				if (params)
+					saveFile (dib, std::string(outfilename), std::string(params), std::string(commandstring));
+				else
+					saveFile (dib, std::string(outfilename), "", std::string(commandstring));
+			} 
+		}
 
 		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
 
@@ -1090,7 +1156,6 @@ int main (int argc, char **argv)
 	char * filename;
 
 	std::string conffile;
-	bool force = false;
 	bool noconf = false;
 	int f;
 	opterr = 0;
@@ -1229,6 +1294,7 @@ int main (int argc, char **argv)
 				fnames f;
 				f.infile = flist[i];
 				f.outfile = makename(variant,outfile[0]);
+				f.variant = variant;
 				files.push_back(f);
 			}
 				
@@ -1354,49 +1420,10 @@ for (int f=0; f<files.size(); f++)
 		printf("\n");
 		exit(0);
 	}
-	
-	GIMAGE_FILETYPE filetype = gImage::getFileNameType(outfilename);
-	
-	std::string profilepath = myConfig::getConfig().getValueOrDefault("cms.profilepath","");
-	if (profilepath[profilepath.length()-1] != '/') profilepath.push_back('/');
-	
-	std::string intentstr;
-	cmsUInt32Number intent = INTENT_PERCEPTUAL;
 
-	if (filetype == FILETYPE_JPEG) {
-		profilepath.append(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile",""));
-		intentstr = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual");
-	}
-	else if (filetype == FILETYPE_TIFF) {
-		profilepath.append(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile",""));
-		intentstr = myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual");
-	}
-	else if (filetype == FILETYPE_PNG) {
-		profilepath.append(myConfig::getConfig().getValueOrDefault("output.png.cms.profile",""));
-		intentstr = myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual");
-	}
-				
-	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
-	if (intentstr == "saturation") intent = INTENT_SATURATION;
-	if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
-	if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
-	_mark();
-	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
-	printf("Saving file %s %s... ",outfilename, outfile[1].c_str());
-	dib.setInfo("Software","img 0.1");
-	dib.setInfo("ImageDescription", commandstring);
-	
-	cmsHPROFILE profile = cmsOpenProfileFromFile(profilepath.c_str(), "r");
-	if (dib.getProfile() && profile)
-		dib.saveImageFile(outfilename, outfile[1].c_str(), profile, intent);
-	else
-		dib.saveImageFile(outfilename, outfile[1].c_str());
-
-	if (dib.getLastError() == GIMAGE_OK) 
-		printf("done. (%fsec)\n\n",_duration());
-	else
-		printf("Error: %s: %s\n\n",dib.getLastErrorMessage().c_str(), outfile[0].c_str());
+	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring));
+	printf("\n");
 
 }
 
