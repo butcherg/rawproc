@@ -23,6 +23,7 @@ class CurvePanel: public PicProcPanel
 			str.Add("red");
 			str.Add("green");
 			str.Add("blue");
+			str.Add("bright");
 			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 
 			enablebox = new wxCheckBox(this, CURVEENABLE, "curve:");
@@ -41,7 +42,7 @@ class CurvePanel: public PicProcPanel
 			m->Layout();
 			SetFocus();
 			wxArrayString cpts = split(params,",");
-			if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) 
+			if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue") | (cpts[0] == "bright")) 
 				chan->SetStringSelection(cpts[0]);
 			else
 				chan->SetSelection(chan->FindString("rgb"));
@@ -103,7 +104,7 @@ PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl
 	Curve crv;
 	int ctstart;
 	wxArrayString cpts = split(command,",");
-	if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue")) {
+	if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue") | (cpts[0] == "bright")) {
 		setChannel(cpts[0]);
 		ctstart = 1;
 	}
@@ -138,6 +139,7 @@ void PicProcessorCurve::setChannel(wxString chan)
 	if (chan == "red")   channel = CHANNEL_RED;
 	if (chan == "green") channel = CHANNEL_GREEN;
 	if (chan == "blue")  channel = CHANNEL_BLUE;
+	if (chan == "bright")  channel = CHANNEL_BRIGHT;
 	m_tree->SetItemText(id, wxString::Format("curve:%s",chan));
 }
 

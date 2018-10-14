@@ -1838,6 +1838,10 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, int threadcount)
 	}
 }
 
+#define  Pr  .299
+#define  Pg  .587
+#define  Pb  .114
+
 void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount)
 {
 	Curve c;
@@ -1882,7 +1886,33 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 			}
 		}
 	}
+
+//an adaptation of the HSL saturation algorithm:
+	else if (channel == CHANNEL_BRIGHT) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (int x=0; x<w; x++) {
+			for (int y=0; y<h; y++) {
+				int pos = x + y*w;
+				double R = image[pos].r;
+				double G = image[pos].g;
+				double B = image[pos].b;
+
+				double  P=sqrt(
+				R*R*Pr+
+				G*G*Pg+
+				B*B*Pb ) ;
+
+				double Br = c.getpoint(P);
+
+				image[pos].r=Br+(R-P);
+				image[pos].g=Br+(G-P);
+				image[pos].b=Br+(B-P);
+			}
+		}
+	}
 }
+
+
 
 void gImage::ApplyToneLine(double low, double high, int threadcount)
 {
@@ -2053,9 +2083,10 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 //Maybe later...
 //
 
-#define  Pr  .299
-#define  Pg  .587
-#define  Pb  .114
+//commented out here, moved to above the ApplyCurve methods to accommodate a 'bright' luminance channel curve:
+//#define  Pr  .299
+//#define  Pg  .587
+//#define  Pb  .114
 
 void gImage::ApplySaturate(double saturate, int threadcount)
 {
