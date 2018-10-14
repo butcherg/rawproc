@@ -17,7 +17,7 @@ class ExposurePanel: public PicProcPanel
 
 			double initialvalue = atof(params.c_str());
 
-			enablebox = new wxCheckBox(this, EXPOSUREENABLE, "exposure:");
+			enablebox = new wxCheckBox(this, EXPOSUREENABLE, "exposure compensation:");
 			enablebox->SetValue(true);
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
@@ -116,7 +116,7 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 bool PicProcessorExposure::processPic(bool processnext) 
 {
 	double ev = atof(c.c_str());
-	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure %2.2f...", ev));
+	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure compensation %2.2f...", ev));
 	bool result = true;
 	
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
@@ -134,7 +134,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.exposure.log","0") == "1"))
-			log(wxString::Format("tool=exposure,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format("tool=exposure_compensation,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

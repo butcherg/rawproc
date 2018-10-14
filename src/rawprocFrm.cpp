@@ -222,7 +222,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DEMOSAIC,		_("Demosaic"), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HIGHLIGHT,	_("Highlight"), _(""), wxITEM_NORMAL);
@@ -1533,7 +1533,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	try {
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
-		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
+		PicProcessorExposure *p = new PicProcessorExposure("exposure compensation",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
