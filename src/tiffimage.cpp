@@ -100,6 +100,8 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &c);
 		TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &b);
 		TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
+		
+		if (config != PLANARCONFIG_CONTIG) return NULL;
 
 		char *infobuf;
 		if (TIFFGetField(tif, TIFFTAG_ARTIST, &infobuf)) info["Artist"]=infobuf; 
@@ -127,77 +129,17 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			*icc_m = NULL;
 			*icclength = 0;
 		}
-
+		
 		img = new char[w*h*c*(b/8)];
 		buf = (char *) _TIFFmalloc(TIFFScanlineSize(tif));
+		int stride = TIFFScanlineSize(tif);
 		
-		if (config != PLANARCONFIG_CONTIG) return NULL;
-		
-		if (b == 8) {
-			char * dst = (char *) img;
-			for (unsigned y = 0; y < h; y++){
-				TIFFReadScanline(tif, buf, y, 0);
-				char * src = (char *) buf;
-				for(unsigned x=0; x < w; x++) {
-					if (c == 1) {
-						dst[0] = (char) src[0];
-						dst+=1;
-						src+=1;
-					}
-					else if(c == 3 ){
-						dst[0] = (char) src[0];
-						dst[1] = (char) src[1];
-						dst[2] = (char) src[2];
-						dst+=3;
-						src+=3;
-					}
-				}
-			}
+		char * dst = (char *) img;
+		for (unsigned y = 0; y < h; y++){
+			TIFFReadScanline(tif, buf, y, 0);
+			memcpy(dst,buf,stride);
+			dst += stride;
 		}
-		else if (b == 16) {
-			unsigned short * dst = (unsigned short *) img;
-			for (unsigned y = 0; y < h; y++){
-				TIFFReadScanline(tif, buf, y, 0);
-				unsigned short * src = (unsigned short *) buf;
-				for(unsigned x=0; x < w; x++) {
-					if (c == 1) {
-						dst[0] = (unsigned short) src[0];
-						dst+=1;
-						src+=1;
-					}
-					else if(c == 3 ){
-						dst[0] = (unsigned short) src[0];
-						dst[1] = (unsigned short) src[1];
-						dst[2] = (unsigned short) src[2];
-						dst+=3;
-						src+=3;
-					}
-				}
-			}			
-			
-		}
-		else if (b == 32) {
-			float * dst = (float *) img;
-			for (unsigned y = 0; y < h; y++){
-				TIFFReadScanline(tif, buf, y, 0);
-				float * src = (float *) buf;
-				for(unsigned x=0; x < w; x++) {
-					if (c == 1) {
-						dst[0] = (float) src[0];
-						dst+=1;
-						src+=1;
-					}
-					else if(c == 3 ){
-						dst[0] = (float) src[0];
-						dst[1] = (float) src[1];
-						dst[2] = (float) src[2];
-						dst+=3;
-						src+=3;
-					}
-				}
-			}			
-		}
-		else return NULL;
 		
 		uint32 read_dir_offset; uint32 count;
 		float fval;

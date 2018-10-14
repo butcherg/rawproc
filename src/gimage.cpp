@@ -136,6 +136,18 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 				}
 			}
 		}
+		else if (colors == 4) {
+			for (unsigned y=0; y<h; y++) {
+				for (unsigned x=0; x<w; x++) {
+					unsigned pos = x + y*w;
+					image[pos].r = (PIXTYPE) ((unsigned short) src[0]/SCALE_16BIT);
+					image[pos].g = (PIXTYPE) ((unsigned short) src[1]/SCALE_16BIT);
+					image[pos].b = (PIXTYPE) ((unsigned short) src[2]/SCALE_16BIT);
+					src += 4;
+				}
+			}
+			c = 3;
+		}
 		else {
 			w = 0;
 			h = 0;
@@ -168,6 +180,18 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 				}
 			}
 		}
+		else if (colors == 4) {
+			for (unsigned y=0; y<height; y++) {
+				for (unsigned x=0; x<width; x++) {
+					unsigned pos = x + y*w;
+					image[pos].r = (PIXTYPE) ((unsigned char) src[0]/SCALE_8BIT);
+					image[pos].g = (PIXTYPE) ((unsigned char) src[1]/SCALE_8BIT);
+					image[pos].b = (PIXTYPE) ((unsigned char) src[2]/SCALE_8BIT);
+					src += 4;
+				}
+			}
+			c = 3;
+		}
 		else {
 			w = 0;
 			h = 0;
@@ -199,6 +223,18 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 3;
 				}
 			}
+		}
+		else if (colors == 4) {
+			for (unsigned y=0; y<height; y++) {
+				for (unsigned x=0; x<width; x++) {
+					unsigned pos = x + y*w;
+					image[pos].r = src[0];
+					image[pos].g = src[1];
+					image[pos].b = src[2];
+					src += 4;
+				}
+			}
+			c = 3;
 		}
 		else {
 			w = 0;

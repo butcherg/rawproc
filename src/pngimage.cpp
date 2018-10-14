@@ -145,11 +145,8 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 	*numbits    = png_get_bit_depth(png, pinfo);
 
 	color_type = png_get_color_type(png, pinfo);
-
-	if (color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
-       		png_set_strip_alpha(png);
-	}
-	else if (color_type != PNG_COLOR_TYPE_RGB) {
+	
+	if (color_type != PNG_COLOR_TYPE_RGB_ALPHA & color_type != PNG_COLOR_TYPE_RGB) {
 		png_destroy_read_struct(&png, &pinfo, NULL);
 		return NULL;
 	}
