@@ -44,7 +44,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 
 	wxArrayString ctrlpts = split(controlpoints,",");
 
-	if ((ctrlpts[0] == "rgb") | (ctrlpts[0] == "red") | (ctrlpts[0] == "green") | (ctrlpts[0] == "blue")) {
+	if ((ctrlpts[0] == "rgb") | (ctrlpts[0] == "red") | (ctrlpts[0] == "green") | (ctrlpts[0] == "blue") | (ctrlpts[0] == "bright")) {
 		ctstart = 1;
 	}
 	else {

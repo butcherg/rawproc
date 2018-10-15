@@ -23,7 +23,7 @@ class CurvePanel: public PicProcPanel
 			str.Add("red");
 			str.Add("green");
 			str.Add("blue");
-			str.Add("bright");
+//			str.Add("bright");  //commenting this out for 0.8, not ready for prime time...  ggb 10/15/2018
 			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 
 			enablebox = new wxCheckBox(this, CURVEENABLE, "curve:");

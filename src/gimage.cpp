@@ -1,4 +1,4 @@
-
+﻿
 #include "gimage/gimage.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -1889,6 +1889,7 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 
 //an adaptation of the HSL saturation algorithm:
 	else if (channel == CHANNEL_BRIGHT) {
+/* 10/15/2018 - this isn't it...
 		#pragma omp parallel for num_threads(threadcount)
 		for (int x=0; x<w; x++) {
 			for (int y=0; y<h; y++) {
@@ -1909,6 +1910,7 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 				image[pos].b=Br+(B-P);
 			}
 		}
+*/
 	}
 }
 
