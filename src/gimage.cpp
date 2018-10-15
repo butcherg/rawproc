@@ -1887,30 +1887,29 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 		}
 	}
 
-//an adaptation of the HSL saturation algorithm:
+//finding the delta tone, adjusting each channel by it:
 	else if (channel == CHANNEL_BRIGHT) {
-/* 10/15/2018 - this isn't it...
+// 10/15/2018 - this isn't it...
 		#pragma omp parallel for num_threads(threadcount)
 		for (int x=0; x<w; x++) {
 			for (int y=0; y<h; y++) {
 				int pos = x + y*w;
-				double R = image[pos].r;
-				double G = image[pos].g;
-				double B = image[pos].b;
 
-				double  P=sqrt(
-				R*R*Pr+
-				G*G*Pg+
-				B*B*Pb ) ;
-
-				double Br = c.getpoint(P);
-
-				image[pos].r=Br+(R-P);
-				image[pos].g=Br+(G-P);
-				image[pos].b=Br+(B-P);
+				double T = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
+				double dT = c.getpoint(T)/T;
+				image[pos].r *= dT;
+				image[pos].g *= dT;
+				image[pos].b *= dT;
+/*
+				double T = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
+				double dT = c.getpoint(T)/T;
+				image[pos].r *= dT;
+				image[pos].g *= dT;
+				image[pos].b *= dT;
+*/
 			}
 		}
-*/
+
 	}
 }
 
