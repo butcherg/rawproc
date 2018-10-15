@@ -1887,7 +1887,7 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 		}
 	}
 
-//finding the delta tone, adjusting each channel by it:
+//finding the delta tone, adjusting each channel by it instead of three separate channel lookups on the curve:
 	else if (channel == CHANNEL_BRIGHT) {
 // 10/15/2018 - this isn't it...
 		#pragma omp parallel for num_threads(threadcount)
