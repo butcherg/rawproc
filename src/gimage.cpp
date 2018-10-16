@@ -1888,8 +1888,8 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 	}
 
 //finding the delta tone, adjusting each channel by it instead of three separate channel lookups on the curve:
-	else if (channel == CHANNEL_BRIGHT) {
-// 10/15/2018 - this isn't it...
+	else if (channel == CHANNEL_TONE) {
+// 10/16/2018 - we'll try deltatone for the time being...
 		#pragma omp parallel for num_threads(threadcount)
 		for (int x=0; x<w; x++) {
 			for (int y=0; y<h; y++) {
@@ -1900,7 +1900,7 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 				image[pos].r *= dT;
 				image[pos].g *= dT;
 				image[pos].b *= dT;
-/*
+/* //no appreciable difference with average...
 				double T = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
 				double dT = c.getpoint(T)/T;
 				image[pos].r *= dT;
