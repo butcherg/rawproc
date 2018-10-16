@@ -2011,33 +2011,38 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 
 //Demosaic
 //
-//This is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB quad and 
-//turns it into a single RGGB pixel.  "COLOR" doesn't demosaic, it zeros out the other 
-//channels in the RGGB quad pixels so the unmosaiced image can be regarded as what was recorded
-//through the color filter array, in color
+//This is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB (or other pattern)
+//quad and turns it into a single RGB pixel.  "COLOR" doesn't demosaic, it zeros out the other 
+//channels in the quad pixels so the unmosaiced image can be regarded as what was recorded
+//through the color filter array, in color.  Still, it's hard to see even at 200%
 //
 void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 {
-	if (imginfo["LibrawCFAPattern"] != "RGGB") return;  //remove when algorithm recognizes other CFA patterns
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
-	
+
+	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
+	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
+	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+
 	if (algorithm == DEMOSAIC_HALF | algorithm == DEMOSAIC_HALF_RESIZE) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y+=2) {
 			for (unsigned x=0; x<w; x+=2) {
 				unsigned Hpos = (x/2) + (y/2)*(w/2);
-				unsigned Rpos = x + y*w;  //upper left
-				unsigned G1pos = (x+1) + y*w; //upper right
-				unsigned G2pos = x + (y+1)*w; //lower left
-				unsigned Bpos = (x+1) + (y+1)*w;  //lower right
-				double gval = (image[G1pos].g + image[G2pos].g) / 2.0;
-				double rval = image[Rpos].r;
-				double bval = image[Bpos].b;
-					
-				halfimage[Hpos].r = rval;
-				halfimage[Hpos].g = gval;
-				halfimage[Hpos].b = bval;
+				float pix[3] = {0.0, 0.0, 0.0};
+				unsigned pos[4];
+				pos[0] = x + y*w;  //upper left
+				pos[1] = (x+1) + y*w; //upper right
+				pos[2] = x + (y+1)*w; //lower left
+				pos[3] = (x+1) + (y+1)*w;  //lower right
+				for (unsigned i=0; i<q.size(); i++) 
+					pix[q[i]] += image[pos[i]].r;  //use r, in grayscale, they're all the same...
+				pix[1] /= 2.0;
+				halfimage[Hpos].r = pix[0];
+				halfimage[Hpos].g = pix[1];
+				halfimage[Hpos].b = pix[2];
 			}
 		}
 		image = halfimage;
@@ -2047,30 +2052,36 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 			ApplyResize(w*2, h*2, FILTER_LANCZOS3, threadcount);
 	}
 	else if (algorithm == DEMOSAIC_COLOR) {
+		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y+=2) {
 			for (unsigned x=0; x<w; x+=2) {
 				unsigned Hpos = (x/2) + (y/2)*(w/2);
-				unsigned Rpos = x + y*w;
-				unsigned G1pos = (x+1) + y*w;
-				unsigned G2pos = x + (y+1)*w;
-				unsigned Bpos = (x+1) + (y+1)*w;
-				image[Rpos].g = 0.0;
-				image[Rpos].b = 0.0;
+				float pix[3] = {0.0, 0.0, 0.0};
+				unsigned pos[4];
+				pos[0] = x + y*w;  //upper left
+				pos[1] = (x+1) + y*w; //upper right
+				pos[2] = x + (y+1)*w; //lower left
+				pos[3] = (x+1) + (y+1)*w;  //lower right
+				for (unsigned i=0; i<q.size(); i++) {
+					switch (q[i]) {
+						case 0:  //red
+							image[pos[i]].g = 0.0;
+							image[pos[i]].b = 0.0;
+							break;
+						case 1:  //green
+							image[pos[i]].r = 0.0;
+							image[pos[i]].b = 0.0;
+							break;
+						case 2:  //blue
+							image[pos[i]].r = 0.0;
+							image[pos[i]].g = 0.0;
+							break;
+					}
 
-				image[G1pos].r = 0.0;
-				image[G1pos].b = 0.0;
-
-				image[G2pos].r = 0.0;
-				image[G2pos].b = 0.0;
-
-				image[Bpos].r = 0.0;
-				image[Bpos].g = 0.0;
-
+				}
 			}
 		}
 	}
-	
-
 }
 
 
