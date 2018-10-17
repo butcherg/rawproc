@@ -225,6 +225,7 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 void PicProcessorBlackWhitePoint::setReCalc(bool r)
 {
 	recalc = r;
+	reCalc();
 }
 
 void PicProcessorBlackWhitePoint::setChannel(wxString chan)
