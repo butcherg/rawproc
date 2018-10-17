@@ -851,13 +851,28 @@ char * _loadRAW(const char *filename,
 	*icclength = 0;
 	
 	if (rawdata) {
-		*width = S.raw_width;
-		*height = S.raw_height;
+		info["Librawraw_width"] = tostr(S.raw_width);
+		info["Librawraw_height"] = tostr(S.raw_height);
+		info["Librawwidth"] = tostr(S.width);
+		info["Librawheight"] = tostr(S.height);
+		info["Librawtop_margin"] = tostr(S.top_margin);
+		info["Librawleft_margin"] = tostr(S.left_margin);
+		*width = S.width; //S.raw_width;
+		*height = S.height; //S.raw_height;
 		*numcolors = 1;
 		*numbits = 16;
-		unsigned imgsize = (*width) * (*height) * (*numcolors) * ((*numbits)/8);
+		
+		unsigned imgsize = S.width * S.height * 2;
 		img = new char[imgsize];
-		memcpy(img, RawProcessor.imgdata.rawdata.raw_image, imgsize);
+		char * src = (char *) RawProcessor.imgdata.rawdata.raw_image;
+		char * dst = img;
+		for (unsigned y=S.top_margin; y<S.height; y++) {
+			src += S.left_margin*2;
+			memcpy(dst, src, S.width*2);
+			dst += S.width*2;
+			src += S.raw_width*2;
+		}
+		
 		RawProcessor.imgdata.params.output_color = 0;
 
 		if (p.find("cameraprofile") != p.end()) {
