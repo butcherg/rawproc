@@ -412,10 +412,18 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		}
 		else if (p[0] == "camera") { //camera, to mults
 			std::vector<double> mults =  PicProcessorWhiteBalance::getCameraMultipliers();
-			redmult = mults[0];
-			greenmult = mults[1];
-			bluemult = mults[2];
-			optype = multipliers;
+			if (mults.size() >= 3) {
+				redmult = mults[0];
+				greenmult = mults[1];
+				bluemult = mults[2];
+				optype = multipliers;
+			}
+			else {
+				redmult = 1.0;
+				greenmult = 1.0;
+				bluemult = 1.0;
+				optype = multipliers;
+			}
 		}
 	}
 	else {
@@ -424,6 +432,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		bluemult = 1.0;
 		optype = multipliers;
 	}
+
 
 	bool result = true;
 
