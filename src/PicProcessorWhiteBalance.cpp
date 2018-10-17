@@ -9,6 +9,7 @@
 #include <wx/clipbrd.h>
 #include "unchecked.xpm"
 #include "checked.xpm"
+#include "undo.xpm"
 
 #define WBENABLE 6400
 #define WBMANUAL 6401
@@ -60,6 +61,10 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			g->Add(bmult, wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset multipliers to original values");
+			g->Add(btn, wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			g->Add(0,10, wxGBPosition(5,0));
 
@@ -151,6 +156,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
 			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::onEnable, this, WBENABLE);
+			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnReset, this);
 			Refresh();
 			Update();
 		}
@@ -158,6 +164,18 @@ class WhiteBalancePanel: public PicProcPanel
 		~WhiteBalancePanel()
 		{
 			t->~wxTimer();
+		}
+		
+		void OnReset(wxCommandEvent& event)
+		{
+			setMultipliers(orgr, orgg, orgb);
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
+			ob->SetValue(true);
+			ab->SetValue(false);
+			pb->SetValue(false);
+			cb->SetValue(false);
+			q->processPic();
+			
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -276,7 +294,8 @@ class WhiteBalancePanel: public PicProcPanel
 		wxStaticText *origwb, *autowb, *patch, *camera;
 		wxRadioButton *ob, *ab, *pb, *cb;
 		wxCheckBox *enablebox;
-		myFloatCtrl *rmult, *gmult ,*bmult;;
+		myFloatCtrl *rmult, *gmult ,*bmult;
+		wxBitmapButton *btn;
 		wxTimer *t;
 		//coord ptch;
 		unsigned patx, paty;
