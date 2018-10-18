@@ -263,6 +263,8 @@ class WhiteBalancePanel: public PicProcPanel
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
+(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 		
@@ -272,13 +274,13 @@ class WhiteBalancePanel: public PicProcPanel
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
+(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
-(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			q->processPic();
 			Refresh();
 			event.Skip();
