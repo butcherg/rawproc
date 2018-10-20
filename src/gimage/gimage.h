@@ -75,6 +75,11 @@ enum GIMAGE_DEMOSAIC {
 	DEMOSAIC_HALF_RESIZE
 };
 
+enum GIMAGE_TONEMAP {
+	REINHARD_CHANNEL,
+	REINHARD_TONE
+};
+
 enum GIMAGE_ERROR {
 	GIMAGE_OK,
 	GIMAGE_EXCEPTION,
@@ -162,9 +167,9 @@ class gImage
 		//Image operations.  
 		//threadcount=0 uses all available CPUs, n uses precisely n CPUs, and -n uses available-n CPUs
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
-		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount);
-		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount);
-		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount);
+		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount=0);
+		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount=0);
+		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount=0);
 		void ApplySharpen(int strength, int threadcount=0);
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
 		void ApplyRotate(double angle, bool crop, int threadcount=0);
@@ -181,11 +186,11 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);
-		void ApplyToneMap(int threadcount);
-		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount);
-		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount);
-		std::vector<double> ApplyWhiteBalance(int threadcount);
-		void ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount);
+		void ApplyToneMap(GIMAGE_TONEMAP algorithm=REINHARD_CHANNEL, int threadcount=0);
+		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
+		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount=0);
+		std::vector<double> ApplyWhiteBalance(int threadcount=0);
+		void ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount=0);
 
 		void ApplyNLMeans(double sigma, int local, int patch, int threadcount=0);
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);

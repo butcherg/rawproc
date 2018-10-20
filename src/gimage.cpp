@@ -1933,7 +1933,12 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 
 // ToneMapping
 //
-// Credit: http://filmicworlds.com/blog/filmic-tonemapping-operators/
+// Credit: 
+//	http://filmicworlds.com/blog/filmic-tonemapping-operators/
+//
+//	Erik Reinhard, Mike Stark, Peter Shirley and Jim Ferwerda, 'Photographic Tone 
+//	Reproduction for Digital Images', ACM Transactions on Graphics, 21(3), 
+//	pp 267--276, July 2002 (Proceedings of SIGGRAPH 2002).
 //
 // Sometimes, the histogram is just too big.  The reference image I use in writing rawproc
 // is underexposed, with the exception of a locomotive headlight.  No amount of curving was 
@@ -1941,14 +1946,32 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 // implemented, Reinhart, kinda splits the difference, bringing that blip at the upper end
 // of the histogram more toward the upper end of the main hump of data.  Now, the overall
 // image can be properly displayed and the headlight can retain some detail.
+//
+// The algorithm implemented is the basic Reinhard algorithm, x/(1+x).
 
-void gImage::ApplyToneMap(int threadcount)
+void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 {
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned i=0; i<image.size(); i++) {
-		image[i].r = image[i].r/(1.0+image[i].r);
-		image[i].g = image[i].g/(1.0+image[i].g);
-		image[i].b = image[i].b/(1.0+image[i].b);
+	//apply directly to each channel:
+	if (algorithm == REINHARD_CHANNEL) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			image[pos].r = image[pos].r/(1.0+image[pos].r);
+			image[pos].g = image[pos].g/(1.0+image[pos].g);
+			image[pos].b = image[pos].b/(1.0+image[pos].b);
+		}
+	}
+
+	//apply to the computed tone, then apply the deltaT to each channel:
+	else if (algorithm == REINHARD_TONE) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			double T = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
+			double mT = T/(1+T);
+			double dT = mT/T;
+			image[pos].r *= dT;
+			image[pos].g *= dT;
+			image[pos].b *= dT;
+		}
 	}
 }
 
