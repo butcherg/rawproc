@@ -181,6 +181,7 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);
+		void ApplyToneMap(int threadcount);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount);
 		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount);
 		std::vector<double> ApplyWhiteBalance(int threadcount);

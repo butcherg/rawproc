@@ -1930,6 +1930,28 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 	}
 }
 
+
+// ToneMapping
+//
+// Credit: http://filmicworlds.com/blog/filmic-tonemapping-operators/
+//
+// Sometimes, the histogram is just too big.  The reference image I use in writing rawproc
+// is underexposed, with the exception of a locomotive headlight.  No amount of curving was 
+// bringing the headlight values down toward the rest of the data. The tonemapping operator
+// implemented, Reinhart, kinda splits the difference, bringing that blip at the upper end
+// of the histogram more toward the upper end of the main hump of data.  Now, the overall
+// image can be properly displayed and the headlight can retain some detail.
+
+void gImage::ApplyToneMap(int threadcount)
+{
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i<image.size(); i++) {
+		image[i].r = image[i].r/(1.0+image[i].r);
+		image[i].g = image[i].g/(1.0+image[i].g);
+		image[i].b = image[i].b/(1.0+image[i].b);
+	}
+}
+
 //White Balance
 //
 //Credit: Guillermo Luijk, dcraw Tutorial,
