@@ -52,6 +52,7 @@ then
 	CXXFLAGS="$CXXFLAGS -DLIBRAW_NODLL"
 #	LDFLAGS="$LDFLAGS -static"  #commented out when I switched to mxe.static...
 	INNO_SRCDIR="$srcdir"
+	INNO_SUFFIX="win32"
 	case "$host_alias" in
 		x86_64-w64-mingw32* )
 			INNO_SUFFIX="w64"

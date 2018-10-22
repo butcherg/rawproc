@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "rawproc"
-#define MyAppVersion "0.6.1"
+#define MyAppVersion "@VERSION@"
 #define MyAppPublisher "Glenn Butcher"
 #define MyAppExeName "rawproc.exe"
 
@@ -20,7 +20,7 @@ DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 LicenseFile=@INNO_SRCDIR@\COPYING
-;OutputBaseFilename=rawproc
+OutputBaseFilename=rawproc-@VERSION@-@INNO_SUFFIX@
 Compression=lzma
 SolidCompression=yes
 ;SourceDir=D:\Documents\rawproc\win
