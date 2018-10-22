@@ -1533,7 +1533,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	try {
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
-		PicProcessorExposure *p = new PicProcessorExposure("exposure compensation",val, commandtree, pic);
+		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
