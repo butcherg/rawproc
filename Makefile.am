@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS = -Wno-portability
 
 dtime=$(shell date +%Y%m%d-%H%M%S)
+DATE=$(shell date +%m\\/%d\\/%Y)
 
 SUBDIRS = src
 dist_doc_DATA = README.md
@@ -11,6 +12,7 @@ doc:
 	
 .PHONY: docpages
 docpages:
+	sed -e 's/#VERSION#/$(VERSION)/' -e 's/#DATE#/$(DATE)/'  $(srcdir)/doc/main.html.in > $(srcdir)/doc/main.html
 	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	$(srcdir)/doc/rawparams.pl $(srcdir)/src/rawimage.cpp > $(srcdir)/doc/rawparams.html
 
