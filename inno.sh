@@ -29,5 +29,6 @@ SCRIPTNAME=$(winepath -w "$SCRIPTNAME" 2> /dev/null)
 [ ! -f "$INNO_PATH" ] && { echo "Install Inno Setup 5 Quickstart before running this script."; echo; exit 1; }
 
 # Compile!
-wine "$INNO_PATH" /F"$FILENAME" "$SCRIPTNAME"
+#wine "$INNO_PATH" /F"$FILENAME" "$SCRIPTNAME"
+wine "$INNO_PATH" "$SCRIPTNAME"
 
