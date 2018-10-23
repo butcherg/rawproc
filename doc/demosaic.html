@@ -19,8 +19,11 @@ in a quad, like this:</p>
 </table>
 
 <p>Regular demosaic algorithms will interpolate values for the other channels for each R, G, or B
-measurement; half simply takes the RGGB quad and makes a single RGB pixel. The resulting image 
-is half the size of the original.</p>
+measurement; half simply takes the quad of pixels and makes a single RGB 
+pixel. The resulting image 
+is half the size of the original. This implementation of half 
+recognizes all the possible combinations of "4-quads", RGGB, BGGR, 
+GRBG, GBRG.</p>
 
 </li><br>
 <li><b>half_resize:</b> This variation does the standard 'half', then resizes the image back

@@ -10,13 +10,22 @@ a control point, the lookup table is applied when you release the mouse button.<
 to be touching the point directly.  You can also double-click anywhere in the curve pane to delete the selected point, 
 holdover behavior from when I was trying to implement a touch interface.</p>
 
-<p>rawproc 0.7 allows movement of the selected control point using the mousewheel.  Holding down the Ctrl key
+<p>The selected control point can be moved using the mousewheel.  
+Holding down the Ctrl key
 and rotating the wheel moves the selected point left/right, holding down the Alt key and rotating the wheel 
 moves the selected point up/down.
 </p>
 
-<p>The individual channels can be selected for manipulation from the drop-down box in the upper left.  If you 
+<p>The individual R, G, and B channels can be selected for manipulation 
+from the drop-down box in the upper left.  If you 
 need to manipulate more than one channel, add a curve tool for each channel.</p>
+
+<p>rawproc 0.8 introduces an additional channel selection, "tone".  For 
+this selection, the curve is applied using the 
+difference between the computed luminance of the channel and the curve 
+lookup of that luminance.  This operation should preserve color 
+saturation that is lost using individual lookups on each channel with 
+"rgb".
 
 <p align=center><img src=curve.png></p>
 

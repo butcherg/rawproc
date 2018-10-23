@@ -4,7 +4,13 @@
 
 <ul>
 
-<li><b>File->Open:</b> Brings up a dialog box in which you can select a file to open.</li><br>
+<li><b>File->Open:</b> Brings up a dialog box in which you can select a 
+file to open.  rawproc recognizes JPEG, TIFF, and PNG 
+"planar" (not pallete-based) images, as well as the full 
+complement of raw formats recognized by the linked LibRaw 
+library.  Note that 4-channel (alpha) images can be opened, but 
+the internal gImage library strips the alpha channel when 
+converting the image array to floating point.</li><br>
 
 <li><b>File->Re-Open:</b> Re-opens the previously opened file.  Helpful if you're trying various raw
 parameters.  If the previous open was Open Source, the source image will be opened and its command
