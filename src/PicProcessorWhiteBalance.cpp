@@ -92,7 +92,8 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(patch, wxGBPosition(8,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
 			g->Add(camera, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			g->Add(new wxStaticText(this,wxID_ANY, "(use only on unmosaiced raw data)"), wxGBPosition(10,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "(use only on unmosaiced \nraw data)"), wxGBPosition(10,1), wxDefaultSpan, 
+wxALIGN_LEFT |wxALL, 3);
 
 			//if camera multipliers are available in the metadata:
 			camr = 1.0; camg = 1.0; camb = 1.0;
