@@ -187,6 +187,7 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);
 		void ApplyToneMap(GIMAGE_TONEMAP algorithm=REINHARD_CHANNEL, int threadcount=0);
+		std::vector<double> ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(int threadcount=0);

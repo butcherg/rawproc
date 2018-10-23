@@ -123,7 +123,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 3;
+			c = 1;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<h; y++) {
@@ -167,7 +167,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 3;
+			c = 1;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<height; y++) {
@@ -211,7 +211,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 3;
+			c = 1;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<height; y++) {
@@ -2005,6 +2005,38 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 	return a;
 }
 
+std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
+{
+	std::vector<double> a;
+	
+	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
+	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
+	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y+=2) {
+		for (unsigned x=0; x<w; x+=2) {
+			unsigned pos[4];
+			pos[0] = x + y*w;  //upper left
+			pos[1] = (x+1) + y*w; //upper right
+			pos[2] = x + (y+1)*w; //lower left
+			pos[3] = (x+1) + (y+1)*w;  //lower right
+			for (unsigned i=0; i<q.size(); i++) {
+				if (q[i] == 0) image[pos[i]].r *= redmult;  //use r, in grayscale, they're all the same...
+				if (q[i] == 1) image[pos[i]].r *= greenmult;  //use r, in grayscale, they're all the same...
+				if (q[i] == 2) image[pos[i]].r *= bluemult;  //use r, in grayscale, they're all the same...
+				image[pos[i]].g = image[pos[i]].b = image[pos[i]].r;
+			}
+		}
+	}
+	
+	a.push_back(redmult);
+	a.push_back(greenmult);
+	a.push_back(bluemult);	
+	return a;
+}
+
 //uses a patch from the image presumed to represent neutral or white:
 std::vector<double>  gImage::ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount)
 {	
@@ -2093,6 +2125,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		image = halfimage;
 		w /=2;
 		h /=2;
+		c = 3;
 		if (algorithm == DEMOSAIC_HALF_RESIZE) 
 			ApplyResize(w*2, h*2, FILTER_LANCZOS3, threadcount);
 	}
@@ -2126,6 +2159,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 				}
 			}
 		}
+		c = 3;
 	}
 }
 

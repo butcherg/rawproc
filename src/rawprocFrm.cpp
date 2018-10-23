@@ -506,6 +506,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	SetStatusText("");
 	bool result = true;
 	PicProcessor *p;
+	name.Trim(); command.Trim();
 
 	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
 	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic);
@@ -1278,7 +1279,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 			if (wxTheClipboard->Open()) {
 				wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 				wxTheClipboard->Close();
-				commandtree->Delete(commandtree->GetSelection());
+				CommandTreeDeleteItem(commandtree->GetSelection());
 				SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
 			}
 		}
@@ -1851,6 +1852,7 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 {
+	wxTreeItemId prev;
 	if (commandtree->IsEmpty()) return;
 	if (commandtree->GetSelection() == commandtree->GetRootItem()) return;
 	wxString cmd = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getCommand();
@@ -1858,7 +1860,7 @@ void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 	{
 		wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 		wxTheClipboard->Close();
-		commandtree->Delete(commandtree->GetSelection());
+		CommandTreeDeleteItem(commandtree->GetSelection());
 		SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
 	}
 }

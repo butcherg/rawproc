@@ -92,6 +92,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(patch, wxGBPosition(8,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
 			g->Add(camera, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "(use only on unmosaiced raw data)"), wxGBPosition(10,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			//if camera multipliers are available in the metadata:
 			camr = 1.0; camg = 1.0; camb = 1.0;
@@ -105,6 +106,7 @@ class WhiteBalancePanel: public PicProcPanel
 			}
 
 			//parse parameters:
+			params.Trim();
 			wxArrayString p = split(params,",");
 
 			if (params == "") {
@@ -256,6 +258,14 @@ class WhiteBalancePanel: public PicProcPanel
 			Refresh();
 		}
 */
+
+		void clearSelectors()
+		{
+			ob->SetValue(true);
+			ab->SetValue(false);
+			pb->SetValue(false);
+			cb->SetValue(false);
+		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
@@ -418,7 +428,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 				redmult = mults[0];
 				greenmult = mults[1];
 				bluemult = mults[2];
-				optype = multipliers;
+				optype = camera;
 			}
 			else {
 				redmult = 1.0;
@@ -455,6 +465,16 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		else if (optype == imgpatch) {
 			wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
 			//wxMessageBox("wb: patch");
+		}
+		else if (optype == camera) {
+			if (dib->getColors() ==1) {
+				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			}
+			else {
+				wxMessageBox("Error: can only apply camera white balance to unmosaiced image");
+				((WhiteBalancePanel *) toolpanel)->clearSelectors();
+				wbmults = {1.0,1.0,1.0};
+			}
 		}
 		else {
 			wbmults = dib->ApplyWhiteBalance(threadcount);
