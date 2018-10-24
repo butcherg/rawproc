@@ -9,7 +9,7 @@ assumes an image tones average to middle gray.</li><br>
 on a point in the picture panel.  The patch size used to compute the multpliers is specified
 in tool.whitebalance.patchradius.</li><br>
 <li><b>Camera:</b> Applies the multipliers retrieved from the raw file's metadata.  These multipliers
-are relevant to the raw image, and won't work well on a processed image.</li><br>
+are relevant to the raw image; rawproc won't let you select this if the image isn't 1-color unmosaiced.</li><br>
 <li><b>Original:</b> The channel multipliers, if no other method is specified.  These can be
 changed in the multiplier edit boxes.  The edit boxes support mousewheel changes, where 
 shift-mousehwheel changes in 0.01 increments, ctrl-mousewheel changes in 0.1 increments, and 
