@@ -1,8 +1,13 @@
 body {
 	font-family: sans-serif;
+	font-size: x-small;
 }
 
 li {
 	margin: 10px 0;
+}
+
+pre {
+	font-size: x-small;
 }
 
