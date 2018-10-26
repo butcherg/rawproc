@@ -468,10 +468,8 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 			//wxMessageBox("wb: patch");
 		}
 		else if (optype == camera) {
-			if (dib->getColors() ==1) {
-				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
-			}
-			else {
+			wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			if (wbmults[0] == 0.0) {
 				wxMessageBox("Error: can only apply camera white balance to unmosaiced image");
 				((WhiteBalancePanel *) toolpanel)->clearSelectors();
 				wbmults = {1.0,1.0,1.0};

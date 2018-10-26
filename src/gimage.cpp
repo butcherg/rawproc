@@ -2007,7 +2007,8 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 
 std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
 {
-	std::vector<double> a;
+	std::vector<double> a = {0.0, 0.0, 0.0};
+	if (imginfo.find("LibrawCFAPattern") == imginfo.end()) return a;
 	
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
