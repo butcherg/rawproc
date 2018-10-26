@@ -468,9 +468,11 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 			//wxMessageBox("wb: patch");
 		}
 		else if (optype == camera) {
-			wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
-			if (wbmults[0] == 0.0) {
-				wxMessageBox("Error: can only apply camera white balance to unmosaiced image");
+			if (dib->getInfoValue("LibrawCFAPattern") != "") {
+				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			}
+			else {
+				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
 				((WhiteBalancePanel *) toolpanel)->clearSelectors();
 				wbmults = {1.0,1.0,1.0};
 			}

@@ -2021,7 +2021,7 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 			unsigned pos[4];
 			pos[0] = x + y*w;  //upper left
 			pos[1] = (x+1) + y*w; //upper right
-			pos[2] = x + (y+1)*w; //lower left
+			pos[2] = x + (y+1)*w; //lower leftfs
 			pos[3] = (x+1) + (y+1)*w;  //lower right
 			for (unsigned i=0; i<q.size(); i++) {
 				if (q[i] == 0) image[pos[i]].r *= redmult;  //use r, in grayscale, they're all the same...
@@ -2032,9 +2032,9 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 		}
 	}
 	
-	a.push_back(redmult);
-	a.push_back(greenmult);
-	a.push_back(bluemult);	
+	a[0] = redmult;
+	a[1] = greenmult;
+	a[2] = bluemult;	
 	return a;
 }
 
