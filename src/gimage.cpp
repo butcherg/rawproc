@@ -123,7 +123,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 1;
+			c = 3;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<h; y++) {
@@ -167,7 +167,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 1;
+			c = 3;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<height; y++) {
@@ -211,7 +211,7 @@ gImage::gImage(char *imagedata, unsigned width, unsigned height, unsigned colors
 					src += 1;
 				}
 			}
-			c = 1;
+			c = 3;
 		}
 		else if (colors == 3) {
 			for (unsigned y=0; y<height; y++) {
