@@ -468,13 +468,18 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 			//wxMessageBox("wb: patch");
 		}
 		else if (optype == camera) {
-			if (dib->getInfoValue("LibrawCFAPattern") != "") {
-				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			if (dib->getInfoValue("LibrawMosaiced") == "1") {
+				if (dib->getInfoValue("LibrawCFAPattern") != "") {
+					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				}
+				else {
+					wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
+					((WhiteBalancePanel *) toolpanel)->clearSelectors();
+					wbmults = {1.0,1.0,1.0};
+				}
 			}
 			else {
-				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
-				((WhiteBalancePanel *) toolpanel)->clearSelectors();
-				wbmults = {1.0,1.0,1.0};
+				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 			}
 		}
 		else {

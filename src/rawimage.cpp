@@ -857,6 +857,7 @@ char * _loadRAW(const char *filename,
 		info["Librawheight"] = tostr(S.height);
 		info["Librawtop_margin"] = tostr(S.top_margin);
 		info["Librawleft_margin"] = tostr(S.left_margin);
+		info["LibrawMosaiced"] = "1";
 		*width = S.width; //S.raw_width;
 		*height = S.height; //S.raw_height;
 		*numcolors = 1;

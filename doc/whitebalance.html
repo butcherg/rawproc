@@ -8,10 +8,13 @@ assumes an image tones average to middle gray.</li><br>
 <li><b>Patch:</b> A point in the image can be selected by holding the shift key and clicking
 on a point in the picture panel.  The patch size used to compute the multpliers is specified
 in tool.whitebalance.patchradius.</li><br>
-<li><b>Camera:</b> Applies the multipliers retrieved from the raw file's metadata, using a whitebalance operator
-specifically written to apply R, G and B to the mosaic array.  These multipliers
-are relevant to the raw, linear image; the colors will be very off if applied to anything other than the monochrome bayer mosaic.
-Additionally, adjusting the camera multipliers in this mode will revert to three-color whitebalance, and the image just won't look nice. </li><br>
+<li><b>Camera:</b> Applies the multipliers retrieved from the raw file's metadata. If the image
+contains a metadata LibrawMosaiced=1, the multipliers are applied using a whitebalance operator
+specifically written to apply R, G and B to the mosaic array.  If LibrawMosaiced=0 (changed by applying
+the demosaic tool), the multipliers are applied using the regular whitebalance operator.  These 
+multipliers are relevant to the raw, linear image; the colors will be very off if applied to anything 
+other than the raw linear image.  Additionally, for the unmosaiced application, adjusting the camera 
+multipliers in this mode will revert to three-color whitebalance, and the image just won't look nice. </li><br>
 <li><b>Original:</b> The channel multipliers, if no other method is specified.  These can be
 changed in the multiplier edit boxes.  The edit boxes support mousewheel changes, where 
 shift-mousehwheel changes in 0.01 increments, ctrl-mousewheel changes in 0.1 increments, and 
