@@ -399,7 +399,7 @@ char * _loadRAW(const char *filename,
 	RawProcessor.imgdata.params.gamm[1] = 12.92; //1.0
 
 
-	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans.  Default=0.</li>
+	//raw <li><b>rawdata</b>=0|1|includeframe - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans. If includeframe, the array isn't cropped to the visible image.  Default=0.</li>
 
 	if (p.find("rawdata") != p.end() && p["rawdata"].compare("0") != 0) 
 		rawdata = 1; // = atoi(p["rawdata"].c_str());
@@ -864,44 +864,26 @@ char * _loadRAW(const char *filename,
 		*numbits = 16;
 
 		if (p["rawdata"].compare("includeframe") == 0) {
-printf("Frame!!\n");
 			*width = S.raw_width;
 			*height = S.raw_height;
+			
 			img = new char[S.raw_width*S.raw_height*2];
 			memcpy(img, (char *) RawProcessor.imgdata.rawdata.raw_image, S.raw_width*S.raw_height*2);
 		}
 		else {
-printf("No frame!!\n");
-
 			*width = S.width;
 			*height = S.height;
-/*
-			
-			unsigned short * src = RawProcessor.imgdata.rawdata.raw_image;
-			img = new char[S.width*S.height*2];
-			unsigned short * image = (unsigned short *) img;
-			unsigned x1=S.left_margin, y1=S.top_margin, x2=S.raw_width-1, y2=S.raw_height-1;
-			unsigned dw = x2-x1;
-			unsigned dh = y2-y1;
-			for (unsigned x=0; x<dw; x++) {
-				for (unsigned y=0; y<dh; y++) {
-					unsigned dpos = x + y*dw;
-					unsigned spos = x1+x + ((y+y1) * w);
-					image[dpos] = src[spos];
 
-				}
-			}
-		}
-*/		
 			unsigned imgsize = S.width * S.height * 2;
 			img = new char[imgsize];
 			char * src = (char *) RawProcessor.imgdata.rawdata.raw_image;
+			src += S.raw_pitch * S.top_margin;
 			char * dst = img;
-			for (unsigned y=S.top_margin; y<S.height; y++) {
+			for (unsigned y=S.top_margin; y<S.raw_height; y++) {
 				src += S.left_margin*2;
 				memcpy(dst, src, S.width*2);
 				dst += S.width*2;
-				src += S.raw_pitch; //S.raw_width*2;
+				src += S.width*2; 
 			}
 		}
 	
