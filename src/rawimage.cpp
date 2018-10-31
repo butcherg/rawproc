@@ -401,8 +401,8 @@ char * _loadRAW(const char *filename,
 
 	//raw <li><b>rawdata</b>=0|1 - Preempts all other parameters, if 1 loads unprocessed raw data as a one-color grayscale array of the individual R, G, and B measurements; well, subject to camera shenanigans.  Default=0.</li>
 
-	if (p.find("rawdata") != p.end()) 
-		rawdata = atoi(p["rawdata"].c_str());
+	if (p.find("rawdata") != p.end() && p["rawdata"].compare("0") != 0) 
+		rawdata = 1; // = atoi(p["rawdata"].c_str());
 	
 	//raw <li><b>Output Colorspace</b>:<ul><li>output_color=0|1|2|3|4|5 - Output color space, dcraw: -o [0-6].  Default=1 (srgb)</li><li>colorspace=raw|srgb|adobe|wide|prophoto|xyz - Alias of output_color, with mnemonic values. default=srgb</li></ul></li>
 	//template input.raw.libraw.colorspace=raw|srgb|adobe|wide|prophoto|xyz
@@ -863,7 +863,7 @@ char * _loadRAW(const char *filename,
 		*numcolors = 1;
 		*numbits = 16;
 
-		if (p.find("rawframe") != p.end() && p["rawframe"] == "1") { 
+		if (p["rawdata"].compare("includeframe") == 0) {
 printf("Frame!!\n");
 			*width = S.raw_width;
 			*height = S.raw_height;
@@ -906,6 +906,7 @@ printf("No frame!!\n");
 		}
 	
 		RawProcessor.imgdata.params.output_color = 0;
+
 
 		if (p.find("cameraprofile") != p.end()) {
 			if (p["cameraprofile"] != "") {

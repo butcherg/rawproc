@@ -58,7 +58,7 @@ wxString rawParamString(wxString filter)
 
 	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
 	if (c.find(std::string((filter+wxString("rawdata")).c_str())) != c.end())
-			if (c[std::string((filter+wxString("rawdata")).c_str())] == "1")
+			if (c[std::string((filter+wxString("rawdata")).c_str())] != "0")
 				rawimage = true;
 	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
 		name = wxString(it->first.c_str());
