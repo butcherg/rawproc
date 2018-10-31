@@ -883,7 +883,7 @@ char * _loadRAW(const char *filename,
 				src += S.left_margin*2;
 				memcpy(dst, src, S.width*2);
 				dst += S.width*2;
-				src += S.width*2; 
+				src += S.raw_width*2; 
 			}
 		}
 	
