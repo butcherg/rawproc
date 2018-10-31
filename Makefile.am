@@ -15,6 +15,7 @@ docpages:
 	sed -e 's/#VERSION#/$(VERSION)/' -e 's/#DATE#/$(DATE)/'  $(srcdir)/doc/main.html.in > $(srcdir)/doc/main.html
 	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	$(srcdir)/doc/rawparams.pl $(srcdir)/src/rawimage.cpp > $(srcdir)/doc/rawparams.html
+	$(srcdir)/doc/img.pl $(srcdir)/src/img.cpp > $(srcdir)/doc/img.html
 
 .PHONY: conf
 conf:

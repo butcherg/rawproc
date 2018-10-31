@@ -204,6 +204,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		strncpy(c, commandstr.c_str(), 255);
 		char* cmd = strtok(c,":");
 		
+		//img <li>colorspace:profilefile[,convert|assign][,renderingintent][,bpc]</li>
 		if (strcmp(cmd,"colorspace") == 0) { 
 			char *profstr = strtok(NULL, ",");
 			char *opstr = strtok(NULL, ",");
@@ -253,7 +254,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 		
-		//#bright:[-100 - 100] default: 0 (no-bright)
+		//img <li>bright:[-100 - 100] default: 0 (no-bright)</li>
 		else if (strcmp(cmd,"bright") == 0) {  
 			double bright = atof(myConfig::getConfig().getValueOrDefault("tool.bright.initialvalue","0").c_str());
 			char *b = strtok(NULL," ");
@@ -281,7 +282,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#demosaic:[half|half_resize|color] default: half
+		//img demosaic:[half|half_resize|color] default: half</li>
 		else if (strcmp(cmd,"demosaic") == 0) {  
 			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half").c_str();
 			char *d = strtok(NULL," ");
@@ -308,7 +309,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#addexif:tagname,value - tagname must be valid EXIF tag for it to survive the file save...
+		//img <li>addexif:tagname,value - tagname must be valid EXIF tag for it to survive the file save...</li>
 		else if (strcmp(cmd,"addexif") == 0) {  
 			char *name = strtok(NULL, ",");
 			char *value = strtok(NULL, " ");
@@ -318,7 +319,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			dib.setInfo(std::string(name),std::string(value));
 		}
 
-		//#blackwhitepoint[:rgb|red|green|blue][;][0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.
+		//img <li>blackwhitepoint[:rgb|red|green|blue][,0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.</li>
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			char *c, *b, *w;
 			GIMAGE_CHANNEL channel = CHANNEL_RGB;
@@ -384,7 +385,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#contrast:[-100 - 100] default: 0 (no-contrast)
+		//img <li>contrast:[-100 - 100] default: 0 (no-contrast)</li>
 		else if (strcmp(cmd,"contrast") == 0) {  
 			double contrast=atof(myConfig::getConfig().getValueOrDefault("tool.contrast.initialvalue","0").c_str());
 			char *c = strtok(NULL," ");
@@ -415,7 +416,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#gamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)
+		//img <li>gamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)</li>
 		else if (strcmp(cmd,"gamma") == 0) {  
 			double gamma=atof(myConfig::getConfig().getValueOrDefault("tool.gamma.initialvalue","2.2").c_str());
 			char *g = strtok(NULL," ");
@@ -446,7 +447,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		}
 
 
-		//#resize:w[,h] If either w or h is 0, resize preserves aspect of that dimension.  If only one number is present, the image is resized to that number along the longest dimension, preserving aspect.  
+		//img <li>resize:w[,h] If either w or h is 0, resize preserves aspect of that dimension.  If only one number is present, the image is resized to that number along the longest dimension, preserving aspect.</li>
 		else if (strcmp(cmd,"resize") == 0) {  
 			unsigned w, h;  //don't read defaults from properties
 			std::string algo = myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","catmullrom");
@@ -508,7 +509,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			}
 		}
 
-		//#rotate:[-45.0 - 45.0] default: 0 (no-rotate)
+		//img <li>rotate:[-45.0 - 45.0] default: 0 (no-rotate)</li>
 		else if (strcmp(cmd,"rotate") == 0) {  
 			double angle= atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
 			char *s = strtok(NULL," ");
@@ -528,7 +529,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#sharpen:[0 - 10, default: 0 (no-sharpen)
+		//img <li>sharpen:[0 - 10, default: 0 (no-sharpen)</li>
 		else if (strcmp(cmd,"sharpen") == 0) {  
 			double sharp= atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
 			char *s = strtok(NULL," ");
@@ -548,6 +549,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
+		//img <li>crop:x,y,w,y  no defaults</li>
 		else if (strcmp(cmd,"crop") == 0) {  //#crop:x,y,w,h      
 			unsigned x=0, y=0, width=0, height=0;
 			char *xstr = strtok(NULL,", ");
@@ -575,7 +577,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#saturation:[0 - 5.0] default=1.0, no change
+		//img <li>saturation:[0 - 5.0] default=1.0, no change</li>
 		else if (strcmp(cmd,"saturation") == 0) {  
 			double saturation= atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
 			char *s = strtok(NULL," ");
@@ -596,7 +598,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3
+		//img <li>denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3</li>
 		else if (strcmp(cmd,"denoise") == 0) {  
 			double sigma= atof(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
 			int local = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
@@ -623,7 +625,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//#tint:[r,g,b] default: 0,0,0
+		//img <li>tint:[r,g,b] default: 0,0,0 (doesn't have a corresponding tool in rawproc)</li>
 		else if (strcmp(cmd,"tint") == 0) {  
 			double red=0.0; double green=0.0; double blue = 0.0;
 			char *r = strtok(NULL,", ");
@@ -648,7 +650,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 		
-		//#whitebalance:[rmult,gmult,bmult] default: automatic, based on "gray world"
+		//img <li>whitebalance:[auto]|[patch]|[camera]|[rmult,gmult,bmult] default: auto, based on "gray world"</li>
 		else if (strcmp(cmd,"whitebalance") == 0) {  
 			std::string op;
 			double redmult=1.0; 
@@ -714,7 +716,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			}
 		}
 
-		//#gray:[r,g,b] default: 0.21,0.72,0.07 
+		//img <li>gray:[r,g,b] default: 0.21,0.72,0.07</li> 
 		else if (strcmp(cmd,"gray") == 0) {  
 			double red   = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str()); 
 			double green = atof(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72").c_str()); 
@@ -740,7 +742,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
 			commandstring += std::string(cs);
 		}
-		
+
 		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
 			int limit = atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50").c_str()); 
 			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5").c_str());
@@ -773,7 +775,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		
 		}
 
-		//#curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb
+		//img <li>curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb</li>
 		else if (strcmp(cmd,"curve") == 0) {
 			Curve crv;
 			int ctstart;
@@ -810,7 +812,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			
 		}
 		
-		//#exposure:ev default: 1.0
+		//img <li>exposure:ev default: 1.0</li>
 		else if (strcmp(cmd,"exposure") == 0) {
 			double ev = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
 			char *s = strtok(NULL," ");
@@ -830,7 +832,8 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			sprintf(cs, "%s:%0.1f ",cmd, ev);
 			commandstring += std::string(cs);
 		}
-		
+
+		//img <li>highlight:1-10</li>
 		else if (strcmp(cmd,"highlight") == 0) {
 			double highlight = atof(myConfig::getConfig().getValueOrDefault("tool.highlight.level","0").c_str());
 			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.highlight.threshold","192").c_str());
@@ -860,7 +863,8 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, highlight,threshold);
 			commandstring += std::string(cs);
 		}
-		
+
+		//img <li>shadow:1-10</li>
 		else if (strcmp(cmd,"shadow") == 0) {
 			double shadow = atof(myConfig::getConfig().getValueOrDefault("tool.shadow.level","0").c_str());
 			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.shadow.threshold","64").c_str());
@@ -892,7 +896,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		}
 		
 		//these don't have rawproc equivalents, so they're not added to the metadata-embedded command
-		//#rotate90 - rotate 90 degrees clockwise
+		//img <li>rotate90 - rotate 90 degrees clockwise</li>
 		else if (strcmp(cmd,"rotate90") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate90 (%d threads)... ", threadcount);
@@ -901,7 +905,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("done (%fsec).\n",_duration());
 		}
 
-		//#rotate180 - rotate 180 degrees
+		//img <li>rotate180 - rotate 180 degrees</li>
 		else if (strcmp(cmd,"rotate180") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate180 (%d threads)... ", threadcount);
@@ -911,7 +915,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			
 		}
 
-		//#rotate270 - rotate 270 degrees clockwise
+		//img <li>rotate270 - rotate 270 degrees clockwise</li>
 		else if (strcmp(cmd,"rotate270") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("rotate270 (%d threads)... ", threadcount);
@@ -920,7 +924,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("done (%fsec).\n",_duration());
 		}
 
-		//#hmirror - flip horizontal	
+		//img <li>hmirror - flip horizontal</li>
 		else if (strcmp(cmd,"hmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("mirror horizontal (%d threads)... ", threadcount);
@@ -929,7 +933,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("done (%fsec).\n",_duration());
 		}
 
-		//#vmirror - flip upside down		
+		//img <li>vmirror - flip upside down</li>	
 		else if (strcmp(cmd,"vmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
 			printf("mirror vertical (%d threads)... ", threadcount);
