@@ -833,7 +833,7 @@ char * _loadRAW(const char *filename,
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 
 	//Normalize libraw orientation:
-	if (RawProcessor.imgdata.params.user_flip == 0) 
+	if (RawProcessor.imgdata.params.user_flip <= 0) 
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 	else
 		info["Orientation"] = "1"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
@@ -858,22 +858,53 @@ char * _loadRAW(const char *filename,
 		info["Librawtop_margin"] = tostr(S.top_margin);
 		info["Librawleft_margin"] = tostr(S.left_margin);
 		info["LibrawMosaiced"] = "1";
-		*width = S.width; //S.raw_width;
-		*height = S.height; //S.raw_height;
+
+
 		*numcolors = 1;
 		*numbits = 16;
-		
-		unsigned imgsize = S.width * S.height * 2;
-		img = new char[imgsize];
-		char * src = (char *) RawProcessor.imgdata.rawdata.raw_image;
-		char * dst = img;
-		for (unsigned y=S.top_margin; y<S.height; y++) {
-			src += S.left_margin*2;
-			memcpy(dst, src, S.width*2);
-			dst += S.width*2;
-			src += S.raw_width*2;
+
+		if (p.find("rawframe") != p.end() && p["rawframe"] == "1") { 
+printf("Frame!!\n");
+			*width = S.raw_width;
+			*height = S.raw_height;
+			img = new char[S.raw_width*S.raw_height*2];
+			memcpy(img, (char *) RawProcessor.imgdata.rawdata.raw_image, S.raw_width*S.raw_height*2);
 		}
-		
+		else {
+printf("No frame!!\n");
+
+			*width = S.width;
+			*height = S.height;
+/*
+			
+			unsigned short * src = RawProcessor.imgdata.rawdata.raw_image;
+			img = new char[S.width*S.height*2];
+			unsigned short * image = (unsigned short *) img;
+			unsigned x1=S.left_margin, y1=S.top_margin, x2=S.raw_width-1, y2=S.raw_height-1;
+			unsigned dw = x2-x1;
+			unsigned dh = y2-y1;
+			for (unsigned x=0; x<dw; x++) {
+				for (unsigned y=0; y<dh; y++) {
+					unsigned dpos = x + y*dw;
+					unsigned spos = x1+x + ((y+y1) * w);
+					image[dpos] = src[spos];
+
+				}
+			}
+		}
+*/		
+			unsigned imgsize = S.width * S.height * 2;
+			img = new char[imgsize];
+			char * src = (char *) RawProcessor.imgdata.rawdata.raw_image;
+			char * dst = img;
+			for (unsigned y=S.top_margin; y<S.height; y++) {
+				src += S.left_margin*2;
+				memcpy(dst, src, S.width*2);
+				dst += S.width*2;
+				src += S.raw_pitch; //S.raw_width*2;
+			}
+		}
+	
 		RawProcessor.imgdata.params.output_color = 0;
 
 		if (p.find("cameraprofile") != p.end()) {
