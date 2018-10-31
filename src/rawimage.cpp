@@ -881,9 +881,9 @@ char * _loadRAW(const char *filename,
 			char * dst = img;
 			for (unsigned y=S.top_margin; y<S.raw_height; y++) {
 				src += S.left_margin*2;
-				memcpy(dst, src, S.width*2);
+				memcpy(dst, src+S.left_margin, S.width*2);
 				dst += S.width*2;
-				src += S.raw_width*2; 
+				src += S.raw_pitch; 
 			}
 		}
 	
