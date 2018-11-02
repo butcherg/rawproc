@@ -944,7 +944,7 @@ char * _loadRAW(const char *filename,
 	else {
 	
 		int result = RawProcessor.dcraw_process();
-		printf("%s\n",LibRaw::strerror(result));
+		//printf("%s\n",LibRaw::strerror(result));
 		if (RawProcessor.imgdata.process_warnings & LIBRAW_WARN_FALLBACK_TO_AHD) {
 			info["Notice"] = "Selected demosaic algorithm not supported, AHD used";
 		}
