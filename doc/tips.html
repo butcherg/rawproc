@@ -2,10 +2,6 @@
 
 <h2 id="Tips">Tips</h2>
 <ul>
-	<li>If you're processing a raw file without color management, just plan to add the 2.2 gamma right off the bat, then apply black/white point
-		to make the image tones fill the tone range.  I finally broke down and added a 
-		configuration paramter (input.raw.default) to automatically apply a list of commands to raw files (after it asks you 
-		if you want to do so), "gamma:2.2 blackwhitepoint" would be useful.</li><br>
 	<li>While the program is named rawproc, it works well for editing JPEGs, PNGs and TIFFs too. </li><br>
 	<li>rawproc tools are mostly multithreaded and compiled with as much optimization as is tolerable.  However, 
 		Denoise is a slow tool that becomes unbearably slow with big images; consider using it 
@@ -27,7 +23,7 @@
 	<li>When you edit properties, use the filter to isolate the relevant ones.  For example, just type "curve" in the 
 		filter, and only the parameters with "curve" in the name will be displayed.  Makes it easier to find 
 		parameters.</li><br>
-	<li>rawproc as of 0.7 doesn't have a white balance tool, but you can use per-channel curves to do the correction.
+	<li>You don't have to use the white balance tool, you can use per-channel curves to do the correction.
 		You can get an approximation of a white tone by zooming to 100%, running the mouse over a known white
 		area and observing the RGB values.  It helps to have the display.rgb.scale set to 256.  Look for either
 		the red or blue channel to be observably different from the other two, then add a curve for that channel and 
