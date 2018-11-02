@@ -26,7 +26,7 @@ class ColorspacePanel: public PicProcPanel
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			b->AddSpacer(10);
 			
-			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			b->Add(edit, flags);
 			b->Add(new wxButton(this, wxID_ANY, "Select profile"), flags);
 			b->AddSpacer(10);

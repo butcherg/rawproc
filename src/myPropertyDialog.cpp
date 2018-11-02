@@ -6,7 +6,6 @@
 
 #include <wx/wx.h>
 
-
 #define FILTERID 3100
 #define ADDID 3101
 #define DELETEID 3102
@@ -22,10 +21,10 @@ class AddDialog: public wxDialog
 			wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
 			
 			sz->Add(new wxStaticText(this, wxID_ANY, "Name: "), 0, wxLEFT, 5);
-			name = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,25),wxTE_PROCESS_ENTER);
+			name = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			sz->Add(name, 0, wxLEFT, 5);
 			sz->Add(new wxStaticText(this, wxID_ANY, "Value: "), 0, wxLEFT, 5);
-			value = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,25),wxTE_PROCESS_ENTER);
+			value = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			sz->Add(value, 0, wxLEFT, 5);
 			
 			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);

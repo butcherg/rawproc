@@ -21,7 +21,7 @@ class GammaPanel: public PicProcPanel
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			b->AddSpacer(10);
 
-			edit = new wxTextCtrl(this, GAMMAID, p, wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, GAMMAID, p, wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
 			b->Add(edit, flags);
 			SetSizerAndFit(b);

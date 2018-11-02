@@ -143,7 +143,7 @@ class myLensDialog: public wxDialog
 			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);
 			ct->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 10);
 			ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
-			fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
+			fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			ct->Add(fil, 0, wxALL, 10);
 			count = new wxStaticText(this, wxID_ANY, wxString::Format("%d items",list->GetItemCount()));
 			ct->Add(count, 0, wxALL, 10);
@@ -219,12 +219,12 @@ class LensCorrectionPanel: public PicProcPanel
 			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,40)), flags);
 			b->AddSpacer(5);
 
-			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			b->Add(cam, flags);
 			b->AddSpacer(2);
 			b->Add(new wxButton(this, CAMERAID, "Select camera"), flags);
 			b->AddSpacer(2);
-			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,25),wxTE_PROCESS_ENTER);
+			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			b->Add(lens, flags);
 			b->AddSpacer(2);
 			b->Add(new wxButton(this, LENSID, "Select lens"), flags);

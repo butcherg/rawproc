@@ -10,6 +10,11 @@
 #include <vector>
 #include "gimage/gimage.h"
 
+#ifdef WIN32
+#define TEXTCTRLHEIGHT 20
+#else
+#define TEXTCTRLHEIGHT 30
+#endif
 
 void FillHistogram(unsigned *histogram);
 

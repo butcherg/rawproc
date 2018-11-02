@@ -33,12 +33,12 @@ class ResizePanel: public PicProcPanel
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "width:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			widthedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[0].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,25));
+			widthedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[0].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			widthedit->SetToolTip("width in pixels, 0 preserves aspect.\nIf you use the spin arrows, type Enter to update the image.");
 			g->Add(widthedit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "height:"), wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			heightedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[1].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,25));
+			heightedit = new myIntegerCtrl(this, wxID_ANY, atoi(p[1].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
 			g->Add(heightedit, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
 
@@ -56,7 +56,7 @@ class ResizePanel: public PicProcPanel
 			blurbox = new wxCheckBox(this, BLURENABLE, "enable pre-blur:");
 			blurbox->SetValue(false);
 			g->Add(blurbox, wxGBPosition(6,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);
-			blursigma = new myFloatCtrl(this, BLURSIGMA, 1.0, 1, wxDefaultPosition, wxSize(50,25));
+			blursigma = new myFloatCtrl(this, BLURSIGMA, 1.0, 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			g->Add(new wxStaticText(this,wxID_ANY, "sigma:"), wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(blursigma, wxGBPosition(7,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			//blurkernel= ...

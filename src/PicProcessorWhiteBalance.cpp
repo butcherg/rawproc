@@ -30,7 +30,7 @@ class WhiteBalancePanel: public PicProcPanel
 		WhiteBalancePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			double rm, gm, bm;
-			wxSize spinsize(130, -1);
+			wxSize spinsize(130, TEXTCTRLHEIGHT);
 			
 			//wxArrayString parm = split(params, ",");
 
