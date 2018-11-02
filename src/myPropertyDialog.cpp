@@ -22,10 +22,10 @@ class AddDialog: public wxDialog
 			
 			sz->Add(new wxStaticText(this, wxID_ANY, "Name: "), 0, wxLEFT, 5);
 			name = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-			sz->Add(name, 0, wxLEFT, 5);
+			sz->Add(name, 0, wxLEFT | wxRIGHT, 5);
 			sz->Add(new wxStaticText(this, wxID_ANY, "Value: "), 0, wxLEFT, 5);
 			value = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(250,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-			sz->Add(value, 0, wxLEFT, 5);
+			sz->Add(value, 0, wxLEFT | wxRIGHT, 5);
 			
 			ct->Add(new wxButton(this, wxID_OK, "Ok"), 0, wxALL, 10);
 			ct->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 10);
