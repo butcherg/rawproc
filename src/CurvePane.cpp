@@ -250,7 +250,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 
 wxString CurvePane::getControlPoints()
 {
-	wxString s = "";
+	wxString s;
 	bool first = true;
 	vector<cp> pts = c.getControlPoints();
 	for (unsigned int i=0; i<pts.size(); i++) {
@@ -263,7 +263,7 @@ wxString CurvePane::getControlPoints()
 
 wxString CurvePane::getXYPoints()
 {
-	wxString s = "";
+	wxString s;
 	bool first = true;
 	double x=0, y=0;
 	for (double x=0.0; x<256.0; x++) {
@@ -276,7 +276,7 @@ wxString CurvePane::getXYPoints()
 
 wxString CurvePane::getYPoints()
 {
-	wxString s = "";
+	wxString s;
 	bool first = true;
 	double x=0, y=0;
 	for (double x=0.0; x<256.0; x++) {

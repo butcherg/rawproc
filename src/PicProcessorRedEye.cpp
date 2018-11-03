@@ -310,7 +310,7 @@ void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 		return;
 	}
 	
-	dcList = "";
+	dcList.clear();
 	c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
 	for (unsigned i=0; i<points.size(); i++) {
 		dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));

@@ -35,7 +35,7 @@ END_EVENT_TABLE()
 		scaleWindow = false;
 		blank = true;
 		settingpic = false;
-		dcList = "";
+		dcList.clear();
 		oob = 0;
 
 		colormgt = false;

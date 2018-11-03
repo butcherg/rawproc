@@ -183,7 +183,7 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 }
 
 bool PicProcessorResize::processPic(bool processnext) {
-	wxString algo = "";
+	wxString algo;
 	bool blur = false;
 	float sigma = 1.0;
 	unsigned kernelsize = 3;

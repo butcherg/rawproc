@@ -253,7 +253,7 @@ void myHistogramPane::render(wxDC&  dc)
 	if (mlx < 0) mlx = 0;
 	if (mlx > hscale) mlx = hscale;
 	//wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
-	wxString str = "";
+	wxString str;
 	if (inwindow)
 		str = wxString::Format("x: %d    hscale=%d",mlx,hscale);
 	else

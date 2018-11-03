@@ -782,7 +782,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 #endif
 	gImage *dib;
 	wxString ofilename, inputprofile;
-	wxString oparams = "";
+	wxString oparams;
 
 	SetStatusText("Retrieving source script...");
 	std::map<std::string,std::string> info =  gImage::getInfo(fname.c_str());
@@ -1124,7 +1124,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		while (!toolfile.Eof())  {
 			wxArrayString cmd = split(token, ":");	
 			if (cmd.GetCount() > 0) {
-				wxString params = "";
+				wxString params;
 				if (cmd.GetCount() >=2) params = cmd[1];
 				if (cmd[0] == "set") {
 					wxArrayString prop = split(params,"=");

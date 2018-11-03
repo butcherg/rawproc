@@ -43,8 +43,8 @@ class myListCtrl: public wxListCtrl
 				InsertItem( item );
 			}
 
-			filter = "";
-			selected = "";
+			filter.clear();
+			selected.clear();
 
 			Bind(wxEVT_LIST_ITEM_SELECTED, &myListCtrl::Selected, this);
 		}
@@ -117,7 +117,7 @@ class myLensDialog: public wxDialog
 			wxBoxSizer *ct = new wxBoxSizer(wxHORIZONTAL);
 
 			wxArrayString items;
-			wxString dlgtitle = "";
+			wxString dlgtitle;
 			if (title == "Camera") {
 				const struct lfCamera *const *cameras;
 				cameras = lf_db_get_cameras (ldb);
@@ -325,13 +325,13 @@ class LensCorrectionPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			wxString cmd = "";
+			wxString cmd;
 			wxString altcam = cam->GetValue();
 			if (altcam != "") paramAppend("camera", wxString(underscore(std::string(altcam.c_str())).c_str()), cmd);
 			wxString altlens = lens->GetValue();
 			if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
 
-			wxString ops = "";
+			wxString ops;
 			if (ca->GetValue()) opAppend("ca",ops);
 			if (vig->GetValue()) opAppend("vig",ops);
 			if (dist->GetValue()) opAppend("dist",ops);
@@ -357,8 +357,8 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 	lfok = false;
 	setlocale (LC_ALL, "");		
 
-	altcamera = "";
-	altlens = "";
+	altcamera.clear();
+	altlens.clear();
 	
 	lfError e;
 	//ldb = lf_db_new ();

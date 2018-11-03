@@ -31,7 +31,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree = tree;
 	c = command;
 	n = name;
-	dcList = "";
+	dcList.clear();
 	channel = CHANNEL_RGB;
 
 	dib = startpic;
@@ -52,7 +52,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree = tree;
 	c = command;
 	n = name;
-	dcList = "";
+	dcList.clear();
 	channel = CHANNEL_RGB;
 
 	dib = new gImage(getSelectedPicProcessor(m_tree)->getProcessedPic());
