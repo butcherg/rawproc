@@ -6,6 +6,9 @@
 #include <iostream>
 #include <sstream> 
 
+#include <locale>
+#include <codecvt>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h> 
@@ -14,6 +17,7 @@
 #ifdef WIN32
 	#include <direct.h>
 	#include <io.h> 
+	#include <shlobj.h>
 	#define GetCurrentDir _getcwd
 
 	#define access    _access_s
@@ -21,6 +25,12 @@
 	#include <unistd.h>
 	#define GetCurrentDir getcwd
 #endif
+
+std::string to_utf8(std::wstring wstr)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	return converter.to_bytes(wstr);
+}
 
 
 std::string tostr(double t)
@@ -66,23 +76,26 @@ std::string filepath_normalize(std::string str)
 	return str;
 }
 
-	
+//don't use for Windows...
 std::string getAppConfigFilePath()
 {
 	std::string dir;
-	char *d;
+	char *d = NULL;
 #ifdef WIN32
-	d = getenv("APPDATA");
-	if (d) dir = std::string(d) + "\\rawproc\\rawproc.conf";
+//	if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, (PWSTR*) d))
+	//d = getenv("APPDATA");
+//		dir = std::string(to_utf8(d)) + "\\rawproc\\rawproc.conf";
+//	else
+		dir = "c:\\Users\\glenn\\AppData\\Roaming\\rawproc\\rawproc.conf";
 #else
 	d = getenv("HOME");
 	if (d) dir = std::string(d) + "/.rawproc/rawproc.conf";
 #endif
 
-	if (access( dir.c_str(), 0 ) == 0)
+//	if (access( dir.c_str(), 0 ) == 0)
 		return dir;
-	else
-		return "";
+//	else
+//		return "";
 }
 
 std::string getCwdConfigFilePath()

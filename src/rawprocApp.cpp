@@ -36,6 +36,7 @@ static const wxCmdLineEntryDesc cmdLineDesc[] =
 bool rawprocFrmApp::OnInit()
 {
 	wxString fname;
+	wxString psep = wxFileName::GetPathSeparator();
 
 	wxInitAllImageHandlers();
 	wxFileSystem::AddHandler(new wxZipFSHandler);
@@ -49,16 +50,19 @@ bool rawprocFrmApp::OnInit()
 
 	wxString configfile;
 	wxString conf_exe = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
-	//wxString conf_configd = wxStandardPaths::Get().GetUserDataDir()+wxFileName::GetPathSeparator()+"rawproc.conf";
-
 	wxString conf_cwd = wxString(getCwdConfigFilePath().c_str());
-	wxString conf_configd = wxString(getAppConfigFilePath().c_str());
+
+#ifdef WIN32
+	wxString conf_configd = wxStandardPaths::Get().GetUserConfigDir()+psep+"rawproc"+psep+"rawproc.conf";
+#else
+	wxString conf_configd = wxStandardPaths::Get().GetUserConfigDir()+psep+".rawproc"+psep+"rawproc.conf";
+#endif
 
 	//config file search order: 
 	//	1) path specified in the -c parameter; 
-	//	2) current working directory; 
-	//	3) executable directory; 
-	//	4) OS-defined user data directory 
+	//	2) current working directory (conf_cwd); 
+	//	3) executable directory (conf_exe); 
+	//	4) OS-defined user data directory (conf_configd) 
 	if (cmdline.Found("c", &configfile)) {
 		if (wxFileName::FileExists(configfile)) {
 			wxFileName cfile(configfile);
