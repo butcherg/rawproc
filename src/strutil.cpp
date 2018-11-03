@@ -70,17 +70,19 @@ std::string filepath_normalize(std::string str)
 std::string getAppConfigFilePath()
 {
 	std::string dir;
+	char *d;
 #ifdef WIN32
-	dir = std::string(getenv("APPDATA")) + "\\rawproc\\rawproc.conf";
+	d = getenv("APPDATA");
+	if (d) dir = std::string(d) + "\\rawproc\\rawproc.conf";
 #else
-	dir = std::string(getenv("HOME")) + "/.rawproc/rawproc.conf";
+	d = getenv("HOME");
+	if (d) dir = std::string(d) + "/.rawproc/rawproc.conf";
 #endif
 
 	if (access( dir.c_str(), 0 ) == 0)
 		return dir;
 	else
 		return "";
-
 }
 
 std::string getCwdConfigFilePath()
