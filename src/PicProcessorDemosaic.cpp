@@ -110,7 +110,12 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 		wxString d = duration();
 		
 		dib->setInfo("LibrawMosaiced", "0");
-		dib->NormalizeRotation(threadcount);
+
+		//parm tool.demosaic.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=1
+		if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","1") == "1") {
+			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("Normalizing image orientation..."));
+			dib->NormalizeRotation(threadcount);
+		}
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
 			log(wxString::Format("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));

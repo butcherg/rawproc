@@ -666,9 +666,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			return;
 		}
 		
-		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
-		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
-		if ((myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") & (rotation != 1)) {
+		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=1
+		if (myConfig::getConfig().getValueOrDefault("input.orient","1") == "1") {
 			WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
 			dib->NormalizeRotation();
 		}
@@ -886,8 +885,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 			
-			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
-			if ((myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") & (rotation != 1)) {
+			if (myConfig::getConfig().getValueOrDefault("input.orient","1") == "1") {
 				WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
 				dib->NormalizeRotation();
 			}
@@ -1032,9 +1030,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			#endif
 			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",versionstr).c_str());
 			
-			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
-			if ((myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") & (rotation != 1)) {
+			if (myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") {
 				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
 				dib->NormalizeRotation();
 			}
@@ -1634,6 +1631,11 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Crop tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+		return;
+	}
 	SetStatusText("");
 	try {
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
@@ -1649,6 +1651,11 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+		return;
+	}
 	SetStatusText("");
 	try {
 		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
@@ -1702,6 +1709,11 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Rotate tool isn't designed to work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
