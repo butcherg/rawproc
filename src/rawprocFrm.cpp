@@ -665,6 +665,14 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			SetStatusText("");
 			return;
 		}
+		
+		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
+		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
+		if ((myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") & (rotation != 1)) {
+			WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
+			dib->NormalizeRotation();
+		}
+		
 		//wxString flagstring(params.c_str());
 		//parm input.log: log the file input operation.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("input.log","0") == "1")
@@ -878,6 +886,12 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 			
+			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
+			if ((myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") & (rotation != 1)) {
+				WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
+				dib->NormalizeRotation();
+			}
+			
 			filename.Assign(ofilename);
 			sourcefilename.Assign(fname);
 			
@@ -1020,16 +1034,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			
 			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
-			if ((myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") & (rotation != 0)) {
+			if ((myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") & (rotation != 1)) {
 				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
-				if (rotation == 2) dib->ApplyHorizontalMirror();
-				if (rotation == 3) dib->ApplyRotate180();
-				if (rotation == 4) dib->ApplyVerticalMirror();
-				if (rotation == 5) {dib->ApplyRotate90(); dib->ApplyHorizontalMirror();}
-				if (rotation == 6) dib->ApplyRotate90();
-				if (rotation == 7) {dib->ApplyRotate270(); dib->ApplyHorizontalMirror(); }
-				if (rotation == 8) dib->ApplyRotate270();
-				dib->setInfo("Orientation","0");
+				dib->NormalizeRotation();
 			}
 
 			wxString configparams;

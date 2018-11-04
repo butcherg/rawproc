@@ -1394,7 +1394,7 @@ void gImage::NormalizeRotation(int threadcount)
 		if (rotation == 6) ApplyRotate90(threadcount);
 		if (rotation == 7) {ApplyRotate270(); ApplyHorizontalMirror(threadcount); }
 		if (rotation == 8) ApplyRotate270(threadcount);
-		setInfo("Orientation","0");
+		setInfo("Orientation","1");
 	}
 }
 
