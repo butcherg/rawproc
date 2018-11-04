@@ -674,7 +674,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 					_mark();
 					dib.ApplyWhiteBalance(threadcount);
 					printf("done (%fsec).\n",_duration());
-					sprintf(cs, "%s:%s",cmd, op.c_str());
+					sprintf(cs, "%s:%s ",cmd, op.c_str());
 				}
 				else if (parm[0] == "patch") {
 					op = "patch";
@@ -699,7 +699,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 						_mark();
 						dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 						printf("done (%fsec).\n",_duration());
-						sprintf(cs, "%s:%s",cmd, op.c_str());
+						sprintf(cs, "%s:%s ",cmd, op.c_str());
 					}
 				}
 				else { // parameters are just three multipliers
