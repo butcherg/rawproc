@@ -110,6 +110,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 		wxString d = duration();
 		
 		dib->setInfo("LibrawMosaiced", "0");
+		dib->NormalizeRotation(threadcount);
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
 			log(wxString::Format("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
