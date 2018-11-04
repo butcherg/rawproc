@@ -1383,6 +1383,21 @@ void gImage::ApplyVerticalMirror(int threadcount)
 	}
 }
 
+void gImage::NormalizeRotation(int threadcount)
+{
+	int rotation = atoi(getInfoValue("Orientation").c_str());
+	if (rotation != 1) {
+		if (rotation == 2) ApplyHorizontalMirror(threadcount);
+		if (rotation == 3) ApplyRotate180(threadcount);
+		if (rotation == 4) ApplyVerticalMirror(threadcount);
+		if (rotation == 5) {ApplyRotate90(); ApplyHorizontalMirror(threadcount);}
+		if (rotation == 6) ApplyRotate90(threadcount);
+		if (rotation == 7) {ApplyRotate270(); ApplyHorizontalMirror(threadcount); }
+		if (rotation == 8) ApplyRotate270(threadcount);
+		setInfo("Orientation","0");
+	}
+}
+
 
 
 /* Rotate by three Shears:

@@ -178,6 +178,7 @@ class gImage
 		void ApplyRotate270(int threadcount=0);
 		void ApplyHorizontalMirror(int threadcount=0);
 		void ApplyVerticalMirror(int threadcount=0);
+		void NormalizeRotation(int threadcount=0);
 		void ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount=0);
 		void ApplySaturate(double saturate, int threadcount=0);
 		void ApplyExposureCompensation(double ev, int threadcount=0);
