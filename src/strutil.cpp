@@ -141,7 +141,7 @@ std::vector<std::string> bifurcate(std::string strg, char c = ' ')
 	return result;
 }
 
-
+//string of the form "name=val;name=val;..."
 std::map<std::string, std::string> parseparams(std::string params)
 {
 	std::map<std::string, std::string> p;
@@ -155,6 +155,31 @@ std::map<std::string, std::string> parseparams(std::string params)
 			p[nameval[0]] = "1";
 	}
 	return p;
+}
+
+void parseparams(std::map<std::string, std::string> &p, std::string params)
+{
+	std::vector<std::string> l = split(params,";");
+	for (std::vector<std::string>::iterator it=l.begin(); it!=l.end(); ++it) {
+		std::string name, val;
+		std::vector<std::string> nameval = split(*it,"=");
+		if (nameval.size() == 2)
+			p[nameval[0]] = nameval[1];
+		else
+			p[nameval[0]] = "1";
+	}
+}
+
+std::string paramstring(std::map<std::string, std::string> &p)
+{
+	std::string s;
+	bool first = true;
+	for (std::map<std::string, std::string>::iterator it=p.begin(); it!=p.end(); ++it) {
+		if (!first) s.append(";");
+		s.append(it->first+"="+it->second);
+		first = false;
+	}
+	return s;
 }
 
 //https://stackoverflow.com/questions/5343190/how-do-i-replace-all-instances-of-a-string-with-another-string/

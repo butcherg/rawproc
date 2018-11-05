@@ -19,7 +19,12 @@ std::string getCwdConfigFilePath();
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 std::vector<std::string> split(std::string s, std::string delim);
 std::vector<std::string> bifurcate(std::string strg, char c = ' ');
+
+//construct and deconstruct parameter lists
 std::map<std::string, std::string> parseparams(std::string params);
+void parseparams(std::map<std::string, std::string> &p, std::string params);
+std::string paramstring(std::map<std::string, std::string> &p);
+
 std::string string_format(const std::string fmt, ...);
 std::string nexttoken(std::string &strng, std::string delims);
 
