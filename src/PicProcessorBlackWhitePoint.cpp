@@ -188,10 +188,15 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
 	//parm tool.blackwhitepoint.whiteinitialvalue: The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255
 	long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
-
+	//parm tool.blackwhitepoint.automode: The calculation mode for auto.  tone=find the points based on the tone; min=find the points based on the min of the channel maxes. Default: tone
+	wxString automode = myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.automode","tone").c_str();
 	
 	if (command == "") {
-		std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
+		std::vector<double> bwpts;
+		if (automode=="min")
+			bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, "min");
+		else
+			bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
 		blk = bwpts[0];
 		wht = bwpts[1];
 		setParams(wxString::Format("rgb,%d,%d",(unsigned) blk, (unsigned) wht));
