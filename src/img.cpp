@@ -1157,6 +1157,15 @@ getopt(int argc, char *argv[], char *optstring)
 
 //end getopt.c
 
+std::string getFileType(std::string filename)
+{
+	std::string ext = filename.substr(filename.find_last_of("."));
+	if (ext == "jpg" | ext == "jpeg" | ext == "JPG" | ext == "JPEG") return "jpeg";
+	if (ext == "tif" | ext == "tiff" | ext == "TIF" | ext == "TIFF") return "tiff";
+	if (ext == "png" | ext == "PNG") return "png";
+	return "raw";
+}
+
 
 
 int main (int argc, char **argv) 
@@ -1273,7 +1282,31 @@ int main (int argc, char **argv)
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
 	if (outfile.size() < 2) outfile.push_back("");
 	
+	std::string filetype = getFileType(infile[0]);
 	
+	//construct input parameters from input.filetype.parameters, input.raw.libraw.* if raw, 
+	//and the command line parameters in that order
+	std::map<std::string,std::string> inputparams;
+	if (myConfig::getConfig().exists("input."+filetype+".parameters"))
+		parseparams(inputparams, myConfig::getConfig().getValue("input."+filetype+".parameters"));
+	if (filetype == "raw")
+		parseparams(inputparams, param_string("input.raw.libraw."));
+	if (infile[1] != "")
+		parseparams(inputparams, infile[1]);
+	if (filetype == "raw") {
+		if (inputparams.find("rawdata") != inputparams.end()) {
+			if (inputparams["rawdata"] == "1") {
+				infile[1] = "rawdata=1";
+				if (inputparams.find("cameraprofile") != inputparams.end())
+					infile[1].append(";cameraprofile="+inputparams["cameraprofile"]);
+			}
+			else infile[1] = paramstring(inputparams);
+		}
+	}
+	else 
+		infile[1] = paramstring(inputparams);
+
+/*
 	//sets input parameter string from a input.*.parameters property:
 	if (infile[1].find(".") != std::string::npos)
 		if (infile[1].find("input") != std::string::npos)
@@ -1291,7 +1324,7 @@ int main (int argc, char **argv)
 			if (infile[1].find("raw") != std::string::npos)
 				if (infile[1].find("libraw") != std::string::npos)
 					infile[1] = param_string(infile[1]+".");
-
+*/
 
 	if (countchar(infile[0],'*') == 1) {
 		if (countchar(outfile[0],'*') == 1) {
