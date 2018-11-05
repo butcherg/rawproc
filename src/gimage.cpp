@@ -3009,6 +3009,15 @@ std::vector<double> gImage::CalculateBlackWhitePoint(double blackthreshold, doub
 	if (channel == "red")   hdata = RedHistogram();
 	else if (channel == "green") hdata = GreenHistogram();
 	else if (channel == "blue")  hdata = BlueHistogram();
+	else if (channel == "min") {
+		std::map<std::string,std::string> stats = StatsMap();
+		float rmax = atof(stats["rmax"].c_str());
+		float gmax = atof(stats["gmax"].c_str());
+		float bmax = atof(stats["bmax"].c_str());
+		if (fmin(rmax,fmin(gmax, bmax))) hdata = RedHistogram();
+		else if (fmin(gmax,fmin(rmax, bmax))) hdata = GreenHistogram();
+		else if (fmin(bmax,fmin(rmax, gmax))) hdata = BlueHistogram();
+	}
 	else hdata = Histogram();
 	long hmax=0;
 	int maxpos;
