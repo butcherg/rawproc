@@ -1285,7 +1285,8 @@ int main (int argc, char **argv)
 	std::string filetype = getFileType(infile[0]);
 	
 	//construct input parameters from input.filetype.parameters, input.raw.libraw.* if raw, 
-	//and the command line parameters in that order
+	//and the command line parameters in that order.  If raw and rawdata=1, paramlist is
+	//truncted to rawdata and cameraprofile
 	std::map<std::string,std::string> inputparams;
 	if (myConfig::getConfig().exists("input."+filetype+".parameters"))
 		parseparams(inputparams, myConfig::getConfig().getValue("input."+filetype+".parameters"));
@@ -1306,25 +1307,6 @@ int main (int argc, char **argv)
 	else 
 		infile[1] = paramstring(inputparams);
 
-/*
-	//sets input parameter string from a input.*.parameters property:
-	if (infile[1].find(".") != std::string::npos)
-		if (infile[1].find("input") != std::string::npos)
-			if (infile[1].find("parameters") != std::string::npos)
-				if (myConfig::getConfig().exists(infile[1]))
-					infile[1] = myConfig::getConfig().getValue(infile[1]);
-				else {
-					printf("Error: property %s not found.\n", infile[1].c_str());
-					exit(0);
-				}
-
-	//builds input parameter string from input.raw.libraw.* parameters
-	else if (infile[1].find(".") != std::string::npos)
-		if (infile[1].find("input") != std::string::npos)
-			if (infile[1].find("raw") != std::string::npos)
-				if (infile[1].find("libraw") != std::string::npos)
-					infile[1] = param_string(infile[1]+".");
-*/
 
 	if (countchar(infile[0],'*') == 1) {
 		if (countchar(outfile[0],'*') == 1) {
