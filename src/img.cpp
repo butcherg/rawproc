@@ -336,7 +336,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			c = strtok(NULL,", ");
 			if (c) { //first token is a channel
 				chan = std::string(c);
-				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue") {
+				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue" | chan == "min") {
 					b = strtok(NULL,", ");
 					w = strtok(NULL,", ");
 					wht = 255; blk = 0;
@@ -1378,21 +1378,7 @@ for (int f=0; f<files.size(); f++)
 	if (infile[1] != "") commandstring += ":" + infile[1];
 	commandstring += " ";
 
-	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
-	//printf("Orientation: %d\n", orientation);
-	if (orientation != 0) {
-		printf("Normalizing image orientation from %d...",orientation);
-		_mark();
-		if (orientation == 2) dib.ApplyHorizontalMirror(); 
-		if (orientation == 3) dib.ApplyRotate180(); 
-		if (orientation == 4) dib.ApplyVerticalMirror(); 
-		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
-		if (orientation == 6) {dib.ApplyRotate90(); }
-		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
-		if (orientation == 8) dib.ApplyRotate270();
-		dib.setInfo("Orientation","0");
-		printf("done. (%fsec)\n",_duration());
-	}
+
 	
 	//process commands:
 	for (int i=0; i<commands.size(); i++) {
@@ -1403,6 +1389,22 @@ for (int f=0; f<files.size(); f++)
 		else do_cmd(dib, commands[i], files[f].variant);
 	}
 
+	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
+	//printf("Orientation: %d\n", orientation);
+	if (orientation != 1) {
+		printf("Normalizing image orientation from %d...",orientation);
+		_mark();
+		dib.NormalizeRotation();
+//		if (orientation == 2) dib.ApplyHorizontalMirror(); 
+//		if (orientation == 3) dib.ApplyRotate180(); 
+//		if (orientation == 4) dib.ApplyVerticalMirror(); 
+//		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
+//		if (orientation == 6) {dib.ApplyRotate90(); }
+//		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
+//		if (orientation == 8) dib.ApplyRotate270();
+//		dib.setInfo("Orientation","1");
+		printf("done. (%fsec)\n",_duration());
+	}
 
 	char outfilename[256];
 	strncpy(outfilename, files[f].outfile.c_str(), 255);
