@@ -148,7 +148,14 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
 	
-	std::vector<histogramdata> histogram = dib.Histogram(scale);
+	histogram = dib.Histogram(scale);
+
+	bool rmax=false, gmax=false, bmax=false;
+	for (unsigned i=scale-1; i>0; i--) {
+		if (!rmax) {if (histogram[i].r == 0) rlen--; else rmax = true;}
+		if (!gmax) {if (histogram[i].g == 0) glen--; else gmax = true;}
+		if (!bmax) {if (histogram[i].b == 0) blen--; else bmax = true;}
+	}
 	
 	if (r) delete[] r;
 	if (g) delete[] g;
@@ -307,15 +314,25 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			else if (event.ControlDown()) xorigin += 100;
 			else xorigin += 1;
 			break;
-		case 67: //c - with Ctrl, copy 256-scale histogram to clipboard
-			//wxString histogram = wxString::Format("%d", (int) smalldata[0]);
-			//for (int i = 1; i< smalldata.size(); i++) 
-			//	histogram.Append(wxString::Format(",%d", (int) smalldata[i]));
-			//if (wxTheClipboard->Open())
-			//{
-			//	wxTheClipboard->SetData( new wxTextDataObject(histogram) );
-			//	wxTheClipboard->Close();
-			//}
+		case 67: // c - with Ctrl, copy 256-scale histogram to clipboard
+			wxString hist;
+			hist.Append(wxString::Format("red:%d", (int) histogram[0].r));
+			for (int i = 1; i< histogram.size(); i++) 
+				hist.Append(wxString::Format(",%d", (int) histogram[i].r));
+			hist.Append("\n");
+			hist.Append(wxString::Format("green:%d", (int) histogram[0].g));
+			for (int i = 1; i< histogram.size(); i++) 
+				hist.Append(wxString::Format(",%d", (int) histogram[i].g));
+			hist.Append("\n");
+			hist.Append(wxString::Format("blue:%d", (int) histogram[0].b));
+			for (int i = 1; i< histogram.size(); i++) 
+				hist.Append(wxString::Format(",%d", (int) histogram[i].b));
+			hist.Append("\n");
+			if (wxTheClipboard->Open())
+			{
+				wxTheClipboard->SetData( new wxTextDataObject(hist) );
+				wxTheClipboard->Close();
+			}
 			break;
 	}
 

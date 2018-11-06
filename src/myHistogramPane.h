@@ -46,6 +46,8 @@ public:
 private:
 	bool blankpic, pressedDown;
 	std::vector<long> rdata, gdata, bdata, smalldata;
+
+	std::vector<histogramdata> histogram;
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
