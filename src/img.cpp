@@ -334,7 +334,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			long hmax = 0;
 			int maxpos;
 			c = strtok(NULL,", ");
-			if (c) { //first token is a channel
+			if (c) { //first token is a channel, or min 
 				chan = std::string(c);
 				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue" | chan == "min") {
 					b = strtok(NULL,", ");
@@ -1395,14 +1395,6 @@ for (int f=0; f<files.size(); f++)
 		printf("Normalizing image orientation from %d...",orientation);
 		_mark();
 		dib.NormalizeRotation();
-//		if (orientation == 2) dib.ApplyHorizontalMirror(); 
-//		if (orientation == 3) dib.ApplyRotate180(); 
-//		if (orientation == 4) dib.ApplyVerticalMirror(); 
-//		if (orientation == 5) {dib.ApplyRotate90(); dib.ApplyHorizontalMirror(); }
-//		if (orientation == 6) {dib.ApplyRotate90(); }
-//		if (orientation == 7) {dib.ApplyRotate270(); dib.ApplyHorizontalMirror(); }
-//		if (orientation == 8) dib.ApplyRotate270();
-//		dib.setInfo("Orientation","1");
 		printf("done. (%fsec)\n",_duration());
 	}
 
