@@ -904,16 +904,17 @@ char * _loadRAW(const char *filename,
 			*width = S.width;
 			*height = S.height;
 
-			unsigned imgsize = S.width * S.height * 2;
-			img = new char[imgsize];
-			char * src = (char *) RawProcessor.imgdata.rawdata.raw_image;
-			src += S.raw_pitch * S.top_margin;
-			char * dst = img;
-			for (unsigned y=S.top_margin; y<S.raw_height; y++) {
-				memcpy(dst, src+S.left_margin*2, S.width*2);
-				dst += S.width*2;
-				src += S.raw_pitch; 
-			}
+			unsigned short *raw = RawProcessor.imgdata.rawdata.raw_image;
+			unsigned img = new unsigned short[S.width*S.height];
+
+			unsigned short *src = raw;
+			unsigned short *dst = img;
+
+			for (unsigned row=0; h 
+			for (unsignedrow=0; row < S.height; row++)
+				for (unsignedcol=0; col < S.width; col++)
+					dst[row*S.width+col] = src[(row+S.top_margin)*S.width)+(col+S.left_margin];
+
 		}
 		else {
 			*width = S.raw_width;
