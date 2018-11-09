@@ -905,16 +905,22 @@ char * _loadRAW(const char *filename,
 			*height = S.height;
 
 			unsigned short *raw = RawProcessor.imgdata.rawdata.raw_image;
-			unsigned img = new unsigned short[S.width*S.height];
+			//unsigned short *img = new unsigned short[S.width*S.height];
+			img = new char[S.raw_width*S.raw_height*2];
 
 			unsigned short *src = raw;
-			unsigned short *dst = img;
+			unsigned short *dst = (unsigned short *) img;
 
-			for (unsigned row=0; h 
-			for (unsignedrow=0; row < S.height; row++)
-				for (unsignedcol=0; col < S.width; col++)
-					dst[row*S.width+col] = src[(row+S.top_margin)*S.width)+(col+S.left_margin];
-
+			unsigned cnt = 0;
+			for (unsigned row=0; row < S.height; row++) {
+				for (unsigned col=0; col < S.width; col++) {
+					unsigned spos = ((row+S.top_margin)*S.raw_width)+(col+S.left_margin);
+					unsigned dpos = row*S.width+col;
+					dst[dpos] = src[spos];
+					cnt++;
+				}
+			}
+printf("count: %d\n",cnt);
 		}
 		else {
 			*width = S.raw_width;
