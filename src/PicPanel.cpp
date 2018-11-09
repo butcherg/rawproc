@@ -148,12 +148,15 @@ END_EVENT_TABLE()
 			img = gImage2wxImage(*dib, oob);
 		else
 			img = gImage2wxImage(*dib);
-		
-		int rotation = atoi(dib->getInfoValue("Orientation").c_str());
-		if (rotation == 3) img = img.Rotate180();
-		if (rotation == 5) img = img.Rotate90(false);
-		if (rotation == 6) img = img.Rotate90(true);
-		if (rotation == 8) img = img.Rotate90(false);
+
+		//parm display.orient: Enable/disable normalization of image rotation for display.  Doesn't alter the working image orientation.  Default=1 
+		if (myConfig::getConfig().getValueOrDefault("display.orient","1") == "1") {
+			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
+			if (rotation == 3) img = img.Rotate180();
+			if (rotation == 5) img = img.Rotate90(false);
+			if (rotation == 6) img = img.Rotate90(true);
+			if (rotation == 8) img = img.Rotate90(false);
+		}
 
 		if (colormgt) {
 

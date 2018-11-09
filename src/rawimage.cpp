@@ -920,7 +920,6 @@ char * _loadRAW(const char *filename,
 					cnt++;
 				}
 			}
-printf("count: %d\n",cnt);
 		}
 		else {
 			*width = S.raw_width;
