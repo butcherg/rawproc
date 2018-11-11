@@ -143,7 +143,7 @@ print OUTFILE $ICON;
 close OUTFILE;
 
 
-$result = `appimagetool-x86_64.AppImage $rootdir $file$version-$arch.AppImage`;
+$result = `appimagetool-x86_64.AppImage $rootdir $file-$version-$arch.AppImage`;
 $result = `rm -rf $rootdir`;
 
 
