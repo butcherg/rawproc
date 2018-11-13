@@ -519,7 +519,8 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
+	//if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
+	if      (name == "gamma")      		p = new PicProcessorTone("tone","gamma,"+command, commandtree,  pic);
 	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic);
 	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic);
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
@@ -537,6 +538,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
+	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
