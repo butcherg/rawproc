@@ -37,6 +37,7 @@
 #include "PicProcessorRedEye.h"
 #include "PicProcessorColorSpace.h"
 #include "PicProcessorWhiteBalance.h"
+#include "PicProcessorTone.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -108,6 +109,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_EXIF,rawprocFrm::MnuEXIF)
 	EVT_MENU(ID_MNU_COLORSPACE, rawprocFrm::MnuColorSpace)
 	EVT_MENU(ID_MNU_WHITEBALANCE, rawprocFrm::MnuWhiteBalance)
+	EVT_MENU(ID_MNU_TONE, rawprocFrm::MnuTone)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
@@ -243,6 +245,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHADOW,	_("Shadow"), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->AppendSeparator();
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
@@ -1478,6 +1481,24 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 	}
 }
 
+void rawprocFrm::MnuTone(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		//parm tool.tone.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","2.2"));
+		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding tone tool failed: %s",e.what()));
+	}
+
+}
+
 
 /*
  * Mnubright1007Click
@@ -1812,6 +1833,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
 	}
 }
+
 
 #ifdef USE_LENSFUN
 void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)

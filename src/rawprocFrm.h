@@ -117,6 +117,7 @@ class rawprocFrm : public wxFrame
 			ID_MNU_LENSCORRECTION = 1035,
 			ID_MNU_WHITEBALANCE = 1036,
 			ID_MNU_DEMOSAIC = 1037,
+			ID_MNU_TONE = 1038,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -167,6 +168,7 @@ class rawprocFrm : public wxFrame
 	void MnuRotateClick(wxCommandEvent& event);
 	void MnuDenoiseClick(wxCommandEvent& event);
 	void MnuRedEyeClick(wxCommandEvent& event);
+	void MnuTone(wxCommandEvent& event);
 
 	void Mnusave1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);
