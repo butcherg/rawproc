@@ -187,7 +187,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 	if (processingenabled & sigma > 0.0) {
 		mark();
 		//dib->ApplyNLMeans(sigma,local, patch, threadcount);
-		dib->ApplyWaveletDenoise(sigma, threadcount);
+		dib->ApplyWaveletDenoise(sigma/100.0, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))

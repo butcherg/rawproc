@@ -54,6 +54,7 @@ using namespace half_float::literal;
 #define SCALE_CURVE 256.0
 #endif
 
+inline unsigned sqr(const unsigned x) { return x*x; }
 
 const char * gImageVersion()
 {
@@ -2407,16 +2408,17 @@ void gImage::ApplyWaveletDenoise(double threshold, int threadcount)
 	img = (PIXTYPE (*)[3]) image.data();
 	size = height*width;;
 
-	//#pragma omp parallel for num_threads(threadcount)
+	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned c=0; c < colors; c++) {			// denoise R,G,B individually
 		int lev, hpass, lpass;
 		//float *fimg = (float *) malloc ((size*3 + height + width) * sizeof *fimg);
 		float *fimg = 0;
-		fimg = new float[(size*3 + height + width) * sizeof *fimg];
+		fimg = new float[(size*3 + height + width) ];
 		float *temp = fimg + size*3;
 
 		for (unsigned i=0; i < size; i++)
-			fimg[i] = sqrt(img[i][c]);
+			//fimg[i] = sqrt(img[i][c]);
+			fimg[i] = img[i][c];
 
 		for (hpass=lev=0; lev < 5; lev++) {
 			lpass = size*((lev & 1)+1);
@@ -2475,7 +2477,8 @@ void gImage::ApplyWaveletDenoise(double threshold, int threadcount)
 		}
 
 		for (unsigned i=0; i < size; i++)
-			//img[i][c] = CLIP(SQR(fimg[i]+fimg[lpass+i]));
+			//img[i][c] = sqr(fimg[i]+fimg[lpass+i]);
+			img[i][c] = fimg[i]+fimg[lpass+i];
 		
 		//free (fimg);
 		delete [] fimg;
@@ -2859,7 +2862,6 @@ void gImage::ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, 
 //treatment rendered a green cast.
 //
 
-inline unsigned sqr(const unsigned x) { return x*x; }
 
 void gImage::ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate, double desaturatepercent, int threadcount)
 {
