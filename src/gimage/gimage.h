@@ -195,6 +195,7 @@ class gImage
 		void ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount=0);
 
 		void ApplyNLMeans(double sigma, int local, int patch, int threadcount=0);
+		void ApplyWaveletDenoise(double strength, int threadcount);
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);
 		GIMAGE_ERROR ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp=false, int threadcount=0);
 		GIMAGE_ERROR AssignColorspace(std::string iccfile);

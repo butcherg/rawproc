@@ -2387,6 +2387,103 @@ void gImage::ApplyNLMeans(double sigma, int local, int patch, int threadcount)
 }
 
 
+//Wavelet Denoise
+//
+//Credit: dcraw wavelet_denoise(): https://www.cybercom.net/~dcoffin/dcraw/dcraw.c
+//
+//This is a straight translation of the dcraw routine from the unsigned short mosaic
+//to the rawproc PIXTYPE floating point RGB.
+
+void gImage::ApplyWaveletDenoise(double threshold, int threadcount)
+{
+	unsigned width = w;
+	unsigned height = h;
+	unsigned colors = c;
+	PIXTYPE (*img)[3];
+	float thold;
+	int size; 
+	static const float noise[] = { 0.8002,0.2735,0.1202,0.0585,0.0291,0.0152,0.0080,0.0044 };
+
+	img = (PIXTYPE (*)[3]) image.data();
+	size = height*width;;
+
+	//#pragma omp parallel for num_threads(threadcount)
+	for (unsigned c=0; c < colors; c++) {			// denoise R,G,B individually
+		int lev, hpass, lpass;
+		//float *fimg = (float *) malloc ((size*3 + height + width) * sizeof *fimg);
+		float *fimg = 0;
+		fimg = new float[(size*3 + height + width) * sizeof *fimg];
+		float *temp = fimg + size*3;
+
+		for (unsigned i=0; i < size; i++)
+			fimg[i] = sqrt(img[i][c]);
+
+		for (hpass=lev=0; lev < 5; lev++) {
+			lpass = size*((lev & 1)+1);
+			for (unsigned row=0; row < height; row++) {
+				//hat_transform (temp, fimg+hpass+row*width, 1, width, 1 << lev);
+				
+				//inline:
+				{
+					float *base = fimg+hpass+row*width; 
+					int st=1;
+					int size=width; 
+					int sc=1 << lev;
+					int i;
+					for (i=0; i < sc; i++)
+						temp[i] = 2*base[st*i] + base[st*(sc-i)] + base[st*(i+sc)];
+					for (; i+sc < size; i++)
+						temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(i+sc)];
+					for (; i < size; i++)
+						temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(2*size-2-(i+sc))];
+				}
+				
+				for (unsigned col=0; col < width; col++)
+					fimg[lpass + row*width + col] = temp[col] * 0.25;
+			}
+			for (unsigned col=0; col < width; col++) {
+				//hat_transform (temp, fimg+lpass+col, width, height, 1 << lev);
+				
+				//inline:
+				{
+					float *base = fimg+lpass+col; 
+					int st=width;
+					int size=height; 
+					int sc=1 << lev;
+					int i;
+					for (i=0; i < sc; i++)
+						temp[i] = 2*base[st*i] + base[st*(sc-i)] + base[st*(i+sc)];
+					for (; i+sc < size; i++)
+						temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(i+sc)];
+					for (; i < size; i++)
+						temp[i] = 2*base[st*i] + base[st*(i-sc)] + base[st*(2*size-2-(i+sc))];
+				}
+				
+				for (unsigned row=0; row < height; row++)
+					fimg[lpass + row*width + col] = temp[row] * 0.25;
+			}
+			
+			thold = threshold * noise[lev];
+			for (unsigned i=0; i < size; i++) {
+				fimg[hpass+i] -= fimg[lpass+i];
+				if	(fimg[hpass+i] < -thold) fimg[hpass+i] += thold;
+				else if (fimg[hpass+i] >  thold) fimg[hpass+i] -= thold;
+				else	 fimg[hpass+i] = 0;
+				if (hpass) fimg[i] += fimg[hpass+i];
+			}
+			hpass = lpass;
+		}
+
+		for (unsigned i=0; i < size; i++)
+			//img[i][c] = CLIP(SQR(fimg[i]+fimg[lpass+i]));
+		
+		//free (fimg);
+		delete [] fimg;
+	}
+	
+}
+
+
 
 //Resizing
 //
