@@ -79,7 +79,7 @@ class DenoisePanel: public PicProcPanel
 			g->Add(wl,  wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "threshold:"), wxGBPosition(8,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, 0.001, 3, wxDefaultPosition, spinsize);
+			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, 0.0001, 4, wxDefaultPosition, spinsize);
 			g->Add(thresh, wxGBPosition(8,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 
 			//sigma->Enable(true); 
@@ -278,19 +278,19 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (processingenabled) {  // & sigma > 0.0) {
+	if (processingenabled) { 
 		mark();
 		if (algorithm == DENOISENLMEANS)
-			dib->ApplyNLMeans(sigma,local, patch, threadcount);
+			if (sigma > 0.0) dib->ApplyNLMeans(sigma,local, patch, threadcount);
 		if (algorithm == DENOISEWAVELET)
-			dib->ApplyWaveletDenoise(threshold, threadcount);
+			if (threshold > 0.0) dib->ApplyWaveletDenoise(threshold, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))
 			if (algorithm == DENOISENLMEANS)
 				log(wxString::Format("tool=denoise_nlmeans,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(),dib->getHeight(),threadcount,d));
 			if (algorithm == DENOISEWAVELET)
-				log(wxString::Format("tool=denoise_wavelet,threshold=%2.2f, imagesize=%dx%d,threads=%d,time=%s",threshold,dib->getWidth(),dib->getHeight(),threadcount,d));
+				log(wxString::Format("tool=denoise_wavelet,threshold=%f, imagesize=%dx%d,threads=%d,time=%s",threshold,dib->getWidth(),dib->getHeight(),threadcount,d));
 	}
 
 	dirty=false;
