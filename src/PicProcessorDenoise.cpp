@@ -28,13 +28,14 @@ class DenoisePanel: public PicProcPanel
 		DenoisePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			algorithm = DENOISENLMEANS;
+			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
+			int localval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
+			int patchval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
+			float thresholdval = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0").c_str());
+			
 			wxSize spinsize(130, TEXTCTRLHEIGHT);
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			wxArrayString p = split(params,",");
-			int initialvalue = atoi(p[0]);
-			int localval = atoi(p[1]);
-			int patchval = atoi(p[2]);
 
 			enablebox = new wxCheckBox(this, DENOISEENABLE, "denoise:");
 			enablebox->SetValue(true);
@@ -44,12 +45,12 @@ class DenoisePanel: public PicProcPanel
 
 			nl = new wxRadioButton(this, DENOISENLMEANS, "NLMeans:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			nl->SetValue(true);
-			g->Add(nl,  wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(nl,  wxGBPosition(2,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 
 			g->Add(new wxStaticText(this,wxID_ANY, "sigma: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			sigma = new wxSlider(this, SIGMASLIDER, initialvalue, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(sigma , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val = new wxStaticText(this,wxID_ANY, p[0], wxDefaultPosition, wxSize(30, -1));
+			val = new wxStaticText(this,wxID_ANY, wxString::Format("%d",sigmaval), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, SIGMARESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
@@ -60,7 +61,7 @@ class DenoisePanel: public PicProcPanel
 			g->Add(new wxStaticText(this,wxID_ANY, "local: "), wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			local = new wxSlider(this, LOCALSLIDER, localval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(local , wxGBPosition(5,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val1 = new wxStaticText(this,wxID_ANY, p[1], wxDefaultPosition, wxSize(30, -1));
+			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%d",localval), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val1 , wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn1 = new wxBitmapButton(this, LOCALRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
@@ -69,30 +70,51 @@ class DenoisePanel: public PicProcPanel
 			g->Add(new wxStaticText(this,wxID_ANY, "patch: "), wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			patch = new wxSlider(this, PATCHSLIDER, patchval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
 			g->Add(patch , wxGBPosition(6,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val2 = new wxStaticText(this,wxID_ANY, p[2], wxDefaultPosition, wxSize(30, -1));
+			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%d",patchval), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val2 , wxGBPosition(6,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn2 = new wxBitmapButton(this, PATCHRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset to default");
 			g->Add(btn2, wxGBPosition(6,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
+
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(7,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+
 			wl = new wxRadioButton(this, DENOISEWAVELET, "Wavelet:");
-			g->Add(wl,  wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(wl,  wxGBPosition(8,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "threshold:"), wxGBPosition(8,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, 0.0001, 4, wxDefaultPosition, spinsize);
-			g->Add(thresh, wxGBPosition(8,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "threshold:"), wxGBPosition(9,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, thresholdval, 4, wxDefaultPosition, spinsize);
+			g->Add(thresh, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			
+			bool nlb, wlb;
+			wxArrayString cp = split(params,",");
+			if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
+				sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
+				local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%4d", local->GetValue()));
+				patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%4d", patch->GetValue()));
+				nlb=true; wlb=false;
+				algorithm = DENOISENLMEANS;
+				nl->SetValue(true);
+			}
+			if (cp.GetCount() == 2 && cp[0] == "wavelet") {
+				thresh->SetFloatValue(atof(cp[1]));
+				nlb=false; wlb=true;
+				algorithm = DENOISEWAVELET;
+				wl->SetValue(true);
+			}
 
-			//sigma->Enable(true); 
-			//local->Enable(true); 
-			//patch->Enable(true);
-			//val->Enable(true);
-			//val1->Enable(true); 
-			//val2->Enable(true);
-			//btn->Enable(true);
-			//btn1->Enable(true);
-			//btn2->Enable(true);
+			sigma->Enable(nlb); 
+			local->Enable(nlb); 
+			patch->Enable(nlb);
+			val->Enable(nlb);
+			val1->Enable(nlb); 
+			val2->Enable(nlb);
+			btn->Enable(nlb);
+			btn1->Enable(nlb);
+			btn2->Enable(nlb);
+			thresh->Enable(wlb);
 
-			thresh->Enable(false);
+
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -187,9 +209,9 @@ class DenoisePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (algorithm == DENOISENLMEANS)
-				q->setParams(wxString::Format("%d,%d,%d",sigma->GetValue(),local->GetValue(),patch->GetValue()));
+				q->setParams(wxString::Format("nlmeans,%d,%d,%d",sigma->GetValue(),local->GetValue(),patch->GetValue()));
 			if (algorithm == DENOISEWAVELET) 
-				q->setParams(wxString::Format("%f",thresh->GetFloatValue()));
+				q->setParams(wxString::Format("wavelet,%f",thresh->GetFloatValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -256,14 +278,14 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 	double threshold = 0.0001;
 
 	wxArrayString cp = split(getParams(),",");
-	if (cp.GetCount() == 3) {
-		sigma = atof(cp[0]);
-		local = atoi(cp[1]);
-		patch = atoi(cp[2]);
+	if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
+		sigma = atof(cp[1]);
+		local = atoi(cp[2]);
+		patch = atoi(cp[3]);
 		algorithm = DENOISENLMEANS;
 	}
-	if (cp.GetCount() == 1) {
-		threshold = atof(cp[0]);
+	if (cp.GetCount() == 2 && cp[0] == "wavelet") {
+		threshold = atof(cp[1]);
 		algorithm = DENOISEWAVELET;
 	}
 	

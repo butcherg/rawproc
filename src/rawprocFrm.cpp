@@ -1761,16 +1761,27 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
+	wxString algorithm, sigma, local, patch, threshold, cmd;
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
-		wxString sigma =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
-		//parm tool.denoise.local: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3
-		wxString local =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3"));
-		//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
-		wxString patch =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1"));
-		wxString cmd = wxString::Format("%s,%s,%s",sigma,local,patch);
+		//parm tool.denoise.algorithm=nlmeans|wavelet The default algorithm to use when adding a denoise tool.  Default=wavelet
+		algorithm =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.algorithm","wavelet"));
+		
+		if (algorithm == "nlmeans") {
+			//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
+			sigma =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
+			//parm tool.denoise.local: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3
+			local =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3"));
+			//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1
+			patch =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1"));
+			cmd = wxString::Format("nlmeans,%s,%s,%s",sigma,local,patch);
+		}
+		if (algorithm == "wavelet") {
+			//parm tool.denoise.threshold: Defines the initial value of the threshold for wavelet denoise.  Default=0.0
+			threshold =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0"));
+			cmd = wxString::Format("wavelet,%s",threshold);
+		}
 		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
