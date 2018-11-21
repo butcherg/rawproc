@@ -8,6 +8,7 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 	q = proc;
 	p = params;
 	
+	SetForegroundColour(*wxBLACK);
 	SetSize(parent->GetSize());
 	b = new wxBoxSizer(wxVERTICAL); 
 	g = new wxGridBagSizer();

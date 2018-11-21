@@ -39,7 +39,7 @@ class DenoisePanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, DENOISEENABLE, "denoise:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(200,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
 
@@ -82,9 +82,9 @@ class DenoisePanel: public PicProcPanel
 			wl = new wxRadioButton(this, DENOISEWAVELET, "Wavelet:");
 			g->Add(wl,  wxGBPosition(8,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "threshold:"), wxGBPosition(9,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, "threshold:"), wxGBPosition(9,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 2);
 			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, thresholdval, 4, wxDefaultPosition, spinsize);
-			g->Add(thresh, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+			g->Add(thresh, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 2);
 			
 			bool nlb, wlb;
 			wxArrayString cp = split(params,",");
@@ -113,8 +113,6 @@ class DenoisePanel: public PicProcPanel
 			btn1->Enable(nlb);
 			btn2->Enable(nlb);
 			thresh->Enable(wlb);
-
-
 
 			SetSizerAndFit(g);
 			g->Layout();
