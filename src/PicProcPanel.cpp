@@ -5,7 +5,8 @@
 
 
 PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params): 
-	wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, !wxTAB_TRAVERSAL) 
+	wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL) 
+	//wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, !wxTAB_TRAVERSAL) 
 {
 	int fr=0, fg=0, fb=0;
 	q = proc;
@@ -27,6 +28,8 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 		fb = atoi(fntc[2].c_str());
 	}
 
+	FitInside();
+        SetScrollRate(5, 5);
 	
 	SetForegroundColour(wxColour(fr,fg,fb));
 	wxFont font(wxFontInfo(fontsize).Family(wxFONTFAMILY_SWISS));

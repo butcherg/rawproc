@@ -20,7 +20,7 @@
 
 class PicProcessor;
 
-class PicProcPanel: public wxPanel
+class PicProcPanel: public wxScrolledWindow //wxPanel
 {
 
 	public:
