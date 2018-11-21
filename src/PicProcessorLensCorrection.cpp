@@ -213,32 +213,30 @@ class LensCorrectionPanel: public PicProcPanel
 			enablebox->SetValue(true);
 			b->Add(enablebox, flags);
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(10);
+			b->AddSpacer(5);
 
 			b->Add(new wxStaticText(this,-1, "metadata:", wxDefaultPosition, wxDefaultSize), flags);
-			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,40)), flags);
+			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,50)), flags);
 			b->AddSpacer(5);
 
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			b->Add(cam, flags);
 			b->AddSpacer(2);
 			b->Add(new wxButton(this, CAMERAID, "Select camera"), flags);
-			b->AddSpacer(2);
+			b->AddSpacer(1);
 			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			b->Add(lens, flags);
-			b->AddSpacer(2);
+			b->AddSpacer(1);
 			b->Add(new wxButton(this, LENSID, "Select lens"), flags);
 			b->AddSpacer(2);
-			
+
+			flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
 			ca = new wxCheckBox(this, wxID_ANY, "chromatic abberation");
 			b->Add(ca , flags);
-			b->AddSpacer(1);
 			vig = new wxCheckBox(this, wxID_ANY, "vignetting");
 			b->Add(vig , flags);
-			b->AddSpacer(1);
 			dist = new wxCheckBox(this, wxID_ANY, "distortion");
 			b->Add(dist , flags);
-			b->AddSpacer(1);
 			crop = new wxCheckBox(this, wxID_ANY, "autocrop");
 			b->Add(crop , flags);
 

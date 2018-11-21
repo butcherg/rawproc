@@ -30,13 +30,13 @@ class TonePanel: public PicProcPanel
 
 
 
-			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			g->Add(edit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			wxArrayString str;
 			str.Add("channel");
 			str.Add("luminance");
-			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT), str);
 			g->Add(reinop, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 

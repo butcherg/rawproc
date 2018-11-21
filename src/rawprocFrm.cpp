@@ -302,7 +302,7 @@ void rawprocFrm::CreateGUIControls()
 #else
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.AddPane(pic, wxCENTER);
-	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
+	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0).Fixed());
 	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.GripperTop());
 	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
 	mgr.Update();

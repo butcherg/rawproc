@@ -286,6 +286,12 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 		threshold = atof(cp[1]);
 		algorithm = DENOISEWAVELET;
 	}
+	else if (cp.GetCount() == 3) { //legacy
+		sigma = atof(cp[0]);
+		local = atoi(cp[1]);
+		patch = atoi(cp[2]);
+		algorithm = DENOISENLMEANS;
+	}
 	
 
 	bool result = true;
