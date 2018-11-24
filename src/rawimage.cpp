@@ -611,10 +611,11 @@ char * _loadRAW(const char *filename,
 	if (p.find("output_tiff") != p.end()) 
 		RawProcessor.imgdata.params.output_tiff = atoi(p["output_tiff"].c_str());
 
-	//raw <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li>
+/* Getting confused with rawproc operations
+	//rawhide <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li>
 	if (p.find("user_flip") != p.end()) 
 		RawProcessor.imgdata.params.user_flip = atoi(p["user_flip"].c_str());
-
+*/
 	//raw <li><b>user_black</b>=n - User black level. dcraw: -k &lt;num&gt;</li>
 	if (p.find("user_black") != p.end()) 
 		RawProcessor.imgdata.params.user_black = atoi(p["user_black"].c_str());
@@ -864,6 +865,7 @@ char * _loadRAW(const char *filename,
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 
 	//Normalize libraw orientation for EXIF:
+/*
 	if (RawProcessor.imgdata.params.user_flip <= 0) {
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 		if (S.flip == 0)  info["Orientation"] = "1";
@@ -874,6 +876,7 @@ char * _loadRAW(const char *filename,
 	else {
 		info["Orientation"] = "1"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
 	}
+*/
 
 	time_t rawtime = P2.timestamp;
 	struct tm * timeinfo;
