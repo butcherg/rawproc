@@ -267,7 +267,7 @@ void rawprocFrm::CreateGUIControls()
 	SetStatusBar(WxStatusBar1);
 	SetTitle(_("rawproc"));
 	SetIcon(wxNullIcon);
-	SetSize(0,0,1200,750);
+	SetSize(0,0,1200,820);
 	Center();
 	
 	////GUI Items Creation End
