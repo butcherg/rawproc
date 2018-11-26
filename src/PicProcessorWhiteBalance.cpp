@@ -123,7 +123,16 @@ class WhiteBalancePanel: public PicProcPanel
 				ab->SetValue(true);
 			}
 			else if (p[0] == "camera") {
+				cb->Enable(true);
 				cb->SetValue(true);
+			}
+			else if (p[0] == "patch") {
+				patx = atoi(p[1]);
+				paty = atoi(p[2]);
+				patrad = atof(p[3]);
+				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
+				pb->Enable(true);
+				pb->SetValue(true);
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
 				orgr = atof(p[0]);
@@ -135,14 +144,7 @@ class WhiteBalancePanel: public PicProcPanel
 				ob->SetValue(true);
 				
 			}
-			else if (p[0] == "patch") {
-				patx = atoi(p[1]);
-				paty = atoi(p[2]);
-				patrad = atof(p[3]);
-				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
-				((PicProcessorWhiteBalance *)proc)->SetPatchCoord(patx, paty);
-				pb->SetValue(true);
-			}
+
 			else 
 				wxMessageBox("Error: ill-formed param string");
 
@@ -217,18 +219,16 @@ class WhiteBalancePanel: public PicProcPanel
 				case WBAUTO:
 					q->setParams("auto");
 					break;
+				case WBCAMERA:
+					q->setParams("camera");
+					break;
 				case WBPATCH:
 					q->setParams(wxString::Format("patch,%d,%d,%0.1f",patx, paty, patrad));
 					break;
 				case WBORIGINAL:
 					q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
-					//setMultipliers(orgr, orgg, orgb);
 					break;
-				case WBCAMERA:
-					//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",camr, camg, camb));
-					q->setParams("camera");
-					//setMultipliers(camr, camg, camb);
-					break;
+
 			}
 			q->processPic();
 			Refresh();
@@ -249,15 +249,6 @@ class WhiteBalancePanel: public PicProcPanel
 			else
 				Refresh();
 		}
-/*
-		void setCamera(double rm, double gm, double bm) 
-		{
-			camr = rm; camg = gm; camb = bm;
-			camera->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",rm,gm,bm));
-			cb->Enable(true);
-			Refresh();
-		}
-*/
 
 		void clearSelectors()
 		{
@@ -273,8 +264,7 @@ class WhiteBalancePanel: public PicProcPanel
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
-(), gmult->GetFloatValue(), bmult->GetFloatValue()));
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 		
@@ -309,12 +299,10 @@ class WhiteBalancePanel: public PicProcPanel
 		myFloatCtrl *rmult, *gmult ,*bmult;
 		wxBitmapButton *btn;
 		wxTimer *t;
-		//coord ptch;
 		unsigned patx, paty;
 		double patrad;
 		double orgr, orgg, orgb; //original multipliers, none if new tool
 		double camr, camg, camb; //camera 'as-shot' multipliers
-		//double autr, autg, autb; //auto multipliers 
 
 };
 
@@ -341,7 +329,6 @@ void PicProcessorWhiteBalance::SetPatchCoord(int x, int y)
 	m_display->SetDrawList(dcList);
 	m_display->Refresh();
 	m_display->Update();
-	((WhiteBalancePanel *) toolpanel)->setPatch(patch);
 }
 
 void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
@@ -401,19 +388,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	optypes optype = automatic; 
 	wxArrayString p = split(c, ",");
 	if (p.GetCount() > 0) {
-		if (p[0].Find(".") != wxNOT_FOUND) {  //float multipliers
-			redmult = atof(p[0]);
-			greenmult = atof(p[1]);
-			bluemult = atof(p[2]);
-			optype = multipliers;
-		}
-		else if (p[0].IsNumber()) { //patch, without 'patch'
-			patchx = atoi(p[0]);
-			patchy = atoi(p[1]);
-			patchrad =  atof(p[2]);
-			optype = imgpatch;
-		}
-		else if (p[0] == "patch"){  //patch, with 'patch' parameter
+		if (p[0] == "patch"){  //patch, with 'patch' parameter
 			patchx = atoi(p[1]);
 			patchy = atoi(p[2]);
 			patchrad =  atof(p[3]);
@@ -436,6 +411,18 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 				bluemult = 1.0;
 				optype = multipliers;
 			}
+		}
+		else if (p[0].Find(".") != wxNOT_FOUND) {  //float multipliers
+			redmult = atof(p[0]);
+			greenmult = atof(p[1]);
+			bluemult = atof(p[2]);
+			optype = multipliers;
+		}
+		else if (p[0].IsNumber()) { //patch, without 'patch'
+			patchx = atoi(p[0]);
+			patchy = atoi(p[1]);
+			patchrad =  atof(p[2]);
+			optype = imgpatch;
 		}
 	}
 	else {
