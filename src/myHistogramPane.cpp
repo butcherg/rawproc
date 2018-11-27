@@ -3,11 +3,14 @@
 #include <math.h>
 #include <algorithm>
 #include <wx/clipbrd.h>
+#include "myConfig.h"
+#include "util.h"
 
 
 myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
+	int fr=0, fg=0, fb=0;
 	blankpic = true;
 	SetDoubleBuffered(true);
 	//t = new wxTimer(this);
@@ -26,6 +29,24 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
 	inwindow = false;
+
+	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","10").c_str());
+	wxString fc = wxString(myConfig::getConfig().getValueOrDefault("app.parameters.fontcolor","0"));
+	if (fc == "") fc = "0";
+	wxArrayString fntc = split(fc,",");
+	fr = atoi(fntc[0].c_str());
+	if (fntc.GetCount() < 3) {
+		fg = atoi(fntc[0].c_str());
+		fb = atoi(fntc[0].c_str());
+	}
+	else if (fntc.GetCount() == 3) {
+		fg = atoi(fntc[1].c_str());
+		fb = atoi(fntc[2].c_str());
+	}
+
+	SetForegroundColour(wxColour(fr,fg,fb));
+	wxFont font(wxFontInfo(fontsize).Family(wxFONTFAMILY_SWISS));
+	SetFont(font);
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
