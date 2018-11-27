@@ -108,7 +108,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 		else if (c == "half_resize")
 			dib->ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
 		wxString d = duration();
-		
+		m_tree->SetItemText(id, wxString::Format("demosaic:%s",c));
 		dib->setInfo("LibrawMosaiced", "0");
 
 		//parm tool.demosaic.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=1

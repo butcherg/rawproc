@@ -238,6 +238,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				switch (ret) {
 					case GIMAGE_OK:
 						result = true;
+						m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
 						break;
 					case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
 						wxMessageBox("ColorSpace apply: no input profile in image.");
@@ -267,10 +268,11 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 			}
 			else if (cp[1] == "assign") {
-					if (dib->AssignColorspace(std::string(fname.GetFullPath().c_str())) != GIMAGE_OK) {
+				if (dib->AssignColorspace(std::string(fname.GetFullPath().c_str())) != GIMAGE_OK) {
 					wxMessageBox("ColorSpace assign failed.");
 					result = false;
 				}
+				else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
 				wxString d = duration();
 
 				if (result) 
