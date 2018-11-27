@@ -52,6 +52,8 @@ private:
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
 
+	int zerobucket, onebucket;
+
 	GIMAGE_CHANNEL display_channels;
 	
 	bool inwindow;

@@ -2975,6 +2975,7 @@ std::string gImage::Stats()
 	double toneupperthreshold = 0.95; 
 	double tonelowerthreshold = 0.0;
 
+	#pragma omp parallel for 
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
 			unsigned pos = x + y*w;
@@ -3019,6 +3020,7 @@ std::map<std::string,std::string> gImage::StatsMap()
 	double toneupperthreshold = 0.95; 
 	double tonelowerthreshold = 0.0;
 
+	#pragma omp parallel for 
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
 			unsigned pos = x + y*w;
@@ -3210,6 +3212,46 @@ std::vector<long> gImage::BlueHistogram()
 			if (t < 0.0) t = 0.0;
 			if (t > 255.0) t = 255.0;
 			histogram[floor(t+0.5)]++;
+		}
+	}
+	return histogram;
+}
+
+std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, int &onebucket)
+{
+	std::map<std::string,std::string> stats = StatsMap();
+	float dmin = fmin(atof(stats["bmin"].c_str()), fmin(atof(stats["rmin"].c_str()),atof(stats["gmin"].c_str())));
+	float dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
+
+	float S = (dmax-dmin) / (float) scale;
+	histogramdata zerodat = {0,0,0};
+	std::vector<histogramdata> histogram(scale, zerodat);
+	zerobucket = (int) ((0.0-dmin)/S);
+	onebucket  = (int) ((1.0-dmin)/S);
+
+	#pragma omp parallel
+	{
+		std::vector<unsigned> pr(scale,0);
+		std::vector<unsigned> pg(scale,0);
+		std::vector<unsigned> pb(scale,0);
+		
+		#pragma omp for
+		for(unsigned y = 0; y < h; y++) {
+			for(unsigned x = 0; x < w; x++) {
+				unsigned pos = x + y*w;
+				pr[(unsigned) (image[pos].r-dmin)/S]++;
+				pg[(unsigned) (image[pos].g-dmin)/S]++;
+				pb[(unsigned) (image[pos].b-dmin)/S]++;
+			}
+		}
+		
+		#pragma omp critical 
+		{
+			for (unsigned i=0; i<scale; i++) {
+				histogram[i].r += pr[i];
+				histogram[i].g += pg[i];
+				histogram[i].b += pb[i];
+			}
 		}
 	}
 	return histogram;

@@ -170,6 +170,7 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	rlen=scale; glen=scale; blen=scale;
 	
 	histogram = dib.Histogram(scale);
+	//histogram = dib.Histogram(scale, zerobucket, onebucket);
 
 	bool rmax=false, gmax=false, bmax=false;
 	for (unsigned i=scale-1; i>0; i--) {
