@@ -169,8 +169,8 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
 	
-	histogram = dib.Histogram(scale);
-	//histogram = dib.Histogram(scale, zerobucket, onebucket);
+	//histogram = dib.Histogram(scale);
+	histogram = dib.Histogram(scale, zerobucket, onebucket);
 
 	bool rmax=false, gmax=false, bmax=false;
 	for (unsigned i=scale-1; i>0; i--) {
@@ -209,7 +209,7 @@ void myHistogramPane::SetChannel(GIMAGE_CHANNEL channel)
 	Refresh();
 }
 
- 
+
 void myHistogramPane::render(wxDC&  dc)
 {
 	int w, h;
@@ -222,7 +222,7 @@ void myHistogramPane::render(wxDC&  dc)
 	if (blankpic) return;
 	
 	//go to histogram coordinates:
-	dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
+	//dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
 	dc.SetDeviceOrigin (xorigin, h-yorigin);
 	dc.SetAxisOrientation(true,true);
 
@@ -261,6 +261,11 @@ void myHistogramPane::render(wxDC&  dc)
 		if (order>3) order=1;
 	}
 
+	dc.SetPen(wxPen(wxColour(192,192,0),1));
+	dc.DrawLine(zerobucket, 0, zerobucket, h);
+	dc.SetPen(wxPen(wxColour(0,192,192),1));
+	dc.DrawLine(onebucket,  0, onebucket,  h);
+
 	//marker lines:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
 	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
@@ -290,6 +295,7 @@ void myHistogramPane::render(wxDC&  dc)
 	wxSize sz = dc.GetTextExtent(str);
 	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
 }
+
 
 
 void myHistogramPane::mouseWheelMoved(wxMouseEvent& event) 

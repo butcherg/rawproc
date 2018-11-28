@@ -3223,7 +3223,11 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 	float dmin = fmin(atof(stats["bmin"].c_str()), fmin(atof(stats["rmin"].c_str()),atof(stats["gmin"].c_str())));
 	float dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
 
-	float S = (dmax-dmin) / (float) scale;
+	float S;
+	if (dmax <=1.0)
+		S = (1.0-dmin) / (float) scale;
+	else
+		S = (dmax-dmin) / (float) scale;
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
 	zerobucket = (int) ((0.0-dmin)/S);
@@ -3239,9 +3243,14 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				unsigned pos = x + y*w;
-				pr[(unsigned) (image[pos].r-dmin)/S]++;
-				pg[(unsigned) (image[pos].g-dmin)/S]++;
-				pb[(unsigned) (image[pos].b-dmin)/S]++;
+				//pr[(unsigned) (image[pos].r-dmin)/S]++;
+				//pg[(unsigned) (image[pos].g-dmin)/S]++;
+				//pb[(unsigned) (image[pos].b-dmin)/S]++;
+
+				pr[(unsigned) ((image[pos].r-dmin)/S)]++;
+				pg[(unsigned) ((image[pos].g-dmin)/S)]++;
+				pb[(unsigned) ((image[pos].b-dmin)/S)]++;
+
 			}
 		}
 		
