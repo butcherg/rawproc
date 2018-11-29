@@ -694,8 +694,11 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.no_interpolation = atoi(p["no_interpolation"].c_str());
 
 	//raw <li><b>whitebalance</b>=none|auto|camera|n,n,n,n - whitebalance overrides all other dcraw/libraw white balance parameters, provides a more intuitive way to specify white balance.  Default=none (no value also equals 'none').</li>
+	RawProcessor.imgdata.params.no_auto_scale=1;  //turn it all off
 	if (p.find("whitebalance") != p.end()) {
-		if (p["whitebalance"] == "none" | p["whitebalance"] == "") {
+		if (p["whitebalance"] == "none" | p["whitebalance"].empty()) {
+printf("wb: none.\n"); fflush(stdout);
+			RawProcessor.imgdata.params.no_auto_scale=1;
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
 			RawProcessor.imgdata.params.user_mul[0] = 1;
@@ -704,22 +707,28 @@ char * _loadRAW(const char *filename,
 			RawProcessor.imgdata.params.user_mul[3] = 1;
 		}
 		else if (p["whitebalance"] == "auto" ) {
+printf("wb: auto.\n"); fflush(stdout);
+			RawProcessor.imgdata.params.no_auto_scale=0;
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 1;
 		}
 		else if (p["whitebalance"] == "camera" ) {
+printf("wb: camera.\n"); fflush(stdout);
+			RawProcessor.imgdata.params.no_auto_scale=0;
 			RawProcessor.imgdata.params.use_camera_wb = 1;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
 		}
 		else { //should be four comma-separated multipliers
 			std::vector<std::string> c = split(p["whitebalance"],",");
 			if (c.size() == 4) {
+				RawProcessor.imgdata.params.no_auto_scale=0;
 				RawProcessor.imgdata.params.use_camera_wb = 0;
 				RawProcessor.imgdata.params.use_auto_wb = 0;
-				RawProcessor.imgdata.params.user_mul[0] = atoi(c[0].c_str());
-				RawProcessor.imgdata.params.user_mul[1] = atoi(c[1].c_str());
-				RawProcessor.imgdata.params.user_mul[2] = atoi(c[2].c_str());
-				RawProcessor.imgdata.params.user_mul[3] = atoi(c[3].c_str());
+				RawProcessor.imgdata.params.user_mul[0] = atof(c[0].c_str());
+				RawProcessor.imgdata.params.user_mul[1] = atof(c[1].c_str());
+				RawProcessor.imgdata.params.user_mul[2] = atof(c[2].c_str());
+				RawProcessor.imgdata.params.user_mul[3] = atof(c[3].c_str());
+printf("wb: four numbers.\n"); fflush(stdout);
 			}
 		}
 	}
