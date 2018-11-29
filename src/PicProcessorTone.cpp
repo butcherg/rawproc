@@ -8,6 +8,7 @@
 #define TONEID 7901
 #define TONEGAMMA 7902
 #define TONEREINHARD 7903
+#define TONELOG2 7904
 
 class TonePanel: public PicProcPanel
 {
@@ -25,8 +26,10 @@ class TonePanel: public PicProcPanel
 
 			gamb = new wxRadioButton(this, TONEGAMMA, "Gamma:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			reinb = new wxRadioButton(this, TONEREINHARD, "Reinhard:");
+			log2b = new wxRadioButton(this, TONELOG2, "Log2:");
 			g->Add(gamb, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(reinb, wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(log2b, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
 
@@ -104,6 +107,9 @@ class TonePanel: public PicProcPanel
 				case TONEREINHARD:
 					q->setParams(wxString::Format("reinhard,%s",reinop->GetString(reinop->GetSelection())));
 					break;
+				case TONELOG2:
+					q->setParams(wxString::Format("log2"));
+					break;
 
 			}
 			q->processPic();
@@ -124,7 +130,7 @@ class TonePanel: public PicProcPanel
 	private:
 		wxTextCtrl *edit;
 		wxCheckBox *enablebox;
-		wxRadioButton *gamb, *reinb;
+		wxRadioButton *gamb, *reinb, *log2b;
 		wxChoice *reinop;
 
 };
@@ -144,14 +150,8 @@ void PicProcessorTone::createPanel(wxSimplebook* parent)
 
 bool PicProcessorTone::processPic(bool processnext) 
 {
-	Curve ctrlpts;
 	wxString d;
-	double gamma = atof(c.c_str());
-
 	wxArrayString p = split(c,",");
-
-	
-
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tone.cores","0").c_str());
@@ -160,8 +160,6 @@ bool PicProcessorTone::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 	
-
-
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 
@@ -172,13 +170,24 @@ bool PicProcessorTone::processPic(bool processnext)
 			double gamma = atof(p[1].c_str());
 			double exponent = 1 / gamma;
 			double v = 255.0 * (double)pow((double)255, -exponent);
-			for (int i = 0; i< 256; i+=1) {
-				double color = (double)pow((double)i, exponent) * v;
-				if (color > 255.0) color = 255.0;
-				ctrlpts.insertpoint((double) i, color);
-			}	
+
 			mark();
-			dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+			std::vector<pix>& src = dib->getImageData();
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned i=0; i< src.size(); i++) {
+				src[i].r = pow(src[i].r,exponent);
+				src[i].g = pow(src[i].g,exponent);
+				src[i].b = pow(src[i].b,exponent);				
+			}
+			d = duration();
+
+		}
+		else if (p[0] == "log2") {
+			((wxFrame*) m_display->GetParent())->SetStatusText("tone: log2...");
+			m_tree->SetItemText(id, "tone:log2");
+			GIMAGE_TONEMAP algorithm = LOG2;
+			mark();
+			dib->ApplyToneMap(algorithm, threadcount);
 			d = duration();
 		}
 		else if (p[0] == "reinhard") {
@@ -186,13 +195,14 @@ bool PicProcessorTone::processPic(bool processnext)
 			m_tree->SetItemText(id, "tone:reinhard");
 			GIMAGE_TONEMAP algorithm = REINHARD_CHANNEL;
 			if (p[1] == "luminance") algorithm = REINHARD_TONE;
+
 			mark();
 			dib->ApplyToneMap(algorithm, threadcount);
 			d = duration();
 		}
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.tone.log","0") == "1"))
-			log(wxString::Format("tool=tone,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format("tool=tone:%s,imagesize=%dx%d,threads=%d,time=%s",p[0],dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

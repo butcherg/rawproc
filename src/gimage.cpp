@@ -1965,10 +1965,42 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 //
 // The algorithm implemented is the basic Reinhard algorithm, x/(1+x).
 
+static inline float Log2( float x)
+{
+  return logf(x) / logf(2);
+}
+
 void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 {
+	if (algorithm == GAMMA) { //gonna need a parameter
+		double gamma = 2.2;  //hardcoded until I can set up parameters
+		double exponent = 1 / gamma;
+		double v = 255.0 * (double)pow((double)255, -exponent);
+		std::vector<pix>& src = getImageData();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned i=0; i< src.size(); i++) {
+			src[i].r = pow(src[i].r,exponent);
+			src[i].g = pow(src[i].g,exponent);
+			src[i].b = pow(src[i].b,exponent);				
+		}
+	}
+
+	//okay, I give up for now, here's log in the curve tool:
+	else if (algorithm == LOG2) {
+		Curve ctrlpts;
+		double v = 255.0 * 1.0/log2(255.0);
+		ctrlpts.insertpoint(0.0, 0.0);
+		ctrlpts.insertpoint(1.0, 15.5);
+		for (int i = 2; i< 256; i+=1) {
+			double color = log2((double)i) * v;
+			if (color > 255.0) color = 255.0;
+			ctrlpts.insertpoint((double) i, color);
+		}
+		ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+	}
+
 	//apply directly to each channel:
-	if (algorithm == REINHARD_CHANNEL) {
+	else if (algorithm == REINHARD_CHANNEL) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
 			image[pos].r = image[pos].r/(1.0+image[pos].r);
@@ -1988,6 +2020,12 @@ void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 			image[pos].g *= dT;
 			image[pos].b *= dT;
 		}
+	}
+
+	else if (algorithm == UNSPECIFIED_1) {
+	}
+
+	else if (algorithm == UNSPECIFIED_2) {
 	}
 }
 
