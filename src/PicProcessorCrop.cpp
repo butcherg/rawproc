@@ -427,6 +427,8 @@ class CropPanel: public PicProcPanel
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
+	if (command.IsEmpty())
+		c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
 	//showParams();
 }
 
