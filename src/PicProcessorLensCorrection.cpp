@@ -14,8 +14,11 @@
 #define LENSID 6303
 #define CAMERAID 6304
 
-#define LENSCORRECTIONS 6305
-
+#define LENSCORRECTIONS		6305
+#define LENSCORRECTION_CA	6306
+#define LENSCORRECTION_VIG	6307
+#define LENSCORRECTION_DIST	6308
+#define LENSCORRECTION_AUTOCROP 6309
 
 
 class myListCtrl: public wxListCtrl
@@ -231,14 +234,23 @@ class LensCorrectionPanel: public PicProcPanel
 			b->AddSpacer(2);
 
 			flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
-			ca = new wxCheckBox(this, wxID_ANY, "chromatic abberation");
+/*
+			ca = new wxCheckBox(this, LENSCORRECTION_CA, "chromatic abberation");
 			b->Add(ca , flags);
-			vig = new wxCheckBox(this, wxID_ANY, "vignetting");
+			vig = new wxCheckBox(this, LENSCORRECTION_VIG, "vignetting");
 			b->Add(vig , flags);
-			dist = new wxCheckBox(this, wxID_ANY, "distortion");
+			dist = new wxCheckBox(this, LENSCORRECTION_DIST, "distortion");
 			b->Add(dist , flags);
-			crop = new wxCheckBox(this, wxID_ANY, "autocrop");
+			crop = new wxCheckBox(this, LENSCORRECTION_AUTOCROP, "autocrop");
 			b->Add(crop , flags);
+*/
+			wxArrayString operations;
+			operations.Add("chromatic abberation");
+			operations.Add("vignetting");
+			operations.Add("distortion");
+			operations.Add("autocrop");
+			corr = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, operations);
+			b->Add(corr, flags);
 
 			for (int i=0; i<parms.GetCount(); i++) {
 				wxArrayString nameval = split(parms[i], "=");
@@ -251,10 +263,15 @@ class LensCorrectionPanel: public PicProcPanel
 				if (nameval[0] == "ops") {
 					wxArrayString ops = split(nameval[1],",");
 					for (int j=0; j<ops.GetCount(); j++) {
-						if (ops[j] == "ca") ca->SetValue(true);
-						if (ops[j] == "vig") vig->SetValue(true);
-						if (ops[j] == "dist") dist->SetValue(true);
-						if (ops[j] == "autocrop") crop->SetValue(true);
+						//if (ops[j] == "ca") ca->SetValue(true);
+						//if (ops[j] == "vig") vig->SetValue(true);
+						//if (ops[j] == "dist") dist->SetValue(true);
+						//if (ops[j] == "autocrop") crop->SetValue(true);
+
+						if (ops[j] == "ca") corr->Check(0);
+						if (ops[j] == "vig") corr->Check(1);
+						if (ops[j] == "dist") corr->Check(2);
+						if (ops[j] == "autocrop") corr->Check(3);
 					}
 				}
 			}
@@ -272,8 +289,9 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
-			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this, LENSCORRECTIONS);
+			//Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_CA, LENSCORRECTION_AUTOCROP);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
+			Bind(wxEVT_CHECKLISTBOX, &LensCorrectionPanel::paramChanged, this);
 		}
 
 		~LensCorrectionPanel()
@@ -330,10 +348,15 @@ class LensCorrectionPanel: public PicProcPanel
 			if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
 
 			wxString ops;
-			if (ca->GetValue()) opAppend("ca",ops);
-			if (vig->GetValue()) opAppend("vig",ops);
-			if (dist->GetValue()) opAppend("dist",ops);
-			if (crop->GetValue()) opAppend("autocrop",ops);
+			//if (ca->GetValue()) opAppend("ca",ops);
+			//if (vig->GetValue()) opAppend("vig",ops);
+			//if (dist->GetValue()) opAppend("dist",ops);
+			//if (crop->GetValue()) opAppend("autocrop",ops);
+
+			if (corr->IsChecked(0)) opAppend("ca",ops);
+			if (corr->IsChecked(1)) opAppend("vig",ops);
+			if (corr->IsChecked(2)) opAppend("dist",ops);
+			if (corr->IsChecked(3)) opAppend("autocrop",ops);
 
 			if (ops != "") paramAppend("ops", ops, cmd);
 
@@ -345,6 +368,7 @@ class LensCorrectionPanel: public PicProcPanel
 
 	private:
 		wxCheckBox *ca, *vig, *dist, *crop;
+		wxCheckListBox *corr;
 		wxTextCtrl *cam, *lens;
 		wxCheckBox *enablebox;
 
@@ -472,128 +496,81 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	std::map<std::string, std::string> info = dib->getInfo();
 
-	if (processingenabled & ModifyFlags) {
-		mark();
-		bool success = false;
+	if (processingenabled) {
+		if (ModifyFlags) {
+			mark();
+			bool success = false;
 
-		const lfCamera *cam = NULL;
-		const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camspec.c_str());
-		if (cameras) {
-			cam = cameras[0];
-			success = true;
-		}
-		else {
-			wxMessageBox(wxString::Format("Cannot find a camera matching %s in database\n", camspec.c_str()));
-			success = false;
-		}
-		lf_free (cameras);
-
-		const lfLens *lens = NULL;
-		const lfLens **lenses = NULL;
-		if (success) {
-			// try to find a matching lens in the database
-			lenses = ldb->FindLenses (cam, NULL, lensspec.c_str());
-			if (lenses) {
-				lens = lenses [0];
+			const lfCamera *cam = NULL;
+			const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camspec.c_str());
+			if (cameras) {
+				cam = cameras[0];
 				success = true;
 			}
 			else {
-				wxMessageBox(wxString::Format("Cannot find a lens matching %s in database\n", lensspec.c_str()));
+				wxMessageBox(wxString::Format("Cannot find a camera matching %s in database\n", camspec.c_str()));
 				success = false;
 			}
-			lf_free (lenses);
-		}
+			lf_free (cameras);
 
-		if (success) {
-			lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
-			int modflags = mod->Initialize (
-	        	lens, 
-				LF_PF_F32, 
-				atof(info["FocalLength"].c_str()), 
-				atof(info["FNumber"].c_str()),
-	        		1.0f, //opts.Distance
-				0.0f, //opts.Scale, 
-				LF_RECTILINEAR, //opts.TargetGeom,
-				ModifyFlags, 
-				false //opts.Inverse
-			);
-
-			if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
-
-			unsigned w = dib->getWidth();
-			unsigned h = dib->getHeight();
-
-			if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#2
-				((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: vignetting...");
-				pix * newimg = dib->getImageDataRaw();
-				bool ok = true;
-
-				#pragma omp parallel for num_threads(threadcount)
-				for (unsigned y = 0; y < h; y++) {
-					unsigned p = y*w;
-					ok = mod->ApplyColorModification (&newimg[p], 0.0, y, w, 1, LF_CR_3 (RED, GREEN, BLUE), w);
+			const lfLens *lens = NULL;
+			const lfLens **lenses = NULL;
+			if (success) {
+				// try to find a matching lens in the database
+				lenses = ldb->FindLenses (cam, NULL, lensspec.c_str());
+				if (lenses) {
+					lens = lenses [0];
+					success = true;
 				}
+				else {
+					wxMessageBox(wxString::Format("Cannot find a lens matching %s in database\n", lensspec.c_str()));
+					success = false;
+				}
+				lf_free (lenses);
 			}
 
-			if ((ModifyFlags & LF_MODIFY_DISTORTION) && (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
-				((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation and distortion...");
-				gImage olddib(*dib);
-				pix * newimg = dib->getImageDataRaw();
-				bool ok = true;
-				int lwidth = w * 2 * 3;
-			
-				#pragma omp parallel for num_threads(threadcount)
-				for (unsigned y = 0; y < h; y++) {
-					float pos[lwidth];
-					ok = mod->ApplySubpixelGeometryDistortion (0.0, y, w, 1, pos);
-					if (ok) {
-						unsigned s=0;
-						for (unsigned x = 0; x < w; x++) {
-							unsigned p = x + y*w;
-							newimg[p].r = olddib.getR (pos [s], pos [s+1]);
-							newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
-							newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
-							s += 2 * 3;
-						}
-					}
-				}
-	
-			}
-			else {  //#2, or #3
-	
-				if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
-					((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: distortion...");
-					gImage olddib(*dib);
+			if (success) {
+				lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
+				int modflags = mod->Initialize (
+	        			lens, 
+					LF_PF_F32, 
+					atof(info["FocalLength"].c_str()), 
+					atof(info["FNumber"].c_str()),
+	        			1.0f, //opts.Distance
+					0.0f, //opts.Scale, 
+					LF_RECTILINEAR, //opts.TargetGeom,
+					ModifyFlags, 
+					false //opts.Inverse
+				);
+
+				if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
+
+				unsigned w = dib->getWidth();
+				unsigned h = dib->getHeight();
+
+				if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#1
+					((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: vignetting...");
 					pix * newimg = dib->getImageDataRaw();
 					bool ok = true;
-					int lwidth = w * 2;
-				
+
 					#pragma omp parallel for num_threads(threadcount)
 					for (unsigned y = 0; y < h; y++) {
-						float pos[lwidth];
-						ok = mod->ApplyGeometryDistortion (0.0, y, w, 1, pos);
-						if (ok) {
-							unsigned s=0;
-							for (unsigned x = 0; x < w; x++) {
-								unsigned p = x + y*w;
-								newimg[p] = olddib.getRGB (pos [s], pos [s+1]);
-								s += 2;
-							}
-						}
+						unsigned p = y*w;
+						ok = mod->ApplyColorModification (&newimg[p], 0.0, y, w, 1, LF_CR_3 (RED, GREEN, BLUE), w);
 					}
 				}
-		
-				if (ModifyFlags & LF_MODIFY_TCA) {  //#3
-					((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation...");
+
+				if ((ModifyFlags & LF_MODIFY_DISTORTION) & (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
+					((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation and distortion...");
 					gImage olddib(*dib);
 					pix * newimg = dib->getImageDataRaw();
 					bool ok = true;
 					int lwidth = w * 2 * 3;
-				
+			
 					#pragma omp parallel for num_threads(threadcount)
 					for (unsigned y = 0; y < h; y++) {
 						float pos[lwidth];
-						ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
+						ok = mod->ApplySubpixelGeometryDistortion (0.0, y, w, 1, pos);
 						if (ok) {
 							unsigned s=0;
 							for (unsigned x = 0; x < w; x++) {
@@ -605,16 +582,65 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 							}
 						}
 					}
+	
+				}
+
+				else {  //#2, or #3
+	
+					if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
+						((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: distortion...");
+						gImage olddib(*dib);
+						pix * newimg = dib->getImageDataRaw();
+						bool ok = true;
+						int lwidth = w * 2;
+				
+						#pragma omp parallel for num_threads(threadcount)
+						for (unsigned y = 0; y < h; y++) {
+							float pos[lwidth];
+							ok = mod->ApplyGeometryDistortion (0.0, y, w, 1, pos);
+							if (ok) {
+								unsigned s=0;
+								for (unsigned x = 0; x < w; x++) {
+									unsigned p = x + y*w;
+									newimg[p] = olddib.getRGB (pos [s], pos [s+1]);
+									s += 2;
+								}
+							}
+						}
+					}
+		
+					if (ModifyFlags & LF_MODIFY_TCA) {  //#3
+						((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection: chromatic abberation...");
+						gImage olddib(*dib);
+						pix * newimg = dib->getImageDataRaw();
+						bool ok = true;
+						int lwidth = w * 2 * 3;
+				
+						#pragma omp parallel for num_threads(threadcount)
+						for (unsigned y = 0; y < h; y++) {
+							float pos[lwidth];
+							ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
+							if (ok) {
+								unsigned s=0;
+								for (unsigned x = 0; x < w; x++) {
+									unsigned p = x + y*w;
+									newimg[p].r = olddib.getR (pos [s], pos [s+1]);
+									newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
+									newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
+									s += 2 * 3;
+								}
+							}
+						}
+					}
 				}
 			}
-		}
 
-		wxString d = duration();
+			wxString d = duration();
 
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
-			log(wxString::Format("tool=lenscorrection,%s,imagesize=%dx%d,time=%s",getParams(), dib->getWidth(), dib->getHeight(),d));
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
+				log(wxString::Format("tool=lenscorrection,%s,imagesize=%dx%d,time=%s",getParams(), dib->getWidth(), dib->getHeight(),d));
 	
-
+		}
 	}
 
 	dirty = false;
