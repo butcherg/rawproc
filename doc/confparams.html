@@ -1,6 +1,8 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
+<li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
+<li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
 <li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li>
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
@@ -69,9 +71,11 @@
 <li><a name="tool.curve"><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=half</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=1</li>
+<li><a name="tool.denoise"><b>tool.denoise.algorithm=nlmeans|wavelet The default algorithm to use when adding a denoise tool.  Default=wavelet</b>: </li>
 <li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
 <li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
+<li><a name="tool.denoise"><b>tool.denoise.threshold</b>:  Defines the initial value of the threshold for wavelet denoise.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0</li>
 <li><a name="tool.gamma"><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
@@ -93,6 +97,7 @@
 <li><a name="tool.shadow"><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
 <li><a name="tool.shadow"><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
+<li><a name="tool.tone"><b>tool.tone.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li>
