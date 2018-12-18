@@ -345,6 +345,7 @@ void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
 		return;
 	}
 	SetPatchCoord(patch.x, patch.y);
+	((WhiteBalancePanel *) toolpanel)->setPatch(patch);
 	event.Skip();
 }
 
