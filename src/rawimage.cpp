@@ -612,7 +612,7 @@ char * _loadRAW(const char *filename,
 		RawProcessor.imgdata.params.output_tiff = atoi(p["output_tiff"].c_str());
 
 /* Getting confused with rawproc operations
-	//rawhide <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li>
+	//hide <li><b>user_flip</b>=0|1 - Flip image (0=none, 3=180, 5=90CCW, 6=90CW). dcraw: -t [0-7] Note: Let rawproc deal with this, output.orient=1...</li>
 	if (p.find("user_flip") != p.end()) 
 		RawProcessor.imgdata.params.user_flip = atoi(p["user_flip"].c_str());
 */
