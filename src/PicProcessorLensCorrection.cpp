@@ -244,12 +244,18 @@ class LensCorrectionPanel: public PicProcPanel
 			crop = new wxCheckBox(this, LENSCORRECTION_AUTOCROP, "autocrop");
 			b->Add(crop , flags);
 */
+			b->AddSpacer(5);
+			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			b->AddSpacer(5);
+
 			wxArrayString operations;
 			operations.Add("chromatic abberation");
 			operations.Add("vignetting");
 			operations.Add("distortion");
 			operations.Add("autocrop");
-			corr = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, operations);
+			corr = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, operations, wxBORDER_NONE);
+			corr->SetBackgroundColour(parent->GetBackgroundColour());
+			corr->SetForegroundColour(parent->GetForegroundColour());
 			b->Add(corr, flags);
 
 			for (int i=0; i<parms.GetCount(); i++) {
