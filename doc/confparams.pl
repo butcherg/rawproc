@@ -17,7 +17,7 @@ foreach $file (@files) {
 @conf = sort @conflines;
 foreach $line (@conf) {
 	#print "<li>$line</li><br>\n";
-	my ($parm,$stuff) = split /:/, $line;
+	my ($parm,$stuff) = split /:/, $line,2;
 	my @terms = split /\./, $parm;
 	if ($terms[0] eq 'tool') {
 		print "<li><a name=\"$terms[0].$terms[1]\"><b>$parm</b>: $stuff</li>\n";
