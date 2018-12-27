@@ -171,12 +171,14 @@ class gImage
 
 		//Image operations.  
 		//threadcount=0 uses all available CPUs, n uses precisely n CPUs, and -n uses available-n CPUs
+		//image operations with a std::string params parameter parse a string to apply the operation
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
 		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount=0);
 		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount=0);
 		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount=0);
 		void ApplySharpen(int strength, int threadcount=0);
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
+		void ApplyResize(std::string params, int threadcount=0);
 		void ApplyRotate(double angle, bool crop, int threadcount=0);
 		void ApplyRotate180(int threadcount=0);
 		void ApplyRotate90(int threadcount=0);

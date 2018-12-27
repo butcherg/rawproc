@@ -2876,6 +2876,51 @@ void gImage::ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, 
 	delete t;
 }
 
+void gImage::ApplyResize(std::string params, int threadcount)
+{
+	char cmd[256];
+	strncpy(cmd, params.c_str(), 255);
+	unsigned w, h;  //don't read defaults from properties
+	std::string algo = "catmullrom";
+	char *wstr = strtok(cmd,", ");
+	char *hstr = strtok(NULL,", ");
+	char *astr = strtok(NULL," ");
+	if (wstr == NULL) {
+		printf("Error: resize needs at least one parameter.\n");
+	}
+	else {
+		if (wstr) w = atoi(wstr);
+		if (hstr) h = atoi(hstr);
+		if (astr) algo = std::string(astr);
+		unsigned dw = getWidth();
+		unsigned dh = getHeight();
+
+		//if only one number is provided, put it in the largest dimension, set the other to 0
+		if (hstr == NULL) {
+			if (dh > dw) {
+				h = w;
+				w = 0;
+			}
+			else {
+				h =0;
+			}
+		}
+
+		if (h ==  0) h = dh * ((float)w/(float)dw);
+		if (w == 0)  w = dw * ((float)h/(float)dh); 
+
+		RESIZE_FILTER filter = FILTER_CATMULLROM; 
+		if (algo == "box") filter = FILTER_BOX;
+		if (algo == "bilinear") filter = FILTER_BILINEAR;
+		if (algo == "bspline") filter = FILTER_BSPLINE;
+		if (algo == "bicubic") filter = FILTER_BICUBIC;
+		if (algo == "catmullrom") filter = FILTER_CATMULLROM;
+		if (algo == "lanczos3") filter = FILTER_LANCZOS3;
+
+		ApplyResize(w,h, filter, threadcount);
+	}
+}
+
 
 
 

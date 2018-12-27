@@ -130,6 +130,7 @@ class rawprocFrm : public wxFrame
 		
 	public:
 	PicProcessor *  AddItem(wxString name, wxString command);
+	void ApplyOps(gImage &dib, wxString operations);
 	//void CommandTreeSelChanging(wxTreeEvent& event);
 	void CommandTreeSelChanged(wxTreeEvent& event);
 	void CommandTreeKeyDown(wxTreeEvent& event);

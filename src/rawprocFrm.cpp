@@ -519,7 +519,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	//if      (name == "gamma")      		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
+	//if    (name == "gamma")			p = new PicProcessorGamma("gamma",command, commandtree,  pic);
 	if      (name == "gamma")      		p = new PicProcessorTone("tone","gamma,"+command, commandtree,  pic);
 	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic);
 	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic);
@@ -538,7 +538,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
-	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
@@ -557,6 +557,21 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	return p;
 }
 
+void rawprocFrm::ApplyOps(gImage &dib, wxString operations)
+{
+	wxArrayString ops = split(operations, " ");
+	for (int i=0; i<ops.GetCount(); i++) {
+		wxArrayString cmd = split(ops[i], ":");
+		if (cmd.GetCount() == 2) {
+			if (cmd[0] == "resize") {
+				dib.ApplyResize(cmd[1].ToStdString());
+			}
+			else if (cmd[0] == "sharpen") {
+				dib.ApplySharpen(atoi(cmd[1].c_str()));
+			}
+		}
+	}
+}
 
 
 
@@ -1050,14 +1065,30 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			}
 
 			wxString configparams;
-			//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
-			if (filetype == FILETYPE_JPEG) configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
+			//parm output.*.thumbnails.directory: *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.
+			wxString thumbdir = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.directory","");
+			//parm output.*.thumbnails.parameters: *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.
+			wxString thumbparams = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.parameters","");
+			if (filetype == FILETYPE_JPEG) {
+				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
+				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.parameters",thumbparams.ToStdString());
+			}
 
-			//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul>
-			if (filetype == FILETYPE_TIFF) configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
+			if (filetype == FILETYPE_TIFF) {
+				//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.parameters",thumbparams.ToStdString());
+			}
 
-			//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul>
-			if (filetype == FILETYPE_PNG) configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
+			if (filetype == FILETYPE_PNG) {
+				//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
+			}
 
 
 			if (pic->GetColorManagement()) {
@@ -1114,7 +1145,18 @@ profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output
 				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
 				dib->saveImageFile(fname, std::string(configparams.c_str()));
 			}
+			
 			wxFileName tmpname(fname);
+			
+			if (thumbdir != "") {
+				wxFileName thumb(tmpname.GetPath(wxPATH_GET_SEPARATOR)+thumbdir, tmpname.GetFullName());
+				if (thumb.DirExists()) {
+					WxStatusBar1->SetStatusText(wxString::Format("Saving thumbnail %s...",fname));
+					gImage thumbdib = *dib;
+					ApplyOps(thumbdib, thumbparams);
+					thumbdib.saveImageFile(thumb.GetFullPath());
+				}					
+			}
 
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
 				sourcefilename.Assign(fname);
