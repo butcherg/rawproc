@@ -1771,6 +1771,17 @@ void gImage::ImageBounds(unsigned *x1, unsigned *x2, unsigned *y1, unsigned *y2,
 //extricate the portion of the image of interest.
 //
 
+//This version takes crop dimensions as fractions of width and height:
+void gImage::ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount)
+{
+	unsigned ux1, uy1, ux2, uy2;
+	if (x1 < 1.0)  ux1 = (unsigned) (x1 * w); else ux1 = (unsigned) x1;
+	if (y1 < 1.0)  uy1 = (unsigned) (y1 * h); else uy1 = (unsigned) y1;
+	if (x2 < 1.0)  ux2 = (unsigned) (x2 * w); else ux2 = (unsigned) x2;
+	if (y2 < 1.0)  uy2 = (unsigned) (y2 * h); else uy2 = (unsigned) y2;
+	ApplyCrop(ux1, uy1, ux2, uy2, threadcount);
+}
+
 void gImage::ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount)
 {
 	if (x1>w | y1>h | x2>w | y2>h) return;
