@@ -8,13 +8,14 @@
 
 #include <wx/treectrl.h>
 
-#define ROTATEENABLE 7500
-#define ROTATEAUTOCROP 7501
+#define ROTATEENABLE	7500
+#define ROTATEAUTOCROP	7501
+#define ROTATERESET 	7502
 
-#define ROTATE45	7502
-#define ROTATE90	7503
-#define ROTATE180	7504
-#define ROTATE270	7505
+#define ROTATE45	7503
+#define ROTATE90	7504
+#define ROTATE180	7505
+#define ROTATE270	7506
 
 class RotatePreview: public wxPanel
 {
@@ -22,6 +23,7 @@ class RotatePreview: public wxPanel
 		RotatePreview(wxWindow *parent, wxImage image, double angle, bool autocrop, const wxSize &size=wxDefaultSize, const wxPoint &pos=wxDefaultPosition): wxPanel(parent, wxID_ANY, pos, size)
 		{
 			SetDoubleBuffered(true);
+SetBackgroundColour(*wxBLUE);
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
 			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
 			anglerad = angle * 0.01745329;
@@ -176,13 +178,13 @@ class rotateSlider: public wxControl
 			s->Add(rotate,  wxALIGN_LEFT | wxALL, 1);
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.1f",initialvalue/10.0), wxDefaultPosition, wxSize(30, -1));
 			s->Add(val, 0, wxALIGN_LEFT | wxALL, 1);
-			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn = new wxBitmapButton(this, ROTATERESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
 			s->Add(btn, 0, wxALIGN_LEFT | wxALL, 1);
 			
 			SetSizerAndFit(s);
 			
-			Bind(wxEVT_BUTTON, &rotateSlider::OnButton, this);
+			//Bind(wxEVT_BUTTON, &rotateSlider::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &rotateSlider::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &rotateSlider::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &rotateSlider::OnChanged, this);
@@ -195,19 +197,29 @@ class rotateSlider: public wxControl
 			Refresh();
 			Update();
 		}
-		
+/*		
 		void OnButton(wxCommandEvent& event)
 		{
-			rotate->SetValue(initval);
+			//double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
+			//rotate->SetValue(resetval);
+			//rotate->SetValue(initval);
 			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
 			event.Skip();
 			Refresh();
 			Update();
 		}
-		
+*/		
 		int GetValue()
 		{
 			return rotate->GetValue();
+		}
+
+		void SetValue(int v)
+		{
+			rotate->SetValue(v);
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
+			Refresh();
+			Update();
 		}
 	
 	
@@ -279,8 +291,123 @@ class RotatePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			
+
+			t = new wxTimer(this);
+			Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
+			rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
+			//rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnThumbRelease, this);
+			rotate->Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
+			rotate->Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
+			rotate->Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
+			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this, ROTATEAUTOCROP);
+			Bind(wxEVT_CHECKBOX, &RotatePanel::onEnable, this, ROTATEENABLE);
+			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
+			Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 		}
+
+		~RotatePanel()
+		{
+			t->~wxTimer();
+			q->getCommandTree()-Unbind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
+		void OnCommandtreeSelChanged(wxTreeEvent& event)
+		{
+			event.Skip();
+			//preview->SetPic(gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic()));
+			wxImage i = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
+			//if (hTransform)
+			//	cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
+			preview->SetPic(i);
+		}
+
+		void OnSize(wxSizeEvent& event) 
+		{
+			wxSize s = GetParent()->GetSize();
+			SetSize(s);
+
+			preview->SetSize(g->GetCellSize(2,0));
+
+			//g->RecalcSizes();
+			//g->Layout();
+			event.Skip();
+			Refresh();
+
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			if (autocrop->GetValue())
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+			else
+				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+			q->processPic();
+			DeletePendingEvents();
+			t->Stop();
+			event.Skip();
+		}
+
+		void OnChanged(wxCommandEvent& event)
+		{
+			preview->setAutocrop(autocrop->GetValue());
+			preview->Rotate(rotate->GetValue()/10.0);
+			if (thumb) {
+				thumb = false;
+			}
+			else {
+				t->Start(500,wxTIMER_ONE_SHOT);
+				Refresh();
+				Update();
+			}
+		}
+
+
+		void OnThumbTrack(wxCommandEvent& event)
+		{
+			thumb = true;
+			preview->Rotate(rotate->GetValue()/10.0);
+			event.Skip();
+			Refresh();
+			Update();
+		}
+
+		void OnThumbRelease(wxCommandEvent& event)
+		{
+			if (autocrop->GetValue())
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+			else
+				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+			event.Skip();
+			q->processPic();
+			thumb = true;
+		}
+
+		void OnButton(wxCommandEvent& event)
+		{
+			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
+			rotate->SetValue(resetval);
+			if (autocrop->GetValue())
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+			else
+				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+			preview->Rotate(0.0);
+			Refresh();
+			q->processPic();
+			event.Skip();
+		}
+
 		
 	private:
 		wxCheckBox *autocrop, *enablebox;
