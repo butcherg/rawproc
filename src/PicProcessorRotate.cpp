@@ -184,7 +184,6 @@ class rotateSlider: public wxControl
 			
 			SetSizerAndFit(s);
 			
-			//Bind(wxEVT_BUTTON, &rotateSlider::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &rotateSlider::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &rotateSlider::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBRELEASE, &rotateSlider::OnChanged, this);
@@ -197,18 +196,7 @@ class rotateSlider: public wxControl
 			Refresh();
 			Update();
 		}
-/*		
-		void OnButton(wxCommandEvent& event)
-		{
-			//double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
-			//rotate->SetValue(resetval);
-			//rotate->SetValue(initval);
-			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
-			event.Skip();
-			Refresh();
-			Update();
-		}
-*/		
+		
 		int GetValue()
 		{
 			return rotate->GetValue();
@@ -283,10 +271,7 @@ class RotatePanel: public PicProcPanel
 
 			preview->setAutocrop(autocrop->GetValue());
 
-
-			
 			SetSizerAndFit(b);
-			//b->Layout();
 
 			Refresh();
 			Update();
@@ -295,12 +280,12 @@ class RotatePanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
 			rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
-			//rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnThumbRelease, this);
 			rotate->Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
 			rotate->Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			rotate->Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
 			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this, ROTATEAUTOCROP);
 			Bind(wxEVT_CHECKBOX, &RotatePanel::onEnable, this, ROTATEENABLE);
+			Bind(wxEVT_RADIOBUTTON, &RotatePanel::onRotateSelection, this);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 		}
@@ -356,6 +341,33 @@ class RotatePanel: public PicProcPanel
 			q->processPic();
 			DeletePendingEvents();
 			t->Stop();
+			event.Skip();
+		}
+
+		void onRotateSelection(wxCommandEvent& event)
+		{
+			double rotation;
+			if (r45->GetValue()) {
+				rotate->Enable(true);
+				autocrop->Enable(true);
+				preview->setAutocrop(autocrop->GetValue());
+				rotation = rotate->GetValue()/10.0;
+				if (autocrop->GetValue())
+					q->setParams(wxString::Format("%2.1f,autocrop",rotation));
+				else
+					q->setParams(wxString::Format("%2.1f",rotation));
+			}
+			else {
+				rotate->Enable(false);
+				autocrop->Enable(false);
+				preview->setAutocrop(false);
+				if (r90->GetValue())  {q->setParams(wxString::Format("%2.1f",90.0));  rotation = 90.0;}
+				if (r180->GetValue()) {q->setParams(wxString::Format("%2.1f",180.0)); rotation = 180.0;}
+				if (r270->GetValue()) {q->setParams(wxString::Format("%2.1f",270.0)); rotation = 270.0;}
+			}
+			preview->Rotate(rotation);
+			Refresh();
+			q->processPic();
 			event.Skip();
 		}
 
