@@ -267,9 +267,15 @@ class RotatePanel: public PicProcPanel
 				cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
 
 			preview = new RotatePreview(this,i,initialvalue, acrop, wxSize(pw, ph));
-			b->Add(preview , 1, wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 3);
+			b->Add(preview , 1, wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 10);
 
 			preview->setAutocrop(autocrop->GetValue());
+			if ((int) initialvalue == 90) r90->SetValue(true);
+			else if ((int) initialvalue == 180) r180->SetValue(true);
+			else if ((int) initialvalue == 270) r270->SetValue(true);
+			else r45->SetValue(true);
+			
+			rotateSelection();
 
 			SetSizerAndFit(b);
 
@@ -343,8 +349,8 @@ class RotatePanel: public PicProcPanel
 			t->Stop();
 			event.Skip();
 		}
-
-		void onRotateSelection(wxCommandEvent& event)
+		
+		void rotateSelection()
 		{
 			double rotation;
 			if (r45->GetValue()) {
@@ -368,6 +374,11 @@ class RotatePanel: public PicProcPanel
 			preview->Rotate(rotation);
 			Refresh();
 			q->processPic();
+		}
+
+		void onRotateSelection(wxCommandEvent& event)
+		{
+			rotateSelection();
 			event.Skip();
 		}
 
