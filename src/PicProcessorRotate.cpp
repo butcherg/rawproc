@@ -26,7 +26,7 @@ class RotatePreview: public wxPanel
 SetBackgroundColour(*wxBLUE);
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
 			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
-			anglerad = angle * 0.01745329;
+			anglerad = -angle * 0.01745329;
 			angledeg = angle;
 			orig = image;
 			this->autocrop = autocrop;
@@ -48,7 +48,7 @@ SetBackgroundColour(*wxBLUE);
 
 		void Rotate(double angle)
 		{
-			anglerad = angle * 0.01745329;
+			anglerad = -angle * 0.01745329;
 			angledeg = angle;
 		}
 
@@ -129,7 +129,7 @@ SetBackgroundColour(*wxBLUE);
 			if (!autocrop) return;
 
 			int x1, y1;
-			if (angledeg > 0.0) {
+			if (angledeg < 0.0) {
 				for (x1=sw-1; x1>0; x1--) if (i.GetRed(x1,2) > 0) break;
 				for (y1=0; y1<sh; y1++) if (i.GetRed(2,y1) > 0) break;
 				if (x1 > sw/2 & y1 < sh/2) {
@@ -156,6 +156,7 @@ SetBackgroundColour(*wxBLUE);
 		void setAutocrop(bool a)
 		{
 			autocrop = a;
+			Refresh();
 		}
 
 	private:
@@ -289,7 +290,7 @@ class RotatePanel: public PicProcPanel
 			rotate->Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
 			rotate->Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
 			rotate->Bind(wxEVT_SCROLL_THUMBRELEASE, &RotatePanel::OnThumbRelease, this);
-			Bind(wxEVT_CHECKBOX, &RotatePanel::OnChanged, this, ROTATEAUTOCROP);
+			Bind(wxEVT_CHECKBOX, &RotatePanel::OnThumbRelease, this, ROTATEAUTOCROP);
 			Bind(wxEVT_CHECKBOX, &RotatePanel::onEnable, this, ROTATEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &RotatePanel::onRotateSelection, this);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
@@ -356,6 +357,7 @@ class RotatePanel: public PicProcPanel
 			if (r45->GetValue()) {
 				rotate->Enable(true);
 				autocrop->Enable(true);
+				preview->Enable(true);
 				preview->setAutocrop(autocrop->GetValue());
 				rotation = rotate->GetValue()/10.0;
 				if (autocrop->GetValue())
@@ -366,6 +368,7 @@ class RotatePanel: public PicProcPanel
 			else {
 				rotate->Enable(false);
 				autocrop->Enable(false);
+				preview->Enable(false);
 				preview->setAutocrop(false);
 				if (r90->GetValue())  {q->setParams(wxString::Format("%2.1f",90.0));  rotation = 90.0;}
 				if (r180->GetValue()) {q->setParams(wxString::Format("%2.1f",180.0)); rotation = 180.0;}
@@ -408,6 +411,7 @@ class RotatePanel: public PicProcPanel
 
 		void OnThumbRelease(wxCommandEvent& event)
 		{
+			preview->setAutocrop(autocrop->GetValue());
 			if (autocrop->GetValue())
 				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
 			else
@@ -686,7 +690,7 @@ bool PicProcessorRotate::processPic(bool processnext) {
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled & angle != 0.0) {
 		mark();
-		dib->ApplyRotate(-angle, autocrop, threadcount);
+		dib->ApplyRotate(angle, autocrop, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
