@@ -17,13 +17,65 @@
 #define ROTATE180	7505
 #define ROTATE270	7506
 
+class rotateSlider: public wxControl
+{
+	public:
+		rotateSlider(wxWindow *parent, wxWindowID id, int initialvalue, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE) 
+		{
+			SetBackgroundColour(parent->GetBackgroundColour());
+			initval = initialvalue;
+			wxBoxSizer *s = new wxBoxSizer(wxHORIZONTAL);
+			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxDefaultPosition, wxSize(200, -1));
+			s->Add(rotate,  wxALIGN_LEFT | wxALL, 1);
+			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.1f",initialvalue/10.0), wxDefaultPosition, wxSize(30, -1));
+			s->Add(val, 0, wxALIGN_LEFT | wxALL, 1);
+			btn = new wxBitmapButton(this, ROTATERESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn->SetToolTip("Reset to default");
+			s->Add(btn, 0, wxALIGN_LEFT | wxALL, 1);
+			
+			SetSizerAndFit(s);
+			
+			Bind(wxEVT_SCROLL_CHANGED, &rotateSlider::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBTRACK, &rotateSlider::OnChanged, this);
+			Bind(wxEVT_SCROLL_THUMBRELEASE, &rotateSlider::OnChanged, this);
+		}
+		
+		void OnChanged(wxCommandEvent& event)
+		{
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
+			event.Skip();
+			Refresh();
+			Update();
+		}
+		
+		int GetValue()
+		{
+			return rotate->GetValue();
+		}
+
+		void SetValue(int v)
+		{
+			rotate->SetValue(v);
+			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
+			Refresh();
+			Update();
+		}
+	
+	
+	private:
+		wxSlider *rotate;
+		wxStaticText *val;
+		wxBitmapButton *btn;
+		int initval;
+	
+};
+
 class RotatePreview: public wxPanel
 {
 	public:
 		RotatePreview(wxWindow *parent, wxImage image, double angle, bool autocrop, const wxSize &size=wxDefaultSize, const wxPoint &pos=wxDefaultPosition): wxPanel(parent, wxID_ANY, pos, size)
 		{
 			SetDoubleBuffered(true);
-SetBackgroundColour(*wxBLUE);
 			haspect = (double) image.GetHeight() / (double) image.GetWidth();
 			vaspect = (double) image.GetWidth() / (double) image.GetHeight();
 			anglerad = -angle * 0.01745329;
@@ -78,19 +130,16 @@ SetBackgroundColour(*wxBLUE);
 
 		void OnSize(wxSizeEvent& event) 
 		{
-			wxSize size = /*GetParent()->*/GetParent()->GetSize();
-			SetSize(size.GetWidth(), size.GetWidth() * aspect);
 			int w, h;
 			GetSize(&w,&h);
 
 			img.Destroy();
 
-			//if (haspect < vaspect) 
-			//	img = orig.Scale(w, w* haspect);
-			//else 
-			//	img = orig.Scale(h * vaspect, h);
+			if (haspect < vaspect) 
+				img = orig.Scale(w, w* haspect);
+			else 
+				img = orig.Scale(h * vaspect, h);
 
-			if (w>0 & h>0) img = orig.Scale(w, h);
 			event.Skip();
 			Refresh();
 		}
@@ -101,30 +150,34 @@ SetBackgroundColour(*wxBLUE);
 			int w, h, iw, ih, sw, sh;
 			float dx, dy;
 			GetSize(&w,&h);
-			if (haspect < vaspect) {
-				i = img.Rotate(anglerad, wxPoint(img.GetWidth()/2,img.GetHeight()/2), true);
+
+			wxPaintDC dc(this);
+			i = img.Rotate(anglerad, wxPoint(img.GetWidth()/2,img.GetHeight()/2), true);
+			
+			//if (((int) angledeg == 270) || ((int) angledeg == 90) || ((int) angledeg == 180)) return;
+			
+			if (haspect < vaspect) 
 				i = i.Scale(w, w*haspect);
-			}
-			else {
-				i = img.Rotate(anglerad, wxPoint(img.GetWidth()/2,img.GetHeight()/2), true);
+			else 
 				i = i.Scale(h*vaspect, h);
-			}
+			
 			sw = i.GetWidth();
 			sh = i.GetHeight();
-			wxPaintDC dc(this);
+			
+			dc.SetDeviceOrigin((w-sw)/2, (h-sh)/2);
+
 			dc.DrawBitmap(wxBitmap(i),0,0);
- 
 
 			dc.SetPen(wxPen(*wxLIGHT_GREY, 1, wxPENSTYLE_SHORT_DASH));
-			dc.DrawLine(0,h*0.2,w,h*0.2);
-			dc.DrawLine(0,h*0.4,w,h*0.4);
-			dc.DrawLine(0,h*0.6,w,h*0.6);
-			dc.DrawLine(0,h*0.8,w,h*0.8);
+			dc.DrawLine(0,sh*0.2,sw,sh*0.2);
+			dc.DrawLine(0,sh*0.4,sw,sh*0.4);
+			dc.DrawLine(0,sh*0.6,sw,sh*0.6);
+			dc.DrawLine(0,sh*0.8,sw,sh*0.8);
 
-			dc.DrawLine(w*0.2,0,w*0.2,h);
-			dc.DrawLine(w*0.4,0,w*0.4,h);
-			dc.DrawLine(w*0.6,0,w*0.6,h);
-			dc.DrawLine(w*0.8,0,w*0.8,h);
+			dc.DrawLine(sw*0.2,0,sw*0.2,sh);
+			dc.DrawLine(sw*0.4,0,sw*0.4,sh);
+			dc.DrawLine(sw*0.6,0,sw*0.6,sh);
+			dc.DrawLine(sw*0.8,0,sw*0.8,sh);
 
 			if (!autocrop) return;
 
@@ -152,7 +205,7 @@ SetBackgroundColour(*wxBLUE);
 				}
 			}
 		}
-		
+
 		void setAutocrop(bool a)
 		{
 			autocrop = a;
@@ -163,62 +216,12 @@ SetBackgroundColour(*wxBLUE);
 		wxImage img, orig;
 		double haspect, vaspect, aspect, anglerad, angledeg;
 		bool autocrop, grid;
+		bool orient; //true=horizontal, false=vertical
 		cmsHTRANSFORM hTransform;
 
 };
 
-class rotateSlider: public wxControl
-{
-	public:
-		rotateSlider(wxWindow *parent, wxWindowID id, int initialvalue, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE) 
-		{
-			SetBackgroundColour(parent->GetBackgroundColour());
-			initval = initialvalue;
-			wxBoxSizer *s = new wxBoxSizer(wxHORIZONTAL);
-			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxDefaultPosition, wxSize(200, -1));
-			s->Add(rotate,  wxALIGN_LEFT | wxALL, 1);
-			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.1f",initialvalue/10.0), wxDefaultPosition, wxSize(30, -1));
-			s->Add(val, 0, wxALIGN_LEFT | wxALL, 1);
-			btn = new wxBitmapButton(this, ROTATERESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn->SetToolTip("Reset to default");
-			s->Add(btn, 0, wxALIGN_LEFT | wxALL, 1);
-			
-			SetSizerAndFit(s);
-			
-			Bind(wxEVT_SCROLL_CHANGED, &rotateSlider::OnChanged, this);
-			Bind(wxEVT_SCROLL_THUMBTRACK, &rotateSlider::OnChanged, this);
-			Bind(wxEVT_SCROLL_THUMBRELEASE, &rotateSlider::OnChanged, this);
-		}
-		
-		void OnChanged(wxCommandEvent& event)
-		{
-			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
-			event.Skip();
-			Refresh();
-			Update();
-		}
-		
-		int GetValue()
-		{
-			return rotate->GetValue();
-		}
 
-		void SetValue(int v)
-		{
-			rotate->SetValue(v);
-			val->SetLabel(wxString::Format("%2.1f", rotate->GetValue()/10.0));
-			Refresh();
-			Update();
-		}
-	
-	
-	private:
-		wxSlider *rotate;
-		wxStaticText *val;
-		wxBitmapButton *btn;
-		int initval;
-	
-};
 
 class RotatePanel: public PicProcPanel
 {
@@ -229,6 +232,8 @@ class RotatePanel: public PicProcPanel
 			SetDoubleBuffered(true);
 			thumb = false;
 			wxSize s = GetSize();
+			
+			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 			
 			wxArrayString tok = split(params, ",");
 			double initialvalue = atof(tok[0].c_str());
@@ -241,6 +246,9 @@ class RotatePanel: public PicProcPanel
 			b->Add(enablebox, 0, wxALIGN_LEFT | wxALL, 3);
 			b->Add(new wxStaticLine(this, wxID_ANY,  wxDefaultPosition, wxSize(280,2)), 0,  wxALIGN_LEFT | wxBOTTOM, 10);
 
+			//preview = new RotatePreview(this,i,initialvalue, acrop);
+			//b->Add(preview , 1, wxEXPAND | wxALIGN_CENTER_VERTICAL |wxALIGN_CENTER_HORIZONTAL | wxALL, 1);  // wxSHAPED |
+			
 			r90 = new wxRadioButton(this, ROTATE90, "Rotate 90", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			b->Add(r90 , 0, wxALIGN_LEFT | wxALL, 1);
 			r180 = new wxRadioButton(this, ROTATE180, "Rotate 180", wxDefaultPosition, wxDefaultSize);
@@ -259,16 +267,12 @@ class RotatePanel: public PicProcPanel
 			b->Add(autocrop , 0, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 
-			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
-			int pw = s.GetWidth();
-			int ph = pw * ((double)s.GetHeight()/(double)pw);
-
 			hTransform = proc->getDisplay()->GetDisplayTransform();
 			if (hTransform)
 				cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
-
-			preview = new RotatePreview(this,i,initialvalue, acrop, wxSize(pw, ph));
-			b->Add(preview , 1, wxEXPAND | wxSHAPED | wxALIGN_LEFT |wxALIGN_TOP | wxALL, 10);
+			
+			preview = new RotatePreview(this,i,initialvalue, acrop);
+			b->Add(preview , 1, wxEXPAND | wxALIGN_CENTER_VERTICAL |wxALIGN_CENTER_HORIZONTAL | wxALL, 1);  // wxSHAPED |
 
 			preview->setAutocrop(autocrop->GetValue());
 			if ((int) initialvalue == 90) r90->SetValue(true);
@@ -285,7 +289,7 @@ class RotatePanel: public PicProcPanel
 			SetFocus();
 
 			t = new wxTimer(this);
-			Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
+			//Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
 			rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
 			rotate->Bind(wxEVT_SCROLL_CHANGED, &RotatePanel::OnChanged, this);
 			rotate->Bind(wxEVT_SCROLL_THUMBTRACK, &RotatePanel::OnThumbTrack, this);
@@ -327,13 +331,13 @@ class RotatePanel: public PicProcPanel
 
 		void OnSize(wxSizeEvent& event) 
 		{
-			wxSize s = GetParent()->GetSize();
-			SetSize(s);
+			wxSize s = GetSize();
+			//SetSize(s);
 
-			preview->SetSize(g->GetCellSize(2,0));
+			preview->SetSize(s);
 
-			//g->RecalcSizes();
-			//g->Layout();
+			g->RecalcSizes();
+			g->Layout();
 			event.Skip();
 			Refresh();
 
@@ -355,9 +359,14 @@ class RotatePanel: public PicProcPanel
 		{
 			double rotation;
 			if (r45->GetValue()) {
-				rotate->Enable(true);
-				autocrop->Enable(true);
-				preview->Enable(true);
+				///rotate->Enable(true);
+				///autocrop->Enable(true);
+				///preview->Enable(true);
+				
+				rotate->Show(true);
+				autocrop->Show(true);
+				preview->Show(true);
+				
 				preview->setAutocrop(autocrop->GetValue());
 				rotation = rotate->GetValue()/10.0;
 				if (autocrop->GetValue())
@@ -366,9 +375,14 @@ class RotatePanel: public PicProcPanel
 					q->setParams(wxString::Format("%2.1f",rotation));
 			}
 			else {
-				rotate->Enable(false);
-				autocrop->Enable(false);
-				preview->Enable(false);
+				//rotate->Enable(false);
+				//autocrop->Enable(false);
+				//preview->Enable(false);
+				
+				rotate->Show(false);
+				autocrop->Show(false);
+				preview->Show(false);
+				
 				preview->setAutocrop(false);
 				if (r90->GetValue())  {q->setParams(wxString::Format("%2.1f",90.0));  rotation = 90.0;}
 				if (r180->GetValue()) {q->setParams(wxString::Format("%2.1f",180.0)); rotation = 180.0;}
