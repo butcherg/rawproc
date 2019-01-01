@@ -704,7 +704,10 @@ bool PicProcessorRotate::processPic(bool processnext) {
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled & angle != 0.0) {
 		mark();
-		dib->ApplyRotate(angle, autocrop, threadcount);
+		if ((int) angle == 270) dib->ApplyRotate270(threadcount);
+		else if ((int) angle == 180) dib->ApplyRotate180(threadcount);
+		else if ((int) angle == 90) dib->ApplyRotate90(threadcount);
+		else dib->ApplyRotate(angle, autocrop, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
