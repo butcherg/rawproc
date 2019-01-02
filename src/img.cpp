@@ -895,7 +895,6 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 		
-		//these don't have rawproc equivalents, so they're not added to the metadata-embedded command
 		//img <li>rotate90 - rotate 90 degrees clockwise</li>
 		else if (strcmp(cmd,"rotate90") == 0) {
 			int threadcount = gImage::ThreadCount();
@@ -903,6 +902,9 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			_mark();
 			dib.ApplyRotate90(threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "rotate:90 ");
+			commandstring += std::string(cs);
 		}
 
 		//img <li>rotate180 - rotate 180 degrees</li>
@@ -912,7 +914,9 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			_mark();
 			dib.ApplyRotate180(threadcount);
 			printf("done (%fsec).\n",_duration());
-			
+			char cs[256];
+			sprintf(cs, "rotate:180 ");
+			commandstring += std::string(cs);
 		}
 
 		//img <li>rotate270 - rotate 270 degrees clockwise</li>
@@ -922,8 +926,12 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			_mark();
 			dib.ApplyRotate270(threadcount);
 			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "rotate:270 ");
+			commandstring += std::string(cs);
 		}
 
+		//these don't have rawproc equivalents, so they're not added to the metadata-embedded command
 		//img <li>hmirror - flip horizontal</li>
 		else if (strcmp(cmd,"hmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
