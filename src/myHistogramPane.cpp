@@ -302,17 +302,27 @@ void myHistogramPane::render(wxDC&  dc)
 
 void myHistogramPane::mouseWheelMoved(wxMouseEvent& event) 
 {
+	wxSize s = GetSize();
 	xcenter = event.m_x; ycenter = event.m_y;
 	double inc = 0.1;
 	if (event.ShiftDown()) inc = 1.0;
 	if (event.ControlDown()) inc = 10.0;
 	if (event.GetWheelRotation() > 0) { 
 		wscale += inc;
+		xorigin -= (inc*event.m_x); 
+		yorigin -= inc*(s.GetHeight()-event.m_y);
 	}
 	else {
 		wscale -= inc;
+		xorigin += (inc*event.m_x); 
+		yorigin += inc*(s.GetHeight()-event.m_y);
 	}
-	if (wscale < 1.0) wscale = 1.0;
+	if (wscale < 1.0) {
+		wscale = 1.0;
+		xorigin = 0;
+		yorigin = 0;
+	}
+
 
 	Refresh();
 	
