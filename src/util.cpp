@@ -130,6 +130,10 @@ wxString duration ()
 	return wxString::Format("%fsec", _duration());
 }
 
+float durationf ()
+{
+	return _duration();
+}
 
 
 //File logging:

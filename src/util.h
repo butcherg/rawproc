@@ -52,6 +52,7 @@ wxImage gImage2wxImage(gImage &dib, int oob);
 //cross-platform duration:
 void mark ();
 wxString duration ();
+float durationf();
 
 
 //Logging to file:
