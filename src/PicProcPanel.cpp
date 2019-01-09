@@ -11,6 +11,7 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 	int fr=0, fg=0, fb=0;
 	q = proc;
 	p = params;
+	rateAdapt = false;
 	
 	//parm app.parameters.fontsize: Integer font size for paramter pane dialogs.  Default=10
 	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","10").c_str());
@@ -44,6 +45,11 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 PicProcPanel::~PicProcPanel()
 {
 
+}
+
+void PicProcPanel::setRateAdapt(bool r)
+{
+	rateAdapt = r;
 }
 
 void PicProcPanel::OnSize(wxSizeEvent& event) 

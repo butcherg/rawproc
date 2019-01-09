@@ -8,7 +8,7 @@
 #include "myConfig.h"
 
 wxDEFINE_EVENT(myCURVE_UPDATE, wxCommandEvent);
-
+wxDEFINE_EVENT(myCURVE_CHANGE, wxCommandEvent);
 
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
  
@@ -117,7 +117,10 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 		mouseCP.x = (double) pos.x;
 		mouseCP.y = (double) pos.y;
 		paintNow();
-		
+		wxCommandEvent e(myCURVE_CHANGE);
+		e.SetEventObject(this);
+		e.SetString("update");
+		ProcessWindowEvent(e);
 	}
 }
 

@@ -9,6 +9,7 @@
 using namespace std;
 
 wxDECLARE_EVENT(myCURVE_UPDATE, wxCommandEvent);
+wxDECLARE_EVENT(myCURVE_CHANGE, wxCommandEvent);
 
 class CurvePane : public wxPanel
 {

@@ -47,7 +47,8 @@ class CurvePanel: public PicProcPanel
 			else
 				chan->SetSelection(chan->FindString("rgb"));
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
-			Bind(myCURVE_UPDATE, &CurvePanel::paramChanged, this);
+			Bind(myCURVE_UPDATE, &CurvePanel::paramUpdated, this);
+			Bind(myCURVE_CHANGE, &CurvePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
 			Refresh();
 		}
@@ -70,7 +71,7 @@ class CurvePanel: public PicProcPanel
 			}
 		}
 
-		void paramChanged(wxCommandEvent& event)
+		void paramUpdated(wxCommandEvent& event)
 		{
 			wxString ch = chan->GetString(chan->GetSelection());
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
@@ -78,6 +79,17 @@ class CurvePanel: public PicProcPanel
 			q->setParams(ch+","+curve->getControlPoints());
 			q->processPic();
 			event.Skip();
+		}
+
+		void paramChanged(wxCommandEvent& event)
+		{
+			if (rateAdapt) {
+				wxString ch = chan->GetString(chan->GetSelection());
+				((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
+				((PicProcessorCurve *) q)->setChannel(ch);
+				q->setParams(ch+","+curve->getControlPoints());
+				q->processPic();
+			}
 		}
 
 		
@@ -165,10 +177,17 @@ bool PicProcessorCurve::processPic(bool processnext) {
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneCurve(ctrlpts, channel, threadcount);
-		wxString d = duration();
+		float d = durationf();
+
+		toolpanel->setRateAdapt(false);
+		//parm tool.all.rateadapt=1|0 - Enable/disable rate adaptation, where mousemoves will process the image.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("tool.all.rateadapt","0") == "1")
+			//parm tool.curve.rateadaptthreshold=sec - Specify threshold to turn on rate adaptation, in seconds. Default=0.3
+			if (d < atof(myConfig::getConfig().getValueOrDefault("tool.curve.rateadaptthreshold","0.3").c_str()))
+				toolpanel->setRateAdapt(true);
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.curve.log","0") == "1"))
-			log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(), threadcount, d));
+			log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%0.3f",dib->getWidth(), dib->getHeight(), threadcount, d));
 	}
 
 	dirty = false;
@@ -178,6 +197,7 @@ bool PicProcessorCurve::processPic(bool processnext) {
 
 	return result;
 }
+
 
 void PicProcessorCurve::displayProcessedPic() 
 {
