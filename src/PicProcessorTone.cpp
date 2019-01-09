@@ -9,6 +9,7 @@
 #define TONEGAMMA 7902
 #define TONEREINHARD 7903
 #define TONELOG2 7904
+#define TONELOGGAM 7905
 
 class TonePanel: public PicProcPanel
 {
@@ -27,9 +28,11 @@ class TonePanel: public PicProcPanel
 			gamb = new wxRadioButton(this, TONEGAMMA, "Gamma:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			reinb = new wxRadioButton(this, TONEREINHARD, "Reinhard:");
 			log2b = new wxRadioButton(this, TONELOG2, "Log2:");
+			hybloggam = new wxRadioButton(this, TONELOGGAM, "Hybrid Log-Gamma:");
 			g->Add(gamb, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(reinb, wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(log2b, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(hybloggam, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
 
@@ -110,6 +113,9 @@ class TonePanel: public PicProcPanel
 				case TONELOG2:
 					q->setParams(wxString::Format("log2"));
 					break;
+				case TONELOGGAM:
+					q->setParams(wxString::Format("loggamma"));
+					break;
 
 			}
 			q->processPic();
@@ -130,7 +136,7 @@ class TonePanel: public PicProcPanel
 	private:
 		wxTextCtrl *edit;
 		wxCheckBox *enablebox;
-		wxRadioButton *gamb, *reinb, *log2b;
+		wxRadioButton *gamb, *reinb, *log2b, *hybloggam;
 		wxChoice *reinop;
 
 };
@@ -178,6 +184,25 @@ bool PicProcessorTone::processPic(bool processnext)
 				src[i].r = pow(src[i].r,exponent);
 				src[i].g = pow(src[i].g,exponent);
 				src[i].b = pow(src[i].b,exponent);				
+			}
+			d = duration();
+
+		}
+		else if (p[0] == "loggamma") {
+			((wxFrame*) m_display->GetParent())->SetStatusText("tone: hybrid log gamma...");
+			m_tree->SetItemText(id, "tone:loggamma");
+
+			double a = 0.17883277, b = 0.28466892, c = 0.55991073;
+			double rubicon = 1.0/12.0;
+			double sqrt3 = sqrt(3);
+
+			mark();
+			std::vector<pix>& src = dib->getImageData();
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned i=0; i< src.size(); i++) {
+				if (src[i].r > rubicon) src[i].r = a * log(12*src[i].r - b) + c; else src[i].r = sqrt3 * pow(src[i].r, 0.5); 
+				if (src[i].g > rubicon) src[i].g = a * log(12*src[i].g - b) + c; else src[i].g = sqrt3 * pow(src[i].g, 0.5); 
+				if (src[i].b > rubicon) src[i].b = a * log(12*src[i].b - b) + c; else src[i].b = sqrt3 * pow(src[i].b, 0.5); 
 			}
 			d = duration();
 
