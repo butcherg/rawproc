@@ -180,10 +180,10 @@ bool PicProcessorCurve::processPic(bool processnext) {
 		float d = durationf();
 
 		toolpanel->setRateAdapt(false);
-		//parm tool.all.rateadapt=1|0 - Enable/disable rate adaptation, where mousemoves will process the image.  Default=0
+		//parm tool.all.rateadapt: 0/1 Enable/disable rate adaptation, where mousemoves will process the image.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("tool.all.rateadapt","0") == "1")
-			//parm tool.curve.rateadaptthreshold=sec - Specify threshold to turn on rate adaptation, in seconds. Default=0.3
-			if (d < atof(myConfig::getConfig().getValueOrDefault("tool.curve.rateadaptthreshold","0.3").c_str()))
+			//parm tool.curve.rateadapt.threshold: Specify threshold to turn on rate adaptation, in seconds. Default=0.01
+			if (d < atof(myConfig::getConfig().getValueOrDefault("tool.curve.rateadapt.threshold","0.01").c_str()))
 				toolpanel->setRateAdapt(true);
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.curve.log","0") == "1"))
