@@ -27,8 +27,8 @@ class TonePanel: public PicProcPanel
 
 			gamb = new wxRadioButton(this, TONEGAMMA, "Gamma:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			reinb = new wxRadioButton(this, TONEREINHARD, "Reinhard:");
-			log2b = new wxRadioButton(this, TONELOG2, "Log2:");
-			hybloggam = new wxRadioButton(this, TONELOGGAM, "Hybrid Log-Gamma:");
+			log2b = new wxRadioButton(this, TONELOG2, "Log2");
+			hybloggam = new wxRadioButton(this, TONELOGGAM, "Hybrid Log-Gamma");
 			g->Add(gamb, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(reinb, wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(log2b, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
@@ -51,15 +51,32 @@ class TonePanel: public PicProcPanel
 			SetFocus();
 
 			wxArrayString p = split(params,",");
-			if (p[0] == "gamma")
-				edit->SetValue(p[1]);
-			else
+			if (p[0] == "gamma") {
+				gamb->SetValue(true);
+				if (p.GetCount() >=2) 
+					edit->SetValue(p[1]);
+				else
+					edit->SetValue("1.0");
+			}
+			else {
 				edit->SetValue("1.0");
-			if (p[0] == "reinhard")
-				reinop->SetStringSelection(p[1]);
-			else
+			}
+			if (p[0] == "reinhard") {
+				reinb->SetValue(true);
+				if (p.GetCount() >=2) 
+					reinop->SetStringSelection(p[1]);
+				else
+					reinop->SetSelection(reinop->FindString("channel"));
+			}
+			else {
 				reinop->SetSelection(reinop->FindString("channel"));
-
+			}
+			if (p[0] == "log2") {
+				log2b->SetValue(true);
+			}
+			if (p[0] == "loggamma") {
+				hybloggam->SetValue(true);
+			}
 
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
