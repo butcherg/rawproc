@@ -1752,7 +1752,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1")
 			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic);
 		else
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "0,255", commandtree, pic);
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb,0,255", commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
