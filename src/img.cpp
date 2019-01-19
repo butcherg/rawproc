@@ -1183,7 +1183,7 @@ int main (int argc, char **argv)
 	std::string conffile;
 	bool noconf = false;
 	int f;
-	opterr = 0;
+	//opterr = 0;
 
 	while ((f = getopt(argc, argv, (char *) "fnc:")) != -1)
 		switch(f) {
