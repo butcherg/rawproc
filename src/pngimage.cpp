@@ -66,7 +66,7 @@ bool _loadPNGInfo(const char *filename, unsigned *width, unsigned *height, unsig
 
 	unsigned char * marker;
 	unsigned marker_length;
-	if (png_get_eXIf_1(png, pinfo, &marker_length, &marker));
+	if (png_get_eXIf_1(png, pinfo, &marker_length, &marker))
 		parse_eXIf_chunk(marker, marker_length, info);
 
 	fclose(fp);
