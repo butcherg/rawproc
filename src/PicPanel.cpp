@@ -601,15 +601,30 @@ END_EVENT_TABLE()
 	}
       
 #define ID_SOFTPROOF 3000
-#define ID_ZOOM 3001	  
+#define ID_ZOOM 3001
+#define ID_PIXEL 3002  
 	void PicPanel::OnRightDown(wxMouseEvent& event)
 	{
 		event.Skip();
 		if (blank) return;
 		wxMenu mnu;
+		wxString xy;
+		wxArrayString p;
+		mnu.Append(ID_PIXEL, "Pixel Copy...");
 		mnu.Append(ID_SOFTPROOF, "Soft Proof...");
 		mnu.Append(ID_ZOOM, "Zoom");
 		switch (GetPopupMenuSelectionFromUser(mnu)) {
+			case ID_PIXEL:
+				xy = wxGetTextFromUser ("copy", "Copy pixel RGB from (x,y):", wxString::Format("%d,%d",imgX, imgY), this);
+				p = split(xy, ",");
+				if (p.GetCount() > 1) {
+					std::vector<float> rgb = d->getPixelArray(atoi(p[0].c_str()), atoi(p[1].c_str()));
+					if (wxTheClipboard->Open()) {
+						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", rgb[0], rgb[1], rgb[2])) );
+						wxTheClipboard->Close();
+					}
+				}
+				break;
 			case ID_SOFTPROOF:
 				//InfoDialog(event.GetItem());
 				wxMessageBox("ID_SOFTPROOF");
