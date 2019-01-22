@@ -12,6 +12,7 @@ with floating point pixel values.  Here's a list of the implemented manipulation
 - Contrast
 - Crop
 - Curve
+- Demosaic
 - Denoise
 - Exposure
 - Gamma
@@ -119,3 +120,56 @@ automake --add-missing
 </pre>
 
 Now, you have the files to proceed with ./configure... make... etc.
+
+## Prerequisites:
+
+If you're on a Debian/Ubuntu or derivatives, install these packages:
+
+<pre>
+sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev libraw-dev
+</pre>
+
+Next, if you want to compile rawproc, get the wxWidgets sources and do a static compile:
+
+<pre>
+wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.2/wxWidgets-3.1.2.tar.bz2
+tar -xjvf wxWidgets-3.1.2.tar.bz2
+cd wxWidgets-3.1.2/
+mkdir build-linux
+cd build-linux
+../configure --disable-shared --enable-unicode
+make
+</pre>
+
+You can make install wxWidgets, I find it just as convenient to use their
+wx-config script to link in-place. 
+
+## Building rawproc
+
+cd over to the rawproc directory and
+do the following:
+
+<pre>
+mkdir build-linux
+cd build-linux
+../configure --enable-demosaic --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
+make
+sudo make install
+</pre>
+
+...and there you go, rawproc, img, and exif binaries will be installed in
+/usr/local/bin.
+
+## Building img without rawproc
+
+If you just want to build the img command line program, just leave out the
+wxWidgets build, then do this to build:
+
+<pre>
+mkdir build-linux
+cd build-linux
+../configure --enable-demosaic --disable-wxwidgets CXXFLAGS=-O3
+cd src
+make img
+</pre>
+
