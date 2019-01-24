@@ -2152,6 +2152,11 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 	return a;
 }
 
+bool f(double d)
+{
+	return true;
+}
+
 
 //Demosaic
 //
@@ -2169,7 +2174,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	unsigned cfarray[2][2] = 	
 	{
 		{ 0, 1 },
-		{ 1, 2 }
+		{ 3, 2 }
 	};
 
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
@@ -2237,19 +2242,18 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	}
 	else if (algorithm == DEMOSAIC_VNG) {
 		int isize = w * h;
-		std::vector<pix>& img = getImageData();
+		
 		float * rawdata = new float[isize];
 		float * red = new float[isize];
 		float * green = new float[isize];
 		float * blue = new float[isize];
 		
-		std::function< bool(double) > f;
-		
+		printf("vng: 1\n"); fflush(stdout);
 		for (unsigned i=0; i<isize; i++) 
-			rawdata[i] = image[i].r;
+			rawdata[i] = image[i].r * 65536.0;
 		
-		rpError result = vng4_demosaic (w, h, (const float * const *) rawdata, &red, &green, &blue, cfarray, f);
-
+		vng4_demosaic (w, h, &rawdata, &red, &green, &blue, cfarray, f);
+		
 		for (unsigned i=0; i<isize; i++) {
 			image[i].r = red[i];
 			image[i].g = green[i];
