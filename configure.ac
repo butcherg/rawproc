@@ -179,8 +179,13 @@ AC_ARG_ENABLE([demosaic],
 )
 if test "$enable_demosaic" == "yes"
 then
-	CXXFLAGS="$CXXFLAGS -DUSE_DEMOSAIC"
-	
+	PKG_CHECK_MODULES([RTPROCESS],[rtprocess], [
+		CPPFLAGS="$RTPROCESS_CFLAGS $CPPFLAGS"
+		LIBS="$RTPROCESS_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
+	CXXFLAGS="$CXXFLAGS -DUSE_DEMOSAIC"	
 fi
 AM_CONDITIONAL(DEMOSAIC, test x$enable_demosaic = xyes)
 
