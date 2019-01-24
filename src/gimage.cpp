@@ -17,6 +17,7 @@
 #include "pngimage.h"
 #include "gimage/strutil.h"
 #include "cJSON.h"
+#include <rtprocess/librtprocess.h>
 
 #define PI            3.14159265358979323846
 #ifndef M_PI
@@ -2159,10 +2160,17 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 //channels in the quad pixels so the unmosaiced image can be regarded as what was recorded
 //through the color filter array, in color.  Still, it's hard to see even at 200%
 //
+
 void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 {
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
+	
+	unsigned cfarray[2][2] = 	
+	{
+		{ 0, 1 },
+		{ 1, 2 }
+	};
 
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
@@ -2226,6 +2234,32 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 			}
 		}
 		c = 3;
+	}
+	else if (algorithm == DEMOSAIC_VNG) {
+		int isize = w * h;
+		std::vector<pix>& img = getImageData();
+		float * rawdata = new float[isize];
+		float * red = new float[isize];
+		float * green = new float[isize];
+		float * blue = new float[isize];
+		
+		std::function< bool(double) > f;
+		
+		for (unsigned i=0; i<isize; i++) 
+			rawdata[i] = image[i].r;
+		
+		rpError result = vng4_demosaic (w, h, (const float * const *) rawdata, &red, &green, &blue, cfarray, f);
+
+		for (unsigned i=0; i<isize; i++) {
+			image[i].r = red[i];
+			image[i].g = green[i];
+			image[i].b = blue[i];
+		}
+		
+		delete [] rawdata;
+		delete [] red;
+		delete [] green;
+		delete [] blue;
 	}
 }
 
