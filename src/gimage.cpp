@@ -18,6 +18,7 @@
 #include "gimage/strutil.h"
 #include "cJSON.h"
 #include <rtprocess/librtprocess.h>
+#include <rtprocess/jaggedarray.h>
 
 #define PI            3.14159265358979323846
 #ifndef M_PI
@@ -2242,54 +2243,28 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	}
 	else if (algorithm == DEMOSAIC_VNG) {
 
-		float **rawdata = (float **)malloc(w * sizeof(float *)); 
-		for (unsigned i=0; i<w; i++) 
-			rawdata[i] = (float *)malloc(h * sizeof(float)); 
+		librtprocess::JaggedArray<float> rawdata(w, h);
+		librtprocess::JaggedArray<float> red(w, h);
+		librtprocess::JaggedArray<float> green(w, h);
+		librtprocess::JaggedArray<float> blue(w, h);
 
-		float **red     = (float **)malloc(w * sizeof(float *)); 
-		for (unsigned i=0; i<w; i++) 
- 			red[i]     = (float *)malloc(h * sizeof(float)); 
-
-		float **green   = (float **)malloc(w * sizeof(float *)); 
-		for (unsigned i=0; i<w; i++) 
-			green[i]   = (float *)malloc(h * sizeof(float)); 
-
-		float **blue    = (float **)malloc(w * sizeof(float *)); 
-		for (unsigned i=0; i<w; i++)
-			blue[i]    = (float *)malloc(h * sizeof(float)); 
-		
-		for (unsigned x=0; x<w; x++) {
-			for (unsigned y=0; y<h; y++) {
-				unsigned pos = x + y*h;
-				rawdata[x][y] = image[pos].r * 65536.0;
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
 			}
 		}
-		
+	
 		vng4_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
-		
-		for (unsigned x=0; x<w; x++) {
-			for (unsigned y=0; y<h; y++) {
-				unsigned pos = x + y*h;
-				image[pos].r = red[x][y];
-				image[pos].g = green[x][y];
-				image[pos].b = blue[x][y];
+	
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x] /65536.0;
+				image[pos].g = green[y][x] /65536.0;
+				image[pos].b = blue[y][x] /65536.0;
 			}
 		}
-
-		for (unsigned i=0; i<w; i++)
-			free(blue[i]);
-		free( blue );
-		for (unsigned i=0; i<w; i++)
-			free(green[i]);
-		free( green );
-		for (unsigned i=0; i<w; i++)
-			free(red[i]);
-		free( red );
-		for (unsigned i=0; i<w; i++)
-			free(rawdata[i]);
-		free( rawdata );
-
-
 	}
 }
 
