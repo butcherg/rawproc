@@ -2241,29 +2241,55 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		c = 3;
 	}
 	else if (algorithm == DEMOSAIC_VNG) {
-		int isize = w * h;
+
+		float **rawdata = (float **)malloc(w * sizeof(float *)); 
+		for (unsigned i=0; i<w; i++) 
+			rawdata[i] = (float *)malloc(h * sizeof(float)); 
+
+		float **red     = (float **)malloc(w * sizeof(float *)); 
+		for (unsigned i=0; i<w; i++) 
+ 			red[i]     = (float *)malloc(h * sizeof(float)); 
+
+		float **green   = (float **)malloc(w * sizeof(float *)); 
+		for (unsigned i=0; i<w; i++) 
+			green[i]   = (float *)malloc(h * sizeof(float)); 
+
+		float **blue    = (float **)malloc(w * sizeof(float *)); 
+		for (unsigned i=0; i<w; i++)
+			blue[i]    = (float *)malloc(h * sizeof(float)); 
 		
-		float * rawdata = new float[isize];
-		float * red = new float[isize];
-		float * green = new float[isize];
-		float * blue = new float[isize];
-		
-		printf("vng: 1\n"); fflush(stdout);
-		for (unsigned i=0; i<isize; i++) 
-			rawdata[i] = image[i].r * 65536.0;
-		
-		vng4_demosaic (w, h, &rawdata, &red, &green, &blue, cfarray, f);
-		
-		for (unsigned i=0; i<isize; i++) {
-			image[i].r = red[i];
-			image[i].g = green[i];
-			image[i].b = blue[i];
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*h;
+				rawdata[x][y] = image[pos].r * 65536.0;
+			}
 		}
 		
-		delete [] rawdata;
-		delete [] red;
-		delete [] green;
-		delete [] blue;
+		vng4_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
+		
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*h;
+				image[pos].r = red[x][y];
+				image[pos].g = green[x][y];
+				image[pos].b = blue[x][y];
+			}
+		}
+
+		for (unsigned i=0; i<w; i++)
+			free(blue[i]);
+		free( blue );
+		for (unsigned i=0; i<w; i++)
+			free(green[i]);
+		free( green );
+		for (unsigned i=0; i<w; i++)
+			free(red[i]);
+		free( red );
+		for (unsigned i=0; i<w; i++)
+			free(rawdata[i]);
+		free( rawdata );
+
+
 	}
 }
 
