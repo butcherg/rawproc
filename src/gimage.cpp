@@ -18,7 +18,7 @@
 #include "gimage/strutil.h"
 #include "cJSON.h"
 #include <rtprocess/librtprocess.h>
-#include <rtprocess/jaggedarray.h>
+//#include <rtprocess/jaggedarray.h>
 
 #define PI            3.14159265358979323846
 #ifndef M_PI
@@ -2243,10 +2243,30 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	}
 	else if (algorithm == DEMOSAIC_VNG) {
 
-		librtprocess::JaggedArray<float> rawdata(w, h);
-		librtprocess::JaggedArray<float> red(w, h);
-		librtprocess::JaggedArray<float> green(w, h);
-		librtprocess::JaggedArray<float> blue(w, h);
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+		
+		float **rawdata = (float **)malloc(h * sizeof(float *));
+		rawdata[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			rawdata[i] = rawdata[i - 1] + w; 
+
+		float **red     = (float **)malloc(h * sizeof(float *)); 
+		red[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			red[i]     = red[i - 1] + w;
+
+		float **green     = (float **)malloc(h * sizeof(float *)); 
+		green[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			green[i]     = green[i - 1] + w;
+
+		float **blue     = (float **)malloc(h * sizeof(float *)); 
+		blue[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			blue[i]     = blue[i - 1] + w;
 
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
@@ -2260,11 +2280,75 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				image[pos].r = red[y][x] /65536.0;
-				image[pos].g = green[y][x] /65536.0;
-				image[pos].b = blue[y][x] /65536.0;
+				image[pos].r = red[y][x] /65535.f;
+				image[pos].g = green[y][x] /65535.f;
+				image[pos].b = blue[y][x] /65535.f;
 			}
 		}
+		
+		free (blue[0]);
+		free( blue );
+		free (green[0]);
+		free( green );
+		free (red[0]);
+		free( red );
+		free (rawdata[0]);
+		free( rawdata );
+	}
+	
+	else if (algorithm == DEMOSAIC_RCD) {
+
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+		
+		float **rawdata = (float **)malloc(h * sizeof(float *));
+		rawdata[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			rawdata[i] = rawdata[i - 1] + w; 
+
+		float **red     = (float **)malloc(h * sizeof(float *)); 
+		red[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			red[i]     = red[i - 1] + w;
+
+		float **green     = (float **)malloc(h * sizeof(float *)); 
+		green[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			green[i]     = green[i - 1] + w;
+
+		float **blue     = (float **)malloc(h * sizeof(float *)); 
+		blue[0] = (float *)malloc(w*h * sizeof(float));
+		for (unsigned i=1; i<h; i++) 
+			blue[i]     = blue[i - 1] + w;
+
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r;// * 65535.f;
+			}
+		}
+	
+		rcd_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
+	
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x];// /65535.f;
+				image[pos].g = green[y][x];// /65535.f;
+				image[pos].b = blue[y][x];// /65535.f;
+			}
+		}
+		
+		free (blue[0]);
+		free( blue );
+		free (green[0]);
+		free( green );
+		free (red[0]);
+		free( red );
+		free (rawdata[0]);
+		free( rawdata );
 	}
 }
 
