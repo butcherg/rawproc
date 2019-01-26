@@ -43,9 +43,7 @@
 #include <locale.h>
 #include <lensfun/lensfun.h>
 #endif
-#ifdef USE_DEMOSAIC
 #include "PicProcessorDemosaic.h"
-#endif
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
@@ -113,9 +111,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
-#ifdef USE_DEMOSAIC
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
-#endif
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	EVT_CHAR(rawprocFrm::CharEvent)
@@ -224,9 +220,7 @@ void rawprocFrm::CreateGUIControls()
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
-#ifdef USE_DEMOSAIC
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DEMOSAIC,		_("Demosaic"), _(""), wxITEM_NORMAL);
-#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
@@ -542,9 +536,7 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
-#ifdef USE_DEMOSAIC
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
-#endif
 	else return NULL;
 	p->createPanel(parambook);
 	p->processPic();
@@ -1919,7 +1911,6 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 }
 #endif
 
-#ifdef USE_DEMOSAIC
 void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
@@ -1936,7 +1927,6 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
 	}
 }
-#endif
 
 void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 {

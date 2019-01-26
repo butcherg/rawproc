@@ -173,11 +173,11 @@ then
 fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
 
-#demosaic:
-AC_ARG_ENABLE([demosaic],
-        AS_HELP_STRING([--enable-demosaic], [enables demosaic.])
+#librtprocess:
+AC_ARG_ENABLE([librtprocess],
+        AS_HELP_STRING([--enable-librtprocess], [enables librtprocess, which contains additional demosaic algorithms.])
 )
-if test "$enable_demosaic" == "yes"
+if test "$enable_librtprocess" == "yes"
 then
 	PKG_CHECK_MODULES([RTPROCESS],[rtprocess], [
 		CPPFLAGS="$RTPROCESS_CFLAGS $CPPFLAGS"
@@ -185,9 +185,9 @@ then
 	],[
 		AC_MSG_ERROR([not found.])
 	])
-	CXXFLAGS="$CXXFLAGS -DUSE_DEMOSAIC"	
+	CXXFLAGS="$CXXFLAGS -DUSE_LIBRTPROCESS"	
 fi
-AM_CONDITIONAL(DEMOSAIC, test x$enable_demosaic = xyes)
+AM_CONDITIONAL(LIBRTPROCESS, test x$enable_librtprocess = xyes)
 
 #old LibRaw dcraw params, pre 0.18.7:
 AC_ARG_ENABLE([old-libraw],

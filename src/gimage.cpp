@@ -18,7 +18,7 @@
 #include "gimage/strutil.h"
 #include "cJSON.h"
 #include <rtprocess/librtprocess.h>
-//#include <rtprocess/jaggedarray.h>
+#include <rtprocess/jaggedarray.h>
 
 #define PI            3.14159265358979323846
 #ifndef M_PI
@@ -2158,11 +2158,32 @@ bool f(double d)
 	return true;
 }
 
+float ** RT_malloc(unsigned w, unsigned h)
+{
+	float **rawdata = (float **)malloc(h * sizeof(float *));
+	rawdata[0] = (float *)malloc(w*h * sizeof(float));
+	for (unsigned i=1; i<h; i++) 
+		rawdata[i] = rawdata[i - 1] + w; 
+	return rawdata;
+}
+
+void RT_free(float ** rawdata)
+{
+	free (rawdata[0]);
+	free( rawdata );	
+}
 
 //Demosaic
 //
-//This is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB (or other pattern)
-//quad and turns it into a single RGB pixel.  "COLOR" doesn't demosaic, it zeros out the other 
+//Turns an out-of-camera image mosaic into a the RGB image array we've come to know and love.  The 
+//main algorithms used come courtesy of RawTherapee, and the librtprocess library.
+//
+//half is a "toy" demosaic, for instructional purposes. "HALF" simply takes the RGGB (or other pattern)
+//quad and turns it into a single RGB pixel. Since each four-pixel quad is turned into a single pixel, 
+//the results of this algorithm are an image that is half the size of the original, hence the catchy
+//name.  half_resize will produce the half image and then re-scale it to the original dimensions.
+//
+//"color" doesn't demosaic, it zeros out the other 
 //channels in the quad pixels so the unmosaiced image can be regarded as what was recorded
 //through the color filter array, in color.  Still, it's hard to see even at 200%
 //
@@ -2171,17 +2192,21 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 {
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
-	
+
+	//for librtprocess algorithms, start with all zeros;
 	unsigned cfarray[2][2] = 	
 	{
-		{ 0, 1 },
-		{ 3, 2 }
+		{ 1, 1 },
+		{ 1, 1 }
 	};
 
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+
+	if (imginfo["LibrawCFAPattern"] == "GRBG") { q = {1, 0, 2, 1}; cfarray[0][1] = 0; cfarray[1][0] = 2; }
+	else if (imginfo["LibrawCFAPattern"] == "GBRG") { q = {1, 2, 0, 1}; cfarray[1][0] = 0; cfarray[0][1] = 2; }
+	else if (imginfo["LibrawCFAPattern"] == "BGGR") { q = {2, 1, 1, 0}; cfarray[1][1] = 0; cfarray[0][0] = 2; }
+	else cfarray[0][0] = 0; cfarray[1][1] = 2;  //RGGB default
+
 
 	if (algorithm == DEMOSAIC_HALF | algorithm == DEMOSAIC_HALF_RESIZE) {
 		#pragma omp parallel for num_threads(threadcount)
@@ -2241,13 +2266,21 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		}
 		c = 3;
 	}
+
+#ifdef USE_LIBRTPROCESS
 	else if (algorithm == DEMOSAIC_VNG) {
 
-		//librtprocess::JaggedArray<float> rawdata(w, h);
-		//librtprocess::JaggedArray<float> red(w, h);
-		//librtprocess::JaggedArray<float> green(w, h);
-		//librtprocess::JaggedArray<float> blue(w, h);
-		
+		//change the second G(1) into G1(3), for vng4:
+		for (int y=1; y>=0; y--) {
+			for (int x=1; x>=0; x--) {
+				if (cfarray[y][x] == 1) {
+					cfarray[y][x] = 3;
+					goto outofloop;
+				}
+			}
+		}
+		outofloop:
+			
 		float **rawdata = (float **)malloc(h * sizeof(float *));
 		rawdata[0] = (float *)malloc(w*h * sizeof(float));
 		for (unsigned i=1; i<h; i++) 
@@ -2268,6 +2301,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		for (unsigned i=1; i<h; i++) 
 			blue[i]     = blue[i - 1] + w;
 
+		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
@@ -2276,7 +2310,8 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		}
 	
 		vng4_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
-	
+
+		#pragma omp parallel for num_threads(threadcount)	
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
@@ -2298,58 +2333,121 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	
 	else if (algorithm == DEMOSAIC_RCD) {
 
-		//librtprocess::JaggedArray<float> rawdata(w, h);
-		//librtprocess::JaggedArray<float> red(w, h);
-		//librtprocess::JaggedArray<float> green(w, h);
-		//librtprocess::JaggedArray<float> blue(w, h);
-		
-		float **rawdata = (float **)malloc(h * sizeof(float *));
-		rawdata[0] = (float *)malloc(w*h * sizeof(float));
-		for (unsigned i=1; i<h; i++) 
-			rawdata[i] = rawdata[i - 1] + w; 
+		librtprocess::JaggedArray<float> rawdata(w, h);
+		librtprocess::JaggedArray<float> red(w, h);
+		librtprocess::JaggedArray<float> green(w, h);
+		librtprocess::JaggedArray<float> blue(w, h);
 
-		float **red     = (float **)malloc(h * sizeof(float *)); 
-		red[0] = (float *)malloc(w*h * sizeof(float));
-		for (unsigned i=1; i<h; i++) 
-			red[i]     = red[i - 1] + w;
-
-		float **green     = (float **)malloc(h * sizeof(float *)); 
-		green[0] = (float *)malloc(w*h * sizeof(float));
-		for (unsigned i=1; i<h; i++) 
-			green[i]     = green[i - 1] + w;
-
-		float **blue     = (float **)malloc(h * sizeof(float *)); 
-		blue[0] = (float *)malloc(w*h * sizeof(float));
-		for (unsigned i=1; i<h; i++) 
-			blue[i]     = blue[i - 1] + w;
-
+		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				rawdata[y][x] = image[pos].r;// * 65535.f;
+				rawdata[y][x] = image[pos].r * 65535.f;
 			}
 		}
 	
 		rcd_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
-	
+
+		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				image[pos].r = red[y][x];// /65535.f;
-				image[pos].g = green[y][x];// /65535.f;
-				image[pos].b = blue[y][x];// /65535.f;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
 			}
 		}
-		
-		free (blue[0]);
-		free( blue );
-		free (green[0]);
-		free( green );
-		free (red[0]);
-		free( red );
-		free (rawdata[0]);
-		free( rawdata );
 	}
+
+	else if (algorithm == DEMOSAIC_DCB) {
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
+			}
+		}
+	
+		dcb_demosaic (w, h, rawdata, red, green, blue, cfarray, f, 1, true);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
+			}
+		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
+	}
+
+	else if (algorithm == DEMOSAIC_AMAZE) {
+
+		librtprocess::JaggedArray<float> rawdata(w, h);
+		librtprocess::JaggedArray<float> red(w, h);
+		librtprocess::JaggedArray<float> green(w, h);
+		librtprocess::JaggedArray<float> blue(w, h);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
+			}
+		}
+	
+		amaze_demosaic (w, h,0,0,w,h, rawdata, red, green, blue, cfarray, f, 1, 0, 1.0, 1.0);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
+			}
+		}
+	}
+
+	else if (algorithm == DEMOSAIC_IGV) {
+
+		librtprocess::JaggedArray<float> rawdata(w, h);
+		librtprocess::JaggedArray<float> red(w, h);
+		librtprocess::JaggedArray<float> green(w, h);
+		librtprocess::JaggedArray<float> blue(w, h);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
+			}
+		}
+	
+		igv_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
+			}
+		}
+	}
+#endif //USE_LIBRTPROCESS
 }
 
 

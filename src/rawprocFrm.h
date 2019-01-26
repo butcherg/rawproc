@@ -187,9 +187,7 @@ class rawprocFrm : public wxFrame
 #ifdef USE_LENSFUN
 	void MnuLensCorrection(wxCommandEvent& event);
 #endif
-#ifdef USE_DEMOSAIC
 	void MnuDemosaic(wxCommandEvent& event);
-#endif
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetStartPath(wxString path);
 	void SetBackground();

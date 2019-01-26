@@ -23,12 +23,14 @@ class DemosaicPanel: public PicProcPanel
 			b->AddSpacer(10);
 
 			wxArrayString opers;
-			//opers.Add("amaze");
-			//opers.Add("dcb");
-			//opers.Add("igv");
+#ifdef USE_LIBRTPROCESS
+			opers.Add("amaze");
+			opers.Add("dcb");
+			opers.Add("igv");
 			//opers.Add("lmmse");
 			opers.Add("rcd");
 			opers.Add("vng");
+#endif
 			opers.Add("half");
 			opers.Add("half_resize");
 			opers.Add("color");
@@ -113,10 +115,18 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			dib->ApplyDemosaic(DEMOSAIC_HALF, threadcount);
 		else if (c == "half_resize")
 			dib->ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
+#ifdef USE_LIBRTPROCESS
 		else if (c == "vng") 
 			dib->ApplyDemosaic(DEMOSAIC_VNG, threadcount);
 		else if (c == "rcd") 
 			dib->ApplyDemosaic(DEMOSAIC_RCD, threadcount);
+		else if (c == "dcb") 
+			dib->ApplyDemosaic(DEMOSAIC_DCB, threadcount);
+		else if (c == "amaze") 
+			dib->ApplyDemosaic(DEMOSAIC_AMAZE, threadcount);
+		else if (c == "igv") 
+			dib->ApplyDemosaic(DEMOSAIC_IGV, threadcount);
+#endif
 		wxString d = duration();
 		m_tree->SetItemText(id, wxString::Format("demosaic:%s",c));
 		dib->setInfo("LibrawMosaiced", "0");
