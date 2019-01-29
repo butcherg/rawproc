@@ -2200,6 +2200,25 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		{ 1, 1 }
 	};
 
+	float rgb_cam[3][4] = { 
+		{ 0.0, 0.0, 0.0, 0.0 },
+		{ 0.0, 0.0, 0.0, 0.0 },
+		{ 0.0, 0.0, 0.0, 0.0 }
+	};
+
+	std::string rgb_cam_str = imginfo["LibrawRGBCam"];
+	std::vector<std::string> rgb_cam_list  = split(rgb_cam_str, ",");
+	rgb_cam[0][0] = atof(rgb_cam_list[0].c_str());
+	rgb_cam[0][1] = atof(rgb_cam_list[1].c_str());
+	rgb_cam[0][2] = atof(rgb_cam_list[2].c_str());
+	rgb_cam[1][0] = atof(rgb_cam_list[3].c_str());
+	rgb_cam[1][1] = atof(rgb_cam_list[4].c_str());
+	rgb_cam[1][2] = atof(rgb_cam_list[5].c_str());
+	rgb_cam[2][0] = atof(rgb_cam_list[6].c_str());
+	rgb_cam[2][1] = atof(rgb_cam_list[7].c_str());
+	rgb_cam[2][2] = atof(rgb_cam_list[8].c_str());
+
+
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 
 	if (imginfo["LibrawCFAPattern"] == "GRBG") { q = {1, 0, 2, 1}; cfarray[0][1] = 0; cfarray[1][0] = 2; }
@@ -2275,11 +2294,11 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 			for (int x=1; x>=0; x--) {
 				if (cfarray[y][x] == 1) {
 					cfarray[y][x] = 3;
-					goto outofloop;
+					goto vng4loop;
 				}
 			}
 		}
-		outofloop:
+		vng4loop:
 			
 		float **rawdata = (float **)malloc(h * sizeof(float *));
 		rawdata[0] = (float *)malloc(w*h * sizeof(float));
@@ -2436,6 +2455,34 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		}
 	
 		igv_demosaic (w, h, rawdata, red, green, blue, cfarray, f);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
+			}
+		}
+	}
+
+	else if (algorithm == DEMOSAIC_AHD) {
+
+		librtprocess::JaggedArray<float> rawdata(w, h);
+		librtprocess::JaggedArray<float> red(w, h);
+		librtprocess::JaggedArray<float> green(w, h);
+		librtprocess::JaggedArray<float> blue(w, h);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
+			}
+		}
+	
+		ahd_demosaic (w, h, rawdata, red, green, blue, cfarray, rgb_cam, f);
 
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
