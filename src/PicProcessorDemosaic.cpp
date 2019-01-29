@@ -141,6 +141,8 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 		else if (c == "ahd") 
 			dib->ApplyDemosaic(DEMOSAIC_AHD, threadcount);
 #endif
+		else 
+			wxMessageBox(wxString::Format("Unknown demosaic algorithm: %s",c.c_str()));
 		wxString d = duration();
 		m_tree->SetItemText(id, wxString::Format("demosaic:%s",c));
 		dib->setInfo("LibrawMosaiced", "0");

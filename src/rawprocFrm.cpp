@@ -1916,8 +1916,12 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.demosaic.default: Demosaic algorithm default.  Default=ahd
+		//parm tool.demosaic.default: Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.
+#ifdef USE_LIBRTPROCESS
 		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd"));
+#else
+		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half"));
+#endif
 		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
