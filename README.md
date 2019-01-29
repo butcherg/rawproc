@@ -1,10 +1,10 @@
 # rawproc
 Raw camera and general image processor, my way...
 
-I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but I'm aiming to make it tablet-
-friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does tone manipulation.  It saves 
-the processing applied in the EXIF of the saved image because I do not like the sidecar concept.  It works internally 
-with floating point pixel values.  Here's a list of the implemented manipulations:
+I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but one day I'll make it tablet-
+friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does 
+tone manipulation.  It saves the processing applied in the EXIF of the saved image because I do not like the sidecar 
+concept.  It works internally with floating point pixel values.  Here's a list of the implemented manipulations:
 
 - Black/White Point
 - Bright
@@ -32,11 +32,9 @@ the order of the manipulations.  Also, you have to deal with the raw image, in t
 demosaic, colorspace conversion, and gamma are for you to make.  The input image is dark, so learn to deal with it.  
 And, in doing so, you'll learn valuable things about digital images.
 
-In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, 
-a 255-value histogram, and no thumbnail.
+In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, a 255-value histogram, and no thumbnail.
 
-So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list 
-saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata.  This is my take on 'non-destructive' editing.
+So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata.  This is my take on 'non-destructive' editing.
 
 rawproc also implements what I call 'incremental processing', in that each added manipulation does its thing against the 
 previous one and stores the result; adding a manipulation doesn't restart the whole processing chain, it just pulls the 
@@ -63,6 +61,7 @@ Contributed code and algorithmns:
 	  https://github.com/erich666/GraphicsGems/blob/master/gemsiii/filter.c</li>
 	<li>Color Management: Primaries and black/white points from Elle Stone's make-elles-profiles.c, 
 	  https://github.com/ellelstone/elles_icc_profiles</li>
+	<li>Demosaic: librtprocess, https://github.com/CarVac/librtprocess</li>
 </ul>
 
 I started rawproc development with FreeImage, http://freeimage.sourceforge.net/.  It served well to flesh out 
@@ -71,26 +70,17 @@ I ended up writing my own image library, gimage, https://github.com/butcherg/gim
 endeavor, but well worth the effort, as I now have high-quality image algorithms with OpenMP threading throughout, with 
 color management tools to boot.  Also, gimage has only one internal tone representation, floating point.  Image
 manipulations are a little slower as a result, but I've done some pixel-peep comparisons and the tone gradations do
-look better.  double, float, or half floating point representations are selectable at compile-time; the 0.5 Windows 
-installer version uses half because I ran into heap limits with a 32-bit executable.  One of my post-0.5 to-do items 
-is to make a 64-bit compilation line.  I compile my Linux version with float; I can't see that using double provides 
-any advantage worth the memory use for the tone ranges we work with in general purpose photography.
-
-Color management is new to 0.5, and is probably deficient in more than one way.  I defer to LibRaw for input profiles and
-transformations, and use Little CMS for display and output transforms.  I also made use of Elle Stone's profile code to
-implement internal profiles.  Any feedback on correcting or improving what I've implemented for color 
-management is appreciated.
+look better.  double, float, or half floating point representations are selectable at compile-time; the 32-bit Windows 
+installer version uses half because I ran into heap limits with a 32-bit executable.  I compile my Linux version with 
+float; I can't see that using double provides any advantage worth the memory use for the tone ranges we work with in 
+general purpose photography.
 
 I offer no promise of support or enhancement, past offering the code on Github for you to fork. It is organized to compile 
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
 on Ubuntu x86_64 and Windows 7, 8, and 10.
 
-To compile in a Linux OS,  you need to have wxWidgets, gimage, LibRaw, libjpeg, libpng, libtiff, and LittleCMS installed, with the associated development headers.  Lensfun is needed for lens correction, but needs to be enabled at ./configure with --enable-lensfun.
-Basically the same thing applies to compiling in Windows, except you'll probably have to spend more time figuring where 
-you put wxWidgets.  
-
-'img' is a command line program that uses the same image processing routines as rawproc. The only 
-comprehensive documentation is the img.cpp source file.  You use it like this:
+'img' is a command line program that uses the same image processing routines as rawproc. The only comprehensive 
+documentation is the img.cpp source file.  You use it like this:
 
 <pre>
 img input.jpg resize:640,0 sharpen:1 output.jpg
