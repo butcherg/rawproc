@@ -142,7 +142,7 @@ do the following:
 <pre>
 mkdir build-linux
 cd build-linux
-../configure --enable-demosaic --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
+../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
 make
 sudo make install
 </pre>
@@ -152,14 +152,20 @@ sudo make install
 
 ## Building img without rawproc
 
-If you just want to build the img command line program, just leave out the
-wxWidgets build, then do this to build:
+If you just want to build the img command line program, without the wxWidgets library, then do this:
 
 <pre>
 mkdir build-linux
 cd build-linux
-../configure --enable-demosaic --disable-wxwidgets CXXFLAGS=-O3
+../configure --enable-lensfun --enable-librtprocess --disable-wxwidgets CXXFLAGS=-O3
 cd src
 make img
 </pre>
 
+# Notes
+
+1. Lens correction using the lensfun library requires particular attention to where the lens correction database is stored.
+Even then, I don't guarantee it'll work correctly at this point.
+
+2. Color management requires the user to specify a profile directory, and in that directory shall go all profiles used, 
+camera, working, and display/output.  rawproc doesn't use the operating system color management facilities.
