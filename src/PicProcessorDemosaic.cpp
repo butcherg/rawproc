@@ -24,6 +24,7 @@ class DemosaicPanel: public PicProcPanel
 
 			wxArrayString opers;
 #ifdef USE_LIBRTPROCESS
+			opers.Add("ahd");
 			opers.Add("amaze");
 			opers.Add("dcb");
 			opers.Add("igv");
@@ -36,6 +37,17 @@ class DemosaicPanel: public PicProcPanel
 			opers.Add("color");
 
 			operselect = new wxRadioBox (this, DEMOSAICOP, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			operselect->SetItemToolTip(operselect->FindString("ahd"),"");
+			operselect->SetItemToolTip(operselect->FindString("amaze"),"Good for low ISO images, architectural images. Fast.");
+			operselect->SetItemToolTip(operselect->FindString("dcb"),"");
+			operselect->SetItemToolTip(operselect->FindString("igv"),"");
+			//operselect->SetItemToolTip(operselect->FindString("lmmse"),"");
+			operselect->SetItemToolTip(operselect->FindString("rcd"),"Good for low ISO images, nature images. Faster than amaze.");
+			operselect->SetItemToolTip(operselect->FindString("vng"),"Slow, good for medium ISO images.");
+			operselect->SetItemToolTip(operselect->FindString("half"),"Turns each bayer quad into a single RGB pixel. Demosaiced mage is half the size of the original.  Fast.");
+			operselect->SetItemToolTip(operselect->FindString("half_resize"),"Does half, then resizes to the original width and height. Somewhat fast, low quality.");
+			operselect->SetItemToolTip(operselect->FindString("color"),"Doesn't demosaic, colors the image according to the bayer array");
+
 			if (params != "") operselect->SetSelection(operselect->FindString(params));
 			b->Add(operselect,flags);
 
@@ -126,6 +138,8 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			dib->ApplyDemosaic(DEMOSAIC_AMAZE, threadcount);
 		else if (c == "igv") 
 			dib->ApplyDemosaic(DEMOSAIC_IGV, threadcount);
+		else if (c == "ahd") 
+			dib->ApplyDemosaic(DEMOSAIC_AHD, threadcount);
 #endif
 		wxString d = duration();
 		m_tree->SetItemText(id, wxString::Format("demosaic:%s",c));
