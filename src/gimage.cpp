@@ -18,7 +18,7 @@
 #include "gimage/strutil.h"
 #include "cJSON.h"
 #include <rtprocess/librtprocess.h>
-#include <rtprocess/jaggedarray.h>
+//#include <rtprocess/jaggedarray.h>  //maybe, later....
 
 #define PI            3.14159265358979323846
 #ifndef M_PI
@@ -2352,10 +2352,15 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 	
 	else if (algorithm == DEMOSAIC_RCD) {
 
-		librtprocess::JaggedArray<float> rawdata(w, h);
-		librtprocess::JaggedArray<float> red(w, h);
-		librtprocess::JaggedArray<float> green(w, h);
-		librtprocess::JaggedArray<float> blue(w, h);
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
 
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
@@ -2376,6 +2381,11 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 				image[pos].b = blue[y][x]  / 65535.f;
 			}
 		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
 	}
 
 	else if (algorithm == DEMOSAIC_DCB) {
@@ -2413,10 +2423,15 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 
 	else if (algorithm == DEMOSAIC_AMAZE) {
 
-		librtprocess::JaggedArray<float> rawdata(w, h);
-		librtprocess::JaggedArray<float> red(w, h);
-		librtprocess::JaggedArray<float> green(w, h);
-		librtprocess::JaggedArray<float> blue(w, h);
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
 
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
@@ -2437,14 +2452,24 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 				image[pos].b = blue[y][x]  / 65535.f;
 			}
 		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
 	}
 
 	else if (algorithm == DEMOSAIC_IGV) {
 
-		librtprocess::JaggedArray<float> rawdata(w, h);
-		librtprocess::JaggedArray<float> red(w, h);
-		librtprocess::JaggedArray<float> green(w, h);
-		librtprocess::JaggedArray<float> blue(w, h);
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
 
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
@@ -2465,14 +2490,24 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 				image[pos].b = blue[y][x]  / 65535.f;
 			}
 		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
 	}
 
 	else if (algorithm == DEMOSAIC_AHD) {
 
-		librtprocess::JaggedArray<float> rawdata(w, h);
-		librtprocess::JaggedArray<float> red(w, h);
-		librtprocess::JaggedArray<float> green(w, h);
-		librtprocess::JaggedArray<float> blue(w, h);
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
 
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned y=0; y<h; y++) {
@@ -2493,6 +2528,11 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 				image[pos].b = blue[y][x]  / 65535.f;
 			}
 		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
 	}
 #endif //USE_LIBRTPROCESS
 }
