@@ -2534,6 +2534,45 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		RT_free(red);
 		RT_free(rawdata);
 	}
+
+	else if (algorithm == DEMOSAIC_LMMSE) {
+
+		//librtprocess::JaggedArray<float> rawdata(w, h);
+		//librtprocess::JaggedArray<float> red(w, h);
+		//librtprocess::JaggedArray<float> green(w, h);
+		//librtprocess::JaggedArray<float> blue(w, h);
+
+		float ** rawdata = RT_malloc(w, h);
+		float ** red = RT_malloc(w, h);
+		float ** green = RT_malloc(w, h);
+		float ** blue = RT_malloc(w, h);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				rawdata[y][x] = image[pos].r * 65535.f;
+			}
+		}
+
+		lmmse_demosaic(w, h, rawdata, red, green, blue, cfarray, f, 1);
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				image[pos].r = red[y][x]   / 65535.f;
+				image[pos].g = green[y][x] / 65535.f;
+				image[pos].b = blue[y][x]  / 65535.f;
+			}
+		}
+
+		RT_free(blue);
+		RT_free(green);
+		RT_free(red);
+		RT_free(rawdata);
+	}
+
 #endif //USE_LIBRTPROCESS
 }
 

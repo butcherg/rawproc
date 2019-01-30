@@ -28,7 +28,7 @@ class DemosaicPanel: public PicProcPanel
 			opers.Add("amaze");
 			opers.Add("dcb");
 			opers.Add("igv");
-			//opers.Add("lmmse");
+			opers.Add("lmmse");
 			opers.Add("rcd");
 			opers.Add("vng");
 #endif
@@ -140,6 +140,8 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			dib->ApplyDemosaic(DEMOSAIC_IGV, threadcount);
 		else if (c == "ahd") 
 			dib->ApplyDemosaic(DEMOSAIC_AHD, threadcount);
+		else if (c == "lmmse") 
+			dib->ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
 #endif
 		else 
 			wxMessageBox(wxString::Format("Unknown demosaic algorithm: %s",c.c_str()));
