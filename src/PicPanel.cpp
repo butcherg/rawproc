@@ -747,7 +747,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 			picY -= picY * 0.1;
 		}
 	}
-	parentframe->SetStatusText(wxString::Format("scale: %.0f%", scale*100),2);
+	parentframe->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
 	parentframe->SetStatusText("");
 	Refresh();
 	
