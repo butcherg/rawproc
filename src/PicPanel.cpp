@@ -62,7 +62,10 @@ END_EVENT_TABLE()
 		//histogram=NULL;
 
 		histstr="histogram: ";
-        }
+		Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
+		
+		t = new wxTimer(this);
+       }
 
 	PicPanel::~PicPanel()
 	{
@@ -72,6 +75,7 @@ END_EVENT_TABLE()
 		if (thumb) thumb->~wxBitmap();
 		if (scaledpic) scaledpic->~wxBitmap();
 		//if (histogram) histogram->~wxBitmap();
+		t->~wxTimer();
 	}
         
 //        void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
@@ -735,8 +739,8 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 		scale -= increment;
 	if (scale < 0.1) 
 		scale = 0.1;
-	else if (scale > 2) 
-		scale = 2; 
+	else if (scale > 3) 
+		scale = 3; 
 	else {
 		if (event.GetWheelRotation() > 0) { 
 			picX += picX * 0.1;
@@ -749,8 +753,16 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	}
 	parentframe->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
 	parentframe->SetStatusText("");
-	Refresh();
+	if (event.ShiftDown())
+		t->Start(500,wxTIMER_ONE_SHOT);
+	else
+		Refresh();
 	
+}
+
+void PicPanel::OnTimer(wxTimerEvent& event)
+{
+	PaintNow();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)

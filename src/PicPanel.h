@@ -60,6 +60,7 @@ class PicPanel: public wxPanel
 		void OnLeftDoubleClicked(wxMouseEvent& event);
 		void OnKey(wxKeyEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
+		void OnTimer(wxTimerEvent& event);
         
     private:
 
@@ -102,6 +103,8 @@ class PicPanel: public wxPanel
 
 		unsigned int hgram[256];
 		wxString histstr;
+		
+		wxTimer *t;
 
 		DECLARE_EVENT_TABLE()
     
