@@ -27,7 +27,6 @@ class PicPanel: public wxPanel
 	public:
 		PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram);
 		~PicPanel();
-		//void OnEraseBackground(wxEraseEvent& event);
 		void OnSize(wxSizeEvent& event);
 		void PaintNow();
 		void OnPaint(wxPaintEvent& event);
@@ -64,49 +63,16 @@ class PicPanel: public wxPanel
         
     private:
 
-		gImage * d;
-		GIMAGE_CHANNEL ch;
-		wxFrame *parentframe;
-		wxTreeCtrl *commandtree;
-		myHistogramPane *histogram;
-		
+		int mousex, mousey;
+
+		double scale;
 		wxImage img;
-		wxImage *thumbimg, *scaledimg;
-		wxBitmap *pic, *thumb, *scaledpic;  //, *histogram;
-		wxBitmap hsgram;
-		bool blank, settingpic;
-    
-		int MouseX, MouseY;
-		int picX, picY;
-		int imgX, imgY;
-		int thumbW, thumbH;
-		float scale, aspectW, aspectH;
-		double pr, pg, pb;
-		int oob;
-		
-		wxString dcList;
-        
-		bool moving, thumbmoving;
-        
-		bool showDebug;
-		bool scaleWindow;
-		bool fitmode;
+		wxBitmap *scaleimg, *viewimg;
 
-		bool colormgt;
-		wxFileName profilepath;
-		cmsHPROFILE hImgProfile;
-		cmsHTRANSFORM hTransform;
-
-		wxColor histogramcolor;
-		int toggleThumb;
-		int keyCode;
-
-		unsigned int hgram[256];
-		wxString histstr;
+		double imgctrx, imgctry;
+		int viewposx, viewposy;
 		
 		wxTimer *t;
-
-		DECLARE_EVENT_TABLE()
     
 };
 

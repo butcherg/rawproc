@@ -7,826 +7,319 @@
 #include <wx/clipbrd.h>
 
 
-BEGIN_EVENT_TABLE(PicPanel, wxPanel)
-    EVT_PAINT(PicPanel::OnPaint)
-    EVT_LEFT_DOWN(PicPanel::OnLeftDown)
-    EVT_RIGHT_DOWN(PicPanel::OnRightDown)
-    EVT_LEFT_DCLICK(PicPanel::OnLeftDoubleClicked)
-    EVT_LEFT_UP(PicPanel::OnLeftUp)
-    EVT_MOTION(PicPanel::OnMouseMove)
-    EVT_MOUSEWHEEL(PicPanel::OnMouseWheel)
-	EVT_LEAVE_WINDOW(PicPanel::OnMouseLeave)
-    //EVT_ERASE_BACKGROUND(PicPanel::OnEraseBackground)
-    EVT_SIZE(PicPanel::OnSize)
-    EVT_KEY_DOWN(PicPanel::OnKey)
-    //EVT_DROP_FILES(PicPanel::DropFiles)
-END_EVENT_TABLE()
-
-	PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
-	{
-		parentframe = parent;
-		commandtree = tree;
-		histogram = hgram;
-		d = NULL;
-		//wxWindow::SetBackgroundStyle(wxBG_STYLE_PAINT);
-		SetBackgroundColour(wxColour(64,64,64));  //SetBackgroundColour(*wxBLACK);
-		SetDoubleBuffered(true);  //watch this one... tricksy...
-		showDebug = true;
-		scaleWindow = false;
-		blank = true;
-		settingpic = false;
-		dcList.clear();
-		oob = 0;
-
-		colormgt = false;
-		hTransform = NULL;
-		hImgProfile = NULL;
-
-		fitmode=true;
-		keyCode = 0;
-		moving=false; thumbmoving=false;
-		histogramcolor = wxColour(50,50,50);
-		picX = 0; picY = 0;
-		scale = 1.0;
-
-		pr = pb = pg = -1.0;
-
-		//wxImages:
-		thumbimg=NULL;
-		scaledimg=NULL;
-
-		//wxBitmaps:
-        	pic=NULL;
-		thumb=NULL;
-		scaledpic=NULL;
-		//histogram=NULL;
-
-		histstr="histogram: ";
-		Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
-		
-		t = new wxTimer(this);
-       }
-
-	PicPanel::~PicPanel()
-	{
-		if (thumbimg) thumbimg->~wxImage();
-		if (scaledimg) scaledimg->~wxImage();
-		if (pic) pic->~wxBitmap();
-		if (thumb) thumb->~wxBitmap();
-		if (scaledpic) scaledpic->~wxBitmap();
-		//if (histogram) histogram->~wxBitmap();
-		t->~wxTimer();
-	}
-        
-//        void PicPanel::OnEraseBackground(wxEraseEvent& event) {};
-        
-        void PicPanel::OnSize(wxSizeEvent& event) 
-        {
-		Refresh();
-		event.Skip();
-        }
-        
-        void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
-        {
-            dc.DrawLine(x, y, x+w, y);
-            dc.DrawLine(x+w, y, x+w, y+h);
-            dc.DrawLine(x+w, y+h, x, y+h);
-            dc.DrawLine(x, y+h, x,y);
-        }
-
-	void PicPanel::SetThumbMode(int mode)
-	{
-		toggleThumb = mode;
-		Refresh();
-		
-	}
-
-	void PicPanel::ToggleThumb()
-	{
-		toggleThumb++;
-		if (toggleThumb>3) toggleThumb = 1;
-		if (toggleThumb==2) toggleThumb = 3;
-		Refresh();
-		
-	}
-	
-	void PicPanel::BlankPic()
-	{
-		blank = true;
-		Refresh();
-		
-	}
-
-	void PicPanel::RefreshPic()
-	{
-		if (d) SetPic(d, ch);
-	}
-
-	void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
-	{
-		cmsHPROFILE hDisplayProfile, hSoftProofProfile;
-
-		settingpic = true;
-		
-		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
-		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
-			parentframe->SetStatusText("display...");
-		//mark();
-		
-		d = dib;
-		ch = channel;
-		int w, h;
-		GetSize(&w, &h);
-		img.Destroy();
-
-		int hist[256];
-		std::vector<int> hgram;
-		int hmax;
-
-		if (thumbimg) thumbimg->~wxImage();
-		if (scaledimg) scaledimg->~wxImage();
-		if (pic) pic->~wxBitmap();
-
-		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
-		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
-			img = gImage2wxImage(*dib, oob);
-		else
-			img = gImage2wxImage(*dib);
-
-		//parm display.orient: Enable/disable normalization of image rotation for display.  Doesn't alter the working image orientation.  Default=1 
-		if (myConfig::getConfig().getValueOrDefault("display.orient","1") == "1") {
-			int rotation = atoi(dib->getInfoValue("Orientation").c_str());
-			if (rotation == 3) img = img.Rotate180();
-			if (rotation == 5) img = img.Rotate90(false);
-			if (rotation == 6) img = img.Rotate90(true);
-			if (rotation == 8) img = img.Rotate90(false);
-		}
-
-		if (colormgt) {
-
-			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
-
-			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
-				cmsHPROFILE hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-				if (hImgProf) {
-					if (hImgProfile) cmsCloseProfile(hImgProfile);
-					hImgProfile = hImgProf;
-				}
-				else {
-					wxMessageBox(wxString::Format("Image profile not found, disabling color management"));
-					SetColorManagement(false);
-					hImgProfile = NULL;
-				}
-			}
-
-			//Get display profile:
-			//parm display.cms.displayprofile: If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb
-			//template display.cms.displayprofile=iccfile
-			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","").c_str()));
-			if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
-				if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
-					wxMessageBox("No display profile specified, and is required. Disabling color management");
-					SetColorManagement(false);
-				}
-				hDisplayProfile = NULL;
-			}
-			else {
-				if (profilepath.IsOk() & profilepath.FileExists()) {
-					hDisplayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-				}
-				else {
-					wxMessageBox(wxString::Format("Display profile %s not found, disabling color management", profilepath.GetFullName()));
-					SetColorManagement(false);
-					hDisplayProfile = NULL;
-				}
-			}
-			
-			cmsUInt32Number dwflags = 0;
-
-			if (hTransform) cmsDeleteTransform(hTransform);
-			
-			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-			wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
-			cmsUInt32Number intent = INTENT_PERCEPTUAL;
-			if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
-			if (intentstr == "saturation") intent = INTENT_SATURATION;
-			if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
-			if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
-			
-			//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
-			if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
-
-			cmsUInt32Number proofintent;
-			//parm display.cms.softproof: Perform softproofing color transform.  Default=0  
-			if (myConfig::getConfig().getValueOrDefault("display.cms.softproof","0") == "1") { 
-				dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
-				//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
-				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") {			
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
-					hSoftProofProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-				}
-				else hSoftProofProfile = NULL;
-				//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-				wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
-				proofintent = INTENT_PERCEPTUAL;
-				if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
-				if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
-				if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
-				if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
-				//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
-				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
-			}
-			
-			if (hImgProfile)
-				if (hDisplayProfile)
-					if (hSoftProofProfile)
-						hTransform = cmsCreateProofingTransform(
-							hImgProfile, TYPE_RGB_8,
-							hDisplayProfile, TYPE_RGB_8,
-							hSoftProofProfile,
-							intent,
-							proofintent,
-							dwflags);
-					else
-					hTransform = cmsCreateTransform(
-						hImgProfile, TYPE_RGB_8,
-						hDisplayProfile, TYPE_RGB_8,
-						intent, dwflags);
-						
-			if (!hTransform) {
-				wxMessageBox(wxString::Format("Display transform creation failed, disabling color management"));
-				SetColorManagement(false);
-				hDisplayProfile = NULL;
-			}
-
-			//cmsCloseProfile(hImgProfile);  //Now done from rawprocFrm with a method call...
-			cmsCloseProfile(hDisplayProfile);
-		}
-//		else {
-//			wxMessageBox("bad image profile, disabling color management");
-//			SetColorManagement(false);
-//		}
-
-		aspectW = (float) img.GetWidth() / (float) img.GetHeight();
-		aspectH = (float) img.GetHeight() / (float) img.GetWidth();
-
-		//parm display.cms.transform=set|render: Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set
-		wxString cmstransform = wxString(myConfig::getConfig().getValueOrDefault("display.cms.transform","set"));
-
-		if (colormgt)
-			if (cmstransform == "set")
-				if (hImgProfile) 
-					if (hTransform) {
-						//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
-						unsigned char* im = img.GetData();
-						unsigned w = img.GetWidth();
-						unsigned h = img.GetHeight();
-						#pragma omp parallel for
-						for (unsigned y=0; y<h; y++) {
-							unsigned pos = y*w*3;
-							cmsDoTransform(hTransform, &im[pos], &im[pos], w);
-						}
-					}
-			
-		
-		//generate and store a thumbnail bitmap:
-		thumbW = 100*aspectW;
-		thumbH = 100;
-		wxImage thumbimg = img.Scale(thumbW,thumbH, wxIMAGE_QUALITY_HIGH);
-		
-		if (colormgt)
-			if (cmstransform != "set")   //meaning, don't do it twice, if 'set'...
-				if (hImgProfile) 
-					if (hTransform) 
-						cmsDoTransform(hTransform, thumbimg.GetData(), thumbimg.GetData(), thumbW*thumbH);
-
-		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
-		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
-		
-		histogram->SetPic(*dib, scale);
-		//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
-		if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
-			histogram->SetChannel(channel);
-		else
-			histogram->SetChannel(CHANNEL_RGB);
-
-		if (thumb) thumb->~wxBitmap();
-		thumb = new wxBitmap(thumbimg);
-
-		hsgram = wxBitmap();
-		settingpic =  false;
-		blank = false;
-
-		parentframe->SetStatusText("");
-		//parentframe->SetStatusText(wxString::Format("disp: %s",duration().c_str()));
-		Refresh();
-		
-
-		
-	}
-
-	void PicPanel::render(wxDC &dc)
-	{
-		//if (blank) return;
-		int w, h;
-		int tw, th;
-		int iw, ih;
-		wxImage spic, sspic;
-		
-		if (blank) {
-			dc.Clear();
-			return;
-		}
-
-		GetSize(&w, &h);
-            
-		if (fitmode) {
-			if (img.GetWidth() > img.GetHeight())
-				scale = (double) w/ (double) img.GetWidth();
-			else
-				scale = (double) h/ (double) img.GetHeight();
-		}
-
-		dc.Clear();
-		 if (!img.IsOk()) return;
-		dc.SetClippingRegion(0,0,w,h);
-                
-                
-		iw = img.GetWidth()*scale;
-		ih = img.GetHeight()*scale;
-   
-		if (iw < w) {
-			picX = (float) w/2 - (float) iw/2;
-		}
-		else {
-			if (picX < -(iw-w))
-				picX = w-iw;
-			else if (picX > 0)
-				picX = 0;
-		}
-
-		if (ih < h) {
-			picY = (float) h/2 - (float) ih/2;
-		}
-		else {
-			if (picY < -(ih-h))
-				picY = h-ih;\
-			else if (picY > 0)
-				picY = 0;
-		}
-                
-		if (scale == 1.0)
-			spic = img.Copy();
-		//else if (scale <= .5)
-		//	spic = img.Scale(iw, ih, wxIMAGE_QUALITY_HIGH);
-		else
-			spic = img.Scale(iw, ih); //, wxIMAGE_QUALITY_HIGH);
-
-		wxString cmstransform = wxString(myConfig::getConfig().getValueOrDefault("display.cms.transform","set"));
-
-		if (colormgt)
-			if (cmstransform == "render") {
-						//cmsDoTransform(hTransform, spic.GetData(), spic.GetData(), iw*ih);
-						unsigned char* im = spic.GetData();
-						unsigned sw = spic.GetWidth();
-						unsigned sh = spic.GetHeight();
-						#pragma omp parallel for
-						for (unsigned y=0; y<sh; y++) {
-							unsigned pos = y*sw*3;
-							cmsDoTransform(hTransform, &im[pos], &im[pos], sw);
-						}
-			}
-    
-		if (scaledpic) scaledpic->~wxBitmap();
-		scaledpic = new wxBitmap(spic);
-		dc.SetPen(wxPen(wxColour(255,255,255),1));
-		dc.SetBrush(wxBrush(wxColour(50,50,50)));
-		dc.DrawBitmap(*scaledpic, picX, picY, false);
-
-//		if (dcList != "" & scale == 1.0) {
-		if (dcList != "") {
-			dc.SetPen(*wxYELLOW_PEN);
-			wxArrayString l = split(dcList, ";");
-			for (unsigned i=0; i<l.GetCount(); i++) {
-				wxArrayString c = split(l[i],",");
-				if (c[0] == "cross") {
-					if (c.GetCount() < 3) continue;
-					int px = (atoi(c[1].c_str())*scale)+picX;
-					int py = (atoi(c[2].c_str())*scale)+picY;
-					dc.DrawLine(px-10, py, px+10, py);
-					dc.DrawLine(px, py-10, px, py+10);
-				}
-			}
-		}
-
-		if (thumb) {
-			if (toggleThumb != 3) {
-				dc.SetPen(wxPen(wxColour(0,0,0),1));
-				dc.DrawRectangle(0,0,thumb->GetWidth()+4, thumb->GetHeight()+4);			
-				dc.SetPen(wxPen(wxColour(255,255,255),1));
-				dc.DrawRectangle(1,1,thumb->GetWidth()+2, thumb->GetHeight()+2);
-			}
-			if (toggleThumb == 1) dc.DrawBitmap(*thumb,2,2,false);
-		
-			//wxSize hs = histogram->GetSize();
-			//histogram->SetBitmap(ThreadedHistogramFrom(img, hs.GetWidth(), hs.GetHeight()));
-		
-			//keep only to debug myHistogramPane...
-			//if (toggleThumb == 2) {
-			//	if (!hsgram.IsOk()) {
-			//		hsgram = ThreadedHistogramFrom(img, thumb->GetWidth(), thumb->GetHeight());
-			//		//hsgram = ThreadedHistogramFrom(spic, thumb->GetWidth(), thumb->GetHeight());
-			//	}
-			//	dc.DrawBitmap(hsgram,2,2,false);	
-			//}
-		}
-
-		//draw crop rectangle in thumbnail:
-		tw = thumbW * ((float) w/ (float) iw);
-		th = thumbH * ((float) h/(float) ih);
-		dc.SetClippingRegion(0,0,thumbW,thumbH);
-		if (iw>w | ih>h) {
-			dc.SetPen(wxPen(wxColour(255,255,255),1));
-			if (toggleThumb == 1) drawBox(dc, (-picX * ((float) thumbW/ (float) iw)), (-picY * ((float) thumbH/(float) ih)),tw,th);
-		}
-		
-	}
-	
-	void PicPanel::SetDrawList(wxString list)
-	{
-		dcList = list;
-		Refresh();
-		
-	}
-   
-
-	void PicPanel::SetColorManagement(bool b)
-	{
-		colormgt = b;
-		if (colormgt)
-			parentframe->SetStatusText("CMS",1);
-		else
-			parentframe->SetStatusText("",1);
-	}
-
-	bool PicPanel::GetColorManagement()
-	{
-		return colormgt;
-	}
-
-
-	void PicPanel::SetProfile(gImage * dib)
-	{
-		cmsHPROFILE hImgProf;
-		if (dib->getProfile() != NULL & dib->getProfileLength() > 0) {
-			hImgProf = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
-			SetImageProfile(hImgProf);
-		}
-	}
-
-	void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
-	{
-		if (hImgProfile) cmsCloseProfile(hImgProfile);
-		hImgProfile = hImgProf;
-	}
-
-	cmsHTRANSFORM PicPanel::GetDisplayTransform()
-	{
-		return hTransform;
-	}
-
-	wxString PicPanel::getHistogramString()
-	{
-		return histstr;
-	}
-        
-
-	void PicPanel::SetScaleToWidth()
-	{
-		int w, h;
-		GetSize(&w, &h);
-		if (img.IsOk()) {
-			scale = (double) w/ (double) img.GetWidth();
-			Refresh();
-			
-		}
-	}
-	
-	void PicPanel::SetScaleToHeight()
-	{
-		int w, h;
-		GetSize(&w, &h);
-		if (img.IsOk()) {
-			scale = (double) h/ (double) img.GetHeight();
-			Refresh();
-			
-		}
-	}
-
-	void PicPanel::SetScaleToWidth(double percentofwidth)
-	{
-		int w, h;
-		GetSize(&w, &h);
-		if (img.IsOk()) {
-			scale = ((double) w/ ((double) img.GetWidth()) * percentofwidth);
-			Refresh();
-			
-		}
-	}
-
-	void PicPanel::SetScale(double s)
-	{
-		scale = s;
-		FitMode(false);
-		parentframe->SetStatusText(wxString::Format("scale: %0.0f\%",scale*100.0),2);
-		Refresh();
-	}
-
-	void PicPanel::FitMode(bool f)
-	{
-		fitmode = f;
-	}
-
-
-	double PicPanel::GetScale()
-	{
-		return scale;
-	}
-	
-	coord PicPanel::GetImgCoords()
-	{
-		coord c; 
-		c.x = imgX; c.y = imgY;
-		return c;
-	}
-	
-	void PicPanel::PaintNow()
-	{
-		wxClientDC dc(this);
-		render(dc);
-		/*
-		wxTreeItemId item = commandtree->GetSelection();
-		if (item.IsOk()) {
-			PicProcessor * i = ((PicProcessor *) commandtree->GetItemData(item));
-			if (i) { 
-				parentframe->SetStatusText("going to displayDraw()...");
-				i->displayDraw(dc);
-			}
-		}
-		*/
-	}
-
-	void PicPanel::OnPaint(wxPaintEvent & event)
-	{
-		event.Skip();
-		if (blank | settingpic ) return;
-		if (img.IsOk() && thumb != NULL) {
-			wxPaintDC dc(this);
-			render(dc);
-		}
-	}
-
-	void PicPanel::OnLeftDown(wxMouseEvent& event)
-	{
-		event.Skip();
-		if (blank) return;
-		SetFocus();
-		int radius = 20;
-		MouseX = event.m_x;
-		MouseY = event.m_y;
-
-		if (toggleThumb != 2)
-			if (MouseX < thumbW & MouseY < thumbH)
-				thumbmoving = true;
-			else
-				moving=true;
-		else
-			moving=true;
-	}
-      
-#define ID_SOFTPROOF 3000
-#define ID_ZOOM 3001
-#define ID_PIXEL 3002  
-	void PicPanel::OnRightDown(wxMouseEvent& event)
-	{
-		event.Skip();
-		if (blank) return;
-		wxMenu mnu;
-		wxString xy;
-		wxArrayString p;
-		mnu.Append(ID_PIXEL, "Pixel Copy...");
-		mnu.Append(ID_SOFTPROOF, "Soft Proof...");
-		mnu.Append(ID_ZOOM, "Zoom");
-		switch (GetPopupMenuSelectionFromUser(mnu)) {
-			case ID_PIXEL:
-				xy = wxGetTextFromUser ("copy", "Copy pixel RGB from (x,y):", wxString::Format("%d,%d",imgX, imgY), this);
-				p = split(xy, ",");
-				if (p.GetCount() > 1) {
-					std::vector<float> rgb = d->getPixelArray(atoi(p[0].c_str()), atoi(p[1].c_str()));
-					if (wxTheClipboard->Open()) {
-						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", rgb[0], rgb[1], rgb[2])) );
-						wxTheClipboard->Close();
-					}
-				}
-				break;
-			case ID_SOFTPROOF:
-				//InfoDialog(event.GetItem());
-				wxMessageBox("ID_SOFTPROOF");
-				break;
-			case ID_ZOOM:
-				//CommandTreeDeleteItem(event.GetItem());
-				wxGetTextFromUser ("zoom", "Zoom to:", "(empty)", this);
-				break;
-		}
-		picX = 0; picY = 0;
-		Refresh();
-		
-	}
-
-	void PicPanel::OnLeftUp(wxMouseEvent& event)
-	{
-		event.Skip();
-		if (blank) return;
-		if (moving | thumbmoving) {
-			moving=false;
-			thumbmoving=false;
-		}
-	}
-
-void PicPanel::OnMouseMove(wxMouseEvent& event)
+PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
 {
-	event.Skip();
-	if (blank) return;
-	int x, y, posx, posy;
-	int iw, ih;
-	int dx, dy;
-	
-	if (img.IsOk()){
-		iw = img.GetWidth()*scale;
-		ih = img.GetHeight()*scale;
-            
-		GetPosition(&posx, &posy);
-		x=event.m_x; y=event.m_y;
-		dx = MouseX-x;
-		dy = MouseY-y;
 
+	SetDoubleBuffered(true);  //watch this one... tricksy...
 
-		if (moving) {
-			picX -= MouseX-x; 
-			picY -= MouseY-y;
-			MouseX = x; MouseY = y;
-			Refresh();
-			
-		}
+	scale = 1.0;
+	imgctrx = 0.5; imgctry = 0.5;
+	mousex = 0; mousey=0;
 
-		if (thumbmoving) {
-			picX += (MouseX-x) * round((float) iw / (float) thumbW);
-			picY += (MouseY-y) * round((float) ih / (float) thumbH);
-			MouseX = x; MouseY = y;
-			Refresh();
-			
-		}
-
-		pr = pb = pg = -1.0;
-
-		imgX = (x-picX)/scale;
-		imgY = (y-picY)/scale;
-
-		if (scale > 0.0 & scaledpic != NULL) {
-			if (d) {
-				std::vector<float> p = d->getPixelArray(imgX, imgY);
-				if (imgX > 1) {
-					if (imgY > 1) {
-						if (imgX < d->getWidth()) { 
-							if (imgY < d->getHeight()) {
-								pr = p[0]; pg = p[1]; pb = p[2];
-								//parm display.rgb.scale: Multiplier for rgb display in status line.  Default=1
-								int pscale = strtol(myConfig::getConfig().getValueOrDefault("display.rgb.scale","1").c_str(),NULL,0);
-								if (pscale == 0) pscale = 1;
-								if (pscale > 1)
-									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %0.0f,%0.0f,%0.0f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 
-								else
-									parentframe->SetStatusText(wxString::Format("xy: %d,%d\trgb: %f,%f,%f", imgX, imgY,  p[0]*pscale, p[1]*pscale, p[2]*pscale)); 									
-							} else parentframe->SetStatusText("");
-						} else parentframe->SetStatusText("");
-					} else parentframe->SetStatusText("");
-				} else parentframe->SetStatusText("");
-			}
-		}
-	}
+	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
+	Bind(wxEVT_LEFT_DOWN, &PicPanel::OnLeftDown,  this);
+	Bind(wxEVT_RIGHT_DOWN, &PicPanel::OnRightDown,  this);
+	Bind(wxEVT_LEFT_DCLICK, &PicPanel::OnLeftDoubleClicked,  this);
+	Bind(wxEVT_LEFT_UP, &PicPanel::OnLeftUp,  this);
+	Bind(wxEVT_MOTION, &PicPanel::OnMouseMove,  this);
+	Bind(wxEVT_MOUSEWHEEL, &PicPanel::OnMouseWheel,  this);
+	Bind(wxEVT_LEAVE_WINDOW, &PicPanel::OnMouseLeave,  this);
+	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
+	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
+		
+	t = new wxTimer(this);
 }
 
-void PicPanel::OnMouseLeave(wxMouseEvent& event)
+PicPanel::~PicPanel()
 {
-	event.Skip();
-	parentframe->SetStatusText("");
+	if (scaleimg) scaleimg->~wxBitmap();
+	if (viewimg) viewimg->~wxBitmap();
+	t->~wxTimer();
 }
         
+void PicPanel::OnSize(wxSizeEvent& event) 
+{
+	Refresh();
+	event.Skip();
+}
+
+void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
+{
+	img = gImage2wxImage(*dib);
+	if (scaleimg) scaleimg->~wxBitmap();
+	scaleimg = new wxBitmap(img.Rescale( img.GetWidth()*scale, img.GetHeight()*scale));
+	//ToDo: cmsTransform()...
+
+	Refresh();
+}
+
+void PicPanel::render(wxDC &dc)
+{
+	if (!scaleimg) return;
+	int vieww, viewh; 
+	//int viewposx=0, viewposy=0;  //now class members...
+	int imgw, imgh; 
+	int scalew, scaleh;
+
+	GetSize(&vieww, &viewh);
+	imgw = img.GetWidth(); imgh = img.GetHeight();
+	scalew = scaleimg->GetWidth(); scaleh = scaleimg->GetHeight();
+
+	//image position to be centered in the view, expressed as a percent:
+	//imgctrx = (float) (1+ viewposx + mousex) / (float) scalew;
+	//imgctry = (float) (1+ viewposy + mousey) / (float) scaleh;
+
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imgctrx: %.2f imgctry: %.2f",imgctrx, imgctry));
+
+	viewimg = scaleimg;  //all alternatives below just use scaleimg...
+
+	if (scalew < vieww) {
+		//center the image in the panel:
+		viewposx = (vieww - scalew) / 2;
+		viewposy = (viewh - scaleh) / 2;
+		dc.DrawBitmap(*viewimg, viewposx, viewposy, false);
+	}
+	else {
+		viewposx = (scalew/2 - vieww/2);
+		viewposy = (scaleh/2 - viewh/2);
+
+		//show the scaled image in its entirety, offset by viewposx/y:
+		//viewposx = -viewposx;
+		//viewposy = -viewposx;
+		//dc.DrawBitmap(*viewimg, viewposx, viewposy, false);
+
+		//extract the viewimage from the position (imgw*imgctrx)-vieww/2 and show it at 0,0:
+		wxMemoryDC mdc;
+		mdc.SelectObject(*scaleimg);
+		dc.Blit(0, 0, vieww, viewh, &mdc, viewposx, viewposy);
+		mdc.SelectObject(wxNullBitmap);
+	}
+
+}
+
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
 {
-	event.Skip();
-	if (blank) return;
+	mousex = event.m_x;
+	mousey = event.m_y;
+
 	double increment = 0.05;
-	
-	int iw = img.GetWidth();
-	int ih = img.GetHeight();
-	
-	fitmode=false;
-	wxImage scaledimg;
+
 	if (event.GetWheelRotation() > 0)
 		scale += increment;
 	else
 		scale -= increment;
+
 	if (scale < 0.1) 
 		scale = 0.1;
 	else if (scale > 3) 
 		scale = 3; 
-	else {
-		if (event.GetWheelRotation() > 0) { 
-			picX += picX * 0.1;
-			picY += picY * 0.1;
-		}
-		else {
-			picX -= picX * 0.1;
-			picY -= picY * 0.1;
-		}
+
+
+	((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
+	event.Skip();
+
+	if (event.ShiftDown()) {
+		t->Start(400,wxTIMER_ONE_SHOT);
 	}
-	parentframe->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
-	parentframe->SetStatusText("");
-	if (event.ShiftDown())
-		t->Start(500,wxTIMER_ONE_SHOT);
-	else
+	else {
+		if (scaleimg) scaleimg->~wxBitmap();
+		wxImage im = img;
+		scaleimg = new wxBitmap(im.Rescale( img.GetWidth()*scale, img.GetHeight()*scale));
 		Refresh();
-	
+	}
 }
 
 void PicPanel::OnTimer(wxTimerEvent& event)
 {
-	PaintNow();
+	if (scaleimg) scaleimg->~wxBitmap();
+	wxImage im = img;
+	scaleimg = new wxBitmap(im.Rescale( img.GetWidth()*scale, img.GetHeight()*scale));
+	Refresh();
 }
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
-	event.Skip();
-	if (blank) return;
-	MouseX = event.m_x;
-	MouseY = event.m_y;
-	
-	int iw = img.GetWidth();
-	int ih = img.GetHeight();
+	mousex = event.m_x;
+	mousey = event.m_y;
 
-	if (MouseX < thumbW & MouseY < thumbH) {
-		ToggleThumb();
-	}
-	else {
-		if (scale != 1.0) {
-			picX = -(iw * ((MouseX-picX)/(iw*scale)) - ((iw*scale)/2));
-			picY = -(ih * ((MouseY-picY)/(ih*scale)) - ((ih*scale)/2));
-			scale = 1.0;
-			FitMode(false);
-			parentframe->SetStatusText("scale: 100%",2);
-		}
-		else {
-			SetScaleToWidth();
-			FitMode(true);
-			parentframe->SetStatusText("scale: fit",2);
-			parentframe->SetStatusText("");
-		}
-	}
+	scale = 1.0;
+
+	if (scaleimg) scaleimg->~wxBitmap();
+	wxImage im = img;
+	scaleimg = new wxBitmap(im.Rescale( img.GetWidth()*scale, img.GetHeight()*scale));
+
+	((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imgctrx: %.2f imgctry: %.2f",imgctrx, imgctry));
+
+	event.Skip();
 	Refresh();
-	
 }
 
 
+
+
+
+        
+void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
+{
+	dc.DrawLine(x, y, x+w, y);
+	dc.DrawLine(x+w, y, x+w, y+h);
+	dc.DrawLine(x+w, y+h, x, y+h);
+	dc.DrawLine(x, y+h, x,y);
+}
+
+void PicPanel::SetThumbMode(int mode)
+{
+
+}
+
+void PicPanel::ToggleThumb()
+{
+
+}
+	
+void PicPanel::BlankPic()
+{
+
+}
+
+void PicPanel::RefreshPic()
+{
+
+}
+
+
+	
+void PicPanel::SetDrawList(wxString list)
+{
+
+}
+   
+
+void PicPanel::SetColorManagement(bool b)
+{
+
+}
+
+bool PicPanel::GetColorManagement()
+{
+	return false;
+}
+
+
+void PicPanel::SetProfile(gImage * dib)
+{
+
+}
+
+void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
+{
+
+}
+
+cmsHTRANSFORM PicPanel::GetDisplayTransform()
+{
+	return NULL;
+}
+
+wxString PicPanel::getHistogramString()
+{
+	return "";
+}
+        
+
+void PicPanel::SetScaleToWidth()
+{
+
+}
+	
+void PicPanel::SetScaleToHeight()
+{
+
+}
+
+void PicPanel::SetScaleToWidth(double percentofwidth)
+{
+	int w, h;
+}
+
+void PicPanel::SetScale(double s)
+{
+	scale = s;
+}
+
+void PicPanel::FitMode(bool f)
+{
+
+}
+
+
+double PicPanel::GetScale()
+{
+	return scale;
+}
+	
+coord PicPanel::GetImgCoords()
+{
+	return coord {0,0};
+}
+	
+void PicPanel::PaintNow()
+{
+	wxClientDC dc(this);
+	render(dc);
+}
+
+void PicPanel::OnPaint(wxPaintEvent & event)
+{
+	wxPaintDC dc(this);
+	render(dc);
+}
+
+void PicPanel::OnLeftDown(wxMouseEvent& event)
+{
+	mousex = event.m_x;
+	mousey = event.m_y;
+
+	int imgw, imgh;
+	int scalew, scaleh;
+
+	//GetSize(&vieww, &viewh);
+	imgw = img.GetWidth(); imgh = img.GetHeight();
+	scalew = scaleimg->GetWidth(); scaleh = scaleimg->GetHeight();
+
+	imgctrx = (float) (1+ viewposx + mousex) / (float) scalew;
+	imgctry = (float) (1+ viewposy + mousey) / (float) scaleh;
+
+	((wxFrame *) GetParent())->SetStatusText(wxString::Format("imgctrx: %.2f imgctry: %.2f",imgctrx, imgctry));
+
+}
+
+void PicPanel::OnRightDown(wxMouseEvent& event)
+{
+
+}
+
+void PicPanel::OnLeftUp(wxMouseEvent& event)
+{
+
+}
+
+void PicPanel::OnMouseMove(wxMouseEvent& event)
+{
+	mousex = event.m_x;
+	mousey = event.m_y;
+	Refresh();
+}
+
+void PicPanel::OnMouseLeave(wxMouseEvent& event)
+{
+
+}
+
 void PicPanel::OnKey(wxKeyEvent& event)
 {
-	event.Skip();
-	if (blank) return;
-	//parentframe->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
-	switch (event.GetKeyCode()) {
-		case 116: //t
-		case 84: //T - toggle display thumbnail
-			ToggleThumb();
-			break;
-		case 67: //c - with Ctrl-, copy RGB at the x,y
-			if (event.ControlDown()) 
-				if (pr > -1.0)
-					if (wxTheClipboard->Open()) {
-						// This data objects are held by the clipboard,
-						// so do not delete them in the app.
-						//wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%d,%d", imgX, imgY)));
-						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", pr, pg, pb)) );
-						wxTheClipboard->Close();
-					}
-		case 79: //o oob toggle
-			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
-				oob++;
-				if (oob > 2) oob = 0;
-				SetPic(d, ch);
-				Refresh();
-			}
-			break;
-	}
+
 }
 
 
