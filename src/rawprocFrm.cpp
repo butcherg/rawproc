@@ -38,6 +38,7 @@
 #include "PicProcessorColorSpace.h"
 #include "PicProcessorWhiteBalance.h"
 #include "PicProcessorTone.h"
+#include "PicProcessorToneMask.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -108,6 +109,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_COLORSPACE, rawprocFrm::MnuColorSpace)
 	EVT_MENU(ID_MNU_WHITEBALANCE, rawprocFrm::MnuWhiteBalance)
 	EVT_MENU(ID_MNU_TONE, rawprocFrm::MnuTone)
+	EVT_MENU(ID_MNU_TONEMASK, rawprocFrm::MnuToneMask)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
@@ -240,6 +242,7 @@ void rawprocFrm::CreateGUIControls()
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONEMASK,	_("Tone Mask"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->AppendSeparator();
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
@@ -513,26 +516,27 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	//if    (name == "gamma")			p = new PicProcessorGamma("gamma",command, commandtree,  pic);
+	//if    (name == "gamma")		p = new PicProcessorGamma("gamma",command, commandtree,  pic);
 	if      (name == "gamma")      		p = new PicProcessorTone("tone","gamma,"+command, commandtree,  pic);
 	else if (name == "bright")     		p = new PicProcessorBright("bright",command, commandtree, pic);
 	else if (name == "contrast")   		p = new PicProcessorContrast("contrast",command, commandtree, pic);
 	else if (name == "shadow")     		p = new PicProcessorShadow("shadow",command, commandtree, pic);
 	else if (name == "highlight")  		p = new PicProcessorHighlight("highlight",command, commandtree, pic);
 	else if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
+	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
-	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "tonemask")		p = new PicProcessorTone("tonemask", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
@@ -1944,6 +1948,20 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuToneMask(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorToneMask *p = new PicProcessorToneMask("whitebalance", "", commandtree, pic);
+		p->createPanel(parambook);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding tone mask tool failed: %s",e.what()));
 	}
 }
 
