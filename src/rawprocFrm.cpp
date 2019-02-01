@@ -1956,7 +1956,7 @@ void rawprocFrm::MnuToneMask(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorToneMask *p = new PicProcessorToneMask("whitebalance", "", commandtree, pic);
+		PicProcessorToneMask *p = new PicProcessorToneMask("tonemask", "threshold=140;mask=upper", commandtree, pic);
 		p->createPanel(parambook);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
