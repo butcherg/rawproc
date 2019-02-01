@@ -64,10 +64,10 @@ class PicPanel: public wxPanel
     private:
 
 		int mousex, mousey;
+		bool dragging, fit;
 
 		double scale;
-		wxImage img;
-		wxBitmap *scaleimg, *viewimg;
+		wxBitmap *image, *viewimage;
 
 		double imgctrx, imgctry;
 		int viewposx, viewposy;
