@@ -69,8 +69,8 @@ void PicPanel::render(wxDC &dc)
 			scale = (double) panelh/ (double) image->GetHeight();
 	}
 
-	imagew = (float) image->GetWidth() * scale;
-	imageh = (float) image->GetHeight() * scale;
+	imagew = (float) image->GetWidth();// * scale;
+	imageh = (float) image->GetHeight();// * scale;
 
 
 	vieww = (float) panelw / scale;
