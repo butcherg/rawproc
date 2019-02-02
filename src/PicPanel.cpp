@@ -16,6 +16,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	mousex = 0; mousey=0;
 	dragging = false;
+	histogram = hgram;
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
 	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
@@ -29,14 +30,14 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
 		
-	t = new wxTimer(this);
+	//t = new wxTimer(this);
 }
 
 PicPanel::~PicPanel()
 {
 	if (image) image->~wxBitmap();
-	if (viewimage) viewimage->~wxBitmap();
-	t->~wxTimer();
+	//if (viewimage) viewimage->~wxBitmap();
+	//t->~wxTimer();
 }
         
 void PicPanel::OnSize(wxSizeEvent& event) 
@@ -51,6 +52,16 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	if (image) image->~wxBitmap();
 	image = new wxBitmap(img);
 	//ToDo: cmsTransform()...
+	
+	//parm histogram.scale: The number of buckets to display in the histogram. Default=256
+	unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
+		
+	histogram->SetPic(*dib, scale);
+	//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
+	if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
+		histogram->SetChannel(channel);
+	else
+		histogram->SetChannel(CHANNEL_RGB);
 
 	Refresh();
 }
@@ -77,8 +88,8 @@ void PicPanel::render(wxDC &dc)
 	viewh = (float) panelh / scale;
 
 	if (imagew < panelw) {
-		imageposx = panelw/2 - imagew/2;
-		imageposy = panelh/2 - imageh/2;
+		viewposx = panelw/2 - imagew/2;
+		viewposy = panelh/2 - imageh/2;
 	}
 
 	if (viewposx < 0) viewposx = 0;
@@ -191,6 +202,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	int my = event.m_y;
 
 	if (fit) return;
+	if (!image) return;
 
 	int imagew, imageh, panelw, panelh;
 	imagew = (float) image->GetWidth() * scale;

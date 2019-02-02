@@ -72,7 +72,8 @@ class PicPanel: public wxPanel
 		double imgctrx, imgctry;
 		int viewposx, viewposy;
 		
-		wxTimer *t;
+		myHistogramPane *histogram;
+
     
 };
 
