@@ -14,6 +14,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	image = NULL;
 	scale = 1.0;
 	imgctrx = 0.5; imgctry = 0.5;
+	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
 	dragging = false;
 
@@ -29,14 +30,14 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
 		
-	t = new wxTimer(this);
+	//t = new wxTimer(this);
 }
 
 PicPanel::~PicPanel()
 {
 	if (image) image->~wxBitmap();
-	if (viewimage) viewimage->~wxBitmap();
-	t->~wxTimer();
+	//if (viewimage) viewimage->~wxBitmap();
+	//t->~wxTimer();
 }
         
 void PicPanel::OnSize(wxSizeEvent& event) 
@@ -50,6 +51,8 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	wxImage img = gImage2wxImage(*dib);
 	if (image) image->~wxBitmap();
 	image = new wxBitmap(img);
+	imagew = image->GetWidth();
+	imageh = image->GetHeight();
 	//ToDo: cmsTransform()...
 
 	Refresh();
@@ -59,26 +62,35 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 void PicPanel::render(wxDC &dc)
 {
 	if (!image) return;
-	int panelw, panelh, viewx=0, viewy=0, vieww, viewh, imageposx=0, imageposy=0, imagew, imageh;
+	int panelw, panelh, viewx=0, viewy=0, vieww, viewh, scaledimagew, scaledimageh;
+
 	GetSize(&panelw, &panelh);
 
+
 	if (fit) {
-		if (image->GetWidth() > image->GetHeight())
-			scale = (double) panelw/ (double) image->GetWidth();
-		else
-			scale = (double) panelh/ (double) image->GetHeight();
+		if (imagew > imageh) {
+			scale = (double) panelw/ (double) imagew;
+		}
+		else {
+			scale = (double) panelh/ (double) imageh;
+		}
+		viewposx = 0;
+		viewposy = 0;
 	}
 
-	imagew = (float) image->GetWidth();// * scale;
-	imageh = (float) image->GetHeight();// * scale;
-
+	scaledimagew = imagew * scale;
+	scaledimageh = imageh * scale;
 
 	vieww = (float) panelw / scale;
 	viewh = (float) panelh / scale;
 
-	if (imagew < panelw) {
-		imageposx = panelw/2 - imagew/2;
-		imageposy = panelh/2 - imageh/2;
+	if (scaledimagew <= panelw | scaledimageh <= panelh) {
+		imageposx = panelw/2 - scaledimagew/2;
+		imageposy = panelh/2 - scaledimageh/2;
+	}
+	else {
+		imageposx = 0;
+		imageposy = 0;
 	}
 
 	if (viewposx < 0) viewposx = 0;
@@ -87,10 +99,13 @@ void PicPanel::render(wxDC &dc)
 	if (viewposy < 0) viewposy = 0;
 	//if (viewposy > imageh - panelh) viewposy = imageh - panelh;
 
-	((wxFrame *) GetParent())->SetStatusText(wxString::Format("image:%dx%d  panel:%dx%d imagepos:%dx%d viewpos:%dx%d",imagew, imageh, panelw, panelh, imageposx, imageposy, viewposx, viewposy));
+	//comment out for mousemove to do it:
+//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d panel:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+//		imageposx,imageposy, panelw, panelh, viewposx, viewposy, vieww, viewh, imagex, imagey));
+
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
-	//StretchBlit (xdest, ydest, dstWidth, dstHeight, wxDC *source, xsrc, ysrc, srcWidth, srcHeight)
+	// definition: StretchBlit (xdest, ydest, dstWidth, dstHeight, wxDC *source, xsrc, ysrc, srcWidth, srcHeight)
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
 }
@@ -174,6 +189,7 @@ void PicPanel::OnPaint(wxPaintEvent & event)
 void PicPanel::OnMouseLeave(wxMouseEvent& event)
 {
 	dragging = false;
+	((wxFrame *) GetParent())->SetStatusText("");
 }
 
 void PicPanel::OnLeftDown(wxMouseEvent& event)
@@ -190,23 +206,26 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	int mx = event.m_x;
 	int my = event.m_y;
 
-	if (fit) return;
-
-	int imagew, imageh, panelw, panelh;
-	imagew = (float) image->GetWidth() * scale;
-	imageh = (float) image->GetHeight() * scale;
-	GetSize(&panelw, &panelh);
-	if (imagew < panelw) return;
-
-
-	if (dragging) {
-		viewposx -= (float) (mx - mousex) / scale;
-		viewposy -= (float) (my - mousey) / scale;
+	if (!fit & dragging) { 
+//		if (dragging) {
+			viewposx -= (float) (mx - mousex) / scale;
+			viewposy -= (float) (my - mousey) / scale;
+//		}
+		Refresh();
 	}
+
+	imagex = (viewposx + (mx - imageposx)) / scale;
+	imagey = (viewposy + (my - imageposy)) / scale;
+
+	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+	else
+		((wxFrame *) GetParent())->SetStatusText("");
 
 	mousex = mx;
 	mousey = my;
-	Refresh();
+
+	//Refresh();
 }
 
 void PicPanel::OnLeftUp(wxMouseEvent& event)

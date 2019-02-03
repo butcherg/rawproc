@@ -71,6 +71,7 @@ class PicPanel: public wxPanel
 
 		double imgctrx, imgctry;
 		int viewposx, viewposy;
+		int imageposx, imageposy, imagex, imagey, imagew, imageh;
 		
 		wxTimer *t;
     
