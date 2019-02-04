@@ -6,6 +6,8 @@
 #include "myConfig.h"
 #include <wx/clipbrd.h>
 
+//move to a property:
+int border = 5;
 
 PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
 {
@@ -72,11 +74,13 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 void PicPanel::render(wxDC &dc)
 {
-	int border = 10;
 	if (!image) return;
-	int panelw, panelh,  scaledimagew, scaledimageh;  //vieww, viewh viewx=0, viewy=0,
+	int panelw, panelh,  scaledimagew, scaledimageh;
 
+	dc.SetDeviceOrigin(border, border);
 	GetSize(&panelw, &panelh);
+	panelw -= border*2;
+	panelh -= border*2;
 
 	if (fit) {
 		if (imagew > imageh) {
@@ -108,12 +112,12 @@ void PicPanel::render(wxDC &dc)
 	}
 
 	//bound lower-right pan to image:
-	if (viewposx+vieww > imagew + border) viewposx = (imagew - vieww) + border;
-	if (viewposy+viewh > imageh + border) viewposy = (imageh - viewh) + border;
+	if (viewposx+vieww > imagew) viewposx = (imagew - vieww);
+	if (viewposy+viewh > imageh) viewposy = (imageh - viewh);
 
 	//bound upper-left pan to image:
-	if (viewposx - border < 0) viewposx = -border;
-	if (viewposy - border < 0) viewposy = -border;
+	if (viewposx < 0) viewposx = 0;
+	if (viewposy < 0) viewposy = 0;
 
 
 	//comment out for mousemove to do it:
@@ -130,8 +134,8 @@ void PicPanel::render(wxDC &dc)
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
 {
 	fit=false;
-	mousex = event.m_x;
-	mousey = event.m_y;
+	int mx = event.m_x;
+	int my = event.m_y;
 
 	double increment = 0.05;
 
@@ -155,18 +159,22 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 		viewposy += (float) viewposy * increment;
 	}
 
-	imagex = ((mousex - imageposx) / scale) + (viewposx);
-	imagey = ((mousey - imageposy) / scale) + (viewposy);
-
+	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+		//for development:
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
 
 	((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
+
+	mousex = mx;
+	mousey = my;
+
 	event.Skip();
 	Refresh();
 }
@@ -178,8 +186,8 @@ void PicPanel::OnTimer(wxTimerEvent& event)
 
 void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
-	mousex = event.m_x;
-	mousey = event.m_y;
+	int mx = event.m_x;
+	int my = event.m_y;
 
 	if (scale != 1.0) {
 		scale = 1.0;
@@ -193,9 +201,11 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 		((wxFrame *) GetParent())->SetStatusText("");
 	}
 
-	//imagex = (viewposx + (mousex - imageposx)) / scale;
-	//imagey = (viewposy + (mousey - imageposy)) / scale;
+	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
+	mousex = mx;
+	mousey = my;
 
 	event.Skip();
 	Refresh();
@@ -249,13 +259,13 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 		Refresh();
 	}
 
-	imagex = ((mx - imageposx) / scale) + (viewposx);
-	imagey = ((my - imageposy) / scale) + (viewposy);
+	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
 
