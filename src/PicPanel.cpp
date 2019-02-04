@@ -73,7 +73,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 void PicPanel::render(wxDC &dc)
 {
 	if (!image) return;
-	int panelw, panelh, viewx=0, viewy=0, vieww, viewh, scaledimagew, scaledimageh;
+	int panelw, panelh,  scaledimagew, scaledimageh;  //vieww, viewh viewx=0, viewy=0,
 
 	GetSize(&panelw, &panelh);
 
@@ -112,8 +112,8 @@ void PicPanel::render(wxDC &dc)
 	//if (viewposy > imageh - panelh) viewposy = imageh - panelh;
 
 	//comment out for mousemove to do it:
-//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d panel:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-//		imageposx,imageposy, panelw, panelh, viewposx, viewposy, vieww, viewh, imagex, imagey));
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d panel:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+	//	imageposx,imageposy, panelw, panelh, viewposx, viewposy, vieww, viewh, imagex, imagey));
 
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
@@ -139,11 +139,27 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 		scale = 0.1;
 	else if (scale > 3) 
 		scale = 3; 
-	//else {
-	//	viewposx += (float) viewposx * increment;
-	//	viewposy += (float) viewposy * increment;
-	//}
 
+
+	if (event.GetWheelRotation() > 0) {
+		viewposx -= (float) viewposx * increment;
+		viewposy -= (float) viewposy * increment;
+	}
+	else {
+		viewposx += (float) viewposx * increment;
+		viewposy += (float) viewposy * increment;
+	}
+
+	imagex = ((mousex - imageposx) / scale) + (viewposx);
+	imagey = ((mousey - imageposy) / scale) + (viewposy);
+
+
+	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+	else
+		((wxFrame *) GetParent())->SetStatusText("");
 
 	((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
 	event.Skip();
@@ -171,6 +187,10 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 		((wxFrame *) GetParent())->SetStatusText("scale: fit",2);
 		((wxFrame *) GetParent())->SetStatusText("");
 	}
+
+	//imagex = (viewposx + (mousex - imageposx)) / scale;
+	//imagey = (viewposy + (mousey - imageposy)) / scale;
+
 
 	event.Skip();
 	Refresh();
@@ -219,25 +239,24 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	int my = event.m_y;
 
 	if (!fit & dragging) { 
-//		if (dragging) {
-			viewposx -= (float) (mx - mousex) / scale;
-			viewposy -= (float) (my - mousey) / scale;
-//		}
+		viewposx -= (float) (mx - mousex) / scale;
+		viewposy -= (float) (my - mousey) / scale;
 		Refresh();
 	}
 
-	imagex = (viewposx + (mx - imageposx)) / scale;
-	imagey = (viewposy + (my - imageposy)) / scale;
+	imagex = ((mx - imageposx) / scale) + (viewposx);
+	imagey = ((my - imageposy) / scale) + (viewposy);
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
 
 	mousex = mx;
 	mousey = my;
 
-	//Refresh();
 }
 
 void PicPanel::OnLeftUp(wxMouseEvent& event)
