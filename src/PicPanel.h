@@ -60,14 +60,17 @@ class PicPanel: public wxPanel
 		void OnKey(wxKeyEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
 		void OnTimer(wxTimerEvent& event);
+
+		void setStatusBar();
         
     private:
+		gImage * display_dib;
 
 		int mousex, mousey;
 		bool dragging, fit;
 
 		double scale;
-		wxBitmap *image, *viewimage;
+		wxBitmap *image;
 
 		double imgctrx, imgctry;
 		int viewposx, viewposy;

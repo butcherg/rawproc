@@ -9,10 +9,12 @@
 //move to a property:
 int border = 5;
 
+
 PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
 {
 
-	SetDoubleBuffered(true);  //watch this one... tricksy...
+	SetDoubleBuffered(true); 
+	display_dib = NULL;
 	image = NULL;
 	scale = 1.0;
 	imgctrx = 0.5; imgctry = 0.5;
@@ -39,8 +41,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 PicPanel::~PicPanel()
 {
 	if (image) image->~wxBitmap();
-	//if (viewimage) viewimage->~wxBitmap();
-	//t->~wxTimer();
+	//if (t) t->~wxTimer();
 }
         
 void PicPanel::OnSize(wxSizeEvent& event) 
@@ -51,24 +52,44 @@ void PicPanel::OnSize(wxSizeEvent& event)
 
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
-	wxImage img = gImage2wxImage(*dib);
-	if (image) image->~wxBitmap();
-	image = new wxBitmap(img);
-	imagew = image->GetWidth();
-	imageh = image->GetHeight();
-	//ToDo: cmsTransform()...
+	if (dib) {
+		display_dib = dib;
+		wxImage img = gImage2wxImage(*dib);
+		if (image) image->~wxBitmap();
+		image = new wxBitmap(img);
+		imagew = image->GetWidth();
+		imageh = image->GetHeight();
+		//ToDo: cmsTransform()...
 	
-	//parm histogram.scale: The number of buckets to display in the histogram. Default=256
-	unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
+		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
+		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
 		
-	histogram->SetPic(*dib, scale);
-	//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
-	if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
-		histogram->SetChannel(channel);
-	else
-		histogram->SetChannel(CHANNEL_RGB);
+		histogram->SetPic(*dib, scale);
+		//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
+		if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
+			histogram->SetChannel(channel);
+		else
+			histogram->SetChannel(CHANNEL_RGB);
 
-	Refresh();
+		Refresh();
+	}
+}
+
+void PicPanel::setStatusBar()
+{
+	struct pix p = display_dib->getPixel(imagex, imagey);
+
+	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b));
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+	else
+		((wxFrame *) GetParent())->SetStatusText("");
+
+	if (fit)
+		((wxFrame *) GetParent())->SetStatusText("scale: fit",2);
+	else
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
 }
 
 
@@ -120,9 +141,7 @@ void PicPanel::render(wxDC &dc)
 	if (viewposy < 0) viewposy = 0;
 
 
-	//comment out for mousemove to do it:
-	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d panel:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-	//	imageposx,imageposy, panelw, panelh, viewposx, viewposy, vieww, viewh, imagex, imagey));
+	//setStatusBar();
 
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
@@ -162,15 +181,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
 	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
-	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
-		//for development:
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
-	else
-		((wxFrame *) GetParent())->SetStatusText("");
-
-	((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
+	setStatusBar();
 
 	mousex = mx;
 	mousey = my;
@@ -192,13 +203,9 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	if (scale != 1.0) {
 		scale = 1.0;
 		fit=false;
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
-	
 	}
 	else {
 		fit=true;
-		((wxFrame *) GetParent())->SetStatusText("scale: fit",2);
-		((wxFrame *) GetParent())->SetStatusText("");
 	}
 
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
@@ -206,6 +213,8 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 
 	mousex = mx;
 	mousey = my;
+
+	setStatusBar();
 
 	event.Skip();
 	Refresh();
@@ -262,12 +271,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
 	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
-	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d",imagex, imagey));
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
-	else
-		((wxFrame *) GetParent())->SetStatusText("");
+	setStatusBar();
 
 	mousex = mx;
 	mousey = my;
