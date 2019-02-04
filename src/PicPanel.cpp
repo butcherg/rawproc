@@ -72,11 +72,11 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 void PicPanel::render(wxDC &dc)
 {
+	int border = 10;
 	if (!image) return;
 	int panelw, panelh,  scaledimagew, scaledimageh;  //vieww, viewh viewx=0, viewy=0,
 
 	GetSize(&panelw, &panelh);
-
 
 	if (fit) {
 		if (imagew > imageh) {
@@ -95,21 +95,26 @@ void PicPanel::render(wxDC &dc)
 	vieww = (float) panelw / scale;
 	viewh = (float) panelh / scale;
 
-
+	//lock pan position if scaled image is smaller than the display panel:
 	if (scaledimagew <= panelw | scaledimageh <= panelh) {
 		imageposx = panelw/2 - scaledimagew/2;
 		imageposy = panelh/2 - scaledimageh/2;
+		viewposx = 0;
+		viewposy = 0;
 	}
 	else {
 		imageposx = 0;
 		imageposy = 0;
 	}
 
-	if (viewposx < 0) viewposx = 0;
-	//if (viewposx > imagew - panelw) viewposx = imagew - panelw;
-	//if (viewposx *scale+viewx*scale > imagew) viewposx = imagew - vieww*scale;
-	if (viewposy < 0) viewposy = 0;
-	//if (viewposy > imageh - panelh) viewposy = imageh - panelh;
+	//bound lower-right pan to image:
+	if (viewposx+vieww > imagew + border) viewposx = (imagew - vieww) + border;
+	if (viewposy+viewh > imageh + border) viewposy = (imageh - viewh) + border;
+
+	//bound upper-left pan to image:
+	if (viewposx - border < 0) viewposx = -border;
+	if (viewposy - border < 0) viewposy = -border;
+
 
 	//comment out for mousemove to do it:
 	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d panel:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
