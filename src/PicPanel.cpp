@@ -145,7 +145,6 @@ void PicPanel::render(wxDC &dc)
 
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
-	// definition: StretchBlit (xdest, ydest, dstWidth, dstHeight, wxDC *source, xsrc, ysrc, srcWidth, srcHeight)
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
 }
@@ -168,23 +167,19 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	else if (scale > 3) 
 		scale = 3; 
 
-
-	if (event.GetWheelRotation() > 0) {
-		viewposx -= (float) viewposx * increment;
-		viewposy -= (float) viewposy * increment;
-	}
-	else {
-		viewposx += (float) viewposx * increment;
-		viewposy += (float) viewposy * increment;
-	}
+	//keep center of panel in the center...
+	int dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
+	int dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
+	viewposx += dimagex;
+	viewposy += dimagey;
 
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
 	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
-	setStatusBar();
-
 	mousex = mx;
 	mousey = my;
+
+	setStatusBar();
 
 	event.Skip();
 	Refresh();
@@ -200,6 +195,9 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	int mx = event.m_x;
 	int my = event.m_y;
 
+	int panelw, panelh;
+	GetSize(&panelw,&panelh);
+
 	if (scale != 1.0) {
 		scale = 1.0;
 		fit=false;
@@ -207,6 +205,10 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 	else {
 		fit=true;
 	}
+
+	//center the view on the pixel that was double-clicked:
+	viewposx = imagex - (panelw/2);
+	viewposy = imagey - (panelh/2);
 
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
 	imagey = (((my-border) - imageposy) / scale) + (viewposy);
@@ -271,11 +273,11 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
 	imagey = (((my-border) - imageposy) / scale) + (viewposy);
 
-	setStatusBar();
-
 	mousex = mx;
 	mousey = my;
 
+	setStatusBar();
+	event.Skip();
 }
 
 void PicPanel::OnLeftUp(wxMouseEvent& event)
