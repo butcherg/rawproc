@@ -67,14 +67,17 @@ class PicPanel: public wxPanel
 		gImage * display_dib;
 
 		int mousex, mousey;
-		bool dragging, fit;
+		bool dragging, thumbdragging, fit;
+		int skipmove;
 
 		double scale;
-		wxBitmap *image;
+		wxBitmap *image, *thumbnail;
 
 		double imgctrx, imgctry;
 		int viewposx, viewposy;
 		int imageposx, imageposy, imagex, imagey, imagew, imageh, vieww, viewh;
+		int thumbw, thumbh;
+		double thumbwscale, thumbhscale;
 		
 		myHistogramPane *histogram;
 

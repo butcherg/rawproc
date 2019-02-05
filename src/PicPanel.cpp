@@ -7,7 +7,6 @@
 #include <wx/clipbrd.h>
 
 
-
 PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
 {
 
@@ -18,8 +17,9 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	dragging = false;
+	thumbdragging = dragging = false;
 	histogram = hgram;
+	skipmove=0;
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
 	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
@@ -57,6 +57,20 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		image = new wxBitmap(img);
 		imagew = image->GetWidth();
 		imageh = image->GetHeight();
+
+		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
+		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
+		thumbh = thumbw = thumbsize;
+
+		if (imagew > imageh)
+			thumbh = thumbw * ((float) imageh / (float) imagew);
+		else
+			thumbw = thumbh * ((float) imagew / (float) imageh);
+		thumbhscale = (float) thumbh / (float) imageh;
+		thumbwscale = (float) thumbw / (float) imagew;
+		thumbnail = new wxBitmap(img.Scale(thumbw,thumbh,wxIMAGE_QUALITY_HIGH));
+
+
 		//ToDo: cmsTransform()...
 	
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
@@ -90,6 +104,13 @@ void PicPanel::setStatusBar()
 		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
 }
 
+void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
+{
+	dc.DrawLine(x, y, x+w, y);
+	dc.DrawLine(x+w, y, x+w, y+h);
+	dc.DrawLine(x+w, y+h, x, y+h);
+	dc.DrawLine(x, y+h, x,y);
+}
 
 void PicPanel::render(wxDC &dc)
 {
@@ -141,13 +162,25 @@ void PicPanel::render(wxDC &dc)
 	if (viewposx < 0) viewposx = 0;
 	if (viewposy < 0) viewposy = 0;
 
-
 	//setStatusBar();
 
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
+
+	dc.SetPen(wxPen(wxColour(0,0,0),1));
+	dc.DrawRectangle(0,0,thumbw+4, thumbh+4);			
+	dc.SetPen(wxPen(wxColour(255,255,255),1));
+	dc.DrawRectangle(1,1,thumbw+2, thumbh+2);
+	dc.DrawBitmap(*thumbnail,2,2);
+
+	dc.SetPen(wxPen(wxColour(255,255,255),1));
+	if (vieww < imagew | viewh < imageh)
+		drawBox(dc, 	(int) ((viewposx+2) * thumbwscale), 
+				(int) ((viewposy+2) * thumbhscale),
+				(int) (vieww * thumbwscale),
+				(int) (viewh * thumbhscale));
 }
 
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
@@ -256,11 +289,24 @@ void PicPanel::OnMouseLeave(wxMouseEvent& event)
 
 void PicPanel::OnLeftDown(wxMouseEvent& event)
 {
-	mousex = event.m_x;
-	mousey = event.m_y;
-	dragging = true;
-	event.Skip();
+	int mx = event.m_x;
+	int my = event.m_y;
 
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+	if (mx < thumbw & my < thumbh) 
+		thumbdragging = true;
+	else
+		dragging = true;
+
+	imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+	imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+	mousex = mx;
+	mousey = my;
+
+	setStatusBar();
+	event.Skip();
 }
 
 void PicPanel::OnMouseMove(wxMouseEvent& event)
@@ -270,7 +316,17 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
-	if (!fit & dragging) { 
+	if (thumbdragging && mx < thumbw & my < thumbh) {
+		if (skipmove < 3) {  //kinda smooths out panning with the thumb viewport...
+			skipmove++;
+			return;
+		}
+		skipmove=0;
+		viewposx -= (mousex - mx) * ((float) imagew / (float) thumbw);
+		viewposy -= (mousey - my) * ((float) imageh / (float) thumbh);
+		Refresh();
+	}
+	else if (!fit & dragging) { 
 		viewposx -= (float) (mx - mousex) / scale;
 		viewposy -= (float) (my - mousey) / scale;
 		Refresh();
@@ -288,17 +344,10 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 
 void PicPanel::OnLeftUp(wxMouseEvent& event)
 {
-	dragging = false;
+	thumbdragging = dragging = false;
+	Refresh();
 }
 
-        
-void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
-{
-	dc.DrawLine(x, y, x+w, y);
-	dc.DrawLine(x+w, y, x+w, y+h);
-	dc.DrawLine(x+w, y+h, x, y+h);
-	dc.DrawLine(x, y+h, x,y);
-}
 
 void PicPanel::SetThumbMode(int mode)
 {
