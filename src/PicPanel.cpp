@@ -6,8 +6,6 @@
 #include "myConfig.h"
 #include <wx/clipbrd.h>
 
-//move to a property:
-int border = 5;
 
 
 PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
@@ -98,6 +96,9 @@ void PicPanel::render(wxDC &dc)
 	if (!image) return;
 	int panelw, panelh,  scaledimagew, scaledimageh;
 
+	//parm display.panelborder: Border around the display image.  Default: 5
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
 	dc.SetDeviceOrigin(border, border);
 	GetSize(&panelw, &panelh);
 	panelw -= border*2;
@@ -156,6 +157,7 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	int my = event.m_y;
 
 	double increment = 0.05;
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
 	if (event.GetWheelRotation() > 0)
 		scale += increment;
@@ -194,6 +196,8 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
 	int mx = event.m_x;
 	int my = event.m_y;
+
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
 	int panelw, panelh;
 	GetSize(&panelw,&panelh);
@@ -263,6 +267,8 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 {
 	int mx = event.m_x;
 	int my = event.m_y;
+
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
 	if (!fit & dragging) { 
 		viewposx -= (float) (mx - mousex) / scale;
