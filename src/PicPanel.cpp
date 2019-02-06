@@ -55,6 +55,10 @@ void PicPanel::OnSize(wxSizeEvent& event)
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
 	if (dib) {
+		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
+		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
+			((wxFrame *) GetParent())->SetStatusText("display...");
+
 		display_dib = dib;
 		wxImage img = gImage2wxImage(*dib);
 		if (image) image->~wxBitmap();
@@ -88,6 +92,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			histogram->SetChannel(CHANNEL_RGB);
 
 		Refresh();
+		((wxFrame *) GetParent())->SetStatusText("");
 	}
 }
 
