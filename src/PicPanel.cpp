@@ -150,7 +150,7 @@ void PicPanel::render(wxDC &dc)
 	viewh = (float) panelh / scale;
 
 	//lock pan position if scaled image is smaller than the display panel:
-	if (scaledimagew <= panelw | scaledimageh <= panelh) {
+	if (scaledimagew <= panelw & scaledimageh <= panelh) {
 		imageposx = panelw/2 - scaledimagew/2;
 		imageposy = panelh/2 - scaledimageh/2;
 		viewposx = 0;
@@ -202,6 +202,7 @@ void PicPanel::render(wxDC &dc)
 		dc.DrawRectangle(1,1,thumbw+2, thumbh+2);
 		dc.DrawBitmap(*thumbnail,2,2);
 
+		dc.SetClippingRegion(2,2,thumbw,thumbh);
 		dc.SetPen(wxPen(wxColour(255,255,255),1));
 		if (vieww < imagew | viewh < imageh)
 			drawBox(dc, 
@@ -330,7 +331,7 @@ void PicPanel::OnLeftDown(wxMouseEvent& event)
 
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
-	if (mx < thumbw & my < thumbh) 
+	if (thumbvisible && mx < thumbw & my < thumbh) 
 		thumbdragging = true;
 	else
 		dragging = true;
@@ -352,7 +353,7 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
-	if (thumbdragging && mx < thumbw & my < thumbh) {
+	if (thumbvisible && thumbdragging && mx < thumbw & my < thumbh) {
 		if (skipmove < 3) {  //kinda smooths out panning with the thumb viewport...
 			skipmove++;
 			return;
