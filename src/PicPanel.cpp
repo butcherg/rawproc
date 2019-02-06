@@ -171,11 +171,13 @@ void PicPanel::render(wxDC &dc)
 
 	//setStatusBar();
 
+	//write the display image:
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
-	
+
+	//write the tool-supplied plots:
 	if (dcList != "") {
 		dc.SetPen(*wxYELLOW_PEN);
 		wxArrayString l = split(dcList, ";");
@@ -183,14 +185,16 @@ void PicPanel::render(wxDC &dc)
 			wxArrayString c = split(l[i],",");
 			if (c[0] == "cross") {
 				if (c.GetCount() < 3) continue;
-				int px = (atoi(c[1].c_str())*scale)-viewposx;
-				int py = (atoi(c[2].c_str())*scale)-viewposy;
+				//convert image coordinates to panel:
+				int px = (atoi(c[1].c_str())-viewposx) * scale + imageposx;
+				int py = (atoi(c[2].c_str())-viewposy) * scale + imageposy;
 				dc.DrawLine(px-10, py, px+10, py);
 				dc.DrawLine(px, py-10, px, py+10);
 			}
 		}
 	}
-	
+
+	//if the thumbnail is visible, write it and its viewport:
 	if (thumbvisible) {
 		dc.SetPen(wxPen(wxColour(0,0,0),1));
 		dc.DrawRectangle(0,0,thumbw+4, thumbh+4);			
