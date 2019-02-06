@@ -22,6 +22,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	thumbvisible = true;
 	histogram = hgram;
 	skipmove=0;
+	oob = 0;
 	dcList.clear();
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
@@ -32,6 +33,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	Bind(wxEVT_LEFT_UP, &PicPanel::OnLeftUp,  this);
 	Bind(wxEVT_MOTION, &PicPanel::OnMouseMove,  this);
 	Bind(wxEVT_MOUSEWHEEL, &PicPanel::OnMouseWheel,  this);
+	Bind(wxEVT_ENTER_WINDOW, &PicPanel::OnMouseEnter,  this);
 	Bind(wxEVT_LEAVE_WINDOW, &PicPanel::OnMouseLeave,  this);
 	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
@@ -60,7 +62,15 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			((wxFrame *) GetParent())->SetStatusText("display...");
 
 		display_dib = dib;
-		wxImage img = gImage2wxImage(*dib);
+		ch = channel;
+		wxImage img;
+
+		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
+			img = gImage2wxImage(*dib, oob);
+		else
+			img = gImage2wxImage(*dib);
+
 		if (image) image->~wxBitmap();
 		image = new wxBitmap(img);
 		imagew = image->GetWidth();
@@ -103,10 +113,12 @@ void PicPanel::setStatusBar()
 	else
 		return;
 
-	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b));
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-			imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh) {
+		struct pix p = display_dib->getPixel(imagex, imagey);
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b));
+		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+	}
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
 
@@ -234,8 +246,8 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 
 	if (scale < 0.1) 
 		scale = 0.1;
-	else if (scale > 3) 
-		scale = 3; 
+	else if (scale > 4) 
+		scale = 4; 
 
 	//keep center of panel in the center...
 	int dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
@@ -323,9 +335,16 @@ void PicPanel::OnPaint(wxPaintEvent & event)
 	render(dc);
 }
 
+void PicPanel::OnMouseEnter(wxMouseEvent& event)
+{
+	SetFocus();
+	thumbdragging = dragging = false;
+	((wxFrame *) GetParent())->SetStatusText("");
+}
+
 void PicPanel::OnMouseLeave(wxMouseEvent& event)
 {
-	dragging = false;
+	thumbdragging = dragging = false;
 	((wxFrame *) GetParent())->SetStatusText("");
 }
 
@@ -483,11 +502,46 @@ void PicPanel::OnRightDown(wxMouseEvent& event)
 
 
 
-
-
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	event.Skip();
+	//if (blank) return;
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
+	switch (event.GetKeyCode()) {
+		case 116: //t
+		case 84: //T - toggle display thumbnail
+			if (thumbvisible)
+				thumbvisible = false;
+			else
+				thumbvisible = true;
+			Refresh();
+			break;
 
+		case 67: //c - with Ctrl-, copy RGB at the x,y
+			if (event.ControlDown()) 
+				if (display_dib)
+					if (wxTheClipboard->Open()) {
+						struct pix p = display_dib->getPixel(imagex, imagey);
+						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
+						wxTheClipboard->Close();
+					}
+			break;
+
+		case 79: //o oob toggle
+			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
+				oob++;
+				if (oob > 2) oob = 0;
+				if (oob == 0)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: off");
+				else if (oob == 1)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
+				else if (oob == 2)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
+				SetPic(display_dib, ch);
+				Refresh();
+			}
+			break;
+	}
 }
 
 

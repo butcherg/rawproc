@@ -57,6 +57,7 @@ class PicPanel: public wxPanel
 		void OnLeftDown(wxMouseEvent& event);
 		void OnLeftDoubleClicked(wxMouseEvent& event);
 		void OnKey(wxKeyEvent& event);
+		void OnMouseEnter(wxMouseEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
 		void OnTimer(wxTimerEvent& event);
 
@@ -64,10 +65,12 @@ class PicPanel: public wxPanel
         
     private:
 		gImage * display_dib;
+		GIMAGE_CHANNEL ch;
 
 		int mousex, mousey;
 		bool dragging, thumbdragging, thumbvisible, fit;
 		int skipmove;
+		int oob;
 
 		double scale;
 		wxBitmap *image, *thumbnail;
