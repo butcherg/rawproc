@@ -67,7 +67,7 @@ class PicPanel: public wxPanel
 		gImage * display_dib;
 
 		int mousex, mousey;
-		bool dragging, thumbdragging, fit;
+		bool dragging, thumbdragging, thumbvisible, fit;
 		int skipmove;
 
 		double scale;

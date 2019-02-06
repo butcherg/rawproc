@@ -13,11 +13,13 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	SetDoubleBuffered(true); 
 	display_dib = NULL;
 	image = NULL;
+	display_dib = NULL;
 	scale = 1.0;
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
 	thumbdragging = dragging = false;
+	thumbvisible = true;
 	histogram = hgram;
 	skipmove=0;
 
@@ -39,6 +41,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 PicPanel::~PicPanel()
 {
 	if (image) image->~wxBitmap();
+	if (thumbnail) thumbnail->~wxBitmap();
 	//if (t) t->~wxTimer();
 }
         
@@ -89,7 +92,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 void PicPanel::setStatusBar()
 {
-	struct pix p = display_dib->getPixel(imagex, imagey);
+	if (display_dib)
+		struct pix p = display_dib->getPixel(imagex, imagey);
+	else
+		return;
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh)
 		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b));
@@ -168,19 +174,22 @@ void PicPanel::render(wxDC &dc)
 	mdc.SelectObject(*image);
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
+	
+	if (thumbvisible) {
+		dc.SetPen(wxPen(wxColour(0,0,0),1));
+		dc.DrawRectangle(0,0,thumbw+4, thumbh+4);			
+		dc.SetPen(wxPen(wxColour(255,255,255),1));
+		dc.DrawRectangle(1,1,thumbw+2, thumbh+2);
+		dc.DrawBitmap(*thumbnail,2,2);
 
-	dc.SetPen(wxPen(wxColour(0,0,0),1));
-	dc.DrawRectangle(0,0,thumbw+4, thumbh+4);			
-	dc.SetPen(wxPen(wxColour(255,255,255),1));
-	dc.DrawRectangle(1,1,thumbw+2, thumbh+2);
-	dc.DrawBitmap(*thumbnail,2,2);
-
-	dc.SetPen(wxPen(wxColour(255,255,255),1));
-	if (vieww < imagew | viewh < imageh)
-		drawBox(dc, 	(int) ((viewposx+2) * thumbwscale), 
+		dc.SetPen(wxPen(wxColour(255,255,255),1));
+		if (vieww < imagew | viewh < imageh)
+			drawBox(dc, 
+				(int) ((viewposx+2) * thumbwscale), 
 				(int) ((viewposy+2) * thumbhscale),
 				(int) (vieww * thumbwscale),
 				(int) (viewh * thumbhscale));
+	}
 }
 
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
@@ -229,6 +238,13 @@ void PicPanel::OnLeftDoubleClicked(wxMouseEvent& event)
 {
 	int mx = event.m_x;
 	int my = event.m_y;
+	
+	if (mx < thumbw & my < thumbh) {
+		if (thumbvisible) thumbvisible = false; else thumbvisible = true;
+		Refresh();
+		event.Skip();
+		return;
+	}
 
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
