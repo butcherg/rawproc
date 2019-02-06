@@ -22,6 +22,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	thumbvisible = true;
 	histogram = hgram;
 	skipmove=0;
+	dcList.clear();
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
 	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
@@ -175,6 +176,21 @@ void PicPanel::render(wxDC &dc)
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
 	
+	if (dcList != "") {
+		dc.SetPen(*wxYELLOW_PEN);
+		wxArrayString l = split(dcList, ";");
+		for (unsigned i=0; i<l.GetCount(); i++) {
+			wxArrayString c = split(l[i],",");
+			if (c[0] == "cross") {
+				if (c.GetCount() < 3) continue;
+				int px = (atoi(c[1].c_str())*scale)-viewposx;
+				int py = (atoi(c[2].c_str())*scale)-viewposy;
+				dc.DrawLine(px-10, py, px+10, py);
+				dc.DrawLine(px, py-10, px, py+10);
+			}
+		}
+	}
+	
 	if (thumbvisible) {
 		dc.SetPen(wxPen(wxColour(0,0,0),1));
 		dc.DrawRectangle(0,0,thumbw+4, thumbh+4);			
@@ -282,7 +298,7 @@ double PicPanel::GetScale()
 	
 coord PicPanel::GetImgCoords()
 {
-	return coord {0,0};
+	return coord {imagex, imagey};
 }
 	
 void PicPanel::PaintNow()
@@ -364,16 +380,15 @@ void PicPanel::OnLeftUp(wxMouseEvent& event)
 	Refresh();
 }
 
-
 void PicPanel::SetThumbMode(int mode)
 {
-
+	if (mode == 0) 
+		thumbvisible = false;
+	else
+		thumbvisible = true;
+	Refresh();
 }
 
-void PicPanel::ToggleThumb()
-{
-
-}
 	
 void PicPanel::BlankPic()
 {
@@ -386,10 +401,10 @@ void PicPanel::RefreshPic()
 }
 
 
-	
 void PicPanel::SetDrawList(wxString list)
 {
-
+	dcList = list;
+	Refresh();
 }
    
 

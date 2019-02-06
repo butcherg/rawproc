@@ -1340,11 +1340,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->processPic();
 		WxStatusBar1->SetStatusText("");
 		break;
-	case 116: //T
-	case 84: //t - toggle display thumbnail
-		pic->ToggleThumb();
-		break;
-    	}
+	}
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
 	//event.Skip();
 }

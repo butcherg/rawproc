@@ -35,13 +35,12 @@ class PicPanel: public wxPanel
 		void drawBox(wxDC &dc, int x, int y, int w,int h);
 		void RefreshPic();
 		void SetPic(gImage * dib, GIMAGE_CHANNEL channel=CHANNEL_RGB);
+		void SetThumbMode(int mode);
 		void SetColorManagement(bool b);
 		bool GetColorManagement();
 		void SetProfile(gImage * dib);
 		void SetImageProfile(cmsHPROFILE hImgProf);
 		cmsHTRANSFORM GetDisplayTransform();
-		void SetThumbMode(int mode);
-		void ToggleThumb();
 		wxString getHistogramString();
 		double GetScale();
 		void SetScale(double s);
@@ -78,6 +77,8 @@ class PicPanel: public wxPanel
 		int imageposx, imageposy, imagex, imagey, imagew, imageh, vieww, viewh;
 		int thumbw, thumbh;
 		double thumbwscale, thumbhscale;
+		
+		wxString dcList;
 		
 		myHistogramPane *histogram;
 
