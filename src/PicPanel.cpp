@@ -174,7 +174,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				}
 				((wxFrame *) GetParent())->SetStatusText("CMS",1);
 			}
-			else ((wxFrame *) GetParent())->SetStatusText("",1);
+			else ((wxFrame *) GetParent())->SetStatusText("CMS:err",1);
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 		
@@ -339,6 +339,9 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	int my = event.m_y;
 
 	double increment = 0.05;
+	if (event.ShiftDown()) increment = 0.2;
+	if (event.ControlDown()) increment = 1.0;
+
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
 	if (event.GetWheelRotation() > 0)
@@ -348,8 +351,8 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 
 	if (scale < 0.1) 
 		scale = 0.1;
-	else if (scale > 4) 
-		scale = 4; 
+	else if (scale > 5) 
+		scale = 5; 
 
 	//keep center of panel in the center...
 	int dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
