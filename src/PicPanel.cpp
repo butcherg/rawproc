@@ -24,12 +24,6 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	skipmove=0;
 	oob = 0;
 	dcList.clear();
-	
-	//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
-	if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1")
-		colormgt = true;
-	else
-		colormgt = false;
 
 	displayProfile = NULL;
 	displayTransform = NULL;
@@ -85,12 +79,14 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		thumbh = thumbw = thumbsize;
 		
 		//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
-		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1")
+		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+/*
 			colormgt = true;
 		else
 			colormgt = false;
 
 		if (colormgt) {
+*/
 			cmsHPROFILE hImgProfile, hSoftProofProfile;
 		
 			wxFileName profilepath;

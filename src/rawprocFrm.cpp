@@ -697,6 +697,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		if (myConfig::getConfig().getValueOrDefault("input.log","0") == "1")
 			log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
+/*
 		//parm input.cms: When a file is input, enable or disable color management.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("input.cms","0") == "1") {
 
@@ -756,7 +757,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			pic->SetImageProfile(NULL);
 			pic->SetColorManagement(false);
 		}
-
+*/
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
 		picdata->createPanel(parambook);
@@ -917,7 +918,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
 
-
+/*
 			if (myConfig::getConfig().getValueOrDefault("input.cms","0") == "1") {
 
 				if (myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","") == "") {
@@ -975,7 +976,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->SetImageProfile(NULL);
 				pic->SetColorManagement(false);
 			}
-
+*/
 
 			//pic->SetScaleToWidth();
 			if (pic->GetSize().GetWidth() > dib->getWidth()) {
@@ -1082,8 +1083,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
 			}
 
-
-			if (pic->GetColorManagement()) {
+			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, that file is embedded, otherwise, if a profile is available in the internal image, that profile is embedded.   Default=1
+			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
+			//if (pic->GetColorManagement()) {
 
 				wxString intentstr;
 				cmsUInt32Number intent = INTENT_PERCEPTUAL;
@@ -1091,7 +1093,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
 					//template output.jpeg.cms.profile=iccfile
-profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
 
 					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.jpeg.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
@@ -1849,13 +1851,6 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
-	//if (!pic->GetColorManagement()) {
-	//	if (myConfig::getConfig().getValueOrDefault("display.cms.requireprofile","1") == "1") {
-	//		wxMessageBox("Color management disabled, no input profile for colorspace");
-	//		return;
-	//	}
-	//}
-
 	wxString cmd = "(none),-,-";
 
 	if (commandtree->IsEmpty()) return;
