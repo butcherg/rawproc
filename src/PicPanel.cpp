@@ -24,6 +24,15 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	skipmove=0;
 	oob = 0;
 	dcList.clear();
+	
+	//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
+	if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1")
+		colormgt = true;
+	else
+		colormgt = false;
+
+	displayProfile = NULL;
+	displayTransform = NULL;
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
 	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
@@ -71,15 +80,111 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		else
 			img = gImage2wxImage(*dib);
 
-		if (image) image->~wxBitmap();
-		image = new wxBitmap(img);
-		imagew = image->GetWidth();
-		imageh = image->GetHeight();
-
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
 		thumbh = thumbw = thumbsize;
 
+
+
+		cmsHPROFILE hImgProfile, hSoftProofProfile;
+		
+		wxFileName profilepath;
+		//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
+		profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+		
+		//parm display.cms.displayprofile: Filename of display profile.  Default: none.
+		profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""))); 
+	
+		if (profilepath.FileExists()) 
+			displayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+		else 
+			displayProfile = NULL;
+		
+		if (dib->getProfile() != NULL & dib->getProfileLength() > 0) 
+			hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+		
+		//wxFileName profilepath;
+		//profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+		
+		if (hImgProfile) {
+			cmsUInt32Number dwflags = 0;
+			if (displayTransform) cmsDeleteTransform(displayTransform);
+			
+			//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+			wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
+			cmsUInt32Number intent = INTENT_PERCEPTUAL;
+			if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+			if (intentstr == "saturation") intent = INTENT_SATURATION;
+			if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+			if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+			
+			//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
+			if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
+
+			cmsUInt32Number proofintent;
+			//parm display.cms.softproof: Perform softproofing color transform.  Default=0  
+			if (myConfig::getConfig().getValueOrDefault("display.cms.softproof","0") == "1") { 
+				dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
+				//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
+				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") {			
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
+					hSoftProofProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				}
+				else hSoftProofProfile = NULL;
+				//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+				wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
+				proofintent = INTENT_PERCEPTUAL;
+				if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
+				if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
+				if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
+				if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
+				//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
+				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
+			}
+			
+			if (hImgProfile) {
+				if (displayProfile) {
+					if (hSoftProofProfile) {
+						displayTransform = cmsCreateProofingTransform(
+							hImgProfile, TYPE_RGB_8,
+							displayProfile, TYPE_RGB_8,
+							hSoftProofProfile,
+							intent,
+							proofintent,
+							dwflags);
+					}
+					else {
+					displayTransform = cmsCreateTransform(
+						hImgProfile, TYPE_RGB_8,
+						displayProfile, TYPE_RGB_8,
+						intent, dwflags);
+					}
+				}
+			}
+		}
+		
+		if (colormgt) {
+			if (displayTransform) {
+				//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+				unsigned char* im = img.GetData();
+				unsigned w = img.GetWidth();
+				unsigned h = img.GetHeight();
+				#pragma omp parallel for
+				for (unsigned y=0; y<h; y++) {
+					unsigned pos = y*w*3;
+					cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
+				}
+				((wxFrame *) GetParent())->SetStatusText("CMS",1);
+			}
+			else ((wxFrame *) GetParent())->SetStatusText("",1);
+		}
+		else ((wxFrame *) GetParent())->SetStatusText("",1);
+		
+		if (image) image->~wxBitmap();
+		image = new wxBitmap(img);
+		imagew = image->GetWidth();
+		imageh = image->GetHeight();
+		
 		if (imagew > imageh)
 			thumbh = thumbw * ((float) imageh / (float) imagew);
 		else
@@ -88,8 +193,6 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		thumbwscale = (float) thumbw / (float) imagew;
 		thumbnail = new wxBitmap(img.Scale(thumbw,thumbh,wxIMAGE_QUALITY_HIGH));
 
-
-		//ToDo: cmsTransform()...
 	
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());

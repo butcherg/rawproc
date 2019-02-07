@@ -83,6 +83,10 @@ class PicPanel: public wxPanel
 		
 		wxString dcList;
 		
+		bool colormgt;
+		cmsHPROFILE displayProfile;
+		cmsHTRANSFORM displayTransform;
+		
 		myHistogramPane *histogram;
 
     
