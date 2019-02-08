@@ -18,7 +18,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	thumbdragging = dragging = false;
+	softproof = thumbdragging = dragging = false;
 	thumbvisible = true;
 	histogram = hgram;
 	skipmove=0;
@@ -80,13 +80,8 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		
 		//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
 		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
-/*
-			colormgt = true;
-		else
-			colormgt = false;
 
-		if (colormgt) {
-*/
+			wxString resultstr = "";
 			cmsHPROFILE hImgProfile, hSoftProofProfile;
 		
 			wxFileName profilepath;
@@ -119,49 +114,60 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
 				if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
 
-				cmsUInt32Number proofintent;
-				//parm display.cms.softproof: Perform softproofing color transform.  Default=0  
-				if (myConfig::getConfig().getValueOrDefault("display.cms.softproof","0") == "1") { 
+				if (softproof) {
+					cmsUInt32Number proofintent;
+					hSoftProofProfile = NULL;
 					dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
+
 					//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
-					if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") {			
-						profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
+					//if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") 		
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
+					
+					if (profilepath.FileExists()) {
 						hSoftProofProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-					}
-					else hSoftProofProfile = NULL;
-					//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
-					wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
-					proofintent = INTENT_PERCEPTUAL;
-					if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
-					if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
-					if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
-					if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
-					//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
-					if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
-				}
+
+						//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+						wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
+						proofintent = INTENT_PERCEPTUAL;
+						if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
+						if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
+						if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
+						if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
+
+						//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
+						if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
 			
-				if (hImgProfile) {
-					if (displayProfile) {
-						if (hSoftProofProfile) {
-							displayTransform = cmsCreateProofingTransform(
-								hImgProfile, TYPE_RGB_8,
-								displayProfile, TYPE_RGB_8,
-								hSoftProofProfile,
-								intent,
-								proofintent,
-								dwflags);
+						if (displayProfile) {
+							if (hSoftProofProfile) {
+								if (displayTransform) 
+								displayTransform = cmsCreateProofingTransform(
+									hImgProfile, TYPE_RGB_8,
+									displayProfile, TYPE_RGB_8,
+									hSoftProofProfile,
+									intent,
+									proofintent,
+									dwflags);
+								resultstr.Append(":softproof");
+							}
+							else resultstr.Append(":soft_err");
 						}
-						else {
+						else resultstr.Append(":disp_err");
+					}
+					else  resultstr.Append(":file_err");
+				}
+				else {
+					if (displayProfile) {
 						displayTransform = cmsCreateTransform(
 							hImgProfile, TYPE_RGB_8,
 							displayProfile, TYPE_RGB_8,
 							intent, dwflags);
-						}
+						resultstr.Append(":display");
 					}
+					else resultstr.Append(":disp_err");
 				}
 			}
 		
-		
+			
 			if (displayTransform) {
 				//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
 				unsigned char* im = img.GetData();
@@ -172,9 +178,9 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 					unsigned pos = y*w*3;
 					cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
 				}
-				((wxFrame *) GetParent())->SetStatusText("CMS",1);
+				((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
 			}
-			else ((wxFrame *) GetParent())->SetStatusText("CMS:err",1);
+			else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_err",1);
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 		
@@ -523,11 +529,6 @@ void PicPanel::SetThumbMode(int mode)
 	Refresh();
 }
 
-	
-void PicPanel::BlankPic()
-{
-
-}
 
 void PicPanel::RefreshPic()
 {
@@ -548,11 +549,74 @@ void PicPanel::SetColorManagement(bool b)
 	RefreshPic();
 }
 
+void PicPanel::OnKey(wxKeyEvent& event)
+{
+	event.Skip();
+	//if (blank) return;
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
+	switch (event.GetKeyCode()) {
+		case 116: //t
+		case 84: //T - toggle display thumbnail
+			if (thumbvisible)
+				thumbvisible = false;
+			else
+				thumbvisible = true;
+			Refresh();
+			break;
+
+		case 67: //c - with Ctrl-, copy RGB at the x,y
+			if (event.ControlDown()) 
+				if (display_dib)
+					if (wxTheClipboard->Open()) {
+						struct pix p = display_dib->getPixel(imagex, imagey);
+						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
+						wxTheClipboard->Close();
+					}
+			break;
+
+		case 79: //o oob toggle
+			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
+				oob++;
+				if (oob > 2) oob = 0;
+				if (oob == 0)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: off");
+				else if (oob == 1)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
+				else if (oob == 2)
+					((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
+				SetPic(display_dib, ch);
+				Refresh();
+			}
+			break;
+
+		case 83: //s softproof toggle
+			if (softproof) {
+				softproof = false;
+				((wxFrame *) GetParent())->SetStatusText("softproof: off");
+			}
+			else {
+				softproof = true;
+				((wxFrame *) GetParent())->SetStatusText("softproof: on");
+			}
+			RefreshPic();
+			break;
+	}
+}
+
+
+
+
+//below methods of questionable utility...
+
 bool PicPanel::GetColorManagement()
 {
 	return false;
 }
 
+void PicPanel::BlankPic()
+{
+
+}
 
 void PicPanel::SetProfile(gImage * dib)
 {
@@ -608,46 +672,5 @@ void PicPanel::OnRightDown(wxMouseEvent& event)
 
 
 
-void PicPanel::OnKey(wxKeyEvent& event)
-{
-	event.Skip();
-	//if (blank) return;
-	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
-	switch (event.GetKeyCode()) {
-		case 116: //t
-		case 84: //T - toggle display thumbnail
-			if (thumbvisible)
-				thumbvisible = false;
-			else
-				thumbvisible = true;
-			Refresh();
-			break;
-
-		case 67: //c - with Ctrl-, copy RGB at the x,y
-			if (event.ControlDown()) 
-				if (display_dib)
-					if (wxTheClipboard->Open()) {
-						struct pix p = display_dib->getPixel(imagex, imagey);
-						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
-						wxTheClipboard->Close();
-					}
-			break;
-
-		case 79: //o oob toggle
-			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
-				oob++;
-				if (oob > 2) oob = 0;
-				if (oob == 0)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: off");
-				else if (oob == 1)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
-				else if (oob == 2)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
-				SetPic(display_dib, ch);
-				Refresh();
-			}
-			break;
-	}
-}
 
 
