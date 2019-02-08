@@ -101,7 +101,6 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		
 			if (hImgProfile) {
 				cmsUInt32Number dwflags = 0;
-				if (displayTransform) cmsDeleteTransform(displayTransform);
 			
 				//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
 				wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
