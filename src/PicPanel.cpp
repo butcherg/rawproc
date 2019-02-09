@@ -14,6 +14,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	display_dib = NULL;
 	image = NULL;
 	display_dib = NULL;
+	thumbnail = NULL;
 	scale = 1.0;
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
