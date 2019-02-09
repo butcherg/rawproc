@@ -85,7 +85,6 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			cmsHPROFILE hImgProfile, hSoftProofProfile;
 		
 			wxFileName profilepath;
-			//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
 			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 		
 			//parm display.cms.displayprofile: Filename of display profile.  Default: none.
