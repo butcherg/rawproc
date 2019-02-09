@@ -282,9 +282,9 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
-		//img demosaic:[half|half_resize|color] default: half</li>
+		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd] default: ahd</li>
 		else if (strcmp(cmd,"demosaic") == 0) {  
-			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half").c_str();
+			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd").c_str();
 			char *d = strtok(NULL," ");
 			if (d) demosaic = d;
 
@@ -302,6 +302,20 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				dib.ApplyDemosaic(DEMOSAIC_HALF, threadcount);
 			else if (demosaic == "half_resize")
 				dib.ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
+			else if (demosaic == "vng")
+				dib.ApplyDemosaic(DEMOSAIC_VNG, threadcount);
+			else if (demosaic == "amaze")
+				dib.ApplyDemosaic(DEMOSAIC_AMAZE, threadcount);
+			else if (demosaic == "dcb")
+				dib.ApplyDemosaic(DEMOSAIC_DCB, threadcount);
+			else if (demosaic == "rcd")
+				dib.ApplyDemosaic(DEMOSAIC_RCD, threadcount);
+			else if (demosaic == "igv")
+				dib.ApplyDemosaic(DEMOSAIC_IGV, threadcount);
+			else if (demosaic == "lmmse")
+				dib.ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
+			else if (demosaic == "ahd")
+				dib.ApplyDemosaic(DEMOSAIC_AHD, threadcount);
 			else printf("no-op... ");
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
@@ -1251,21 +1265,34 @@ int main (int argc, char **argv)
 		printf("open all the .NEFs in the current directory, apply gamma and auto black/white \n");
 		printf("point correction to each,and save each as the corresponding filename.tif.\n\n");
 		printf("Available commands:\n");
-		printf("\tbright:[-100 - 100, default=0]\n");
-		printf("\tblackwhitepoint[:0-127,128-255 default=auto]\n");
-		printf("\tcontrast:[-100 - 100, default=0]\n");
-		printf("\tcrop:x,y,w,h\n");
+
+
+		printf("\tcolorspace:profilefile[,convert|assign][,renderingintent][,bpc]\n");
+		printf("\tbright:[-100 - 100] default: 0 (no-bright)\n");
+		printf("\tdemosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd]\n\t\t default: ahd\n");
+		printf("\taddexif:tagname,value - tagname must be valid EXIF tag for it\n\t\t to survive the file save...\n");
+		printf("\tblackwhitepoint[:rgb|red|green|blue][,0-127,128-255] \n\t\tdefault: auto blackwhitepoint determination. The \n\t\tcalculated points will be used in the metafile entry.\n");
+		printf("\tcontrast:[-100 - 100] default: 0 (no-contrast)\n");
+		printf("\tgamma:[0.0-5.0] default: 1.0 (linear, or no-gamma)\n");
+		printf("\tresize:w[,h] If either w or h is 0, resize preserves aspect of\n\t\t that dimension.  If only one number is present, the image is\n\t\t resized to that number along the longest dimension,\n\t\tpreserving aspect.\n");
+		printf("\trotate:[-45.0 - 45.0] default: 0 (no-rotate)\n");
+		printf("\tsharpen:[0 - 10, default: 0 (no-sharpen)\n");
+		printf("\tcrop:x,y,w,y  no defaults\n");
+		printf("\tsaturation:[0 - 5.0] default=1.0, no change\n");
 		printf("\tdenoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3\n");
-		printf("\tgamma:[0.0 - 5.0, default=1.0]\n");
-		printf("\tgray:r,g,b - values are the fractional (0.x) proportions with which to calculate the neutral value.\n");
-		printf("\tresize:[width],[height],[box|bilinear|bspline|bicubic|catmullrom|\n");
-		printf("\t\tlanczos3 (default)]\n");
-		printf("\trotate:[0 - 45, default=0]\n");
-		printf("\tsharpen:[0 - 10, default=0]\n");
-		printf("\tsaturation:[0 - 5.0, default=1.0, no change]\n");
-		printf("\ttint:r,g,b - add/subtract value from each channel\n\n");
-		printf("\twhitebalance:rmult,gmult,bmult\n");
-		
+		printf("\ttint:[r,g,b] default: 0,0,0 (doesn't have a corresponding\n\t\t tool in rawproc)\n");
+		printf("\twhitebalance:[auto]|[patch]|[camera]|[rmult,gmult,bmult] \n\t\tdefault: auto, based on 'gray world'\n");
+		printf("\tgray:[r,g,b] default: 0.21,0.72,0.07\n"); 
+		printf("\tcurve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb\n");
+		printf("\texposure:ev default: 1.0\n");
+		printf("\thighlight:1-10\n");
+		printf("\tshadow:1-10\n");
+		printf("\trotate90 - rotate 90 degrees clockwise\n");
+		printf("\trotate180 - rotate 180 degrees\n");
+		printf("\trotate270 - rotate 270 degrees clockwise\n");
+		printf("\thmirror - flip horizontal\n");
+		printf("\tvmirror - flip upside down\n");
+
 		exit(1);
 	}
 
