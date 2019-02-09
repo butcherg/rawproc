@@ -119,6 +119,15 @@ If you're on a Debian/Ubuntu or derivatives, install these packages:
 sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev libraw-dev
 </pre>
 
+If you want to enjoy the fruits of librtprocess, the nascent effort to package the Raw Therapee
+demosaic routines, you'll at present need to compile and install librtprocess from a github clone:
+
+https://github.com/CarVac/librtprocess
+
+Instructions to do so are in the librtprocess README.  Once you've done that, you'll be able to use
+--enable-librtprocess in rawproc's ./configure.  Otherwise, the demosaic tool will only allow the
+internal algorithms half, half_resize, and color.
+
 Next, if you want to compile rawproc, get the wxWidgets sources and do a static compile:
 
 <pre>
