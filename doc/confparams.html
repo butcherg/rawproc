@@ -8,21 +8,21 @@
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
+<li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
-<li><b>display.cms.displayprofile</b>:  If color management is enabled, sets the ICC profile used for rendering the display image. Is either a path/filename, or one of the internal profiles.  This parameter is read every time the display is updated, so it can be changed in mid-edit.  Default=srgb</li>
+<li><b>display.cms.displayprofile</b>:  Filename of display profile.  Default: none.</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.requireprofile</b>:  Enforce display profile requirement.  If 0, image will be displayed 'as-is' with no output profile transform.  Default=1</li>
 <li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
 <li><b>display.cms.softproof.profile</b>:  Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.</li>
 <li><b>display.cms.softproof.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
-<li><b>display.cms.softproof</b>:  Perform softproofing color transform.  Default=0  </li>
-<li><b>display.cms.transform=set|render</b>:  Do display color profile transform at image set, or at render.  Trade is load time vs image pan smoothness.  Default=set</li>
-<li><b>display.orient</b>:  Enable/disable normalization of image rotation for display.  Doesn't alter the working image orientation.  Default=1 </li>
+<li><b>display.cms</b>:  Enable color tranform of the display image, 0|1.  Default=1</li>
 <li><b>display.outofbound.black=r,g,b</b>:  RGB color to use for out-of-lower-bound pixels.  Default: 255,0,255 (cyan)</li>
 <li><b>display.outofbound.white=r,g,b</b>:  RGB color to use for out-of-upper-bound pixels.  Default: 0,255,255 (magenta)</li>
 <li><b>display.outofbound</b>:  Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0</li>
-<li><b>display.rgb.scale</b>:  Multiplier for rgb display in status line.  Default=1</li>
+<li><b>display.panelborder</b>:  Border around the display image.  Default: 5</li>
 <li><b>display.status</b>:  Write display... in status when setting the display image, 0|1.  Default=1</li>
+<li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
 <li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li>
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
@@ -46,6 +46,7 @@
 <li><b>menu.showcommand.type</b>:  Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text</li>
 <li><b>output.*.thumbnails.directory</b>:  *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.</li>
 <li><b>output.*.thumbnails.parameters</b>:  *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.</li>
+<li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, that file is embedded, otherwise, if a profile is available in the internal image, that profile is embedded.   Default=1</li>
 <li><b>output.jpeg.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li>
 <li><b>output.jpeg.cms.renderingintent</b>:  Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul></li>
