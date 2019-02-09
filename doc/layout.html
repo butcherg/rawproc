@@ -2,38 +2,62 @@
 
 <h2 id="LayoftherawprocLand">Lay of the rawproc Land</h2>
 
-<p>When started, rawproc will present you with a window containing four panes:</p>
+<p>When started, rawproc will present you with a window containing four panes:</p><br>
 
 <ol>
-	<li>Display: The right-hand window, contains the image being manipulated.  There is also a thumbnail 
-	window in the top-left corner that will toggle visible or hidden.
-	You can toggle the thumb modes with either the 't' key, or double-click on the thumb.  For the 
-	display image, you
-	can zoom in or out of the image using the mousewheel, or toggle 100%/fit by double-clicking
-	the image.  In version 0.7, at 100% magnification Ctrl-C will copy the float RGB values of the
-	pixel under the mouse pointer to the clipboard.  This will eventually feed a white balance tool...</li><br>
+	<li><b>Display:</b> The right-hand window, contains the image being manipulated.  There is also a thumbnail 
+	window in the top-left corner; if the image size is greater than the display panel, the thumbnail will
+	also contain a viewport rectangle that can be dragged to pan the display image.
+	You can toggle the thumb visibility by double-clicking in the thumb.  For the 
+	display image, you can zoom in or out of the image in 5% increments using the mousewheel, or toggle 
+	100%/fit-to-display by double-clicking the image.  The min/max zoom is presently 10%/500%.<br><br>
+	Display pane keyboard commands:
+	<ul>
+		<li>o: Toggle out-of-bound tone flagging, off|average|at-least-one-channel.  Must be enabled with display.outofbound=1.</li>
+		<li>s: Toggle soft-proof.  A proofing profile needs to be specified in display.cms.softproof.profile.</li>
+		<li>t: Toggle thumbnail visibility.</li>
+		<li>ctrl-c: Copy the float RGB values of the pixel under the mouse pointer to the clipboard.</li>
+		<li>shift-mousewheel: Increase the zoom increment to 10%.</li>
+		<li>ctrl-mousewheel: Increase the zoom increment to 100%.</li>
+	</ul>
+	</li><br>
 
-	<li>Commands: The top-left-hand window, contains the list of tools applied to the image.  You
+	<li><b>Commands:</b> The top-left-hand window, contains the list of tools applied to the image.  You
 	can select a tool to mess with by left-clicking it.  Right-clicking a tool 
 	brings up a pop-up menu from which you can either display EXIF and image data or delete the
 	tool. The checkbox beside each tool is to
 	select that tool result for display; this can be done separate from selecting the tool to
 	mess with its parameters.  This is extremely useful to compare the results of different tools,
 	as the display is switched from image to image without having to reprocess, at the expense of
-	memory.  It works well for 16MP images, but I'm not sure how it'll scale to larger ones.</li><br>
+	memory.  It works well for 16MP images, but I'm not sure how it'll scale to larger ones.<br><br>
+	Command pane keyboard commands:
+	<ul>
+		<li>ctrl-c: Copies the selected comand and its parameters to the clipboard.</li>
+		<li>ctrl-x: Cuts the selected command and its parameters from the list, puts them in the clipboard.</li>
+		<li>ctrl-v: Pastes the command/parameters in the clipboard to the list, after the selected command.</li>
+	</ul>
+	</li><br>
 	
-	<li>Histogram: Standard RGB histogram.  It can be zoomed in with the mouse thumbwheel, and panned
-	by dragging with the mouse. The default scale is 256 bins; this can be changed with the 
+	<li><b>Histogram:</b> Standard RGB histogram.  It can be zoomed in with the mouse thumbwheel, and panned
+	by dragging with the mouse. Double-clicking the histogram restores the original scale and origin. 
+	The default scale is 256 bins; this can be changed with the 
 	histogram.scale parameter in the Properties list, for instance, to set 65536 for sixteen-bit 
 	scaling. Note that the default of 256 supports the curve tool, which works on a 0-255 range. 
-	if you change the histogram tool scaling, the curve tool will still work at 0-255.</li><br>
+	if you change the histogram tool scaling, the curve tool will still work internally at 0.0-255.0.<br><br>
+	Histogram pane keyboard commands:
+	<ul>
+		<li>l: Pan the histogram left.</li>
+		<li>r: Pan the histogram right.</li>
+		<li>t: Restores the histogram scale and origin.</li>
+		<li>spacebar: Toggles the channel display order.</li>
+		<li>ctrl-c: Copies the histogram data as 256 buckets to the clipboard, in the form "red:0val,1val,2val...\ngreen:...\nblue:..."</li>
+	</ul>
+	</li><br>
 
-	<li>Parameters: The bottom-left-hand window, contains the tools for changing the tool 
+	<li><b>Parameters:</b> The bottom-left-hand window, contains the tools for changing the tool 
 	selected in the Commands pane.  These are mostly sliders that you can manipulate with either
 	a mouse or a touchscreen implement (stylus, or your finger).  Most tools have a reset button.  
-	Sometimes, especially with Linux/GTK,
-	the parameter tools won't display when you select a command; just resize the window slightly and
-	they'll appear.  Something about Refresh() I need to figure out...</li><br>
+	</li><br>
 </ol>
 
 <p>You can drag the Commands and Parameters windows from their initial positions and dock them to various sides of the 
