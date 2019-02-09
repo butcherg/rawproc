@@ -82,7 +82,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
 
 			wxString resultstr = "";
-			cmsHPROFILE hImgProfile, hSoftProofProfile;
+			cmsHPROFILE hImgProfile=NULL, hSoftProofProfile=NULL;
 		
 			wxFileName profilepath;
 			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
@@ -147,11 +147,11 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 									dwflags);
 								resultstr.Append(":softproof");
 							}
-							else resultstr.Append(":soft_err");
+							else resultstr.Append(":soft_error");
 						}
-						else resultstr.Append(":disp_err");
+						else resultstr.Append(":disp_error");
 					}
-					else  resultstr.Append(":file_err");
+					else  resultstr.Append(":file_error");
 				}
 				else {
 					if (displayProfile) {
@@ -161,7 +161,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 							intent, dwflags);
 						resultstr.Append(":display");
 					}
-					else resultstr.Append(":disp_err");
+					else resultstr.Append(":disp_error");
 				}
 			}
 		
@@ -178,7 +178,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				}
 				((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
 			}
-			else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_err",1);
+			else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 		
