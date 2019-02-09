@@ -11,6 +11,7 @@ Code at https://github.com/butcherg/rawproc, licensed under the GPL V2
 <ul>
 	<li>wxWidgets, http://wxwidgets.org</li>
 	<li>LibRaw, https://www.libraw.org</li>
+	<li>librtprocess, https://github.com/CarVac/librtprocess</li>
 	<li>LibTIFF, http://www.libtiff.org</li>
 	<li>LibJPEG, http://libjpeg.sourceforge.net</li>
 	<li>LibPNG, http://www.libpng.org/pub/png/libpng.html</li>
