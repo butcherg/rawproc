@@ -19,7 +19,15 @@
 		<li>ctrl-c: Copy the float RGB values of the pixel under the mouse pointer to the clipboard.</li>
 		<li>shift-mousewheel: Increase the zoom increment to 10%.</li>
 		<li>ctrl-mousewheel: Increase the zoom increment to 100%.</li>
-	</ul>
+	</ul><br><br>
+	As of version 0.9, the input.cms property is removed.  Instead, display.cms enables/disables transform of the 
+	image from the checked tool to the display profile before rendering in the display pane.  The internal working
+	image has to have an attached profile, and an appropriate profile has to be entered in display.cms.displayprofile.
+	This change is in response to the realization that there is no global "color management" mode in rawproc; it all
+	depends of the "chain of custody" maintained by having the associated profile as metadata to the image that is
+	encoded to its constraints.  In rawproc, that is maintained through use of the associated input.*.profile parameters
+	that assign a profile to an image when the file is opened, and the application of the colorspace tool as the tool
+	chain is built by the user.
 	</li><br>
 
 	<li><b>Commands:</b> The top-left-hand window, contains the list of tools applied to the image.  You
