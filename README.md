@@ -129,6 +129,7 @@ mkdir build-linux
 cd build-linux
 ../configure --disable-shared --enable-unicode
 make
+make doc
 </pre>
 
 You can make install wxWidgets, I find it just as convenient to use their
@@ -144,6 +145,7 @@ mkdir build-linux
 cd build-linux
 ../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
 make
+make doc
 sudo make install
 </pre>
 
