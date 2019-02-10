@@ -18,6 +18,7 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 		
 float myFloatCtrl::GetFloatValue()
 {
+	v = atof(textbox->GetValue().c_str());
 	return v;
 }
 

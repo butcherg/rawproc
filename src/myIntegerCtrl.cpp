@@ -22,6 +22,7 @@ void myIntegerCtrl::SetToolTip(const wxString &tipString)
 		
 int myIntegerCtrl::GetIntegerValue()
 {
+	v = atoi(textbox->GetValue().c_str());
 	return v;
 }
 
