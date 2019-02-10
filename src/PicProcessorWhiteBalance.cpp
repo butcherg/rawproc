@@ -69,7 +69,7 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Add(0,10, wxGBPosition(5,0));
 
 			//Operator radio buttons:
-			ob = new wxRadioButton(this, WBORIGINAL, "Original:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			ab = new wxRadioButton(this, WBAUTO, "Auto");
 			pb = new wxRadioButton(this, WBPATCH, "Patch:");
 			cb = new wxRadioButton(this, WBCAMERA, "Camera:");
@@ -260,7 +260,7 @@ class WhiteBalancePanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			ob->SetValue(false);
+			ob->SetValue(true);
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
@@ -270,7 +270,7 @@ class WhiteBalancePanel: public PicProcPanel
 		
 		void onWheel(wxMouseEvent& event)
 		{
-			ob->SetValue(false);
+			ob->SetValue(true);
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
@@ -446,33 +446,28 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled) {
 		mark();
-		if (optype == multipliers) {
-			wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
-			//wxMessageBox("wb: multipliers");
-		}
-		else if (optype == imgpatch) {
-			wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
-			//wxMessageBox("wb: patch");
-		}
-		else if (optype == camera) {
-			if (dib->getInfoValue("LibrawMosaiced") == "1") {
-				if (dib->getInfoValue("LibrawCFAPattern") != "") {
-					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
-				}
-				else {
-					wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
-					((WhiteBalancePanel *) toolpanel)->clearSelectors();
-					wbmults = {1.0,1.0,1.0};
-				}
+		if (dib->getInfoValue("LibrawMosaiced") == "1") {
+			if (dib->getInfoValue("LibrawCFAPattern") != "") {
+				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 			}
 			else {
-				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
+				((WhiteBalancePanel *) toolpanel)->clearSelectors();
+				wbmults = {1.0,1.0,1.0};
 			}
 		}
 		else {
-			wbmults = dib->ApplyWhiteBalance(threadcount);
-			//wxMessageBox("wb: auto");
+			if (optype == multipliers | optype == camera) {
+				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			}
+			else if (optype == imgpatch) {
+				wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+			}
+			else if (optype == automatic) {
+				wbmults = dib->ApplyWhiteBalance(threadcount);
+			}
 		}
+
 		wxString d = duration();
 		((WhiteBalancePanel *) toolpanel)->setMultipliers(wbmults);
 
