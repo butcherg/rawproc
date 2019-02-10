@@ -840,7 +840,9 @@ printf("wb: four numbers.\n"); fflush(stdout);
 	info["Model"] = P1.model;  
 
 	//used for subsequent metadata collection:
-	char buffer [4096];
+	char buffer  [4096];
+	char cfarray [4096];
+	const char ndesc[4] = {'0', '1', '2', '3'};
 
 	//Normalized libraw white balance:
 	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
@@ -858,12 +860,22 @@ printf("wb: four numbers.\n"); fflush(stdout);
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
 	info["LibrawRGBCam"] = buffer;
 
-	buffer[0] = P1.cdesc[RawProcessor.COLOR(0,0)];
-	buffer[1] = P1.cdesc[RawProcessor.COLOR(0,1)];
-	buffer[2] = P1.cdesc[RawProcessor.COLOR(1,0)];
-	buffer[3] = P1.cdesc[RawProcessor.COLOR(1,1)];
-	buffer[4] = '\0';
+	int cfadim = 2;			 //bayer
+	if (P1.filters == 9) cfadim = 6; //fuji x-trans
+
+	unsigned pos;
+	for (unsigned y=0; y<cfadim; y++) {
+		for (unsigned x=0; x<cfadim; x++) {
+			pos = x + y*cfadim;
+			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(x,y)];
+			cfarray[pos] = ndesc[RawProcessor.COLOR(x,y)];
+		}
+	}
+	buffer[pos+1]  = '\0';
+	cfarray[pos+1] = '\0';
+
 	info["LibrawCFAPattern"] =  buffer;
+	info["LibrawCFAArray"] =  cfarray;
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)

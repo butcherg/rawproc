@@ -31,6 +31,8 @@ class DemosaicPanel: public PicProcPanel
 			opers.Add("lmmse");
 			opers.Add("rcd");
 			opers.Add("vng");
+			opers.Add("xtran_markesteijn");
+			opers.Add("xtran_fast");
 #endif
 			opers.Add("half");
 			opers.Add("half_resize");
@@ -142,6 +144,10 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			dib->ApplyDemosaic(DEMOSAIC_AHD, threadcount);
 		else if (c == "lmmse") 
 			dib->ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
+		else if (c == "xtran_fast") 
+			dib->ApplyDemosaic(DEMOSAIC_XTRANSFAST, threadcount);
+		else if (c == "xtran_markesteijn") 
+			dib->ApplyDemosaic(DEMOSAIC_MARKESTEIJN, threadcount);
 #endif
 		else 
 			wxMessageBox(wxString::Format("Unknown demosaic algorithm: %s",c.c_str()));

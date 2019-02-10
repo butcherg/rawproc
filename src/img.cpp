@@ -316,6 +316,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				dib.ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
 			else if (demosaic == "ahd")
 				dib.ApplyDemosaic(DEMOSAIC_AHD, threadcount);
+			else if (demosaic == "xtran_fast") 
+				dib.ApplyDemosaic(DEMOSAIC_XTRANSFAST, threadcount);
+			else if (demosaic == "xtran_markesteijn") 
+				dib.ApplyDemosaic(DEMOSAIC_MARKESTEIJN, threadcount);
 			else printf("no-op... ");
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
@@ -1266,10 +1270,9 @@ int main (int argc, char **argv)
 		printf("point correction to each,and save each as the corresponding filename.tif.\n\n");
 		printf("Available commands:\n");
 
-
 		printf("\tcolorspace:profilefile[,convert|assign][,renderingintent][,bpc]\n");
 		printf("\tbright:[-100 - 100] default: 0 (no-bright)\n");
-		printf("\tdemosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd]\n\t\t default: ahd\n");
+		printf("\tdemosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd|\n\t\txtran_fast|xtran_markesteijn] default: ahd\n");
 		printf("\taddexif:tagname,value - tagname must be valid EXIF tag for it\n\t\t to survive the file save...\n");
 		printf("\tblackwhitepoint[:rgb|red|green|blue][,0-127,128-255] \n\t\tdefault: auto blackwhitepoint determination. The \n\t\tcalculated points will be used in the metafile entry.\n");
 		printf("\tcontrast:[-100 - 100] default: 0 (no-contrast)\n");
