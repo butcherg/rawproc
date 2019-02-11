@@ -629,7 +629,7 @@ void PicPanel::SetImageProfile(cmsHPROFILE hImgProf)
 
 cmsHTRANSFORM PicPanel::GetDisplayTransform()
 {
-	return NULL;
+	return displayTransform;
 }
 
 wxString PicPanel::getHistogramString()
