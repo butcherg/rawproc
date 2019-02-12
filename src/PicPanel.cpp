@@ -89,6 +89,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 		
 			//parm display.cms.displayprofile: Filename of display profile.  Default: none.
+			//template display.cms.displayprofile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""))); 
 	
 			if (profilepath.FileExists()) 
@@ -119,7 +120,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 					dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
 
 					//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
-					//if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","") != "") 		
+					//template display.cms.softproof.profile=iccfile	
 					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
 					
 					if (profilepath.FileExists()) {

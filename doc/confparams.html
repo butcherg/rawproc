@@ -11,7 +11,6 @@
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
 <li><b>display.cms.displayprofile</b>:  Filename of display profile.  Default: none.</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
-<li><b>display.cms.requireprofile</b>:  Enforce display profile requirement.  If 0, image will be displayed 'as-is' with no output profile transform.  Default=1</li>
 <li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
 <li><b>display.cms.softproof.profile</b>:  Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.</li>
 <li><b>display.cms.softproof.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
@@ -27,7 +26,6 @@
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
 <li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>imageinfo.libraw</b>:  Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)</li>
-<li><b>input.cms</b>:  When a file is input, enable or disable color management.  Default=0</li>
 <li><b>input.jpeg.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li>
 <li><b>input.log</b>:  log the file input operation.  Default=0</li>
