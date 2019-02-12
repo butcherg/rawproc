@@ -311,7 +311,7 @@ bool PicProcessorDenoise::processPic(bool processnext) {
 		if (algorithm == DENOISEWAVELET)
 			if (threshold > 0.0) dib->ApplyWaveletDenoise(threshold, threadcount);
 		wxString d = duration();
-
+		m_tree->SetItemText(id, wxString::Format("denoise:%s",cp[0]));
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))
 			if (algorithm == DENOISENLMEANS)
 				log(wxString::Format("tool=denoise_nlmeans,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(),dib->getHeight(),threadcount,d));
