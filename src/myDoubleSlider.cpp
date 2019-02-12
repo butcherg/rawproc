@@ -147,12 +147,18 @@ void myDoubleSlider::render(wxDC& dc)
 	//left slider:
 	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
 	DrawUpThumb(dc,SLIDER_MARGIN+leftval-4, h*0.5+2);
-	dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
+	if (leftval < maxval/2)
+		dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
+	else
+		dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval-tw-7, h*0.5+5);
 	
 	//right slider:
 	dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
 	DrawDownThumb(dc,SLIDER_MARGIN+rightval-4, h*0.5-th-8);
-	dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
+	if (rightval < maxval/2)
+		dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval+8, h*0.5-th-4);
+	else
+		dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
 }
 
 
