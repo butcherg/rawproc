@@ -2583,7 +2583,7 @@ void gImage::ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount)
 		//convert to 3-color:
 		for (int y=0; y<2; y++) 
 			for (int x=0; x<2; x++) 
-				if (cfarray[y][x] == 3) cfarray[y][x] == 1;
+				if (cfarray[y][x] == 3) cfarray[y][x] = 1;
 
 		//librtprocess::JaggedArray<float> rawdata(w, h);
 		//librtprocess::JaggedArray<float> red(w, h);
