@@ -1,5 +1,6 @@
 #include "PicProcessorTone.h"
 #include "PicProcPanel.h"
+#include "myRowColumnSizer.h"
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
@@ -22,33 +23,19 @@ class TonePanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, TONEENABLE, "tone:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
+			//All the radio buttons in the same group:
 			gamb = new wxRadioButton(this, TONEGAMMA, "Gamma:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			reinb = new wxRadioButton(this, TONEREINHARD, "Reinhard:");
 			log2b = new wxRadioButton(this, TONELOG2, "Log2");
 			hybloggam = new wxRadioButton(this, TONELOGGAM, "Hybrid Log-Gamma");
-			g->Add(gamb, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(reinb, wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(log2b, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(hybloggam, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-
-
 
 			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-			g->Add(edit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			wxArrayString str;
 			str.Add("channel");
 			str.Add("luminance");
 			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT), str);
-			g->Add(reinop, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-
-
-			SetSizerAndFit(g);
-			g->Layout();
-			SetFocus();
 
 			wxArrayString p = split(params,",");
 			if (p[0] == "gamma") {
@@ -77,6 +64,39 @@ class TonePanel: public PicProcPanel
 			if (p[0] == "loggamma") {
 				hybloggam->SetValue(true);
 			}
+
+/*
+			//Lay out the panel controls:
+			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
+			g->Add(gamb, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(reinb, wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(log2b, wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(hybloggam, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(edit, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(reinop, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+*/
+
+myRowColumnSizer *m = new myRowColumnSizer(10,3);
+m->AddItem(enablebox, wxALIGN_LEFT);
+m->NextRow();
+m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
+m->NextRow();
+m->AddItem(gamb, wxALIGN_LEFT);
+m->AddItem(edit, wxALIGN_LEFT);
+m->NextRow();
+m->AddItem(reinb, wxALIGN_LEFT);
+m->AddItem(reinop, wxALIGN_LEFT);
+m->NextRow();
+m->AddItem(log2b, wxALIGN_LEFT);
+m->NextRow();
+m->AddItem(hybloggam, wxALIGN_LEFT);
+SetSizerAndFit(m);
+
+
+//			SetSizerAndFit(g);
+			g->Layout();
+			SetFocus();
 
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
