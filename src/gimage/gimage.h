@@ -8,7 +8,7 @@
 #include "curve.h"
 
 #if defined PIXhalf
-#include "half.hpp"
+#include "gimage/half.hpp"
 #endif
 
 #ifndef PIXTYPE
