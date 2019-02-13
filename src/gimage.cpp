@@ -1978,6 +1978,7 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 // image can be properly displayed and the headlight can retain some detail.
 //
 // The algorithm implemented is the basic Reinhard algorithm, x/(1+x).
+// Reinhard: R(x) = x/(x+1) Filmic: R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2) (I took the power part out)
 
 static inline float Log2( float x)
 {
@@ -1986,7 +1987,7 @@ static inline float Log2( float x)
 
 void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 {
-	if (algorithm == GAMMA) { //gonna need a parameter
+	if (algorithm == TONE_GAMMA) { //gonna need a parameter
 		double gamma = 2.2;  //hardcoded until I can set up parameters
 		double exponent = 1 / gamma;
 		double v = 255.0 * (double)pow((double)255, -exponent);
@@ -2000,7 +2001,7 @@ void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 	}
 
 	//okay, I give up for now, here's log in the curve tool:
-	else if (algorithm == LOG2) {
+	else if (algorithm == TONE_LOG2) {
 		Curve ctrlpts;
 		double v = 255.0 * 1.0/log2(255.0);
 		ctrlpts.insertpoint(0.0, 0.0);
@@ -2014,7 +2015,7 @@ void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 	}
 
 	//apply directly to each channel:
-	else if (algorithm == REINHARD_CHANNEL) {
+	else if (algorithm == TONE_REINHARD_CHANNEL) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
 			image[pos].r = image[pos].r/(1.0+image[pos].r);
@@ -2024,7 +2025,7 @@ void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 	}
 
 	//apply to the computed tone, then apply the deltaT to each channel:
-	else if (algorithm == REINHARD_TONE) {
+	else if (algorithm == TONE_REINHARD_TONE) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
 			double T = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
@@ -2036,10 +2037,25 @@ void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 		}
 	}
 
-	else if (algorithm == UNSPECIFIED_1) {
+	else if (algorithm == TONE_FILMIC) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			image[pos].r = (image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06);
+			image[pos].g = (image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06);
+			image[pos].b = (image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06);
+		}
 	}
 
-	else if (algorithm == UNSPECIFIED_2) {
+	else if (algorithm == TONE_LOGGAMMA) {
+		double a = 0.17883277, b = 0.28466892, c = 0.55991073;
+		double rubicon = 1.0/12.0;
+		double sqrt3 = sqrt(3);
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			if (image[pos].r > 0.0) if (image[pos].r > rubicon) image[pos].r = a * log(12*image[pos].r - b) + c; else image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
+			if (image[pos].g > 0.0) if (image[pos].g > rubicon) image[pos].g = a * log(12*image[pos].g - b) + c; else image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
+			if (image[pos].b > 0.0) if (image[pos].b > rubicon) image[pos].b = a * log(12*image[pos].b - b) + c; else image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
+		}
 	}
 }
 

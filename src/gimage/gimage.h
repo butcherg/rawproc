@@ -85,12 +85,12 @@ enum GIMAGE_DEMOSAIC {
 };
 
 enum GIMAGE_TONEMAP {
-	GAMMA,
-	LOG2,
-	REINHARD_CHANNEL,
-	REINHARD_TONE,
-	UNSPECIFIED_1,
-	UNSPECIFIED_2
+	TONE_GAMMA,
+	TONE_LOG2,
+	TONE_LOGGAMMA,
+	TONE_REINHARD_CHANNEL,
+	TONE_REINHARD_TONE,
+	TONE_FILMIC
 };
 
 enum GIMAGE_ERROR {
@@ -204,7 +204,7 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);
-		void ApplyToneMap(GIMAGE_TONEMAP algorithm=REINHARD_CHANNEL, int threadcount=0);
+		void ApplyToneMap(GIMAGE_TONEMAP algorithm=TONE_REINHARD_CHANNEL, int threadcount=0);
 		std::vector<double> ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount=0);
