@@ -2040,9 +2040,9 @@ void gImage::ApplyToneMapFilmic(bool do_gamma, int threadcount)
 	if (do_gamma) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
-			image[pos].r = pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),2.2);
-			image[pos].g = pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),2.2);
-			image[pos].b = pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),2.2);
+			image[pos].r = pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),1/2.2);
+			image[pos].g = pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),1/2.2);
+			image[pos].b = pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),1/2.2);
 		}
 	}
 	else {
