@@ -1369,6 +1369,8 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 		pic->RefreshPic();
 	if (propname.Find("histogram.singlechannel") != wxNOT_FOUND)
 		pic->RefreshPic();
+	if (propname.Find("histogram.clipbuckets") != wxNOT_FOUND)
+		pic->RefreshPic();
 	//not ready for prime time
 	//if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
 }
