@@ -12,6 +12,7 @@
 #define TONELOG2 7904
 #define TONELOGGAM 7905
 #define TONEFILMIC 7906
+#define TONEFILMICGAMMA 7907
 
 class TonePanel: public PicProcPanel
 {
@@ -26,11 +27,12 @@ class TonePanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			//All the radio buttons in the same group:
-			gamb = new wxRadioButton(this, TONEGAMMA, "gamma:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			reinb = new wxRadioButton(this, TONEREINHARD, "reinhard:");
+			gamb = new wxRadioButton(this, TONEGAMMA, "gamma", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			reinb = new wxRadioButton(this, TONEREINHARD, "reinhard");
 			log2b = new wxRadioButton(this, TONELOG2, "log2");
 			hybloggam = new wxRadioButton(this, TONELOGGAM, "loggamma");
-			filmic = new wxRadioButton(this, TONEFILMIC, "filmic:");
+			filmic = new wxRadioButton(this, TONEFILMIC, "filmic");
+			filmicgamma = new wxCheckBox(this, TONEFILMICGAMMA, "add gamma");
 
 			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
@@ -68,6 +70,8 @@ class TonePanel: public PicProcPanel
 			}
 			if (p[0] == "filmic") {
 				filmic->SetValue(true);
+				filmicgamma->SetValue(false);
+				if (p.GetCount() >=2) if (p[1] == "gamma") filmicgamma->SetValue(true);
 			}
 
 			//Lay out the controls in the panel:
@@ -87,6 +91,7 @@ class TonePanel: public PicProcPanel
 			m->AddItem(hybloggam, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmic, wxALIGN_LEFT);
+			m->AddItem(filmicgamma, wxALIGN_LEFT);
 			SetSizerAndFit(m);
 
 
@@ -94,8 +99,9 @@ class TonePanel: public PicProcPanel
 			SetFocus();
 
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
+			Bind(wxEVT_CHECKBOX, &TonePanel::OnButton, this, TONEFILMICGAMMA);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
-			Bind(wxEVT_TEXT_ENTER,&TonePanel::paramChanged, this, TONEID);
+			Bind(wxEVT_TEXT_ENTER,&TonePanel::gammaParamChanged, this, TONEID);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
 			Refresh();
 			Update();
@@ -149,18 +155,19 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("loggamma"));
 					break;
 				case TONEFILMIC:
-					q->setParams(wxString::Format("filmic"));
+				case TONEFILMICGAMMA:
+					if (filmicgamma->GetValue())
+						q->setParams(wxString::Format("filmic,gamma"));
+					else
+						q->setParams(wxString::Format("filmic"));
 					break;
-
-
 			}
 			q->processPic();
 			Refresh();
 		}
 
 
-
-		void paramChanged(wxCommandEvent& event)
+		void gammaParamChanged(wxCommandEvent& event)
 		{
 			if (gamb->GetValue()) {
 				q->setParams(wxString::Format("gamma,%0.2f",atof(edit->GetLineText(0))));
@@ -171,7 +178,7 @@ class TonePanel: public PicProcPanel
 
 	private:
 		wxTextCtrl *edit;
-		wxCheckBox *enablebox;
+		wxCheckBox *enablebox, *filmicgamma;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggam, *filmic;
 		wxChoice *reinop;
 
@@ -209,72 +216,44 @@ bool PicProcessorTone::processPic(bool processnext)
 		if (p[0] == "gamma") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: gamma...");
 			m_tree->SetItemText(id, "tone:gamma");
-			double gamma = atof(p[1].c_str());
-			double exponent = 1 / gamma;
-			double v = 255.0 * (double)pow((double)255, -exponent);
-
+			double gamma = 1.0;
+			if (p.size() >= 2) gamma = atof(p[1].c_str());
 			mark();
-			std::vector<pix>& src = dib->getImageData();
-			#pragma omp parallel for num_threads(threadcount)
-			for (unsigned i=0; i< src.size(); i++) {
-				src[i].r = pow(src[i].r,exponent);
-				src[i].g = pow(src[i].g,exponent);
-				src[i].b = pow(src[i].b,exponent);				
-			}
+			dib->ApplyToneMapGamma(gamma, threadcount);
 			d = duration();
 
 		}
 		else if (p[0] == "loggamma") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: hybrid log gamma...");
 			m_tree->SetItemText(id, "tone:loggamma");
-
-/*
-			double a = 0.17883277, b = 0.28466892, c = 0.55991073;
-			double rubicon = 1.0/12.0;
-			double sqrt3 = sqrt(3);
-
 			mark();
-			std::vector<pix>& src = dib->getImageData();
-			#pragma omp parallel for num_threads(threadcount)
-			for (unsigned i=0; i< src.size(); i++) {
-				if (src[i].r > 0.0) if (src[i].r > rubicon) src[i].r = a * log(12*src[i].r - b) + c; else src[i].r = sqrt3 * pow(src[i].r, 0.5); 
-				if (src[i].g > 0.0) if (src[i].g > rubicon) src[i].g = a * log(12*src[i].g - b) + c; else src[i].g = sqrt3 * pow(src[i].g, 0.5); 
-				if (src[i].b > 0.0) if (src[i].b > rubicon) src[i].b = a * log(12*src[i].b - b) + c; else src[i].b = sqrt3 * pow(src[i].b, 0.5); 
-			}
-			d = duration();
-*/
-
-			GIMAGE_TONEMAP algorithm = TONE_LOGGAMMA;
-			mark();
-			dib->ApplyToneMap(algorithm, threadcount);
+			dib->ApplyToneMapLogGamma(threadcount);
 			d = duration();
 
 		}
 		else if (p[0] == "log2") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: log2...");
 			m_tree->SetItemText(id, "tone:log2");
-			GIMAGE_TONEMAP algorithm = TONE_LOG2;
 			mark();
-			dib->ApplyToneMap(algorithm, threadcount);
+			dib->ApplyToneMapLog2(threadcount);
 			d = duration();
 		}
 		else if (p[0] == "reinhard") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: reinhard...");
 			m_tree->SetItemText(id, "tone:reinhard");
-			GIMAGE_TONEMAP algorithm = TONE_REINHARD_CHANNEL;
-			if (p[1] == "luminance") algorithm = TONE_REINHARD_TONE;
-
+			bool channel = true;
+			if (p.size() >= 2) if (p[1] == "luminance") channel = false;
 			mark();
-			dib->ApplyToneMap(algorithm, threadcount);
+			dib->ApplyToneMapReinhard(channel, threadcount);
 			d = duration();
 		}
 		else if (p[0] == "filmic") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
 			m_tree->SetItemText(id, "tone:filmic");
-			GIMAGE_TONEMAP algorithm = TONE_FILMIC;
-
+			bool dogamma = false;
+			if (p.size() >= 2) if (p[1] == "gamma") dogamma=true;
 			mark();
-			dib->ApplyToneMap(algorithm, threadcount);
+			dib->ApplyToneMapFilmic(dogamma, threadcount);
 			d = duration();
 		}
 
