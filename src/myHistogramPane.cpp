@@ -186,8 +186,6 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	g = new wxPoint[scale];
 	b = new wxPoint[scale];
 	
-	//unsigned lower = scale * 0.05;
-	//unsigned upper = scale * 0.95;
 
 	//parm histogram.clipbuckets - n, number of buckets to eliminate on both ends of the histogram in calculating the max height
 	unsigned clipbuckets = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbuckets","0").c_str()); 

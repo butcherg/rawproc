@@ -286,30 +286,48 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		if (c == "color")
-			dib->ApplyDemosaic(DEMOSAIC_COLOR, threadcount);
+			dib->ApplyMosaicColor(threadcount);
 		else if (c == "half")
-			dib->ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+			dib->ApplyDemosaicHalf(false, threadcount);
 		else if (c == "half_resize")
-			dib->ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
+			dib->ApplyDemosaicHalf(true, threadcount);
 #ifdef USE_LIBRTPROCESS
-		else if (c == "vng") 
-			dib->ApplyDemosaic(DEMOSAIC_VNG, threadcount);
-		else if (c == "rcd") 
-			dib->ApplyDemosaic(DEMOSAIC_RCD, threadcount);
-		else if (c == "dcb") 
-			dib->ApplyDemosaic(DEMOSAIC_DCB, threadcount);
-		else if (c == "amaze") 
-			dib->ApplyDemosaic(DEMOSAIC_AMAZE, threadcount);
-		else if (c == "igv") 
-			dib->ApplyDemosaic(DEMOSAIC_IGV, threadcount);
-		else if (c == "ahd") 
-			dib->ApplyDemosaic(DEMOSAIC_AHD, threadcount);
-		else if (c == "lmmse") 
-			dib->ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
-		else if (c == "xtran_fast") 
-			dib->ApplyDemosaic(DEMOSAIC_XTRANSFAST, threadcount);
-		else if (c == "xtran_markesteijn") 
-			dib->ApplyDemosaic(DEMOSAIC_MARKESTEIJN, threadcount);
+		else if (c == "vng") {
+			dib->ApplyDemosaicVNG(threadcount);
+		}
+		else if (c == "rcd") {
+			dib->ApplyDemosaicRCD(threadcount);
+		}
+		else if (c == "dcb") {
+			int iterations = 1;
+			bool dcb_enhance = false;
+			dib->ApplyDemosaicDCB(iterations, dcb_enhance, threadcount);
+		}
+		else if (c == "amaze") {
+			double initGain = 1.0;
+			int border = 0;
+			float inputScale = 1.0;
+			float outputScale = 1.0;
+			dib->ApplyDemosaicAMAZE(initGain, border, inputScale, outputScale, threadcount);
+		}
+		else if (c == "igv") {
+			dib->ApplyDemosaicIGV(threadcount);
+		}
+		else if (c == "ahd") {
+			dib->ApplyDemosaicAHD(threadcount);
+		}
+		else if (c == "lmmse") { 
+			int iterations = 1;
+			dib->ApplyDemosaicLMMSE(iterations, threadcount);
+		}
+		else if (c == "xtran_fast") {
+			dib->ApplyDemosaicXTRANSFAST(threadcount);
+		}
+		else if (c == "xtran_markesteijn") { 
+			int passes = 1;
+			bool useCieLab = false;
+			dib->ApplyDemosaicXTRANSMARKESTEIJN(passes, useCieLab, threadcount);
+		}
 #endif
 		else 
 			wxMessageBox(wxString::Format("Unknown demosaic algorithm: %s",c.c_str()));

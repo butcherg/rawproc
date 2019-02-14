@@ -297,29 +297,31 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 
 			_mark();
 			if (demosaic == "color")
-				dib.ApplyDemosaic(DEMOSAIC_COLOR, threadcount);
+				dib.ApplyMosaicColor(threadcount);
 			else if (demosaic == "half")
-				dib.ApplyDemosaic(DEMOSAIC_HALF, threadcount);
+				dib.ApplyDemosaicHalf(false, threadcount);
 			else if (demosaic == "half_resize")
-				dib.ApplyDemosaic(DEMOSAIC_HALF_RESIZE, threadcount);
+				dib.ApplyDemosaicHalf(true, threadcount);
+#ifdef USE_LIBRTPROCESS
 			else if (demosaic == "vng")
-				dib.ApplyDemosaic(DEMOSAIC_VNG, threadcount);
+				dib.ApplyDemosaicVNG(threadcount);
 			else if (demosaic == "amaze")
-				dib.ApplyDemosaic(DEMOSAIC_AMAZE, threadcount);
+				dib.ApplyDemosaicAMAZE(1.0, 0, 1.0, 1.0, threadcount);
 			else if (demosaic == "dcb")
-				dib.ApplyDemosaic(DEMOSAIC_DCB, threadcount);
+				dib.ApplyDemosaicDCB(1, false, threadcount);
 			else if (demosaic == "rcd")
-				dib.ApplyDemosaic(DEMOSAIC_RCD, threadcount);
+				dib.ApplyDemosaicRCD(threadcount);
 			else if (demosaic == "igv")
-				dib.ApplyDemosaic(DEMOSAIC_IGV, threadcount);
+				dib.ApplyDemosaicIGV(threadcount);
 			else if (demosaic == "lmmse")
-				dib.ApplyDemosaic(DEMOSAIC_LMMSE, threadcount);
+				dib.ApplyDemosaicLMMSE(1, threadcount);
 			else if (demosaic == "ahd")
-				dib.ApplyDemosaic(DEMOSAIC_AHD, threadcount);
+				dib.ApplyDemosaicAHD(threadcount);
 			else if (demosaic == "xtran_fast") 
-				dib.ApplyDemosaic(DEMOSAIC_XTRANSFAST, threadcount);
+				dib.ApplyDemosaicXTRANSFAST(threadcount);
 			else if (demosaic == "xtran_markesteijn") 
-				dib.ApplyDemosaic(DEMOSAIC_MARKESTEIJN, threadcount);
+				dib.ApplyDemosaicXTRANSMARKESTEIJN(1, false, threadcount);
+#endif
 			else printf("no-op... ");
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
@@ -965,14 +967,6 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("mirror vertical (%d threads)... ", threadcount);
 			_mark();
 			dib.ApplyVerticalMirror(threadcount);
-			printf("done (%fsec).\n",_duration());
-		}
-		
-		else if (strcmp(cmd,"demosaic") == 0) {
-			int threadcount = gImage::ThreadCount();
-			printf("demosaic (%d threads)... ", threadcount);
-			_mark();
-			dib.ApplyDemosaic(DEMOSAIC_HALF, threadcount);
 			printf("done (%fsec).\n",_duration());
 		}
 

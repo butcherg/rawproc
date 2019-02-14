@@ -69,29 +69,6 @@ enum RESIZE_FILTER {
 	FILTER_LANCZOS3
 };
 
-enum GIMAGE_DEMOSAIC {
-	DEMOSAIC_COLOR,
-	DEMOSAIC_HALF,
-	DEMOSAIC_HALF_RESIZE,
-	DEMOSAIC_VNG,
-	DEMOSAIC_AMAZE,
-	DEMOSAIC_DCB,
-	DEMOSAIC_RCD,
-	DEMOSAIC_IGV,
-	DEMOSAIC_LMMSE,
-	DEMOSAIC_AHD,
-	DEMOSAIC_XTRANSFAST,
-	DEMOSAIC_MARKESTEIJN
-};
-
-enum GIMAGE_TONEMAP {
-	TONE_GAMMA,
-	TONE_LOG2,
-	TONE_LOGGAMMA,
-	TONE_REINHARD_CHANNEL,
-	TONE_REINHARD_TONE,
-	TONE_FILMIC
-};
 
 enum GIMAGE_ERROR {
 	GIMAGE_OK,
@@ -222,14 +199,28 @@ class gImage
 		std::vector<double> ApplyWhiteBalance(int threadcount=0);
 
 		//demosaic algorithms:
-		void ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount=0);
+		bool ApplyDemosaicHalf(bool resize=false, int threadcount=0);
+		bool ApplyMosaicColor(int threadcount=0);
+
+
+#ifdef USE_LIBRTPROCESS
+		bool ApplyDemosaicVNG(int threadcount=0);
+		bool ApplyDemosaicRCD(int threadcount=0);
+		bool ApplyDemosaicDCB(int iterations, bool dcb_enhance=false, int threadcount=0);
+		bool ApplyDemosaicAMAZE(double initGain=1.0, int border=0, float inputScale=1.0, float outputScale=1.0, int threadcount=0);
+		bool ApplyDemosaicIGV(int threadcount=0);
+		bool ApplyDemosaicAHD(int threadcount=0);
+		bool ApplyDemosaicLMMSE(int iterations=1, int threadcount=0);
+		bool ApplyDemosaicXTRANSFAST(int threadcount=0);
+		bool ApplyDemosaicXTRANSMARKESTEIJN(int passes=1, bool useCieLab=false, int threadcount=0);
+#endif
 
 		//tonemap algorithms:
-		void ApplyToneMap(GIMAGE_TONEMAP algorithm=TONE_REINHARD_CHANNEL, int threadcount=0);
+		//void ApplyToneMap(GIMAGE_TONEMAP algorithm=TONE_REINHARD_CHANNEL, int threadcount=0);
 		void ApplyToneMapGamma(float gamma, int threadcount=0);
 		void ApplyToneMapLog2(int threadcount=0);
 		void ApplyToneMapReinhard(bool channel=true, int threadcount=0);
-		void ApplyToneMapFilmic(bool dogamma=false, int threadcount=0);
+		void ApplyToneMapFilmic(bool do_gamma=false, int threadcount=0);
 		void ApplyToneMapLogGamma(int threadcount=0);
 
 		//blur/noise algorithms:
@@ -273,6 +264,12 @@ class gImage
 		static void makeICCProfile(cmsHPROFILE hProfile, char *& profile, cmsUInt32Number  &profilesize);
 
 	protected:
+
+		//demosaic support routines:
+		bool xtranArray(unsigned (&xtarray)[6][6]);
+		bool cfArray(unsigned (&cfarray)[2][2]);
+		bool rgbCam(float (&rgb_cam)[3][4]);
+
 		std::vector<float> Compute1DGaussianKernel(const int kernelsize, const float sigma);
 		//void ImageBounds(unsigned *x1, unsigned *x2, unsigned *y1, unsigned *y2, bool cropbounds=false);
 		//void ApplyXShear(double rangle, int threadcount);
@@ -281,35 +278,6 @@ class gImage
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
 
 
-/*
-		//Lensfun internal support
-		PIXTYPE (*fGetR) (Image *This, float x, float y);
-		unsigned char (*fGetG) (Image *This, float x, float y);
-		unsigned char (*fGetB) (Image *This, float x, float y);
-		void (*fGet) (Image *This, RGBpixel &out, float x, float y);
-
-		// --- Linear interpolation --- //
-
-		/// Get interpolated red value at given position
-		static unsigned char GetR_b (Image *This, float x, float y);
-		/// Get interpolated green value at given position
-		static unsigned char GetG_b (Image *This, float x, float y);
-		/// Get interpolated blue value at given position
-		static unsigned char GetB_b (Image *This, float x, float y);
-		/// Get interpolated pixel value at given position
-		static void Get_b (Image *This, RGBpixel &out, float x, float y);
-
-		// --- Lanczos interpolation --- //
-
-		/// Get interpolated red value at given position
-		static unsigned char GetR_l (Image *This, float x, float y);
-		/// Get interpolated green value at given position
-		static unsigned char GetG_l (Image *This, float x, float y);
-		/// Get interpolated blue value at given position
-		static unsigned char GetB_l (Image *This, float x, float y);
-		/// Get interpolated pixel value at given position
-		static void Get_l (Image *This, RGBpixel &out, float x, float y);
-*/
 
 	private:
 		std::vector<pix> image;
