@@ -1977,14 +1977,102 @@ void gImage::ApplyToneLine(double low, double high, int threadcount)
 // of the histogram more toward the upper end of the main hump of data.  Now, the overall
 // image can be properly displayed and the headlight can retain some detail.
 //
-// The algorithm implemented is the basic Reinhard algorithm, x/(1+x).
-// Reinhard: R(x) = x/(x+1) Filmic: R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2) (I took the power part out)
+
+//
+
 
 static inline float Log2( float x)
 {
   return logf(x) / logf(2);
 }
 
+void gImage::ApplyToneMapGamma(float gamma, int threadcount)
+{
+	double exponent = 1 / gamma;
+	//double v = 255.0 * (double)pow((double)255, -exponent);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i< image.size(); i++) {
+		image[i].r = pow(image[i].r,exponent);
+		image[i].g = pow(image[i].g,exponent);
+		image[i].b = pow(image[i].b,exponent);				
+	}
+}
+
+void gImage::ApplyToneMapLog2(int threadcount)
+{
+	//need to figure this one out...
+}
+
+void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
+{
+	// The Reinhard algorithm implemented is the basic algorithm:
+	// R(x) = x/(x+1)
+	// Default applies it to each channel, 
+	// alternate computes the delta tone as a multiplier, which is then applied to the channels 
+
+	if (channel) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			image[pos].r = image[pos].r/(1.0+image[pos].r);
+			image[pos].g = image[pos].g/(1.0+image[pos].g);
+			image[pos].b = image[pos].b/(1.0+image[pos].b);
+		}
+	}
+	else {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			double T = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
+			double mT = T/(1+T);
+			double dT = mT/T;
+			image[pos].r *= dT;
+			image[pos].g *= dT;
+			image[pos].b *= dT;
+		}
+	}
+}
+
+void gImage::ApplyToneMapFilmic(bool do_gamma, int threadcount)
+{
+	// The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog:
+	// R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2), pow(f,gamma) removed for do_gamma = false
+
+	if (do_gamma) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			image[pos].r = pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),2.2);
+			image[pos].g = pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),2.2);
+			image[pos].b = pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),2.2);
+		}
+	}
+	else {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned pos=0; pos<image.size(); pos++) {
+			image[pos].r = (image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06);
+			image[pos].g = (image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06);
+			image[pos].b = (image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06);
+		}
+	}
+}
+
+void gImage::ApplyToneMapLogGamma(int threadcount)
+{
+	//The HEVC version of the ARIB STD-B67 algorithm, as defined in:
+	//https://en.wikipedia.org/wiki/Hybrid_Log-Gamma
+
+	double a = 0.17883277, b = 0.28466892, c = 0.55991073;
+	double rubicon = 1.0/12.0;
+	double sqrt3 = sqrt(3);
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned pos=0; pos<image.size(); pos++) {
+		if (image[pos].r > 0.0) if (image[pos].r > rubicon) image[pos].r = a * log(12*image[pos].r - b) + c; else image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
+		if (image[pos].g > 0.0) if (image[pos].g > rubicon) image[pos].g = a * log(12*image[pos].g - b) + c; else image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
+		if (image[pos].b > 0.0) if (image[pos].b > rubicon) image[pos].b = a * log(12*image[pos].b - b) + c; else image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
+	}
+}
+
+
+//dump this one after the individual methods are tested:
 void gImage::ApplyToneMap(GIMAGE_TONEMAP algorithm, int threadcount)
 {
 	if (algorithm == TONE_GAMMA) { //gonna need a parameter

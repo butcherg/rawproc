@@ -118,7 +118,7 @@ class gImage
 
 		~gImage();
 
-		//Getters
+		//image component getters
 		pix getPixel(unsigned x,  unsigned y);
 		std::vector<float> getPixelArray(unsigned x,  unsigned y);
 		char *getImageData(BPP bits, cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
@@ -126,6 +126,8 @@ class gImage
 		char *getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		std::vector<pix>& getImageData();
 		pix* getImageDataRaw();
+
+		//metadata getters
 		unsigned getWidth();
 		unsigned getHeight();
 		unsigned getColors();
@@ -142,6 +144,11 @@ class gImage
 		std::string Stats();
 		std::map<std::string,std::string> StatsMap();
 
+		//Setters
+		void setInfo(std::string name, std::string value);
+		void setProfile(char * prof, unsigned proflength);
+		void deleteProfile();
+
 		//calculators:
 		std::vector<double> CalculateChannelMeans();
 		std::vector<double> CalculatePatchMeans(int x, int y, float radius);
@@ -157,10 +164,6 @@ class gImage
 		//std::map<GIMAGE_CHANNEL,std::vector<unsigned> > Histogram(unsigned channels, unsigned scale);
 		std::vector<long> Histogram(unsigned channel, unsigned &hmax);
 
-		//Setters
-		void setInfo(std::string name, std::string value);
-		void setProfile(char * prof, unsigned proflength);
-		void deleteProfile();
 		
 		//Lensfun support methods
 		void initInterpolation(RESIZE_FILTER method);  //only accepts FILTER_BILINEAR and FILTER_LANCZOS3
@@ -181,13 +184,29 @@ class gImage
 		//Image operations.  
 		//threadcount=0 uses all available CPUs, n uses precisely n CPUs, and -n uses available-n CPUs
 		//image operations with a std::string params parameter parse a string to apply the operation
+
+		//kernel-based algorithms:
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
 		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount=0);
 		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount=0);
 		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount=0);
 		void ApplySharpen(int strength, int threadcount=0);
+
+
+		//basic color/tone operations:
+		void ApplySaturate(double saturate, int threadcount=0);
+		void ApplyExposureCompensation(double ev, int threadcount=0);
+		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
+		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
+		void ApplyToneLine(double low, double high, int threadcount=0);
+
+		//image geometry algorithms:
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
 		void ApplyResize(std::string params, int threadcount=0);
+		void ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount);
+		void ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount=0);
+
+		//rotation algorithms:
 		void ApplyRotate(double angle, bool crop, int threadcount=0);
 		void ApplyRotate180(int threadcount=0);
 		void ApplyRotate90(int threadcount=0);
@@ -195,25 +214,33 @@ class gImage
 		void ApplyHorizontalMirror(int threadcount=0);
 		void ApplyVerticalMirror(int threadcount=0);
 		void NormalizeRotation(int threadcount=0);
-		void ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount);
-		void ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount=0);
-		void ApplySaturate(double saturate, int threadcount=0);
-		void ApplyExposureCompensation(double ev, int threadcount=0);
-		void ApplyTint(double red,double green,double blue, int threadcount=0);
-		void ApplyGray(double redpct, double greenpct, double bluepct, int threadcount=0);
-		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
-		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
-		void ApplyToneLine(double low, double high, int threadcount=0);
-		void ApplyToneMap(GIMAGE_TONEMAP algorithm=TONE_REINHARD_CHANNEL, int threadcount=0);
+
+		//white balance algorithms:
 		std::vector<double> ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(int threadcount=0);
+
+		//demosaic algorithms:
 		void ApplyDemosaic(GIMAGE_DEMOSAIC algorithm, int threadcount=0);
 
+		//tonemap algorithms:
+		void ApplyToneMap(GIMAGE_TONEMAP algorithm=TONE_REINHARD_CHANNEL, int threadcount=0);
+		void ApplyToneMapGamma(float gamma, int threadcount=0);
+		void ApplyToneMapLog2(int threadcount=0);
+		void ApplyToneMapReinhard(bool channel=true, int threadcount=0);
+		void ApplyToneMapFilmic(bool dogamma=false, int threadcount=0);
+		void ApplyToneMapLogGamma(int threadcount=0);
+
+		//blur/noise algorithms:
 		void ApplyNLMeans(double sigma, int local, int patch, int threadcount=0);
 		void ApplyWaveletDenoise(double strength, int threadcount);
+
+		//specialty algorithms:
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);
+		void ApplyTint(double red,double green,double blue, int threadcount=0);
+		void ApplyGray(double redpct, double greenpct, double bluepct, int threadcount=0);
+
 		GIMAGE_ERROR ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp=false, int threadcount=0);
 		GIMAGE_ERROR AssignColorspace(std::string iccfile);
 		
