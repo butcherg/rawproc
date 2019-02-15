@@ -12,7 +12,6 @@
 #define TONELOG2 7904
 #define TONELOGGAM 7905
 #define TONEFILMIC 7906
-#define TONEFILMICGAMMA 7907
 
 class TonePanel: public PicProcPanel
 {
@@ -32,7 +31,6 @@ class TonePanel: public PicProcPanel
 			log2b = new wxRadioButton(this, TONELOG2, "log2");
 			hybloggam = new wxRadioButton(this, TONELOGGAM, "loggamma");
 			filmic = new wxRadioButton(this, TONEFILMIC, "filmic");
-			filmicgamma = new wxCheckBox(this, TONEFILMICGAMMA, "add gamma");
 
 			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
@@ -70,8 +68,6 @@ class TonePanel: public PicProcPanel
 			}
 			if (p[0] == "filmic") {
 				filmic->SetValue(true);
-				filmicgamma->SetValue(false);
-				if (p.GetCount() >=2) if (p[1] == "gamma") filmicgamma->SetValue(true);
 			}
 
 			//Lay out the controls in the panel:
@@ -91,15 +87,12 @@ class TonePanel: public PicProcPanel
 			m->AddItem(hybloggam, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmic, wxALIGN_LEFT);
-			m->AddItem(filmicgamma, wxALIGN_LEFT);
+
 			SetSizerAndFit(m);
-
-
-			g->Layout();
+			m->Layout();
 			SetFocus();
 
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
-			Bind(wxEVT_CHECKBOX, &TonePanel::OnButton, this, TONEFILMICGAMMA);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_TEXT_ENTER,&TonePanel::gammaParamChanged, this, TONEID);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
@@ -155,11 +148,7 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("loggamma"));
 					break;
 				case TONEFILMIC:
-				case TONEFILMICGAMMA:
-					if (filmicgamma->GetValue())
-						q->setParams(wxString::Format("filmic,gamma"));
-					else
-						q->setParams(wxString::Format("filmic"));
+					q->setParams(wxString::Format("filmic"));
 					break;
 			}
 			q->processPic();
@@ -178,7 +167,7 @@ class TonePanel: public PicProcPanel
 
 	private:
 		wxTextCtrl *edit;
-		wxCheckBox *enablebox, *filmicgamma;
+		wxCheckBox *enablebox;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggam, *filmic;
 		wxChoice *reinop;
 
@@ -250,10 +239,8 @@ bool PicProcessorTone::processPic(bool processnext)
 		else if (p[0] == "filmic") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
 			m_tree->SetItemText(id, "tone:filmic");
-			bool dogamma = false;
-			if (p.size() >= 2) if (p[1] == "gamma") dogamma=true;
 			mark();
-			dib->ApplyToneMapFilmic(dogamma, threadcount);
+			dib->ApplyToneMapFilmic(false, threadcount);
 			d = duration();
 		}
 
