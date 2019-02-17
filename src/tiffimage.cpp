@@ -141,6 +141,7 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			dst += stride;
 		}
 		
+
 		uint32 read_dir_offset; uint32 count;
 		float fval;
 		uint16 * sval;
@@ -151,7 +152,9 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 				if (TIFFGetField( tif, EXIFTAG_FOCALLENGTH, &fval)) info["FocalLength"] = tostr(fval);
 				if (TIFFGetField( tif, EXIFTAG_ISOSPEEDRATINGS, &count, &sval)) info["ISOSpeedRatings"] = tostr(*sval);
 			}
+			else printf("TIFFReadEXIFDirectory failed\n");
 		}
+		else printf("TIFFGetField TIFFTAG_EXIFID failed\n");
 		
 		*width = w;
 		*height = h;
@@ -188,6 +191,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 
 		TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 		TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE); //todo: COMPRESSION_ADOBE_DEFLATE);
 		// We set the strip size of the file to be size of one row of pixels
 		TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, width*numcolors));
 
@@ -204,7 +208,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
 		}
 
-		if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
+		//if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
 				
 		unsigned scanlinesize = TIFFScanlineSize(tif);
 		buf = (unsigned char *) _TIFFmalloc(scanlinesize);
@@ -220,39 +224,41 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			}
 			img+=scanlinesize;
 		}
-	}
 
-	TIFFWriteDirectory( tif );
+		TIFFWriteDirectory( tif );
 	
-	uint64 dir_offset = 0;
-	TIFFCreateEXIFDirectory(tif);
+		uint64 dir_offset = 0;
+		if (TIFFCreateEXIFDirectory(tif)) {
+			if (info.find("ISOSpeedRatings") != info.end())  {
+				uint16 iso = (uint16) atoi(info["ISOSpeedRatings"].c_str());
+				if (!TIFFSetField(tif, EXIFTAG_ISOSPEEDRATINGS, 1, &iso)) printf("TIFFSetField failed\n");
+			}
 
-	if (info.find("ISOSpeedRatings") != info.end())  {
-		uint16 iso = (uint16) atoi(info["ISOSpeedRatings"].c_str());
-		TIFFSetField(tif, EXIFTAG_ISOSPEEDRATINGS, 1, &iso);
+			if (info.find("ExposureTime") != info.end())  {
+				double extime = atof(info["ExposureTime"].c_str());
+				if (!TIFFSetField(tif, EXIFTAG_EXPOSURETIME, extime)) printf("TIFFSetField failed\n");
+			}
+
+			if (info.find("FNumber") != info.end())  {
+				double fnbr = atof(info["FNumber"].c_str());
+				if (!TIFFSetField(tif, EXIFTAG_FNUMBER, fnbr)) printf("TIFFSetField failed\n");
+			}
+
+			if (info.find("FocalLength") != info.end())  {
+				double flen = atof(info["FocalLength"].c_str());
+				if (!TIFFSetField(tif, EXIFTAG_FOCALLENGTH, flen)) printf("TIFFSetField failed\n");
+			}
+
+			if (!TIFFWriteCustomDirectory( tif, &dir_offset)) printf("TIFFWriteCustomDirectory failed\n");
+			if (!TIFFSetDirectory(tif, 0)) printf("TIFFSetDirectory failed\n");
+			if (!TIFFSetField(tif, TIFFTAG_EXIFIFD, dir_offset )) printf("TIFFSetField failed\n");
+		}
+		else printf("TIFF EXIF writing failed...\n");
+
+		(void) TIFFClose(tif);
+		if (buf) _TIFFfree(buf);
+		return true;
 	}
-
-	if (info.find("ExposureTime") != info.end())  {
-		double extime = atof(info["ExposureTime"].c_str());
-		TIFFSetField(tif, EXIFTAG_EXPOSURETIME, extime);
-	}
-
-	if (info.find("FNumber") != info.end())  {
-		double fnbr = atof(info["FNumber"].c_str());
-		TIFFSetField(tif, EXIFTAG_FNUMBER, fnbr);
-	}
-
-	if (info.find("FocalLength") != info.end())  {
-		double flen = atof(info["FocalLength"].c_str());
-		TIFFSetField(tif, EXIFTAG_FOCALLENGTH, flen);
-	}
-
-	TIFFWriteCustomDirectory( tif, &dir_offset);
-	TIFFSetDirectory(tif, 0);
-	TIFFSetField(tif, TIFFTAG_EXIFIFD, dir_offset );
-
-	(void) TIFFClose(tif);
-	if (buf) _TIFFfree(buf);
-	return true;
+	else return true;
 }
 
