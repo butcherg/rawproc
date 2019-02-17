@@ -962,9 +962,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
 			}
 
-			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, that file is embedded, otherwise, if a profile is available in the internal image, that profile is embedded.   Default=1
+			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
 			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
-			//if (pic->GetColorManagement()) {
 
 				wxString intentstr;
 				cmsUInt32Number intent = INTENT_PERCEPTUAL;
@@ -1002,15 +1001,23 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
 				profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-				if (!profile) {
-					wxMessageBox(wxString::Format("No CMS profile found, saving with the working profile..."));
-					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with working profile...",fname));
-					dib->saveImageFile(fname, std::string(configparams.c_str()));
+				if (dib->getProfile()) {
+					if (profile) {
+						WxStatusBar1->SetStatusText(wxString::Format("Saving %s converting to color profile %s, rendering intent %s...",fname, profilepath.GetFullName(), intentstr));
+						dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+					}
+					else {
+						wxMessageBox(wxString::Format("No CMS profile file found, saving with the assigned internal color profile..."));
+						WxStatusBar1->SetStatusText(wxString::Format("Saving %s with working profile...",fname));
+						dib->saveImageFile(fname, std::string(configparams.c_str()));
+					}
 				}
 				else {
-					WxStatusBar1->SetStatusText(wxString::Format("Saving %s with icc profile %s, rendering intent %s...",fname, profilepath.GetFullName(), intentstr));
-					dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+					wxMessageBox(wxString::Format("No internal working profile found, saving without a color profile..."));
+					WxStatusBar1->SetStatusText(wxString::Format("Saving %s without a color profile...",fname));
+					dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
+
 
 
 			}
