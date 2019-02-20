@@ -9,6 +9,7 @@ class myRowColumnSizer: public wxGridBagSizer
 	public:
 		myRowColumnSizer(int vgap=0, int hgap=0);
 		wxSizerItem * AddItem(wxWindow *window, int flags, int colspan=1);
+		void AddEmptyItem();
 		void NextRow();
 
 	private:

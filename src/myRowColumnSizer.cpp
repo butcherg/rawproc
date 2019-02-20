@@ -9,7 +9,7 @@ myRowColumnSizer::myRowColumnSizer(int vgap, int hgap): wxGridBagSizer(vgap, hga
 
 wxSizerItem * myRowColumnSizer::AddItem(wxWindow *window, int flags, int colspan)
 {
-	wxSizerItem * i = Add(window, wxGBPosition(r,c), wxGBSpan(1,colspan), flags);
+	wxSizerItem * i = Add(window, wxGBPosition(r,c), wxGBSpan(1, colspan), flags);
 	c += colspan;
 	return i;
 }
@@ -18,6 +18,11 @@ void myRowColumnSizer::NextRow()
 {
 	r++;
 	c=0;
+}
+
+void myRowColumnSizer::AddEmptyItem()
+{
+	c++;
 }
 		
 
