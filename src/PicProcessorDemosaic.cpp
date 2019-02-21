@@ -24,8 +24,8 @@
 #define DEMOSAICXTRANMARKESTEIJN 6912
 #define DEMOSAICXTRANFAST 6913
 
-#define DCBITERATIONS 6914
-#define DCBENHANCE 6915
+//#define DCBITERATIONS 6914
+//#define DCBENHANCE 6915
 #endif
 
 
@@ -56,17 +56,20 @@ class DemosaicPanel: public PicProcPanel
 			amazeb->SetToolTip("Good for low ISO images, architectural images. Fast.");
 			dcbb = new wxRadioButton(this, DEMOSAICDCB, "dcb:");
 			dcbb->SetToolTip("");
-				dcb_iterations = new myIntegerCtrl(this, wxID_ANY, 1, 1, 5, wxDefaultPosition, wxSize(20,-1));
-				dcb_enhance = new wxCheckBox(this, DCBENHANCE, "enhance");
+				dcb_iterations = new myIntegerCtrl(this, wxID_ANY, "iterations:", 1, 1, 5, wxDefaultPosition, wxSize(20,-1));
+				dcb_enhance = new wxCheckBox(this, wxID_ANY, "enhance:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 			igvb = new wxRadioButton(this, DEMOSAICIGV, "igv");
 			igvb->SetToolTip("");
 			lmmseb = new wxRadioButton(this, DEMOSAICLMMSE, "lmmse");
 			lmmseb->SetToolTip("");
+				lmmse_iterations = new myIntegerCtrl(this, wxID_ANY, "iterations:", 1, 1, 5, wxDefaultPosition, wxSize(20,-1));
 			rcdb = new wxRadioButton(this, DEMOSAICRCD, "rcd");
 			rcdb->SetToolTip("Good for low ISO images, nature images. Faster than amaze.");
 			vngb = new wxRadioButton(this, DEMOSAICVNG, "vng");
 			vngb->SetToolTip("Slow, good for medium ISO images.");
 			xtran_markesteijnb = new wxRadioButton(this, DEMOSAICXTRANMARKESTEIJN, "xtran_markesteijn");
+				xtran_markesteijn_passes = new myIntegerCtrl(this, wxID_ANY, "passes:", 1, 1, 5, wxDefaultPosition, wxSize(20,-1));
+				xtran_markesteijn_cielab = new wxCheckBox(this, wxID_ANY, "cielab:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 			xtran_markesteijnb->SetToolTip("");
 			xtran_fastb = new wxRadioButton(this, DEMOSAICXTRANFAST, "xtran_fast");
 			xtran_fastb->SetToolTip("");
@@ -74,19 +77,19 @@ class DemosaicPanel: public PicProcPanel
 
 			if (params != "") {
 				wxArrayString p = split(params, ",");
-				if (p[0] == "half") halfb->SetValue(true);
-				else if (p[0] == "half_resize") halfresizeb->SetValue(true);
-				else if (p[0] == "color") colorb->SetValue(true);
+				if (p[0] == "half") 			{ halfb->SetValue(true); 		selected_algorithm = DEMOSAICHALF; }
+				else if (p[0] == "half_resize") 	{ halfresizeb->SetValue(true); 		selected_algorithm = DEMOSAICHALFRESIZE; }
+				else if (p[0] == "color") 		{ colorb->SetValue(true); 		selected_algorithm = DEMOSAICCOLOR; }
 #ifdef USE_LIBRTPROCESS
-				else if (p[0] == "ahd") ahdb->SetValue(true);
-				else if (p[0] == "amaze") amazeb->SetValue(true);
-				else if (p[0] == "dcb") dcbb->SetValue(true);
-				else if (p[0] == "igv") igvb->SetValue(true);
-				else if (p[0] == "lmmse") lmmseb->SetValue(true);
-				else if (p[0] == "rcd") rcdb->SetValue(true);
-				else if (p[0] == "vng") vngb->SetValue(true);
-				else if (p[0] == "xtran_markesteijn") xtran_markesteijnb->SetValue(true);
-				else if (p[0] == "xtran_fast") xtran_fastb->SetValue(true);
+				else if (p[0] == "ahd") 		{ ahdb->SetValue(true); 		selected_algorithm = DEMOSAICAHD; }
+				else if (p[0] == "amaze") 		{ amazeb->SetValue(true); 		selected_algorithm = DEMOSAICAMAZE; }
+				else if (p[0] == "dcb") 		{ dcbb->SetValue(true); 		selected_algorithm = DEMOSAICDCB; }
+				else if (p[0] == "igv") 		{ igvb->SetValue(true); 		selected_algorithm = DEMOSAICIGV; }
+				else if (p[0] == "lmmse") 		{ lmmseb->SetValue(true); 		selected_algorithm = DEMOSAICLMMSE; }
+				else if (p[0] == "rcd") 		{ rcdb->SetValue(true); 		selected_algorithm = DEMOSAICRCD; }
+				else if (p[0] == "vng") 		{ vngb->SetValue(true); 		selected_algorithm = DEMOSAICVNG; }
+				else if (p[0] == "xtran_markesteijn") 	{ xtran_markesteijnb->SetValue(true); 	selected_algorithm = DEMOSAICXTRANMARKESTEIJN; }
+				else if (p[0] == "xtran_fast") 		{ xtran_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
 #endif
 				else {
 					wxMessageBox(wxString::Format("%s is not a valid demosaic algorithm.  Setting to default.",p[0].mb_str()));
@@ -97,6 +100,7 @@ class DemosaicPanel: public PicProcPanel
 				halfb->SetValue(true); //to-do: change to tool.demosaic.default value 
 			}
 
+			enableIt();
 
 			//Lay out the controls in the panel:
 			myRowSizer *m = new myRowSizer();
@@ -112,14 +116,19 @@ class DemosaicPanel: public PicProcPanel
 			m->AddRowItem(ahdb, flags); m->NextRow();
 			m->AddRowItem(amazeb, flags); m->NextRow();
 			m->AddRowItem(dcbb, flags);
-				m->AddRowItem(dcb_iterations, flags); m->AddRowItem(new wxStaticText(this, wxID_ANY, "iterations"),flags);  
+				m->AddRowItem(dcb_iterations, flags);   
 				m->AddRowItem(dcb_enhance, flags);
 				m->NextRow();
 			m->AddRowItem(igvb, flags); m->NextRow();
-			m->AddRowItem(lmmseb, flags); m->NextRow();
+			m->AddRowItem(lmmseb, flags); 
+				m->AddRowItem(lmmse_iterations, flags);
+				m->NextRow();
 			m->AddRowItem(rcdb, flags); m->NextRow();
 			m->AddRowItem(vngb, flags); m->NextRow();
-			m->AddRowItem(xtran_markesteijnb, flags); m->NextRow();
+			m->AddRowItem(xtran_markesteijnb, flags);
+				m->AddRowItem(xtran_markesteijn_passes, flags);
+				m->AddRowItem(xtran_markesteijn_cielab, flags);
+				m->NextRow();
 			m->AddRowItem(xtran_fastb, flags); m->NextRow();
 			m->End();
 #endif
@@ -130,15 +139,19 @@ class DemosaicPanel: public PicProcPanel
 			Refresh();
 			Update();
 
+			t = new wxTimer(this);
+
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &DemosaicPanel::algorithmChanged, this);
-			Bind(wxEVT_TEXT_ENTER, &DemosaicPanel::paramChanged, this);
+			Bind(myINTEGERCTRL_UPDATE, &DemosaicPanel::paramChanged, this);
+			Bind(myINTEGERCTRL_CHANGE, &DemosaicPanel::onWheel, this);
+			Bind(wxEVT_TIMER, &DemosaicPanel::OnTimer, this);
 		}
 
 		~DemosaicPanel()
 		{
-			
+			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -153,6 +166,17 @@ class DemosaicPanel: public PicProcPanel
 			}
 		}
 
+		void onWheel(wxCommandEvent& event)
+		{
+			t->Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void OnTimer(wxTimerEvent& event)
+		{
+			processIt();
+			event.Skip();
+		}
+
 		void paramChanged(wxCommandEvent& event)
 		{
 			processIt();
@@ -161,8 +185,34 @@ class DemosaicPanel: public PicProcPanel
 		void algorithmChanged(wxCommandEvent& event)
 		{
 			selected_algorithm = event.GetId();
+			enableIt();
 			processIt();
 		}
+
+		void enableIt()
+		{
+#ifdef USE_LIBRTPROCESS
+			dcb_enhance->Enable(false);
+			dcb_iterations->Enable(false);
+			lmmse_iterations->Enable(false);
+			xtran_markesteijn_passes->Enable(false);
+			xtran_markesteijn_cielab->Enable(false);
+			switch (selected_algorithm) {
+				case DEMOSAICDCB:
+					dcb_enhance->Enable(true);
+					dcb_iterations->Enable(true);
+					break;
+				case DEMOSAICLMMSE:
+					lmmse_iterations->Enable(true);
+					break;
+				case DEMOSAICXTRANMARKESTEIJN:
+					xtran_markesteijn_passes->Enable(true);
+					xtran_markesteijn_cielab->Enable(true);
+					break;
+			}
+#endif
+		}
+		
 
 		void processIt()
 		{
@@ -194,7 +244,7 @@ class DemosaicPanel: public PicProcPanel
 					q->setParams("igv");
 					break;
 				case DEMOSAICLMMSE:
-					q->setParams("lmmse");
+					q->setParams(wxString::Format("lmmse,%d",lmmse_iterations->GetIntegerValue()));
 					break;
 				case DEMOSAICRCD:
 					q->setParams("rcd");
@@ -203,7 +253,10 @@ class DemosaicPanel: public PicProcPanel
 					q->setParams("vng");
 					break;
 				case DEMOSAICXTRANMARKESTEIJN:
-					q->setParams("xtran_markesteijn");
+					if (xtran_markesteijn_cielab->GetValue())
+						q->setParams(wxString::Format("xtran_markesteijn,%d,1",xtran_markesteijn_passes->GetIntegerValue()));
+					else
+						q->setParams(wxString::Format("xtran_markesteijn,%d,0",xtran_markesteijn_passes->GetIntegerValue()));
 					break;
 				case DEMOSAICXTRANFAST:
 					q->setParams("xtran_fast");
@@ -220,11 +273,12 @@ class DemosaicPanel: public PicProcPanel
 		wxRadioBox *operselect;
 		wxRadioButton *halfb, *halfresizeb, *colorb;
 		int selected_algorithm;
+		wxTimer *t;
 
 #ifdef USE_LIBRTPROCESS
 		wxRadioButton *ahdb, *amazeb, *dcbb, *igvb, *lmmseb, *rcdb, *vngb, *xtran_markesteijnb, *xtran_fastb;
-		myIntegerCtrl *dcb_iterations;
-		wxCheckBox *dcb_enhance;
+		myIntegerCtrl *dcb_iterations, *lmmse_iterations, *xtran_markesteijn_passes;
+		wxCheckBox *dcb_enhance, *xtran_markesteijn_cielab;
 #endif
 
 };
@@ -246,7 +300,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 {
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
-	bool result = true;
+	bool result = false;
 
 	wxArrayString p = split(c,",");
 
@@ -262,49 +316,52 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		if (p[0] == "color")
-			dib->ApplyMosaicColor(threadcount);
+			result = dib->ApplyMosaicColor(threadcount);
 		else if (p[0] == "half")
-			dib->ApplyDemosaicHalf(false, threadcount);
+			result = dib->ApplyDemosaicHalf(false, threadcount);
 		else if (p[0] == "half_resize")
-			dib->ApplyDemosaicHalf(true, threadcount);
+			result = dib->ApplyDemosaicHalf(true, threadcount);
 #ifdef USE_LIBRTPROCESS
 		else if (p[0] == "vng") {
-			dib->ApplyDemosaicVNG(threadcount);
+			result = dib->ApplyDemosaicVNG(threadcount);
 		}
 		else if (p[0] == "rcd") {
-			dib->ApplyDemosaicRCD(threadcount);
+			result = dib->ApplyDemosaicRCD(threadcount);
 		}
 		else if (p[0] == "dcb") {
 			int iterations = 1;
 			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
 			bool dcb_enhance = false;
 			if (p.GetCount() >= 3) if (p[2] == "1") dcb_enhance = true;
-			dib->ApplyDemosaicDCB(iterations, dcb_enhance, threadcount);
+			result = dib->ApplyDemosaicDCB(iterations, dcb_enhance, threadcount);
 		}
 		else if (p[0] == "amaze") {
 			double initGain = 1.0;
 			int border = 0;
 			float inputScale = 1.0;
 			float outputScale = 1.0;
-			dib->ApplyDemosaicAMAZE(initGain, border, inputScale, outputScale, threadcount);
+			result = dib->ApplyDemosaicAMAZE(initGain, border, inputScale, outputScale, threadcount);
 		}
 		else if (p[0] == "igv") {
-			dib->ApplyDemosaicIGV(threadcount);
+			result = dib->ApplyDemosaicIGV(threadcount);
 		}
 		else if (p[0] == "ahd") {
-			dib->ApplyDemosaicAHD(threadcount);
+			result = dib->ApplyDemosaicAHD(threadcount);
 		}
 		else if (p[0] == "lmmse") { 
 			int iterations = 1;
-			dib->ApplyDemosaicLMMSE(iterations, threadcount);
+			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
+			result = dib->ApplyDemosaicLMMSE(iterations, threadcount);
 		}
 		else if (p[0] == "xtran_fast") {
-			dib->ApplyDemosaicXTRANSFAST(threadcount);
+			result = dib->ApplyDemosaicXTRANSFAST(threadcount);
 		}
 		else if (p[0] == "xtran_markesteijn") { 
 			int passes = 1;
+			if (p.GetCount() >= 2) passes = atoi(p[1].c_str());
 			bool useCieLab = false;
-			dib->ApplyDemosaicXTRANSMARKESTEIJN(passes, useCieLab, threadcount);
+			if (p.GetCount() >= 3) if (p[2] == "1") useCieLab = true;
+			result = dib->ApplyDemosaicXTRANSMARKESTEIJN(passes, useCieLab, threadcount);
 		}
 #endif
 		else {
@@ -327,7 +384,9 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 				log(wxString::Format("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 
 			dirty = false;
+
 		}
+		else wxMessageBox(wxString::Format("Demosaic algorithm %s didn't work on this image.",p[0].c_str()));
 	}
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

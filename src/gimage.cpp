@@ -2279,6 +2279,9 @@ bool gImage::rgbCam(float (&rgb_cam)[3][4])
 
 bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 {
+	unsigned cfarray[2][2];
+	if (!cfArray(cfarray)) return false;
+
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
 
@@ -2319,6 +2322,9 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 
 bool gImage::ApplyMosaicColor(int threadcount)
 {
+	unsigned cfarray[2][2];
+	if (!cfArray(cfarray)) return false;
+
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 
 	if (imginfo.find("LibrawCFAPattern") == imginfo.end()) return false;
