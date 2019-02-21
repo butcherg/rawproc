@@ -1,5 +1,24 @@
 #include "myIntegerCtrl.h"
 
+wxDEFINE_EVENT(myINTEGERCTRL_UPDATE, wxCommandEvent);
+wxDEFINE_EVENT(myINTEGERCTRL_CHANGE, wxCommandEvent);
+
+
+myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, wxString label, int value, int lower, int upper, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE)
+{
+	l = lower;
+	u = upper;
+	v = value;
+	fmt = "%d";
+	SetBackgroundColour(parent->GetBackgroundColour());	
+	wxBoxSizer *b = new wxBoxSizer(wxHORIZONTAL);
+	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
+	b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
+	b->Add(textbox,0,wxALL,0);
+	SetSizerAndFit(b);
+	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
+	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
+}
 
 myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int lower, int upper, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE)
 {
@@ -7,6 +26,7 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int low
 	u = upper;
 	v = value;
 	fmt = "%d";
+	SetBackgroundColour(parent->GetBackgroundColour());
 	wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	b->Add(textbox,0,wxALL,0);
@@ -48,13 +68,19 @@ void myIntegerCtrl::OnWheel(wxMouseEvent& event)
 	if (v < l) v = l;
 	textbox->SetValue(wxString::Format(fmt,v));
 	textbox->Refresh();
-	event.Skip();
+	wxCommandEvent e(myINTEGERCTRL_CHANGE);
+	e.SetEventObject(this);
+	e.SetString("change");
+	ProcessWindowEvent(e);
 }
 
 void myIntegerCtrl::OnEnter(wxCommandEvent& event)
 {
 	v = atoi(textbox->GetValue().c_str());
-	event.Skip();
+	wxCommandEvent e(myINTEGERCTRL_UPDATE);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
 }
 		
 
