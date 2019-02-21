@@ -36,7 +36,7 @@ class DemosaicPanel: public PicProcPanel
 		DemosaicPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
 
 			enablebox = new wxCheckBox(this, DEMOSAICENABLE, "demosaic:");
 			enablebox->SetValue(true);
