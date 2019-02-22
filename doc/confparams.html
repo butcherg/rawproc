@@ -23,6 +23,7 @@
 <li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
 <li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li>
+<li><b>histogram.clipbuckets - n, number of buckets to eliminate on both ends of the histogram in calculating the max height</b>: </li>
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
 <li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>imageinfo.libraw</b>:  Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)</li>
@@ -43,7 +44,7 @@
 <li><b>menu.showcommand.type</b>:  Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text</li>
 <li><b>output.*.thumbnails.directory</b>:  *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.</li>
 <li><b>output.*.thumbnails.parameters</b>:  *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.</li>
-<li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, that file is embedded, otherwise, if a profile is available in the internal image, that profile is embedded.   Default=1</li>
+<li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1</li>
 <li><b>output.jpeg.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li>
 <li><b>output.jpeg.cms.renderingintent</b>:  Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul></li>
