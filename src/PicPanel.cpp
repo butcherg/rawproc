@@ -355,10 +355,14 @@ void PicPanel::OnMouseWheel(wxMouseEvent& event)
 	else
 		scale -= increment;
 
-	if (scale < 0.1) 
-		scale = 0.1;
-	else if (scale > 5) 
-		scale = 5; 
+	//parm display.minscale: Smallest panel image size.  Default=0.1, or 10%
+	float minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
+	//parm display.maxscale: Smallest panel image size.  Default=5.0, or 500%
+	float maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
+	if (scale < minscale) 
+		scale = minscale;
+	else if (scale > maxscale) 
+		scale = maxscale; 
 
 	//keep center of panel in the center...
 	int dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
