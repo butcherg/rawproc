@@ -1,5 +1,8 @@
 #include "myFloatCtrl.h"
 
+wxDEFINE_EVENT(myFLOATCTRL_UPDATE, wxCommandEvent);
+wxDEFINE_EVENT(myFLOATCTRL_CHANGE, wxCommandEvent);
+
 
 myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned precision, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE)
 {
@@ -10,6 +13,24 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 	fmt.Append("f");
 	wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
+	b->Add(textbox,0,wxALL,0);
+	SetSizerAndFit(b);
+	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
+	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
+}
+
+myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float value, unsigned precision, const wxPoint &pos, const wxSize &size, bool labelleft): wxControl(parent, id, pos, size, wxBORDER_NONE)
+{
+	v = value;
+	p = precision;
+	fmt = "%0.";
+	SetBackgroundColour(parent->GetBackgroundColour());	
+	fmt.Append(wxString::Format("%d",p));
+	fmt.Append("f");
+	wxBoxSizer *b = new wxBoxSizer(wxHORIZONTAL);
+	if (labelleft) b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
+	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
+	if (!labelleft) b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
 	b->Add(textbox,0,wxALL,0);
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
@@ -42,13 +63,19 @@ void myFloatCtrl::OnWheel(wxMouseEvent& event)
 	}
 	textbox->SetValue(wxString::Format(fmt,v));
 	textbox->Refresh();
-	event.Skip();
+	wxCommandEvent e(myFLOATCTRL_CHANGE);
+	e.SetEventObject(this);
+	e.SetString("change");
+	ProcessWindowEvent(e);
 }
 
 void myFloatCtrl::OnEnter(wxCommandEvent& event)
 {
 	v = atof(textbox->GetValue().c_str());
-	event.Skip();
+	wxCommandEvent e(myFLOATCTRL_UPDATE);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
 }
 		
 
