@@ -130,9 +130,10 @@ class DemosaicPanel: public PicProcPanel
 				m->AddRowItem(xtran_markesteijn_cielab, flags);
 				m->NextRow();
 			m->AddRowItem(xtran_fastb, flags); m->NextRow();
-			m->End();
 #endif
 
+			m->End();
+			
 			SetSizerAndFit(m);
 			b->Layout();
 			SetFocus();
