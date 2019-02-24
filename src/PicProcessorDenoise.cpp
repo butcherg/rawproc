@@ -45,18 +45,18 @@ class DenoisePanel: public PicProcPanel
 			nl = new wxRadioButton(this, DENOISENLMEANS, "NLMeans:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			nl->SetValue(true);
 
-			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			val = new wxStaticText(this,wxID_ANY, wxString::Format("%d",sigmaval), wxDefaultPosition, wxSize(30, -1));
+			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(110, -1));
+			val = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",sigmaval), wxDefaultPosition, wxSize(25, -1));
 			btn = new wxBitmapButton(this, SIGMARESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
 
-			local = new wxSlider(this, LOCALSLIDER, localval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
-			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%d",localval), wxDefaultPosition, wxSize(30, -1));
+			local = new wxSlider(this, LOCALSLIDER, localval, 0, 15, wxPoint(10, 30), wxSize(110, -1));
+			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",localval), wxDefaultPosition, wxSize(25, -1));
 			btn1 = new wxBitmapButton(this, LOCALRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn1->SetToolTip("Reset to default");
 
-			patch = new wxSlider(this, PATCHSLIDER, patchval, 0, 15, wxPoint(10, 30), wxSize(140, -1));
-			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%d",patchval), wxDefaultPosition, wxSize(30, -1));
+			patch = new wxSlider(this, PATCHSLIDER, patchval, 0, 15, wxPoint(10, 30), wxSize(110, -1));
+			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",patchval), wxDefaultPosition, wxSize(25, -1));
 			btn2 = new wxBitmapButton(this, PATCHRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset to default");
 			
@@ -75,7 +75,7 @@ class DenoisePanel: public PicProcPanel
 			m->AddRowItem(nl, flags);
 			m->NextRow();
 			
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "sigma: "), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "sigma: ", wxDefaultPosition,wxSize(50, -1)), flags);
 			m->AddRowItem(sigma, flags);
 			m->AddRowItem(val, flags);
 			m->AddRowItem(btn, flags);
@@ -84,13 +84,13 @@ class DenoisePanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, ""), flags);
 			m->NextRow();
 			
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "local: "), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "local: ", wxDefaultPosition,wxSize(50, -1)), flags);
 			m->AddRowItem(local, flags);
 			m->AddRowItem(val1, flags);
 			m->AddRowItem(btn1, flags);
 			m->NextRow();
 
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "patch: "), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "patch: ", wxDefaultPosition,wxSize(50, -1)), flags);
 			m->AddRowItem(patch, flags);
 			m->AddRowItem(val2, flags);
 			m->AddRowItem(btn2, flags);
@@ -109,9 +109,9 @@ class DenoisePanel: public PicProcPanel
 			bool nlb, wlb;
 			wxArrayString cp = split(params,",");
 			if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
-				sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
-				local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%4d", local->GetValue()));
-				patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%4d", patch->GetValue()));
+				sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+				local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+				patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
 				nlb=true; wlb=false;
 				algorithm = DENOISENLMEANS;
 				nl->SetValue(true);
@@ -213,17 +213,17 @@ class DenoisePanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			if (event.GetId() == SIGMASLIDER) val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
-			if (event.GetId() == LOCALSLIDER) val1->SetLabel(wxString::Format("%4d", local->GetValue()));
-			if (event.GetId() == PATCHSLIDER) val2->SetLabel(wxString::Format("%4d", patch->GetValue()));
+			if (event.GetId() == SIGMASLIDER) val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+			if (event.GetId() == LOCALSLIDER) val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+			if (event.GetId() == PATCHSLIDER) val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
 			if (event.GetId() == SIGMASLIDER) t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			if (event.GetId() == SIGMASLIDER) val->SetLabel(wxString::Format("%4d", sigma->GetValue()));
-			if (event.GetId() == LOCALSLIDER) val1->SetLabel(wxString::Format("%4d", local->GetValue()));
-			if (event.GetId() == PATCHSLIDER) val2->SetLabel(wxString::Format("%4d", patch->GetValue()));
+			if (event.GetId() == SIGMASLIDER) val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+			if (event.GetId() == LOCALSLIDER) val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+			if (event.GetId() == PATCHSLIDER) val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
 		}
 
 		void OnTimer(wxTimerEvent& event)
