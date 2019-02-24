@@ -9,11 +9,13 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 	v = value;
 	p = precision;
 	fmt = "%0.";
+	SetBackgroundColour(parent->GetBackgroundColour());	
 	fmt.Append(wxString::Format("%d",p));
 	fmt.Append("f");
 	wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	b->Add(textbox,0,wxALL,0);
+	//textbox->SetBackgroundColour(wxColour(0,255,255));
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
@@ -32,6 +34,7 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float 
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	if (!labelleft) b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
 	b->Add(textbox,0,wxALL,0);
+	//textbox->SetBackgroundColour(wxColour(0,255,255));
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
