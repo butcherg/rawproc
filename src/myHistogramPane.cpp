@@ -21,6 +21,9 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	hmax = 0;
 	hscale = 0;
 	ord = 1;
+	EVaxis = false;
+	//parm histogram.ev.zero: Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18
+	EV0 = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.zero","0.18").c_str());
 	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
@@ -78,6 +81,8 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	hmax = 0;
 	hscale = 0;
 	ord = 1;
+	EVaxis = false;
+	EV0 = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.zero","0.18").c_str());
 	display_channels = CHANNEL_RGB;
 
 	//not needed, for now; renders 'c' key command inop
@@ -264,6 +269,21 @@ void myHistogramPane::render(wxDC&  dc)
 		if (order>3) order=1;
 	}
 
+	if (EVaxis) {
+		EV0 = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.zero","0.18").c_str());
+		//parm histogram.ev.range: +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)
+		float EVrange = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.range","3.0").c_str());
+		//parm histogram.ev.increment: Step increment for EV plot.  Default: 1.0
+		float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
+
+		dc.SetPen(wxPen(wxColour(192,192,192), 1, wxPENSTYLE_SOLID ));
+		dc.DrawLine(hscale * EV0, 0, hscale * EV0, hmax);
+		dc.SetPen(wxPen(wxColour(192,192,192), 1, wxPENSTYLE_LONG_DASH ));
+		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc)
+			dc.DrawLine(hscale * EV0*pow(2.0, ev), 0, hscale * EV0*pow(2.0, ev), hmax);
+
+	}
+
 /*
 	dc.SetPen(wxPen(wxColour(192,192,0),1));
 	dc.DrawLine(zerobucket, 0, zerobucket, h);
@@ -274,6 +294,7 @@ void myHistogramPane::render(wxDC&  dc)
 	//marker lines:
 	dc.SetPen(wxPen(wxColour(192,192,192),1));
 	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
+	float mlx_ev = hscale * mlx*pow(2.9, 1.0/mlx);
 	
 	unsigned mly=0;
 	//if (mlx > 0 & mlx < hscale) {
@@ -292,13 +313,19 @@ void myHistogramPane::render(wxDC&  dc)
 	if (mlx < 0) mlx = 0;
 	if (mlx > hscale) mlx = hscale;
 	//wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
-	wxString str;
+	wxString str, str1;
 	if (inwindow)
-		str = wxString::Format("x: %d    hscale=%d",mlx,hscale);
+		str = wxString::Format("x: %d    hscale: %d",mlx,hscale);
 	else
-		str = wxString::Format("hscale=%d",hscale);
+		str = wxString::Format("hscale: %d",hscale);
+
 	wxSize sz = dc.GetTextExtent(str);
 	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
+	if (EVaxis) {
+		str1 = wxString::Format("ev0: %0.2f",EV0);
+		wxSize sz1 = dc.GetTextExtent(str1);
+		dc.DrawText(str1,w-sz1.GetWidth()-3,20);
+	}
 }
 
 
@@ -351,6 +378,12 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			if (event.ShiftDown()) xorigin -= 10;
 			else if (event.ControlDown()) xorigin -= 100;
 			else xorigin -= 1;
+			break;
+		case 88: //x - toggle x axis linear-EV
+			if (EVaxis)
+				EVaxis = false;
+			else
+				EVaxis = true;
 			break;
 		case 76: //l - pan left
 			if (event.ShiftDown()) xorigin += 10;
@@ -434,6 +467,7 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 void myHistogramPane::mouseEnterWindow(wxMouseEvent& event) 
 {
 	inwindow = true;
+	SetFocus();
 	Refresh();
 	
 }

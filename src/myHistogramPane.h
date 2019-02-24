@@ -53,6 +53,8 @@ private:
 	int rlen, glen, blen;
 
 	int zerobucket, onebucket;
+	bool EVaxis;
+	float EV0;
 
 	GIMAGE_CHANNEL display_channels;
 	
