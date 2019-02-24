@@ -155,12 +155,14 @@ class WhiteBalancePanel: public PicProcPanel
 			g->Layout();
 			SetFocus();
 			t = new wxTimer(this);
-			Bind(wxEVT_MOUSEWHEEL,&WhiteBalancePanel::onWheel, this);
+
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
-			Bind(wxEVT_TEXT_ENTER, &WhiteBalancePanel::paramChanged, this);
+			Bind(myFLOATCTRL_CHANGE,&WhiteBalancePanel::onWheel, this);
+			Bind(myFLOATCTRL_UPDATE,&WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::onEnable, this, WBENABLE);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnReset, this);
+
 			Refresh();
 			Update();
 		}
@@ -265,17 +267,17 @@ class WhiteBalancePanel: public PicProcPanel
 			pb->SetValue(false);
 			cb->SetValue(false);
 			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			q->processPic();
+			Refresh();
 		}
 		
-		void onWheel(wxMouseEvent& event)
+		void onWheel(wxCommandEvent& event)
 		{
 			ob->SetValue(true);
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue
-(), gmult->GetFloatValue(), bmult->GetFloatValue()));
+			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -283,13 +285,11 @@ class WhiteBalancePanel: public PicProcPanel
 		{
 			q->processPic();
 			Refresh();
-			event.Skip();
 		}
 
 		void OnButton(wxCommandEvent& event)
 		{
 			processWB(event.GetId());
-			event.Skip();
 		}
 
 	private:
