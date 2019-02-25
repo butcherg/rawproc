@@ -422,5 +422,22 @@ bool ImageContainsRawprocCommand(wxString fname)
 	return false;
 }
 
+wxColour wxString2wxColour(wxString s)
+{
+	int r=0, g=0, b=0;
+	if (s == "") s = "0";
+	wxArrayString c = split(s,",");
+	r = atoi(c[0].c_str());
+	if (c.GetCount() < 3) {
+		g = atoi(c[0].c_str());
+		b = atoi(c[0].c_str());
+	}
+	else if (c.GetCount() == 3) {
+		g = atoi(c[1].c_str());
+		b = atoi(c[2].c_str());
+	}
+	return wxColour(r,g,b);
+}
+
 
 
