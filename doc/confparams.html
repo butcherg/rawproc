@@ -3,6 +3,7 @@
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
 <li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
+<li><b>app.parameters.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw lines in the parameter pane. Some tools override this, look for "linecolor" in the Properties filter. Default=0</li>
 <li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li>
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
@@ -26,6 +27,11 @@
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
 <li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li>
 <li><b>histogram.clipbuckets - n, number of buckets to eliminate on both ends of the histogram in calculating the max height</b>: </li>
+<li><b>histogram.cursor.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw the histogram cursor. Some tools override this, look for "linecolor" in the Properties filter. Default=app.parameters.linecolor</li>
+<li><b>histogram.ev.increment</b>:  Step increment for EV plot.  Default: 1.0</li>
+<li><b>histogram.ev.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw EV lines in the parameter pane.  Default=app.parameters.linecolor</li>
+<li><b>histogram.ev.range</b>:  +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)</li>
+<li><b>histogram.ev.zero</b>:  Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18</li>
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
 <li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>imageinfo.libraw</b>:  Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)</li>
