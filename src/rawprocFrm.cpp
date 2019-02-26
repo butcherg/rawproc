@@ -1684,7 +1684,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.denoise.algorithm=nlmeans|wavelet The default algorithm to use when adding a denoise tool.  Default=wavelet
+		//parm tool.denoise.algorithm: nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet
 		algorithm =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.algorithm","wavelet"));
 		
 		if (algorithm == "nlmeans") {

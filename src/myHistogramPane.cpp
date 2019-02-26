@@ -22,6 +22,8 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	hscale = 0;
 	ord = 1;
 	EVaxis = false;
+	Unbounded = false;
+	//db = gImage();
 	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
@@ -48,6 +50,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 
 }
 
+/*
 myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
@@ -62,7 +65,9 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	hscale = 0;
 	ord = 1;
 	EVaxis = false;
+	Unbounded = false;
 	display_channels = CHANNEL_RGB;
+	db = dib;
 
 	//not needed, for now; renders 'c' key command inop
 	//smalldata = dib.Histogram();
@@ -111,7 +116,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &p
 	
 	//Refresh();
 }
-
+*/
 
 myHistogramPane::~myHistogramPane()
 {
@@ -146,16 +151,63 @@ void myHistogramPane::BlankPic()
 	
 }
 
+void myHistogramPane::RecalcHistogram()
+{
+	blankpic = false;
+	hmax = 0;
+
+	if (Unbounded)
+		histogram = db.Histogram(hscale, zerobucket, onebucket);
+	else
+		histogram = db.Histogram(hscale);
+	
+	bool rmax=false, gmax=false, bmax=false;
+	for (unsigned i=hscale-1; i>0; i--) {
+		if (!rmax) {if (histogram[i].r == 0) rlen--; else rmax = true;}
+		if (!gmax) {if (histogram[i].g == 0) glen--; else gmax = true;}
+		if (!bmax) {if (histogram[i].b == 0) blen--; else bmax = true;}
+	}
+	
+	if (r) delete[] r;
+	if (g) delete[] g;
+	if (b) delete[] b;
+	r = new wxPoint[hscale];
+	g = new wxPoint[hscale];
+	b = new wxPoint[hscale];
+	
+
+	//parm histogram.clipbuckets: number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0
+	unsigned clipbuckets = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbuckets","0").c_str()); 
+	unsigned lower = clipbuckets;
+	unsigned upper = (hscale-1)-clipbuckets;
+	
+	for (unsigned i=0; i<hscale; i++) {
+		r[i] = wxPoint(i, histogram[i].r);
+		g[i] = wxPoint(i, histogram[i].g);
+		b[i] = wxPoint(i, histogram[i].b);
+		if (i >= lower & i <= upper) {
+			if (hmax < histogram[i].r) hmax = histogram[i].r;
+			if (hmax < histogram[i].g) hmax = histogram[i].g;
+			if (hmax < histogram[i].b) hmax = histogram[i].b;
+		}
+	}
+	Refresh();
+
+}
+
 void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 {	
+	db = dib;
 	blankpic = false;
 	hmax = 0;
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
 	
-	histogram = dib.Histogram(scale);
-	//histogram = dib.Histogram(scale, zerobucket, onebucket);
-
+	if (Unbounded)
+		histogram = db.Histogram(scale, zerobucket, onebucket);
+	else
+		histogram = db.Histogram(scale);
+	
 	bool rmax=false, gmax=false, bmax=false;
 	for (unsigned i=scale-1; i>0; i--) {
 		if (!rmax) {if (histogram[i].r == 0) rlen--; else rmax = true;}
@@ -171,7 +223,7 @@ void myHistogramPane::SetPic(gImage &dib, unsigned scale)
 	b = new wxPoint[scale];
 	
 
-	//parm histogram.clipbuckets - n, number of buckets to eliminate on both ends of the histogram in calculating the max height
+	//parm histogram.clipbuckets: number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0
 	unsigned clipbuckets = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbuckets","0").c_str()); 
 	unsigned lower = clipbuckets;
 	unsigned upper = (scale-1)-clipbuckets;
@@ -229,11 +281,11 @@ void myHistogramPane::render(wxDC&  dc)
 
 	//go to histogram coordinates:
 	if (EVaxis) {
-		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax) * wscale);
+		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
 		dc.SetDeviceOrigin (xorigin, h-yorigin-lineheight);
 	}
 	else {
-		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax) * wscale);
+		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax)); // * wscale);
 		dc.SetDeviceOrigin (xorigin, h-yorigin);
 	}
 	dc.SetAxisOrientation(true,true);
@@ -280,6 +332,7 @@ void myHistogramPane::render(wxDC&  dc)
 	//parm histogram.ev.increment: Step increment for EV plot.  Default: 1.0
 	float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
 
+/*
 	if (EVaxis) {
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
 		dc.DrawLine(hscale * EV0, 0, hscale * EV0, hmax);
@@ -287,10 +340,11 @@ void myHistogramPane::render(wxDC&  dc)
 		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
 			dc.DrawLine(hscale * EV0*pow(2.0, ev), 0, hscale * EV0*pow(2.0, ev), hmax);
 
-
 		}
 
 	}
+*/
+
 
 /*
 	dc.SetPen(wxPen(wxColour(192,192,0),1));
@@ -346,8 +400,19 @@ void myHistogramPane::render(wxDC&  dc)
 			if (ev < 0.0) e.Prepend("-");
 			if (ev > 0.0) e.Prepend("+");
 			ew = wxSize(dc.GetTextExtent(e)).GetWidth() - ew;
-			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev)*wscale)-ew))+xorigin,(h-(lineheight-1))-yorigin);
+			//dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev)*wscale)-ew))+xorigin,(h-(lineheight-1))-yorigin);
+			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev))-ew))+xorigin,(h-(lineheight-1))-yorigin);
 		}
+	}
+	if (EVaxis) {
+		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
+		dc.DrawLine(w * EV0, 0, w * EV0, hmax);
+		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_LONG_DASH ));
+		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
+			dc.DrawLine(w * EV0*pow(2.0, ev), 0, w * EV0*pow(2.0, ev), hmax);
+
+		}
+
 	}
 
 }
@@ -363,13 +428,13 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 	if (event.ControlDown()) inc = 10.0;
 	if (event.GetWheelRotation() > 0) { 
 		wscale += inc;
-		xorigin -= (inc*event.m_x); 
-		yorigin -= inc*(s.GetHeight()-event.m_y);
+//		xorigin -= (inc*event.m_x); 
+//		yorigin -= inc*(s.GetHeight()-event.m_y);
 	}
 	else {
 		wscale -= inc;
-		xorigin += (inc*event.m_x); 
-		yorigin += inc*(s.GetHeight()-event.m_y);
+//		xorigin += (inc*event.m_x); 
+//		yorigin += inc*(s.GetHeight()-event.m_y);
 	}
 	if (wscale < 1.0) {
 		wscale = 1.0;
@@ -387,6 +452,13 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 {
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
+		case 66: //b - bounded/unbounded histogram
+			if (Unbounded)
+				Unbounded = false;
+			else
+				Unbounded = true;
+			RecalcHistogram();
+			break;
 		case 116: //T
 		case 84: //t
 			wscale = 1.0;
