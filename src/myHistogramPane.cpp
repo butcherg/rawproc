@@ -23,7 +23,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	ord = 1;
 	EVaxis = false;
 	Unbounded = false;
-	//db = gImage();
+	db = NULL;
 	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
@@ -40,14 +40,12 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	//Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
 	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
 	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
-        //EVT_CHAR(myHistogramPane::keyPressed)
-        Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
-        //EVT_KEY_UP(myHistogramPane::keyReleased)
-        Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
-        Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
-
-    	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
-
+	//EVT_CHAR(myHistogramPane::keyPressed)
+	Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
+	//EVT_KEY_UP(myHistogramPane::keyReleased)
+	Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
+	Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
+	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
 }
 
 /*
@@ -157,9 +155,9 @@ void myHistogramPane::RecalcHistogram()
 	hmax = 0;
 
 	if (Unbounded)
-		histogram = db.Histogram(hscale, zerobucket, onebucket);
+		histogram = db->Histogram(hscale, zerobucket, onebucket);
 	else
-		histogram = db.Histogram(hscale);
+		histogram = db->Histogram(hscale);
 	
 	bool rmax=false, gmax=false, bmax=false;
 	for (unsigned i=hscale-1; i>0; i--) {
@@ -195,51 +193,12 @@ void myHistogramPane::RecalcHistogram()
 
 }
 
-void myHistogramPane::SetPic(gImage &dib, unsigned scale)
+void myHistogramPane::SetPic(gImage *dib, unsigned scale)
 {	
 	db = dib;
-	blankpic = false;
-	hmax = 0;
 	hscale = scale;
 	rlen=scale; glen=scale; blen=scale;
-	
-	if (Unbounded)
-		histogram = db.Histogram(scale, zerobucket, onebucket);
-	else
-		histogram = db.Histogram(scale);
-	
-	bool rmax=false, gmax=false, bmax=false;
-	for (unsigned i=scale-1; i>0; i--) {
-		if (!rmax) {if (histogram[i].r == 0) rlen--; else rmax = true;}
-		if (!gmax) {if (histogram[i].g == 0) glen--; else gmax = true;}
-		if (!bmax) {if (histogram[i].b == 0) blen--; else bmax = true;}
-	}
-	
-	if (r) delete[] r;
-	if (g) delete[] g;
-	if (b) delete[] b;
-	r = new wxPoint[scale];
-	g = new wxPoint[scale];
-	b = new wxPoint[scale];
-	
-
-	//parm histogram.clipbuckets: number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0
-	unsigned clipbuckets = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbuckets","0").c_str()); 
-	unsigned lower = clipbuckets;
-	unsigned upper = (scale-1)-clipbuckets;
-	
-	for (unsigned i=0; i<scale; i++) {
-		r[i] = wxPoint(i, histogram[i].r);
-		g[i] = wxPoint(i, histogram[i].g);
-		b[i] = wxPoint(i, histogram[i].b);
-		if (i >= lower & i <= upper) {
-			if (hmax < histogram[i].r) hmax = histogram[i].r;
-			if (hmax < histogram[i].g) hmax = histogram[i].g;
-			if (hmax < histogram[i].b) hmax = histogram[i].b;
-		}
-	}
-	Refresh();
-	
+	RecalcHistogram();	
 }
 
 void myHistogramPane::SetChannel(GIMAGE_CHANNEL channel)
@@ -345,13 +304,13 @@ void myHistogramPane::render(wxDC&  dc)
 	}
 */
 
+	if (Unbounded) {
+		dc.SetPen(wxPen(wxColour(192,192,0),1));
+		dc.DrawLine(hscale * (zerobucket/hscale), 0, hscale * (zerobucket/hscale), hmax);
+		dc.SetPen(wxPen(wxColour(0,192,192),1));
+		dc.DrawLine(hscale * (onebucket/hscale),  0, hscale * (onebucket/hscale),  hmax);
+	}
 
-/*
-	dc.SetPen(wxPen(wxColour(192,192,0),1));
-	dc.DrawLine(zerobucket, 0, zerobucket, h);
-	dc.SetPen(wxPen(wxColour(0,192,192),1));
-	dc.DrawLine(onebucket,  0, onebucket,  h);
-*/
 
 	//marker lines:
 	dc.SetPen(wxPen(cursorcolor));
@@ -414,7 +373,14 @@ void myHistogramPane::render(wxDC&  dc)
 		}
 
 	}
-
+/*
+	if (Unbounded) {
+		dc.SetPen(wxPen(wxColour(192,192,0),1));
+		dc.DrawLine(zerobucket, 0, zerobucket, hmax);
+		dc.SetPen(wxPen(wxColour(0,192,192),1));
+		dc.DrawLine(onebucket,  0, onebucket,  hmax);
+	}
+*/
 }
 
 

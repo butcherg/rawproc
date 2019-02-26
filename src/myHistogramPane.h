@@ -26,7 +26,7 @@ public:
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
 	
-	void SetPic(gImage &dib, unsigned scale=256);
+	void SetPic(gImage *dib, unsigned scale=256);
 	void RecalcHistogram();
 	void SetChannel(GIMAGE_CHANNEL channel);
 	void BlankPic();
@@ -48,7 +48,7 @@ private:
 	bool blankpic, pressedDown;
 	std::vector<long> rdata, gdata, bdata, smalldata;
 
-	gImage db;
+	gImage *db;
 	std::vector<histogramdata> histogram;
 	
 	wxPoint *r, *g, *b;

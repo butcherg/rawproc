@@ -1933,7 +1933,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
-	gImage &g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
+	gImage *g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer();
 	SetStatusText("Building histogram...");
 	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", g , wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
 	SetStatusText("");
