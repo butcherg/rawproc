@@ -153,6 +153,7 @@ void myHistogramPane::RecalcHistogram()
 {
 	blankpic = false;
 	hmax = 0;
+	rlen=hscale; glen=hscale; blen=hscale;
 
 	if (Unbounded)
 		histogram = db->Histogram(hscale, zerobucket, onebucket);
@@ -197,7 +198,7 @@ void myHistogramPane::SetPic(gImage *dib, unsigned scale)
 {	
 	db = dib;
 	hscale = scale;
-	rlen=scale; glen=scale; blen=scale;
+	//rlen=scale; glen=scale; blen=scale;
 	RecalcHistogram();	
 }
 
@@ -248,6 +249,22 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.SetDeviceOrigin (xorigin, h-yorigin);
 	}
 	dc.SetAxisOrientation(true,true);
+
+//	if something I haven't defined yet {
+		wxColour boundcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("histogram.bound.color","128")));
+		wxPen origpen = dc.GetPen();
+		wxBrush origbrush = dc.GetBrush();
+		dc.SetPen(wxPen(boundcolor));
+		dc.SetBrush(wxBrush(boundcolor));
+
+		if (Unbounded) 
+			dc.DrawRectangle(zerobucket,0,onebucket,hmax);
+		else
+			dc.DrawRectangle(0,0,hscale,hmax);
+
+		dc.SetPen(origpen);
+		dc.SetBrush(origbrush);
+//	}
 
 	wxPoint * frontcolor;
 	
@@ -304,12 +321,7 @@ void myHistogramPane::render(wxDC&  dc)
 	}
 */
 
-	if (Unbounded) {
-		dc.SetPen(wxPen(wxColour(192,192,0),1));
-		dc.DrawLine(hscale * (zerobucket/hscale), 0, hscale * (zerobucket/hscale), hmax);
-		dc.SetPen(wxPen(wxColour(0,192,192),1));
-		dc.DrawLine(hscale * (onebucket/hscale),  0, hscale * (onebucket/hscale),  hmax);
-	}
+
 
 
 	//marker lines:
@@ -363,6 +375,7 @@ void myHistogramPane::render(wxDC&  dc)
 			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev))-ew))+xorigin,(h-(lineheight-1))-yorigin);
 		}
 	}
+
 	if (EVaxis) {
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
 		dc.DrawLine(w * EV0, 0, w * EV0, hmax);
@@ -373,6 +386,8 @@ void myHistogramPane::render(wxDC&  dc)
 		}
 
 	}
+
+
 /*
 	if (Unbounded) {
 		dc.SetPen(wxPen(wxColour(192,192,0),1));
