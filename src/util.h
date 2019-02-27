@@ -16,7 +16,6 @@
 #define TEXTCTRLHEIGHT 30
 #endif
 
-void FillHistogram(unsigned *histogram);
 
 bool ImageContainsRawprocCommand(wxString fname);
 
@@ -25,29 +24,22 @@ wxString paramString(wxString filter);
 wxString rawParamString(wxString filter);
 wxArrayString paramList(wxString filter);
 
+
 void paramAppend(wxString name, wxString value, wxString &paramstring);
 wxArrayString paramSplit(wxString paramstring);
 void opAppend(wxString name, wxString &opstring);
 
+
+void FillHistogram(unsigned *histogram);
 wxBitmap HistogramFrom(wxImage img, int width, int height);
-
 wxBitmap HistogramFromVec(std::vector<int> hdata, int hmax, int width, int height);
-
-//wxString MetadataString(const char *sectionTitle, FIBITMAP *dib, FREE_IMAGE_MDMODEL model);
-
-//wxString FreeImage_Information(FIBITMAP *dib);
-
-//wxImage FreeImage2wxImage(FIBITMAP* dib);
-
 wxBitmap ThreadedHistogramFrom(wxImage img, int width, int height);
-//wxImage ThreadedFreeImage2wxImage(FIBITMAP* dib);
-
-//use these together:
-//wxImage FreeImage2wxImageAndHistogram(FIBITMAP* dib);
 wxBitmap HistogramFromData(int width, int height);
 
 wxImage gImage2wxImage(gImage &dib);
 wxImage gImage2wxImage(gImage &dib, int oob);
+
+wxColour wxString2wxColour(wxString s);
 
 //cross-platform duration:
 void mark ();

@@ -3,7 +3,7 @@
 
 #define FILTERID 3000
 
-myHistogramDialog::myHistogramDialog(wxWindow *parent, wxWindowID id, const wxString &title, gImage &dib, const wxPoint &pos, const wxSize &size):
+myHistogramDialog::myHistogramDialog(wxWindow *parent, wxWindowID id, const wxString &title, gImage *dib, const wxPoint &pos, const wxSize &size):
 wxDialog(parent, id, title, pos, size, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
 {
 	s = new wxBoxSizer( wxVERTICAL );

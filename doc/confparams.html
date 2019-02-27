@@ -3,6 +3,7 @@
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
 <li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
+<li><b>app.parameters.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw lines in the parameter pane. Some tools override this, look for "linecolor" in the Properties filter. Default=0</li>
 <li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li>
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
@@ -25,7 +26,12 @@
 <li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
 <li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li>
-<li><b>histogram.clipbuckets - n, number of buckets to eliminate on both ends of the histogram in calculating the max height</b>: </li>
+<li><b>histogram.clipbuckets</b>:  number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0</li>
+<li><b>histogram.cursor.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw the histogram cursor. Some tools override this, look for "linecolor" in the Properties filter. Default=app.parameters.linecolor</li>
+<li><b>histogram.ev.increment</b>:  Step increment for EV plot.  Default: 1.0</li>
+<li><b>histogram.ev.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw EV lines in the parameter pane.  Default=app.parameters.linecolor</li>
+<li><b>histogram.ev.range</b>:  +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)</li>
+<li><b>histogram.ev.zero</b>:  Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18</li>
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
 <li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>imageinfo.libraw</b>:  Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)</li>
@@ -76,7 +82,7 @@
 <li><a name="tool.curve"><b>tool.curve.rateadapt.threshold</b>:  Specify threshold to turn on rate adaptation, in seconds. Default=0.01</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=1</li>
-<li><a name="tool.denoise"><b>tool.denoise.algorithm=nlmeans|wavelet The default algorithm to use when adding a denoise tool.  Default=wavelet</b>: </li>
+<li><a name="tool.denoise"><b>tool.denoise.algorithm</b>:  nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet</li>
 <li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
 <li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>

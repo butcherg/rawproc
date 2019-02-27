@@ -18,7 +18,7 @@ class myHistogramPane : public wxWindow
 
 public:
 
-	myHistogramPane(wxWindow* parent,  gImage &dib,  const wxPoint &pos, const wxSize &size);
+	//myHistogramPane(wxWindow* parent,  gImage &dib,  const wxPoint &pos, const wxSize &size);
 	myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size);
 	~myHistogramPane();
 	void OnSize(wxSizeEvent& event);
@@ -26,7 +26,8 @@ public:
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
 	
-	void SetPic(gImage &dib, unsigned scale=256);
+	void SetPic(gImage *dib, unsigned scale=256);
+	void RecalcHistogram();
 	void SetChannel(GIMAGE_CHANNEL channel);
 	void BlankPic();
  
@@ -47,12 +48,15 @@ private:
 	bool blankpic, pressedDown;
 	std::vector<long> rdata, gdata, bdata, smalldata;
 
+	gImage *db;
 	std::vector<histogramdata> histogram;
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
 
 	int zerobucket, onebucket;
+	bool EVaxis, Unbounded;
+	float EV0;
 
 	GIMAGE_CHANNEL display_channels;
 	
