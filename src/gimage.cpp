@@ -3861,15 +3861,12 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 	float dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
 	#endif
 
-	float S;
-	if (dmax <=1.0)
-		S = (1.0-dmin) / (float) scale;
-	else
-		S = (dmax-dmin) / (float) scale;
+	float inc = (dmax - dmin) / (float) scale;
+	zerobucket = abs(dmin) /inc;
+	onebucket = zerobucket + (1.0 / inc);
+
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
-	zerobucket = (int) ((0.0-dmin)/S);
-	onebucket  = (int) ((1.0-dmin)/S);
 
 	#pragma omp parallel
 	{
@@ -3881,14 +3878,9 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 		for(unsigned y = 0; y < h; y++) {
 			for(unsigned x = 0; x < w; x++) {
 				unsigned pos = x + y*w;
-				//pr[(unsigned) (image[pos].r-dmin)/S]++;
-				//pg[(unsigned) (image[pos].g-dmin)/S]++;
-				//pb[(unsigned) (image[pos].b-dmin)/S]++;
-
-				pr[(unsigned) ((image[pos].r-dmin)/S)]++;
-				pg[(unsigned) ((image[pos].g-dmin)/S)]++;
-				pb[(unsigned) ((image[pos].b-dmin)/S)]++;
-
+				pr[(unsigned) ((image[pos].r-dmin)/inc)]++;
+				pg[(unsigned) ((image[pos].g-dmin)/inc)]++;
+				pb[(unsigned) ((image[pos].b-dmin)/inc)]++;
 			}
 		}
 		
@@ -3903,6 +3895,7 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 	}
 	return histogram;
 }
+
 
 //rgb histogram, scale=number of buckets, 256 or 65536...
 std::vector<histogramdata> gImage::Histogram(unsigned scale)
