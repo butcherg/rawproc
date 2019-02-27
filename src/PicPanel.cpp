@@ -202,7 +202,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
 		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
 		
-		histogram->SetPic(dib, scale);
+		histogram->SetPic(*dib, scale);
 		//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
 		if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
 			histogram->SetChannel(channel);

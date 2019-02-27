@@ -1374,9 +1374,10 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 			pic->RefreshPic();
 	if (propname.Find("display.outofbound") != wxNOT_FOUND)
 		pic->RefreshPic();
-	if (propname.Find("histogram") != wxNOT_FOUND)
+	if (propname.Find("histogram.singlechannel") != wxNOT_FOUND)
 		pic->RefreshPic();
-
+	if (propname.Find("histogram.clipbuckets") != wxNOT_FOUND)
+		pic->RefreshPic();
 	//not ready for prime time
 	//if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
 }
@@ -1684,7 +1685,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.denoise.algorithm: nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet
+		//parm tool.denoise.algorithm=nlmeans|wavelet The default algorithm to use when adding a denoise tool.  Default=wavelet
 		algorithm =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.algorithm","wavelet"));
 		
 		if (algorithm == "nlmeans") {
@@ -1933,7 +1934,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
-	gImage *g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer();
+	gImage &g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 	SetStatusText("Building histogram...");
 	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", g , wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
 	SetStatusText("");
