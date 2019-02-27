@@ -48,73 +48,6 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
 }
 
-/*
-myHistogramPane::myHistogramPane(wxWindow* parent, gImage &dib, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
-{
-	blankpic = false;
-	//SetDoubleBuffered(true);
-	//t = new wxTimer(this);
-	unsigned hm = 0;
-	wscale = 1.0;
-	xorigin = 0;
-	yorigin = 0;
-	hmax = 0;
-	hscale = 0;
-	ord = 1;
-	EVaxis = false;
-	Unbounded = false;
-	display_channels = CHANNEL_RGB;
-	db = dib;
-
-	//not needed, for now; renders 'c' key command inop
-	//smalldata = dib.Histogram();
-	
-	rdata = dib.Histogram(CHANNEL_RED, hm);
-	if (hmax < hm) hmax = hm;
-	if (hscale < rdata.size()) hscale = rdata.size();
-	rlen=rdata.size();
-	r = new wxPoint[rlen];
-	for (unsigned i=0; i<rlen; i++) r[i] = wxPoint(i,rdata[i]);
-
-	gdata = dib.Histogram(CHANNEL_GREEN, hm);
-	if (hmax < hm) hmax = hm;
-	if (hscale < gdata.size()) hscale = gdata.size();
-	glen=gdata.size();
-	g = new wxPoint[glen];
-	for (unsigned i=0; i<rlen; i++) g[i] = wxPoint(i,gdata[i]);
-
-	bdata = dib.Histogram(CHANNEL_BLUE, hm);
-	if (hmax < hm) hmax = hm;
-	if (hscale < bdata.size()) hscale = bdata.size();
-	blen=bdata.size();
-	b = new wxPoint[blen];
-	for (unsigned i=0; i<blen; i++) b[i] = wxPoint(i,bdata[i]);
-
-	MouseX = 0; MouseY=0;
-	SetInitialSize(wxSize(500,400));
-	pressedDown = false;
-	inwindow = false;
-
-
-	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
-	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
-	Bind(wxEVT_LEFT_UP, &myHistogramPane::mouseReleased, this);
-	Bind(wxEVT_LEFT_DCLICK, &myHistogramPane::mouseDoubleClicked, this);
-	//Bind(wxEVT_RIGHT_DOWN, &myHistogramPane::rightClick, this);
-	Bind(wxEVT_ENTER_WINDOW, &myHistogramPane::mouseEnterWindow, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myHistogramPane::mouseLeftWindow, this);
-        //EVT_CHAR(myHistogramPane::keyPressed)
-        Bind(wxEVT_KEY_DOWN, &myHistogramPane::keyPressed, this);
-        //EVT_KEY_UP(myHistogramPane::keyReleased)
-        Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
-        Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
-
-    	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
-	
-	//Refresh();
-}
-*/
 
 myHistogramPane::~myHistogramPane()
 {
@@ -155,6 +88,9 @@ void myHistogramPane::RecalcHistogram()
 	hmax = 0;
 	rlen=hscale; glen=hscale; blen=hscale;
 
+	if (db == NULL) return;
+
+	histogram.clear();
 	if (Unbounded)
 		histogram = db->Histogram(hscale, zerobucket, onebucket);
 	else
@@ -258,7 +194,7 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.SetBrush(wxBrush(boundcolor));
 
 		if (Unbounded) 
-			dc.DrawRectangle(zerobucket,0,onebucket,hmax);
+			dc.DrawRectangle(zerobucket,0,onebucket-zerobucket,hmax);
 		else
 			dc.DrawRectangle(0,0,hscale,hmax);
 
@@ -387,15 +323,16 @@ void myHistogramPane::render(wxDC&  dc)
 
 	}
 
-
-/*
 	if (Unbounded) {
-		dc.SetPen(wxPen(wxColour(192,192,0),1));
-		dc.DrawLine(zerobucket, 0, zerobucket, hmax);
-		dc.SetPen(wxPen(wxColour(0,192,192),1));
-		dc.DrawLine(onebucket,  0, onebucket,  hmax);
+		//dc.SetPen(wxPen(wxColour(192,192,0),1));
+		//dc.DrawLine(zerobucket, 0, zerobucket, hmax);
+		//dc.SetPen(wxPen(wxColour(0,192,192),1));
+		//dc.DrawLine(onebucket,  0, onebucket,  hmax);
+		wxString bucketstring = wxString::Format("buckets: %d,%d",zerobucket,onebucket);
+		int bw =  wxSize(dc.GetTextExtent(bucketstring)).GetWidth();
+		dc.DrawText(bucketstring, w-bw, (lineheight+4)*2);
 	}
-*/
+
 }
 
 
