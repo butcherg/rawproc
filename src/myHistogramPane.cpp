@@ -176,14 +176,14 @@ void myHistogramPane::render(wxDC&  dc)
 
 
 	//go to histogram coordinates:
-	if (EVaxis) {
+//	if (EVaxis) {
 		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
 		dc.SetDeviceOrigin (xorigin, h-yorigin-lineheight);
-	}
-	else {
-		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) h/ (double) hmax)); // * wscale);
-		dc.SetDeviceOrigin (xorigin, h-yorigin);
-	}
+//	}
+//	else {
+//		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
+//		dc.SetDeviceOrigin (xorigin, h-yorigin);
+//	}
 	dc.SetAxisOrientation(true,true);
 
 //	if something I haven't defined yet {
@@ -265,7 +265,7 @@ void myHistogramPane::render(wxDC&  dc)
 	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
 	float mlx_ev = hscale * mlx*pow(2.9, 1.0/mlx);
 	
-	unsigned mly=0;
+	//unsigned mly=0;
 	//if (mlx > 0 & mlx < hscale) { 
 	//	mly = wxCoord(frontcolor[mlx].y);
 	//	dc.DrawLine(0,mly,hscale,mly);
@@ -282,13 +282,25 @@ void myHistogramPane::render(wxDC&  dc)
 	if (inwindow & !pressedDown & mlx > 0 & mlx < hscale) 
 		dc.DrawLine(MouseX,0,MouseX,h);
 	if (mlx < 0) mlx = 0;
-	if (mlx > hscale) mlx = hscale;
-	//wxString str = wxString::Format("x: %d y: %d    hscale=%d",mlx,mly,hscale);
+	if (mlx >= hscale) mlx = hscale-1;
+	long mlr = histogram[mlx].r;
+	long mlg = histogram[mlx].g;
+	long mlb = histogram[mlx].b;
+	//wxString str = wxString::Format("x: %d   hscale=%d",mlx,hscale);
 	wxString str, str1;
-	if (inwindow)
-		str = wxString::Format("x: %d    hscale: %d",mlx,hscale);
-	else
+	if (inwindow) {
+		str = wxString::Format("x:%d    hscale: %d",mlx,hscale);
+		wxSize sz = dc.GetTextExtent(str);
+		dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
+		dc.DrawText(wxString::Format("r:%d",mlr),w-sz.GetWidth()-3,(lineheight*1)+2);
+		dc.DrawText(wxString::Format("g:%d",mlg),w-sz.GetWidth()-3,(lineheight*2)+2);
+		dc.DrawText(wxString::Format("b:%d",mlb),w-sz.GetWidth()-3,(lineheight*3)+2);
+	}
+	else {
 		str = wxString::Format("hscale: %d",hscale);
+		wxSize sz = dc.GetTextExtent(str);
+		dc.DrawText(str,w-sz.GetWidth()-3,2);
+	}
 
 	wxSize sz = dc.GetTextExtent(str);
 	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
@@ -323,15 +335,16 @@ void myHistogramPane::render(wxDC&  dc)
 
 	}
 
-	if (Unbounded) {
+//	if (Unbounded) {
 		//dc.SetPen(wxPen(wxColour(192,192,0),1));
 		//dc.DrawLine(zerobucket, 0, zerobucket, hmax);
 		//dc.SetPen(wxPen(wxColour(0,192,192),1));
 		//dc.DrawLine(onebucket,  0, onebucket,  hmax);
-		wxString bucketstring = wxString::Format("buckets: %d,%d",zerobucket,onebucket);
-		int bw =  wxSize(dc.GetTextExtent(bucketstring)).GetWidth();
-		dc.DrawText(bucketstring, w-bw, (lineheight+4)*2);
-	}
+
+		//wxString bucketstring = wxString::Format("buckets: %d,%d",zerobucket,onebucket);
+		//int bw =  wxSize(dc.GetTextExtent(bucketstring)).GetWidth();
+		//dc.DrawText(bucketstring, w-bw, (lineheight+4)*2);
+//	}
 
 }
 
