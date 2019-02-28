@@ -137,7 +137,7 @@ class gImage
 		std::vector<long> GreenHistogram();
 		std::vector<long> BlueHistogram();
 		std::vector<histogramdata> Histogram(unsigned scale);
-		std::vector<histogramdata> Histogram(unsigned scale, int &zerobucket, int &onebucket);
+		std::vector<histogramdata> Histogram(unsigned scale, int &zerobucket, int &onebucket, float &dmin, float &dmax);
 		//std::map<GIMAGE_CHANNEL,std::vector<unsigned> > Histogram(unsigned channels, unsigned scale);
 		std::vector<long> Histogram(unsigned channel, unsigned &hmax);
 

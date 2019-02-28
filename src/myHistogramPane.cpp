@@ -91,10 +91,14 @@ void myHistogramPane::RecalcHistogram()
 	if (db == NULL) return;
 
 	histogram.clear();
-	if (Unbounded)
-		histogram = db->Histogram(hscale, zerobucket, onebucket);
-	else
+	if (Unbounded) {
+		histogram = db->Histogram(hscale, zerobucket, onebucket, dmin, dmax);
+	}
+	else {
 		histogram = db->Histogram(hscale);
+		dmin = 0.0;
+		dmax = 1.0;
+	}
 	
 	bool rmax=false, gmax=false, bmax=false;
 	for (unsigned i=hscale-1; i>0; i--) {
@@ -171,7 +175,7 @@ void myHistogramPane::render(wxDC&  dc)
 	//parm histogram.cursor.linecolor: integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw the histogram cursor. Some tools override this, look for "linecolor" in the Properties filter. Default=app.parameters.linecolor
 	wxColour cursorcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("histogram.cursor.linecolor",applinecolorstring.ToStdString())));
 
-
+	//Get a line height from an arbitrary character:
 	int lineheight = wxSize(dc.GetTextExtent("l")).GetHeight();
 
 
@@ -244,19 +248,17 @@ void myHistogramPane::render(wxDC&  dc)
 	//parm histogram.ev.increment: Step increment for EV plot.  Default: 1.0
 	float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
 
-/*
-	if (EVaxis) {
+	std::map<float,int> evlist;
+	if (EVaxis && !Unbounded) {
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
 		dc.DrawLine(hscale * EV0, 0, hscale * EV0, hmax);
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_LONG_DASH ));
 		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
+			evlist[ev] = dc.LogicalToDeviceX(hscale*EV0*pow(2.0, ev));
 			dc.DrawLine(hscale * EV0*pow(2.0, ev), 0, hscale * EV0*pow(2.0, ev), hmax);
-
 		}
 
 	}
-*/
-
 
 
 
@@ -283,27 +285,48 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.DrawLine(MouseX,0,MouseX,h);
 	if (mlx < 0) mlx = 0;
 	if (mlx >= hscale) mlx = hscale-1;
+
+	float inc = (dmax - dmin) / (float) hscale;
+	float mlf = dmin + (inc * (float) mlx);
+
 	long mlr = histogram[mlx].r;
 	long mlg = histogram[mlx].g;
 	long mlb = histogram[mlx].b;
 	//wxString str = wxString::Format("x: %d   hscale=%d",mlx,hscale);
 	wxString str, str1;
 	if (inwindow) {
-		str = wxString::Format("x:%d    hscale: %d",mlx,hscale);
+		if (Unbounded)
+			//str = wxString::Format("x:%d    buckets:%d range:data",mlx,hscale);
+			str = wxString::Format("x:%0.4f    buckets:%d range:data",mlf,hscale);
+		else
+			//str = wxString::Format("x:%d    buckets:%d range:display",mlx,hscale);
+			str = wxString::Format("x:%0.4f    buckets:%d range:display",mlf,hscale);
 		wxSize sz = dc.GetTextExtent(str);
 		dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
-		dc.DrawText(wxString::Format("r:%d",mlr),w-sz.GetWidth()-3,(lineheight*1)+2);
-		dc.DrawText(wxString::Format("g:%d",mlg),w-sz.GetWidth()-3,(lineheight*2)+2);
-		dc.DrawText(wxString::Format("b:%d",mlb),w-sz.GetWidth()-3,(lineheight*3)+2);
+//		dc.DrawText(wxString::Format("r:%d",mlr),w-sz.GetWidth()-3,(lineheight*1)+2);
+//		dc.DrawText(wxString::Format("g:%d",mlg),w-sz.GetWidth()-3,(lineheight*2)+2);
+//		dc.DrawText(wxString::Format("b:%d",mlb),w-sz.GetWidth()-3,(lineheight*3)+2);
 	}
 	else {
-		str = wxString::Format("hscale: %d",hscale);
+		if (Unbounded)
+			str = wxString::Format("buckets:%d range:data",hscale);
+		else
+			str = wxString::Format("buckets:%d range:display",hscale);
 		wxSize sz = dc.GetTextExtent(str);
 		dc.DrawText(str,w-sz.GetWidth()-3,2);
 	}
 
-	wxSize sz = dc.GetTextExtent(str);
-	dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
+	//wxSize sz = dc.GetTextExtent(str);
+	//dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
+
+
+	if (EVaxis) {
+		for (std::map<float,int>::iterator it=evlist.begin(); it!=evlist.end(); ++it) {
+			dc.DrawText(wxString::Format("%0.1f", it->first),it->second, h-lineheight);
+		}
+	}
+
+/*
 	if (EVaxis) {
 		str1 = wxString::Format("ev0: %0.2f",EV0);
 		wxSize sz1 = dc.GetTextExtent(str1);
@@ -319,21 +342,12 @@ void myHistogramPane::render(wxDC&  dc)
 			if (ev < 0.0) e.Prepend("-");
 			if (ev > 0.0) e.Prepend("+");
 			ew = wxSize(dc.GetTextExtent(e)).GetWidth() - ew;
-			//dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev)*wscale)-ew))+xorigin,(h-(lineheight-1))-yorigin);
-			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev))-ew))+xorigin,(h-(lineheight-1))-yorigin);
+			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev)*wscale)-ew))+xorigin,(h-(lineheight-1))-yorigin);
+			//dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev))-ew))+xorigin,(h-(lineheight-1))-yorigin);
 		}
 	}
+*/
 
-	if (EVaxis) {
-		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
-		dc.DrawLine(w * EV0, 0, w * EV0, hmax);
-		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_LONG_DASH ));
-		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
-			dc.DrawLine(w * EV0*pow(2.0, ev), 0, w * EV0*pow(2.0, ev), hmax);
-
-		}
-
-	}
 
 //	if (Unbounded) {
 		//dc.SetPen(wxPen(wxColour(192,192,0),1));
@@ -345,6 +359,12 @@ void myHistogramPane::render(wxDC&  dc)
 		//int bw =  wxSize(dc.GetTextExtent(bucketstring)).GetWidth();
 		//dc.DrawText(bucketstring, w-bw, (lineheight+4)*2);
 //	}
+
+	wxString ws = wxString::Format("scale: %0.2f",wscale);
+	int ww = wxSize(dc.GetTextExtent(ws)).GetWidth();
+	dc.DrawText(ws, w-ww, h-lineheight-1);
+
+	if (inwindow) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bucket:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
 
 }
 
@@ -460,7 +480,7 @@ void myHistogramPane::mouseMoved(wxMouseEvent& event)
 	x=event.m_x; y=event.m_y;
 	if (pressedDown) {
 		dx = MouseX-x;
-		dy = MouseY-y;
+		dy = 0; //dy = MouseY-y;  //panning only left-right...
 		if (event.ShiftDown())   if (dx > dy) dx *= 10;  else dy *= 10;
 		if (event.ControlDown()) if (dx > dy) dx *= 100; else dy *= 100;
 		xorigin -= dx; yorigin += dy;
@@ -502,6 +522,7 @@ void myHistogramPane::mouseEnterWindow(wxMouseEvent& event)
 void myHistogramPane::mouseLeftWindow(wxMouseEvent& event) 
 {
 	inwindow =  false;
+	((wxFrame *) GetParent())->SetStatusText("");
 	Refresh();
 	
 }

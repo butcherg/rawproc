@@ -56,7 +56,7 @@ private:
 
 	int zerobucket, onebucket;
 	bool EVaxis, Unbounded;
-	float EV0;
+	float EV0, dmin, dmax;
 
 	GIMAGE_CHANNEL display_channels;
 	

@@ -3850,15 +3850,15 @@ std::vector<long> gImage::BlueHistogram()
 	return histogram;
 }
 
-std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, int &onebucket)
+std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, int &onebucket, float &dmin, float &dmax)
 {
 	std::map<std::string,std::string> stats = StatsMap();
 	#if defined PIXHALF
-	float dmin = fmin((half_float::half) atof(stats["bmin"].c_str()), fmin((half_float::half) atof(stats["rmin"].c_str()),(half_float::half) atof(stats["gmin"].c_str())));
-	float dmax = fmax((half_float::half) atof(stats["bmax"].c_str()), fmax((half_float::half) atof(stats["rmax"].c_str()),(half_float::half) atof(stats["gmax"].c_str())));
+	dmin = fmin((half_float::half) atof(stats["bmin"].c_str()), fmin((half_float::half) atof(stats["rmin"].c_str()),(half_float::half) atof(stats["gmin"].c_str())));
+	dmax = fmax((half_float::half) atof(stats["bmax"].c_str()), fmax((half_float::half) atof(stats["rmax"].c_str()),(half_float::half) atof(stats["gmax"].c_str())));
 	#else
-	float dmin = fmin(atof(stats["bmin"].c_str()), fmin(atof(stats["rmin"].c_str()),atof(stats["gmin"].c_str())));
-	float dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
+	dmin = fmin(atof(stats["bmin"].c_str()), fmin(atof(stats["rmin"].c_str()),atof(stats["gmin"].c_str())));
+	dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
 	#endif
 
 	float inc = (dmax - dmin) / (float) scale;
