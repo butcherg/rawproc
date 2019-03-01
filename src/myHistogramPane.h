@@ -64,7 +64,7 @@ private:
 	
 	long hmax;
 	unsigned hscale;
-	unsigned xorigin, yorigin, MouseX, MouseY, xcenter, ycenter;
+	int xorigin, yorigin, MouseX, MouseY, xcenter, ycenter;
 	unsigned ord;
 
 	double wscale;
