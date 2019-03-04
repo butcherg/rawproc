@@ -2827,6 +2827,26 @@ void gImage::ApplyExposureCompensation(double ev, int threadcount)
 	}
 }
 
+//Multiplies each R, G, and B value of each pixel by a multiplier that will shift the patch to the destination ev
+//
+
+void gImage::ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount)
+{
+	std::vector<double> patchrgb = CalculatePatchMeans(x, y, radius);
+	float tone = (patchrgb[0] + patchrgb[1] + patchrgb[2]) / 3.0;
+	double mult = 1.0 / (tone/destinationev);
+	
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			image[pos].r *= mult;
+			image[pos].g *= mult;
+			image[pos].b *= mult;
+		}
+	}
+}
+
 
 
 //Tint
