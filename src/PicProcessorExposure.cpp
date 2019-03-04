@@ -89,6 +89,11 @@ class ExposurePanel: public PicProcPanel
 			event.Skip();
 		}
 
+		void setPatch(coord p)
+		{
+
+		}
+
 
 	private:
 		wxSlider *ev;
@@ -103,7 +108,41 @@ class ExposurePanel: public PicProcPanel
 PicProcessorExposure::PicProcessorExposure(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
 	//showParams();
+	m_display->Bind(wxEVT_LEFT_DOWN, &PicProcessorExposure::OnLeftDown, this);
 }
+
+PicProcessorExposure::~PicProcessorExposure()
+{
+	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorExposure::OnLeftDown, this);
+	m_display->SetDrawList("");
+}
+
+void PicProcessorExposure::SetPatchCoord(int x, int y)
+{
+	dcList = wxString::Format("cross,%d,%d;",x,y);
+	m_display->SetDrawList(dcList);
+	m_display->Refresh();
+	m_display->Update();
+}
+
+void PicProcessorExposure::OnLeftDown(wxMouseEvent& event)
+{
+	if (m_tree->GetItemState(GetId()) != 1) {
+		event.Skip();
+		return;
+	}
+	if (event.ShiftDown()) {
+		patch = m_display->GetImgCoords();
+	}
+	else {
+		event.Skip();
+		return;
+	}
+	SetPatchCoord(patch.x, patch.y);
+	((ExposurePanel *) toolpanel)->setPatch(patch);
+	event.Skip();
+}
+
 
 void PicProcessorExposure::createPanel(wxSimplebook* parent)
 {
