@@ -181,8 +181,8 @@ void myHistogramPane::render(wxDC&  dc)
 
 //go to histogram coordinates:
 	//if (EVaxis) {
-		dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
-		dc.SetDeviceOrigin (xorigin, h-yorigin-lineheight);
+		dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
+		dc.SetDeviceOrigin (xorigin+3, h-yorigin-lineheight);
 	//}
 	//else {
 	//	dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
@@ -190,7 +190,7 @@ void myHistogramPane::render(wxDC&  dc)
 	//}
 	dc.SetAxisOrientation(true,true);
 
-	//if something I haven't defined yet {
+	//if (something I haven't defined yet) {
 		wxColour boundcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("histogram.bound.color","128")));
 		wxPen origpen = dc.GetPen();
 		wxBrush origbrush = dc.GetBrush();
@@ -260,18 +260,10 @@ void myHistogramPane::render(wxDC&  dc)
 
 	}
 
-
-
 	//marker lines:
 	dc.SetPen(wxPen(cursorcolor));
 	int mlx = dc.DeviceToLogicalX(wxCoord(MouseX));
 	float mlx_ev = hscale * mlx*pow(2.9, 1.0/mlx);
-	
-	//unsigned mly=0;
-	//if (mlx > 0 & mlx < hscale) { 
-	//	mly = wxCoord(frontcolor[mlx].y);
-	//	dc.DrawLine(0,mly,hscale,mly);
-	//}
 
 //return to window coords:
 	dc.SetLogicalScale(1.0, 1.0);
@@ -289,7 +281,11 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetPen(wxPen(cursorcolor));
 	if (inwindow & !pressedDown & mlx > 0 & mlx < hscale) {
 		dc.DrawLine(MouseX,0,MouseX,h);
-		dc.DrawText(wxString::Format("%0.4f",mlf),MouseX, 2);
+		wxString cursorstr = wxString::Format("%0.4f",mlf);
+		if (MouseX < w/2)
+			dc.DrawText(cursorstr,MouseX+1, 2);
+		else 
+			dc.DrawText(cursorstr,MouseX-(dc.GetTextExtent(cursorstr).GetWidth()+1), 2);
 		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2);
 	}
 
@@ -300,83 +296,26 @@ void myHistogramPane::render(wxDC&  dc)
 	wxString str, str1;
 
 	wxString bstr = wxString::Format("%d",hscale);
-	dc.DrawText(bstr,w-dc.GetTextExtent(bstr).GetWidth()-2, (lineheight*0)+2);
+	dc.DrawText(bstr,w-dc.GetTextExtent(bstr).GetWidth()-2, (lineheight*1)+2);
 
 	wxString rstr = (Unbounded) ? "data" : "display"; 
-	dc.DrawText(rstr,w-dc.GetTextExtent(rstr).GetWidth()-2, (lineheight*1)+2);
-
-/*
-	if (inwindow) {
-		if (Unbounded)
-			//str = wxString::Format("x:%d    buckets:%d range:data",mlx,hscale);
-			str = wxString::Format("x:%0.4f    buckets:%d range:data",mlf,hscale);
-		else
-			//str = wxString::Format("x:%d    buckets:%d range:display",mlx,hscale);
-			str = wxString::Format("x:%0.4f    buckets:%d range:display",mlf,hscale);
-		wxSize sz = dc.GetTextExtent(str);
-		dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
-//		dc.DrawText(wxString::Format("r:%d",mlr),w-sz.GetWidth()-3,(lineheight*1)+2);
-//		dc.DrawText(wxString::Format("g:%d",mlg),w-sz.GetWidth()-3,(lineheight*2)+2);
-//		dc.DrawText(wxString::Format("b:%d",mlb),w-sz.GetWidth()-3,(lineheight*3)+2);
-	}
-	else {
-		if (Unbounded)
-			str = wxString::Format("buckets:%d range:data",hscale);
-		else
-			str = wxString::Format("buckets:%d range:display",hscale);
-		wxSize sz = dc.GetTextExtent(str);
-		dc.DrawText(str,w-sz.GetWidth()-3,2);
-	}
-*/
-
-
-	//wxSize sz = dc.GetTextExtent(str);
-	//dc.DrawText(str,w-sz.GetWidth()-3,2);   //h-20);
+	dc.DrawText(rstr,w-dc.GetTextExtent(rstr).GetWidth()-2, (lineheight*2)+2);
 
 
 	if (EVaxis) {
 		for (std::map<float,int>::iterator it=evlist.begin(); it!=evlist.end(); ++it) {
-			dc.DrawText(wxString::Format("%0.1f", it->first),it->second, h-lineheight);
-		}
-	}
-
-/*
-	if (EVaxis) {
-		str1 = wxString::Format("ev0: %0.2f",EV0);
-		wxSize sz1 = dc.GetTextExtent(str1);
-		dc.DrawText(str1,w-sz1.GetWidth()-3,lineheight+4);
-		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
-			wxString e; float fpart, ipart;
-			fpart = modf(ev, &ipart);
-			if (abs(fpart) > 0.0) 
-				e = wxString::Format("%1.1f", abs(ev));
+			wxString evstr;
+			if (it->first == 0.0)
+				evstr = wxString::Format("%0.f", it->first);
 			else
-				e = wxString::Format("%1.0f", abs(ev));
-			int ew = wxSize(dc.GetTextExtent(e)).GetWidth();
-			if (ev < 0.0) e.Prepend("-");
-			if (ev > 0.0) e.Prepend("+");
-			ew = wxSize(dc.GetTextExtent(e)).GetWidth() - ew;
-			dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev)*wscale)-ew))+xorigin,(h-(lineheight-1))-yorigin);
-			//dc.DrawText(e,((int) ((w*EV0*pow(2.0, ev))-ew))+xorigin,(h-(lineheight-1))-yorigin);
+				evstr = wxString::Format("%+0.f", it->first);
+			dc.DrawText(evstr,it->second-dc.GetTextExtent(evstr).GetWidth()/2, h-lineheight);
 		}
 	}
-*/
 
-
-//	if (Unbounded) {
-		//dc.SetPen(wxPen(wxColour(192,192,0),1));
-		//dc.DrawLine(zerobucket, 0, zerobucket, hmax);
-		//dc.SetPen(wxPen(wxColour(0,192,192),1));
-		//dc.DrawLine(onebucket,  0, onebucket,  hmax);
-
-		//wxString bucketstring = wxString::Format("buckets: %d,%d",zerobucket,onebucket);
-		//int bw =  wxSize(dc.GetTextExtent(bucketstring)).GetWidth();
-		//dc.DrawText(bucketstring, w-bw, (lineheight+4)*2);
-//	}
-
-	wxString ws = wxString::Format("scale: %0.2f",wscale);
-	int ww = wxSize(dc.GetTextExtent(ws)).GetWidth();
-	dc.DrawText(ws, w-ww, h-lineheight-1);
+//	wxString ws = wxString::Format("scale: %0.2f",wscale);
+//	int ww = wxSize(dc.GetTextExtent(ws)).GetWidth();
+//	dc.DrawText(ws, w-ww, h-lineheight-1);
 
 	//if (inwindow) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bucket:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
 
