@@ -180,14 +180,14 @@ void myHistogramPane::render(wxDC&  dc)
 
 
 //go to histogram coordinates:
-	//if (EVaxis) {
+	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
 		dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
 		dc.SetDeviceOrigin (xorigin+3, h-yorigin-lineheight);
-	//}
-	//else {
-	//	dc.SetLogicalScale(((double) w / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
-	//	dc.SetDeviceOrigin (xorigin, h-yorigin);
-	//}
+	}
+	else {
+		dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
+		dc.SetDeviceOrigin (xorigin+3, h-yorigin-5);
+	}
 	dc.SetAxisOrientation(true,true);
 
 	//if (something I haven't defined yet) {
@@ -249,7 +249,7 @@ void myHistogramPane::render(wxDC&  dc)
 	float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
 
 	std::map<float,int> evlist;
-	if (EVaxis) {  // && !Unbounded) {
+	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
 		dc.DrawLine(hscale * EV0, 0, hscale * EV0, hmax);
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_LONG_DASH ));
@@ -270,8 +270,8 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetDeviceOrigin (0, 0);
 	dc.SetAxisOrientation(true,false);
 
-	if (mlx < 0) mlx = 0;
-	if (mlx >= hscale) mlx = hscale-1;
+	//if (mlx < 0) mlx = 0;
+	//if (mlx >= hscale) mlx = hscale-1;
 
 	float inc = (dmax - dmin) / (float) hscale;
 	float mlf = dmin + (inc * (float) mlx);
@@ -279,14 +279,14 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetTextBackground(wxColour(255,255,255));
 
 	dc.SetPen(wxPen(cursorcolor));
-	if (inwindow & !pressedDown & mlx > 0 & mlx < hscale) {
+	if (inwindow & !pressedDown) { // & mlx > 0 & mlx < hscale) {
 		dc.DrawLine(MouseX,0,MouseX,h);
 		wxString cursorstr = wxString::Format("%0.4f",mlf);
 		if (MouseX < w/2)
 			dc.DrawText(cursorstr,MouseX+1, 2);
 		else 
 			dc.DrawText(cursorstr,MouseX-(dc.GetTextExtent(cursorstr).GetWidth()+1), 2);
-		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2);
+		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2); //ToDo: property to switch between data/bucket...
 	}
 
 	long mlr = histogram[mlx].r;
@@ -295,14 +295,20 @@ void myHistogramPane::render(wxDC&  dc)
 	//wxString str = wxString::Format("x: %d   hscale=%d",mlx,hscale);
 	wxString str, str1;
 
-	wxString bstr = wxString::Format("%d",hscale);
-	dc.DrawText(bstr,w-dc.GetTextExtent(bstr).GetWidth()-2, (lineheight*1)+2);
+	wxString bstr = wxString::Format("buckets:%d",hscale);
+	wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
+	int strw = std::min(w-dc.GetTextExtent(bstr).GetWidth(),w-dc.GetTextExtent(rstr).GetWidth());
+	bstr.Append(rstr);
+	dc.DrawText(bstr,strw, (lineheight*1)+2);
 
-	wxString rstr = (Unbounded) ? "data" : "display"; 
-	dc.DrawText(rstr,w-dc.GetTextExtent(rstr).GetWidth()-2, (lineheight*2)+2);
+	//dc.DrawText(bstr,w-dc.GetTextExtent(bstr).GetWidth()-2, (lineheight*1)+2);
+	//dc.DrawText(rstr,w-dc.GetTextExtent(rstr).GetWidth()-2, (lineheight*2)+2);
+
+	//dc.DrawText(bstr,strw, (lineheight*1)+2);
+	//dc.DrawText(rstr,strw, (lineheight*2)+2);
 
 
-	if (EVaxis) {
+	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
 		for (std::map<float,int>::iterator it=evlist.begin(); it!=evlist.end(); ++it) {
 			wxString evstr;
 			if (it->first == 0.0)
@@ -317,7 +323,8 @@ void myHistogramPane::render(wxDC&  dc)
 //	int ww = wxSize(dc.GetTextExtent(ws)).GetWidth();
 //	dc.DrawText(ws, w-ww, h-lineheight-1);
 
-	//if (inwindow) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bucket:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
+	if (inwindow) 
+		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bucket:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
 
 }
 
