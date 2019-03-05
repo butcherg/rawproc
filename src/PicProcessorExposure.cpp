@@ -4,6 +4,7 @@
 #include "myRowColumnSizer.h"
 #include "myConfig.h"
 #include "util.h"
+#include "gimage/strutil.h"
 #include "undo.xpm"
 
 #define EXPOSUREENABLE	 7000
@@ -33,11 +34,13 @@ class ExposurePanel: public PicProcPanel
 			
 			patch = new wxStaticText(this, wxID_ANY, "-");
 
+			expmode = EXPOSUREEV;
+
 
 			myRowColumnSizer *m = new myRowColumnSizer(10,3);
 			m->AddItem(enablebox, wxALIGN_LEFT);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
+			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 3);
 			m->NextRow();
 			m->AddItem(evb, wxALIGN_LEFT);
 			m->NextRow();
@@ -45,7 +48,7 @@ class ExposurePanel: public PicProcPanel
 			m->AddItem(val, wxALIGN_LEFT);
 			m->AddItem(btn, wxALIGN_LEFT);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
+			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 3);
 			m->NextRow();
 			m->AddItem(evtgtb, wxALIGN_LEFT);
 			m->NextRow();
@@ -58,6 +61,7 @@ class ExposurePanel: public PicProcPanel
 			SetFocus();
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this);
+			Bind(wxEVT_RADIOBUTTON, &ExposurePanel::OnRadioButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &ExposurePanel::onEnable, this, EXPOSUREENABLE);
@@ -73,11 +77,13 @@ class ExposurePanel: public PicProcPanel
 		{
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
-				q->processPic();
+				//q->processPic();
+				processEV();
 			}
 			else {
 				q->enableProcessing(false);
-				q->processPic();
+				//q->processPic();
+				processEV();
 			}
 		}
 
@@ -95,7 +101,8 @@ class ExposurePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
-			q->processPic();
+			//q->processPic();
+			processEV();
 			event.Skip();
 		}
 
@@ -105,8 +112,29 @@ class ExposurePanel: public PicProcPanel
 			ev->SetValue(50.0+(resetval*10));
 			q->setParams(wxString::Format("%2.2f",resetval));
 			val->SetLabel(wxString::Format("%2.2f", resetval));
-			q->processPic();
+			//q->processPic();
+			processEV();
 			event.Skip();
+		}
+
+		void OnRadioButton(wxCommandEvent& event)
+		{
+			expmode = event.GetId();
+			processEV();
+		}
+
+		void processEV()
+		{
+			switch (expmode) {
+				case EXPOSUREEV:
+					q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
+					q->processPic();
+					break;
+				case EXPOSURETARGETEV:
+					q->setParams(wxString::Format("patch=%d,%d;radius=1.5;ev0=0.18",patx,paty));
+					q->processPic();
+					break;
+			}
 		}
 
 		void setPatch(coord p)
@@ -116,7 +144,9 @@ class ExposurePanel: public PicProcPanel
 
 			patx = p.x;
 			paty = p.y;
-			patch->SetLabel(wxString::Format("patch,%d,%d,%0.1f",patx, paty, patrad));
+			patch->SetLabel(wxString::Format("patch xy: %d,%d",patx, paty));
+
+			if (expmode == EXPOSURETARGETEV) processEV();
 
 			//pb->Enable(true);
 			//if (pb->GetValue() == true)
@@ -126,12 +156,27 @@ class ExposurePanel: public PicProcPanel
 		}
 
 
+		std::map<std::string,std::string> paramMap(std::string params)
+		{
+			std::map<std::string,std::string> p;
+
+			if (params.find("=") == std::string::npos) {
+				p["ev"] = atof(params.c_str());
+			}
+			else {
+				p = parseparams(params);
+			}
+			return p;
+		}
+
+
 	private:
 		wxSlider *ev;
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		wxRadioButton *evb, *evtgtb;
+		int expmode;
 		wxStaticText *patch;
 		unsigned patx, paty;
 		double patrad;
@@ -229,6 +274,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 		}
 		expv = false;
 	}
+
 
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure compensation %2.2f...", ev));

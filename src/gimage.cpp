@@ -2834,7 +2834,7 @@ void gImage::ApplyExposureCompensation(int x, int y, float radius, float destina
 {
 	std::vector<double> patchrgb = CalculatePatchMeans(x, y, radius);
 	float tone = (patchrgb[0] + patchrgb[1] + patchrgb[2]) / 3.0;
-	double mult = 1.0 / (tone/destinationev);
+	double mult = destinationev/tone;
 	
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
