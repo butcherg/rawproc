@@ -30,6 +30,8 @@ class ExposurePanel: public PicProcPanel
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
+			
+			patch = new wxStaticText(this, wxID_ANY, "-");
 
 
 			myRowColumnSizer *m = new myRowColumnSizer(10,3);
@@ -47,6 +49,7 @@ class ExposurePanel: public PicProcPanel
 			m->NextRow();
 			m->AddItem(evtgtb, wxALIGN_LEFT);
 			m->NextRow();
+			m->AddItem(patch, wxALIGN_LEFT);
 			SetSizerAndFit(m);
 			m->Layout();
 
@@ -108,7 +111,18 @@ class ExposurePanel: public PicProcPanel
 
 		void setPatch(coord p)
 		{
+			//parm tool.exposure.patchradius: (float), radius of patch.  Default=1.5
+			patrad = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.patchradius","1.5").c_str());
 
+			patx = p.x;
+			paty = p.y;
+			patch->SetLabel(wxString::Format("patch,%d,%d,%0.1f",patx, paty, patrad));
+
+			//pb->Enable(true);
+			//if (pb->GetValue() == true)
+			//	processWB(WBPATCH);
+			//else
+			//	Refresh();
 		}
 
 
@@ -118,6 +132,9 @@ class ExposurePanel: public PicProcPanel
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		wxRadioButton *evb, *evtgtb;
+		wxStaticText *patch;
+		unsigned patx, paty;
+		double patrad;
 		wxTimer *t;
 
 };
