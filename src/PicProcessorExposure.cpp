@@ -21,7 +21,7 @@ class ExposurePanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
 
-			double initialvalue = atof(params.c_str());
+			//double initialvalue = atof(params.c_str());
 
 			enablebox = new wxCheckBox(this, EXPOSUREENABLE, "exposure:");
 			enablebox->SetValue(true);
@@ -29,8 +29,8 @@ class ExposurePanel: public PicProcPanel
 			evb = new wxRadioButton(this, EXPOSUREEV, "compensation", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			evtgtb = new wxRadioButton(this, EXPOSURETARGETEV, "target patch");
 
-			ev = new wxSlider(this, wxID_ANY, 50.0+(initialvalue*10.0), 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
+			ev = new wxSlider(this, wxID_ANY, 0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
+			val = new wxStaticText(this,wxID_ANY, "0.0", wxDefaultPosition, wxSize(30, -1));
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
 			
@@ -39,7 +39,22 @@ class ExposurePanel: public PicProcPanel
 			radius->SetIncrement(0.5);
 			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
 
-			expmode = EXPOSUREEV;
+
+			std::map<std::string,std::string> p = paramMap(std::string(params));
+			if (p.find("ev") != p.end()) { 
+				expmode = EXPOSUREEV;
+				ev->SetValue(50.0+(atof(p["ev"].c_str())*10.0));
+				val->SetLabel(wxString(p["ev"]));
+			}
+			if (p.find("patch") != p.end()) {
+				expmode = EXPOSURETARGETEV;
+				coord pat;
+				std::vector<std::string> patstr = split(p["patch"],",");
+				pat.x = atoi(patstr[0].c_str());
+				pat.y = atoi(patstr[1].c_str());
+				radius->SetFloatValue(atof(p["radius"].c_str()));
+				ev0->SetFloatValue(atof(p["ev0"].c_str()));
+			}
 
 
 			myRowSizer *m = new myRowSizer();
@@ -73,8 +88,11 @@ class ExposurePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &ExposurePanel::OnRadioButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
+			Bind(myFLOATCTRL_CHANGE, &ExposurePanel::OnFloatChange, this);
 			Bind(wxEVT_CHECKBOX, &ExposurePanel::onEnable, this, EXPOSUREENABLE);
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);
+			
+			processEV();
 		}
 
 		~ExposurePanel()
@@ -101,6 +119,16 @@ class ExposurePanel: public PicProcPanel
 			val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
+		
+		void OnFloatChange(wxCommandEvent& event)
+		{
+			if (expmode == EXPOSURETARGETEV) t->Start(500,wxTIMER_ONE_SHOT);
+		}
+		
+		void OnFloatUpdate(wxCommandEvent& event)
+		{
+			if (expmode == EXPOSURETARGETEV) processEV();
+		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
@@ -109,10 +137,7 @@ class ExposurePanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
-			//q->processPic();
 			processEV();
-			event.Skip();
 		}
 
 		void OnButton(wxCommandEvent& event)
@@ -134,13 +159,15 @@ class ExposurePanel: public PicProcPanel
 
 		void processEV()
 		{
+			float evval;
 			switch (expmode) {
 				case EXPOSUREEV:
-					q->setParams(wxString::Format("%2.2f",(ev->GetValue()-50.0)/10.0));
+					evval = (ev->GetValue()-50.0)/10.0;
+					q->setParams(wxString::Format("%2.2f",evval));
 					q->processPic();
 					break;
 				case EXPOSURETARGETEV:
-					q->setParams(wxString::Format("patch=%d,%d;radius=1.5;ev0=0.18",patx,paty));
+					q->setParams(wxString::Format("patch=%d,%d;radius=%0.1f;ev0=%0.2f",patx,paty, radius->GetFloatValue(), ev0->GetFloatValue()));
 					q->processPic();
 					break;
 			}
@@ -303,7 +330,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 
 		mark();
 		if (expv) {
-			dib->ApplyExposureCompensation(ev, threadcount);
+			if (ev != 0.0) dib->ApplyExposureCompensation(ev, threadcount);
 		}
 		else {
 			dib->ApplyExposureCompensation(x, y, radius, ev, threadcount);
