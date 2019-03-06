@@ -70,10 +70,6 @@
 //Code added in other places will be removed by wxDev-C++
 ////Event Table Start
 BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
-	////Manual Code Start
-	EVT_TREE_SEL_CHANGED(ID_COMMANDTREE,rawprocFrm::CommandTreeSelChanged)
-	////Manual Code End
-
 	EVT_SIZE(rawprocFrm::OnSize)
 	EVT_CLOSE(rawprocFrm::OnClose)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
@@ -119,6 +115,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
 	EVT_TREE_STATE_IMAGE_CLICK(ID_COMMANDTREE, rawprocFrm::CommandTreeStateClick)
+	EVT_TREE_SEL_CHANGED(ID_COMMANDTREE,rawprocFrm::CommandTreeSelChanged)
 	//EVT_TREE_SEL_CHANGING(ID_COMMANDTREE, rawprocFrm::CommandTreeSelChanging)
 	EVT_TREE_ITEM_MENU(ID_COMMANDTREE, rawprocFrm::CommandTreePopup)
 END_EVENT_TABLE()
@@ -1111,7 +1108,7 @@ bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
 	return false;
 }
 
-
+//wxEVT_TREE_STATE_IMAGE_CLICK 
 void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 {
 	SetStatusText("");
@@ -1125,15 +1122,17 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 	event.Skip();
 }
 
-
+//wxEVT_TREE_SEL_CHANGED
 void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 {
 	SetStatusText("");
 	wxTreeItemId item = event.GetItem();
 	if (item.IsOk()) { 
 		if ((PicProcessor *) commandtree->GetItemData(item))
-			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND)
+			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND) {
 				parambook->SetSelection(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
+				pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
+			}
 	}
 	event.Skip();
 }
