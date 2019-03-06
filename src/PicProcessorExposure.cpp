@@ -1,7 +1,8 @@
 #include "PicProcessor.h"
 #include "PicProcessorExposure.h"
 #include "PicProcPanel.h"
-#include "myRowColumnSizer.h"
+#include "myRowSizer.h"
+#include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/strutil.h"
@@ -18,6 +19,7 @@ class ExposurePanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
 
 			double initialvalue = atof(params.c_str());
 
@@ -32,27 +34,34 @@ class ExposurePanel: public PicProcPanel
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
 			
-			patch = new wxStaticText(this, wxID_ANY, "-");
+			patch  = new wxStaticText(this, wxID_ANY, " patch xy: -- ");
+			radius = new myFloatCtrl(this, wxID_ANY, " radius: ", 1.5, 1, wxDefaultPosition, wxSize(40, -1));
+			radius->SetIncrement(0.5);
+			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
 
 			expmode = EXPOSUREEV;
 
 
-			myRowColumnSizer *m = new myRowColumnSizer(10,3);
-			m->AddItem(enablebox, wxALIGN_LEFT);
+			myRowSizer *m = new myRowSizer();
+			m->AddRowItem(enablebox, flags);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 3);
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
-			m->AddItem(evb, wxALIGN_LEFT);
+			m->AddRowItem(evb, flags);
 			m->NextRow();
-			m->AddItem(ev, wxALIGN_LEFT);
-			m->AddItem(val, wxALIGN_LEFT);
-			m->AddItem(btn, wxALIGN_LEFT);
+			m->AddRowItem(ev, flags);
+			m->AddRowItem(val, flags);
+			m->AddRowItem(btn, flags);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 3);
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
-			m->AddItem(evtgtb, wxALIGN_LEFT);
+			m->AddRowItem(evtgtb, flags);
 			m->NextRow();
-			m->AddItem(patch, wxALIGN_LEFT);
+			m->AddRowItem(patch, flags);
+			m->NextRow();
+			m->AddRowItem(radius, flags);
+			m->AddRowItem(ev0, flags);
+			m->End();
 			SetSizerAndFit(m);
 			m->Layout();
 
@@ -144,7 +153,7 @@ class ExposurePanel: public PicProcPanel
 
 			patx = p.x;
 			paty = p.y;
-			patch->SetLabel(wxString::Format("patch xy: %d,%d",patx, paty));
+			patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
 
 			if (expmode == EXPOSURETARGETEV) processEV();
 
@@ -178,6 +187,7 @@ class ExposurePanel: public PicProcPanel
 		wxRadioButton *evb, *evtgtb;
 		int expmode;
 		wxStaticText *patch;
+		myFloatCtrl *radius, *ev0;
 		unsigned patx, paty;
 		double patrad;
 		wxTimer *t;
