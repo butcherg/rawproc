@@ -15,11 +15,12 @@ class myFloatCtrl: public wxControl
 
 		float GetFloatValue();
 		void SetFloatValue(double value);
+		void SetIncrement(double increment);
 		void OnWheel(wxMouseEvent& event);
 		void OnEnter(wxCommandEvent& event);
 
 	private:
-		double v;
+		double v, incr;
 		unsigned p;
 		wxString fmt;
 		wxTextCtrl *textbox;

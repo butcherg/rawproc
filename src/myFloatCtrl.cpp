@@ -8,6 +8,7 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 {
 	v = value;
 	p = precision;
+	incr = 0.0;
 	fmt = "%0.";
 	SetBackgroundColour(parent->GetBackgroundColour());	
 	fmt.Append(wxString::Format("%d",p));
@@ -25,6 +26,7 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float 
 {
 	v = value;
 	p = precision;
+	incr = 0.0;
 	fmt = "%0.";
 	SetBackgroundColour(parent->GetBackgroundColour());	
 	fmt.Append(wxString::Format("%d",p));
@@ -51,13 +53,24 @@ void myFloatCtrl::SetFloatValue(double value)
 	v = value;
 	textbox->SetValue(wxString::Format(fmt,value));
 }
+
+void myFloatCtrl::SetIncrement(double increment)
+{
+ 	incr = increment;
+}
 	
 void myFloatCtrl::OnWheel(wxMouseEvent& event)
 {
+	double inc;
 	v = atof(textbox->GetValue().c_str());
-	double inc = pow(10,-((float)p));
-	if (event.ShiftDown()) inc *= 10.0;
-	if (event.ControlDown()) inc *= 100.0;
+	if (incr > 0.0) {
+		inc = incr;
+	}
+	else {
+		inc = pow(10,-((float)p));
+		if (event.ShiftDown()) inc *= 10.0;
+		if (event.ControlDown()) inc *= 100.0;
+	}
 	if (event.GetWheelRotation() > 0) { 
 		v += inc;
 	}
