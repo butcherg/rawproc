@@ -317,7 +317,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 
 
 	
-	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("exposure...", ev));
+	((wxFrame*) m_display->GetParent())->SetStatusText("exposure...");
 	bool result = true;
 	
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
