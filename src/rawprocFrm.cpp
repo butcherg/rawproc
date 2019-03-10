@@ -121,6 +121,38 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 END_EVENT_TABLE()
 ////Event Table End
 
+class myFileDropTarget: public wxFileDropTarget
+{
+	public:
+		myFileDropTarget(rawprocFrm *frm) {
+			frame = frm;
+		}
+
+		bool OnDropFiles (wxCoord x, wxCoord y, const wxArrayString &filenames)
+		{
+			if (frame) {
+				wxFileName f(filenames[0]);
+				f.MakeAbsolute();
+				wxSetWorkingDirectory (f.GetPath());
+				frame->SetStartPath(f.GetPath());
+				//frame->OpenFile(f.GetFullPath());
+
+				if (ImageContainsRawprocCommand(f.GetFullPath())) {
+					if (wxMessageBox("Image contains rawproc script.  Open the script?", "Contains Script", wxYES_NO | wxCANCEL | wxNO_DEFAULT) == wxYES)
+						frame->OpenFileSource(f.GetFullPath());
+					else	
+						frame->OpenFile(f.GetFullPath());
+				}
+				else frame->OpenFile(f.GetFullPath());
+			}
+		}
+
+	private:
+		rawprocFrm *frame;
+
+};
+
+
 void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
 {
 	//wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
@@ -134,6 +166,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
 			openfilepath = startpath;
+
+	SetDropTarget(new myFileDropTarget(this));
 
 	CreateGUIControls();
 #if defined(_OPENMP)
@@ -1253,6 +1287,17 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 
 
 //Menu Items (keep last in file)
+
+
+/*
+bool rawprocFrm::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
+{
+	wxFileName f(filenames[0]);
+	wxSetWorkingDirectory (f.GetPath());
+	openfilepath = f.GetPath();
+	OpenFile(filenames[0]);
+}
+*/
 
 
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)

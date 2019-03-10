@@ -47,6 +47,7 @@
 #include <wx/filesys.h>
 #include <wx/fs_zip.h>
 #include <wx/generic/statbmpg.h>
+#include <wx/dnd.h>
 
 #include "gimage/gimage.h"
 #include "PicPanel.h"
@@ -54,7 +55,7 @@
 #include "myPropertyDialog.h"
 
 
-class rawprocFrm : public wxFrame
+class rawprocFrm : public wxFrame //, wxFileDropTarget
 {
 	private:
 		DECLARE_EVENT_TABLE();
