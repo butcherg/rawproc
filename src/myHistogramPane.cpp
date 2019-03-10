@@ -253,9 +253,11 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_SOLID ));
 		dc.DrawLine(hscale * EV0, 0, hscale * EV0, hmax);
 		dc.SetPen(wxPen(linecolor, 1, wxPENSTYLE_LONG_DASH ));
+		float prev_evval = EV0;
 		for (float ev=-EVrange; ev<=EVrange; ev+=EVinc) {
-			evlist[ev] = dc.LogicalToDeviceX(hscale*EV0*pow(2.0, ev));
-			dc.DrawLine(hscale * EV0*pow(2.0, ev), 0, hscale * EV0*pow(2.0, ev), hmax);
+			float evval = hscale*EV0*pow(2.0, ev);
+			evlist[ev] = dc.LogicalToDeviceX(evval);
+			dc.DrawLine(evval, 0, evval, hmax);
 		}
 
 	}
