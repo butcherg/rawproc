@@ -91,6 +91,7 @@ class ExposurePanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
 			Bind(myFLOATCTRL_CHANGE, &ExposurePanel::OnFloatChange, this);
+			Bind(myFLOATCTRL_UPDATE, &ExposurePanel::OnFloatUpdate, this);
 			Bind(wxEVT_CHECKBOX, &ExposurePanel::onEnable, this, EXPOSUREENABLE);
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);
 			
