@@ -14,6 +14,7 @@ class GammaPanel: public PicProcPanel
 		GammaPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
 			enablebox = new wxCheckBox(this, GAMMAENABLE, "gamma:");
 			enablebox->SetValue(true);

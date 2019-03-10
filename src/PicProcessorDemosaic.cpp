@@ -135,7 +135,6 @@ class DemosaicPanel: public PicProcPanel
 			m->End();
 			
 			SetSizerAndFit(m);
-			b->Layout();
 			SetFocus();
 			Refresh();
 			Update();

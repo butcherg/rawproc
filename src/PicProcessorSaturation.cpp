@@ -14,6 +14,7 @@ class SaturationPanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			wxGridBagSizer *g = new wxGridBagSizer();
 
 			double initialvalue = atof(params.c_str());
 

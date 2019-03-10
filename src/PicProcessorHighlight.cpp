@@ -14,6 +14,8 @@ class HighlightPanel: public PicProcPanel
 	public:
 		HighlightPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxGridBagSizer *g = new wxGridBagSizer();
+
 			wxArrayString p = split(params,",");
 
 			int hlt = atoi(p[0]);

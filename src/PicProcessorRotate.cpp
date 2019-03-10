@@ -24,6 +24,7 @@ class rotateSlider: public wxControl
 		{
 			SetBackgroundColour(parent->GetBackgroundColour());
 			initval = initialvalue;
+
 			wxBoxSizer *s = new wxBoxSizer(wxHORIZONTAL);
 			rotate = new wxSlider(this, wxID_ANY, initialvalue*10.0, -450, 450, wxDefaultPosition, wxSize(200, -1));
 			s->Add(rotate,  wxALIGN_LEFT | wxALL, 1);
@@ -232,6 +233,8 @@ class RotatePanel: public PicProcPanel
 			SetDoubleBuffered(true);
 			thumb = false;
 			wxSize s = GetSize();
+
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 			
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 			
@@ -336,8 +339,8 @@ class RotatePanel: public PicProcPanel
 
 			preview->SetSize(s);
 
-			g->RecalcSizes();
-			g->Layout();
+			//g->RecalcSizes();
+			//g->Layout();
 			event.Skip();
 			Refresh();
 

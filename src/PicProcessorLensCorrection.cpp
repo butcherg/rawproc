@@ -210,6 +210,8 @@ class LensCorrectionPanel: public PicProcPanel
 		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, wxString metadata): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
+
 			wxArrayString parms = split(params, ";");
 
 			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, "lenscorrection:");

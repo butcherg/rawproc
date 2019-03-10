@@ -16,6 +16,7 @@ class SharpenPanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			wxGridBagSizer *g = new wxGridBagSizer();
 
 			int initialvalue = atoi(params.c_str());
 

@@ -9,6 +9,7 @@ class BlankPanel: public PicProcPanel
 	public:
 		BlankPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 			panel = new wxPanel(this);
 			b->Add(panel, 1, wxALIGN_LEFT, 10);
 			SetSizerAndFit(b);
@@ -16,7 +17,7 @@ class BlankPanel: public PicProcPanel
 
 		~BlankPanel()
 		{
-			panel->~wxPanel();
+			//panel->~wxPanel();
 		}
 
 	private:

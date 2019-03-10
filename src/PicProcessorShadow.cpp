@@ -14,6 +14,7 @@ class ShadowPanel: public PicProcPanel
 	public:
 		ShadowPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxGridBagSizer *g = new wxGridBagSizer();
 			wxArrayString p = split(params,",");
 
 			int shd = atoi(p[0]);

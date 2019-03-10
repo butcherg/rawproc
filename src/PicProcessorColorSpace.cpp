@@ -16,7 +16,8 @@ class ColorspacePanel: public PicProcPanel
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 
-			s = new wxBoxSizer(wxHORIZONTAL); 
+			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
+			wxBoxSizer *s = new wxBoxSizer(wxHORIZONTAL); 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 
@@ -160,7 +161,6 @@ class ColorspacePanel: public PicProcPanel
 
 
 	private:
-		wxBoxSizer *s;
 		wxCheckBox *bpc, *enablebox;
 		wxTextCtrl *edit;
 		wxRadioBox *operselect, *intentselect;

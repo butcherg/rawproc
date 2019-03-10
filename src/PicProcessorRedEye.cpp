@@ -16,6 +16,7 @@ class RedEyePanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			wxGridBagSizer *g = new wxGridBagSizer();
 
 			//std::vector<std::string> p = split(params,",");
 			wxArrayString p = split(params,",");

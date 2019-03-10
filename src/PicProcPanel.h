@@ -34,8 +34,8 @@ class PicProcPanel: public wxScrolledWindow //wxPanel
 
 	protected:
 		PicProcessor *q;
-		wxBoxSizer *b;
-		wxGridBagSizer *g;
+		//wxBoxSizer *b;
+		//wxGridBagSizer *g;
 		wxString p;
 		bool rateAdapt;
 

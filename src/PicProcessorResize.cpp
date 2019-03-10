@@ -18,6 +18,8 @@ class ResizePanel: public PicProcPanel
 		ResizePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
+			wxGridBagSizer *g = new wxGridBagSizer();
+
 			wxArrayString algos;
 			algos.Add("box");
 			algos.Add("bilinear");

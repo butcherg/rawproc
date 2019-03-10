@@ -44,6 +44,7 @@ class WhiteBalancePanel: public PicProcPanel
 			double increment = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.increment","0.001").c_str());
 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
+			wxGridBagSizer *g = new wxGridBagSizer();
 
 			enablebox = new wxCheckBox(this, WBENABLE, "white balance:");
 			enablebox->SetValue(true);

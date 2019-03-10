@@ -20,6 +20,8 @@ class GrayPanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
+			wxGridBagSizer *g = new wxGridBagSizer();
+
 			wxArrayString p = split(params,",");
 
 			rd = atof(p[0]);
