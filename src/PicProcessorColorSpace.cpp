@@ -99,10 +99,8 @@ class ColorspacePanel: public PicProcPanel
 		void selectProfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			if (myConfig::getConfig().exists("cms.profilepath"))
-				pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
-			else
-				pname.AssignDir(((PicProcessorColorSpace *) q)->getOpenFilePath());
+			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath",((PicProcessorColorSpace *) q)->getOpenFilePath().ToStdString())));
+
 #ifdef WIN32
 			pname.SetVolume(pname.GetVolume().MakeUpper());
 #endif

@@ -645,11 +645,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 	wxFileName profilepath;
 	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
-	if (myConfig::getConfig().exists("cms.profilepath"))
-		profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
-	else
-		profilepath.AssignDir(openfilepath);
-
+	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath",openfilepath.ToStdString())));
 
 	if (fif != FILETYPE_UNKNOWN) {
 
@@ -854,11 +850,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			fif = gImage::getFileType(ofilename.c_str());
 
 			wxFileName profilepath;
-			if (myConfig::getConfig().exists("cms.profilepath"))
-				profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
-			else
-				profilepath.AssignDir(openfilepath);
-
+			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath",openfilepath.ToStdString())));
 
 			if (fif == FILETYPE_RAW) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
