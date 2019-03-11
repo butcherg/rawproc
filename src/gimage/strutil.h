@@ -15,6 +15,7 @@ bool file_exists(const std::string& filename);
 
 std::string getAppConfigFilePath();
 std::string getCwdConfigFilePath();
+std::string getCwd();
 
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 std::vector<std::string> split(std::string s, std::string delim);

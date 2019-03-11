@@ -1244,7 +1244,10 @@ int main (int argc, char **argv)
 		}
 	}
 	
-	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
+	if (myConfig::getConfig().exists("cms.profilepath"))
+		gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValue("cms.profilepath")));
+	else
+		gImage::setProfilePath(getCwd());
 
 	#ifdef USE_DCRAW
 	gImage::setdcrawPath(filepath_normalize(myConfig::getConfig().getValueOrDefault("input.raw.dcraw.path","dcraw")));

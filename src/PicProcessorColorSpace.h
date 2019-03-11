@@ -10,6 +10,12 @@ class PicProcessorColorSpace: public PicProcessor
 		PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
 		bool processPic(bool processnext=true);
+		void setOpenFilePath(wxString path);
+		wxString getOpenFilePath();
+
+
+	private:
+		wxString openfilepath;
 };
 
 #endif

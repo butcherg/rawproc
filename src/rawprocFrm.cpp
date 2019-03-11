@@ -623,6 +623,11 @@ wxString rawprocFrm::AssembleCommand()
 	return cmd;
 }
 
+wxString rawprocFrm::getOpenFilePath()
+{
+	return openfilepath;
+}
+
 void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 {
 #ifdef USE_DCRAW
@@ -640,7 +645,10 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 	wxFileName profilepath;
 	//parm cms.profilepath: Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)
-	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+	if (myConfig::getConfig().exists("cms.profilepath"))
+		profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+	else
+		profilepath.AssignDir(openfilepath);
 
 
 	if (fif != FILETYPE_UNKNOWN) {
@@ -846,7 +854,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			fif = gImage::getFileType(ofilename.c_str());
 
 			wxFileName profilepath;
-			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+			if (myConfig::getConfig().exists("cms.profilepath"))
+				profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+			else
+				profilepath.AssignDir(openfilepath);
 
 
 			if (fif == FILETYPE_RAW) {
@@ -1796,6 +1807,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
+		p->setOpenFilePath(openfilepath);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {

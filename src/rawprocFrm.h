@@ -194,6 +194,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void SetBackground();
 	void OnSize(wxSizeEvent& event);
 	void CharEvent(wxKeyEvent& event);
+	wxString getOpenFilePath();
 		
 	private:
 		void OnClose(wxCloseEvent& event);

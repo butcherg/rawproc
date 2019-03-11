@@ -99,7 +99,10 @@ class ColorspacePanel: public PicProcPanel
 		void selectProfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
+			if (myConfig::getConfig().exists("cms.profilepath"))
+				pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str()));
+			else
+				pname.AssignDir(((PicProcessorColorSpace *) q)->getOpenFilePath());
 #ifdef WIN32
 			pname.SetVolume(pname.GetVolume().MakeUpper());
 #endif
@@ -179,6 +182,16 @@ void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
 	if (getPreviousPicProcessor()->getProcessedPic().getProfile() == NULL) ((ColorspacePanel *) toolpanel)->EnableConvert(false);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorColorSpace::setOpenFilePath(wxString path)
+{
+	openfilepath = path;
+}
+
+wxString PicProcessorColorSpace::getOpenFilePath()
+{
+	return openfilepath;
 }
 
 bool PicProcessorColorSpace::processPic(bool processnext) 
