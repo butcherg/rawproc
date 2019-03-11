@@ -144,7 +144,9 @@ class myFileDropTarget: public wxFileDropTarget
 						frame->OpenFile(f.GetFullPath());
 				}
 				else frame->OpenFile(f.GetFullPath());
+				return true;
 			}
+			return false;
 		}
 
 	private:
