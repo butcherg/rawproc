@@ -173,7 +173,7 @@ class gImage
 		//basic color/tone operations:
 		void ApplySaturate(double saturate, int threadcount=0);
 		void ApplyExposureCompensation(double ev, int threadcount=0);
-		void ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount);
+		float ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount);
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, int threadcount=0);

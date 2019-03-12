@@ -38,6 +38,7 @@ class ExposurePanel: public PicProcPanel
 			radius = new myFloatCtrl(this, wxID_ANY, " radius: ", 1.5, 1, wxDefaultPosition, wxSize(40, -1));
 			radius->SetIncrement(1.0);
 			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
+			stops  = new wxStaticText(this, wxID_ANY, "stops: --");
 
 			std::map<std::string,std::string> p = paramMap(std::string(params));
 
@@ -75,6 +76,7 @@ class ExposurePanel: public PicProcPanel
 			m->AddRowItem(evtgtb, flags);
 			m->NextRow();
 			m->AddRowItem(patch, flags);
+			m->AddRowItem(stops, flags);
 			m->NextRow();
 			m->AddRowItem(radius, flags);
 			m->AddRowItem(ev0, flags);
@@ -190,11 +192,17 @@ class ExposurePanel: public PicProcPanel
 			patx = p.x;
 			paty = p.y;
 			patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+			GetSizer()->Layout();
 
 			if (expmode == EXPOSURETARGETEV) processEV();
 
 		}
 
+		void setStops(float s)
+		{
+			stops->SetLabel(wxString::Format("stops: %0.1f",s));
+			GetSizer()->Layout();
+		}
 
 		std::map<std::string,std::string> paramMap(std::string params)
 		{
@@ -217,7 +225,7 @@ class ExposurePanel: public PicProcPanel
 		wxCheckBox *enablebox;
 		wxRadioButton *evb, *evtgtb;
 		int expmode;
-		wxStaticText *patch;
+		wxStaticText *patch, *stops;
 		myFloatCtrl *radius, *ev0;
 		unsigned patx, paty;
 		double patrad;
@@ -339,7 +347,8 @@ bool PicProcessorExposure::processPic(bool processnext)
 		}
 		else {
 			m_tree->SetItemText(id, "exposure:patch");
-			dib->ApplyExposureCompensation(x, y, radius, ev, threadcount);
+			float stops = dib->ApplyExposureCompensation(x, y, radius, ev, threadcount);
+			((ExposurePanel *) toolpanel)->setStops(stops);
 		}
 		wxString d = duration();
 

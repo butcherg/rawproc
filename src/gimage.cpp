@@ -2830,7 +2830,7 @@ void gImage::ApplyExposureCompensation(double ev, int threadcount)
 //Multiplies each R, G, and B value of each pixel by a multiplier that will shift the patch to the destination ev
 //
 
-void gImage::ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount)
+float gImage::ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount)
 {
 	std::vector<double> patchrgb = CalculatePatchMeans(x, y, radius);
 	float tone = (patchrgb[0] + patchrgb[1] + patchrgb[2]) / 3.0;
@@ -2845,6 +2845,7 @@ void gImage::ApplyExposureCompensation(int x, int y, float radius, float destina
 			image[pos].b *= mult;
 		}
 	}
+	return sqrt(mult);
 }
 
 
