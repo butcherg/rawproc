@@ -1,4 +1,6 @@
 #include "myIntegerCtrl.h"
+#include "myConfig.h"
+#include "util.h"
 
 wxDEFINE_EVENT(myINTEGERCTRL_UPDATE, wxCommandEvent);
 wxDEFINE_EVENT(myINTEGERCTRL_CHANGE, wxCommandEvent);
@@ -15,6 +17,9 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, wxString label, in
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
 	b->Add(textbox,0,wxALL,0);
+	//parm app.integerctrl.backgroundcolor: Specifies the integer control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,192,255
+	wxColour tcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("app.integerctrl.backgroundcolor","192,192,255")));  
+	textbox->SetBackgroundColour(tcolor);
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
@@ -30,6 +35,8 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int low
 	wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	b->Add(textbox,0,wxALL,0);
+	wxColour tcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("app.integerctrl.backgroundcolor","192,192,255")));  
+	textbox->SetBackgroundColour(tcolor);
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);

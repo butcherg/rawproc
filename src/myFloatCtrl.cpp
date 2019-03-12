@@ -1,4 +1,6 @@
 #include "myFloatCtrl.h"
+#include "myConfig.h"
+#include "util.h"
 
 wxDEFINE_EVENT(myFLOATCTRL_UPDATE, wxCommandEvent);
 wxDEFINE_EVENT(myFLOATCTRL_CHANGE, wxCommandEvent);
@@ -16,11 +18,14 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 	wxBoxSizer *b = new wxBoxSizer(wxVERTICAL);
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	b->Add(textbox,0,wxALL,0);
-	//textbox->SetBackgroundColour(wxColour(0,255,255));
+	//parm app.floatctrl.backgroundcolor: Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192
+	wxColour tcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("app.floatctrl.backgroundcolor","192,255,192")));  
+	textbox->SetBackgroundColour(tcolor);
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
 }
+
 
 myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float value, unsigned precision, const wxPoint &pos, const wxSize &size, bool labelleft): wxControl(parent, id, pos, size, wxBORDER_NONE)
 {
@@ -36,7 +41,8 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float 
 	textbox = new wxTextCtrl(this, wxID_ANY, wxString::Format(fmt,value), pos, size, wxTE_PROCESS_ENTER);
 	if (!labelleft) b->Add(new wxStaticText(this, wxID_ANY, label),0,wxALL|wxALIGN_CENTER_VERTICAL,0);
 	b->Add(textbox,0,wxALL,0);
-	//textbox->SetBackgroundColour(wxColour(0,255,255));
+	wxColour tcolor = wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("app.floatctrl.backgroundcolor","192,255,192")));
+	textbox->SetBackgroundColour(tcolor);
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
