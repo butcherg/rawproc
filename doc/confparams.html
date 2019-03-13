@@ -1,6 +1,8 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
+<li><b>app.floatctrl.backgroundcolor</b>:  Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192</li>
+<li><b>app.integerctrl.backgroundcolor</b>:  Specifies the integer control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,192,255</li>
 <li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
 <li><b>app.parameters.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw lines in the parameter pane. Some tools override this, look for "linecolor" in the Properties filter. Default=0</li>
@@ -88,6 +90,7 @@
 <li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
 <li><a name="tool.denoise"><b>tool.denoise.threshold</b>:  Defines the initial value of the threshold for wavelet denoise.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0</li>
+<li><a name="tool.exposure"><b>tool.exposure.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
 <li><a name="tool.gamma"><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
 <li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
