@@ -31,6 +31,8 @@ class AddDialog: public wxDialog
 			ct->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 10);
 			sz->Add(ct, 0, wxALL, 10);
 			SetSizerAndFit(sz);
+
+			Bind(wxEVT_TEXT_ENTER, &AddDialog::OnTextEnter, this);
 		}
 		
 		~AddDialog()
@@ -49,6 +51,10 @@ class AddDialog: public wxDialog
 			return value->GetValue();
 		}
 		
+		void OnTextEnter(wxCommandEvent& event)
+		{
+			EndModal(wxID_OK);
+		}
 		
 		
 	private:
@@ -240,11 +246,13 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 void PropertyDialog::DelProp(wxCommandEvent& event)
 {
 	wxPGProperty* p = pg->GetSelectedProperty();
-	wxString name = p->GetName();
-	int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
-	if (answer == wxYES) {
-		pg->DeleteProperty(p);
-		myConfig::getConfig().deleteValue((const char  *) name.mb_str());
-		if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
+	if (p) {
+		wxString name = p->GetName();
+		int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
+		if (answer == wxYES) {
+			pg->DeleteProperty(p);
+			myConfig::getConfig().deleteValue((const char  *) name.mb_str());
+			if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
+		}
 	}
 }
