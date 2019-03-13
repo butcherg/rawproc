@@ -1,6 +1,7 @@
 #include "PicProcessorTone.h"
 #include "PicProcPanel.h"
 #include "myRowColumnSizer.h"
+#include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
@@ -32,7 +33,8 @@ class TonePanel: public PicProcPanel
 			hybloggam = new wxRadioButton(this, TONELOGGAM, "loggamma");
 			filmic = new wxRadioButton(this, TONEFILMIC, "filmic");
 
-			edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			//edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			gamma = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 
 			wxArrayString str;
 			str.Add("channel");
@@ -43,12 +45,12 @@ class TonePanel: public PicProcPanel
 			if (p[0] == "gamma") {
 				gamb->SetValue(true);
 				if (p.GetCount() >=2) 
-					edit->SetValue(p[1]);
+					gamma->SetFloatValue(atof(p[1].c_str()));
 				else
-					edit->SetValue("1.0");
+					gamma->SetFloatValue(1.0);
 			}
 			else {
-				edit->SetValue("1.0");
+				gamma->SetFloatValue(1.0);
 			}
 			if (p[0] == "reinhard") {
 				reinb->SetValue(true);
@@ -77,7 +79,7 @@ class TonePanel: public PicProcPanel
 			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
 			m->NextRow();
 			m->AddItem(gamb, wxALIGN_LEFT);
-			m->AddItem(edit, wxALIGN_LEFT);
+			m->AddItem(gamma, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(reinb, wxALIGN_LEFT);
 			m->AddItem(reinop, wxALIGN_LEFT);
@@ -91,10 +93,15 @@ class TonePanel: public PicProcPanel
 			SetSizerAndFit(m);
 			m->Layout();
 			SetFocus();
+			t = new wxTimer(this);
+
+			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
+			Bind(myFLOATCTRL_CHANGE, &TonePanel::gammaParamChanged, this);
+			Bind(myFLOATCTRL_UPDATE, &TonePanel::gammaParamUpdated, this);
 
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
-			Bind(wxEVT_TEXT_ENTER,&TonePanel::gammaParamChanged, this, TONEID);
+			//Bind(wxEVT_TEXT_ENTER,&TonePanel::gammaParamChanged, this, TONEID);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
 			Refresh();
 			Update();
@@ -102,7 +109,7 @@ class TonePanel: public PicProcPanel
 
 		~TonePanel()
 		{
-			
+			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -136,7 +143,7 @@ class TonePanel: public PicProcPanel
 		{
 			switch (src) {
 				case TONEGAMMA:
-					q->setParams(wxString::Format("gamma,%0.2f",atof(edit->GetLineText(0))));
+					q->setParams(wxString::Format("gamma,%0.2f",gamma->GetFloatValue()));
 					break;
 				case TONEREINHARD:
 					q->setParams(wxString::Format("reinhard,%s",reinop->GetString(reinop->GetSelection())));
@@ -158,15 +165,22 @@ class TonePanel: public PicProcPanel
 
 		void gammaParamChanged(wxCommandEvent& event)
 		{
-			if (gamb->GetValue()) {
-				q->setParams(wxString::Format("gamma,%0.2f",atof(edit->GetLineText(0))));
-				q->processPic();
-			}
-			event.Skip();
+			if (gamb->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
+		}
+		
+		void gammaParamUpdated(wxCommandEvent& event)
+		{
+			if (gamb->GetValue()) processTone(TONEGAMMA);
+		}
+		
+		void OnTimer(wxTimerEvent& event)
+		{
+			processTone(TONEGAMMA);
 		}
 
 	private:
-		wxTextCtrl *edit;
+		wxTimer *t;
+		myFloatCtrl *gamma;
 		wxCheckBox *enablebox;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggam, *filmic;
 		wxChoice *reinop;
