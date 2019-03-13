@@ -452,7 +452,6 @@ void PicPanel::OnPaint(wxPaintEvent & event)
 
 void PicPanel::OnMouseEnter(wxMouseEvent& event)
 {
-	SetFocus();
 	thumbdragging = dragging = false;
 	((wxFrame *) GetParent())->SetStatusText("");
 }
@@ -465,6 +464,7 @@ void PicPanel::OnMouseLeave(wxMouseEvent& event)
 
 void PicPanel::OnLeftDown(wxMouseEvent& event)
 {
+	SetFocus();
 	int mx = event.m_x;
 	int my = event.m_y;
 

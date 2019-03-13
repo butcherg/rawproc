@@ -430,6 +430,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
  
 void myHistogramPane::mouseDown(wxMouseEvent& event) 
 {
+	SetFocus();
 	pressedDown = true;
 	MouseX = event.m_x;
 	MouseY = event.m_y;
@@ -478,7 +479,6 @@ void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 void myHistogramPane::mouseEnterWindow(wxMouseEvent& event) 
 {
 	inwindow = true;
-	SetFocus();
 	Refresh();
 	
 }

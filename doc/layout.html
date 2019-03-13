@@ -64,9 +64,24 @@
 
 	<li><b>Parameters:</b> The bottom-left-hand window, contains the tools for changing the tool 
 	selected in the Commands pane.  These are mostly sliders that you can manipulate with either
-	a mouse or a touchscreen implement (stylus, or your finger).  Most tools have a reset button.  
+	a mouse or a touchscreen implement (stylus, or your finger).  Most tools have a reset button.<br><br>
+	
+	Tool panes that have integer or float parameters use a special text entry widget that responds to mousewheel
+	input.  Integer widgets have a blue background; float widges have a green background.  The number in either 
+	can be modified with the keyboard; click in the widget to set the focus and show an edit cursor.  Press Enter
+	after changing the number to suit.<br><br>  
+	
+	Mousewheel rotation will increment/decrement the number, up to increment,
+	down to decrement.  The increment for integers is 1, for floats it's the smallest number in the precision. The 
+	increment can be changed by holding the Shift or Control keys while rotating the wheel; Shift multiplies the 
+	increment x10, Control multiplies it by 100.<br><br>
+	
+	The blue/green background can be changed with the app.integerctrl.backgroundcolor and 
+	app.floatctrl.backgroundcolor properties.
 	</li><br>
 </ol>
+
+<p>Keyboard commands won't route to a particular pane until you click the mouse somewhere in the pane.</p>
 
 <p>You can drag the Commands and Parameters windows from their initial positions and dock them to various sides of the 
 rawproc window, or you can let them float like independent windows.  This is particularly useful for the crop and 
