@@ -23,17 +23,15 @@ class GammaPanel: public PicProcPanel
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			b->AddSpacer(10);
 
-			//edit = new wxTextCtrl(this, GAMMAID, p, wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			gamma = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 
-			//b->Add(edit, flags);
 			b->Add(gamma, flags);
 			SetSizerAndFit(b);
 			b->Layout();
 			SetFocus();
 			t = new wxTimer(this);
 
-			//Bind(wxEVT_TEXT_ENTER,&GammaPanel::paramChanged, this, GAMMAID);
+			Bind(wxEVT_TIMER, &GammaPanel::OnTimer, this);
 			Bind(myFLOATCTRL_CHANGE, &GammaPanel::paramChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &GammaPanel::paramUpdated, this);
 			Bind(wxEVT_CHECKBOX, &GammaPanel::onEnable, this, GAMMAENABLE);
@@ -60,19 +58,24 @@ class GammaPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
+			q->setParams(wxString::Format("%0.2f", gamma->GetFloatValue()));
 			t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void paramUpdated(wxCommandEvent& event)
 		{
-			//q->setParams(edit->GetLineText(0));
 			q->setParams(wxString::Format("%0.2f", gamma->GetFloatValue()));
+			q->processPic();
+			Refresh();
+		}
+		
+		void OnTimer(wxTimerEvent& event)
+		{
 			q->processPic();
 			Refresh();
 		}
 
 	private:
-		//wxTextCtrl *edit;
 		wxCheckBox *enablebox;
 		myFloatCtrl *gamma;
 		wxTimer *t;
