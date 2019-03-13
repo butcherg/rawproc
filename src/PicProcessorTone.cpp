@@ -33,7 +33,6 @@ class TonePanel: public PicProcPanel
 			hybloggam = new wxRadioButton(this, TONELOGGAM, "loggamma");
 			filmic = new wxRadioButton(this, TONEFILMIC, "filmic");
 
-			//edit = new wxTextCtrl(this, TONEID, p, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			gamma = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 
 			wxArrayString str;
@@ -98,10 +97,8 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
 			Bind(myFLOATCTRL_CHANGE, &TonePanel::gammaParamChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &TonePanel::gammaParamUpdated, this);
-
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
-			//Bind(wxEVT_TEXT_ENTER,&TonePanel::gammaParamChanged, this, TONEID);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
 			Refresh();
 			Update();
