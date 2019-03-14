@@ -189,6 +189,22 @@ then
 fi
 AM_CONDITIONAL(LIBRTPROCESS, test x$enable_librtprocess = xyes)
 
+#OpenColorIO:
+AC_ARG_ENABLE([ocio],
+        AS_HELP_STRING([--enable-ocio], [enables ocio, which contains colorspace managment tools.])
+)
+if test "$enable_ocio" == "yes"
+then
+	PKG_CHECK_MODULES([OCIO],[OpenColorIO], [
+		CPPFLAGS="$OCIO_CFLAGS $CPPFLAGS"
+		LIBS="$OCIO_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
+	CXXFLAGS="$CXXFLAGS -DUSE_OCIO"	
+fi
+AM_CONDITIONAL(OCIO, test x$enable_ocio = xyes)
+
 #old LibRaw dcraw params, pre 0.18.7:
 AC_ARG_ENABLE([old-libraw],
         AS_HELP_STRING([--enable-old-libraw], [enables old LibRaw demosaic parameters.])
