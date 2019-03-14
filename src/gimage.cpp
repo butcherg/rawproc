@@ -3562,7 +3562,11 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	if (sizeof(PIXTYPE) == 8) format = TYPE_RGB_DBL;
 
 	cmsHPROFILE gImgProf = cmsOpenProfileFromMem(profile, profile_length);
-	cmsHPROFILE hImgProf = myCmsOpenProfileFromFile(iccfile);
+	cmsHPROFILE hImgProf;
+	if (std::count(iccfile.begin(), iccfile.end(), ',') == 8)
+		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
+	else
+		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	
 	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
 	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
@@ -3594,7 +3598,11 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 
 GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 {
-	cmsHPROFILE hImgProf = myCmsOpenProfileFromFile(iccfile);
+	cmsHPROFILE hImgProf;
+	if (std::count(iccfile.begin(), iccfile.end(), ',') == 8)
+		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
+	else
+		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	if (hImgProf) {
 		char * prof; cmsUInt32Number proflen;	
 		gImage::makeICCProfile(hImgProf, prof, proflen);

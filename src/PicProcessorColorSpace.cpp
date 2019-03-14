@@ -199,6 +199,14 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	GIMAGE_ERROR ret;
 	
 	wxArrayString cp = split(getParams(),",");
+	if (cp.Count() >= 8) {
+		for (int i=0; i<8; i++) {
+			cp[0].Append(wxString::Format(",%s",cp[1]));
+			cp.RemoveAt(1);
+		}
+		wxMessageBox(cp[0]);
+	}
+
 	wxString intentstr;
 	bool bpc = false;
 	if (cp.Count() >=3) intentstr = cp[2];
@@ -292,6 +300,34 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			}
 	
 		}
+
+		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
+			if (cp[1] == "convert") {
+				if (dib->ApplyColorspace(cp[0].ToStdString(),intent, bpc, threadcount) != GIMAGE_OK) {
+					wxMessageBox("ColorSpace convert failed.");
+					result = false;
+				}
+				else m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
+				wxString d = duration();
+
+				if (result) 
+					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+						log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+			}
+			else if (cp[1] == "assign") {
+				if (dib->AssignColorspace(cp[0].ToStdString()) != GIMAGE_OK) {
+					wxMessageBox("ColorSpace assign failed.");
+					result = false;
+				}
+				else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
+				wxString d = duration();
+
+				if (result) 
+					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+						log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+			}
+		}
+
 		else if (cp[0] != "(none)") {
 			wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
 		}
