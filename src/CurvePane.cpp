@@ -2,6 +2,7 @@
 
 #include <wx/dnd.h> 
 #include <wx/dcbuffer.h> 
+#include <wx/clipbrd.h>
 #include <string>
 
 #include "util.h"
@@ -10,6 +11,7 @@
 wxDEFINE_EVENT(myCURVE_UPDATE, wxCommandEvent);
 wxDEFINE_EVENT(myCURVE_CHANGE, wxCommandEvent);
 
+/*
 BEGIN_EVENT_TABLE(CurvePane, wxPanel)
  
 // catch paint events
@@ -26,6 +28,7 @@ EVT_CHAR(CurvePane::keyPressed)
 EVT_MOUSEWHEEL(CurvePane::mouseWheelMoved)
  
 END_EVENT_TABLE()
+*/
 
 CurvePane::CurvePane(wxWindow* parent, wxString controlpoints) :
 wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
@@ -57,6 +60,19 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
 	c.clampto(0.0,255.0);
+
+	Bind(wxEVT_MOTION, &CurvePane::mouseMoved, this);
+	Bind(wxEVT_LEFT_DOWN, &CurvePane::mouseLeftDown, this);
+	//EVT_RIGHT_DOWN(CurvePane::mouseRightDown, this);
+	Bind(wxEVT_LEFT_DCLICK, &CurvePane::mouseDclick, this);
+	Bind(wxEVT_LEFT_UP, &CurvePane::mouseReleased, this);
+	Bind(wxEVT_LEAVE_WINDOW, &CurvePane::mouseReleased, this);
+	Bind(wxEVT_PAINT, &CurvePane::paintEvent, this);
+	Bind(wxEVT_SIZE, &CurvePane::OnSize, this);
+	//Bind(wxEVT_KEY_DOWN, &CurvePane::keyPressed, this);
+	Bind(wxEVT_CHAR, &CurvePane::keyPressed, this);
+	Bind(wxEVT_MOUSEWHEEL, &CurvePane::mouseWheelMoved, this);
+
 	paintNow();
 
 }
@@ -128,6 +144,7 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 
 void CurvePane::mouseLeftDown(wxMouseEvent& event)
 {
+	SetFocus();
 	int m=10;
 	int w, h;
 	double x, y;
@@ -236,16 +253,29 @@ void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 
 void CurvePane::keyPressed(wxKeyEvent &event)
 {
+	wxString curvedata;
+	wxCommandEvent e(myCURVE_UPDATE);
 	//wxMessageBox(wxString::Format("%d",event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
 		case 127:  //delete
 		case 8: //Backspace
 			c.deletepoint(selectedCP.x, selectedCP.y);
-			Refresh();
-			wxCommandEvent e(myCURVE_UPDATE);
+			paintNow();
+			
 			e.SetEventObject(this);
 			e.SetString("update");
 			ProcessWindowEvent(e);
+			break;
+		case 67: // c - with Ctrl, copy curve Y to clipboard
+			if (!event.ControlDown()) break;
+			curvedata = getYPoints();
+			curvedata.Append("\n");
+			if (wxTheClipboard->Open())
+			{
+				wxTheClipboard->SetData( new wxTextDataObject(curvedata) );
+				wxTheClipboard->Close();
+			}
+			//((wxFrame *) GetParent())->SetStatusText("curve Y data copied to clibboard");
 			break;
 	}
 	event.Skip();

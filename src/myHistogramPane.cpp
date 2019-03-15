@@ -430,6 +430,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			Refresh();
 			break;
 		case 67: // c - with Ctrl, copy 256-scale histogram to clipboard
+			if (!event.ControlDown()) break;
 			wxString hist;
 			hist.Append(wxString::Format("red:%d", (int) histogram[0].r));
 			for (int i = 1; i< histogram.size(); i++) 
@@ -448,6 +449,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				wxTheClipboard->SetData( new wxTextDataObject(hist) );
 				wxTheClipboard->Close();
 			}
+			((wxFrame *) GetParent())->SetStatusText("histogram data copied to clibboard");
 			break;
 	}
 

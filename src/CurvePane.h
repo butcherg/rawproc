@@ -47,7 +47,7 @@ public:
      void keyReleased(wxKeyEvent& event);
      */
  
-    DECLARE_EVENT_TABLE()
+   // DECLARE_EVENT_TABLE()
 
 private:
 	vector< vector<int> > data;
