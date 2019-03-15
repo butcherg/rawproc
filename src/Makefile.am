@@ -16,6 +16,10 @@ if LENSFUN
 rawproc_SOURCES += PicProcessorLensCorrection.cpp PicProcessorLensCorrection.h
 endif
 
+if OCIO
+rawproc_SOURCES += PicProcessorOCIO.cpp PicProcessorOCIO.h
+endif
+
 rawproc_LDADD = @WX_LIBS@
 
 
