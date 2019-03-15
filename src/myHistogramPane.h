@@ -55,7 +55,7 @@ private:
 	int rlen, glen, blen;
 
 	int zerobucket, onebucket;
-	bool EVaxis, Unbounded;
+	bool EVaxis, Unbounded, TextVisible, FloatCursor;
 	float EV0, dmin, dmax;
 
 	GIMAGE_CHANNEL display_channels;

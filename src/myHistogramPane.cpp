@@ -23,6 +23,8 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	ord = 1;
 	EVaxis = false;
 	Unbounded = false;
+	TextVisible = true;
+	FloatCursor = true;
 	db = NULL;
 	
 	r = NULL; g = NULL; b = NULL;
@@ -283,7 +285,11 @@ void myHistogramPane::render(wxDC&  dc)
 	dc.SetPen(wxPen(cursorcolor));
 	if (inwindow & !pressedDown) { // & mlx > 0 & mlx < hscale) {
 		dc.DrawLine(MouseX,0,MouseX,h);
-		wxString cursorstr = wxString::Format("%0.4f",mlf);
+		wxString cursorstr;
+		if (FloatCursor)
+			cursorstr = wxString::Format("%0.4f",mlf);
+		else
+			cursorstr = wxString::Format("%d",mlx);
 		if (MouseX < w/2)
 			dc.DrawText(cursorstr,MouseX+1, 2);
 		else 
@@ -297,11 +303,13 @@ void myHistogramPane::render(wxDC&  dc)
 	//wxString str = wxString::Format("x: %d   hscale=%d",mlx,hscale);
 	wxString str, str1;
 
-	wxString bstr = wxString::Format("buckets:%d",hscale);
-	wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
-	int strw = std::min(w-dc.GetTextExtent(bstr).GetWidth(),w-dc.GetTextExtent(rstr).GetWidth());
-	bstr.Append(rstr);
-	dc.DrawText(bstr,strw, (lineheight*1)+2);
+	if (TextVisible) {
+		wxString bstr = wxString::Format("buckets:%d",hscale);
+		wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
+		int strw = std::min(w-dc.GetTextExtent(bstr).GetWidth(),w-dc.GetTextExtent(rstr).GetWidth());
+		bstr.Append(rstr);
+		dc.DrawText(bstr,strw, (lineheight*1)+2);
+	}
 
 	//dc.DrawText(bstr,w-dc.GetTextExtent(bstr).GetWidth()-2, (lineheight*1)+2);
 	//dc.DrawText(rstr,w-dc.GetTextExtent(rstr).GetWidth()-2, (lineheight*2)+2);
@@ -373,33 +381,53 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			else
 				Unbounded = true;
 			RecalcHistogram();
+			Refresh();
 			break;
 		case 116: //T
-		case 84: //t
+		case 82: //r - reset
 			wscale = 1.0;
 			xorigin = 0;
 			yorigin = 0;
+			Refresh();
 			break;
 		case WXK_SPACE : // s?
 			if (ord == 1) ord = 2;
 			else if(ord == 2) ord = 3;
 			else if(ord == 3) ord = 1;
+			Refresh();
 			break;
-		case 82: //r - pan right
+		case 316: //-> - pan right
 			if (event.ShiftDown()) xorigin -= 10;
 			else if (event.ControlDown()) xorigin -= 100;
 			else xorigin -= 1;
+			Refresh();
+			break;
+		case 84: //t - toggle text labels
+			if (TextVisible)
+				TextVisible = false;
+			else
+				TextVisible = true;
+			Refresh();
 			break;
 		case 69: //e - toggle EV stop lines
 			if (EVaxis)
 				EVaxis = false;
 			else
 				EVaxis = true;
+			Refresh();
 			break;
-		case 76: //l - pan left
+		case 70: //f - toggle float/bucket cursor label
+			if (FloatCursor)
+				FloatCursor = false;
+			else
+				FloatCursor = true;
+			Refresh();
+			break;
+		case 314: // <- - pan left
 			if (event.ShiftDown()) xorigin += 10;
 			else if (event.ControlDown()) xorigin += 100;
 			else xorigin += 1;
+			Refresh();
 			break;
 		case 67: // c - with Ctrl, copy 256-scale histogram to clipboard
 			wxString hist;
@@ -423,7 +451,6 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			break;
 	}
 
-	Refresh();
 	
 	event.Skip();
 }
