@@ -43,6 +43,9 @@
 #include <locale.h>
 #include <lensfun/lensfun.h>
 #endif
+#ifdef USE_OCIO
+#include "PicProcessorOCIO.h"
+#endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
@@ -106,6 +109,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_TONE, rawprocFrm::MnuTone)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
+#endif
+#ifdef USE_OCIO
+	EVT_MENU(ID_MNU_OCIO, rawprocFrm::MnuOCIO)
 #endif
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
@@ -263,6 +269,9 @@ void rawprocFrm::CreateGUIControls()
 #endif
 #ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
+#endif
+#ifdef USE_OCIO
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_OCIO,_("OCIO"), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
@@ -568,6 +577,9 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
+#endif
+#ifdef USE_OCIO
+	else if (name == "ocio")	p = new PicProcessorOCIO("ocio", command, commandtree, pic);
 #endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return NULL;
@@ -1835,6 +1847,23 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding lenscorrection tool failed: %s",e.what()));
+	}
+}
+#endif
+
+#ifdef USE_OCIO
+void rawprocFrm::MnuOCIO(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorOCIO *p = new PicProcessorOCIO("ocio", "", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding ocio tool failed: %s",e.what()));
 	}
 }
 #endif

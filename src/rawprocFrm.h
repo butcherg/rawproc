@@ -119,6 +119,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_WHITEBALANCE = 1036,
 			ID_MNU_DEMOSAIC = 1037,
 			ID_MNU_TONE = 1038,
+			ID_MNU_OCIO = 1039,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -187,6 +188,9 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuToolList(wxCommandEvent& event);
 #ifdef USE_LENSFUN
 	void MnuLensCorrection(wxCommandEvent& event);
+#endif
+#ifdef USE_OCIO
+	void MnuOCIO(wxCommandEvent& event);
 #endif
 	void MnuDemosaic(wxCommandEvent& event);
 	void UpdateConfig(wxPropertyGridEvent& event);
