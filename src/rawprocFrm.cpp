@@ -752,7 +752,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
 		wxString raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
-			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "Confirm", wxYES_NO, this) == wxYES) {
+			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "input.raw.default", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				try {
 					for (int i=0; i<token.GetCount(); i++) {
@@ -1323,7 +1323,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 	wxString cmdstring = AssembleCommand();
 	if (filename.IsOk() && filename.FileExists()) {
 		if (opensource) {
-			int result = wxMessageBox(wxString::Format("Open source file %s with the old processing?\n\nSelecting No will open the source file with current Properties parameters and the current processing chain.\n\nCancel aborts the whole thing.",filename.GetFullName()), "Confirm", wxYES_NO |wxCANCEL, this);
+			int result = wxMessageBox(wxString::Format("Open source file %s with the old processing?\n\nSelecting No will open the source file with current Properties parameters and the current processing chain.\n\nCancel aborts the whole thing.",filename.GetFullName()), "Re-Open", wxYES_NO |wxCANCEL, this);
 			if (result == wxYES) {
 				OpenFileSource(sourcefilename.GetFullPath());
 			}
@@ -1343,7 +1343,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 			OpenFile(filename.GetFullPath());
 			wxArrayString token = split(cmdstring, " ");
 			if (token.GetCount() > 2) {
-				if (wxMessageBox("Re-apply processing chain?", "Confirm", wxYES_NO, this) == wxYES) {
+				if (wxMessageBox("Re-apply processing chain?", "Re-Open", wxYES_NO, this) == wxYES) {
 					for (int i=2; i<token.GetCount(); i++) {
 						wxArrayString cmd = split(token[i], ":");					
 						if (AddItem(cmd[0], cmd[1])) 
