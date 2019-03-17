@@ -40,21 +40,22 @@ class ExposurePanel: public PicProcPanel
 			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
 			stops  = new wxStaticText(this, wxID_ANY, "stops: --");
 
-			std::map<std::string,std::string> p = paramMap(std::string(params));
+			std::map<std::string,std::string> p = paramMap(params.ToStdString());
 
 			if (p.find("ev") != p.end()) { 
 				evb->SetValue(true);
 				expmode = EXPOSUREEV;
 				ev->SetValue(50.0+(atof(p["ev"].c_str())*10.0));
 				val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+
 			}
 			if (p.find("patch") != p.end()) {
 				evtgtb->SetValue(true);
 				expmode = EXPOSURETARGETEV;
-				coord pat;
 				std::vector<std::string> patstr = split(p["patch"],",");
-				pat.x = atoi(patstr[0].c_str());
-				pat.y = atoi(patstr[1].c_str());
+				patx = atoi(patstr[0].c_str());
+				paty = atoi(patstr[1].c_str());
+				patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
 				radius->SetFloatValue(atof(p["radius"].c_str()));
 				ev0->SetFloatValue(atof(p["ev0"].c_str()));
 			}
@@ -97,7 +98,7 @@ class ExposurePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &ExposurePanel::onEnable, this, EXPOSUREENABLE);
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);
 			
-			processEV();
+			//processEV();
 		}
 
 		~ExposurePanel()
@@ -200,8 +201,10 @@ class ExposurePanel: public PicProcPanel
 
 		void setStops(float s)
 		{
-			stops->SetLabel(wxString::Format("stops: %0.1f",s));
-			GetSizer()->Layout();
+			if (stops) {
+				stops->SetLabel(wxString::Format("stops: %0.1f",s));
+				GetSizer()->Layout();
+			}
 		}
 
 		std::map<std::string,std::string> paramMap(std::string params)
@@ -209,7 +212,7 @@ class ExposurePanel: public PicProcPanel
 			std::map<std::string,std::string> p;
 
 			if (params.find("=") == std::string::npos) {
-				p["ev"] = atof(params.c_str());
+				p["ev"] = params;
 			}
 			else {
 				p = parseparams(params);
