@@ -69,7 +69,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	Bind(wxEVT_LEAVE_WINDOW, &CurvePane::mouseReleased, this);
 	Bind(wxEVT_PAINT, &CurvePane::paintEvent, this);
 	Bind(wxEVT_SIZE, &CurvePane::OnSize, this);
-	//Bind(wxEVT_KEY_DOWN, &CurvePane::keyPressed, this);
+	Bind(wxEVT_KEY_DOWN, &CurvePane::keyPressed, this);
 	Bind(wxEVT_CHAR, &CurvePane::keyPressed, this);
 	Bind(wxEVT_MOUSEWHEEL, &CurvePane::mouseWheelMoved, this);
 
@@ -275,7 +275,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 				wxTheClipboard->SetData( new wxTextDataObject(curvedata) );
 				wxTheClipboard->Close();
 			}
-			//((wxFrame *) GetParent())->SetStatusText("curve Y data copied to clibboard");
+			((wxFrame *) GetGrandParent()->GetParent())->SetStatusText("curve Y data copied to clibboard");
 			break;
 	}
 	event.Skip();
