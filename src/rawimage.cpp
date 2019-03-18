@@ -848,6 +848,18 @@ printf("wb: four numbers.\n"); fflush(stdout);
 	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
 	info["LibrawWhiteBalance"] = buffer;
 
+	//Black level, for subtraction
+	snprintf(buffer, 4096, "%d", C.black);
+	info["LibrawBlack"] = buffer;
+
+	//per-channel black correction:
+	snprintf(buffer, 4096, "%d,%d,%d,%d",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
+	info["LibrawPerChannelBlack"] = buffer;
+
+	//Maximum pixel value:
+	snprintf(buffer, 4096, "%d", C.maximum);
+	info["LibrawMaximum"] = buffer;
+
 	//cam_xyz matrix:
 	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cam_xyz[0][0],C.cam_xyz[0][1],C.cam_xyz[0][2],
 		C.cam_xyz[1][0],C.cam_xyz[1][1],C.cam_xyz[1][2],
