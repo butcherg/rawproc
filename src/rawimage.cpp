@@ -872,6 +872,12 @@ printf("wb: four numbers.\n"); fflush(stdout);
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
 	info["LibrawRGBCam"] = buffer;
 
+	//camera matrix:
+	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cmatrix[0][0],C.cmatrix[0][1],C.cmatrix[0][2],
+		C.cmatrix[1][0],C.cmatrix[1][1],C.cmatrix[1][2],
+		C.cmatrix[2][0],C.cmatrix[2][1],C.cmatrix[2][2]);
+	info["LibrawCameraMatrix"] = buffer;
+
 	int cfadim = 2;			 //bayer
 	if (P1.filters == 9) cfadim = 6; //fuji x-trans
 
