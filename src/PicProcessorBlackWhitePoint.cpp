@@ -296,7 +296,8 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled) {
 		mark();
-		dib->ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
+		//dib->ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
+		dib->ApplyToneLine(blk, wht, channel, threadcount);
 		wxString d = duration();
 
 		//parm tool.all.log: Turns on logging for all tools.  Default=0

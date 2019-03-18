@@ -1945,18 +1945,52 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 
 
 
-void gImage::ApplyToneLine(double low, double high, int threadcount)
+void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount)
 {
 	double slope = 255.0 / (high-low);
+	low = low / 255.0;
 
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned x=0; x<w; x++) {
-		for (unsigned y=0; y<h; y++) {
-			unsigned pos = x + y*w;
-			image[pos].r = image[pos].r * slope;
-			image[pos].g = image[pos].g * slope;
-			image[pos].b = image[pos].b * slope;
+	if (channel == CHANNEL_RGB) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r = (image[pos].r - low) * slope;
+				image[pos].g = (image[pos].g - low) * slope;
+				image[pos].b = (image[pos].b - low) * slope;
+			}
 		}
+	}
+	else if (channel == CHANNEL_RED) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r = (image[pos].r - low) * slope;
+			}
+		}
+	}
+	else if (channel == CHANNEL_GREEN) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].g = (image[pos].g - low) * slope;
+			}
+		}
+	}
+	else if (channel == CHANNEL_BLUE) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].b = (image[pos].b - low) * slope;
+			}
+		}
+	}
+	else if (channel == CHANNEL_TONE) {
+		//ToDo: need to figure out ApplyToneLine with a luminance...
+
 	}
 }
 
