@@ -40,7 +40,7 @@ class ExposurePanel: public PicProcPanel
 			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
 			stops  = new wxStaticText(this, wxID_ANY, "stops: --");
 
-			std::map<std::string,std::string> p = paramMap(params.ToStdString());
+			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "ev");
 
 			if (p.find("ev") != p.end()) { 
 				evb->SetValue(true);
@@ -206,20 +206,6 @@ class ExposurePanel: public PicProcPanel
 				GetSizer()->Layout();
 			}
 		}
-
-		std::map<std::string,std::string> paramMap(std::string params)
-		{
-			std::map<std::string,std::string> p;
-
-			if (params.find("=") == std::string::npos) {
-				p["ev"] = params;
-			}
-			else {
-				p = parseparams(params);
-			}
-			return p;
-		}
-
 
 	private:
 		wxSlider *ev;
