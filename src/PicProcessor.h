@@ -18,6 +18,8 @@
 #include "PicProcPanel.h"
 //#include <deque>
 #include "gimage/gimage.h"
+#include <string>
+#include <map>
 
 class PicProcPanel;
 class PicPanel;
@@ -42,6 +44,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		gImage& getProcessedPic();
 		gImage* getProcessedPicPointer();
 		PicPanel *getDisplay();
+		virtual std::map<std::string,std::string> paramMap(std::string params, std::string positionnames="");
 		wxString getDrawList();
 		wxTreeCtrl *getCommandTree();
 		void enableProcessing(bool e);

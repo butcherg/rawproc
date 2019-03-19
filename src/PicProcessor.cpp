@@ -1,6 +1,7 @@
 
 #include "PicProcessor.h"
 #include "util.h"
+#include "gimage/strutil.h"
 #include <wx/event.h>
 #include <exception>
 
@@ -98,6 +99,25 @@ void PicProcessor::enableProcessing(bool e)
 PicProcPanel* PicProcessor::getPanel()
 {
 	return toolpanel;
+}
+
+std::map<std::string,std::string> PicProcessor::paramMap(std::string params, std::string positionnames)
+{
+	std::map<std::string,std::string> p;
+	std::vector<std::string> posnames = split(positionnames, ",");
+	if (params.find("=") == std::string::npos) {  //positional
+		std::vector<std::string> posvals = split(params, ",");
+		for(unsigned short int i=0; i<posvals.size(); i++) {
+			if (i < posnames.size())
+				p[posnames[i]] = posvals[i];
+			else
+				p[tostr(i)] = posvals[i];
+		}
+	}
+	else { //name=val
+		p = parseparams(params);
+	}
+	return p;
 }
 
 bool PicProcessor::processPic(bool processnext) 
