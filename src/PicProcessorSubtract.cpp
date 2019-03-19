@@ -1,5 +1,6 @@
 #include "PicProcessorSubtract.h"
 #include "PicProcPanel.h"
+#include "myRowSizer.h"
 #include "myConfig.h"
 #include "myFloatCtrl.h"
 #include "util.h"
@@ -19,15 +20,26 @@ class SubtractPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, SUBTRACTENABLE, "subtract:");
 			enablebox->SetValue(true);
-			b->Add(enablebox, flags);
-			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(10);
-
 			subtract = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 
-			b->Add(subtract, flags);
-			SetSizerAndFit(b);
-			b->Layout();
+			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "subtract");
+
+			if (p.find("subtract") != p.end())
+				subtract->SetFloatValue(atof(p["subtract"].c_str()));
+			else 
+				subtract->SetFloatValue(0.0);
+
+			myRowSizer *m = new myRowSizer();
+			m->AddRowItem(enablebox, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddRowItem(subtract, flags);
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+
+
 			SetFocus();
 			t = new wxTimer(this);
 
@@ -97,9 +109,8 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 
 bool PicProcessorSubtract::processPic(bool processnext) 
 {
-	Curve ctrlpts;
 	((wxFrame*) m_display->GetParent())->SetStatusText("subtract...");
-	double gamma = atof(c.c_str());
+	double subtract = atof(c.c_str());
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
@@ -108,23 +119,28 @@ bool PicProcessorSubtract::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 	
-	double exponent = 1 / gamma;
-	double v = 255.0 * (double)pow((double)255, -exponent);
-	for (int i = 0; i< 256; i+=1) {
-		double color = (double)pow((double)i, exponent) * v;
-		if (color > 255.0) color = 255.0;
-		ctrlpts.insertpoint((double) i, color);
-	}	
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 
 	if (processingenabled) {
 		mark();
-		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+
+		std::vector<pix> &img = dib->getImageData();
+		unsigned w = dib->getWidth(); unsigned h = dib->getHeight();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				img[pos].r -= subtract;
+				img[pos].g -= subtract;
+				img[pos].b -= subtract;
+			}
+		}
+
 		wxString d = duration();
 
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gamma.log","0") == "1"))
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.subtract.log","0") == "1"))
 			log(wxString::Format("tool=subtract,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
