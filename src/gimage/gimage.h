@@ -177,6 +177,9 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount=0);
+		void ApplySubtract(double subtract, int threadcount=0);
+		bool ApplySubtract(std::string filename, int threadcount=0);
+
 
 		//image geometry algorithms:
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);

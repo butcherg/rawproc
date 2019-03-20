@@ -1995,6 +1995,41 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 }
 
 
+void gImage::ApplySubtract(double subtract, int threadcount)
+{
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			image[pos].r -= subtract;
+			image[pos].g -= subtract;
+			image[pos].b -= subtract;
+		}
+	}
+}
+
+bool gImage::ApplySubtract(std::string filename, int threadcount)
+{
+	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
+	if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
+		std::vector<pix> &dark = darkfile.getImageData();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r -= dark[pos].r;
+				image[pos].g -= dark[pos].g;
+				image[pos].b -= dark[pos].b;
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 // ToneMapping
 //
 // Credit: 
