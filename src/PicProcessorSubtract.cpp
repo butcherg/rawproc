@@ -78,6 +78,7 @@ class SubtractPanel: public PicProcPanel
 			t = new wxTimer(this);
 
 			Bind(wxEVT_TIMER, &SubtractPanel::OnTimer, this);
+			Bind(wxEVT_TEXT_ENTER,&SubtractPanel::fileChanged, this);
 			Bind(myFLOATCTRL_CHANGE, &SubtractPanel::paramChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &SubtractPanel::paramUpdated, this);
 			Bind(wxEVT_CHECKBOX, &SubtractPanel::onEnable, this, SUBTRACTENABLE);
@@ -116,12 +117,7 @@ class SubtractPanel: public PicProcPanel
 			wxFileName fname, pname;
 			fname.Assign(wxFileSelector("Select dark file"));
 			darkfile->SetValue(fname.GetFullName());
-		}
-
-		void OnRadioButton(wxCommandEvent& event)
-		{
-			submode = event.GetId();
-			processSUB();
+			if (submode == SUBTRACTFILE) processSUB();
 		}
 
 		void processSUB()
@@ -143,24 +139,31 @@ class SubtractPanel: public PicProcPanel
 
 			}
 		}
+		
+		void OnRadioButton(wxCommandEvent& event)
+		{
+			submode = event.GetId();
+			processSUB();
+		}
+		
+		void fileChanged(wxCommandEvent& event)
+		{
+			if (submode == SUBTRACTFILE) processSUB();
+		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("rgb,%0.2f", subtract->GetFloatValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			if (submode == SUBTRACTVAL) t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void paramUpdated(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("rgb,%0.2f", subtract->GetFloatValue()));
-			q->processPic();
-			Refresh();
+			if (submode == SUBTRACTVAL) processSUB();
 		}
 		
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->processPic();
-			Refresh();
+			processSUB();
 		}
 
 	private:
@@ -168,7 +171,6 @@ class SubtractPanel: public PicProcPanel
 		wxRadioButton *subb, *fileb, *camb;
 		wxTextCtrl *darkfile;
 		myFloatCtrl *subtract;
-		//wxString filename;
 		wxStaticText *cam;
 		wxTimer *t;
 		float camval;
@@ -246,9 +248,15 @@ bool PicProcessorSubtract::processPic(bool processnext)
 					}
 					result = true;
 				}
-				else result = false;
+				else {
+					wxMessageBox("dark image not the same size as the image.");
+					result = false;
+				}
 			}
-			else result = false;
+			else {
+				wxMessageBox("dark image file not found.");
+				result = false;
+			}
 		}
 		else {
 			#pragma omp parallel for num_threads(threadcount)
