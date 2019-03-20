@@ -35,17 +35,24 @@ class SubtractPanel: public PicProcPanel
 
 			if (p.find("value") != p.end())
 				if (p["value"] == "camera") {
+					submode = SUBTRACTCAMERA;
 					camb->SetValue(true);
 				}
-				else if (p["value"] == "file") {
+				else if (p["value"] == "file" & p.find("filename") != p.end()) {
+					submode = SUBTRACTFILE;
 					fileb->SetValue(true);
+					darkfile->SetValue(wxString(p["filename"]));
 				}
 				else {
+					submode = SUBTRACTVAL;
 					subb->SetValue(true);
 					subtract->SetFloatValue(atof(p["subtract"].c_str()));
 				}
-			else 
+			else {
+				submode = SUBTRACTVAL;
+				subb->SetValue(true);
 				subtract->SetFloatValue(0.0);
+			}
 
 			
 			myRowSizer *m = new myRowSizer();
@@ -234,22 +241,11 @@ bool PicProcessorSubtract::processPic(bool processnext)
 
 		if (p["value"] == "file") {
 			if (wxFileName::FileExists(wxString(p["filename"]))) {
-				gImage darkfile = gImage::loadImageFile(p["filename"].c_str(), "");
-				if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
-					std::vector<pix> &dark = darkfile.getImageData();
-					#pragma omp parallel for num_threads(threadcount)
-					for (unsigned x=0; x<w; x++) {
-						for (unsigned y=0; y<h; y++) {
-							unsigned pos = x + y*w;
-							img[pos].r -= dark[pos].r;
-							img[pos].g -= dark[pos].g;
-							img[pos].b -= dark[pos].b;
-						}
-					}
+				if (dib->ApplySubtract(p["filename"].c_str(), threadcount)) {
 					result = true;
 				}
 				else {
-					wxMessageBox("dark image not the same size as the image.");
+					wxMessageBox("dark image subtraction not successful.");
 					result = false;
 				}
 			}
@@ -259,15 +255,7 @@ bool PicProcessorSubtract::processPic(bool processnext)
 			}
 		}
 		else {
-			#pragma omp parallel for num_threads(threadcount)
-			for (unsigned x=0; x<w; x++) {
-				for (unsigned y=0; y<h; y++) {
-					unsigned pos = x + y*w;
-					img[pos].r -= subtract;
-					img[pos].g -= subtract;
-					img[pos].b -= subtract;
-				}
-			}
+			dib->ApplySubtract(subtract, threadcount);
 			result = true;
 		}
 
