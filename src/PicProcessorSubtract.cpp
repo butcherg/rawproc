@@ -28,7 +28,7 @@ class SubtractPanel: public PicProcPanel
 			camb = new wxRadioButton(this, SUBTRACTCAMERA, "camera:", wxDefaultPosition, wxDefaultSize);
 
 			subtract = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
-			darkfile = new wxTextCtrl(this, wxID_ANY, "--", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
+			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
 			cam = new wxStaticText(this, wxID_ANY, "--");
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "value,filename");
