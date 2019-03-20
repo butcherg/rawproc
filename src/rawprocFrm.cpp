@@ -1884,7 +1884,7 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "", commandtree, pic);
+		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "0.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
