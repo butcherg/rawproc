@@ -853,6 +853,41 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			commandstring += std::string(cs);
 		}
 
+		//img <li>subtract:val|camera|file,filename  val=a float value, "camera" retrieves the camera </li>
+		else if (strcmp(cmd,"subtract") == 0) {
+			double subtract;
+			char filename[256];
+			char *v = strtok(NULL,", ");
+			char *f = strtok(NULL," ");
+
+			if (strcmp(v,"camera") == 0) {
+				subtract = atof(dib.getInfoValue("LibrawBlack").c_str()) / 65536.0;
+			}
+			else if (strcmp(v,"file") == 0) {
+				strcpy(filename, f);
+			}
+			else {
+				subtract = atof(v);
+			}
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			printf("subtract: %f (%d threads)... ",subtract,threadcount);
+
+			_mark();
+			if (strcmp(v,"file") == 0)
+				dib.ApplySubtract(std::string(filename), threadcount);  
+			else
+				dib.ApplySubtract(subtract, threadcount);  
+			printf("done (%fsec).\n",_duration());
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, subtract);
+			commandstring += std::string(cs);
+		}
+
 		//img <li>highlight:1-10</li>
 		else if (strcmp(cmd,"highlight") == 0) {
 			double highlight = atof(myConfig::getConfig().getValueOrDefault("tool.highlight.level","0").c_str());
@@ -1179,7 +1214,9 @@ getopt(int argc, char *argv[], char *optstring)
 
 std::string getFileType(std::string filename)
 {
-	std::string ext = filename.substr(filename.find_last_of("."));
+	size_t pos = filename.find_last_of(".");
+	if (pos =std::string::npos) return "";
+	std::string ext = filename.substr(pos);
 	if (ext == "jpg" | ext == "jpeg" | ext == "JPG" | ext == "JPEG") return "jpeg";
 	if (ext == "tif" | ext == "tiff" | ext == "TIF" | ext == "TIFF") return "tiff";
 	if (ext == "png" | ext == "PNG") return "png";
@@ -1221,7 +1258,6 @@ int main (int argc, char **argv)
 	int c;
 	int flags;
 	//gImage dib;
-	
 
 	std::string conf_cwd = getCwdConfigFilePath();
 	std::string conf_configd = getAppConfigFilePath();
@@ -1243,7 +1279,7 @@ int main (int argc, char **argv)
 			printf("configuration file: %s\n", conf_configd.c_str());
 		}
 	}
-	
+
 	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValueOrDefault("cms.profilepath",getCwd())));
 
 	#ifdef USE_DCRAW
@@ -1307,15 +1343,18 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
+
 	//separates the parameters from the input and output file strings
 	std::vector<std::string> infile = split(std::string(argv[optind]),":");
 	if (infile.size() < 2) infile.push_back("");
 	optind++;
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
 	if (outfile.size() < 2) outfile.push_back("");
-	
+
+	printf("file:%s\n",argv[optind]);
+
 	std::string filetype = getFileType(infile[0]);
-	
+
 	//construct input parameters from input.filetype.parameters, input.raw.libraw.* if raw, 
 	//and the command line parameters in that order.  If raw and rawdata=1, paramlist is
 	//truncted to rawdata and cameraprofile
@@ -1375,7 +1414,6 @@ for (int i = optind; i<argc-1; i++) {
 }
 
 int count = 0;
-
 
 for (int f=0; f<files.size(); f++)
 {
