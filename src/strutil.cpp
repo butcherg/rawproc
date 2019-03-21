@@ -142,10 +142,14 @@ std::vector<std::string> split(std::string s, std::string delim)
 	return v;
 }
 
-std::vector<std::string> bifurcate(std::string strg, char c = ' ')
+std::vector<std::string> bifurcate(std::string strg, char c = ' ', bool fromback=false)
 {
 	std::vector<std::string> result;
-	std::size_t eq = strg.find_first_of(c);
+	std::size_t eq;
+	if (fromback)
+		eq = strg.find_last_of(c);
+	else
+		eq = strg.find_first_of(c);
 	result.push_back(strg.substr(0,eq));
 	result.push_back(strg.substr(eq+1));
 	return result;

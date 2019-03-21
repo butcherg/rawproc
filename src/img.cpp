@@ -1215,7 +1215,7 @@ getopt(int argc, char *argv[], char *optstring)
 std::string getFileType(std::string filename)
 {
 	size_t pos = filename.find_last_of(".");
-	if (pos =std::string::npos) return "";
+	if (pos = std::string::npos) return "";
 	std::string ext = filename.substr(pos);
 	if (ext == "jpg" | ext == "jpeg" | ext == "JPG" | ext == "JPEG") return "jpeg";
 	if (ext == "tif" | ext == "tiff" | ext == "TIF" | ext == "TIFF") return "tiff";
@@ -1343,10 +1343,26 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
-	printf("file:%s\n",argv[optind]);
+	printf("file:%s, len=%ld\n",argv[optind], strlen(argv[optind])); fflush(stdout);
 
 	//separates the parameters from the input and output file strings
-	std::vector<std::string> infile = split(std::string(argv[optind]),":");
+	std::vector<std::string> infile;
+	std::string infilename = std::string(argv[optind]);
+
+#ifdef WIN32
+	if (infilename.find_first_of(':') == 1) { 	
+		if (std::count(infilename.begin(), infilename.end(), ':') > 1)
+			infile = bifurcate(infilename, ':', true);
+		else 
+			infile.push_back(infilename); 
+	}
+	else { 
+		infile = bifurcate(infilename, ':');
+	}
+#else
+	infile = bifurcate(infilename, ':');
+#endif
+
 	if (infile.size() < 2) infile.push_back("");
 	optind++;
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
