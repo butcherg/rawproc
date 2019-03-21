@@ -1343,6 +1343,7 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
+	printf("file:%s\n",argv[optind]);
 
 	//separates the parameters from the input and output file strings
 	std::vector<std::string> infile = split(std::string(argv[optind]),":");
@@ -1350,8 +1351,6 @@ int main (int argc, char **argv)
 	optind++;
 	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
 	if (outfile.size() < 2) outfile.push_back("");
-
-	printf("file:%s\n",argv[optind]);
 
 	std::string filetype = getFileType(infile[0]);
 
