@@ -1343,7 +1343,7 @@ int main (int argc, char **argv)
 		exit(1);
 	}
 
-	printf("file:%s, len=%ld\n",argv[optind], strlen(argv[optind])); fflush(stdout);
+
 
 	//separates the parameters from the input and output file strings
 	std::vector<std::string> infile;
@@ -1365,8 +1365,28 @@ int main (int argc, char **argv)
 
 	if (infile.size() < 2) infile.push_back("");
 	optind++;
-	std::vector<std::string> outfile = split(std::string(argv[argc-1]),":");
+
+
+	std::vector<std::string> outfile;
+	std::string outfilename = std::string(std::string(argv[argc-1]));
+
+#ifdef WIN32
+	if (outfilename.find_first_of(':') == 1) { 	
+		if (std::count(outfilename.begin(), outfilename.end(), ':') > 1)
+			outfile = bifurcate(outfilename, ':', true);
+		else 
+			outfile.push_back(outfilename); 
+	}
+	else { 
+		outfile = bifurcate(outfilename, ':');
+	}
+#else
+	outfile = bifurcate(outfilename, ':');
+#endif
+
 	if (outfile.size() < 2) outfile.push_back("");
+
+
 
 	std::string filetype = getFileType(infile[0]);
 
