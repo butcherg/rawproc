@@ -1202,6 +1202,24 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
 	}
 }
 
+void rawprocFrm::CommandTreeDeleteSubsequent(wxTreeItemId item)
+{
+	wxTreeItemId next;
+	wxTreeItemIdValue cookie;
+	commandtree->SelectItem(item);
+	CommandTreeSetDisplay(item);
+	if (item == commandtree->GetRootItem())
+		next = commandtree->GetFirstChild(item, cookie);
+	else
+		next = commandtree->GetNextSibling(item);
+	while (next.IsOk()) {
+		wxTreeItemId following = commandtree->GetNextSibling(next);
+		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(next))->getPanel()));
+       	commandtree->Delete(next);
+		next = following;
+	}
+}
+
 void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 {
 	wxString cmd;
@@ -1996,7 +2014,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 }
 
 #define ID_EXIF		2001
-//#define ID_HISTOGRAM	2002
+#define ID_DELETESUBSEQUENT	2002
 #define ID_DELETE	2003
 #define ID_ICC		2004
 
@@ -2016,6 +2034,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
  	//mnu.Append(ID_HISTOGRAM, "Full Histogram...");
 	mnu.AppendSeparator();
 	mnu.Append(ID_DELETE, "Delete");
+	mnu.Append(ID_DELETESUBSEQUENT, "Delete subsequent...");
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
 		case ID_EXIF:
 			InfoDialog(event.GetItem());
@@ -2027,6 +2046,8 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 		case ID_DELETE:
 			CommandTreeDeleteItem(event.GetItem());
 			break;
+		case ID_DELETESUBSEQUENT:
+			CommandTreeDeleteSubsequent(event.GetItem());
 	}
 }
 

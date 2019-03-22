@@ -143,6 +143,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void CommandTreeSetDisplay(wxTreeItemId item);
 	void CommandTreePopup(wxTreeEvent& event);
 	void CommandTreeDeleteItem(wxTreeItemId item);
+	void CommandTreeDeleteSubsequent(wxTreeItemId item);
 
 	void SetConfigFile(wxString cfile);
 	void SetThumbMode(int mode);
