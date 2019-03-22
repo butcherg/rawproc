@@ -1,5 +1,6 @@
 #include "PicProcessorLensCorrection.h"
 #include "PicProcPanel.h"
+#include "myRowSizer.h"
 #include "util.h"
 #include "gimage/strutil.h"
 #include "myConfig.h"
@@ -19,7 +20,7 @@
 #define LENSCORRECTION_VIG	6307
 #define LENSCORRECTION_DIST	6308
 #define LENSCORRECTION_AUTOCROP 6309
-
+#define LENSCORRECTION_APPLY	6310
 
 class myListCtrl: public wxListCtrl
 {
@@ -216,49 +217,14 @@ class LensCorrectionPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, "lenscorrection:");
 			enablebox->SetValue(true);
-			b->Add(enablebox, flags);
-			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(5);
-
-			b->Add(new wxStaticText(this,-1, "metadata:", wxDefaultPosition, wxDefaultSize), flags);
-			b->Add(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,50)), flags);
-			b->AddSpacer(5);
-
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-			b->Add(cam, flags);
-			b->AddSpacer(2);
-			b->Add(new wxButton(this, CAMERAID, "Select camera"), flags);
-			b->AddSpacer(1);
 			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-			b->Add(lens, flags);
-			b->AddSpacer(1);
-			b->Add(new wxButton(this, LENSID, "Select lens"), flags);
-			b->AddSpacer(2);
-
 			flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
-/*
-			ca = new wxCheckBox(this, LENSCORRECTION_CA, "chromatic abberation");
-			b->Add(ca , flags);
-			vig = new wxCheckBox(this, LENSCORRECTION_VIG, "vignetting");
-			b->Add(vig , flags);
-			dist = new wxCheckBox(this, LENSCORRECTION_DIST, "distortion");
-			b->Add(dist , flags);
-			crop = new wxCheckBox(this, LENSCORRECTION_AUTOCROP, "autocrop");
-			b->Add(crop , flags);
-*/
-			b->AddSpacer(5);
-			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(5);
 
-			wxArrayString operations;
-			operations.Add("chromatic abberation");
-			operations.Add("vignetting");
-			operations.Add("distortion");
-			operations.Add("autocrop");
-			corr = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, operations, wxBORDER_NONE);
-			corr->SetBackgroundColour(parent->GetBackgroundColour());
-			corr->SetForegroundColour(parent->GetForegroundColour());
-			b->Add(corr, flags);
+			ca = new wxCheckBox(this, LENSCORRECTION_CA, "chromatic abberation");
+			vig = new wxCheckBox(this, LENSCORRECTION_VIG, "vignetting");
+			dist = new wxCheckBox(this, LENSCORRECTION_DIST, "distortion");
+			crop = new wxCheckBox(this, LENSCORRECTION_AUTOCROP, "autocrop");
 
 			for (int i=0; i<parms.GetCount(); i++) {
 				wxArrayString nameval = split(parms[i], "=");
@@ -271,15 +237,10 @@ class LensCorrectionPanel: public PicProcPanel
 				if (nameval[0] == "ops") {
 					wxArrayString ops = split(nameval[1],",");
 					for (int j=0; j<ops.GetCount(); j++) {
-						//if (ops[j] == "ca") ca->SetValue(true);
-						//if (ops[j] == "vig") vig->SetValue(true);
-						//if (ops[j] == "dist") dist->SetValue(true);
-						//if (ops[j] == "autocrop") crop->SetValue(true);
-
-						if (ops[j] == "ca") corr->Check(0);
-						if (ops[j] == "vig") corr->Check(1);
-						if (ops[j] == "dist") corr->Check(2);
-						if (ops[j] == "autocrop") corr->Check(3);
+						if (ops[j] == "ca") ca->SetValue(true);
+						if (ops[j] == "vig") vig->SetValue(true);
+						if (ops[j] == "dist") dist->SetValue(true);
+						if (ops[j] == "autocrop") crop->SetValue(true);
 					}
 				}
 			}
@@ -287,10 +248,43 @@ class LensCorrectionPanel: public PicProcPanel
 			wxString altcam = cam->GetValue();
 			wxString altlens = lens->GetValue();
 			((PicProcessorLensCorrection *) q)->setAlternates(altcam, altlens);
-			
 
-			SetSizerAndFit(b);
-			b->Layout();
+			myRowSizer *m = new myRowSizer();
+			m->AddRowItem(enablebox, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,50)), flags);
+			m->NextRow();
+			m->AddRowItem(new wxButton(this, CAMERAID, "Camera:", wxDefaultPosition, wxSize(70,-1)), flags);
+			m->AddRowItem(cam, flags);
+			m->NextRow();
+			m->AddRowItem(new wxButton(this, LENSID, "Lens:", wxDefaultPosition, wxSize(70,-1)), flags);
+			m->AddRowItem(lens, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			m->NextRow();
+			m->AddRowItem(ca, flags);
+			m->NextRow();
+			m->AddRowItem(vig, flags);
+			m->NextRow();
+			m->AddRowItem(dist, flags);
+			m->NextRow();
+			m->AddRowItem(crop, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			m->NextRow();
+			m->AddRowItem(new wxButton(this, LENSCORRECTION_APPLY, "Apply", wxDefaultPosition, wxSize(70,-1)), flags);
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+
 			Refresh();
 			Update();
 			SetFocus();
@@ -298,8 +292,9 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
 			//Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_CA, LENSCORRECTION_AUTOCROP);
+			Bind(wxEVT_BUTTON, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_APPLY);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
-			Bind(wxEVT_CHECKLISTBOX, &LensCorrectionPanel::paramChanged, this);
+
 		}
 
 		~LensCorrectionPanel()
@@ -356,15 +351,10 @@ class LensCorrectionPanel: public PicProcPanel
 			if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
 
 			wxString ops;
-			//if (ca->GetValue()) opAppend("ca",ops);
-			//if (vig->GetValue()) opAppend("vig",ops);
-			//if (dist->GetValue()) opAppend("dist",ops);
-			//if (crop->GetValue()) opAppend("autocrop",ops);
-
-			if (corr->IsChecked(0)) opAppend("ca",ops);
-			if (corr->IsChecked(1)) opAppend("vig",ops);
-			if (corr->IsChecked(2)) opAppend("dist",ops);
-			if (corr->IsChecked(3)) opAppend("autocrop",ops);
+			if (ca->GetValue()) opAppend("ca",ops);
+			if (vig->GetValue()) opAppend("vig",ops);
+			if (dist->GetValue()) opAppend("dist",ops);
+			if (crop->GetValue()) opAppend("autocrop",ops);
 
 			if (ops != "") paramAppend("ops", ops, cmd);
 
@@ -376,7 +366,6 @@ class LensCorrectionPanel: public PicProcPanel
 
 	private:
 		wxCheckBox *ca, *vig, *dist, *crop;
-		wxCheckListBox *corr;
 		wxTextCtrl *cam, *lens;
 		wxCheckBox *enablebox;
 

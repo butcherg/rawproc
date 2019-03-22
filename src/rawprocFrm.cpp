@@ -1830,11 +1830,11 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 
 	SetStatusText("");
 	try {
-		//parm tool.lenscorrection.default: The initial (and reset button) red intensity threshold.  Default=1.5
+		//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
 		wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
 		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		if (defaults != "") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
