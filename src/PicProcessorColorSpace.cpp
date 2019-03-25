@@ -11,7 +11,8 @@
 #define COLORINTENT 6502
 #define COLORBPC 6503
 #define COLORFILE 6504
-#define COLORCAMERA 6505
+#define COLORPROFILE 6505
+#define COLORCAMERA 6506
 
 
 struct cameradata {
@@ -94,6 +95,9 @@ class ColorspacePanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, COLORENABLE, "colorspace:");
 			enablebox->SetValue(true);
+
+			profileb = new wxRadioButton(this, COLORPROFILE, "profile file:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			camb = new wxRadioButton(this, COLORCAMERA, "assign camera profile:");
 			
 			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
@@ -118,21 +122,34 @@ class ColorspacePanel: public PicProcPanel
 			bpc = new wxCheckBox(this, COLORBPC, "black point compensation");
 			//bpc->SetValue(bpc);
 
+			makemodel = new wxStaticText(this,wxID_ANY, "--"); //, wxDefaultPosition, wxSize(30, -1));
+			primaries = new wxStaticText(this,wxID_ANY, "--"); //, wxDefaultPosition, wxSize(30, -1));
+
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
 			m->NextRow();
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
+			m->AddRowItem(profileb, flags);
+			m->NextRow();
 			m->AddRowItem(edit, flags);
 			m->NextRow();
 			m->AddRowItem(new wxButton(this, COLORFILE, "Select profile"), flags);
-			m->AddRowItem(new wxButton(this, COLORCAMERA, "Look Up Camera Profile"), flags);
+			//m->AddRowItem(new wxButton(this, COLORCAMERA, "Look Up Camera Profile"), flags);
 			m->NextRow();
 			m->AddSpacer(5);
 			m->AddRowItem(operselect, flags);
 			m->AddRowItem(intentselect, flags);
 			m->NextRow();
 			m->AddRowItem(bpc, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddSpacer(3);
+			m->AddRowItem(camb, flags);
+			m->AddRowItem(makemodel, flags);
+			m->NextRow();
+			m->AddRowItem(primaries, flags);
 			m->End();
 			SetSizerAndFit(m);
 			m->Layout();
@@ -142,8 +159,9 @@ class ColorspacePanel: public PicProcPanel
 			Update();
 			SetFocus();
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
+			Bind(wxEVT_RADIOBUTTON, &ColorspacePanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this, COLORFILE);
-			Bind(wxEVT_BUTTON, &ColorspacePanel::lookupCamera, this, COLORCAMERA);
+			//Bind(wxEVT_BUTTON, &ColorspacePanel::lookupCamera, this, COLORCAMERA);
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::paramChanged, this, COLORBPC);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::onEnable, this, COLORENABLE);
@@ -166,6 +184,24 @@ class ColorspacePanel: public PicProcPanel
 			}
 		}
 
+		void OnRadioButton(wxCommandEvent& event)
+		{
+			cpmode = event.GetId();
+			processCS();
+		}
+
+		void processCS()
+		{
+			if (cpmode == COLORPROFILE) {
+
+			}
+			else if (cpmode == COLORCAMERA) {
+				q->setParams("camera,assign");
+				q->processPic();
+			}
+			
+		}
+
 		void setParams(wxString profile, wxString oper, wxString intent)
 		{
 			if  (oper == "assign")
@@ -175,6 +211,13 @@ class ColorspacePanel: public PicProcPanel
 
 		}
 
+		void setPrimaries(wxString primstring)
+		{
+			primaries->SetLabel(primstring);
+			Refresh();
+		}
+
+/*
 		void lookupCamera(wxCommandEvent& event)
 		{
 			wxString cam = "";
@@ -220,7 +263,8 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
 			event.Skip();
 		}
-		
+*/
+
 		void selectProfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
@@ -288,8 +332,11 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 
 	private:
 		wxCheckBox *bpc, *enablebox;
+		wxRadioButton *profileb, *camb;
 		wxTextCtrl *edit;
 		wxRadioBox *operselect, *intentselect;
+		wxStaticText *makemodel, *primaries;
+		int cpmode;
 
 };
 
@@ -438,7 +485,6 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			else {
 				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
 				if (!dcrawfile.FileExists()) {
-printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().ToStdString().c_str());
 					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
 					if (!dcrawfile.FileExists()) {
 						wxMessageBox("dcraw.c not found in any of the proscribed locations");
@@ -454,6 +500,7 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 			if (dcrawfile.FileExists()) {
 				CameraData c(dcrawfile.GetFullPath().ToStdString());
 				std::string cam = c.getTrans(makemodel);
+				((ColorspacePanel *) toolpanel)->setPrimaries(cam);
 				if (cam != "") {
 					if (cp[1] == "convert") {
 						if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
@@ -480,6 +527,7 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 								log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 					}
 				}
+				else wxMessageBox(wxString::Format("primaries not found for %s",wxString(makemodel)));
 			}
 			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
 		}
