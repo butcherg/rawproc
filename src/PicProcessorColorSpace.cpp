@@ -182,9 +182,6 @@ class ColorspacePanel: public PicProcPanel
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
 			if (bpc->GetValue()) intentstr.Append(",bpc");
 
-			//property...
-			//APPDATA/userconfig
-			//same directory as executable
 			wxFileName dcrawfile("dcraw.c");
 
 			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
@@ -197,22 +194,27 @@ class ColorspacePanel: public PicProcPanel
 			else {
 				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
 				if (!dcrawfile.FileExists()) {
-printf("exepath: %s\n",wxStandardPaths::Get().GetExecutablePath().ToStdString().c_str());
-					dcrawfile.SetPath(wxStandardPaths::Get().GetExecutablePath());
+printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().ToStdString().c_str());
+					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
 					if (!dcrawfile.FileExists()) {
 						wxMessageBox("dcraw.c not found in any of the proscribed locations");
 						return;
 					}
 				}
 			}
+			
+			std::string makemodel = q->getProcessedPicPointer()->getInfoValue("Make");
+			makemodel.append(" ");
+			makemodel.append(q->getProcessedPicPointer()->getInfoValue("Model"));
 
 			if (dcrawfile.FileExists()) {
 				CameraData c(dcrawfile.GetFullPath().ToStdString());
-				cam = wxString(c.getTrans("Nikon D7000"));
+				cam = wxString(c.getTrans(makemodel));
 				if (cam != "") {
+					wxMessageBox(wxString::Format("found primaries for %s",wxString(makemodel)));
 					edit->SetValue(cam);
 					setParams(cam, operstr,intentstr);			
-					//q->processPic();
+					q->processPic();
 				}
 			}
 			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
@@ -327,7 +329,6 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			cp[0].Append(wxString::Format(",%s",cp[1]));
 			cp.RemoveAt(1);
 		}
-		wxMessageBox(cp[0]);
 	}
 
 	wxString intentstr;
@@ -422,6 +423,65 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 						log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 			}
 	
+		}
+		
+		else if (cp[0] == "camera") {
+			wxFileName dcrawfile("dcraw.c");
+
+			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
+				dcrawfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.dcrawpath")));
+				if (!dcrawfile.FileExists()) {
+					wxMessageBox("dcraw.c not found in tool.colorspace.dcrawpath");
+					return false;
+				}
+			}
+			else {
+				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
+				if (!dcrawfile.FileExists()) {
+printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().ToStdString().c_str());
+					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
+					if (!dcrawfile.FileExists()) {
+						wxMessageBox("dcraw.c not found in any of the proscribed locations");
+						return false;
+					}
+				}
+			}
+			
+			std::string makemodel = dib->getInfoValue("Make");
+			makemodel.append(" ");
+			makemodel.append(dib->getInfoValue("Model"));
+			
+			if (dcrawfile.FileExists()) {
+				CameraData c(dcrawfile.GetFullPath().ToStdString());
+				std::string cam = c.getTrans(makemodel);
+				if (cam != "") {
+					if (cp[1] == "convert") {
+						if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
+							wxMessageBox("ColorSpace convert failed.");
+							result = false;
+						}
+						else m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
+						wxString d = duration();
+
+						if (result) 
+							if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+								log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+					}
+					else if (cp[1] == "assign") {
+						if (dib->AssignColorspace(cam) != GIMAGE_OK) {
+							wxMessageBox("ColorSpace assign failed.");
+							result = false;
+						}
+						else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
+						wxString d = duration();
+
+						if (result) 
+							if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+								log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+					}
+				}
+			}
+			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
 		}
 
 		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
