@@ -1995,6 +1995,15 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 }
 
 
+
+// Subtract
+//
+// Credit: Kindegarten, if I recall correctly...
+//
+// A lot of cameras require subtraction of a particular value to establish
+// black.  Also, subtracting a dark frame is useful in low-light applications
+// such as astrophotography.  So, ApplySubtract, in two forms...
+// 
 void gImage::ApplySubtract(double subtract, int threadcount)
 {
 	#pragma omp parallel for num_threads(threadcount)
@@ -2028,6 +2037,7 @@ bool gImage::ApplySubtract(std::string filename, int threadcount)
 		return false;
 	}
 }
+
 
 
 // ToneMapping
