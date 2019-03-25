@@ -123,6 +123,11 @@ std::string getCwdConfigFilePath()
 }
 
 
+bool contains(const char * buf, const char * str)
+{
+	if (std::string(buf).find(str) != std::string::npos) return true;
+	return false;
+}
 
 std::vector<std::string> split(std::string s, std::string delim)
 {
