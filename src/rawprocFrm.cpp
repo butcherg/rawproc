@@ -1478,8 +1478,8 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.tone.initialvalue: The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2
-		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","2.2"));
+		//parm tool.tone.initialvalue: The initial (and reset button) value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
 		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
@@ -1544,7 +1544,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
 		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		if (val != "0.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1557,11 +1557,11 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.exposure.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0
+		//parm tool.exposure.initialvalue: The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
 		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		if (val != "0.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1697,12 +1697,16 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 	try {
 		PicProcessorBlackWhitePoint *p;
 		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
-		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1")
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "", commandtree, pic);
-		else
+		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1") {
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb", commandtree, pic);
+			p->createPanel(parambook);
+			p->processPic();
+		}
+		else {
 			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb,0,255", commandtree, pic);
-		p->createPanel(parambook);
-		p->processPic();
+			p->createPanel(parambook);
+		}
+
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
@@ -1719,7 +1723,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0"));
 		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
+		if (defval != "0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	}
 	catch (std::exception& e) {
