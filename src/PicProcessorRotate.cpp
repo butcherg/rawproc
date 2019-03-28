@@ -271,8 +271,17 @@ class RotatePanel: public PicProcPanel
 			autocrop->SetValue(acrop);
 
 			hTransform = proc->getDisplay()->GetDisplayTransform();
-			if (hTransform)
-				cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
+			if (hTransform) {
+				unsigned char* im = i.GetData();
+				unsigned w = i.GetWidth();
+				unsigned h = i.GetHeight();
+				#pragma omp parallel for
+				for (unsigned y=0; y<h; y++) {
+					unsigned pos = y*w*3;
+					cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+				}
+			}
+				//cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());
 			
 			preview = new RotatePreview(this,i,initialvalue, acrop);
 			b->Add(preview , 1, wxEXPAND | wxALIGN_CENTER_VERTICAL |wxALIGN_CENTER_HORIZONTAL | wxALL, 1);  // wxSHAPED |

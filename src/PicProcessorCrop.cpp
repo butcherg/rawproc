@@ -36,8 +36,16 @@ class CropPanel: public PicProcPanel
 			aspect = wa > ha? ha : wa;
 
 			hTransform = proc->getDisplay()->GetDisplayTransform();
-			if (hTransform)
-				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
+			if (hTransform) {
+				unsigned char* im = img.GetData();
+				unsigned w = img.GetWidth();
+				unsigned h = img.GetHeight();
+				#pragma omp parallel for
+				for (unsigned y=0; y<h; y++) {
+					unsigned pos = y*w*3;
+					cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+				}
+			}
 
 			iwa = (double) img.GetWidth() / (double) img.GetHeight();
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
@@ -105,6 +113,13 @@ class CropPanel: public PicProcPanel
 			GetSize(&ww, &wh);
 			wxPaintDC dc(this);
 			dc.DrawBitmap(wxBitmap(img.Scale(iw*aspect, ih*aspect)),0,0);
+/*
+			wxMemoryDC mdc;
+			displayimg = new wxBitmap(img);
+			mdc.SelectObject(*displayimg);
+			dc.StretchBlit(0,0,ww, wh, &mdc, 0, 0, img.GetWidth(), img.GetHeight());
+			displayimg->~wxBitmap();
+*/
 			if (isaspect)
 				dc.SetPen(*wxYELLOW_PEN);
 			else
@@ -414,6 +429,7 @@ class CropPanel: public PicProcPanel
 	private:
 		//wxTextCtrl *widthedit, *heightedit;
 		wxImage img;
+		wxBitmap *displayimg;
 		int ww, iw, wh, ih;
 		int node, cropmode, mousex, mousey;
 		double aspect, wa, ha, iwa, iha;
