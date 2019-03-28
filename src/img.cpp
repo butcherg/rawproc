@@ -375,6 +375,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				}
 			}
 			else { //no tokens, do auto rgb:
+				chan = "rgb";
 				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
 				blk = bwpts[0];
 				wht = bwpts[1];
@@ -401,7 +402,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			//dib.ApplyToneLine(blk, wht, threadcount);
 			printf("done (%fsec).\n",_duration());
 			char cs[256];
-			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, blk, wht);
+			sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
 			commandstring += std::string(cs);
 		}
 
