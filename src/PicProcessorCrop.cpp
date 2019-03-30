@@ -9,6 +9,7 @@ class CropPanel: public PicProcPanel
 	public:
 		CropPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			wxImage img;
 			SetDoubleBuffered(true);
 			node = 0;
 			cropmode = 1; //0=freeform; 1=maintain aspect
@@ -35,20 +36,24 @@ class CropPanel: public PicProcPanel
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
 
-			hTransform = proc->getDisplay()->GetDisplayTransform();
-			if (hTransform) {
-				unsigned char* im = img.GetData();
-				unsigned w = img.GetWidth();
-				unsigned h = img.GetHeight();
-				#pragma omp parallel for
-				for (unsigned y=0; y<h; y++) {
-					unsigned pos = y*w*3;
-					cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+				hTransform = proc->getDisplay()->GetDisplayTransform();
+				if (hTransform) {
+					unsigned char* im = img.GetData();
+					unsigned w = img.GetWidth();
+					unsigned h = img.GetHeight();
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w*3;
+						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+					}
 				}
 			}
 
 			iwa = (double) img.GetWidth() / (double) img.GetHeight();
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
+			
+			displayimg = new wxBitmap(img);
 
 			t = new wxTimer(this);
 			SetFocus();
@@ -72,6 +77,7 @@ class CropPanel: public PicProcPanel
 		
 		void OnCommandtreeSelChanged(wxTreeEvent& event)
 		{
+			wxImage img;
 			event.Skip();
 			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
 
@@ -86,8 +92,12 @@ class CropPanel: public PicProcPanel
 			if (hTransform)
 				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
 
-			iwa = (double) img.GetWidth() / (double) img.GetHeight();
-			iha = (double) img.GetHeight() / (double) img.GetWidth();
+			iwa = (double) iw / (double) ih;
+			iha = (double) ih / (double) iw;
+			
+			if (displayimg) displayimg->~wxBitmap();
+			displayimg = new wxBitmap(img);
+			
 			Refresh();
 		}
 
@@ -97,14 +107,14 @@ class CropPanel: public PicProcPanel
 			SetSize(s);
 
 			GetSize(&ww, &wh);
-			iw = img.GetWidth();
-			ih = img.GetHeight();
+			iw = displayimg->GetWidth();
+			ih = displayimg->GetHeight();
 			wa = (double) ww/ (double) iw;
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
 
-			iwa = (double) img.GetWidth() / (double) img.GetHeight();
-			iha = (double) img.GetHeight() / (double) img.GetWidth();
+			iwa = (double) iw / (double) ih;
+			iha = (double) ih / (double) iw;
 			Refresh();
 		}
 
@@ -112,14 +122,13 @@ class CropPanel: public PicProcPanel
 		{
 			GetSize(&ww, &wh);
 			wxPaintDC dc(this);
-			dc.DrawBitmap(wxBitmap(img.Scale(iw*aspect, ih*aspect)),0,0);
-/*
+			//dc.DrawBitmap(wxBitmap(img.Scale(iw*aspect, ih*aspect)),0,0);
+
 			wxMemoryDC mdc;
-			displayimg = new wxBitmap(img);
 			mdc.SelectObject(*displayimg);
-			dc.StretchBlit(0,0,ww, wh, &mdc, 0, 0, img.GetWidth(), img.GetHeight());
-			displayimg->~wxBitmap();
-*/
+			dc.StretchBlit(0,0,iw*aspect, ih*aspect, &mdc, 0, 0, displayimg->GetWidth(), displayimg->GetHeight());
+			mdc.SelectObject(wxNullBitmap);
+
 			if (isaspect)
 				dc.SetPen(*wxYELLOW_PEN);
 			else
@@ -428,7 +437,7 @@ class CropPanel: public PicProcPanel
 
 	private:
 		//wxTextCtrl *widthedit, *heightedit;
-		wxImage img;
+		//wxImage img;
 		wxBitmap *displayimg;
 		int ww, iw, wh, ih;
 		int node, cropmode, mousex, mousey;
@@ -459,7 +468,6 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 	toolpanel = new CropPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorCrop::processPic(bool processnext) {
