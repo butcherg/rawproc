@@ -214,6 +214,13 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 	}
 }
 
+wxBitmap * PicPanel::getBitmap()
+{
+	return image;
+}
+		
+		
+
 void PicPanel::setStatusBar()
 {
 	if (display_dib)

@@ -35,6 +35,7 @@ class PicPanel: public wxPanel
 		void drawBox(wxDC &dc, int x, int y, int w,int h);
 		void RefreshPic();
 		void SetPic(gImage * dib, GIMAGE_CHANNEL channel=CHANNEL_RGB);
+		wxBitmap * getBitmap();
 		void SetThumbMode(int mode);
 		void SetColorManagement(bool b);
 		bool GetColorManagement();
