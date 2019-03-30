@@ -166,8 +166,15 @@ class RotatePreview: public wxPanel
 			sh = i.GetHeight();
 			
 			dc.SetDeviceOrigin((w-sw)/2, (h-sh)/2);
+			
+			wxBitmap * displayimg = new wxBitmap(i);
+			wxMemoryDC mdc;
+			mdc.SelectObject(*displayimg);
+			dc.Blit(0,0,displayimg->GetWidth(), displayimg->GetHeight(), &mdc, 0, 0);
+			mdc.SelectObject(wxNullBitmap);
+			displayimg->~wxBitmap();
 
-			dc.DrawBitmap(wxBitmap(i),0,0);
+			//dc.DrawBitmap(wxBitmap(i),0,0);
 
 			dc.SetPen(wxPen(*wxLIGHT_GREY, 1, wxPENSTYLE_SHORT_DASH));
 			dc.DrawLine(0,sh*0.2,sw,sh*0.2);
@@ -270,15 +277,17 @@ class RotatePanel: public PicProcPanel
 			b->Add(autocrop , 0, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 
-			hTransform = proc->getDisplay()->GetDisplayTransform();
-			if (hTransform) {
-				unsigned char* im = i.GetData();
-				unsigned w = i.GetWidth();
-				unsigned h = i.GetHeight();
-				#pragma omp parallel for
-				for (unsigned y=0; y<h; y++) {
-					unsigned pos = y*w*3;
-					cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+				hTransform = proc->getDisplay()->GetDisplayTransform();
+				if (hTransform) {
+					unsigned char* im = i.GetData();
+					unsigned w = i.GetWidth();
+					unsigned h = i.GetHeight();
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w*3;
+						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+					}
 				}
 			}
 				//cmsDoTransform(hTransform, i.GetData(), i.GetData(), i.GetWidth()*i.GetHeight());

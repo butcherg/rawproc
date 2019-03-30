@@ -87,10 +87,20 @@ class CropPanel: public PicProcPanel
 			wa = (double) ww/ (double) iw;
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
-
-			hTransform = q->getDisplay()->GetDisplayTransform();
-			if (hTransform)
-				cmsDoTransform(hTransform, img.GetData(), img.GetData(), iw*ih);
+			
+			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+				hTransform = q->getDisplay()->GetDisplayTransform();
+				if (hTransform) {
+					unsigned char* im = img.GetData();
+					unsigned w = img.GetWidth();
+					unsigned h = img.GetHeight();
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w*3;
+						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+					}
+				}
+			}
 
 			iwa = (double) iw / (double) ih;
 			iha = (double) ih / (double) iw;
