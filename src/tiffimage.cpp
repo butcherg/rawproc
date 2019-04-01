@@ -154,7 +154,6 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			}
 			else printf("TIFFReadEXIFDirectory failed\n");
 		}
-		else printf("TIFFGetField TIFFTAG_EXIFID failed\n");
 		
 		*width = w;
 		*height = h;
