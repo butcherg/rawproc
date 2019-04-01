@@ -450,6 +450,12 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		if (dib->getInfoValue("LibrawMosaiced") == "1") {
 			if (dib->getInfoValue("LibrawCFAPattern") != "") {
 				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				if (optype == multipliers)
+					m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
+				else if (optype == camera)
+					m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
+				else
+					m_tree->SetItemText(id, wxString::Format("whitebalance"));
 			}
 			else {
 				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
@@ -458,14 +464,21 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 			}
 		}
 		else {
-			if (optype == multipliers | optype == camera) {
+			if (optype == multipliers) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
+			} 
+			else if (optype == camera) {
+				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
 			}
 			else if (optype == imgpatch) {
 				wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+				m_tree->SetItemText(id, wxString::Format("whitebalance:patch"));
 			}
 			else if (optype == automatic) {
 				wbmults = dib->ApplyWhiteBalance(threadcount);
+				m_tree->SetItemText(id, wxString::Format("whitebalance:auto"));
 			}
 		}
 
