@@ -31,15 +31,16 @@ class CameraData
 				while(!contains(buf,"table[]")) fgets(buf, 255, f);
 				fgets(buf, 255, f); 
 				while(!contains(buf,"};")) {
-					struct cameradata c;
-					std::vector<std::string> t = split(std::string(buf), ",");
-					std::string makemodel = split(t[0], "\"")[1];
-					c.black = t[1];
-					c.maximum = t[2];
-					fgets(buf, 255, f); 
-					std::vector<std::string> m = split(std::string(buf), " ");
-					c.trans = m[1];
-					camdat[makemodel] = c;
+					if (contains(buf, "{")) {
+						struct cameradata c;
+						std::vector<std::string> t = split(std::string(buf), ",");
+						std::string makemodel = split(t[0], "\"")[1];
+						c.black = t[1];
+						c.maximum = t[2];
+						fgets(buf, 255, f); 
+						c.trans = split(split(std::string(buf), "{ ")[1], " }")[0];
+						camdat[makemodel] = c;
+					}
 					fgets(buf, 255, f); 
 				}
 				break;
@@ -122,8 +123,13 @@ class ColorspacePanel: public PicProcPanel
 			bpc = new wxCheckBox(this, COLORBPC, "black point compensation");
 			//bpc->SetValue(bpc);
 
-			makemodel = new wxStaticText(this,wxID_ANY, "--"); //, wxDefaultPosition, wxSize(30, -1));
-			primaries = new wxStaticText(this,wxID_ANY, "--"); //, wxDefaultPosition, wxSize(30, -1));
+			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
+			wxString makemodelstr = wxString(img.getInfoValue("Make"));
+			makemodelstr.Append(" ");
+			makemodelstr.Append(wxString(img.getInfoValue("Model")));
+
+			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
+			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
 
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
@@ -214,7 +220,8 @@ class ColorspacePanel: public PicProcPanel
 		void setPrimaries(wxString primstring)
 		{
 			primaries->SetLabel(primstring);
-			Refresh();
+			//Update();
+			primaries->Refresh();
 		}
 
 /*
@@ -473,7 +480,9 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 		}
 		
 		else if (cp[0] == "camera") {
-			wxFileName dcrawfile("dcraw.c");
+			//parm tool.colorspace.dcrawfile: Specifies the name of the file containing adobe_coeff camera data. Default: dcraw.c
+			//wxFileName dcrawfile("dcraw.c");
+			wxFileName dcrawfile(wxString(myConfig::getConfig().getValueOrDefault("tool.colorspace.dcrawfile","dcraw.c")));
 
 			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
 				dcrawfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.dcrawpath")));
@@ -507,7 +516,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							wxMessageBox("ColorSpace convert failed.");
 							result = false;
 						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
+						else m_tree->SetItemText(id, wxString::Format("colorspace:camera"));
 						wxString d = duration();
 
 						if (result) 
@@ -519,7 +528,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							wxMessageBox("ColorSpace assign failed.");
 							result = false;
 						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
+						else m_tree->SetItemText(id, wxString::Format("colorspace:camera"));
 						wxString d = duration();
 
 						if (result) 
@@ -527,7 +536,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 								log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 					}
 				}
-				else wxMessageBox(wxString::Format("primaries not found for %s",wxString(makemodel)));
+				else wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
 			}
 			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
 		}
