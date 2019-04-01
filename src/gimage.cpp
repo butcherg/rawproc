@@ -4018,42 +4018,97 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 	
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
-	
-	#pragma omp parallel
-	{
-		std::vector<unsigned> pr(scale,0);
-		std::vector<unsigned> pg(scale,0);
-		std::vector<unsigned> pb(scale,0);
-		
-		#pragma omp for
-		for(unsigned y = 0; y < h; y++) {
-			for(unsigned x = 0; x < w; x++) {
-				unsigned pos = x + y*w;
-				#if defined PIXHALF
-				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0_h),s-1.0_h))]++;
-				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0_h),s-1.0_h))]++;
-				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0_h),s-1.0_h))]++;
-				#elif defined PIXFLOAT
-				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0f),s-1.0f))]++;
-				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0f),s-1.0f))]++;
-				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0f),s-1.0f))]++;
-				#else
-				pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0),s-1.0))]++;
-				pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0),s-1.0))]++;
-				pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0),s-1.0))]++;
-				#endif
-			}
-		}
-		
-		#pragma omp critical 
+
+	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
+
+		std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
+		if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
+		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+		if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+
+		#pragma omp parallel
 		{
-			for (unsigned i=0; i<scale; i++) {
-				histogram[i].r += pr[i];
-				histogram[i].g += pg[i];
-				histogram[i].b += pb[i];
+			std::vector<unsigned> pr(scale,0);
+			std::vector<unsigned> pg(scale,0);
+			std::vector<unsigned> pb(scale,0);
+
+
+			#pragma omp for
+			for (unsigned y=0; y<h; y+=2) {
+				for (unsigned x=0; x<w; x+=2) {
+					unsigned pos[4];
+					pos[0] = x + y*w;  //upper left
+					pos[1] = (x+1) + y*w; //upper right
+					pos[2] = x + (y+1)*w; //lower leftfs
+					pos[3] = (x+1) + (y+1)*w;  //lower right
+					for (unsigned i=0; i<q.size(); i++) {
+						#if defined PIXHALF
+						if (q[i] == 0) pr[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0_h),s-1.0_h))]++;
+						if (q[i] == 1) pg[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0_h),s-1.0_h))]++;
+						if (q[i] == 2) pb[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0_h),s-1.0_h))]++;
+						#elif defined PIXFLOAT
+						if (q[i] == 0) pr[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0f),s-1.0f))]++;
+						if (q[i] == 1) pg[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0f),s-1.0f))]++;
+						if (q[i] == 2) pb[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0f),s-1.0f))]++;
+						#else
+						if (q[i] == 0) pr[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0),s-1.0))]++;
+						if (q[i] == 1) pg[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0),s-1.0))]++;
+						if (q[i] == 2) pb[(unsigned) lrint(fmin(fmax(image[pos[i]].r*s,0.0),s-1.0))]++;
+						#endif
+					}
+				}
+			}
+
+			#pragma omp critical 
+			{
+				for (unsigned i=0; i<scale; i++) {
+					histogram[i].r += pr[i];
+					histogram[i].g += pg[i];
+					histogram[i].b += pb[i];
+				}
 			}
 		}
 	}
+	else { //regular RGB image
+
+		#pragma omp parallel
+		{
+			std::vector<unsigned> pr(scale,0);
+			std::vector<unsigned> pg(scale,0);
+			std::vector<unsigned> pb(scale,0);
+		
+			#pragma omp for
+			for(unsigned y = 0; y < h; y++) {
+				for(unsigned x = 0; x < w; x++) {
+					unsigned pos = x + y*w;
+					#if defined PIXHALF
+					pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0_h),s-1.0_h))]++;
+					pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0_h),s-1.0_h))]++;
+					pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0_h),s-1.0_h))]++;
+					#elif defined PIXFLOAT
+					pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0f),s-1.0f))]++;
+					pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0f),s-1.0f))]++;
+					pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0f),s-1.0f))]++;
+					#else
+					pr[(unsigned) lrint(fmin(fmax(image[pos].r*s,0.0),s-1.0))]++;
+					pg[(unsigned) lrint(fmin(fmax(image[pos].g*s,0.0),s-1.0))]++;
+					pb[(unsigned) lrint(fmin(fmax(image[pos].b*s,0.0),s-1.0))]++;
+					#endif
+				}
+			}
+		
+			#pragma omp critical 
+			{
+				for (unsigned i=0; i<scale; i++) {
+					histogram[i].r += pr[i];
+					histogram[i].g += pg[i];
+					histogram[i].b += pb[i];
+				}
+			}
+		}
+
+	}
+
 	return histogram;
 }
 
