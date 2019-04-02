@@ -17,6 +17,8 @@
 #ifdef WIN32
 	#include <direct.h>
 	#include <io.h> 
+	#include <initguid.h>
+	#include <KnownFolders.h>
 	#include <shlobj.h>
 	#define GetCurrentDir _getcwd
 
@@ -76,26 +78,59 @@ std::string filepath_normalize(std::string str)
 	return str;
 }
 
-//don't use for Windows...
-std::string getAppConfigFilePath()
+
+//ToDo: add MacOS code for getAppConfigDir() and getExeDir()
+
+std::string getAppConfigDir(std::string filename="")
 {
 	std::string dir;
-	char *d = NULL;
+
 #ifdef WIN32
-//	if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, (PWSTR*) d))
-	//d = getenv("APPDATA");
-//		dir = std::string(to_utf8(d)) + "\\rawproc\\rawproc.conf";
-//	else
-		dir = "c:\\Users\\glenn\\AppData\\Roaming\\rawproc\\rawproc.conf";
+	wchar_t *roamingAppData = NULL;
+	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &roamingAppData);
+	char strng[128];
+	wcstombs(strng, roamingAppData, 128);
+	dir = std::string(strng) + "\\rawproc\\";
 #else
-	d = getenv("HOME");
-	if (d) dir = std::string(d) + "/.rawproc/rawproc.conf";
+	char *d = getenv("HOME");
+	if (d) dir = std::string(d) + "/.rawproc/"
+#endif
+	if (filename != "") dir.append(filename);
+	return dir;
+}
+
+
+std::string getExeDir(std::string filename="")
+{
+	std::string dir;
+
+#ifdef WIN32
+	TCHAR exePath[MAX_PATH];
+	GetModuleFileName(NULL, exePath, MAX_PATH) ;
+	dir = std::string(exePath);
+	dir.erase(dir.find_last_of('\\'));
+	if (filename != "") dir.append("\\"+filename);
+#else
+	char exePath[PATH_MAX];
+	size_t len = readlink("/proc/self/exe", exePath, sizeof(exePath));
+	if (len == -1 || len == sizeof(exePath))
+	        len = 0;
+	exePath[len] = '\0';
+	dir = std::string(exePath);
+	dir.erase(dir.find_last_of('/'));
+	if (filename != "") dir.append("/"+filename);
 #endif
 
-//	if (access( dir.c_str(), 0 ) == 0)
-		return dir;
-//	else
-//		return "";
+	return dir;
+}
+
+
+
+std::string getAppConfigFilePath()
+{
+	std::string path = getAppConfigDir();
+	path = path + "rawproc.conf";
+	return path;
 }
 
 std::string getCwd() 

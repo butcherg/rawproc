@@ -13,9 +13,14 @@ std::string de_underscore(std::string str);
 std::string filepath_normalize(std::string str);
 bool file_exists(const std::string& filename);
 
+
 std::string getAppConfigFilePath();
 std::string getCwdConfigFilePath();
 std::string getCwd();
+
+//returns the particular path, if filename != "", appends it to the returned path:
+std::string getAppConfigDir(std::string filename="");
+std::string getExeDir(std::string filename="");
 
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 std::vector<std::string> split(std::string s, std::string delim);
