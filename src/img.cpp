@@ -18,6 +18,7 @@
 #include "elapsedtime.h"
 #include "gimage/strutil.h"
 #include "myConfig.h"
+#include "CameraData.h"
 
 std::string param_string(std::string filter)
 {
@@ -213,6 +214,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			
 			std::string profile;
 			std::string profilepath =  gImage::getProfilePath(); //myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str();
+
 			if (profstr == NULL) {
 				printf("colorspace: no profile.\n");
 				return;
@@ -242,15 +244,72 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-			printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount);
-			_mark();
-			if (operation == "convert")
-				if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
-			else
-				dib.AssignColorspace(profilepath+profile);
-			printf("done (%fsec).\n",_duration());
 			char cs[256];
-			sprintf(cs, "%s:%s,%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
+
+			if (profile == "camera") {
+				std::string dcrawfile = "";
+				if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
+					dcrawfile = myConfig::getConfig().getValue("tool.colorspace.dcrawpath");
+					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
+				}
+
+				if (dcrawfile == "") {
+					dcrawfile = getExeDir("dcraw.c");
+					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
+				}
+
+				if (dcrawfile == "") {
+					dcrawfile = getAppConfigDir("dcraw.c");
+					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
+				}
+
+				if (dcrawfile == "") {
+					printf("Error: dcraw.c not found in either the tool.colorspace.dcrawpath, the executable's directory, or the app config directory.\n");
+					exit(1);
+				}
+
+				std::string makemodel;
+				if (dib.getInfoValue("Make") != "" & dib.getInfoValue("Model") != "") {
+					makemodel = dib.getInfoValue("Make");
+					makemodel.append(" ");
+					makemodel.append(dib.getInfoValue("Model"));
+				}
+				else {
+					printf("Error: camera make and/or model not found.\n");
+					exit(1);
+				}
+
+				CameraData c(dcrawfile);
+				std::string cam = c.getTrans(makemodel);
+				if (cam != "") {
+					printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
+					_mark();
+					if (operation == "convert") {
+						if (dib.ApplyColorspace(cam, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
+					}
+					else if (operation == "assign") {
+						if (dib.AssignColorspace(cam)!= GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
+					} 
+					else printf("Error: unrecognized operator %s ", operation.c_str());
+					sprintf(cs, "%s:%s,%s ",cmd,profile.c_str(),opstr);
+				}
+			}
+			else {
+				printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount); fflush(stdout);
+				_mark();
+				if (operation == "convert") {
+					if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s (%s)\n", dib.getLastErrorMessage().c_str(), profilepath.append(profile).c_str());
+					sprintf(cs, "%s:%s,%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
+				}
+				else if (operation == "assign") {
+					dib.AssignColorspace(profilepath+profile);
+					sprintf(cs, "%s:%s,%s ",cmd,profile.c_str(),opstr);
+				}
+				else printf("Error: unrecognized operator -%s- ", operation.c_str());
+
+			}
+
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			commandstring += std::string(cs);
 		}
 		
@@ -272,11 +331,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("bright: %0.2f (%d threads)... ",bright,threadcount);
+			printf("bright: %0.2f (%d threads)... ",bright,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, bright);
 			commandstring += std::string(cs);
@@ -293,7 +352,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("demosaic: %s (%d threads)... ",demosaic.c_str(),threadcount);
+			printf("demosaic: %s (%d threads)... ",demosaic.c_str(),threadcount); fflush(stdout);
 
 			_mark();
 			if (demosaic == "color")
@@ -323,7 +382,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				dib.ApplyDemosaicXTRANSMARKESTEIJN(1, false, threadcount);
 #endif
 			else printf("no-op... ");
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%s ",cmd, demosaic.c_str());
 			commandstring += std::string(cs);
@@ -334,7 +393,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			char *name = strtok(NULL, ",");
 			char *value = strtok(NULL, " ");
 			
-			printf("addexif: %s=%s ... ",name,value);
+			printf("addexif: %s=%s ... ",name,value); fflush(stdout);
 
 			dib.setInfo(std::string(name),std::string(value));
 		}
@@ -395,12 +454,12 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount);
+			printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
 			//dib.ApplyToneLine(blk, wht, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
 			commandstring += std::string(cs);
@@ -427,11 +486,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("contrast: %0.2f (%d threads)... ",contrast,threadcount);
+			printf("contrast: %0.2f (%d threads)... ",contrast,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, contrast);
 			commandstring += std::string(cs);
@@ -457,11 +516,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("gamma: %0.2f (%d threads)... ",gamma,threadcount);
+			printf("gamma: %0.2f (%d threads)... ",gamma,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, gamma);
 			commandstring += std::string(cs);
@@ -512,11 +571,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 					threadcount = gImage::ThreadCount();
 				else if (threadcount < 0) 
 					threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-				printf("resize: %dx%d,%s (%d threads)... ",w,h,algo.c_str(), threadcount);
+				printf("resize: %dx%d,%s (%d threads)... ",w,h,algo.c_str(), threadcount); fflush(stdout);
 
 				_mark();
 				dib.ApplyResize(w,h, filter, threadcount);
-				printf("done (%fsec).\n", _duration());
+				printf("done (%fsec).\n", _duration()); fflush(stdout);
 				char cs[256];
 				if (wstr)
 					if (hstr)
@@ -540,11 +599,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("rotate: %0.2f (%d threads)... ",angle,threadcount);
+			printf("rotate: %0.2f (%d threads)... ",angle,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyRotate(angle, false, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, angle);
 			commandstring += std::string(cs);
@@ -560,11 +619,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount);
+			printf("sharp: %0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplySharpen(sharp, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.0f ",cmd, sharp);
 			commandstring += std::string(cs);
@@ -588,11 +647,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("crop: %d,%d %dx%d (%d threads)... ",x,y,width,height,threadcount);
+			printf("crop: %d,%d %dx%d (%d threads)... ",x,y,width,height,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyCrop(x,y,width,height,threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%d,%d,%d,%d ",cmd, x, y, width, height);
 			commandstring += std::string(cs);
@@ -609,11 +668,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("saturate: %0.2f (%d threads)... ",saturation,threadcount);
+			printf("saturate: %0.2f (%d threads)... ",saturation,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplySaturate(saturation, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, saturation);
 			commandstring += std::string(cs);
@@ -636,11 +695,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("denoise: %0.2f (%d threads)... ",sigma,threadcount);
+			printf("denoise: %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyNLMeans(sigma, local, patch, threadcount);  
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%d,%d ",cmd, sigma, 3, 1);
 			commandstring += std::string(cs);
@@ -661,11 +720,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("tint: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
+			printf("tint: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyTint(red,green,blue, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
 			commandstring += std::string(cs);
@@ -689,49 +748,69 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			char *p = strtok(NULL, " ");
 			if (p) {
 				std::vector<std::string> parm = split(std::string(p),",");
-				if (parm[0] == "auto") {
-					op = "auto";
-					printf("whitebalance: %s (%d threads)... ",op.c_str(),threadcount);
-					_mark();
-					dib.ApplyWhiteBalance(threadcount);
-					printf("done (%fsec).\n",_duration());
-					sprintf(cs, "%s:%s ",cmd, op.c_str());
-				}
-				else if (parm[0] == "patch") {
-					op = "patch";
-					patchx   = atoi(parm[1].c_str());
-					patchy   = atoi(parm[2].c_str());
-					patchrad = atof(parm[3].c_str());
-					printf("whitebalance: %s,%d,%d,%0.1f (%d threads)... ",op.c_str(),patchx,patchy,patchrad,threadcount);
-					_mark();
-					dib.ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
-					printf("done (%fsec).\n",_duration());
-					sprintf(cs, "%s:%s,%d,%d,%0.1f ",cmd, op.c_str(), patchx, patchy, patchrad);
-				}
-				else if (parm[0] == "camera") {
-					op = "camera";
-					std::string cameraWB = dib.getInfoValue("LibrawWhiteBalance");
-					if (cameraWB != "") {
-						std::vector<std::string> m = split(cameraWB,",");
-						redmult   = atof(m[0].c_str());
-						greenmult = atof(m[1].c_str());
-						bluemult  = atof(m[2].c_str());
-						printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op.c_str(),redmult,greenmult,bluemult,threadcount);
+				if (dib.getInfoValue("LibrawMosaiced") == "0") {
+					if (parm[0] == "auto") {
+						op = "auto";
+						printf("whitebalance: %s (%d threads)... ",op.c_str(),threadcount); fflush(stdout);
 						_mark();
-						dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
-						printf("done (%fsec).\n",_duration());
+						dib.ApplyWhiteBalance(threadcount);
+						printf("done (%fsec).\n",_duration()); fflush(stdout);
 						sprintf(cs, "%s:%s ",cmd, op.c_str());
 					}
+					else if (parm[0] == "patch") {
+						op = "patch";
+						patchx   = atoi(parm[1].c_str());
+						patchy   = atoi(parm[2].c_str());
+						patchrad = atof(parm[3].c_str());
+						printf("whitebalance: %s,%d,%d,%0.1f (%d threads)... ",op.c_str(),patchx,patchy,patchrad,threadcount); fflush(stdout);
+						_mark();
+						dib.ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+						printf("done (%fsec).\n",_duration()); fflush(stdout);
+						sprintf(cs, "%s:%s,%d,%d,%0.1f ",cmd, op.c_str(), patchx, patchy, patchrad);
+					}
+					else if (parm[0] == "camera") {
+						op = "camera";
+						std::string cameraWB = dib.getInfoValue("LibrawWhiteBalance");
+						if (cameraWB != "") {
+							std::vector<std::string> m = split(cameraWB,",");
+							redmult   = atof(m[0].c_str());
+							greenmult = atof(m[1].c_str());
+							bluemult  = atof(m[2].c_str());
+							printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op.c_str(),redmult,greenmult,bluemult,threadcount); fflush(stdout);
+							_mark();
+							dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+							printf("done (%fsec).\n",_duration()); fflush(stdout);
+							sprintf(cs, "%s:%s ",cmd, op.c_str());
+						}
+					}
+					else { // parameters are just three multipliers
+						redmult   = atof(parm[0].c_str());
+						greenmult = atof(parm[1].c_str());
+						bluemult  = atof(parm[2].c_str());
+						printf("whitebalance: %0.1f,%0.1f,%0.1f (%d threads)... ",redmult, greenmult, bluemult,threadcount); fflush(stdout);
+						_mark();
+						dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+						printf("done (%fsec).\n",_duration()); fflush(stdout);
+						sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+					}
 				}
-				else { // parameters are just three multipliers
-					redmult   = atof(parm[0].c_str());
-					greenmult = atof(parm[1].c_str());
-					bluemult  = atof(parm[2].c_str());
-					printf("whitebalance: %0.1f,%0.1f,%0.1f (%d threads)... ",redmult, greenmult, bluemult,threadcount);
-					_mark();
-					dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
-					printf("done (%fsec).\n",_duration());
-					sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+				else {
+					if (parm[0] == "camera") {
+						op = "camera";
+						std::string cameraWB = dib.getInfoValue("LibrawWhiteBalance");
+						if (cameraWB != "") {
+							std::vector<std::string> m = split(cameraWB,",");
+							redmult   = atof(m[0].c_str());
+							greenmult = atof(m[1].c_str());
+							bluemult  = atof(m[2].c_str());
+							printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op.c_str(),redmult,greenmult,bluemult,threadcount); fflush(stdout);
+							_mark();
+							dib.ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+							printf("done (%fsec).\n",_duration()); fflush(stdout);
+							sprintf(cs, "%s:%s ",cmd, op.c_str());
+						}
+					}
+					else printf("whitebalance: Error: only camera white balance can be applied to pre-demosaiced images.\n");
 				}
 				commandstring += std::string(cs);
 			}
@@ -754,11 +833,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("gray: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
+			printf("gray: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyGray(red,green,blue, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
 			commandstring += std::string(cs);
@@ -785,10 +864,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 						threadcount = gImage::ThreadCount();
 					else if (threadcount < 0) 
 						threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-					printf("redeye (%d threads)... ", threadcount);
+					printf("redeye (%d threads)... ", threadcount); fflush(stdout);
 					_mark();
 					dib.ApplyRedeye(pts, threshold, limit, false, 1.0,  threadcount);
-					printf("done (%fsec).\n",_duration());
+					printf("done (%fsec).\n",_duration()); fflush(stdout);
 				}
 				else printf("redeye: bad y coord\n");
 			}
@@ -823,10 +902,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("curve: %s (%d threads)... ",p,threadcount);
+			printf("curve: %s (%d threads)... ",p,threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%s ",cmd, p);
 			commandstring += std::string(cs);
@@ -844,11 +923,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("exposure: %0.2f (%d threads)... ",ev,threadcount);
+			printf("exposure: %0.2f (%d threads)... ",ev,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyExposureCompensation(ev, threadcount);  //local and patch hard-coded, for now...
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, ev);
 			commandstring += std::string(cs);
@@ -876,14 +955,14 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("subtract: %f (%d threads)... ",subtract,threadcount);
+			printf("subtract: %f (%d threads)... ",subtract,threadcount); fflush(stdout);
 
 			_mark();
 			if (strcmp(v,"file") == 0)
 				dib.ApplySubtract(std::string(filename), threadcount);  
 			else
 				dib.ApplySubtract(subtract, threadcount);  
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f ",cmd, subtract);
 			commandstring += std::string(cs);
@@ -910,11 +989,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("highlight: %0.2f,%0.2f (%d threads)... ",highlight,threshold,threadcount);
+			printf("highlight: %0.2f,%0.2f (%d threads)... ",highlight,threshold,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, highlight,threshold);
 			commandstring += std::string(cs);
@@ -941,11 +1020,11 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("shadow: %0.2f,%0.2f (%d threads)... ",shadow,threshold,threadcount);
+			printf("shadow: %0.2f,%0.2f (%d threads)... ",shadow,threshold,threadcount); fflush(stdout);
 
 			_mark();
 			dib.ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.0f,%0.0f ",cmd, shadow,threshold);
 			commandstring += std::string(cs);
@@ -954,10 +1033,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		//img <li>rotate90 - rotate 90 degrees clockwise</li>
 		else if (strcmp(cmd,"rotate90") == 0) {
 			int threadcount = gImage::ThreadCount();
-			printf("rotate90 (%d threads)... ", threadcount);
+			printf("rotate90 (%d threads)... ", threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyRotate90(threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "rotate:90 ");
 			commandstring += std::string(cs);
@@ -966,10 +1045,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		//img <li>rotate180 - rotate 180 degrees</li>
 		else if (strcmp(cmd,"rotate180") == 0) {
 			int threadcount = gImage::ThreadCount();
-			printf("rotate180 (%d threads)... ", threadcount);
+			printf("rotate180 (%d threads)... ", threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyRotate180(threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "rotate:180 ");
 			commandstring += std::string(cs);
@@ -978,10 +1057,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		//img <li>rotate270 - rotate 270 degrees clockwise</li>
 		else if (strcmp(cmd,"rotate270") == 0) {
 			int threadcount = gImage::ThreadCount();
-			printf("rotate270 (%d threads)... ", threadcount);
+			printf("rotate270 (%d threads)... ", threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyRotate270(threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "rotate:270 ");
 			commandstring += std::string(cs);
@@ -991,19 +1070,19 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		//img <li>hmirror - flip horizontal</li>
 		else if (strcmp(cmd,"hmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
-			printf("mirror horizontal (%d threads)... ", threadcount);
+			printf("mirror horizontal (%d threads)... ", threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyHorizontalMirror(threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 		}
 
 		//img <li>vmirror - flip upside down</li>	
 		else if (strcmp(cmd,"vmirror") == 0) {
 			int threadcount = gImage::ThreadCount();
-			printf("mirror vertical (%d threads)... ", threadcount);
+			printf("mirror vertical (%d threads)... ", threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyVerticalMirror(threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 		}
 
 		else if (strcmp(cmd,"tonescale") == 0) {  
@@ -1022,7 +1101,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
                                 threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			printf("tonescale: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount);
+			printf("tonescale: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount); fflush(stdout);
 			_mark();
 
 			gImage mask = gImage(dib);
@@ -1048,7 +1127,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 
 
 			//dib.ApplyToneGrayMask(red,green,blue, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
 			commandstring += std::string(cs);
@@ -1083,10 +1162,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			for (unsigned i=0; i<25; i++) kdata.push_back(karray[i]);
 
 			int threadcount = gImage::ThreadCount();
-			printf("blur, 2Dkernel: %s (%d threads)... ",k, threadcount);
+			printf("blur, 2Dkernel: %s (%d threads)... ",k, threadcount); fflush(stdout);
 			_mark();
 			dib.Apply2DConvolutionKernel(kdata, 5, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			if (k)
 				sprintf(cs, "%s:%s ",cmd, k);
@@ -1106,10 +1185,10 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 
 			int threadcount = gImage::ThreadCount();
 
-			printf("blur: sigma=%0.1f, kernelsize=%d (%d threads)... ", sigma, kernelsize, threadcount);
+			printf("blur: sigma=%0.1f, kernelsize=%d (%d threads)... ", sigma, kernelsize, threadcount); fflush(stdout);
 			_mark();
 			dib.ApplyGaussianBlur(sigma, kernelsize, threadcount);
-			printf("done (%fsec).\n",_duration());
+			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			if (s)
 				if (k)
@@ -1129,7 +1208,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			if (countchar(outfilename,'*') == 1) outfilename = makename(outfile, outfilename);
 
 			if (!force && file_exists(outfilename.c_str())) {
-				printf("save: file %s exists, skipping...\n",outfilename.c_str());
+				printf("save: file %s exists, skipping...\n",outfilename.c_str()); fflush(stdout);
 			}
 			else {
 
@@ -1140,7 +1219,7 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			} 
 		}
 
-		else printf("Unrecognized command: %s.  Continuing...\n",cmd);
+		else printf("Unrecognized command: %s.  Continuing...\n",cmd); fflush(stdout);
 
 }
 
