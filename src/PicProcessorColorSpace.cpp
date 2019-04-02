@@ -4,6 +4,7 @@
 #include "util.h"
 #include "gimage/strutil.h"
 #include "myConfig.h"
+#include "CameraData.h"
 #include <wx/stdpaths.h>
 
 #define COLORENABLE 6500
@@ -14,7 +15,7 @@
 #define COLORPROFILE 6505
 #define COLORCAMERA 6506
 
-
+/*
 struct cameradata {
 	std::string black, maximum, trans;
 };
@@ -67,7 +68,7 @@ class CameraData
 				return camdat[makemodel].trans;
 			return "";
 		}
-/*
+
 		struct cameradata getData(std::string makemodel)
 		{
 			struct cameradata cd;
@@ -75,7 +76,7 @@ class CameraData
 				cd = camdat[makemodel];
 			return cd;
 		}
-*/
+
 
 	private:
 		std::map<std::string, struct cameradata> camdat;
@@ -83,7 +84,7 @@ class CameraData
 
 
 };
-
+*/
 
 class ColorspacePanel: public PicProcPanel
 {
@@ -131,6 +132,25 @@ class ColorspacePanel: public PicProcPanel
 			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
 
+			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "profile,op,intent,bpc");
+
+			if (p.find("profile") != p.end()) { 
+				if (p["profile"] == "camera") {
+					camb->SetValue(true);
+					cpmode = COLORCAMERA;
+				}
+				else {
+					profileb->SetValue(true);
+					cpmode = COLORPROFILE;
+					edit->SetValue(wxString(p["profile"]));
+					if (p["op"] == "convert") operselect->SetSelection(0); else operselect->SetSelection(1);
+					if      (p["intent"] == "perceptual") intentselect->SetSelection(0);
+					else if (p["intent"] == "saturation") intentselect->SetSelection(1);
+					else if (p["intent"] == "relative_colorimetric") intentselect->SetSelection(2);
+					else if (p["intent"] == "absolute_colorimetric") intentselect->SetSelection(3);
+				}
+			}
+
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
 			m->NextRow();
@@ -167,7 +187,6 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &ColorspacePanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this, COLORFILE);
-			//Bind(wxEVT_BUTTON, &ColorspacePanel::lookupCamera, this, COLORCAMERA);
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::paramChanged, this, COLORBPC);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::onEnable, this, COLORENABLE);
@@ -199,7 +218,15 @@ class ColorspacePanel: public PicProcPanel
 		void processCS()
 		{
 			if (cpmode == COLORPROFILE) {
-
+				wxString profilestr = edit->GetValue();
+				wxString operstr = operselect->GetString(operselect->GetSelection());
+				wxString intentstr = intentselect->GetString(intentselect->GetSelection());
+				if (bpc->GetValue()) intentstr.Append(",bpc");
+				if  (operselect->GetSelection() == 1)
+					q->setParams(wxString::Format("%s,%s",profilestr, operstr));
+				else
+					q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
+				q->processPic();
 			}
 			else if (cpmode == COLORCAMERA) {
 				q->setParams("camera,assign");
@@ -210,7 +237,7 @@ class ColorspacePanel: public PicProcPanel
 
 		void setParams(wxString profile, wxString oper, wxString intent)
 		{
-			if  (oper == "assign")
+			if  (operselect->GetSelection() == 0)
 				q->setParams(wxString::Format("%s,%s",profile, oper));
 			else
 				q->setParams(wxString::Format("%s,%s,%s",profile, oper, intent));
@@ -224,53 +251,6 @@ class ColorspacePanel: public PicProcPanel
 			primaries->Refresh();
 		}
 
-/*
-		void lookupCamera(wxCommandEvent& event)
-		{
-			wxString cam = "";
-			wxString operstr = operselect->GetString(operselect->GetSelection());
-			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
-			if (bpc->GetValue()) intentstr.Append(",bpc");
-
-			wxFileName dcrawfile("dcraw.c");
-
-			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
-				dcrawfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.dcrawpath")));
-				if (!dcrawfile.FileExists()) {
-					wxMessageBox("dcraw.c not found in tool.colorspace.dcrawpath");
-					return;
-				}
-			}
-			else {
-				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
-				if (!dcrawfile.FileExists()) {
-printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().ToStdString().c_str());
-					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
-					if (!dcrawfile.FileExists()) {
-						wxMessageBox("dcraw.c not found in any of the proscribed locations");
-						return;
-					}
-				}
-			}
-			
-			std::string makemodel = q->getProcessedPicPointer()->getInfoValue("Make");
-			makemodel.append(" ");
-			makemodel.append(q->getProcessedPicPointer()->getInfoValue("Model"));
-
-			if (dcrawfile.FileExists()) {
-				CameraData c(dcrawfile.GetFullPath().ToStdString());
-				cam = wxString(c.getTrans(makemodel));
-				if (cam != "") {
-					wxMessageBox(wxString::Format("found primaries for %s",wxString(makemodel)));
-					edit->SetValue(cam);
-					setParams(cam, operstr,intentstr);			
-					q->processPic();
-				}
-			}
-			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
-			event.Skip();
-		}
-*/
 
 		void selectProfile(wxCommandEvent& event)
 		{
@@ -294,7 +274,7 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 				else
 					setParams(fname.GetFullPath(), operstr,intentstr);
 					//q->setParams(wxString::Format("%s,%s,%s",fname.GetFullPath(), operstr,intentstr));					
-				q->processPic();
+				if (cpmode == COLORPROFILE) processCS();
 			}
 			event.Skip();
 		}
@@ -305,6 +285,12 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 			if (!e) operselect->SetSelection(1);
 		}
 
+		void paramChanged(wxCommandEvent& event)
+		{
+			if (cpmode == COLORPROFILE) processCS();
+		}
+
+/*
 		void paramChanged(wxCommandEvent& event)
 		{
 
@@ -325,17 +311,12 @@ printf("exepath: %s\n",wxFileName(wxStandardPaths::Get().GetExecutablePath()).Ge
 
 			if (profilestr != "(none)") {
 				setParams(profilestr, operstr, intentstr);
-/*
-				if  (operstr == "assign")
-					q->setParams(wxString::Format("%s,%s",profilestr, operstr));
-				else
-					q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
-*/
+
 				q->processPic();
 			}
 			event.Skip();
 		}
-
+*/
 
 	private:
 		wxCheckBox *bpc, *enablebox;
@@ -435,7 +416,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				switch (ret) {
 					case GIMAGE_OK:
 						result = true;
-						m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
+						m_tree->SetItemText(id, wxString::Format("colorspace:profile,convert"));
 						break;
 					case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
 						wxMessageBox("ColorSpace apply: no input profile in image.");
@@ -469,7 +450,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					wxMessageBox("ColorSpace assign failed.");
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
+				else m_tree->SetItemText(id, wxString::Format("colorspace:profile,assign"));
 				wxString d = duration();
 
 				if (result) 
@@ -516,7 +497,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							wxMessageBox("ColorSpace convert failed.");
 							result = false;
 						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:camera"));
+						else m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
 						wxString d = duration();
 
 						if (result) 
@@ -528,7 +509,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							wxMessageBox("ColorSpace assign failed.");
 							result = false;
 						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:camera"));
+						else m_tree->SetItemText(id, wxString::Format("colorspace:camera,assign"));
 						wxString d = duration();
 
 						if (result) 
@@ -547,7 +528,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					wxMessageBox("ColorSpace convert failed.");
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:convert"));
+				else m_tree->SetItemText(id, wxString::Format("colorspace:dcraw,convert"));
 				wxString d = duration();
 
 				if (result) 
@@ -559,7 +540,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					wxMessageBox("ColorSpace assign failed.");
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:assign"));
+				else m_tree->SetItemText(id, wxString::Format("colorspace:dcraw,assign"));
 				wxString d = duration();
 
 				if (result) 
