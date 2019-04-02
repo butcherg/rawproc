@@ -630,6 +630,8 @@ std::string gImage::getLastErrorMessage()
 	if (lasterror == GIMAGE_UNSUPPORTED_FILEFORMAT) return "GIMAGE_UNSUPPORTED_FILEFORMAT";
 	
 	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADPROFILE) return "GIMAGE_APPLYCOLORSPACE_BADPROFILE";
+	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADINPUTPROFILE) return "GIMAGE_APPLYCOLORSPACE_BADINPUTPROFILE";
+	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADOUTPUTPROFILE) return "GIMAGE_APPLYCOLORSPACE_BADOUTPUTPROFILE";
 	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADINTENT) return "GIMAGE_APPLYCOLORSPACE_BADINTENT";
 	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADTRANSFORM) return "GIMAGE_APPLYCOLORSPACE_BADTRANSFORM";
 	
@@ -3632,7 +3634,7 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	cmsHTRANSFORM hTransform;
 	cmsUInt32Number dwFlags = 0;
 
-	if (profile == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+	if (profile == NULL) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINPUTPROFILE; return lasterror;}
 	
 	if (blackpointcomp) dwFlags = cmsFLAGS_BLACKPOINTCOMPENSATION;
 
@@ -3647,8 +3649,8 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	
-	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
-	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADPROFILE; return lasterror;}
+	if (!gImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINPUTPROFILE; return lasterror;}
+	if (!hImgProf) {lasterror = GIMAGE_APPLYCOLORSPACE_BADOUTPUTPROFILE; return lasterror;}
 
 	if (!cmsIsIntentSupported(gImgProf, intent, LCMS_USED_AS_INPUT))  {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
 	if (!cmsIsIntentSupported(hImgProf, intent, LCMS_USED_AS_OUTPUT)) {lasterror = GIMAGE_APPLYCOLORSPACE_BADINTENT; return lasterror;}
