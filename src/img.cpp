@@ -279,8 +279,9 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 					exit(1);
 				}
 
-				CameraData c(dcrawfile);
-				std::string cam = c.getTrans(makemodel);
+				CameraData c;
+				c.parseDcraw(dcrawfile);
+				std::string cam = c.getItem(makemodel, "dcraw_matrix");
 				if (cam != "") {
 					printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
 					_mark();

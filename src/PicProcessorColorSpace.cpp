@@ -412,14 +412,15 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					}
 				}
 			}
-			
+
 			std::string makemodel = dib->getInfoValue("Make");
 			makemodel.append(" ");
 			makemodel.append(dib->getInfoValue("Model"));
-			
+
 			if (dcrawfile.FileExists()) {
-				CameraData c(dcrawfile.GetFullPath().ToStdString());
-				std::string cam = c.getTrans(makemodel);
+				CameraData c;
+				c.parseDcraw(dcrawfile.GetFullPath().ToStdString());
+				std::string cam = c.getItem(makemodel, "dcraw_matrix");
 				((ColorspacePanel *) toolpanel)->setPrimaries(cam);
 				if (cam != "") {
 					if (cp[1] == "convert") {
