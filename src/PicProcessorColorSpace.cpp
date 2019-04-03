@@ -260,6 +260,7 @@ class ColorspacePanel: public PicProcPanel
 
 PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
+	dcraw_primaries = "";
 	//showParams();
 }
 
@@ -391,69 +392,27 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 		}
 		
 		else if (cp[0] == "camera") {
-			std::string dcrawpath = "";
-
-			//parm tool.colorspace.dcrawfile: Specifies the name of the file containing adobe_coeff camera data. Default: dcraw.c
-			wxFileName dcrawfile(wxString(myConfig::getConfig().getValueOrDefault("tool.colorspace.dcrawfile","dcraw.c")));
-
-			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
-				dcrawfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.dcrawpath")));
-				if (dcrawfile.FileExists()) {
-					dcrawpath = dcrawfile.GetFullPath().ToStdString();
-				}
-			}
-
-			if (dcrawpath == "") {
-				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
-				if (dcrawfile.FileExists()) {
-					dcrawpath = dcrawfile.GetFullPath().ToStdString();
-				}
-				else {
-					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
-					if (dcrawfile.FileExists()) {
-						dcrawpath = dcrawfile.GetFullPath().ToStdString();
-					}
-				}
-			}
-
-			std::string camconstpath = "";
-
-			//parm tool.colorspace.camconstfile: Specifies the name of the file containing adobe_coeff camera data. Default: dcraw.c
-			wxFileName camconstfile(wxString(myConfig::getConfig().getValueOrDefault("tool.colorspace.camconstfile","camconst.json")));
-
-			if (myConfig::getConfig().exists("tool.colorspace.camconstpath")) {
-				camconstfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.camconstpath")));
-				if (camconstfile.FileExists()) {
-					camconstpath = camconstfile.GetFullPath().ToStdString();
-				}
-			}
-			else {
-				camconstfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
-				if (camconstfile.FileExists()) {
-					camconstpath = camconstfile.GetFullPath().ToStdString();
-				}
-				else {
-					camconstfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
-					if (camconstfile.FileExists()) {
-						camconstpath = camconstfile.GetFullPath().ToStdString();
-					}
-				}
-			}
-
-printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
-printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
 
 			std::string makemodel = dib->getInfoValue("Make");
 			makemodel.append(" ");
 			makemodel.append(dib->getInfoValue("Model"));
 
+			std::string dcrawpath = CameraData::findFile("dcraw.c","tool.colorspace.dcrawpath");
+			std::string camconstpath = CameraData::findFile("camconst.json","tool.colorspace.camconstpath");
+
 			if (file_exists(dcrawpath)) {
-				CameraData c;
-				c.parseDcraw(dcrawpath);
-				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
-				std::string cam = c.getItem(makemodel, "dcraw_matrix");
-				((ColorspacePanel *) toolpanel)->setPrimaries(cam);
-				if (cam != "") {
+				if (dcraw_primaries == "") {
+
+					printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
+					printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
+					CameraData c;
+					c.parseDcraw(dcrawpath);
+					//if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
+					dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
+				}
+				std::string cam =  dcraw_primaries.ToStdString();
+				((ColorspacePanel *) toolpanel)->setPrimaries(dcraw_primaries);
+				if (dcraw_primaries != "") {
 					if (cp[1] == "convert") {
 						if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
 							wxMessageBox("ColorSpace convert failed.");
@@ -481,7 +440,7 @@ printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
 				}
 				else wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
 			}
-			else wxMessageBox(wxString::Format("%s not found",dcrawfile.GetFullPath()));
+			else wxMessageBox(wxString::Format("%s not found",wxString(dcrawpath)));
 		}
 
 		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
