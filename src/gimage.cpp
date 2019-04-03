@@ -4602,11 +4602,17 @@ void printrgb(double (*p)[3])
 	printf("\n");
 }
 
-//make a linear D65 profile from a dcraw adobe_coeff entry, 
-//e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181
+// make a linear D65 profile from a dcraw adobe_coeff entry, 
+// e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181
+// also takes a json array, e.g., [ 8198, -2239, -724, -4871, 12389, 2798, -1043, 2050, 7181 ]
 cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 {
 	double in_XYZ[3][3], inverse[3][3], out_XYZ[3][3];
+
+	//if json, remove the extraneous characters;
+	adobecoeff.erase(std::remove(adobecoeff.begin(), adobecoeff.end(), ' '), adobecoeff.end());
+	adobecoeff.erase(std::remove(adobecoeff.begin(), adobecoeff.end(), '['), adobecoeff.end());
+	adobecoeff.erase(std::remove(adobecoeff.begin(), adobecoeff.end(), ']'), adobecoeff.end());
 	
 	std::vector<std::string> mat = split(adobecoeff, ",");
 	for (unsigned i=0; i<3; i++) {
