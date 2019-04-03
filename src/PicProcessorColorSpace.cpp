@@ -391,35 +391,66 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 		}
 		
 		else if (cp[0] == "camera") {
+			std::string dcrawpath = "";
+
 			//parm tool.colorspace.dcrawfile: Specifies the name of the file containing adobe_coeff camera data. Default: dcraw.c
-			//wxFileName dcrawfile("dcraw.c");
 			wxFileName dcrawfile(wxString(myConfig::getConfig().getValueOrDefault("tool.colorspace.dcrawfile","dcraw.c")));
 
 			if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
 				dcrawfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.dcrawpath")));
-				if (!dcrawfile.FileExists()) {
-					wxMessageBox("dcraw.c not found in tool.colorspace.dcrawpath");
-					return false;
+				if (dcrawfile.FileExists()) {
+					dcrawpath = dcrawfile.GetFullPath().ToStdString();
 				}
 			}
-			else {
+
+			if (dcrawpath == "") {
 				dcrawfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
-				if (!dcrawfile.FileExists()) {
+				if (dcrawfile.FileExists()) {
+					dcrawpath = dcrawfile.GetFullPath().ToStdString();
+				}
+				else {
 					dcrawfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
-					if (!dcrawfile.FileExists()) {
-						wxMessageBox("dcraw.c not found in any of the proscribed locations");
-						return false;
+					if (dcrawfile.FileExists()) {
+						dcrawpath = dcrawfile.GetFullPath().ToStdString();
 					}
 				}
 			}
+
+			std::string camconstpath = "";
+
+			//parm tool.colorspace.camconstfile: Specifies the name of the file containing adobe_coeff camera data. Default: dcraw.c
+			wxFileName camconstfile(wxString(myConfig::getConfig().getValueOrDefault("tool.colorspace.camconstfile","camconst.json")));
+
+			if (myConfig::getConfig().exists("tool.colorspace.camconstpath")) {
+				camconstfile.SetPath(wxString(myConfig::getConfig().getValue("tool.colorspace.camconstpath")));
+				if (camconstfile.FileExists()) {
+					camconstpath = camconstfile.GetFullPath().ToStdString();
+				}
+			}
+			else {
+				camconstfile.SetPath(wxStandardPaths::Get().GetUserDataDir());
+				if (camconstfile.FileExists()) {
+					camconstpath = camconstfile.GetFullPath().ToStdString();
+				}
+				else {
+					camconstfile.SetPath(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
+					if (camconstfile.FileExists()) {
+						camconstpath = camconstfile.GetFullPath().ToStdString();
+					}
+				}
+			}
+
+printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
+printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
 
 			std::string makemodel = dib->getInfoValue("Make");
 			makemodel.append(" ");
 			makemodel.append(dib->getInfoValue("Model"));
 
-			if (dcrawfile.FileExists()) {
+			if (file_exists(dcrawpath)) {
 				CameraData c;
-				c.parseDcraw(dcrawfile.GetFullPath().ToStdString());
+				c.parseDcraw(dcrawpath);
+				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				std::string cam = c.getItem(makemodel, "dcraw_matrix");
 				((ColorspacePanel *) toolpanel)->setPrimaries(cam);
 				if (cam != "") {
