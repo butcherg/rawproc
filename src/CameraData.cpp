@@ -43,7 +43,7 @@ void CameraData::parseDcraw(std::string filename)
 		}
 		break;
 	}
-	printf("CameraData: %d dcraw.c additions (%d duplicates), %d entries total...\n",i,d,camdat.size()); fflush(stdout);
+	printf("CameraData: %d dcraw.c additions (%d duplicates), %ld entries total...\n",i,d, camdat.size()); fflush(stdout);
 }
 
 void CameraData::parseCamconst(std::string filename)
@@ -103,7 +103,7 @@ void CameraData::parseCamconst(std::string filename)
 
 	if (json) cJSON_Delete(json);
 
-	printf("CameraData: %d camconst.json additions (%d duplicates), %d entries total...\n",i,d,camdat.size()); fflush(stdout);
+	printf("CameraData: %d camconst.json additions (%d duplicates), %ld entries total...\n",i,d,camdat.size()); fflush(stdout);
 }
 
 std::string CameraData::getItem(std::string makemodel, std::string itemname)
@@ -124,18 +124,18 @@ std::string CameraData::findFile(std::string filename, std::string propertypath)
 	if (propertypath != "") {
 		if (myConfig::getConfig().exists(propertypath)) {
 			foundfile = myConfig::getConfig().getValue(propertypath);
-			if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+			if (!file_exists(foundfile.c_str())) foundfile == "";
 		}
 	}
 
 	if (foundfile == "") {
 		foundfile = getExeDir(filename);
-		if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+		if (!file_exists(foundfile.c_str())) foundfile == "";
 	}
 
 	if (foundfile == "") {
 		foundfile = getAppConfigDir(filename);
-		if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+		if (!file_exists(foundfile.c_str())) foundfile == "";
 	}
 
 	return foundfile;

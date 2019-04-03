@@ -390,6 +390,8 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			}
 	
 		}
+
+
 		
 		else if (cp[0] == "camera") {
 
@@ -400,14 +402,16 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			std::string dcrawpath = CameraData::findFile("dcraw.c","tool.colorspace.dcrawpath");
 			std::string camconstpath = CameraData::findFile("camconst.json","tool.colorspace.camconstpath");
 
+printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
+printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
+
 			if (file_exists(dcrawpath)) {
 				if (dcraw_primaries == "") {
-
 					printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
 					printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
 					CameraData c;
 					c.parseDcraw(dcrawpath);
-					//if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
+					if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 					dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
 				}
 				std::string cam =  dcraw_primaries.ToStdString();
