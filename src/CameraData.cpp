@@ -4,6 +4,10 @@
 #include <vector>
 #include <stdio.h>
 
+#ifdef USECONFIG
+#include "myConfig.h"
+#include <unistd.h>
+#endif
 
 CameraData::CameraData()
 {
@@ -106,4 +110,36 @@ std::string CameraData::getItem(std::string makemodel, std::string itemname)
 {
 	return camdat[makemodel][itemname];
 }
+
+#ifdef USECONFIG
+//searches for filename in 
+//   1) property-specified full pathname, if the property exists, 
+//   2) the directory containing the executable, 
+//   3) the OS-specific application configuration
+//If not found, returns ""
+std::string CameraData::findFile(std::string filename, std::string propertypath)
+{
+	std::string foundfile = "";
+
+	if (propertypath != "") {
+		if (myConfig::getConfig().exists(propertypath)) {
+			foundfile = myConfig::getConfig().getValue(propertypath);
+			if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+		}
+	}
+
+	if (foundfile == "") {
+		foundfile = getExeDir(filename);
+		if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+	}
+
+	if (foundfile == "") {
+		foundfile = getAppConfigDir(filename);
+		if (access(foundfile.c_str(), 0 ) != 0) foundfile == "";
+	}
+
+	return foundfile;
+
+}
+#endif
 

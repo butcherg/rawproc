@@ -4,19 +4,22 @@
 #include <string>
 #include <map>
 
+#define USECONFIG
 
 class CameraData
 {
 	public:
 		CameraData();
 		CameraData(std::string filename);
+
 		void parseDcraw(std::string filename);
 		void parseCamconst(std::string filename);
-		//std::string getBlack(std::string makemodel);
-		//std::string getMaximum(std::string makemodel);
-		//std::string getTrans(std::string makemodel);
-		//struct cameradata getData(std::string makemodel);
+
 		std::string getItem(std::string makemodel, std::string itemname);
+
+#ifdef USECONFIG
+		static std::string findFile(std::string filename, std::string propertypath);
+#endif
 		
 
 	private:
