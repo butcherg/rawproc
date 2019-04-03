@@ -24,6 +24,7 @@
 
 	#define access    _access_s
 #else
+	#include <limits.h>
 	#include <unistd.h>
 	#define GetCurrentDir getcwd
 #endif
@@ -93,7 +94,7 @@ std::string getAppConfigDir(std::string filename="")
 	dir = std::string(strng) + "\\rawproc\\";
 #else
 	char *d = getenv("HOME");
-	if (d) dir = std::string(d) + "/.rawproc/"
+	if (d) dir = std::string(d) + "/.rawproc/";
 #endif
 	if (filename != "") dir.append(filename);
 	return dir;
