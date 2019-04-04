@@ -426,6 +426,8 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				CameraData c;
 				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
 				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
+printf("dcraw: %s\n",dcrawpath.c_str()); fflush(stdout);
+printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
 				c.parseDcraw(dcrawpath);
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");

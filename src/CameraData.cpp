@@ -62,16 +62,14 @@ void CameraData::parseCamconst(std::string filename)
 	fseek(f, 0, SEEK_SET);
 
 	data = (char *) malloc(len+1);
-
 	fread(data, 1, len, f);
 	data[len] = '\0';
 	fclose(f);
 
 	cJSON_Minify(data);
 	cJSON * json = cJSON_Parse(data);
-
-	if (!json) return;
         free(data);
+	if (!json) return;
 
 	std::string makemodel, name, value;
 
@@ -103,8 +101,7 @@ void CameraData::parseCamconst(std::string filename)
 		}
 	}
 
-
-	if (json) cJSON_Delete(json);
+	cJSON_Delete(json);
 
 	fileorder.push_back("camconst.json");
 	camdat_status["camconst.json"].append(string_format("<li>load: %d additions (%d replacements), %ld entries total</li>\n",i,d,camdat.size())); 
