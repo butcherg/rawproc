@@ -66,6 +66,7 @@ class ColorspacePanel: public PicProcPanel
 			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
 			camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			camdatstatus->SetToolTip("Open a dialog to review the sources found and loaded for camera data");
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "profile,op,intent,bpc");
 
@@ -426,9 +427,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				CameraData c;
 				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
 				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
-printf("dcraw: %s\n",dcrawpath.c_str()); fflush(stdout);
-printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
-				c.parseDcraw(dcrawpath);
+				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
 				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
