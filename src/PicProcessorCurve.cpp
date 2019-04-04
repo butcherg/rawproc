@@ -50,7 +50,6 @@ class CurvePanel: public PicProcPanel
 			Bind(wxEVT_CHOICE, &CurvePanel::channelChanged, this);
 			Bind(myCURVE_UPDATE, &CurvePanel::paramUpdated, this);
 			Bind(myCURVE_CHANGE, &CurvePanel::paramChanged, this);
-			Bind(wxEVT_KEY_DOWN, &CurvePanel::keyPressed, this);
 			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
 			Refresh();
 		}
@@ -73,26 +72,7 @@ class CurvePanel: public PicProcPanel
 			}
 		}
 
-		void keyPressed(wxKeyEvent& event) 
-		{
-			wxString curvedata;
-			wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
-			switch (event.GetKeyCode()) {
-				case 67: // c - with Ctrl, copy curve Y to clipboard
-					if (!event.ControlDown()) break;
-					curvedata = curve->getYPoints();
-					curvedata.Append("\n");
-					if (wxTheClipboard->Open())
-					{
-						wxTheClipboard->SetData( new wxTextDataObject(curvedata) );
-						wxTheClipboard->Close();
-					}
-					((wxFrame *) GetGrandParent())->SetStatusText("curve Y data copied to clibboard");
-					break;
 
-			}
-			event.Skip();
-		}
 
 		void paramUpdated(wxCommandEvent& event)
 		{
@@ -144,6 +124,7 @@ PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl
 		ctstart = 1;
 	}
 	else {
+
 		setChannel("rgb");
 		ctstart = 0;
 	}

@@ -29,6 +29,11 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	displayProfile = NULL;
 	displayTransform = NULL;
 
+	//parm display.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
+	if (myConfig::getConfig().getValueOrDefault("display.tooltip","1") == "1")
+		SetToolTip("Keyboard Commands:\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: thumbnail toggle\n   ctrl-c: copy RGB at the cursor x,y");
+
+
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
 	Bind(wxEVT_PAINT, &PicPanel::OnPaint,  this);
 	Bind(wxEVT_LEFT_DOWN, &PicPanel::OnLeftDown,  this);
@@ -51,7 +56,7 @@ PicPanel::~PicPanel()
 	if (thumbnail) thumbnail->~wxBitmap();
 	//if (t) t->~wxTimer();
 }
-        
+
 void PicPanel::OnSize(wxSizeEvent& event) 
 {
 	Refresh();
@@ -560,6 +565,7 @@ void PicPanel::SetColorManagement(bool b)
 	RefreshPic();
 }
 
+
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	event.Skip();
@@ -582,6 +588,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 						struct pix p = display_dib->getPixel(imagex, imagey);
 						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
 						wxTheClipboard->Close();
+						((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
 					}
 			break;
 

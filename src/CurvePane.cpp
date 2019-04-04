@@ -61,6 +61,11 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	selectedCP.y = -1.0;
 	c.clampto(0.0,255.0);
 
+	//parm tool.curve.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
+	if (myConfig::getConfig().getValueOrDefault("tool.curve.tooltip","1") == "1")
+		SetToolTip("Keyboard Commands:\n   del/backspace: delete selected control point\n   ctrl-c: copy curve y data to clipboard");
+
+
 	Bind(wxEVT_MOTION, &CurvePane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &CurvePane::mouseLeftDown, this);
 	//EVT_RIGHT_DOWN(CurvePane::mouseRightDown, this);
@@ -70,7 +75,6 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	Bind(wxEVT_PAINT, &CurvePane::paintEvent, this);
 	Bind(wxEVT_SIZE, &CurvePane::OnSize, this);
 	Bind(wxEVT_KEY_DOWN, &CurvePane::keyPressed, this);
-	Bind(wxEVT_CHAR, &CurvePane::keyPressed, this);
 	Bind(wxEVT_MOUSEWHEEL, &CurvePane::mouseWheelMoved, this);
 
 	paintNow();
@@ -275,7 +279,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 				wxTheClipboard->SetData( new wxTextDataObject(curvedata) );
 				wxTheClipboard->Close();
 			}
-			((wxFrame *) GetGrandParent()->GetParent())->SetStatusText("curve Y data copied to clibboard");
+			((wxFrame *) GetGrandParent()->GetParent())->SetStatusText("curve Y data copied to clipboard");
 			break;
 	}
 	event.Skip();
