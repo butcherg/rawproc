@@ -302,14 +302,13 @@ void rawprocFrm::CreateGUIControls()
 	
 	////GUI Items Creation End
 	
+	//parm app.dock.width: Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300
+	int dockwidth = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.dock.width","300")).c_str());
 
 	//Image manipulation panels:
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(280,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT);  
-
-	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(285,150));
-
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(285,350), wxBORDER_SUNKEN);
-
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT);  
+	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(dockwidth,150));
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,350), wxBORDER_SUNKEN);
 
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
@@ -333,8 +332,8 @@ void rawprocFrm::CreateGUIControls()
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.AddPane(pic, wxCENTER);
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0).Fixed());
-	mgr.AddPane(histogram, pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.GripperTop());
-	mgr.AddPane(parambook, pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
+	mgr.AddPane(histogram,   pinfo.Caption(wxT("Histogram")).Position(1).Resizable());  
+	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
 	mgr.Update();
 #endif
 
