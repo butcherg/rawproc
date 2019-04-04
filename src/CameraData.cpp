@@ -129,29 +129,33 @@ std::string CameraData::getStatus()
 //   1) property-specified full pathname, if the property exists, 
 //   2) the directory containing the executable, 
 //   3) the OS-specific application configuration
-//If not found, returns ""
+//If not found, returns an empty string
 std::string CameraData::findFile(std::string filename, std::string propertypath)
 {
-	std::string foundfile = "";
+	std::string foundfile;
 
-	if (propertypath != "") {
+	if (!propertypath.empty()) {
 		if (myConfig::getConfig().exists(propertypath)) {
 			foundfile = myConfig::getConfig().getValue(propertypath);
 			if (!file_exists(foundfile.c_str())) foundfile = "";
 		}
 	}
 
-	if (foundfile == "") {
+	if (foundfile.empty()) {
 		foundfile = getExeDir(filename);
-		if (!file_exists(foundfile.c_str())) foundfile = "";
+		if (!file_exists(foundfile.c_str())) foundfile.clear();
 	}
 
-	if (foundfile == "") {
+	if (foundfile.empty()) {
 		foundfile = getAppConfigDir(filename);
-		if (!file_exists(foundfile.c_str())) foundfile = "";
+		if (!file_exists(foundfile.c_str())) foundfile.clear();
 	}
 
-	camdat_status[filename].append("<li>path: " + foundfile + "</li>\n");
+	if (foundfile.empty())
+		camdat_status[filename].append("<li>path: file not found.</li>\n");
+
+	else
+		camdat_status[filename].append("<li>path: " + foundfile + "</li>\n");
 
 	return foundfile;
 
