@@ -43,7 +43,10 @@ void CameraData::parseDcraw(std::string filename)
 		}
 		break;
 	}
-	printf("CameraData: %d dcraw.c additions (%d duplicates), %ld entries total...\n",i,d, camdat.size()); fflush(stdout);
+
+	fileorder.push_back("dcraw.c");
+	camdat_status["dcraw.c"].append(string_format("<li>load: %d additions (%d replacements), %ld entries total</li>\n",i,d,camdat.size())); 
+
 }
 
 void CameraData::parseCamconst(std::string filename)
@@ -103,12 +106,25 @@ void CameraData::parseCamconst(std::string filename)
 
 	if (json) cJSON_Delete(json);
 
-	printf("CameraData: %d camconst.json additions (%d duplicates), %ld entries total...\n",i,d,camdat.size()); fflush(stdout);
+	fileorder.push_back("camconst.json");
+	camdat_status["camconst.json"].append(string_format("<li>load: %d additions (%d replacements), %ld entries total</li>\n",i,d,camdat.size())); 
 }
 
 std::string CameraData::getItem(std::string makemodel, std::string itemname)
 {
 	return camdat[makemodel][itemname];
+}
+
+std::string CameraData::getStatus()
+{
+	std::string msg;
+	//for (std::map<std::string, std::string>::iterator it=camdat_status.begin(); it!=camdat_status.end(); ++it) {
+	for (std::vector<std::string>::iterator it=fileorder.begin(); it!=fileorder.end(); ++it) {
+		//msg.append("<p><b>" + it->first + ":</b><ul>" + it->second + "</ul></p>");
+		msg.append("<p><b>" + *it + ":</b><ul>" + camdat_status[*it] + "</ul></p>");
+	}
+		
+	return msg;
 }
 
 #ifdef USECONFIG
@@ -124,19 +140,21 @@ std::string CameraData::findFile(std::string filename, std::string propertypath)
 	if (propertypath != "") {
 		if (myConfig::getConfig().exists(propertypath)) {
 			foundfile = myConfig::getConfig().getValue(propertypath);
-			if (!file_exists(foundfile.c_str())) foundfile == "";
+			if (!file_exists(foundfile.c_str())) foundfile = "";
 		}
 	}
 
 	if (foundfile == "") {
 		foundfile = getExeDir(filename);
-		if (!file_exists(foundfile.c_str())) foundfile == "";
+		if (!file_exists(foundfile.c_str())) foundfile = "";
 	}
 
 	if (foundfile == "") {
 		foundfile = getAppConfigDir(filename);
-		if (!file_exists(foundfile.c_str())) foundfile == "";
+		if (!file_exists(foundfile.c_str())) foundfile = "";
 	}
+
+	camdat_status[filename].append("<li>path: " + foundfile + "</li>\n");
 
 	return foundfile;
 

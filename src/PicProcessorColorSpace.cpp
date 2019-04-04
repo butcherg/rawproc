@@ -4,8 +4,10 @@
 #include "util.h"
 #include "gimage/strutil.h"
 #include "myConfig.h"
+#include "myEXIFDialog.h"
 #include "CameraData.h"
 #include <wx/stdpaths.h>
+#include "listview.xpm"
 
 #define COLORENABLE 6500
 #define COLOROP 6501
@@ -14,6 +16,7 @@
 #define COLORFILE 6504
 #define COLORPROFILE 6505
 #define COLORCAMERA 6506
+#define COLORCAMERASTATUS 6507
 
 
 class ColorspacePanel: public PicProcPanel
@@ -22,6 +25,7 @@ class ColorspacePanel: public PicProcPanel
 	public:
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			camdat_status = "";
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 
@@ -61,6 +65,7 @@ class ColorspacePanel: public PicProcPanel
 
 			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
+			camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "profile,op,intent,bpc");
 
@@ -104,6 +109,7 @@ class ColorspacePanel: public PicProcPanel
 			m->AddSpacer(3);
 			m->AddRowItem(camb, flags);
 			m->AddRowItem(makemodel, flags);
+			m->AddRowItem(camdatstatus, flags);
 			m->NextRow();
 			m->AddRowItem(primaries, flags);
 			m->End();
@@ -120,6 +126,7 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::paramChanged, this, COLORBPC);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::onEnable, this, COLORENABLE);
+			Bind(wxEVT_BUTTON, &ColorspacePanel::camstatusDialog, this, COLORCAMERASTATUS);
 		}
 
 		~ColorspacePanel()
@@ -219,6 +226,21 @@ class ColorspacePanel: public PicProcPanel
 		{
 			if (cpmode == COLORPROFILE) processCS();
 		}
+		
+		void setCamdatStatus(wxString status)
+		{
+			camdat_status = status;
+		}
+		
+		void camstatusDialog(wxCommandEvent& event)
+		{
+			if (camdat_status != "") {
+				myEXIFDialog dlg(this, wxID_ANY, "Camera Data Status", "<ul>" + camdat_status + "</ul>",  wxDefaultPosition, wxSize(500,200));
+				dlg.ShowModal();
+			}
+			
+			//wxMessageBox(camdat_status);
+		}
 
 /*
 		void paramChanged(wxCommandEvent& event)
@@ -254,6 +276,8 @@ class ColorspacePanel: public PicProcPanel
 		wxTextCtrl *edit;
 		wxRadioBox *operselect, *intentselect;
 		wxStaticText *makemodel, *primaries;
+		wxString camdat_status;
+		wxBitmapButton *camdatstatus;
 		int cpmode;
 
 };
@@ -391,60 +415,55 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	
 		}
 
-
-		
 		else if (cp[0] == "camera") {
 
 			std::string makemodel = dib->getInfoValue("Make");
 			makemodel.append(" ");
 			makemodel.append(dib->getInfoValue("Model"));
 
-			std::string dcrawpath = CameraData::findFile("dcraw.c","tool.colorspace.dcrawpath");
-			std::string camconstpath = CameraData::findFile("camconst.json","tool.colorspace.camconstpath");
+			std::string dcrawpath;
+			std::string camconstpath;
 
-printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
-printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
+			if (dcraw_primaries == "") {
+				CameraData c;
+				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
+				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
+				c.parseDcraw(dcrawpath);
+				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
+				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
+				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
+			}
 
-			if (file_exists(dcrawpath)) {
-				if (dcraw_primaries == "") {
-					printf("dcraw:    %s\n",dcrawpath.c_str()); fflush(stdout);
-					printf("camconst: %s\n",camconstpath.c_str()); fflush(stdout);
-					CameraData c;
-					c.parseDcraw(dcrawpath);
-					if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
-					dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
-				}
+			if (dcraw_primaries != "") {
 				std::string cam =  dcraw_primaries.ToStdString();
 				((ColorspacePanel *) toolpanel)->setPrimaries(dcraw_primaries);
-				if (dcraw_primaries != "") {
-					if (cp[1] == "convert") {
-						if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
-							wxMessageBox("ColorSpace convert failed.");
-							result = false;
-						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
-						wxString d = duration();
-
-						if (result) 
-							if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-								log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+				if (cp[1] == "convert") {
+					if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
+						wxMessageBox("ColorSpace convert failed.");
+						result = false;
 					}
-					else if (cp[1] == "assign") {
-						if (dib->AssignColorspace(cam) != GIMAGE_OK) {
-							wxMessageBox("ColorSpace assign failed.");
-							result = false;
-						}
-						else m_tree->SetItemText(id, wxString::Format("colorspace:camera,assign"));
-						wxString d = duration();
+					else m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
+					wxString d = duration();
 
-						if (result) 
-							if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-								log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
-					}
+					if (result) 
+						if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+							log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 				}
-				else wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
+				else if (cp[1] == "assign") {
+					if (dib->AssignColorspace(cam) != GIMAGE_OK) {
+						wxMessageBox("ColorSpace assign failed.");
+						result = false;
+					}
+					else m_tree->SetItemText(id, wxString::Format("colorspace:camera,assign"));
+					wxString d = duration();
+
+					if (result) 
+						if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+							log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+				}
 			}
-			else wxMessageBox(wxString::Format("%s not found",wxString(dcrawpath)));
+			else wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
+
 		}
 
 		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
