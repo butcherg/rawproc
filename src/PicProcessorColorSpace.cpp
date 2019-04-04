@@ -235,11 +235,9 @@ class ColorspacePanel: public PicProcPanel
 		void camstatusDialog(wxCommandEvent& event)
 		{
 			if (camdat_status != "") {
-				myEXIFDialog dlg(this, wxID_ANY, "Camera Data Status", "<ul>" + camdat_status + "</ul>",  wxDefaultPosition, wxSize(500,200));
+				myEXIFDialog dlg(this, wxID_ANY, "Camera Data Status", camdat_status,  wxDefaultPosition, wxSize(500,250));
 				dlg.ShowModal();
 			}
-			
-			//wxMessageBox(camdat_status);
 		}
 
 /*
