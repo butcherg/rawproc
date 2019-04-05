@@ -279,9 +279,18 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 					exit(1);
 				}
 
+				std::string dcrawpath;
+				std::string camconstpath;
+				std::string cam;
+
 				CameraData c;
-				c.parseDcraw(dcrawfile);
-				std::string cam = c.getItem(makemodel, "dcraw_matrix");
+				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
+				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
+				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
+				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
+				cam = c.getItem(makemodel, "dcraw_matrix");
+
+
 				if (cam != "") {
 					printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
 					_mark();
@@ -446,9 +455,9 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			if (chan == "green") channel = CHANNEL_GREEN;
 			if (chan == "blue")  channel = CHANNEL_BLUE;
 
-			Curve ctrlpts;
-			ctrlpts.insertpoint(blk,0);
-			ctrlpts.insertpoint(wht,255);
+			//Curve ctrlpts;
+			//ctrlpts.insertpoint(blk,0);
+			//ctrlpts.insertpoint(wht,255);
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
 			if (threadcount == 0) 
@@ -458,8 +467,8 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount); fflush(stdout);
 
 			_mark();
-			dib.ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
-			//dib.ApplyToneLine(blk, wht, threadcount);
+			//dib.ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
+			dib.ApplyToneLine(blk, wht, channel, threadcount);
 			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
@@ -937,18 +946,22 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 		//img <li>subtract:val|camera|file,filename  val=a float value, "camera" retrieves the camera </li>
 		else if (strcmp(cmd,"subtract") == 0) {
 			double subtract;
+			char cs[256];
 			char filename[256];
 			char *v = strtok(NULL,", ");
 			char *f = strtok(NULL," ");
 
 			if (strcmp(v,"camera") == 0) {
 				subtract = atof(dib.getInfoValue("LibrawBlack").c_str()) / 65536.0;
+				sprintf(cs, "%s:camera ",cmd);
 			}
 			else if (strcmp(v,"file") == 0) {
 				strcpy(filename, f);
+				sprintf(cs, "%s:file,%s ",cmd, filename);
 			}
 			else {
 				subtract = atof(v);
+				sprintf(cs, "%s:%0.1f ",cmd, subtract);
 			}
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
@@ -964,8 +977,8 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			else
 				dib.ApplySubtract(subtract, threadcount);  
 			printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.1f ",cmd, subtract);
+
+
 			commandstring += std::string(cs);
 		}
 
