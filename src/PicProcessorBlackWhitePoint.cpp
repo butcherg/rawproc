@@ -277,11 +277,6 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 		wht = atof(p[1]);
 	}
 
-
-	Curve ctrlpts;
-	ctrlpts.insertpoint(blk,0);
-	ctrlpts.insertpoint(wht,255);
-	
 	bool result = true;
 
 	//parm tool.*.cores: Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);
@@ -296,7 +291,6 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (processingenabled) {
 		mark();
-		//dib->ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
 		dib->ApplyToneLine(blk, wht, channel, threadcount);
 		wxString d = duration();
 

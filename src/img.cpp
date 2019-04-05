@@ -455,10 +455,6 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			if (chan == "green") channel = CHANNEL_GREEN;
 			if (chan == "blue")  channel = CHANNEL_BLUE;
 
-			//Curve ctrlpts;
-			//ctrlpts.insertpoint(blk,0);
-			//ctrlpts.insertpoint(wht,255);
-
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
 			if (threadcount == 0) 
 				threadcount = gImage::ThreadCount();
@@ -467,7 +463,6 @@ void do_cmd(gImage &dib, std::string commandstr, std::string outfile)
 			printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount); fflush(stdout);
 
 			_mark();
-			//dib.ApplyToneCurve(ctrlpts.getControlPoints(), channel, threadcount);
 			dib.ApplyToneLine(blk, wht, channel, threadcount);
 			printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
