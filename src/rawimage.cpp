@@ -148,7 +148,7 @@ char * _loadRAW(const char *filename,
 			unsigned *numcolors, 
 			unsigned *numbits, 
 			std::map<std::string,std::string> &info, 
-			std::string params="",
+			std::string params=std::string(),
 			char ** icc_m=NULL, 
 			unsigned  *icclength=0)
 {
@@ -331,7 +331,7 @@ char * _loadRAW(const char *filename,
 	cmsHPROFILE profile = NULL;
 	cmsUInt32Number size;
 	if (p.find("cameraprofile") != p.end()) {
-		if (p["cameraprofile"] != "") {
+		if (p["cameraprofile"] != std::string()) {
 			if (p["cameraprofile"].find_first_of(",") != std::string::npos) 
 				profile = gImage::makeLCMSAdobeCoeffProfile(p["cameraprofile"]);
 			else
@@ -362,7 +362,7 @@ char * _loadRAW(const char *filename,
 			unsigned *numcolors, 
 			unsigned *numbits, 
 			std::map<std::string,std::string> &info, 
-			std::string params="",
+			std::string params=std::string(),
 			char ** icc_m=NULL, 
 			unsigned  *icclength=0)
 {
@@ -697,7 +697,6 @@ char * _loadRAW(const char *filename,
 	RawProcessor.imgdata.params.no_auto_scale=1;  //turn it all off
 	if (p.find("whitebalance") != p.end()) {
 		if (p["whitebalance"] == "none" | p["whitebalance"].empty()) {
-printf("wb: none.\n"); fflush(stdout);
 			RawProcessor.imgdata.params.no_auto_scale=1;
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
@@ -707,13 +706,11 @@ printf("wb: none.\n"); fflush(stdout);
 			RawProcessor.imgdata.params.user_mul[3] = 1;
 		}
 		else if (p["whitebalance"] == "auto" ) {
-printf("wb: auto.\n"); fflush(stdout);
 			RawProcessor.imgdata.params.no_auto_scale=0;
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 1;
 		}
 		else if (p["whitebalance"] == "camera" ) {
-printf("wb: camera.\n"); fflush(stdout);
 			RawProcessor.imgdata.params.no_auto_scale=0;
 			RawProcessor.imgdata.params.use_camera_wb = 1;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
@@ -728,7 +725,6 @@ printf("wb: camera.\n"); fflush(stdout);
 				RawProcessor.imgdata.params.user_mul[1] = atof(c[1].c_str());
 				RawProcessor.imgdata.params.user_mul[2] = atof(c[2].c_str());
 				RawProcessor.imgdata.params.user_mul[3] = atof(c[3].c_str());
-printf("wb: four numbers.\n"); fflush(stdout);
 			}
 		}
 	}
@@ -975,7 +971,7 @@ printf("wb: four numbers.\n"); fflush(stdout);
 
 
 		if (p.find("cameraprofile") != p.end()) {
-			if (p["cameraprofile"] != "") {
+			if (p["cameraprofile"] != std::string()) {
 					if (p["cameraprofile"].find_first_of(",") != std::string::npos) 
 						profile = gImage::makeLCMSAdobeCoeffProfile(p["cameraprofile"]);
 					else
@@ -1026,7 +1022,7 @@ printf("wb: four numbers.\n"); fflush(stdout);
 				//raw <li><b>cameraprofile</b>=iccfile|adobe_coeff - If (and only if) colorspace=raw, this parameter assigns the camera profile to the image.  Unlike input.raw.cms.profile in rawproc, this parameter will provide a record of its application in the command string, so it is the preferred method for assigning camera profiles.  If the parameter is present but blank in Properties, it will be ignored.  Trick: Instead of a filename, paste a comma-delimited set of dcraw-style (adobe_coeff) primaries here and a linear gamma D65 whitepoint profile will be built and assigned to the raw image.</li>
 				//template input.raw.libraw.cameraprofile=iccfile
 				if (p.find("cameraprofile") != p.end()) {
-					if (p["cameraprofile"] != "") {
+					if (p["cameraprofile"] != std::string()) {
 						if (p["cameraprofile"].find_first_of(",") != std::string::npos) 
 							profile = gImage::makeLCMSAdobeCoeffProfile(p["cameraprofile"]);
 						else
