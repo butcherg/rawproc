@@ -17,6 +17,7 @@ class CurvePane : public wxPanel
 public:	
 	CurvePane(wxWindow* parent, wxString controlpoints);
 	~CurvePane();
+	bool ToggleToolTip();
 	void paintEvent(wxPaintEvent & evt);	
 	void paintNow();
 	void OnTimer(wxTimerEvent& event);

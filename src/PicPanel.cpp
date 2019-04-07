@@ -29,8 +29,8 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	displayProfile = NULL;
 	displayTransform = NULL;
 
-	//parm display.tooltip: 0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1
-	if (myConfig::getConfig().getValueOrDefault("display.tooltip","1") == "1")
+	//parm app.tooltip: 0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1
+	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
 		SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
 
 

@@ -61,9 +61,8 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	selectedCP.y = -1.0;
 	c.clampto(0.0,255.0);
 
-	//parm tool.curve.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
-	if (myConfig::getConfig().getValueOrDefault("tool.curve.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   del/backspace: delete selected control point\n   ctrl-c: copy curve y data to clipboard");
+	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
+		SetToolTip("Curve Keyboard Commands:\n   t: toggle tooltip\n   del/backspace: delete selected control point\n   ctrl-c: copy curve y data to clipboard");
 
 
 	Bind(wxEVT_MOTION, &CurvePane::mouseMoved, this);
@@ -84,6 +83,18 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 CurvePane::~CurvePane()
 {
 	t->~wxTimer();
+}
+
+bool CurvePane::ToggleToolTip()
+{
+	if (GetToolTipText() == "") {
+		SetToolTip("Curve Keyboard Commands:\n   t: toggle tooltip\n   del/backspace: delete selected control point\n   ctrl-c: copy curve y data to clipboard");
+		return true;
+	}
+	else {
+		UnsetToolTip();
+		return false;
+	}
 }
 
 
@@ -261,6 +272,12 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 	wxCommandEvent e(myCURVE_UPDATE);
 	//wxMessageBox(wxString::Format("%d",event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
+		case 84: //t - toggle tooltip
+			if (ToggleToolTip())
+				((wxFrame *) GetParent()->GetGrandParent())->SetStatusText("Curve tooltip display: on");
+			else
+				((wxFrame *) GetParent()->GetGrandParent())->SetStatusText("Curve tooltip display: off");
+			break;
 		case 127:  //delete
 		case 8: //Backspace
 			c.deletepoint(selectedCP.x, selectedCP.y);
