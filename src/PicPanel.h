@@ -28,6 +28,7 @@ class PicPanel: public wxPanel
 		PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram);
 		~PicPanel();
 		void OnSize(wxSizeEvent& event);
+		bool ToggleToolTip();
 		void PaintNow();
 		void OnPaint(wxPaintEvent& event);
 		void BlankPic();
@@ -69,7 +70,7 @@ class PicPanel: public wxPanel
 		GIMAGE_CHANNEL ch;
 
 		int mousex, mousey;
-		bool dragging, thumbdragging, thumbvisible, fit, softproof;
+		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip;
 		int skipmove;
 		int oob;
 

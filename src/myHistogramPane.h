@@ -22,7 +22,7 @@ public:
 	myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size);
 	~myHistogramPane();
 	void OnSize(wxSizeEvent& event);
- 
+	bool ToggleToolTip();
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
 	

@@ -37,7 +37,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 
 	//parm histogram.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
 	if (myConfig::getConfig().getValueOrDefault("histogram.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   r: reset scale\n   t: label visibility\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
@@ -66,6 +66,18 @@ void myHistogramPane::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
 	Refresh();
+}
+
+bool myHistogramPane::ToggleToolTip()
+{
+	if (GetToolTipText() == "") {
+		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		return true;
+	}
+	else {
+		UnsetToolTip();
+		return false;
+	}
 }
 
  
@@ -409,7 +421,14 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			else xorigin -= 1;
 			Refresh();
 			break;
-		case 84: //t - toggle text labels
+		case 84: //t - toggle tooltip
+				if (ToggleToolTip())
+					((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: on");
+				else
+					((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: off");
+			break;
+
+		case 76: // l - toggle lables
 			if (TextVisible)
 				TextVisible = false;
 			else

@@ -29,9 +29,9 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	displayProfile = NULL;
 	displayTransform = NULL;
 
-	//parm display.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
+	//parm display.tooltip: 0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1
 	if (myConfig::getConfig().getValueOrDefault("display.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: thumbnail toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
 
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
@@ -61,6 +61,18 @@ void PicPanel::OnSize(wxSizeEvent& event)
 {
 	Refresh();
 	event.Skip();
+}
+
+bool PicPanel::ToggleToolTip()
+{
+	if (GetToolTipText() == "") {
+		SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		return true;
+	}
+	else {
+		UnsetToolTip();
+		return false;
+	}
 }
 
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
@@ -573,7 +585,14 @@ void PicPanel::OnKey(wxKeyEvent& event)
 	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
 	switch (event.GetKeyCode()) {
 		case 116: //t
-		case 84: //T - toggle display thumbnail
+		case 84: //T - toggle tooltip
+				if (ToggleToolTip())
+					((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: on");
+				else
+					((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: off");
+			break;
+
+		case 72: //h - toggle display thumbnail 
 			if (thumbvisible)
 				thumbvisible = false;
 			else
@@ -619,6 +638,16 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			RefreshPic();
 			break;
 	}
+}
+
+void PicPanel::SetScale(double s)
+{
+	scale = s;
+}
+
+void PicPanel::FitMode(bool f)
+{
+	fit = f;
 }
 
 
@@ -670,16 +699,6 @@ void PicPanel::SetScaleToHeight()
 void PicPanel::SetScaleToWidth(double percentofwidth)
 {
 	int w, h;
-}
-
-void PicPanel::SetScale(double s)
-{
-	scale = s;
-}
-
-void PicPanel::FitMode(bool f)
-{
-	fit = f;
 }
 
 
