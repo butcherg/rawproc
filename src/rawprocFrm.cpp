@@ -541,7 +541,8 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 }
 
 
-PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
+//PicProcessor * rawprocFrm::AddItem(wxString name, wxString command, bool display)
+bool rawprocFrm::AddItem(wxString name, wxString command, bool display)
 {
 	SetStatusText("");
 	bool result = true;
@@ -573,16 +574,17 @@ PicProcessor * rawprocFrm::AddItem(wxString name, wxString command)
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
-	else return NULL;
+	else return false;
 	p->createPanel(parambook);
 	p->processPic();
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
-	if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	if (display) CommandTreeSetDisplay(p->GetId());
+	//if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
 	Refresh();
 	//Update();
 
-	return p;
+	return true;
 }
 
 void rawprocFrm::ApplyOps(gImage &dib, wxString operations)
@@ -754,6 +756,11 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
 		wxString raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+
+		//parm app.incrementaldisplay: 0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;
+		bool incdisplay=false;
+		if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
+
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
 			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "input.raw.default", wxYES_NO, this) == wxYES) {
 				wxArrayString token = split(raw_default, " ");
@@ -761,11 +768,12 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 					for (int i=0; i<token.GetCount(); i++) {
 						wxArrayString cmd = split(token[i], ":");
 						if (cmd.GetCount() == 2)
-							AddItem(cmd[0], cmd[1]);
+							AddItem(cmd[0], cmd[1], incdisplay);
 						else
-							AddItem(cmd[0], "");
+							AddItem(cmd[0], "", incdisplay);
 						wxSafeYield(this);
 					}
+					if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
 				}
 				catch (std::exception& e) {
 					wxMessageBox(wxString::Format("Error: Adding tool failed: %s",e.what()));
@@ -904,18 +912,24 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				pic->FitMode(true);
 				SetStatusText("scale: fit",2);
 			}
+
+			
+			bool incdisplay=false;
+			if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
+
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
 			picdata->createPanel(parambook);
-			CommandTreeSetDisplay(picdata->GetId());
+			if (incdisplay) CommandTreeSetDisplay(picdata->GetId());
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
-			
+
 			for (int i=2; i<token.GetCount(); i++) {
 				wxArrayString cmd = split(token[i], ":");					
-				if (AddItem(cmd[0], cmd[1])) 
+				if (AddItem(cmd[0], cmd[1], incdisplay)) 
 					wxSafeYield(this);
 				else
 					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
 			}
+			if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
 			
 			opensource = true;
 
@@ -1092,6 +1106,9 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 	//parm app.toollistpath: Directory path where tool list files can be found.  Default: (none, implies current working directory)
 	toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
 
+	bool incdisplay=false;
+	if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
+
 	wxString fname = wxFileSelector("Open Tool List...", toollistpath.GetPath());
 	if (fname == "") return;
 
@@ -1108,7 +1125,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 					wxArrayString prop = split(params,"=");
 					if (prop.GetCount() >=2) myConfig::getConfig().setValue(std::string(prop[0].c_str()),std::string(prop[1].c_str()));
 				}
-				else if (AddItem(cmd[0], params)) {
+				else if (AddItem(cmd[0], params, incdisplay)) {
 					wxSafeYield(this);
 				}
 				else {
@@ -1121,6 +1138,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 
 			token = toolfile.GetNextLine();
 		}
+		if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
 		myConfig::getConfig().enableTempConfig(false);
 		toolfile.Close();
 	}
@@ -1260,7 +1278,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 					wxTextDataObject data;
 					wxTheClipboard->GetData( data );
 					wxArrayString s = split(data.GetText(), ":");
-					if (AddItem(s[0], s[1]) != NULL)
+					if (AddItem(s[0], s[1]))
 						SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
 					else
 						SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
@@ -1953,7 +1971,7 @@ void rawprocFrm::MnuPaste1203Click(wxCommandEvent& event)
 			wxTextDataObject data;
 			wxTheClipboard->GetData( data );
 			wxArrayString s = split(data.GetText(), ":");
-			if (AddItem(s[0], s[1]) != NULL)
+			if (AddItem(s[0], s[1]))
 				SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
 			else
 				SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
