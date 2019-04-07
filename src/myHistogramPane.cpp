@@ -301,9 +301,12 @@ void myHistogramPane::render(wxDC&  dc)
 		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2); //ToDo: property to switch between data/bucket...
 	}
 
-	long mlr = histogram[mlx].r;
-	long mlg = histogram[mlx].g;
-	long mlb = histogram[mlx].b;
+	long mlr, mlg, mlb;
+	if (!histogram.empty()  && histogram.size() > mlx) {
+		mlr = histogram[mlx].r;
+		mlg = histogram[mlx].g;
+		mlb = histogram[mlx].b;
+	}
 	//wxString str = wxString::Format("x: %d   hscale=%d",mlx,hscale);
 	wxString str, str1;
 
@@ -328,7 +331,7 @@ void myHistogramPane::render(wxDC&  dc)
 			if (it->first == 0.0)
 				evstr = wxString::Format("%0.f", it->first);
 			else
-				evstr = wxString::Format("%+0.f", it->first);
+				evstr = wxString::Format("%+0.1f", it->first);
 			dc.DrawText(evstr,it->second-dc.GetTextExtent(evstr).GetWidth()/2, h-lineheight);
 		}
 	}

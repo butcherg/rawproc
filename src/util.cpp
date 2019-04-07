@@ -305,19 +305,21 @@ wxImage gImage2wxImage(gImage &dib)
 	unsigned w =  dib.getWidth();
 	unsigned size = w*h;
 
-	//std::vector<pix> img = dib.getImageData();
-	//wxImage image(w, h);
-	//dpix * dst = (dpix *) image.GetData();
+	std::vector<pix> img = dib.getImageData();
+	wxImage image(w, h);
+	dpix * dst = (dpix *) image.GetData();
 	
-	wxImage image(w, h, (unsigned char *) dib.getImageData(BPP_8));
-/*	
+
+
 	#pragma omp parallel for
 	for (unsigned i = 0; i<size; i++) {
 		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
 		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
 		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
 	}
-*/
+
+	//can't use this because wxWidgets deallocates the image with free, rather than delete []...
+	//wxImage image(w, h, (unsigned char *) dib.getImageData(BPP_8));
 
 	return image;
 }
