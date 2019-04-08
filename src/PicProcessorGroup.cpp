@@ -14,7 +14,7 @@ class GroupPanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
-			enablebox = new wxCheckBox(this, GROUPENABLE, "gamma:");
+			enablebox = new wxCheckBox(this, GROUPENABLE, "group:");
 			enablebox->SetValue(true);
 			b->Add(enablebox, flags);
 			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);

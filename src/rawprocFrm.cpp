@@ -39,6 +39,7 @@
 #include "PicProcessorWhiteBalance.h"
 #include "PicProcessorTone.h"
 #include "PicProcessorSubtract.h"
+#include "PicProcessorGroup.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -106,6 +107,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_WHITEBALANCE, rawprocFrm::MnuWhiteBalance)
 	EVT_MENU(ID_MNU_TONE, rawprocFrm::MnuTone)
 	EVT_MENU(ID_MNU_SUBTRACT, rawprocFrm::MnuSubtract)
+	EVT_MENU(ID_MNU_GROUP, rawprocFrm::MnuGroup)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
@@ -278,6 +280,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->AppendSeparator();
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GROUP,	_("Group"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
 	
 	
@@ -570,6 +573,7 @@ bool rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
+	else if (name == "group")		p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
@@ -1930,6 +1934,21 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding subtract tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuGroup(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding group tool failed: %s",e.what()));
 	}
 }
 
