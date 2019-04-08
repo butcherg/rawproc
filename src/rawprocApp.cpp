@@ -44,11 +44,7 @@ bool rawprocFrmApp::OnInit()
 	wxCmdLineParser cmdline(cmdLineDesc, wxGetApp().argc, wxGetApp().argv);
 	if (cmdline.Parse() == -1) exit(0);
 
-	rawprocFrm* frame = new rawprocFrm(NULL);
-	SetTopWindow(frame);
-	frame->Show();
-
-	wxString configfile;
+	wxString configfile, configfilepath;
 	wxString conf_exe = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
 	wxString conf_cwd = wxString(getCwdConfigFilePath().c_str());
 
@@ -67,22 +63,31 @@ bool rawprocFrmApp::OnInit()
 		if (wxFileName::FileExists(configfile)) {
 			wxFileName cfile(configfile);
 			cfile.Normalize();
-			frame->SetConfigFile(cfile.GetFullPath());
+			//frame->SetConfigFile(cfile.GetFullPath());
+			configfilepath = cfile.GetFullPath();
 			myConfig::loadConfig(std::string(cfile.GetFullPath().c_str()));
 		}
 	}
 	else if (wxFileName::FileExists(conf_exe)) {
-		frame->SetConfigFile(conf_exe);
+		//frame->SetConfigFile(conf_exe);
+		configfilepath = conf_exe;
 		myConfig::loadConfig(std::string(conf_exe.c_str()));
 	}
 	else if (wxFileName::FileExists(conf_cwd)) {
-		frame->SetConfigFile(conf_cwd);
+		//frame->SetConfigFile(conf_cwd);
+		configfilepath = conf_cwd;
 		myConfig::loadConfig(std::string(conf_cwd.c_str()));
 	}
 	else if (wxFileName::FileExists(conf_configd)) {
-		frame->SetConfigFile(conf_configd);
+		//frame->SetConfigFile(conf_configd);
+		configfilepath = conf_configd;
 		myConfig::loadConfig(std::string(conf_configd.c_str()));
 	}
+	
+	rawprocFrm* frame = new rawprocFrm(NULL);
+	SetTopWindow(frame);
+	frame->Show();
+	frame->SetConfigFile(configfilepath);
 
 	//propvar EXEDIR: Use to substitute the path to the running executable in path properties
 	myConfig::getConfig().setVariable("EXEDIR", std::string(wxFileName(conf_exe).GetPath().c_str()));

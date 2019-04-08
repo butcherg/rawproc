@@ -35,8 +35,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	pressedDown = false;
 	inwindow = false;
 
-	//parm histogram.tooltip: 0|1, enable/disable tooltip display. Restart rawproc to effect a change.  Default=1
-	if (myConfig::getConfig().getValueOrDefault("histogram.tooltip","1") == "1")
+	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
 		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
