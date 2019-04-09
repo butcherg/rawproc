@@ -11,9 +11,15 @@ foreach $file (@files) {
 		foreach $string (@strings) {
 			$string =~ s/myConfig::getConfig\(\).getValueOrDefault\(//;
 			$string =~ s/\)//;
-			$string =~ s/","/=/;
-			$string =~ s/"//g;
+			$string =~ s/,/=/;
 			my ($name, $value) = split "=", $string;
+			$name   =~ s/"//g;
+			if (index($value,"\"") != -1) {
+				$value =~ s/"//g;
+			}
+			else {
+				$value = "";
+			} 
 			$properties{$name} = $value;
 		}
 	}
