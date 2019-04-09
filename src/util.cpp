@@ -313,9 +313,9 @@ wxImage gImage2wxImage(gImage &dib)
 
 	#pragma omp parallel for
 	for (unsigned i = 0; i<size; i++) {
-		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
-		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
-		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
 	}
 
 	//can't use this because wxWidgets deallocates the image with free, rather than delete []...
