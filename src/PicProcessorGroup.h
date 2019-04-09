@@ -10,6 +10,12 @@ class PicProcessorGroup: public PicProcessor
 		PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
 		bool processPic(bool processnext=true);
+		void loadCommands(wxString commandstring);
+		void setSource(wxString src);
+		wxString getSource();
+
+	private:
+		wxString source;
 };
 
 #endif
