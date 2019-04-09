@@ -21,14 +21,15 @@ class GroupPanel: public PicProcPanel
 			enablebox = new wxCheckBox(this, GROUPENABLE, "group:");
 			enablebox->SetValue(true);
 
-			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
 			m->NextRow();
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
-			m->AddRowItem(edit, flags);
+			//m->AddRowItem(edit, flags);
+			//m->NextRow();
 			m->AddRowItem(new wxButton(this, GROUPFILESELECT, "Select File"), flags);
 			m->End();
 
@@ -67,8 +68,9 @@ class GroupPanel: public PicProcPanel
 
 			wxString fname = wxFileSelector("Open Tool List...", toollistpath.GetPath());
 			if (fname == "") return;
+			wxFileName filepath(fname);
 
-			wxTextFile toolfile(fname);
+			wxTextFile toolfile(filepath.GetFullPath());
 			if (toolfile.Open()) {
 
 				myConfig::getConfig().enableTempConfig(true);
@@ -91,7 +93,9 @@ class GroupPanel: public PicProcPanel
 				}
 				myConfig::getConfig().enableTempConfig(false);
 				toolfile.Close();
-				q->setParams(commandstring);
+				//edit->SetValue(filepath.GetFullName());
+				((PicProcessorGroup *) q)->loadCommands(commandstring);
+				((PicProcessorGroup *) q)->setSource(filepath.GetFullName());
 				q->processPic();
 			}
 			else wxMessageBox("Error: tool file not found.");
@@ -104,9 +108,27 @@ class GroupPanel: public PicProcPanel
 
 };
 
+class GroupData : public wxTreeItemData
+{
+public:
+	GroupData( wxString command, wxString params) : wxTreeItemData()
+	{
+		c = command;
+		p = params;
+	};
+
+	wxString CmdString()
+	{
+		return wxString::Format("%s:%s;",c, p);
+	}
+
+	wxString c, p;
+};
+
 PicProcessorGroup::PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	//showParams();
+	loadCommands(command);
 }
 
 void PicProcessorGroup::createPanel(wxSimplebook* parent)
@@ -115,6 +137,34 @@ void PicProcessorGroup::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorGroup::loadCommands(wxString commandstring)
+{
+	m_tree->DeleteChildren(id);
+	wxArrayString p = split(commandstring,";");
+	for (unsigned i=0; i< p.GetCount(); i++) {
+		wxArrayString nc = split(p[i],":");
+		if (nc.GetCount() < 2) nc.Add("");
+		if (nc[1] != "") {
+			wxArrayString firstp = split(nc[1], ",");
+			nc[0] = nc[0]+":"+firstp[0];
+		}
+		m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
+	}
+	m_tree->Expand(id);
+	c = commandstring;
+}
+
+void PicProcessorGroup::setSource(wxString src)
+{
+	source = src;
+	m_tree->SetItemText(id, n+":"+source);
+}
+
+wxString PicProcessorGroup::getSource()
+{
+	return source;
 }
 
 bool PicProcessorGroup::processPic(bool processnext) 
