@@ -195,7 +195,7 @@ std::vector<std::string> split(std::string s, std::string delim)
 std::vector<std::string> bifurcate(std::string strg, char c = ' ', bool fromback=false)
 {
 	std::vector<std::string> result;
-	if (countchar(strg, ':') == 0) {
+	if (countchar(strg, c) == 0) {
 		result.push_back(strg);
 	}
 	else {
