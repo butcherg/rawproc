@@ -4,6 +4,6 @@
 #include "gimage/gimage.h"
 #include <string>
 
-std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile=std::string());
+std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile=std::string(), bool print=true);
 
 #endif

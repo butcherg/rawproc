@@ -50,6 +50,7 @@
 #include "myEXIFDialog.h"
 #include "myConfig.h"
 #include "util.h"
+#include "gimage/strutil.h"
 #include "lcms2.h"
 #include <omp.h>
 #include <exception>
@@ -770,11 +771,11 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 				wxArrayString token = split(raw_default, " ");
 				try {
 					for (int i=0; i<token.GetCount(); i++) {
-						wxArrayString cmd = split(token[i], ":");
-						if (cmd.GetCount() == 2)
-							AddItem(cmd[0], cmd[1], incdisplay);
+						std::vector<std::string> cmd = bifurcate(token[i].ToStdString(),':');
+						if (cmd.size() == 2)
+							AddItem(wxString(cmd[0]), wxString(cmd[1]), incdisplay);
 						else
-							AddItem(cmd[0], "", incdisplay);
+							AddItem(wxString(cmd[0]), "", incdisplay);
 						wxSafeYield(this);
 					}
 					if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
@@ -927,11 +928,13 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 
 			for (int i=2; i<token.GetCount(); i++) {
-				wxArrayString cmd = split(token[i], ":");					
-				if (AddItem(cmd[0], cmd[1], incdisplay)) 
-					wxSafeYield(this);
+				std::vector<std::string> cmd = bifurcate(token[i].ToStdString(),':');
+				if (cmd.size() == 2) 
+					AddItem(wxString(cmd[0]), wxString(cmd[1]), incdisplay);
 				else
-					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+					AddItem(wxString(cmd[0]), "", incdisplay);
+				wxSafeYield(this);
+				
 			}
 			if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
 			
