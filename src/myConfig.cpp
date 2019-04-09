@@ -40,8 +40,8 @@ myConfig::myConfig(std::string conffile)
 
 		if (str.find_first_of("=") != std::string::npos) {
 			nameval = bifurcate(parm, '=');
-			if (nameval[0] != "") {
-				if (nameval.size() < 2) nameval.push_back("");
+			if (nameval.size() < 2) nameval.push_back("");
+			if (nameval[0] != std::string()) {
 				if (section == "default")
 					defaultconfig[nameval[0]] = nameval[1];
 				else
