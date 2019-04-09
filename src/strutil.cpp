@@ -50,6 +50,15 @@ std::string tostr(unsigned short t)
    return os.str(); 
 } 
 
+int countchar(std::string s, char c)
+{
+	int count = 0;
+	for (int i=0; i<s.size(); i++) {
+		if (s[i] == c) count++;
+	}
+	return count;
+}
+
 std::string underscore(std::string str)
 {
 	std::string s = str;
@@ -186,13 +195,18 @@ std::vector<std::string> split(std::string s, std::string delim)
 std::vector<std::string> bifurcate(std::string strg, char c = ' ', bool fromback=false)
 {
 	std::vector<std::string> result;
-	std::size_t eq;
-	if (fromback)
-		eq = strg.find_last_of(c);
-	else
-		eq = strg.find_first_of(c);
-	result.push_back(strg.substr(0,eq));
-	result.push_back(strg.substr(eq+1));
+	if (countchar(strg, ':') == 0) {
+		result.push_back(strg);
+	}
+	else {
+		std::size_t eq;
+		if (fromback)
+			eq = strg.find_last_of(c);
+		else
+			eq = strg.find_first_of(c);
+		result.push_back(strg.substr(0,eq));
+		result.push_back(strg.substr(eq+1));
+	}
 	return result;
 }
 
@@ -236,6 +250,8 @@ std::string paramstring(std::map<std::string, std::string> &p)
 	}
 	return s;
 }
+
+
 
 //https://stackoverflow.com/questions/5343190/how-do-i-replace-all-instances-of-a-string-with-another-string/
 void replace_all(std::string& str, const std::string& from, const std::string& to) 
@@ -292,7 +308,6 @@ bool file_exists(const std::string& filename)
   struct stat buffer;   
   return (stat (filename.c_str(), &buffer) == 0); 
 }
-
 
 
 
