@@ -54,9 +54,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
 			enablebox->SetValue(true);
 
-			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA, "data:");
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera:");
+			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			datb   = new wxRadioButton(this, BLACKWHITEDATA, "data");
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera");
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
@@ -332,11 +332,12 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 			}
 			else if (channel == CHANNEL_RGB) {
 				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-				wht = fmax(fmax(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+				wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 			}
 		}
 		else if (p[1] == "camera") {
-
+			blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
+			wht = atof(dib->getInfoValue("LibrawMaximum").c_str())/65536.0;
 		}
 		else {
 			blk = atof(p[1]);
