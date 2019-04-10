@@ -725,6 +725,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		parambook->DeleteAllPages();
 		
 		mark();
+		if (dib) delete dib;
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
 		if (dib->getWidth() == 0) {
