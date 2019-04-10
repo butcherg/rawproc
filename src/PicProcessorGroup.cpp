@@ -141,19 +141,21 @@ void PicProcessorGroup::createPanel(wxSimplebook* parent)
 
 void PicProcessorGroup::loadCommands(wxString commandstring)
 {
-	m_tree->DeleteChildren(id);
-	wxArrayString p = split(commandstring,";");
-	for (unsigned i=0; i< p.GetCount(); i++) {
-		wxArrayString nc = split(p[i],":");
-		if (nc.GetCount() < 2) nc.Add("");
-		if (nc[1] != "") {
-			wxArrayString firstp = split(nc[1], ",");
-			nc[0] = nc[0]+":"+firstp[0];
+	if (id.IsOk() & m_tree->GetSelection() == id) { 
+		m_tree->DeleteChildren(id);
+		wxArrayString p = split(commandstring,";");
+		for (unsigned i=0; i< p.GetCount(); i++) {
+			wxArrayString nc = split(p[i],":");
+			if (nc.GetCount() < 2) nc.Add("");
+			if (nc[1] != "") {
+				wxArrayString firstp = split(nc[1], ",");
+				nc[0] = nc[0]+":"+firstp[0];
+			}
+			m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
 		}
-		m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
+		m_tree->Expand(id);
+		c = commandstring;
 	}
-	m_tree->Expand(id);
-	c = commandstring;
 }
 
 void PicProcessorGroup::setSource(wxString src)
