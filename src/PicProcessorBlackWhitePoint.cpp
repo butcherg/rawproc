@@ -4,12 +4,15 @@
 #include "PicProcPanel.h"
 #include "myDoubleSlider.h"
 #include "myConfig.h"
-#include "myRowColumnSizer.h"
+#include "myRowSizer.h"
 #include "undo.xpm"
 #include "util.h"
 
 #define BLACKWHITEENABLE 6100
 #define BLACKWHITERECALC 6101
+#define BLACKWHITESLIDER 6102
+#define BLACKWHITEDATA   6103
+#define BLACKWHITECAMERA 6104
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -26,7 +29,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			int recalcdefault = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.autorecalcdefault","0").c_str());
 
 
-			
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
 			wxArrayString str;
 			str.Add("rgb");
@@ -50,20 +53,35 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
 			enablebox->SetValue(true);
+
+			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			datb   = new wxRadioButton(this, BLACKWHITEDATA, "data:");
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera:");
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
 			if (recalcdefault) recalc->SetValue(true);
 			
-			myRowColumnSizer *m = new myRowColumnSizer(3,3);
-			m->AddItem(enablebox, wxALIGN_LEFT);
-			m->AddItem(chan, wxALIGN_RIGHT);
+			myRowSizer *m = new myRowSizer();
+			m->AddRowItem(enablebox, flags);
+			m->AddRowItem(chan, flags);
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
-			m->AddItem(bwpoint, wxALIGN_LEFT, 2);
+			m->AddRowItem(slideb, flags);
 			m->NextRow();
-			m->AddItem(recalc, wxALIGN_LEFT);
+			m->AddRowItem(bwpoint, flags);
+			m->NextRow();
+			m->AddRowItem(recalc, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddRowItem(datb, flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			m->NextRow();
+			m->AddRowItem(camb, flags);
+			m->End();
 
 			SetSizerAndFit(m);
 			m->Layout();
@@ -71,6 +89,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			t = new wxTimer(this);
+			Bind(wxEVT_RADIOBUTTON, &BlackWhitePointPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
@@ -97,10 +116,35 @@ class BlackWhitePointPanel: public PicProcPanel
 			}
 		}
 
+		void OnRadioButton(wxCommandEvent& event)
+		{
+			bwmode = event.GetId();
+			processBW();
+		}
+
+		void processBW()
+		{
+			switch (bwmode) {
+				case BLACKWHITESLIDER:
+					q->setParams(wxString::Format("%s,%d,%d",chan->GetString(chan->GetSelection()), bwpoint->GetLeftValue(),bwpoint->GetRightValue()));
+					q->processPic();
+					break;
+				case BLACKWHITEDATA:
+					q->setParams(wxString::Format("%s,data",  chan->GetString(chan->GetSelection())));
+					q->processPic();
+					break;
+				case BLACKWHITECAMERA:
+					q->setParams(wxString::Format("%s,camera",chan->GetString(chan->GetSelection())));
+					q->processPic();
+					break;
+			}
+		}
+
+
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			t->Start(500,wxTIMER_ONE_SHOT);
+			if (bwmode == BLACKWHITESLIDER) t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -111,14 +155,13 @@ class BlackWhitePointPanel: public PicProcPanel
 		void OnCheckBox(wxCommandEvent& event)
 		{
 			((PicProcessorBlackWhitePoint *) q)->setReCalc(recalc->GetValue());
-			q->processPic();
+			processBW();
 			event.Skip();
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%s,%d,%d",chan->GetString(chan->GetSelection()), bwpoint->GetLeftValue(),bwpoint->GetRightValue()));
-			q->processPic();
+			processBW();
 			event.Skip();
 		}
 
@@ -136,7 +179,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 			((PicProcessorBlackWhitePoint *) q)->reCalc();
 			updateSliders();
-			q->processPic();
+			processBW();
 			event.Skip();
 		}
 
@@ -167,9 +210,11 @@ class BlackWhitePointPanel: public PicProcPanel
 		wxChoice *chan;
 		wxSlider *black, *white;
 		wxCheckBox *recalc,*enablebox;
+		wxRadioButton *slideb, *datb, *camb;
 		myDoubleSlider *bwpoint;
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
+		int bwmode;
 		wxTimer *t;
 
 };
@@ -259,6 +304,9 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	double blk, wht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
+	if (dib) delete dib;
+	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+
 	if (recalc) {
 		reCalc();
 		((BlackWhitePointPanel *) toolpanel)->updateSliders();
@@ -268,8 +316,32 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	
 	if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 		setChannel(p[0]);
-		blk = atof(p[1]);
-		wht = atof(p[2]);
+		if (p[1] == "data") {
+			std::map<std::string,std::string> s = dib->StatsMap();
+			if (channel == CHANNEL_RED) {
+				blk = atof(s["rmin"].c_str());
+				wht = atof(s["rmax"].c_str());
+			} 
+			else if (channel == CHANNEL_GREEN) {
+				blk = atof(s["gmin"].c_str());
+				wht = atof(s["gmax"].c_str());
+			}
+			else if (channel == CHANNEL_BLUE) {
+				blk = atof(s["bmin"].c_str());
+				wht = atof(s["bmax"].c_str());
+			}
+			else if (channel == CHANNEL_RGB) {
+				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+				wht = fmax(fmax(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+			}
+		}
+		else if (p[1] == "camera") {
+
+		}
+		else {
+			blk = atof(p[1]);
+			wht = atof(p[2]);
+		}
 	}
 	else {
 		setChannel("rgb");
@@ -287,8 +359,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneLine(blk, wht, channel, threadcount);
