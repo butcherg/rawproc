@@ -1946,9 +1946,14 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 }
 
 
-
+//takes either low/high in the range 0.0-255.0, or 0.0-1.0 and scales accordingly:
 void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount)
 {
+	if (high <= 1.0) {
+		low *= 256.0;
+		high *= 256.0;
+	}
+
 	double slope = 255.0 / (high-low);
 	low = low / 255.0;
 
