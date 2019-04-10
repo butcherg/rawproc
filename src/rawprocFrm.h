@@ -138,13 +138,13 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	//void CommandTreeSelChanging(wxTreeEvent& event);
 	void CommandTreeSelChanged(wxTreeEvent& event);
 	void CommandTreeKeyDown(wxTreeEvent& event);
-	void CommandTreeDeleteItem(wxTreeEvent& event);
+	//void CommandTreeDeleteItem(wxTreeEvent& event);
 	void CommandTreeBeginDrag(wxTreeEvent& event);
 	void CommandTreeEndDrag(wxTreeEvent& event);
 	void CommandTreeStateClick(wxTreeEvent& event);
 	void CommandTreeSetDisplay(wxTreeItemId item);
 	void CommandTreePopup(wxTreeEvent& event);
-	void CommandTreeDeleteItem(wxTreeItemId item);
+	void CommandTreeDeleteItem(wxTreeItemId item, bool selectprevious=false);
 	void CommandTreeDeleteSubsequent(wxTreeItemId item);
 
 	void SetConfigFile(wxString cfile);

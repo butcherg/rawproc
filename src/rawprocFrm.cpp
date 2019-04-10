@@ -1204,7 +1204,7 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	event.Skip();
 }
 
-void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
+void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item, bool selectprevious)
 {
 	wxTreeItemId prev, next, newitem;
 	if (commandtree->GetItemParent(item).IsOk()) {  //not root
@@ -1218,6 +1218,7 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item)
 			newitem = prev;
 		commandtree->SelectItem(newitem);
 		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
+		if (selectprevious) commandtree->SelectItem(prev);
        		commandtree->Delete(item);
 		if (newitem.IsOk()) {
 			((PicProcessor *) commandtree->GetItemData(newitem))->processPic();
@@ -1317,14 +1318,6 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	//event.Skip();
 }
 
-void rawprocFrm::CommandTreeDeleteItem(wxTreeEvent& event)
-{
-	wxTreeItemId s = commandtree->GetSelection();
-	if (s)
-		((PicProcessor *) commandtree->GetItemData(s))->processPic();
-	((PicProcessor *) commandtree->GetItemData(event.GetItem()))->processPic();
-	event.Skip();
-}
 
 void rawprocFrm::CommandTreeBeginDrag(wxTreeEvent& event)
 {
@@ -2056,10 +2049,12 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 	help.DisplayContents();
 }
 
-#define ID_EXIF		2001
+#define ID_EXIF			2001
 #define ID_DELETESUBSEQUENT	2002
-#define ID_DELETE	2003
+#define ID_DELETE		2003
 #define ID_HISTOGRAM		2004
+#define ID_GROUPTOTOOLLIST	2005
+#define ID_GROUPLASTTOTOOL	2006
 
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
@@ -2072,13 +2067,22 @@ void rawprocFrm::showHistogram(wxTreeItemId item)
 
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
-	if (commandtree->GetItemText(commandtree->GetItemParent(event.GetItem())) == "group") return;  //for now...
+	wxTreeItemId disp;
+	wxString pstr, newlist, last;
+	wxArrayString p, cmd;
+	PicProcessorGroup *g;
+	if (commandtree->GetItemText(commandtree->GetItemParent(event.GetItem())) == "group") return;  
 	wxMenu mnu;
  	mnu.Append(ID_EXIF, "Image Information...");
  	mnu.Append(ID_HISTOGRAM, "Full Histogram...");
 	mnu.AppendSeparator();
 	mnu.Append(ID_DELETE, "Delete");
 	mnu.Append(ID_DELETESUBSEQUENT, "Delete subsequent...");
+	if (commandtree->GetItemText(event.GetItem()) == "group") {
+		mnu.AppendSeparator();
+		mnu.Append(ID_GROUPTOTOOLLIST, "Convert group to toollist");
+		mnu.Append(ID_GROUPLASTTOTOOL, "Convert last group item to tool");
+	}	
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
 		case ID_EXIF:
 			InfoDialog(event.GetItem());
@@ -2092,6 +2096,41 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			break;
 		case ID_DELETESUBSEQUENT:
 			CommandTreeDeleteSubsequent(event.GetItem());
+			break;
+		case ID_GROUPTOTOOLLIST:
+			disp = displayitem;
+			pstr = ((PicProcessor *) commandtree->GetItemData(event.GetItem()))->getParams();
+			p = split(pstr, ";");
+			CommandTreeDeleteItem(event.GetItem(), true);
+			for (int i=0; i<p.GetCount(); i++) {
+				cmd = split(p[i], ":");					
+				if (AddItem(cmd[0], cmd[1])) 
+					wxSafeYield(this);
+				else
+					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+			}
+			if (disp.IsOk()) CommandTreeSetDisplay(disp);
+			break;
+		case ID_GROUPLASTTOTOOL:
+			disp = displayitem;
+			g = ((PicProcessorGroup *) commandtree->GetItemData(event.GetItem()));
+			pstr = g->getParams();
+			p = split(pstr, ";");
+			last = p.Last();
+			p.RemoveAt(p.GetCount()-1);
+			if (p.GetCount() > 0) {
+				newlist = p[0];
+				for (int i=1; i<p.GetCount(); i++) newlist.Append(wxString::Format(";%s",p[i]));
+				g->loadCommands(newlist);
+				g->processPic(false);
+			}
+			else {
+				CommandTreeDeleteItem(event.GetItem(), true);
+			}
+			cmd = split(last,":");
+			AddItem(cmd[0], cmd[1]);
+			if (disp.IsOk()) CommandTreeSetDisplay(disp);
+			break;
 	}
 }
 
