@@ -169,6 +169,8 @@ void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *t
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
 : wxFrame(parent, id, title, position, size, style)
 {
+	d = NULL;
+	img = NULL;
 	wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
@@ -651,7 +653,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		return;
 	}
 	sourcefilename.Clear();
-	gImage *dib;
+	gImage *dib = NULL;
 	GIMAGE_FILETYPE fif;
 	fif = gImage::getFileType(fname.c_str());
 
