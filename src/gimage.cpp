@@ -919,7 +919,7 @@ void gImage::ApplyConvolutionKernel(double kernel[3][3], int threadcount)
 	} 
 }
 
-void gImage::ApplySharpen(int strength, int threadcount)
+void gImage::ApplySharpen(double strength, int threadcount)
 {
 	double kernel[3][3] =
 	{
@@ -934,7 +934,7 @@ void gImage::ApplySharpen(int strength, int threadcount)
 	kernel[1][0] = x;
 	kernel[1][2] = x;
 	kernel[2][1] = x;
-	kernel[1][1] = strength+1;
+	kernel[1][1] = strength+1.0;
 
 	ApplyConvolutionKernel(kernel, threadcount);
 }

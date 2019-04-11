@@ -169,7 +169,7 @@ class gImage
 		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount=0);
 		void Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimension, int threadcount=0);
 		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount=0);
-		void ApplySharpen(int strength, int threadcount=0);
+		void ApplySharpen(double strength, int threadcount=0);
 
 
 		//basic color/tone operations:
