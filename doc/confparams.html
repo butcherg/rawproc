@@ -1,7 +1,9 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
+<li><b>app.dock.width</b>:  Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300</li>
 <li><b>app.floatctrl.backgroundcolor</b>:  Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192</li>
+<li><b>app.incrementaldisplay</b>:  0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;</li>
 <li><b>app.integerctrl.backgroundcolor</b>:  Specifies the integer control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,192,255</li>
 <li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
@@ -10,6 +12,7 @@
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
+<li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
 <li><b>display.cms.displayprofile</b>:  Filename of display profile.  Default: none.</li>
@@ -89,7 +92,7 @@
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
 <li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
 <li><a name="tool.denoise"><b>tool.denoise.threshold</b>:  Defines the initial value of the threshold for wavelet denoise.  Default=0.0</li>
-<li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=0.0</li>
+<li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
 <li><a name="tool.gamma"><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
@@ -98,7 +101,7 @@
 <li><a name="tool.highlight"><b>tool.highlight.level</b>:  The initial (and reset button) value of the highlight tool, 0=no change.  Default=0</li>
 <li><a name="tool.highlight"><b>tool.highlight.threshold</b>:  The initial (and reset button) value of the highlight curve threshold.  Default=192</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.</li>
-<li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The initial (and reset button) red intensity threshold.  Default=1.5</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: none.</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>
 <li><a name="tool.redeye"><b>tool.redeye.radius</b>:  Defines the initial (and reset button) limit of the patch size.  Default=50</li>
@@ -111,7 +114,7 @@
 <li><a name="tool.shadow"><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
 <li><a name="tool.shadow"><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
-<li><a name="tool.tone"><b>tool.tone.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
+<li><a name="tool.tone"><b>tool.tone.initialvalue</b>:  The initial (and reset button) value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li>
