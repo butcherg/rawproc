@@ -73,6 +73,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		
 		wxString dcList;
 
+		static bool processing_enabled;
+
 };
 
 

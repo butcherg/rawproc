@@ -27,6 +27,8 @@ class BlankPanel: public PicProcPanel
 };
 
 
+bool PicProcessor::processing_enabled = true;
+
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, gImage * startpic) 
 {
 	m_display = display;
@@ -214,7 +216,8 @@ PicProcessor *PicProcessor::getSelectedPicProcessor(wxTreeCtrl *tree)
 
 gImage& PicProcessor::getProcessedPic() 
 {
-	if (dirty || dib->getWidth()==0) processPic();
+	if (dib) 
+		if (dirty || dib->getWidth()==0) processPic();
 	return *dib;
 }
 
