@@ -334,6 +334,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
 				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
 				wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 			}
+			if (blk < 0.0) blk = 0.0;
 		}
 		else if (p[1] == "camera") {
 			blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
