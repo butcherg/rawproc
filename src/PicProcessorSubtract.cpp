@@ -201,6 +201,7 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 
 bool PicProcessorSubtract::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	double subtract;
 	wxFileName fname;
 	//gImage darkfile;

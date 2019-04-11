@@ -171,6 +171,7 @@ wxString PicProcessorGroup::getSource()
 
 bool PicProcessorGroup::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("group...");
 
 	bool result = true;

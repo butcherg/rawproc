@@ -113,7 +113,9 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSaturation::processPic(bool processnext) {
+bool PicProcessorSaturation::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
 	bool result = true;

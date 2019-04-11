@@ -272,6 +272,7 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 
 bool PicProcessorExposure::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	double ev;
 	int x=0, y=0;
 	float radius=0.0;

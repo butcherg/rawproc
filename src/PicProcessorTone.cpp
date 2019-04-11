@@ -199,6 +199,7 @@ void PicProcessorTone::createPanel(wxSimplebook* parent)
 
 bool PicProcessorTone::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	wxString d;
 	wxArrayString p = split(c,",");
 	bool result = true;

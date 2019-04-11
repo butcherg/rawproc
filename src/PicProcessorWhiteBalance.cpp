@@ -382,6 +382,7 @@ std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 
 bool PicProcessorWhiteBalance::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	std::vector<double> wbmults;
 	int patchx, patchy; double patchrad;

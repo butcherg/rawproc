@@ -166,7 +166,9 @@ void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
 	ctrlpts = ctpts;
 }
 
-bool PicProcessorCurve::processPic(bool processnext) {
+bool PicProcessorCurve::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("curve...");
 	bool result = true;
 

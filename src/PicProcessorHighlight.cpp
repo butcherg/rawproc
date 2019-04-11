@@ -141,7 +141,9 @@ void PicProcessorHighlight::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorHighlight::processPic(bool processnext) {
+bool PicProcessorHighlight::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	bool result = true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("highlight...");
 

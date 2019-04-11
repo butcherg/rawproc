@@ -703,7 +703,9 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorRotate::processPic(bool processnext) {
+bool PicProcessorRotate::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
 	bool autocrop = false;
 	

@@ -480,7 +480,9 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 }
 
-bool PicProcessorCrop::processPic(bool processnext) {
+bool PicProcessorCrop::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
 	int left = atoi(p[0]);

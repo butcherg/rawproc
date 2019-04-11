@@ -167,7 +167,9 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorGray::processPic(bool processnext) {
+bool PicProcessorGray::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gray...");
 	wxArrayString cp = split(getParams(),",");
 	double r = atof(cp[0]);

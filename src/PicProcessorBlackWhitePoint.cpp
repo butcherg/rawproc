@@ -300,7 +300,9 @@ void PicProcessorBlackWhitePoint::reCalc()
 	setParams(wxString::Format("%s,%d,%d",p[0],(unsigned) blk, (unsigned) wht));
 }
 
-bool PicProcessorBlackWhitePoint::processPic(bool processnext) {
+bool PicProcessorBlackWhitePoint::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	double blk, wht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 

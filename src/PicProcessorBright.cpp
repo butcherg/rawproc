@@ -114,7 +114,9 @@ void PicProcessorBright::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorBright::processPic(bool processnext) {
+bool PicProcessorBright::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("bright...");
 	double bright = atof(c.c_str());
 	bool result = true;

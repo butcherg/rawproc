@@ -450,6 +450,7 @@ lfDatabase * PicProcessorLensCorrection::getLensDatabase()
 
 bool PicProcessorLensCorrection::processPic(bool processnext) 
 {
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection...");
 	bool result = true;
 	GIMAGE_ERROR ret;

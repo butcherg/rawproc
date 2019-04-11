@@ -145,7 +145,7 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
-	if (processingenabled & sharp > 1.0) {
+	if (global_processing_enabled & processingenabled & sharp > 1.0) {
 		mark();
 		dib->ApplyConvolutionKernel(kernel, threadcount);
 		wxString d = duration();

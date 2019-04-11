@@ -247,7 +247,9 @@ void PicProcessorRedEye::setDesat(bool d)
 }
 
 
-bool PicProcessorRedEye::processPic(bool processnext) {
+bool PicProcessorRedEye::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
 	bool result = true;
 

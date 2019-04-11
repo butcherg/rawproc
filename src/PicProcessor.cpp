@@ -27,7 +27,7 @@ class BlankPanel: public PicProcPanel
 };
 
 
-bool PicProcessor::processing_enabled = true;
+bool PicProcessor::global_processing_enabled = true;
 
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, gImage * startpic) 
 {
@@ -89,6 +89,11 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
+void PicProcessor::enableGlobalProcessing(bool e)
+{
+	global_processing_enabled = e;
+}
+
 void PicProcessor::enableProcessing(bool e)
 {
 	if (e) 
@@ -124,6 +129,7 @@ std::map<std::string,std::string> PicProcessor::paramMap(std::string params, std
 
 bool PicProcessor::processPic(bool processnext) 
 { 	
+	if (!global_processing_enabled) return true;
 	if (GetId() != m_tree->GetRootItem()) {
 		if (dib) delete dib;
 		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());

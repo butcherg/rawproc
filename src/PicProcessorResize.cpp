@@ -182,7 +182,9 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorResize::processPic(bool processnext) {
+bool PicProcessorResize::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	wxString algo;
 	bool blur = false;
 	float sigma = 1.0;

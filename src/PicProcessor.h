@@ -56,6 +56,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void displayDraw(wxDC &dc);
 
 		static PicProcessor *getSelectedPicProcessor(wxTreeCtrl *tree);
+		static void enableGlobalProcessing(bool e);
 
 	protected:
 		gImage *dib;
@@ -73,7 +74,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		
 		wxString dcList;
 
-		static bool processing_enabled;
+		static bool global_processing_enabled;
 
 };
 

@@ -124,7 +124,9 @@ void PicProcessorContrast::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorContrast::processPic(bool processnext) {
+bool PicProcessorContrast::processPic(bool processnext) 
+{
+	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("contrast...");
 	double contrast = atof(c.c_str());
 	bool result = true;
