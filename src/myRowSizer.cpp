@@ -1,9 +1,10 @@
 #include "myRowSizer.h"
 
 
-myRowSizer::myRowSizer(): wxBoxSizer(wxVERTICAL) 
+myRowSizer::myRowSizer(wxSizerFlags rowflags): wxBoxSizer(wxVERTICAL) 
 {
 	r = new wxBoxSizer(wxHORIZONTAL);
+	f = rowflags;
 }
 
 wxSizerItem * myRowSizer::AddRowItem(wxWindow *window, wxSizerFlags &flags)
@@ -12,15 +13,16 @@ wxSizerItem * myRowSizer::AddRowItem(wxWindow *window, wxSizerFlags &flags)
 	return i;
 }
 
-void myRowSizer::NextRow()
+void myRowSizer::NextRow(wxSizerFlags rowflags)
 {
-	Add(r);
+	Add(r, f);
 	r = new wxBoxSizer(wxHORIZONTAL);
+	f = rowflags;
 }
 
 void myRowSizer::End()
 {
-	Add(r);
+	Add(r, f);
 }
 
 	

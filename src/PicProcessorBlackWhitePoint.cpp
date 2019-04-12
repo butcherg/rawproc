@@ -100,11 +100,13 @@ class BlackWhitePointPanel: public PicProcPanel
 			}
 
 			
-			myRowSizer *m = new myRowSizer();
-			m->AddRowItem(enablebox, flags);
-			m->AddRowItem(chan, wxSizerFlags().Right().Border(wxLEFT|wxRIGHT|wxTOP));
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(chan, wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddRowItem(slideb, flags);
 			m->NextRow();
@@ -112,13 +114,17 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(recalc, flags);
 			m->AddRowItem(new wxButton(this, BLACKWHITERECALC, "recalc"), flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddRowItem(datb, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht)), flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddRowItem(camb, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f (%d)\nwhite: %f (%d)",camblk, librawblk, camwht,librawwht)), flags);

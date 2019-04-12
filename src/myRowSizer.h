@@ -7,13 +7,14 @@
 class myRowSizer: public wxBoxSizer
 {
 	public:
-		myRowSizer();
+		myRowSizer(wxSizerFlags rowflags=wxSizerFlags());
 		wxSizerItem * AddRowItem(wxWindow *window, wxSizerFlags &flags);
-		void NextRow();
+		void NextRow(wxSizerFlags rowflags=wxSizerFlags());
 		void End();
 
 	private:
 		wxBoxSizer *r;
+		wxSizerFlags f;
 };
 
 #endif
