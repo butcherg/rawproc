@@ -139,6 +139,18 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 		
+		//img <li>group:command;command;...</li>
+		else if (strcmp(cmd,"group") == 0) {
+			char cs[4096];
+			char *c = strtok(NULL, " ");
+			std::vector<std::string> cmdlist = split(std::string(c), ";");
+			for (int i=0; i<cmdlist.size(); i++) {
+				do_cmd(dib, cmdlist[i], std::string(), true);
+			}
+			sprintf(cs, "group:%s ",c);
+			commandstring += std::string(cs);
+		}
+		
 		//img <li>bright:[-100 - 100] default: 0 (no-bright)</li>
 		else if (strcmp(cmd,"bright") == 0) {  
 			double bright = atof(myConfig::getConfig().getValueOrDefault("tool.bright.initialvalue","0").c_str());
