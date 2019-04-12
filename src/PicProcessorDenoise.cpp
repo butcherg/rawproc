@@ -66,43 +66,48 @@ class DenoisePanel: public PicProcPanel
 			
 			
 			//Lay out the controls in the panel:
-			myRowSizer *m = new myRowSizer();
-			m->AddRowItem(enablebox, flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			m->NextRow();
-			
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			m->NextRow();			
 			m->AddRowItem(nl, flags);
-			m->NextRow();
-			
+
+			m->NextRow();			
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, "sigma: ", wxDefaultPosition,wxSize(50, -1)), flags);
+
 			m->AddRowItem(sigma, flags);
 			m->AddRowItem(val, flags);
 			m->AddRowItem(btn, flags);
 			m->NextRow();
 			
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, ""), flags);
-			m->NextRow();
-			
+
+			m->NextRow();		
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, "local: ", wxDefaultPosition,wxSize(50, -1)), flags);
+
 			m->AddRowItem(local, flags);
 			m->AddRowItem(val1, flags);
 			m->AddRowItem(btn1, flags);
-			m->NextRow();
 
+			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, "patch: ", wxDefaultPosition,wxSize(50, -1)), flags);
+
 			m->AddRowItem(patch, flags);
 			m->AddRowItem(val2, flags);
 			m->AddRowItem(btn2, flags);
-			m->NextRow();
-			
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			m->NextRow();
-			
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			m->NextRow();			
 			m->AddRowItem(wl, flags);
-			m->NextRow();
-			
+
+			m->NextRow();			
 			m->AddRowItem(thresh, flags);
+
 			m->NextRow();
 			m->End();
 			

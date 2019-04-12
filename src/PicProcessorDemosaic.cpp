@@ -104,10 +104,12 @@ class DemosaicPanel: public PicProcPanel
 			enableIt();
 
 			//Lay out the controls in the panel:
-			myRowSizer *m = new myRowSizer();
-			m->AddRowItem(enablebox, flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddRowItem(halfb, flags); m->NextRow();
 			m->AddRowItem(halfresizeb, flags); m->NextRow();

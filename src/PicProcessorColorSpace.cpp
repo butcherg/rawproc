@@ -35,7 +35,7 @@ class ColorspacePanel: public PicProcPanel
 			profileb = new wxRadioButton(this, COLORPROFILE, "profile file:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			camb = new wxRadioButton(this, COLORCAMERA, "assign camera profile:");
 			
-			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(-1,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
 			wxArrayString opers;
 			opers.Add("convert");
@@ -87,25 +87,31 @@ class ColorspacePanel: public PicProcPanel
 				}
 			}
 
-			myRowSizer *m = new myRowSizer();
-			m->AddRowItem(enablebox, flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+
+			
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddRowItem(profileb, flags);
-			m->NextRow();
-			m->AddRowItem(edit, flags);
-			m->NextRow();
-			m->AddRowItem(new wxButton(this, COLORFILE, "Select profile"), flags);
-			//m->AddRowItem(new wxButton(this, COLORCAMERA, "Look Up Camera Profile"), flags);
+
+			//edit box grows to select button:
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(edit, wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP));
+			m->AddRowItem(new wxButton(this, COLORFILE, "Select"), wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
 			m->NextRow();
 			m->AddSpacer(5);
 			m->AddRowItem(operselect, flags);
 			m->AddRowItem(intentselect, flags);
 			m->NextRow();
 			m->AddRowItem(bpc, flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			m->AddSpacer(3);
 			m->AddRowItem(camb, flags);

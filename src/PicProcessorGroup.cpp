@@ -23,10 +23,12 @@ class GroupPanel: public PicProcPanel
 
 			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			
-			myRowSizer *m = new myRowSizer();
-			m->AddRowItem(enablebox, flags);
-			m->NextRow();
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
 			//m->AddRowItem(edit, flags);
 			//m->NextRow();
