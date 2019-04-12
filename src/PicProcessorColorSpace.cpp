@@ -35,7 +35,7 @@ class ColorspacePanel: public PicProcPanel
 			profileb = new wxRadioButton(this, COLORPROFILE, "profile file:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			camb = new wxRadioButton(this, COLORCAMERA, "assign camera profile:");
 			
-			edit = new wxTextCtrl(this, wxID_ANY, parms[0], wxDefaultPosition, wxSize(-1,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(-1,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
 			wxArrayString opers;
 			opers.Add("convert");
