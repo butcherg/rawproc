@@ -20,7 +20,7 @@ class BlackWhitePointPanel: public PicProcPanel
 	public:
 		BlackWhitePointPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			int blk=0.0, wht=255.0;
+			int blk=0, wht=255;
 			wxArrayString p = split(params,",");
 
 			//int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
@@ -39,8 +39,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxSize(50,-1));
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxSize(50,-1));
+			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxSize(60,-1));
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxSize(60,-1));
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
@@ -83,6 +83,8 @@ class BlackWhitePointPanel: public PicProcPanel
 					slideb->SetValue(true);
 					blk = atoi(p[1]);
 					wht = atoi(p[2]);
+					bwpoint->SetLeftValue(blk);
+					bwpoint->SetRightValue(wht);
 				}
 			}
 			else {
@@ -92,6 +94,8 @@ class BlackWhitePointPanel: public PicProcPanel
 				if (p.size() >= 3) {
 					blk = atoi(p[0]);
 					wht = atoi(p[1]);
+					bwpoint->SetLeftValue(blk);
+					bwpoint->SetRightValue(wht);
 				}
 			}
 
