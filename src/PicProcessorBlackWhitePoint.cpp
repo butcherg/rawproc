@@ -9,17 +9,18 @@
 #include "util.h"
 
 #define BLACKWHITEENABLE 6100
-#define BLACKWHITERECALC 6101
-#define BLACKWHITESLIDER 6102
-#define BLACKWHITEDATA   6103
-#define BLACKWHITECAMERA 6104
+#define BLACKWHITEAUTORECALC 6101
+#define BLACKWHITERECALC 6102
+#define BLACKWHITESLIDER 6103
+#define BLACKWHITEDATA   6104
+#define BLACKWHITECAMERA 6105
 
 class BlackWhitePointPanel: public PicProcPanel
 {
 	public:
 		BlackWhitePointPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			int blk, wht;
+			int blk=0.0, wht=255.0;
 			wxArrayString p = split(params,",");
 
 			//int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
@@ -38,11 +39,11 @@ class BlackWhitePointPanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA, "data");
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera");
+			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxSize(50,-1));
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxSize(50,-1));
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
-			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
+			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
 			if (recalcdefault) recalc->SetValue(true);
 
 			wxArrayString str;
@@ -56,6 +57,16 @@ class BlackWhitePointPanel: public PicProcPanel
 			slideb->SetValue(true);
 			blk = 0.0;
 			wht = 255.0;
+
+			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
+			std::map<std::string,std::string> s = img.StatsMap();
+			double datblk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+			double datwht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+			int librawblk = atoi(img.getInfoValue("LibrawBlack").c_str());
+			double camblk = librawblk / 65536.0; 
+			int librawwht = atoi(img.getInfoValue("LibrawMaximum").c_str());
+			double camwht = librawwht / 65536.0; 
+
 			
 			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 				chan->SetStringSelection(p[0]);
@@ -87,7 +98,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
-			m->AddRowItem(chan, flags);
+			m->AddRowItem(chan, wxSizerFlags().Right().Border(wxLEFT|wxRIGHT|wxTOP));
 			m->NextRow();
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
@@ -96,28 +107,32 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->AddRowItem(bwpoint, flags);
 			m->NextRow();
 			m->AddRowItem(recalc, flags);
+			m->AddRowItem(new wxButton(this, BLACKWHITERECALC, "recalc"), flags);
 			m->NextRow();
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
 			m->AddRowItem(datb, flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht)), flags);
 			m->NextRow();
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
 			m->NextRow();
 			m->AddRowItem(camb, flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f (%d)\nwhite: %f (%d)",camblk, librawblk, camwht,librawwht)), flags);
 			m->End();
 
 			SetSizerAndFit(m);
 			m->Layout();
+			bwpoint->Refresh();
 			Refresh();
 			Update();
 			SetFocus();
 			t = new wxTimer(this);
 			Bind(wxEVT_RADIOBUTTON, &BlackWhitePointPanel::OnRadioButton, this);
-			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this);
+			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this, BLACKWHITERECALC);
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHOICE, &BlackWhitePointPanel::channelChanged, this);
-			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this, BLACKWHITERECALC);
+			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this, BLACKWHITEAUTORECALC);
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::onEnable, this, BLACKWHITEENABLE);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 		}
@@ -208,23 +223,9 @@ class BlackWhitePointPanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
-/*
-			int resetblackval, resetwhiteval;
-			switch (event.GetId()) {
-				case 1000:
-					resetblackval = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackinitialvalue","0").c_str());
-					black->SetValue(resetblackval);
-					val1->SetLabel(wxString::Format("%4d", resetblackval));
-					break;
-				case 2000:
-					resetwhitekval = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
-					white->SetValue(resetwhiteval);
-					val2->SetLabel(wxString::Format("%4d", resetwhiteval));
-					break;
-			}
-			q->setParams(wxString::Format("%d,%d",black->GetValue(),white->GetValue()));
-			q->processPic();
-*/
+			((PicProcessorBlackWhitePoint *) q)->reCalc();
+			updateSliders();
+			processBW();
 			event.Skip();
 		}
 
