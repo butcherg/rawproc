@@ -119,6 +119,8 @@ public:
 		p = params;
 	};
 
+	virtual ~GroupData() { }
+
 	wxString CmdString()
 	{
 		return wxString::Format("%s:%s;",c, p);
