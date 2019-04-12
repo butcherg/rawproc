@@ -126,7 +126,6 @@ void PicProcessorContrast::createPanel(wxSimplebook* parent)
 
 bool PicProcessorContrast::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("contrast...");
 	double contrast = atof(c.c_str());
 	bool result = true;
@@ -150,6 +149,7 @@ bool PicProcessorContrast::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
 		mark();

@@ -299,7 +299,6 @@ void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDemosaic::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
 	bool result = false;
 
@@ -314,6 +313,8 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		if (p[0] == "color")

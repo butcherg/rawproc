@@ -133,7 +133,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 		
 	public:
 	//PicProcessor *  AddItem(wxString name, wxString command, bool display=true);
-	bool AddItem(wxString name, wxString command, bool display=true);
+	wxTreeItemId AddItem(wxString name, wxString command, bool display=true);
 	void ApplyOps(gImage &dib, wxString operations);
 	//void CommandTreeSelChanging(wxTreeEvent& event);
 	void CommandTreeSelChanged(wxTreeEvent& event);
@@ -142,7 +142,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void CommandTreeBeginDrag(wxTreeEvent& event);
 	void CommandTreeEndDrag(wxTreeEvent& event);
 	void CommandTreeStateClick(wxTreeEvent& event);
-	void CommandTreeSetDisplay(wxTreeItemId item);
+	void CommandTreeSetDisplay(wxTreeItemId item, int src=0);
 	void CommandTreePopup(wxTreeEvent& event);
 	void CommandTreeDeleteItem(wxTreeItemId item, bool selectprevious=false);
 	void CommandTreeDeleteSubsequent(wxTreeItemId item);

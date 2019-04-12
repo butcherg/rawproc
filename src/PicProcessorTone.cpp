@@ -199,7 +199,6 @@ void PicProcessorTone::createPanel(wxSimplebook* parent)
 
 bool PicProcessorTone::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	wxString d;
 	wxArrayString p = split(c,",");
 	bool result = true;
@@ -212,6 +211,8 @@ bool PicProcessorTone::processPic(bool processnext)
 	
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 
 	if (processingenabled) {
 		if (p[0] == "gamma") {

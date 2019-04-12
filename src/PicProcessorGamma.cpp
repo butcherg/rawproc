@@ -97,7 +97,6 @@ void PicProcessorGamma::createPanel(wxSimplebook* parent)
 
 bool PicProcessorGamma::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	Curve ctrlpts;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
@@ -119,6 +118,7 @@ bool PicProcessorGamma::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
 		mark();

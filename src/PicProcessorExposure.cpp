@@ -272,7 +272,6 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 
 bool PicProcessorExposure::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	double ev;
 	int x=0, y=0;
 	float radius=0.0;
@@ -327,6 +326,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
 

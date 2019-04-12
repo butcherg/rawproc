@@ -171,7 +171,6 @@ wxString PicProcessorGroup::getSource()
 
 bool PicProcessorGroup::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("group...");
 
 	bool result = true;
@@ -185,6 +184,7 @@ bool PicProcessorGroup::processPic(bool processnext)
 	
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
 		mark();

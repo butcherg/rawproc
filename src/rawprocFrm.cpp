@@ -548,10 +548,12 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 
 
 //PicProcessor * rawprocFrm::AddItem(wxString name, wxString command, bool display)
-bool rawprocFrm::AddItem(wxString name, wxString command, bool display)
+wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 {
 	SetStatusText("");
-	bool result = true;
+	//bool result = true;
+	wxTreeItemId id;
+	id.Unset();
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
@@ -581,17 +583,18 @@ bool rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
 #endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
-	else return false;
+	else return id;
+	id = p->GetId();
 	p->createPanel(parambook);
 	p->processPic();
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
-	if (display) CommandTreeSetDisplay(p->GetId());
-	//if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+	if (display) CommandTreeSetDisplay(id, 592);
+	//if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(), 593);
 	Refresh();
 	//Update();
 
-	return true;
+	return id;
 }
 
 void rawprocFrm::ApplyOps(gImage &dib, wxString operations)
@@ -750,7 +753,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
 		picdata->createPanel(parambook);
-		CommandTreeSetDisplay(picdata->GetId());
+		CommandTreeSetDisplay(picdata->GetId(), 756);
 		//pic->SetScaleToWidth();
 		if (pic->GetSize().GetWidth() > dib->getWidth()) {
 			pic->SetScale(1.0);
@@ -781,7 +784,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 							AddItem(wxString(cmd[0]), "", incdisplay);
 						wxSafeYield(this);
 					}
-					if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
+					if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()),787);
 				}
 				catch (std::exception& e) {
 					wxMessageBox(wxString::Format("Error: Adding tool failed: %s",e.what()));
@@ -927,7 +930,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
 			picdata->createPanel(parambook);
-			if (incdisplay) CommandTreeSetDisplay(picdata->GetId());
+			if (incdisplay) CommandTreeSetDisplay(picdata->GetId(),933);
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 
 			for (int i=2; i<token.GetCount(); i++) {
@@ -939,7 +942,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				wxSafeYield(this);
 				
 			}
-			if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
+			if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()),945);
 			
 			opensource = true;
 
@@ -1135,7 +1138,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 					wxArrayString prop = split(params,"=");
 					if (prop.GetCount() >=2) myConfig::getConfig().setValue(std::string(prop[0].c_str()),std::string(prop[1].c_str()));
 				}
-				else if (AddItem(cmd[0], params, incdisplay)) {
+				else if (AddItem(cmd[0], params, incdisplay).IsOk()) {
 					wxSafeYield(this);
 				}
 				else {
@@ -1148,7 +1151,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 
 			token = toolfile.GetNextLine();
 		}
-		if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()));
+		if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()),1154);
 		myConfig::getConfig().enableTempConfig(false);
 		toolfile.Close();
 	}
@@ -1157,8 +1160,9 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 }
 
 
-void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item)
+void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item, int src)
 {
+//printf("set display called from %d\n", src);  //used for group tool debugging, keep around just in case...
 	SetStatusText("");
 	if (!item.IsOk()) return;
 	if (displayitem.IsOk()) commandtree->SetItemState(displayitem,0);
@@ -1184,7 +1188,7 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 	SetStatusText("");
 	wxTreeItemId item = event.GetItem();
 	wxTreeItemId prev = displayitem;
-	CommandTreeSetDisplay(item);
+	CommandTreeSetDisplay(item,1191);
 	if (isDownstream(prev, item)) {
 		wxTreeItemId next = commandtree->GetNextSibling(prev);
 		if (next.IsOk()) ((PicProcessor *) commandtree->GetItemData(next))->processPic();
@@ -1214,7 +1218,7 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item, bool selectprevious)
 		prev = commandtree->GetPrevSibling(item);
 		next = commandtree->GetNextSibling(item);
 		if (!prev.IsOk()) prev = commandtree->GetRootItem();
-		if (commandtree->GetItemState(item) == 1) CommandTreeSetDisplay(prev);
+		if (commandtree->GetItemState(item) == 1) CommandTreeSetDisplay(prev,1221);
 		if (next.IsOk())
 			newitem = next;
 		else
@@ -1235,7 +1239,7 @@ void rawprocFrm::CommandTreeDeleteSubsequent(wxTreeItemId item)
 	wxTreeItemId next;
 	wxTreeItemIdValue cookie;
 	commandtree->SelectItem(item);
-	CommandTreeSetDisplay(item);
+	CommandTreeSetDisplay(item,1242);
 	if (item == commandtree->GetRootItem())
 		next = commandtree->GetFirstChild(item, cookie);
 	else
@@ -1289,7 +1293,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 					wxTextDataObject data;
 					wxTheClipboard->GetData( data );
 					wxArrayString s = split(data.GetText(), ":");
-					if (AddItem(s[0], s[1]))
+					if (AddItem(s[0], s[1]).IsOk())
 						SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
 					else
 						SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
@@ -1374,7 +1378,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 				wxArrayString token = split(cmdstring, " ");
 				for (int i=2; i<token.GetCount(); i++) {
 					wxArrayString cmd = split(token[i], ":");					
-					if (AddItem(cmd[0], cmd[1])) 
+					if (AddItem(cmd[0], cmd[1]).IsOk()) 
 						wxSafeYield(this);
 					else
 						wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
@@ -1388,7 +1392,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 				if (wxMessageBox("Re-apply processing chain?", "Re-Open", wxYES_NO, this) == wxYES) {
 					for (int i=2; i<token.GetCount(); i++) {
 						wxArrayString cmd = split(token[i], ":");					
-						if (AddItem(cmd[0], cmd[1])) 
+						if (AddItem(cmd[0], cmd[1]).IsOk()) 
 							wxSafeYield(this);
 						else
 							wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
@@ -1486,7 +1490,7 @@ void rawprocFrm::Mnugamma1006Click(wxCommandEvent& event)
 		PicProcessorGamma *p = new PicProcessorGamma("gamma",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1493);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding gamma tool failed: %s",e.what()));
@@ -1503,7 +1507,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding tone tool failed: %s",e.what()));
@@ -1525,7 +1529,7 @@ void rawprocFrm::Mnubright1007Click(wxCommandEvent& event)
 		PicProcessorBright *p = new PicProcessorBright("bright",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1532);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding bright tool failed: %s",e.what()));
@@ -1546,7 +1550,7 @@ void rawprocFrm::Mnucontrast1008Click(wxCommandEvent& event)
 		PicProcessorContrast *p = new PicProcessorContrast("contrast",val, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1553);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding contrast tool failed: %s",e.what()));
@@ -1565,7 +1569,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
 		p->createPanel(parambook);
 		if (val != "0.0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
@@ -1582,7 +1586,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
 		p->createPanel(parambook);
 		if (val != "0.0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1589);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
@@ -1598,7 +1602,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();  //comment out, don't need to process new tool
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
@@ -1620,7 +1624,7 @@ void rawprocFrm::MnuShadow1015Click(wxCommandEvent& event)
 		PicProcessorShadow *p = new PicProcessorShadow("shadow",cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1627);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding shadow tool failed: %s",e.what()));
@@ -1640,7 +1644,7 @@ void rawprocFrm::MnuHighlightClick(wxCommandEvent& event)
 		PicProcessorHighlight *p = new PicProcessorHighlight("highlight",cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1647);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding highlight tool failed: %s",e.what()));
@@ -1662,7 +1666,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1669);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
@@ -1682,7 +1686,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1689);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding crop tool failed: %s",e.what()));
@@ -1703,7 +1707,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 		p->createPanel(parambook);
 		p->processPic();
 		pic->SetScale(1.0);
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1710);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
@@ -1727,7 +1731,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 			p->createPanel(parambook);
 		}
 
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1734);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
@@ -1744,7 +1748,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
 		p->createPanel(parambook);
 		if (defval != "0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
@@ -1766,7 +1770,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();  //not sure why rotate has an initial value.....
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1733);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
@@ -1799,7 +1803,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1806);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding denoise tool failed: %s",e.what()));
@@ -1824,7 +1828,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1831);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
@@ -1848,7 +1852,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 		p->createPanel(parambook);
 		p->processPic();
 		p->setOpenFilePath(openfilepath);
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1855);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
@@ -1877,7 +1881,7 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
 		p->createPanel(parambook);
 		if (defaults != "") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding lenscorrection tool failed: %s",e.what()));
@@ -1899,7 +1903,7 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1906);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
@@ -1914,7 +1918,7 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1921);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
@@ -1929,7 +1933,7 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "0.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding subtract tool failed: %s",e.what()));
@@ -1944,7 +1948,7 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId());
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format("Error: Adding group tool failed: %s",e.what()));
@@ -1989,7 +1993,7 @@ void rawprocFrm::MnuPaste1203Click(wxCommandEvent& event)
 			wxTextDataObject data;
 			wxTheClipboard->GetData( data );
 			wxArrayString s = split(data.GetText(), ":");
-			if (AddItem(s[0], s[1]))
+			if (AddItem(s[0], s[1]).IsOk())
 				SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
 			else
 				SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
@@ -2070,7 +2074,8 @@ void rawprocFrm::showHistogram(wxTreeItemId item)
 
 void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 {
-	wxTreeItemId disp;
+	wxTreeItemId disp, id, first, prev, next;
+	bool displaylast = false;
 	wxString pstr, newlist, last;
 	wxArrayString p, cmd;
 	PicProcessorGroup *g;
@@ -2101,18 +2106,26 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			CommandTreeDeleteSubsequent(event.GetItem());
 			break;
 		case ID_GROUPTOTOOLLIST:
-			disp = displayitem;
+			if (event.GetItem() == displayitem) displaylast = true;
+			prev = commandtree->GetPrevSibling(event.GetItem());
+			//next = commandtree->GetNextSibling(event.GetItem());
+			if (!prev.IsOk()) prev = commandtree->GetRootItem();
 			pstr = ((PicProcessor *) commandtree->GetItemData(event.GetItem()))->getParams();
 			p = split(pstr, ";");
 			CommandTreeDeleteItem(event.GetItem(), true);
+			//PicProcessor::enableGlobalProcessing(false);  //not ready for prime time
 			for (int i=0; i<p.GetCount(); i++) {
 				cmd = split(p[i], ":");					
-				if (AddItem(cmd[0], cmd[1])) 
+				id = AddItem(cmd[0], cmd[1], false);
+				if (id.IsOk()) 
 					wxSafeYield(this);
 				else
 					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+				if (i==0) first = id;
 			}
-			if (disp.IsOk()) CommandTreeSetDisplay(disp);
+			//PicProcessor::enableGlobalProcessing(true);  //not ready for prime time
+			((PicProcessor *) commandtree->GetItemData(id))->processPic();
+			if (displaylast && id.IsOk()) CommandTreeSetDisplay(id,2128);
 			break;
 		case ID_GROUPLASTTOTOOL:
 			disp = displayitem;
@@ -2131,8 +2144,8 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 				CommandTreeDeleteItem(event.GetItem(), true);
 			}
 			cmd = split(last,":");
-			AddItem(cmd[0], cmd[1]);
-			if (disp.IsOk()) CommandTreeSetDisplay(disp);
+			wxTreeItemId id = AddItem(cmd[0], cmd[1]);
+			if (disp.IsOk()) CommandTreeSetDisplay(disp,2148);
 			break;
 	}
 }

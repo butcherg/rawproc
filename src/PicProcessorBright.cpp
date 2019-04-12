@@ -116,7 +116,6 @@ void PicProcessorBright::createPanel(wxSimplebook* parent)
 
 bool PicProcessorBright::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("bright...");
 	double bright = atof(c.c_str());
 	bool result = true;
@@ -136,6 +135,8 @@ bool PicProcessorBright::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);

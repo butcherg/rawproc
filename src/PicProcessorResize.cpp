@@ -184,7 +184,6 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 
 bool PicProcessorResize::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	wxString algo;
 	bool blur = false;
 	float sigma = 1.0;
@@ -204,6 +203,7 @@ bool PicProcessorResize::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	bool result = true;
 	unsigned dw = dib->getWidth();

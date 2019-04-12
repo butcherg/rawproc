@@ -143,7 +143,6 @@ void PicProcessorHighlight::createPanel(wxSimplebook* parent)
 
 bool PicProcessorHighlight::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	bool result = true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("highlight...");
 
@@ -166,6 +165,8 @@ bool PicProcessorHighlight::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);

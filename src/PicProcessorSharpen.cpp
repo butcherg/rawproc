@@ -116,7 +116,8 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSharpen::processPic(bool processnext) {
+bool PicProcessorSharpen::processPic(bool processnext) 
+{
 	double kernel[3][3] =
 	{
 		0.0, 0.0, 0.0,
@@ -145,6 +146,8 @@ bool PicProcessorSharpen::processPic(bool processnext) {
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (global_processing_enabled & processingenabled & sharp > 1.0) {
 		mark();
 		dib->ApplyConvolutionKernel(kernel, threadcount);

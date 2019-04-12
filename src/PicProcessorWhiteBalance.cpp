@@ -382,7 +382,6 @@ std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 
 bool PicProcessorWhiteBalance::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	std::vector<double> wbmults;
 	int patchx, patchy; double patchrad;
@@ -446,6 +445,8 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		if (dib->getInfoValue("LibrawMosaiced") == "1") {

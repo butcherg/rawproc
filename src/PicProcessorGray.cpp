@@ -169,7 +169,6 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 
 bool PicProcessorGray::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gray...");
 	wxArrayString cp = split(getParams(),",");
 	double r = atof(cp[0]);
@@ -185,6 +184,8 @@ bool PicProcessorGray::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		dib->ApplyGray(r, g, b, threadcount);

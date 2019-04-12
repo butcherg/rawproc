@@ -299,7 +299,6 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDenoise::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");
 
 	int algorithm = DENOISENLMEANS;
@@ -338,6 +337,8 @@ bool PicProcessorDenoise::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) { 
 		mark();
 		if (algorithm == DENOISENLMEANS)

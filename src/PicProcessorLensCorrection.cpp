@@ -450,7 +450,6 @@ lfDatabase * PicProcessorLensCorrection::getLensDatabase()
 
 bool PicProcessorLensCorrection::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection...");
 	bool result = true;
 	GIMAGE_ERROR ret;
@@ -492,6 +491,8 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	std::map<std::string, std::string> info = dib->getInfo();
 
 	if (processingenabled) {

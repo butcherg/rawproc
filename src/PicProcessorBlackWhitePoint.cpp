@@ -31,23 +31,6 @@ class BlackWhitePointPanel: public PicProcPanel
 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 2); //.Expand();
-			wxArrayString str;
-			str.Add("rgb");
-			str.Add("red");
-			str.Add("green");
-			str.Add("blue");
-			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
-			
-			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
-				chan->SetStringSelection(p[0]);
-				blk = atoi(p[1]);
-				wht = atoi(p[2]);
-			}
-			else {
-				chan->SetSelection(chan->FindString("rgb"));
-				blk = atoi(p[0]);
-				wht = atoi(p[1]);
-			}
 
 			SetSize(parent->GetSize());
 			
@@ -61,6 +44,46 @@ class BlackWhitePointPanel: public PicProcPanel
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			recalc = new wxCheckBox(this, BLACKWHITERECALC, "ReCalculate");
 			if (recalcdefault) recalc->SetValue(true);
+
+			wxArrayString str;
+			str.Add("rgb");
+			str.Add("red");
+			str.Add("green");
+			str.Add("blue");
+			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+
+			bwmode = BLACKWHITESLIDER;
+			slideb->SetValue(true);
+			blk = 0.0;
+			wht = 255.0;
+			
+			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
+				chan->SetStringSelection(p[0]);
+				if (p.size() >= 2 && p[1] == "data") {
+					bwmode = BLACKWHITEDATA;
+					datb->SetValue(true);
+				}
+				else if (p.size() >= 2 && p[1] == "camera") {
+					bwmode = BLACKWHITECAMERA;
+					camb->SetValue(true);
+				}
+				else if (p.size() >= 3) {
+					bwmode = BLACKWHITESLIDER;
+					slideb->SetValue(true);
+					blk = atoi(p[1]);
+					wht = atoi(p[2]);
+				}
+			}
+			else {
+				chan->SetSelection(chan->FindString("rgb"));
+				bwmode = BLACKWHITESLIDER;
+				slideb->SetValue(true);
+				if (p.size() >= 3) {
+					blk = atoi(p[0]);
+					wht = atoi(p[1]);
+				}
+			}
+
 			
 			myRowSizer *m = new myRowSizer();
 			m->AddRowItem(enablebox, flags);
@@ -302,12 +325,12 @@ void PicProcessorBlackWhitePoint::reCalc()
 
 bool PicProcessorBlackWhitePoint::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	double blk, wht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (recalc) {
 		reCalc();

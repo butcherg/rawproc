@@ -249,7 +249,6 @@ void PicProcessorRedEye::setDesat(bool d)
 
 bool PicProcessorRedEye::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
 	bool result = true;
 
@@ -261,6 +260,8 @@ bool PicProcessorRedEye::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
+
 	if (processingenabled) {
 		mark();
 		dib->ApplyRedeye(points, threshold, radius, desat, desatpct, threadcount);

@@ -308,7 +308,6 @@ wxString PicProcessorColorSpace::getOpenFilePath()
 
 bool PicProcessorColorSpace::processPic(bool processnext) 
 {
-	if (!global_processing_enabled) return true;
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
 	GIMAGE_ERROR ret;
@@ -345,6 +344,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
 		mark();
