@@ -2145,7 +2145,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			}
 			cmd = split(last,":");
 			wxTreeItemId id = AddItem(cmd[0], cmd[1]);
-			if (disp.IsOk()) CommandTreeSetDisplay(disp,2148);
+			if (disp == event.GetItem()) CommandTreeSetDisplay(id,2148);
 			break;
 	}
 }
