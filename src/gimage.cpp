@@ -3985,9 +3985,9 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 
 	#pragma omp parallel
 	{
-		std::vector<unsigned> pr(scale,0);
-		std::vector<unsigned> pg(scale,0);
-		std::vector<unsigned> pb(scale,0);
+		std::vector<unsigned> pr(scale+1,0);
+		std::vector<unsigned> pg(scale+1,0);
+		std::vector<unsigned> pb(scale+1,0);
 		
 		#pragma omp for
 		for(unsigned y = 0; y < h; y++) {
