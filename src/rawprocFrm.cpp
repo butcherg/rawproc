@@ -773,7 +773,11 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
 
 		if ((fif == FILETYPE_RAW) & (raw_default != "")) {
-			if (wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "input.raw.default", wxYES_NO, this) == wxYES) {
+			int applydefault = wxYES;
+			//parm input.raw.default.prompt: 1|0, enable/disable prompt to apply input.raw.default.  Default=1 
+			if (myConfig::getConfig().getValueOrDefault("input.raw.default.prompt","1") == "1") 
+				applydefault = wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "input.raw.default", wxYES_NO, this);
+			if (applydefault == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				try {
 					for (int i=0; i<token.GetCount(); i++) {
