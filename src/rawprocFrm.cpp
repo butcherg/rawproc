@@ -739,8 +739,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			return;
 		}
 		
-		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=1
-		if (myConfig::getConfig().getValueOrDefault("input.orient","1") == "1") {
+		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
 			WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
 			dib->NormalizeRotation();
 		}
@@ -907,7 +907,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 			
-			if (myConfig::getConfig().getValueOrDefault("input.orient","1") == "1") {
+			if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
 				WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
 				dib->NormalizeRotation();
 			}

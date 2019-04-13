@@ -224,6 +224,10 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				return std::string();
 			}
 			dib.setInfo("LibrawMosaiced","0");
+			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
+				if (print) printf("normalizing rotation... "); fflush(stdout);
+				dib.NormalizeRotation(threadcount);
+			}
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 			char cs[256];
 			sprintf(cs, "%s:%s ",cmd, demosaic.c_str());

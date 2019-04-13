@@ -900,8 +900,8 @@ char * _loadRAW(const char *filename,
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 
 	//Normalize libraw orientation for EXIF:
-/*
-	if (RawProcessor.imgdata.params.user_flip <= 0) {
+
+	if (RawProcessor.imgdata.params.user_flip == -1) {  //take the orientation from flip
 		info["Orientation"] = tostr((unsigned short) S.flip); //dcraw left the orientation alone, use the metadata
 		if (S.flip == 0)  info["Orientation"] = "1";
 		if (S.flip == 3)  info["Orientation"] = "3";
@@ -911,7 +911,7 @@ char * _loadRAW(const char *filename,
 	else {
 		info["Orientation"] = "1"; //dcraw flipped the image per the user's instruction (3, 5, 6) or the raw file specification (-1), so don't specify an orientation transform
 	}
-*/
+
 
 	time_t rawtime = P2.timestamp;
 	struct tm * timeinfo;
