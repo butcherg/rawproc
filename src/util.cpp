@@ -310,12 +310,30 @@ wxImage gImage2wxImage(gImage &dib)
 	dpix * dst = (dpix *) image.GetData();
 	
 
-
+/*
 	#pragma omp parallel for
 	for (unsigned i = 0; i<size; i++) {
 		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
 		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
 		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+	}
+*/
+
+	#pragma omp parallel for
+	for (unsigned pos = 0; pos<size; pos++) {
+		#if defined PIXHALF
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(half_float::half) 256.0_h,0.0_h),255.0_h)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(half_float::half) 256.0_h,0.0_h),255.0_h));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(half_float::half) 256.0_h,0.0_h),255.0_h)); 
+		#elif defined PIXFLOAT
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(float) 256.0f,0.0f),255.0f)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(float) 256.0f,0.0f),255.0f));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(float) 256.0f,0.0f),255.0f)); 
+		#else
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(double) 256.0,0.0),255.0)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(double) 256.0,0.0),255.0));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(double) 256.0,0.0),255.0)); 
+		#endif
 	}
 
 	//can't use this because wxWidgets deallocates the image with free, rather than delete []...
