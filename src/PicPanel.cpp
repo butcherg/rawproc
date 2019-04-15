@@ -326,6 +326,10 @@ void PicPanel::render(wxDC &dc)
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
 
+	//write the display image, slowly.  For reference, doesn't work right:
+	//wxBitmap dimage(image->ConvertToImage().Scale(panelw, panelh, wxIMAGE_QUALITY_HIGH));
+	//dc.DrawBitmap(dimage,imageposx,imageposy);
+
 	//write the tool-supplied plots:
 	if (dcList != "") {
 		dc.SetPen(*wxYELLOW_PEN);
@@ -662,7 +666,12 @@ bool PicPanel::GetColorManagement()
 
 void PicPanel::BlankPic()
 {
-
+	if (image) { 
+		wxBitmap *dimg = new wxBitmap(image->ConvertToImage().ConvertToDisabled(128));
+		image->~wxBitmap();
+		image = dimg;
+	}
+	PaintNow();
 }
 
 void PicPanel::SetProfile(gImage * dib)
