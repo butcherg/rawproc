@@ -1572,7 +1572,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
 		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
 		p->createPanel(parambook);
-		if (val != "0.0") p->processPic();
+		if (val != "1.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
 	}
 	catch (std::exception& e) {
