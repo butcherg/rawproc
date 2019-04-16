@@ -6,11 +6,16 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/strutil.h"
+#include "copy.xpm"
+#include "paste.xpm"
 #include "undo.xpm"
 
 #define EXPOSUREENABLE	 7000
 #define EXPOSUREEV	 7001
 #define EXPOSURETARGETEV 7002
+#define EXPOSURECOPY	 7003
+#define EXPOSUREPASTE	 7004
+#define EXPOSUREUNDO	 7005
 
 class ExposurePanel: public PicProcPanel
 {
@@ -31,7 +36,7 @@ class ExposurePanel: public PicProcPanel
 
 			ev = new wxSlider(this, wxID_ANY, 0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			val = new wxStaticText(this,wxID_ANY, "0.0", wxDefaultPosition, wxSize(30, -1));
-			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn = new wxBitmapButton(this, EXPOSUREUNDO, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
 			
 			patch  = new wxStaticText(this, wxID_ANY, " patch xy: -- ");
@@ -63,7 +68,8 @@ class ExposurePanel: public PicProcPanel
 
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
-
+			m->AddRowItem(new wxBitmapButton(this, EXPOSURECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, EXPOSUREPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -93,7 +99,9 @@ class ExposurePanel: public PicProcPanel
 			Update();
 			SetFocus();
 			t = new wxTimer(this);
-			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this);
+			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this, EXPOSUREUNDO);
+			Bind(wxEVT_BUTTON, &ExposurePanel::OnCopy, this, EXPOSURECOPY);
+			Bind(wxEVT_BUTTON, &ExposurePanel::OnPaste, this, EXPOSUREPASTE);
 			Bind(wxEVT_RADIOBUTTON, &ExposurePanel::OnRadioButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ExposurePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ExposurePanel::OnThumbTrack, this);
@@ -121,6 +129,42 @@ class ExposurePanel: public PicProcPanel
 				processEV();
 			}
 		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				std::map<std::string,std::string> p = q->paramMap(q->getParams().ToStdString(), "ev");
+
+				if (p.find("ev") != p.end()) { 
+					evb->SetValue(true);
+					expmode = EXPOSUREEV;
+					ev->SetValue(50.0+(atof(p["ev"].c_str())*10.0));
+					val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+				}
+				if (p.find("patch") != p.end()) {
+					evtgtb->SetValue(true);
+					expmode = EXPOSURETARGETEV;
+					std::vector<std::string> patstr = split(p["patch"],",");
+					patx = atoi(patstr[0].c_str());
+					paty = atoi(patstr[1].c_str());
+					patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+					radius->SetFloatValue(atof(p["radius"].c_str()));
+					ev0->SetFloatValue(atof(p["ev0"].c_str()));
+				}
+
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
+		}
+
 
 		void OnChanged(wxCommandEvent& event)
 		{

@@ -149,6 +149,7 @@ class WhiteBalancePanel: public PicProcPanel
 				orgg = 1.0;
 				orgb = 1.0;
 				origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
+				q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
 				setMultipliers(orgr, orgg, orgb);
 				ob->Enable(true);
 				ob->SetValue(true);
@@ -233,6 +234,7 @@ class WhiteBalancePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
 			
 		}
 
@@ -257,19 +259,16 @@ class WhiteBalancePanel: public PicProcPanel
 					pb->SetValue(true);
 				}
 				else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
-					orgr = atof(p[0]);
-					orgg = atof(p[1]);
-					orgb = atof(p[2]);
-					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
-					setMultipliers(orgr, orgg, orgb);
+					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[0]), atof(p[1]), atof(p[2])));
+					setMultipliers(atof(p[0]), atof(p[1]), atof(p[2]));
 					ob->Enable(true);
 					ob->SetValue(true);
 				
 				}
 				q->processPic();
-				wxMessageBox(q->getParams());
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste:%s:%s",q->getCommand(),q->getParams()));
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 
 
