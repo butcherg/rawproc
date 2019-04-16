@@ -652,10 +652,22 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 							sprintf(cs, "%s:%s ",cmd, op.c_str());
 						}
 					}
+					else { // parameters are just three multipliers
+						redmult   = atof(parm[0].c_str());
+						greenmult = atof(parm[1].c_str());
+						bluemult  = atof(parm[2].c_str());
+						if (print) printf("whitebalance: %0.1f,%0.1f,%0.1f (%d threads)... ",redmult, greenmult, bluemult,threadcount); fflush(stdout);
+						_mark();
+						dib.ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+						if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+						sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, redmult, greenmult, bluemult);
+					}
+/*
 					else {
-						if (print) printf("whitebalance: Error: only camera white balance can be applied to pre-demosaiced images.\n");
+						if (print) printf("whitebalance: Error: only camera white balance or multipliers can be applied to pre-demosaiced images.\n");
 						return std::string();
 					}
+*/
 				}
 				commandstring += std::string(cs);
 			}
