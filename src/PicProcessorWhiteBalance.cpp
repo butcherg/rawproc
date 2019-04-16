@@ -4,12 +4,15 @@
 #include "util.h"
 //#include "gimage/strutil.h"
 #include "gimage/curve.h"
+#include "myRowSizer.h"
 #include "myFloatCtrl.h"
 #include <wx/spinctrl.h>
 #include <wx/clipbrd.h>
 #include "unchecked.xpm"
 #include "checked.xpm"
 #include "undo.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #define WBENABLE 6400
 #define WBMANUAL 6401
@@ -21,6 +24,10 @@
 #define WBRED 6406
 #define WBGREEN 6407
 #define WBBLUE 6408
+
+#define WBRESET 6409
+#define WBCOPY 6410
+#define WBPASTE 6411
 
 
 class WhiteBalancePanel: public PicProcPanel
@@ -43,41 +50,20 @@ class WhiteBalancePanel: public PicProcPanel
 			//parm tool.whitebalance.increment: (float), maximum multiplier value.  Default=0.001
 			double increment = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.increment","0.001").c_str());
 
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
-			wxGridBagSizer *g = new wxGridBagSizer();
-
 			enablebox = new wxCheckBox(this, WBENABLE, "white balance:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "red mult:"), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			g->Add(rmult, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-
-			g->Add(new wxStaticText(this,wxID_ANY, "green mult:"), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			gmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			g->Add(gmult, wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-
-			g->Add(new wxStaticText(this,wxID_ANY, "blue mult:"), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			g->Add(bmult, wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
-			
-			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn = new wxBitmapButton(this, WBRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset multipliers to original values");
-			g->Add(btn, wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-
-			g->Add(0,10, wxGBPosition(5,0));
 
 			//Operator radio buttons:
-			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			ab = new wxRadioButton(this, WBAUTO, "Auto");
-			pb = new wxRadioButton(this, WBPATCH, "Patch:");
-			cb = new wxRadioButton(this, WBCAMERA, "Camera:");
-			g->Add(ob, wxGBPosition(6,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(ab, wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(pb, wxGBPosition(8,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(cb, wxGBPosition(9,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxSize(80,-1), wxRB_GROUP);
+			ab = new wxRadioButton(this, WBAUTO, "Auto",  wxDefaultPosition, wxSize(80,-1));
+			pb = new wxRadioButton(this, WBPATCH, "Patch:",  wxDefaultPosition, wxSize(80,-1));
+			cb = new wxRadioButton(this, WBCAMERA, "Camera:",  wxDefaultPosition, wxSize(80,-1));
 
 			ab->SetValue(false);
 			ob->Enable(false);
@@ -86,13 +72,61 @@ class WhiteBalancePanel: public PicProcPanel
 
 			//Operator parameters:
 			origwb = new wxStaticText(this, wxID_ANY, "(none)");
-			g->Add(origwb, wxGBPosition(6,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			autowb = new wxStaticText(this, wxID_ANY, "");
-			g->Add(autowb, wxGBPosition(7,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			patch = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
-			g->Add(patch, wxGBPosition(8,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
 			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
-			g->Add(camera, wxGBPosition(9,1), wxDefaultSpan, wxALIGN_LEFT |wxALL, 3);
+
+
+			//Lay out with RowSizer:
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, WBCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, WBPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			//multipliers:
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "red mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(rmult, flags);
+
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "green mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(gmult, flags);
+
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "blue mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(bmult, flags);
+			m->AddRowItem(btn, flags);
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			//orig:
+			m->NextRow();
+			m->AddRowItem(ob, flags);
+			m->AddRowItem(origwb, flags);
+
+			//auto:
+			m->NextRow();
+			m->AddRowItem(ab, flags);
+			m->AddRowItem(autowb, flags);
+
+			//patch:
+			m->NextRow();
+			m->AddRowItem(pb, flags);
+			m->AddRowItem(patch, flags);
+
+			//camera:
+			m->NextRow();
+			m->AddRowItem(cb, flags);
+			m->AddRowItem(camera, flags);
+
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+
 			
 
 			//if camera multipliers are available in the metadata:
@@ -150,10 +184,6 @@ class WhiteBalancePanel: public PicProcPanel
 				wxMessageBox("Error: ill-formed param string");
 
 
-
-		
-			SetSizerAndFit(g);
-			g->Layout();
 			SetFocus();
 			t = new wxTimer(this);
 
@@ -161,8 +191,11 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
 			Bind(myFLOATCTRL_CHANGE,&WhiteBalancePanel::onWheel, this);
 			Bind(myFLOATCTRL_UPDATE,&WhiteBalancePanel::paramChanged, this);
-			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::onEnable, this, WBENABLE);
-			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnReset, this);
+			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::OnEnable, this, WBENABLE);
+			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnReset, this, WBRESET);
+			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnCopy, this, WBCOPY);
+			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnPaste, this, WBPASTE);
+
 
 			Refresh();
 			Update();
@@ -185,7 +218,7 @@ class WhiteBalancePanel: public PicProcPanel
 			
 		}
 
-		void onEnable(wxCommandEvent& event)
+		void OnEnable(wxCommandEvent& event)
 		{
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
@@ -196,6 +229,49 @@ class WhiteBalancePanel: public PicProcPanel
 				q->processPic();
 			}
 		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				wxArrayString p = split(q->getParams(),",");
+				if (p[0] == "auto") {
+					ab->Enable(true);
+					ab->SetValue(true);
+				}
+				else if (p[0] == "camera") {
+					cb->Enable(true);
+					cb->SetValue(true);
+				}
+				else if (p[0] == "patch") {
+					patx = atoi(p[1]);
+					paty = atoi(p[2]);
+					patrad = atof(p[3]);
+					patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
+					pb->Enable(true);
+					pb->SetValue(true);
+				}
+				else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
+					orgr = atof(p[0]);
+					orgg = atof(p[1]);
+					orgb = atof(p[2]);
+					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
+					setMultipliers(orgr, orgg, orgb);
+					ob->Enable(true);
+					ob->SetValue(true);
+				
+				}
+				q->processPic();
+				wxMessageBox(q->getParams());
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste:%s:%s",q->getCommand(),q->getParams()));
+		}
+
 
 		//used by PicProcessorWhiteBalance to initialize panel:
 		void setMultipliers(double rm, double gm, double bm)
