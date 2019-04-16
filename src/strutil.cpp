@@ -147,7 +147,7 @@ std::string getCwd()
 {
 	char buff[4096];
 
-	getcwd( buff, 4096 );
+	char * result = getcwd( buff, 4096 );
 	std::string cwd( buff );
 
 	return cwd;
