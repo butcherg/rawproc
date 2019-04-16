@@ -288,17 +288,20 @@ bool PicProcessor::pasteParamsFromClipboard()
 			wxTextDataObject data;
 			wxTheClipboard->GetData( data );
 			std::vector<std::string> s = bifurcate(data.GetText().ToStdString(), ':');
-			if (s.size() < 2) { 
-				if (s[0] != n.ToStdString()) {
+			if (s.size() <= 2) { 
+				if (wxString(s[0]) == n) {
 					n = wxString(s[0]);
 					c = wxString(s[1]);
 				}
-				else result = false;
+				else result = false; 
 			}
-			else result = false;
+			else result = false; 
 		}
+		else result = false; 
 		wxTheClipboard->Close();
 	}
+	else result = false; 
+
 	return result;
 }
 
