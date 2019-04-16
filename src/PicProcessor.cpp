@@ -3,6 +3,7 @@
 #include "util.h"
 #include "gimage/strutil.h"
 #include <wx/event.h>
+#include <wx/clipbrd.h>
 #include <exception>
 
 class BlankPanel: public PicProcPanel 
@@ -266,6 +267,39 @@ void PicProcessor::displayDraw(wxDC &dc)
 	
 }
 
+bool PicProcessor::copyParamsToClipboard()
+{
+	if (wxTheClipboard->Open())
+	{
+		wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%s:%s",n,c)));
+		wxTheClipboard->Close();
+		return true;
+	}
+	return false;
+}
 
+bool PicProcessor::pasteParamsFromClipboard()
+{
+	bool result = true;
+	if (wxTheClipboard->Open())
+	{
+		if (wxTheClipboard->IsSupported( wxDF_TEXT ))
+		{
+			wxTextDataObject data;
+			wxTheClipboard->GetData( data );
+			std::vector<std::string> s = bifurcate(data.GetText().ToStdString(), ':');
+			if (s.size() < 2) { 
+				if (s[0] != n.ToStdString()) {
+					n = wxString(s[0]);
+					c = wxString(s[1]);
+				}
+				else result = false;
+			}
+			else result = false;
+		}
+		wxTheClipboard->Close();
+	}
+	return result;
+}
 
 

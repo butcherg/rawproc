@@ -55,6 +55,9 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		virtual void setParams(wxString params);
 		virtual void displayDraw(wxDC &dc);
 
+		bool copyParamsToClipboard();
+		bool pasteParamsFromClipboard();
+
 		static PicProcessor *getSelectedPicProcessor(wxTreeCtrl *tree);
 		static void enableGlobalProcessing(bool e);
 
