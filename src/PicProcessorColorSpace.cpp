@@ -8,6 +8,8 @@
 #include "CameraData.h"
 #include <wx/stdpaths.h>
 #include "listview.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #define COLORENABLE 6500
 #define COLOROP 6501
@@ -17,6 +19,8 @@
 #define COLORPROFILE 6505
 #define COLORCAMERA 6506
 #define COLORCAMERASTATUS 6507
+#define COLORPASTE	 6508
+#define COLORCOPY	 6509
 
 
 class ColorspacePanel: public PicProcPanel
@@ -91,7 +95,8 @@ class ColorspacePanel: public PicProcPanel
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
-
+			m->AddRowItem(new wxBitmapButton(this, COLORCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, COLORPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -130,6 +135,8 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &ColorspacePanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this, COLORFILE);
+			Bind(wxEVT_BUTTON, &ColorspacePanel::OnCopy, this, COLORCOPY);
+			Bind(wxEVT_BUTTON, &ColorspacePanel::OnPaste, this, COLORPASTE);
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::paramChanged, this, COLORBPC);
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::onEnable, this, COLORENABLE);
@@ -152,6 +159,43 @@ class ColorspacePanel: public PicProcPanel
 				q->processPic();
 			}
 		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+
+				std::map<std::string,std::string> p = q->paramMap(q->getParams().ToStdString(), "profile,op,intent,bpc");
+
+				if (p.find("profile") != p.end()) { 
+					if (p["profile"] == "camera") {
+						camb->SetValue(true);
+						cpmode = COLORCAMERA;
+					}
+					else {
+						profileb->SetValue(true);
+						cpmode = COLORPROFILE;
+						edit->SetValue(wxString(p["profile"]));
+						if (p["op"] == "convert") operselect->SetSelection(0); else operselect->SetSelection(1);
+						if      (p["intent"] == "perceptual") intentselect->SetSelection(0);
+						else if (p["intent"] == "saturation") intentselect->SetSelection(1);
+						else if (p["intent"] == "relative_colorimetric") intentselect->SetSelection(2);
+						else if (p["intent"] == "absolute_colorimetric") intentselect->SetSelection(3);
+					}
+				}
+
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
+		}
+
 
 		void OnRadioButton(wxCommandEvent& event)
 		{
@@ -193,6 +237,27 @@ class ColorspacePanel: public PicProcPanel
 			primaries->SetLabel(primstring);
 			//Update();
 			primaries->Refresh();
+		}
+
+		void setMode(int mode)
+		{
+			cpmode = mode;
+			if (mode == COLORPROFILE) {
+				profileb->SetValue(true);
+				wxString profilestr = edit->GetValue();
+				wxString operstr = operselect->GetString(operselect->GetSelection());
+				wxString intentstr = intentselect->GetString(intentselect->GetSelection());
+				if (bpc->GetValue()) intentstr.Append(",bpc");
+				if  (operselect->GetSelection() == 1)
+					q->setParams(wxString::Format("%s,%s",profilestr, operstr));
+				else
+					q->setParams(wxString::Format("%s,%s,%s",profilestr, operstr, intentstr));
+			}
+			else if (mode == COLORCAMERA) {
+				q->setParams("camera,assign");
+				camb->SetValue(true);
+			}
+			
 		}
 
 
@@ -468,8 +533,10 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 							log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
 				}
 			}
-			else wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
-
+			else {
+				((ColorspacePanel *) toolpanel)->setMode(COLORPROFILE);
+				wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
+			}
 		}
 
 		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
