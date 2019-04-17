@@ -6,6 +6,8 @@
 #include "myConfig.h"
 #include "myRowSizer.h"
 #include "undo.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 #include "util.h"
 
 #define BLACKWHITEENABLE 6100
@@ -14,6 +16,8 @@
 #define BLACKWHITESLIDER 6103
 #define BLACKWHITEDATA   6104
 #define BLACKWHITECAMERA 6105
+#define BLACKWHITECOPY 6106
+#define BLACKWHITEPASTE 6107
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -102,8 +106,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, BLACKWHITECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, BLACKWHITEPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->AddRowItem(chan, wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
-
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -139,6 +144,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			t = new wxTimer(this);
 			Bind(wxEVT_RADIOBUTTON, &BlackWhitePointPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this, BLACKWHITERECALC);
+			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnCopy, this, BLACKWHITECOPY);
+			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnPaste, this, BLACKWHITEPASTE);
 			Bind(wxEVT_SCROLL_CHANGED, &BlackWhitePointPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BlackWhitePointPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHOICE, &BlackWhitePointPanel::channelChanged, this);
@@ -162,6 +169,56 @@ class BlackWhitePointPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				double blk=0.0, wht=255.0;
+				wxArrayString p = split(q->getParams(),",");
+
+				if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
+					chan->SetStringSelection(p[0]);
+					if (p.size() >= 2 && p[1] == "data") {
+						bwmode = BLACKWHITEDATA;
+						datb->SetValue(true);
+					}
+					else if (p.size() >= 2 && p[1] == "camera") {
+						bwmode = BLACKWHITECAMERA;
+						camb->SetValue(true);
+					}
+					else if (p.size() >= 3) {
+						bwmode = BLACKWHITESLIDER;
+						slideb->SetValue(true);
+						blk = atoi(p[1]);
+						wht = atoi(p[2]);
+						bwpoint->SetLeftValue(blk);
+						bwpoint->SetRightValue(wht);
+					}
+				}
+				else {
+					chan->SetSelection(chan->FindString("rgb"));
+					bwmode = BLACKWHITESLIDER;
+					slideb->SetValue(true);
+					if (p.size() >= 3) {
+						blk = atoi(p[0]);
+						wht = atoi(p[1]);
+						bwpoint->SetLeftValue(blk);
+						bwpoint->SetRightValue(wht);
+					}
+				}
+
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 
 		void OnRadioButton(wxCommandEvent& event)
