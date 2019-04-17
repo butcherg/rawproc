@@ -4,13 +4,17 @@
 #include "PicProcPanel.h"
 #include "CurvePane.h"
 #include "myConfig.h"
-#include "myRowColumnSizer.h"
+#include "myRowSizer.h"
 #include "util.h"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #include <wx/choice.h>
 #include <wx/clipbrd.h>
 
 #define CURVEENABLE 6800
+#define CURVECOPY 6801
+#define CURVEPASTE 6802
 
 
 class CurvePanel: public PicProcPanel
@@ -31,13 +35,18 @@ class CurvePanel: public PicProcPanel
 			enablebox->SetValue(true);
 			curve = new CurvePane(this, params);
 
-			myRowColumnSizer *m = new myRowColumnSizer(3,3);
-			m->AddItem(enablebox, wxALIGN_LEFT);
-			m->AddItem(chan, wxALIGN_RIGHT);
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, CURVECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, CURVEPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(chan, flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 			m->NextRow();
-			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
-			m->NextRow();
-			m->AddItem(curve, wxALIGN_LEFT, 2);
+			m->AddRowItem(curve, wxSizerFlags().Left());
+			m->End();
 
 			SetSizerAndFit(m);
 			m->Layout();
@@ -51,6 +60,8 @@ class CurvePanel: public PicProcPanel
 			Bind(myCURVE_UPDATE, &CurvePanel::paramUpdated, this);
 			Bind(myCURVE_CHANGE, &CurvePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
+			Bind(wxEVT_BUTTON, &CurvePanel::OnCopy, this, CURVECOPY);
+			Bind(wxEVT_BUTTON, &CurvePanel::OnPaste, this, CURVEPASTE);
 			Refresh();
 		}
 
@@ -72,6 +83,59 @@ class CurvePanel: public PicProcPanel
 			}
 		}
 
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+
+				Curve crv;
+				int ctstart;
+				wxArrayString cpts = split(q->getParams(),",");
+				if ((cpts[0] == "rgb") | (cpts[0] == "red") | (cpts[0] == "green") | (cpts[0] == "blue") | (cpts[0] == "tone")) {
+					((PicProcessorCurve *) q)->setChannel(cpts[0]);
+					ctstart = 1;
+				}
+				else {
+					((PicProcessorCurve *) q)->setChannel("rgb");
+					ctstart = 0;
+				}
+				for (int i=ctstart; i<cpts.GetCount()-1; i+=2) {
+					crv.insertpoint(atof(cpts[i]), atof(cpts[i+1]));
+				}
+				//ctrlpts = crv.getControlPoints();
+				((PicProcessorCurve *) q)->setControlPoints(crv.getControlPoints());
+				curve->setPoints(crv.getControlPoints());
+/*
+				std::map<std::string,std::string> p = q->paramMap(q->getParams().ToStdString(), "ev");
+
+				if (p.find("ev") != p.end()) { 
+					evb->SetValue(true);
+					expmode = EXPOSUREEV;
+					ev->SetValue(50.0+(atof(p["ev"].c_str())*10.0));
+					val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
+				}
+				if (p.find("patch") != p.end()) {
+					evtgtb->SetValue(true);
+					expmode = EXPOSURETARGETEV;
+					std::vector<std::string> patstr = split(p["patch"],",");
+					patx = atoi(patstr[0].c_str());
+					paty = atoi(patstr[1].c_str());
+					patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+					radius->SetFloatValue(atof(p["radius"].c_str()));
+					ev0->SetFloatValue(atof(p["ev0"].c_str()));
+				}
+*/
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
+		}
 
 
 		void paramUpdated(wxCommandEvent& event)
