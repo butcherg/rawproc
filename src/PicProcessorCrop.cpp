@@ -59,6 +59,12 @@ class CropPane: public wxPanel
 			wxPaintDC dc(this);
 			render(dc);
 		}
+
+		void PaintNow()
+		{
+			wxClientDC dc(this);
+			render(dc);
+		}
 		
 		void render (wxDC &dc)
 		{
@@ -163,23 +169,23 @@ class CropPane: public wxPanel
 					case 1:  //top left
 						if (left - fdx < right) left -= fdx;
 						if (top - fdy < bottom) top  -= fdy;
-						if (left < 0) {
+						if (left < 0.0) {
 							//bottom -= left;
-							left = 0;
+							left = 0.0;
 						}
-						if (top < 0) {
+						if (top < 0.0) {
 							//right -= top;
-							top = 0;
+							top = 0.0;
 						}
 						break;
 					case 2:  //bottom right
 						if (right - fdx > left) right -= fdx;
 						if (bottom - fdy > top) bottom  -= fdy;
-						if (right > 1) right = 1;
-						if (bottom > 1) bottom = 1;
+						if (right > 1.0) right = 1.0;
+						if (bottom > 1.0) bottom = 1.0;
 						break;
 					case 3:  //move
-						if ((left - fdx > 0) & (top - fdy > 0) & (right - fdx < 1) & (bottom - fdy < 1)) {
+						if ((left - fdx >= 0.0) & (top - fdy >= 0.0) & (right - fdx <= 1.0) & (bottom - fdy <= 1.0)) {
 							left -= fdx;
 							top  -= fdy;
 							right -= fdx;
@@ -199,21 +205,21 @@ class CropPane: public wxPanel
 						isaspect = true;
 						if (anchorx) {
 							if (left - fdx < right) left -= fdx;
-							if (left < 0) {
+							if (left < 0.0) {
 								//bottom -= left;
-								left = 0;
+								left = 0.0;
 							}
 							float width = right-left;
 							bottom = top + width;
 						}
 						else {
 							if (top - fdy < bottom) top -= fdy;
-							if (top < 0) {
+							if (top < 0.0) {
 								//right -= top;
-								top = 0;
+								top = 0.0;
 							}
 							float height = bottom-top;
-							if (left + fdx < 1)
+							if (left + fdx < 1.0)
 								right = left + height;
 							//else, do something to preserve aspect...
 						}
@@ -222,23 +228,23 @@ class CropPane: public wxPanel
 						isaspect = false;
 						if (anchorx) {
 							if (right - fdx > left) right -= fdx;
-							if (right > 1) {
+							if (right > 1.0) {
 								//top -= right-iw;
-								right = 1;
+								right = 1.0;
 							}
 							int width = right-left;
 						}
 						else {
 							if (bottom - fdy >top) bottom -= fdy;
-							if (bottom > ih) {
+							if (bottom > 1.0) {
 								//left -= bottom-ih;
-								bottom = 1;
+								bottom = 1.0;
 							}
 							int height = bottom-top;
 						}
 						break;
 					case 3:
-						if ((left - fdx > 0) & (top - fdy > 0) & (right - fdx < 1) & (bottom - fdy < 1)) {
+						if ((left - fdx >= 0.0) & (top - fdy >= 0.0) & (right - fdx <= 1.0) & (bottom - fdy <= 1.0)) {
 							left -= fdx;
 							top  -= fdy;
 							right -= fdx;
@@ -246,16 +252,18 @@ class CropPane: public wxPanel
 						}
 						break;
 				}
-				if (left < 0) left = 0;
-				if (right > 1) right = 1;
-				if (top < 0) top = 0;
-				if (bottom > 1) bottom = 1;
+
 			}
+			//if (left < 0.0) left = 0.0;
+			//if (right > 1.0) right = 1.0;
+			//if (top < 0.0) top = 0.0;
+			//if (bottom > 1.0) bottom = 1.0;
 			mousemoved = true;
 			mousex = event.m_x;
 			mousey = event.m_y;
-			Refresh();
-			Update();
+			//Refresh();
+			//Update();
+			PaintNow();
 			event.Skip();
 		}
 
