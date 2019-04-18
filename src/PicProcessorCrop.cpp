@@ -4,27 +4,39 @@
 #include "myConfig.h"
 #include "myRowSizer.h"
 #include "util.h"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #define CROPENABLE 9500
+#define CROPCOPY 9501
+#define CROPPASTE 9502
 
+wxDECLARE_EVENT(myCROP_UPDATE, wxCommandEvent);
+wxDEFINE_EVENT(myCROP_UPDATE, wxCommandEvent);
 
-class CropPreview: public wxPanel
+class CropPane: public wxPanel
 {
 	public:
-		CropPreview(wxWindow *parent,  wxWindowID id, wxImage image, const wxPoint &pos=wxDefaultPosition,  const wxSize &size=wxDefaultSize): wxPanel(parent, id, pos, size)
+		CropPane(wxWindow *parent,  wxWindowID id, wxImage image, wxString params, const wxPoint &pos=wxDefaultPosition,  const wxSize &size=wxDefaultSize): wxPanel(parent, id, pos, size)
 		{
 			SetDoubleBuffered(true);
 			img = new wxBitmap(image);
 			SetSize(image.GetWidth(), image.GetHeight());
-			
-			Bind(wxEVT_PAINT,&CropPreview::OnPaint, this);
-			//Bind(wxEVT_SIZE,&CropPreview::OnSize, this);
-		}
-		
-		void OnSize(wxSizeEvent& event) 
-		{
-			wxSize s = GetParent()->GetSize();
-			SetSize(s);
+
+			cropmode = 1; //0=freeform; 1=maintain aspect
+			//parm tool.crop.controlpointradius: Radius of the rectangle displayed to indicate a control point.  Default=7
+			cpradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.controlpointradius","7").c_str());
+			//parm tool.crop.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7
+			landingradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
+			isaspect = true;
+
+			int indent = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.initialindent","0").c_str());
+
+			wxArrayString p = split(params,",");
+			left = atof(p[0]);
+			top = atof(p[1]);
+			right = atof(p[2]);
+			bottom = atof(p[3]);
 
 			GetSize(&ww, &wh);
 			iw = img->GetWidth();
@@ -33,11 +45,14 @@ class CropPreview: public wxPanel
 			ha = (double) wh/ (double) ih;
 			aspect = wa > ha? ha : wa;
 
-			iwa = (double) iw / (double) ih;
-			iha = (double) ih / (double) iw;
-			Refresh();
+			
+			Bind(wxEVT_PAINT,&CropPane::OnPaint, this);
+			//Bind(wxEVT_SIZE,&CropPane::OnSize, this);
+			Bind(wxEVT_LEFT_DOWN, &CropPane::OnMouseDown, this);
+			Bind(wxEVT_MOTION , &CropPane::OnMouseMove, this);
+			Bind(wxEVT_LEFT_UP, &CropPane::OnMouseUp, this);
+			Bind(wxEVT_LEAVE_WINDOW, &CropPane::OnMouseUp, this);
 		}
-		
 		
 		void OnPaint(wxPaintEvent& event)
 		{
@@ -54,8 +69,206 @@ class CropPreview: public wxPanel
 			mdc.SelectObject(*img);
 			dc.StretchBlit(0,0, w, h, &mdc, 0, 0, img->GetWidth(), img->GetHeight());
 			mdc.SelectObject(wxNullBitmap);
+
+			if (isaspect)
+				dc.SetPen(*wxYELLOW_PEN);
+			else
+				dc.SetPen(*wxRED_PEN);
+			dc.SetBrush(*wxYELLOW_BRUSH);
+
+			dc.DrawLine(left*w, top*h, right*w-1, top*h);
+			dc.DrawLine(right*w-1, top*h, right*w-1, bottom*h-1);
+			dc.DrawLine(right*w-1, bottom*h-1, left*w, bottom*h-1);
+			dc.DrawLine(left*w, bottom*h-1, left*w, top*h);
+			dc.SetBrush(*wxYELLOW_BRUSH);
+			dc.SetPen(*wxYELLOW_PEN);
+			dc.DrawRectangle(left*w+1, top*h+1,cpradius*2,cpradius*2);
+			dc.SetBrush(*wxRED_BRUSH);
+			dc.SetPen(*wxRED_PEN);
+			dc.DrawRectangle((right*w-cpradius*2)-1, (bottom*h-cpradius*2),cpradius*2,cpradius*2);
 		}
-	
+
+		wxString getParams()
+		{
+			return wxString::Format("%f,%f,%f,%f",left,top,right,bottom);
+		}
+
+		void setParams(wxString params)
+		{
+			wxArrayString p = split(params,",");
+			left = atof(p[0]);
+			top = atof(p[1]);
+			right = atof(p[2]);
+			bottom = atof(p[3]);
+			Refresh();
+		}
+
+
+		void OnMouseDown(wxMouseEvent& event)
+		{
+			mousex = event.m_x;
+			mousey = event.m_y;
+
+			int w, h;
+			GetSize(&w, &h);
+
+			int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
+
+			if ((mousex > left*w) & (mousex < left*w+radius*2)) {
+				if ((mousey > top*h) & (mousey < top*h+landingradius*2)) {
+					node = 1;  //top left
+					cropmode = 1;  //preserve aspect
+					isaspect = true;
+				}
+			}
+			else if ((mousex > right*w-landingradius*2) & (mousex < right*w)) {
+				if ((mousey > bottom*h-landingradius*2) & (mousey < bottom*h)) {
+					node = 2; //bottom right
+					cropmode = 0;  //free-form
+					isaspect = false;
+				}
+			}
+			else if ((mousex > left*w) * (mousex < right*w)) {
+				if ((mousey > top*h) & (mousey < bottom*h)) {
+					node = 3; //move
+				}
+			}
+			mousemoved = false;
+			SetFocus();
+			Refresh();
+			Update();
+			event.Skip();
+		}
+
+		void OnMouseMove(wxMouseEvent& event)
+		{
+
+			int w, h;
+			GetSize(&w, &h);
+
+			bool anchorx;
+			if (node == 0) {
+				event.Skip();
+				return;
+			}
+
+			int dx = mousex-event.m_x;
+			int dy = mousey-event.m_y;
+			float fdx = (float) dx / (float) w;
+			float fdy = (float) dy / (float) h;
+
+			if (cropmode == 0) {  //free form
+				isaspect = false;
+				switch (node) {
+					case 1:  //top left
+						if (left - fdx < right) left -= fdx;
+						if (top - fdy < bottom) top  -= fdy;
+						if (left < 0) {
+							//bottom -= left;
+							left = 0;
+						}
+						if (top < 0) {
+							//right -= top;
+							top = 0;
+						}
+						break;
+					case 2:  //bottom right
+						if (right - fdx > left) right -= fdx;
+						if (bottom - fdy > top) bottom  -= fdy;
+						if (right > 1) right = 1;
+						if (bottom > 1) bottom = 1;
+						break;
+					case 3:  //move
+						if ((left - fdx > 0) & (top - fdy > 0) & (right - fdx < 1) & (bottom - fdy < 1)) {
+							left -= fdx;
+							top  -= fdy;
+							right -= fdx;
+							bottom  -= fdy;
+						}
+						break;
+				}
+			}
+			else if (cropmode == 1) {  //preserve aspect
+				if (abs(dx) > abs(dy))
+					anchorx = true;  //x
+				else 
+					anchorx = false;  //y
+
+				switch (node) {
+					case 1:
+						isaspect = true;
+						if (anchorx) {
+							if (left - fdx < right) left -= fdx;
+							if (left < 0) {
+								//bottom -= left;
+								left = 0;
+							}
+							float width = right-left;
+							bottom = top + width;
+						}
+						else {
+							if (top - fdy < bottom) top -= fdy;
+							if (top < 0) {
+								//right -= top;
+								top = 0;
+							}
+							float height = bottom-top;
+							if (left + fdx < 1)
+								right = left + height;
+							//else, do something to preserve aspect...
+						}
+						break;
+					case 2:
+						isaspect = false;
+						if (anchorx) {
+							if (right - fdx > left) right -= fdx;
+							if (right > 1) {
+								//top -= right-iw;
+								right = 1;
+							}
+							int width = right-left;
+						}
+						else {
+							if (bottom - fdy >top) bottom -= fdy;
+							if (bottom > ih) {
+								//left -= bottom-ih;
+								bottom = 1;
+							}
+							int height = bottom-top;
+						}
+						break;
+					case 3:
+						if ((left - fdx > 0) & (top - fdy > 0) & (right - fdx < 1) & (bottom - fdy < 1)) {
+							left -= fdx;
+							top  -= fdy;
+							right -= fdx;
+							bottom  -= fdy;
+						}
+						break;
+				}
+				if (left < 0) left = 0;
+				if (right > 1) right = 1;
+				if (top < 0) top = 0;
+				if (bottom > 1) bottom = 1;
+			}
+			mousemoved = true;
+			mousex = event.m_x;
+			mousey = event.m_y;
+			Refresh();
+			Update();
+			event.Skip();
+		}
+
+		void OnMouseUp(wxMouseEvent& event)
+		{
+			if (node != 0) node = 0;
+			wxCommandEvent e(myCROP_UPDATE);
+			e.SetEventObject(this);
+			e.SetString("update");
+			ProcessWindowEvent(e);
+
+		}
+
 	private:
 
 		wxBitmap *img;
@@ -63,10 +276,10 @@ class CropPreview: public wxPanel
 		int ww, iw, wh, ih;
 		int node, cropmode, mousex, mousey;
 		double aspect, wa, ha, iwa, iha;
-		int left, top , bottom, right, cpradius, landingradius;
-		//bool isaspect, mousemoved;
-		//cmsHTRANSFORM hTransform;
-	
+		float left, top , bottom, right;
+		int cpradius, landingradius;
+		bool isaspect, mousemoved;
+
 };
 
 class CropPanel: public PicProcPanel
@@ -76,104 +289,9 @@ class CropPanel: public PicProcPanel
 		{
 			wxImage img;
 			SetDoubleBuffered(true);
-			node = 0;
-			cropmode = 1; //0=freeform; 1=maintain aspect
-			//parm tool.crop.controlpointradius: Radius of the rectangle displayed to indicate a control point.  Default=7
-			cpradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.controlpointradius","7").c_str());
-			//parm tool.crop.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7
-			landingradius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
-			isaspect = true;
-
-			int indent = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.initialindent","0").c_str());
-
-			wxArrayString p = split(params,",");
-			left = atoi(p[0])+indent;
-			top = atoi(p[1])+indent;
-			right = atoi(p[2])-indent;
-			bottom = atoi(p[3])-indent;
 
 			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
-			GetSize(&ww, &wh);
-			iw = img.GetWidth();
-			ih = img.GetHeight();
-			wa = (double) ww/ (double) iw;
-			ha = (double) wh/ (double) ih;
-			aspect = wa > ha? ha : wa;
-
-			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
-				hTransform = proc->getDisplay()->GetDisplayTransform();
-				if (hTransform) {
-					unsigned char* im = img.GetData();
-					unsigned w = img.GetWidth();
-					unsigned h = img.GetHeight();
-					#pragma omp parallel for
-					for (unsigned y=0; y<h; y++) {
-						unsigned pos = y*w*3;
-						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
-					}
-				}
-			}
-
-			iwa = (double) img.GetWidth() / (double) img.GetHeight();
-			iha = (double) img.GetHeight() / (double) img.GetWidth();
-			
-			displayimg = new wxBitmap(img);
-/*
-			enablebox = new wxCheckBox(this, CROPENABLE, "crop:");
-			enablebox->SetValue(true);
-			
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
-			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
-			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
-			//m->AddRowItem(new wxBitmapButton(this, EXPOSURECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
-			//m->AddRowItem(new wxBitmapButton(this, EXPOSUREPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
-			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-
-			m->NextRow(wxSizerFlags(1).Expand());
-			m->AddRowItem(new CropPreview(this, wxID_ANY, img), 
-				wxSizerFlags(1).Left().Shaped().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-
-			m->End();
-			SetSizerAndFit(m);
-			m->Layout();
-*/			
-			
-			
-			t = new wxTimer(this);
-			SetFocus();
-
-			Bind(wxEVT_SIZE,&CropPanel::OnSize, this);
-			Bind(wxEVT_PAINT,&CropPanel::OnPaint, this);
-			Bind(wxEVT_LEFT_DOWN, &CropPanel::OnMouseDown, this);
-			Bind(wxEVT_MOTION , &CropPanel::OnMouseMove, this);
-			Bind(wxEVT_LEFT_UP, &CropPanel::OnMouseUp, this);
-			Bind(wxEVT_LEAVE_WINDOW, &CropPanel::OnMouseUp, this);
-			Bind(wxEVT_CHAR, &CropPanel::OnKey, this);
-			Bind(wxEVT_TIMER, &CropPanel::OnTimer,  this);
-			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
-		}
-
-		~CropPanel()
-		{
-
-		}
-		
-		
-		void OnCommandtreeSelChanged(wxTreeEvent& event)
-		{
-			wxImage img;
-			event.Skip();
-			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
-
-			GetSize(&ww, &wh);
-			iw = img.GetWidth();
-			ih = img.GetHeight();
-			wa = (double) ww/ (double) iw;
-			ha = (double) wh/ (double) ih;
-			aspect = wa > ha? ha : wa;
-			
 			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
 				hTransform = q->getDisplay()->GetDisplayTransform();
 				if (hTransform) {
@@ -188,215 +306,105 @@ class CropPanel: public PicProcPanel
 				}
 			}
 
-			iwa = (double) iw / (double) ih;
-			iha = (double) ih / (double) iw;
+			enablebox = new wxCheckBox(this, CROPENABLE, "crop:");
+			enablebox->SetValue(true);
+			cpane = new CropPane(this, wxID_ANY, img, params);
 			
-			if (displayimg) displayimg->~wxBitmap();
-			displayimg = new wxBitmap(img);
-			
-			Refresh();
-		}
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, CROPCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, CROPPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-		void OnSize(wxSizeEvent& event) 
-		{
-			wxSize s = GetParent()->GetSize();
-			SetSize(s);
+			m->NextRow(wxSizerFlags(1).Expand());
+			m->AddRowItem(cpane, 
+				wxSizerFlags(1).Left().Shaped().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-			GetSize(&ww, &wh);
-			iw = displayimg->GetWidth();
-			ih = displayimg->GetHeight();
-			wa = (double) ww/ (double) iw;
-			ha = (double) wh/ (double) ih;
-			aspect = wa > ha? ha : wa;
-
-			iwa = (double) iw / (double) ih;
-			iha = (double) ih / (double) iw;
-			Refresh();
-		}
-
-		void OnPaint(wxPaintEvent& event)
-		{
-			GetSize(&ww, &wh);
-			wxPaintDC dc(this);
-			//dc.DrawBitmap(wxBitmap(img.Scale(iw*aspect, ih*aspect)),0,0);
-
-			wxMemoryDC mdc;
-			mdc.SelectObject(*displayimg);
-			dc.StretchBlit(0,0,iw*aspect, ih*aspect, &mdc, 0, 0, displayimg->GetWidth(), displayimg->GetHeight());
-			mdc.SelectObject(wxNullBitmap);
-
-			if (isaspect)
-				dc.SetPen(*wxYELLOW_PEN);
-			else
-				dc.SetPen(*wxRED_PEN);
-			dc.SetBrush(*wxYELLOW_BRUSH);
-			dc.DrawLine(left*aspect, top*aspect, right*aspect-1, top*aspect);
-			dc.DrawLine(right*aspect-1, top*aspect, right*aspect-1, bottom*aspect);
-			dc.DrawLine(right*aspect-1, bottom*aspect, left*aspect, bottom*aspect);
-			dc.DrawLine(left*aspect, bottom*aspect, left*aspect, top*aspect);
-			dc.SetBrush(*wxYELLOW_BRUSH);
-			dc.SetPen(*wxYELLOW_PEN);
-			dc.DrawRectangle(left*aspect+1, top*aspect+1,cpradius*2,cpradius*2);
-			dc.SetBrush(*wxRED_BRUSH);
-			dc.SetPen(*wxRED_PEN);
-			dc.DrawRectangle((right*aspect-cpradius*2)-1, (bottom*aspect-cpradius*2),cpradius*2,cpradius*2);
-		}
-
-		void OnMouseDown(wxMouseEvent& event)
-		{
-			mousex = event.m_x;
-			mousey = event.m_y;
-
-			int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.landingradius","7").c_str());
-
-			if ((mousex > left*aspect) & (mousex < left*aspect+radius*2)) {
-				if ((mousey > top*aspect) & (mousey < top*aspect+landingradius*2)) {
-					node = 1;  //top left
-					cropmode = 1;
-					isaspect = true;
-				}
-			}
-			else if ((mousex > right*aspect-landingradius*2) & (mousex < right*aspect)) {
-				if ((mousey > bottom*aspect-landingradius*2) & (mousey < bottom*aspect)) {
-					node = 2; //bottom right
-					cropmode = 0;
-					isaspect = false;
-				}
-			}
-			else if ((mousex > left*aspect) * (mousex < right*aspect)) {
-				if ((mousey > top*aspect) & (mousey < bottom*aspect)) {
-					node = 3; //move
-				}
-			}
-			mousemoved = false;
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+		
 			SetFocus();
-			Refresh();
-			Update();
-			event.Skip();
+
+			Bind(wxEVT_CHECKBOX, &CropPanel::onEnable, this, CROPENABLE);
+			Bind(myCROP_UPDATE, &CropPanel::OnCropUpdate, this);
+			Bind(wxEVT_BUTTON, &CropPanel::OnCopy, this, CROPCOPY);
+			Bind(wxEVT_BUTTON, &CropPanel::OnPaste, this, CROPPASTE);
+			//Bind(wxEVT_CHAR, &CropPanel::OnKey, this);
+			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 
-		void OnMouseMove(wxMouseEvent& event)
+		~CropPanel()
 		{
-			bool anchorx;
-			if (node == 0) {
-				event.Skip();
-				return;
-			}
-			int dx = mousex-event.m_x;
-			int dy = mousey-event.m_y;
 
-			if (cropmode == 0) {
-				isaspect = false;
-				switch (node) {
-					case 1:  //top left
-						if (left - dx/aspect < right) left -= dx/aspect;
-						if (top - dy/aspect < bottom) top  -= dy/aspect;
-						if (left < 0) {
-							bottom -= left;
-							left = 0;
-						}
-						if (top < 0) {
-							right -= top;
-							top = 0;
-						}
-						break;
-					case 2:  //bottom right
-						if (right - dx/aspect > left) right -= dx/aspect;
-						if (bottom - dy/aspect > top) bottom  -= dy/aspect;
-						if (right > iw) right = iw;
-						if (bottom > ih) bottom = ih;
-						break;
-					case 3:  //move
-						if ((left - dx/aspect > 0) & (top - dy/aspect > 0) & (right - dx/aspect < iw) & (bottom - dy/aspect < ih)) {
-							left -= dx/aspect;
-							top  -= dy/aspect;
-							right -= dx/aspect;
-							bottom  -= dy/aspect;
-						}
-						break;
+		}
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				cpane->setParams(q->getParams());
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
+		}
+
+		
+		
+		void OnCommandtreeSelChanged(wxTreeEvent& event)
+		{
+			wxImage img;
+			event.Skip();
+			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
+
+			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+				hTransform = q->getDisplay()->GetDisplayTransform();
+				if (hTransform) {
+					unsigned char* im = img.GetData();
+					unsigned w = img.GetWidth();
+					unsigned h = img.GetHeight();
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w*3;
+						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+					}
 				}
 			}
-			else if (cropmode == 1) {
-				if (abs(dx) > abs(dy))
-					anchorx = true;  //x
-				else 
-					anchorx = false;  //y
 
-				switch (node) {
-					case 1:
-						isaspect = true;
-						if (anchorx) {
-							if (left - dx/aspect < right) left -= dx/aspect;
-							if (left < 0) {
-								bottom -= left;
-								left = 0;
-							}
-							int width = right-left;
-							bottom = top + width*iha;
-						}
-						else {
-							if (top - dy/aspect < bottom) top -= dy/aspect;
-							if (top < 0) {
-								right -= top;
-								top = 0;
-							}
-							int height = bottom-top;
-							if (left + height*iwa < iw)
-								right = left + height*iwa;
-							//else, do something to preserve aspect...
-						}
-						break;
-					case 2:
-						isaspect = false;
-						if (anchorx) {
-							if (right - dx/aspect > left) right -= dx/aspect;
-							if (right > iw) {
-								top -= right-iw;
-								right = iw;
-							}
-							int width = right-left;
-						}
-						else {
-							if (bottom - dy/aspect >top) bottom -= dy/aspect;
-							if (bottom > ih) {
-								left -= bottom-ih;
-								bottom = ih;
-							}
-							int height = bottom-top;
-						}
-						break;
-					case 3:
-						if ((left - dx/aspect > 0) & (top - dy/aspect > 0) & (right - dx/aspect < iw) & (bottom - dy/aspect < ih)) {
-							left -= dx/aspect;
-							top  -= dy/aspect;
-							right -= dx/aspect;
-							bottom  -= dy/aspect;
-						}
-						break;
-				}
-				if (left < 0) left = 0;
-				if (right > iw) right = iw;
-				if (top < 0) top = 0;
-				if (bottom > ih) bottom = ih;
-			}
-			mousemoved = true;
-			mousex = event.m_x;
-			mousey = event.m_y;
 			Refresh();
-			Update();
-			event.Skip();
 		}
 
-		void OnMouseUp(wxMouseEvent& event)
+
+
+
+		void OnCropUpdate(wxCommandEvent& event)
 		{
-			if (node != 0) {
-				node = 0;
-				q->setParams(wxString::Format("%d,%d,%d,%d",left,top,right,bottom));
-				if (mousemoved) q->processPic();
-			}
-			event.Skip();
+			q->setParams(cpane->getParams());
+			q->processPic();
 		}
 
+/*
 		void OnKey(wxKeyEvent& event)
 		{
 			int newleft, newright, newtop, newbottom;
@@ -523,42 +531,43 @@ class CropPanel: public PicProcPanel
 				}
 			}
 		}
-
-		void OnTimer(wxTimerEvent& event)
-		{
-			q->setParams(wxString::Format("%d,%d,%d,%d",left,top,right,bottom));
-			q->processPic();
-		}
-
+*/
 
 	private:
-		//wxTextCtrl *widthedit, *heightedit;
-		//wxImage img;
-		wxBitmap *displayimg;
-		int ww, iw, wh, ih;
-		int node, cropmode, mousex, mousey;
-		double aspect, wa, ha, iwa, iha;
-		int left, top , bottom, right, cpradius, landingradius;
-		bool isaspect, mousemoved;
 		cmsHTRANSFORM hTransform;
-		wxTimer *t;
-		
 		wxCheckBox *enablebox;
+		CropPane *cpane;
 
 };
 
 
 PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
-	if (command.IsEmpty())
-		c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
-	//showParams();
+	if (command.IsEmpty()) {
+		c= "0.0,0.0,1.0,1.0";
+	}
+	else {
+		wxArrayString p = split(command, ",");
+		float l = atof(p[0]);
+		float t = atof(p[1]);
+		float r = atof(p[2]);
+		float b = atof(p[3]);
+
+		if (l >= 1.0 | t >= 1.0 | r >= 1.0 | b >= 1.0) {  // old image-sized based crop
+			int iw = getPreviousPicProcessor()->getProcessedPic().getWidth();
+			int ih = getPreviousPicProcessor()->getProcessedPic().getHeight();
+			l = l * (float) iw;
+			t = t * (float) ih;
+			r = r * (float) iw;
+			b = b * (float) ih;
+			c = wxString::Format("%f,%f,%f,%f", l, t, r, b);
+		}
+	}
 }
 
-PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, "",  tree, display) 
+PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, "0.0,0.0,1.0,1.0",  tree, display) 
 {
-	c = wxString::Format("0,0,%d,%d",getPreviousPicProcessor()->getProcessedPic().getWidth(), getPreviousPicProcessor()->getProcessedPic().getHeight());
-	//showParams();
+
 }
 
 void PicProcessorCrop::createPanel(wxSimplebook* parent)
@@ -572,10 +581,11 @@ bool PicProcessorCrop::processPic(bool processnext)
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
-	int left = atoi(p[0]);
-	int top = atoi(p[1]);
-	int right = atoi(p[2]);
-	int bottom = atoi(p[3]);
+	float l = atof(p[0]);
+	float t = atof(p[1]);
+	float r = atof(p[2]);
+	float b = atof(p[3]);
+
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str());
@@ -588,15 +598,25 @@ bool PicProcessorCrop::processPic(bool processnext)
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	if (!global_processing_enabled) return true;
-	
-	mark();
-	dib->ApplyCrop(left, top, right, bottom, threadcount);
-	wxString d = duration();
 
-	if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))
-		log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	int iw = dib->getWidth();
+	int ih = dib->getHeight();
+	int left    = iw * l;
+	int top     = ih * t;
+	int right   = iw * r;
+	int bottom  = ih * b;
+	
+	if (processingenabled) {
+		mark();
+		dib->ApplyCrop(left, top, right, bottom, threadcount);
+		wxString d = duration();
+
+		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))
+			log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+	}
 
 	dirty = false;
+
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	if (processnext) processNext();
