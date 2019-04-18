@@ -254,10 +254,10 @@ class CropPane: public wxPanel
 				}
 
 			}
-			//if (left < 0.0) left = 0.0;
-			//if (right > 1.0) right = 1.0;
-			//if (top < 0.0) top = 0.0;
-			//if (bottom > 1.0) bottom = 1.0;
+			if (left < 0.0) left = 0.0;
+			if (right > 1.0) right = 1.0;
+			if (top < 0.0) top = 0.0;
+			if (bottom > 1.0) bottom = 1.0;
 			mousemoved = true;
 			mousex = event.m_x;
 			mousey = event.m_y;
