@@ -2,7 +2,72 @@
 #include "PicProcessorCrop.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "myRowSizer.h"
 #include "util.h"
+
+#define CROPENABLE 9500
+
+
+class CropPreview: public wxPanel
+{
+	public:
+		CropPreview(wxWindow *parent,  wxWindowID id, wxImage image, const wxPoint &pos=wxDefaultPosition,  const wxSize &size=wxDefaultSize): wxPanel(parent, id, pos, size)
+		{
+			SetDoubleBuffered(true);
+			img = new wxBitmap(image);
+			SetSize(image.GetWidth(), image.GetHeight());
+			
+			Bind(wxEVT_PAINT,&CropPreview::OnPaint, this);
+			//Bind(wxEVT_SIZE,&CropPreview::OnSize, this);
+		}
+		
+		void OnSize(wxSizeEvent& event) 
+		{
+			wxSize s = GetParent()->GetSize();
+			SetSize(s);
+
+			GetSize(&ww, &wh);
+			iw = img->GetWidth();
+			ih = img->GetHeight();
+			wa = (double) ww/ (double) iw;
+			ha = (double) wh/ (double) ih;
+			aspect = wa > ha? ha : wa;
+
+			iwa = (double) iw / (double) ih;
+			iha = (double) ih / (double) iw;
+			Refresh();
+		}
+		
+		
+		void OnPaint(wxPaintEvent& event)
+		{
+			wxPaintDC dc(this);
+			render(dc);
+		}
+		
+		void render (wxDC &dc)
+		{
+			int w, h;
+			GetSize(&w, &h);
+			
+			wxMemoryDC mdc;
+			mdc.SelectObject(*img);
+			dc.StretchBlit(0,0, w, h, &mdc, 0, 0, img->GetWidth(), img->GetHeight());
+			mdc.SelectObject(wxNullBitmap);
+		}
+	
+	private:
+
+		wxBitmap *img;
+		
+		int ww, iw, wh, ih;
+		int node, cropmode, mousex, mousey;
+		double aspect, wa, ha, iwa, iha;
+		int left, top , bottom, right, cpradius, landingradius;
+		//bool isaspect, mousemoved;
+		//cmsHTRANSFORM hTransform;
+	
+};
 
 class CropPanel: public PicProcPanel
 {
@@ -54,7 +119,28 @@ class CropPanel: public PicProcPanel
 			iha = (double) img.GetHeight() / (double) img.GetWidth();
 			
 			displayimg = new wxBitmap(img);
+/*
+			enablebox = new wxCheckBox(this, CROPENABLE, "crop:");
+			enablebox->SetValue(true);
+			
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			//m->AddRowItem(new wxBitmapButton(this, EXPOSURECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			//m->AddRowItem(new wxBitmapButton(this, EXPOSUREPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
+			m->NextRow(wxSizerFlags(1).Expand());
+			m->AddRowItem(new CropPreview(this, wxID_ANY, img), 
+				wxSizerFlags(1).Left().Shaped().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+*/			
+			
+			
 			t = new wxTimer(this);
 			SetFocus();
 
@@ -456,6 +542,8 @@ class CropPanel: public PicProcPanel
 		bool isaspect, mousemoved;
 		cmsHTRANSFORM hTransform;
 		wxTimer *t;
+		
+		wxCheckBox *enablebox;
 
 };
 
