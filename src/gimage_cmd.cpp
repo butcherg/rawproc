@@ -793,7 +793,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		//img <li>subtract:val|camera|file,filename  val=a float value, "camera" retrieves the camera </li>
 		else if (strcmp(cmd,"subtract") == 0) {
 			double subtract;
-			char cs[256];
+			char cs[1024];
 			char filename[256];
 			char *v = strtok(NULL,", ");
 			char *f = strtok(NULL," ");

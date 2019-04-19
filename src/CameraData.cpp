@@ -23,11 +23,12 @@ void CameraData::parseDcraw(std::string filename)
 {
 	int i = 0, d = 0;
 	char buf[256];
+	char * result;
 	FILE *f = fopen(filename.c_str(), "r");
 	while (!feof(f)) {
-		while(!contains(buf,"void") | !contains(buf,"CLASS") | !contains(buf,"adobe_coeff")) fgets(buf, 255, f);
-		while(!contains(buf,"table[]")) fgets(buf, 255, f);
-		fgets(buf, 255, f); 
+		while(!contains(buf,"void") | !contains(buf,"CLASS") | !contains(buf,"adobe_coeff")) result = fgets(buf, 255, f);
+		while(!contains(buf,"table[]")) result = fgets(buf, 255, f);
+		result = fgets(buf, 255, f); 
 		while(!contains(buf,"};")) {
 			if (contains(buf, "{")) {
 				std::vector<std::string> t = split(std::string(buf), ",");
@@ -35,11 +36,11 @@ void CameraData::parseDcraw(std::string filename)
 				if (camdat.find(makemodel) != camdat.end()) d++;
 				camdat[makemodel]["black"] = t[1];
 				camdat[makemodel]["maximum"] = t[2];
-				fgets(buf, 255, f); 
+				result = fgets(buf, 255, f); 
 				camdat[makemodel]["dcraw_matrix"] = split(split(std::string(buf), "{ ")[1], " }")[0];
 				i++;
 			}
-			fgets(buf, 255, f); 
+			result = fgets(buf, 255, f); 
 		}
 		break;
 	}
@@ -55,6 +56,7 @@ void CameraData::parseCamconst(std::string filename)
 	FILE *f = NULL;
 	long len = 0;
 	char *data = NULL;
+	size_t result;
 
 	f = fopen(filename.c_str(), "rb");
 	fseek(f, 0, SEEK_END);
@@ -62,7 +64,7 @@ void CameraData::parseCamconst(std::string filename)
 	fseek(f, 0, SEEK_SET);
 
 	data = (char *) malloc(len+1);
-	fread(data, 1, len, f);
+	result = fread(data, 1, len, f);
 	data[len] = '\0';
 	fclose(f);
 
