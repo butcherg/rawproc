@@ -185,11 +185,31 @@ class CropPane: public wxPanel
 						if (bottom > 1.0) bottom = 1.0;
 						break;
 					case 3:  //move
-						if ((left - fdx >= 0.0) & (top - fdy >= 0.0) & (right - fdx <= 1.0) & (bottom - fdy <= 1.0)) {
+						float dx = right - left;
+						float dy = bottom - top;
+						if (left - fdx < 0.0) {
+							right = dx; 
+							left = 0.0;
+						}
+						else if (right - fdx > 1.0) {
+							left = 1.0 - dx;
+							right = 1.0;
+						}
+						else {
 							left -= fdx;
-							top  -= fdy;
 							right -= fdx;
-							bottom  -= fdy;
+						}
+						if (top - fdy < 0.0) {
+							bottom = dy;
+							top = 0.0;
+						}
+						else if (bottom - fdy > 1.0) {
+							top = 1.0 - dy;
+							bottom = 1.0;
+						}
+						else {
+							top -= fdy;
+							bottom -= fdy;
 						}
 						break;
 				}
@@ -244,11 +264,31 @@ class CropPane: public wxPanel
 						}
 						break;
 					case 3:
-						if ((left - fdx >= 0.0) & (top - fdy >= 0.0) & (right - fdx <= 1.0) & (bottom - fdy <= 1.0)) {
+						float dx = right - left;
+						float dy = bottom - top;
+						if (left - fdx < 0.0) {
+							right = dx; 
+							left = 0.0;
+						}
+						else if (right - fdx > 1.0) {
+							left = 1.0 - dx;
+							right = 1.0;
+						}
+						else {
 							left -= fdx;
-							top  -= fdy;
 							right -= fdx;
-							bottom  -= fdy;
+						}
+						if (top - fdy < 0.0) {
+							bottom = dy;
+							top = 0.0;
+						}
+						else if (bottom - fdy > 1.0) {
+							top = 1.0 - dy;
+							bottom = 1.0;
+						}
+						else {
+							top -= fdy;
+							bottom -= fdy;
 						}
 						break;
 				}
