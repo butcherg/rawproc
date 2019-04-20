@@ -670,6 +670,7 @@ void PicPanel::BlankPic()
 		wxBitmap *dimg = new wxBitmap(image->ConvertToImage().ConvertToDisabled(128));
 		image->~wxBitmap();
 		image = dimg;
+		display_dib = NULL;
 	}
 	PaintNow();
 }
