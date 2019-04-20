@@ -604,10 +604,10 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *
 		if (l >= 1.0 | t >= 1.0 | r >= 1.0 | b >= 1.0) {  // old image-sized based crop
 			int iw = getPreviousPicProcessor()->getProcessedPic().getWidth();
 			int ih = getPreviousPicProcessor()->getProcessedPic().getHeight();
-			l = l * (float) iw;
-			t = t * (float) ih;
-			r = r * (float) iw;
-			b = b * (float) ih;
+			l = l / (float) iw;
+			t = t / (float) ih;
+			r = r / (float) iw;
+			b = b / (float) ih;
 			c = wxString::Format("%f,%f,%f,%f", l, t, r, b);
 		}
 	}
