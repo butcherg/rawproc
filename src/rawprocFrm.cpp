@@ -307,6 +307,23 @@ void rawprocFrm::CreateGUIControls()
 	Center();
 	
 	////GUI Items Creation End
+
+	int fr=0, fg=0, fb=0;
+	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","10").c_str());
+	wxString fc = wxString(myConfig::getConfig().getValueOrDefault("app.parameters.fontcolor","0"));
+	if (fc == "") fc = "0";
+	wxArrayString fntc = split(fc,",");
+	fr = atoi(fntc[0].c_str());
+	if (fntc.GetCount() < 3) {
+		fg = atoi(fntc[0].c_str());
+		fb = atoi(fntc[0].c_str());
+	}
+	else if (fntc.GetCount() == 3) {
+		fg = atoi(fntc[1].c_str());
+		fb = atoi(fntc[2].c_str());
+	}
+	
+
 	
 	//parm app.dock.width: Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300
 	int dockwidth = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.dock.width","300")).c_str());
@@ -319,6 +336,10 @@ void rawprocFrm::CreateGUIControls()
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
 
+	
+	commandtree->SetForegroundColour(wxColour(fr,fg,fb));
+	wxFont font(wxFontInfo(fontsize).Family(wxFONTFAMILY_SWISS));
+	commandtree->SetFont(font);
 
 #ifdef SIZERLAYOUT
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).FixedMinSize();  
