@@ -320,15 +320,41 @@ void PicPanel::render(wxDC &dc)
 
 	//setStatusBar();
 
+//
 	//write the display image:
 	wxMemoryDC mdc;
 	mdc.SelectObject(*image);
 	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
 	mdc.SelectObject(wxNullBitmap);
+//
+/*
+	//write the display image, slowly.  Legacy (circa v8) code for reference, doesn't work quite right here:
+	int iw = image->GetWidth()*scale;
+	int ih = image->GetHeight()*scale;
+	int picX=imageposx, picY=imageposy;
+	if (iw < panelw) {
+		picX = (float) panelw/2 - (float) iw/2;
+	}
+	else {
+		if (picX < -(iw-panelw))
+			picX = panelw-iw;
+		else if (picX > 0)
+			picX = 0;
+	}
 
-	//write the display image, slowly.  For reference, doesn't work right:
-	//wxBitmap dimage(image->ConvertToImage().Scale(panelw, panelh, wxIMAGE_QUALITY_HIGH));
-	//dc.DrawBitmap(dimage,imageposx,imageposy);
+	if (ih < panelh) {
+		picY = (float) panelh/2 - (float) ih/2;
+	}
+	else {
+		if (picY < -(ih-panelh))
+			picY = panelh-ih;
+		else if (picY > 0)
+			picY = 0;
+	}
+	wxBitmap dimage(image->ConvertToImage().Scale(iw, ih, wxIMAGE_QUALITY_HIGH));
+	//dc.DrawBitmap(dimage,picX,picY, false);
+	dc.DrawBitmap(dimage,imageposx,imageposy, false);
+*/
 
 	//write the tool-supplied plots:
 	if (dcList != "") {
