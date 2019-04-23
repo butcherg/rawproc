@@ -75,6 +75,28 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	processingenabled = true;
 }
 
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent) 
+{
+	m_display = display;
+	m_tree = tree;
+	c = command;
+	n = name;
+	dcList.clear();
+	channel = CHANNEL_RGB;
+
+	dib = getSelectedPicProcessor(m_tree)->getProcessedPicPointer();
+
+	id = m_tree->AppendItem(parent, name, -1, -1, this);
+
+	m_tree->SetItemState(id,0);
+	//m_tree->SelectItem(id);
+	m_tree->SetItemBold(id,true);
+
+	dirty = true;
+	processingenabled = true;
+}
+
+
 
 
 PicProcessor::~PicProcessor()

@@ -31,6 +31,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 	public:
 		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, gImage * startipc);
 		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) ;
+		PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent);  //for group items
+
 		~PicProcessor();
 
 		virtual bool processPic(bool processnext=true);
