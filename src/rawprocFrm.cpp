@@ -121,7 +121,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
 	EVT_TREE_STATE_IMAGE_CLICK(ID_COMMANDTREE, rawprocFrm::CommandTreeStateClick)
 	EVT_TREE_SEL_CHANGED(ID_COMMANDTREE,rawprocFrm::CommandTreeSelChanged)
-	//EVT_TREE_SEL_CHANGING(ID_COMMANDTREE, rawprocFrm::CommandTreeSelChanging)
+	EVT_TREE_SEL_CHANGING(ID_COMMANDTREE, rawprocFrm::CommandTreeSelChanging)
 	EVT_TREE_ITEM_MENU(ID_COMMANDTREE, rawprocFrm::CommandTreePopup)
 END_EVENT_TABLE()
 ////Event Table End
@@ -1219,6 +1219,13 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 		if (next.IsOk()) ((PicProcessor *) commandtree->GetItemData(next))->processPic();
 	}
 	event.Skip();
+}
+
+//wxEVT_TREE_SEL_CHANGING
+void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
+{
+	std::string parentitem = bifurcate(commandtree->GetItemText(commandtree->GetItemParent(event.GetItem())).ToStdString(), ':')[0];
+	if (parentitem == "group") event.Veto();
 }
 
 //wxEVT_TREE_SEL_CHANGED

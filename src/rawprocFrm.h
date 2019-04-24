@@ -135,7 +135,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	//PicProcessor *  AddItem(wxString name, wxString command, bool display=true);
 	wxTreeItemId AddItem(wxString name, wxString command, bool display=true);
 	void ApplyOps(gImage &dib, wxString operations);
-	//void CommandTreeSelChanging(wxTreeEvent& event);
+	void CommandTreeSelChanging(wxTreeEvent& event);
 	void CommandTreeSelChanged(wxTreeEvent& event);
 	void CommandTreeKeyDown(wxTreeEvent& event);
 	//void CommandTreeDeleteItem(wxTreeEvent& event);
