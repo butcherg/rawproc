@@ -75,7 +75,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 
 		PicProcPanel *r, *toolpanel;
 
-		bool dirty, processingenabled;
+		bool dirty, processingenabled, groupitem;
 		
 		wxString dcList;
 

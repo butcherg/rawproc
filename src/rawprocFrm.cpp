@@ -1258,6 +1258,7 @@ void rawprocFrm::CommandTreeDeleteItem(wxTreeItemId item, bool selectprevious)
 		commandtree->SelectItem(newitem);
 		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
 		if (selectprevious) commandtree->SelectItem(prev);
+		if (commandtree->ItemHasChildren(item)) commandtree->DeleteChildren(item);
        		commandtree->Delete(item);
 		if (newitem.IsOk()) {
 			((PicProcessor *) commandtree->GetItemData(newitem))->processPic();
@@ -2118,7 +2119,8 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 	mnu.AppendSeparator();
 	mnu.Append(ID_DELETE, "Delete");
 	mnu.Append(ID_DELETESUBSEQUENT, "Delete subsequent...");
-	if (commandtree->GetItemText(event.GetItem()) == "group") {
+	//if (commandtree->GetItemText(event.GetItem()) == "group") {
+	if (bifurcate(commandtree->GetItemText(event.GetItem()).ToStdString(), ':')[0] == "group") {
 		mnu.AppendSeparator();
 		mnu.Append(ID_GROUPTOTOOLLIST, "Convert group to toollist");
 		mnu.Append(ID_GROUPLASTTOTOOL, "Convert last group item to tool");
@@ -2147,7 +2149,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			CommandTreeDeleteItem(event.GetItem(), true);
 			//PicProcessor::enableGlobalProcessing(false);  //not ready for prime time
 			for (int i=0; i<p.GetCount(); i++) {
-				cmd = split(p[i], ":");					
+				cmd = split(p[i], ":");	
 				id = AddItem(cmd[0], cmd[1], false);
 				if (id.IsOk()) 
 					wxSafeYield(this);

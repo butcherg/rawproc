@@ -49,6 +49,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree->ExpandAll();
 	dirty = true;
 	processingenabled = true;
+	groupitem = false;
 }
 
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) 
@@ -73,6 +74,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	dirty = true;
 	processingenabled = true;
+	groupitem = false;
 }
 
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent) 
@@ -88,12 +90,9 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	id = m_tree->AppendItem(parent, name, -1, -1, this);
 
-	//m_tree->SetItemState(id,0);
-	//m_tree->SelectItem(id);
-	//m_tree->SetItemBold(id,true);
-
 	dirty = true;
 	processingenabled = true;
+	groupitem = true;
 }
 
 
@@ -101,7 +100,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 PicProcessor::~PicProcessor()
 {
-	if (dib) delete dib;
+	if (!groupitem) if (dib) delete dib;
 }
 
 void PicProcessor::createPanel(wxSimplebook* parent)
