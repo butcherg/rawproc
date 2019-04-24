@@ -88,9 +88,9 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	id = m_tree->AppendItem(parent, name, -1, -1, this);
 
-	m_tree->SetItemState(id,0);
+	//m_tree->SetItemState(id,0);
 	//m_tree->SelectItem(id);
-	m_tree->SetItemBold(id,true);
+	//m_tree->SetItemBold(id,true);
 
 	dirty = true;
 	processingenabled = true;
