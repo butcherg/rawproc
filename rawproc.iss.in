@@ -19,6 +19,7 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
+PrivilegesRequired=lowest
 LicenseFile=@INNO_SRCDIR@\COPYING
 OutputBaseFilename=rawproc-@VERSION@-@INNO_SUFFIX@
 Compression=lzma
@@ -50,6 +51,8 @@ Source: "src\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
+Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
+Source: "src\camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
