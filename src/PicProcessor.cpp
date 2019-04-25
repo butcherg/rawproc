@@ -49,6 +49,7 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 	m_tree->ExpandAll();
 	dirty = true;
 	processingenabled = true;
+	groupitem = false;
 }
 
 PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display) 
@@ -73,13 +74,33 @@ PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, Pi
 
 	dirty = true;
 	processingenabled = true;
+	groupitem = false;
 }
+
+PicProcessor::PicProcessor(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent) 
+{
+	m_display = display;
+	m_tree = tree;
+	c = command;
+	n = name;
+	dcList.clear();
+	channel = CHANNEL_RGB;
+
+	dib = getSelectedPicProcessor(m_tree)->getProcessedPicPointer();
+
+	id = m_tree->AppendItem(parent, name, -1, -1, this);
+
+	dirty = true;
+	processingenabled = true;
+	groupitem = true;
+}
+
 
 
 
 PicProcessor::~PicProcessor()
 {
-	if (dib) delete dib;
+	if (!groupitem) if (dib) delete dib;
 }
 
 void PicProcessor::createPanel(wxSimplebook* parent)

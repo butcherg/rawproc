@@ -110,26 +110,18 @@ class GroupPanel: public PicProcPanel
 
 };
 
-class GroupData : public wxTreeItemData
+class GroupData : public PicProcessor
 {
 public:
-	GroupData( wxString command, wxString params) : wxTreeItemData()
+	GroupData(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent): PicProcessor(name, command, tree, display, parent)
 	{
-		c = command;
-		p = params;
-	};
-
-	virtual ~GroupData() { }
-
-	wxString CmdString()
-	{
-		return wxString::Format("%s:%s;",c, p);
 	}
 
-	wxString c, p;
 };
 
-PicProcessorGroup::PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
+
+
+PicProcessorGroup::PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display)
 {
 	//showParams();
 	loadCommands(command);
@@ -145,6 +137,7 @@ void PicProcessorGroup::createPanel(wxSimplebook* parent)
 
 void PicProcessorGroup::loadCommands(wxString commandstring)
 {
+	PicProcessor *item;
 	if (id.IsOk() & m_tree->GetSelection() == id) { 
 		m_tree->DeleteChildren(id);
 		wxArrayString p = split(commandstring,";");
@@ -155,7 +148,9 @@ void PicProcessorGroup::loadCommands(wxString commandstring)
 				wxArrayString firstp = split(nc[1], ",");
 				nc[0] = nc[0]+":"+firstp[0];
 			}
-			m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
+			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
+			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1], m_tree, m_display, id)));	
+			item = new GroupData(nc[0],nc[1], m_tree, m_display, id);
 		}
 		m_tree->Expand(id);
 		c = commandstring;
