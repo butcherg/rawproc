@@ -110,10 +110,10 @@ class GroupPanel: public PicProcPanel
 
 };
 
-class GroupData : public PicProcessor
+class PicProcessorGroupItem : public PicProcessor
 {
 public:
-	GroupData(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent): PicProcessor(name, command, tree, display, parent)
+	PicProcessorGroupItem(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display, wxTreeItemId parent): PicProcessor(name, command, tree, display, parent)
 	{
 	}
 
@@ -150,7 +150,7 @@ void PicProcessorGroup::loadCommands(wxString commandstring)
 			}
 			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
 			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1], m_tree, m_display, id)));	
-			item = new GroupData(nc[0],nc[1], m_tree, m_display, id);
+			item = new PicProcessorGroupItem(nc[0],nc[1], m_tree, m_display, id);
 		}
 		m_tree->Expand(id);
 		c = commandstring;
