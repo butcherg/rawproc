@@ -14,14 +14,16 @@
 #include <stdarg.h> 
 #include <sys/stat.h>
 
-#ifdef WIN32
+#ifdef _WIN32
+	#define WINVER 0x0600
+	#define _WIN32_WINNT 0x0600
+	#include <windows.h>
+	#include <shlobj.h>
 	#include <direct.h>
 	#include <io.h> 
 	#include <initguid.h>
-	#include <KnownFolders.h>
-	#include <shlobj.h>
+	#include <knownfolders.h>
 	#define GetCurrentDir _getcwd
-
 	#define access    _access_s
 #else
 	#include <limits.h>
@@ -78,7 +80,7 @@ std::string de_underscore(std::string str)
 std::string filepath_normalize(std::string str)
 {
 	int pos;
-#ifdef WIN32
+#ifdef _WIN32
 	while ((pos = str.find_first_of('/')) != std::string::npos) str.replace(pos,1,"\\");
 	if (str[str.size()-1] != '\\') str.push_back('\\');
 #else
@@ -95,7 +97,7 @@ std::string getAppConfigDir(std::string filename="")
 {
 	std::string dir;
 
-#ifdef WIN32
+#ifdef _WIN32
 	wchar_t *roamingAppData = NULL;
 	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &roamingAppData);
 	char strng[128];
@@ -114,7 +116,7 @@ std::string getExeDir(std::string filename="")
 {
 	std::string dir;
 
-#ifdef WIN32
+#ifdef _WIN32
 	TCHAR exePath[MAX_PATH];
 	GetModuleFileName(NULL, exePath, MAX_PATH) ;
 	dir = std::string(exePath);
@@ -160,7 +162,7 @@ std::string getCwdConfigFilePath()
 	if (!GetCurrentDir(cwdpath, sizeof(cwdpath))) {
 		return "";
 	}
-#ifdef WIN32
+#ifdef _WIN32
 	return std::string(cwdpath)+"\\rawproc.conf";
 #else
 	return std::string(cwdpath) + "/rawproc.conf";
