@@ -25,7 +25,7 @@ class CameraData
 		
 
 	private:
-		std::map<std::string, std::map<std::string, std::string>> camdat;
+		std::map<std::string, std::map<std::string, std::string> > camdat;
 		std::map<std::string, std::string> camdat_status;
 		std::vector<std::string> fileorder;
 
