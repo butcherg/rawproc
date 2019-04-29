@@ -291,38 +291,31 @@ wxString PicProcessorRedEye::getPointList()
 
 void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 {
-	if (m_tree->GetItemState(GetId()) != 1) {
-		event.Skip();
-		return;
-	}
-	if (event.ShiftDown()) {
-		coord c = m_display->GetImgCoords();
-		points.push_back(c);
-	}
-	else if (event.ControlDown()) {
-		coord co = m_display->GetImgCoords();
-		std::vector<coord> n;
-		for (unsigned i=0; i<points.size(); i++) {
-			int dx = abs(points[i].x - co.x);
-			int dy = abs(points[i].y - co.y);
-			if (dx > radius | dy > radius) n.push_back(points[i]);  
+	if (m_tree->GetSelection() == GetId()) {
+		if (event.ShiftDown()) {
+
+			coord c = m_display->GetImgCoords();
+			points.push_back(c);
 		}
-		points = n;
-	}
-	else {
-		event.Skip();
-		return;
-	}
-	
-	dcList.clear();
-	c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
-	for (unsigned i=0; i<points.size(); i++) {
-		dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
-		c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
-	}
-	m_display->SetDrawList(dcList);
-	processPic();
-	m_display->Refresh();
+		else if (event.ControlDown()) {
+			coord co = m_display->GetImgCoords();
+			std::vector<coord> n;
+			for (unsigned i=0; i<points.size(); i++) {
+				int dx = abs(points[i].x - co.x);
+				int dy = abs(points[i].y - co.y);
+				if (dx > radius | dy > radius) n.push_back(points[i]);  
+			}
+			points = n;
+		}
+		dcList.clear();
+		c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
+		for (unsigned i=0; i<points.size(); i++) {
+			dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
+			c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
+		}
+		processPic();
+	}	
+
 	event.Skip();
 }
 

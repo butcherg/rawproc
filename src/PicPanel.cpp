@@ -357,7 +357,8 @@ void PicPanel::render(wxDC &dc)
 	dc.DrawBitmap(dimage,imageposx,imageposy, false);
 */
 
-	//dclist = PicProcessor::
+	PicProcessor *selected = PicProcessor::getSelectedPicProcessor(commandtree);
+	if (selected) dcList = selected->getDrawList();
 
 	//write the tool-supplied plots:
 	if (dcList != "") {

@@ -286,27 +286,20 @@ PicProcessorExposure::~PicProcessorExposure()
 void PicProcessorExposure::SetPatchCoord(int x, int y)
 {
 	dcList = wxString::Format("cross,%d,%d;",x,y);
-	m_display->SetDrawList(dcList);
-	m_display->Refresh();
-	m_display->Update();
 }
 
 void PicProcessorExposure::OnLeftDown(wxMouseEvent& event)
 {
-	if (m_tree->GetItemState(GetId()) != 1) {
-		event.Skip();
-		return;
+	if (m_tree->GetSelection() == GetId()) {
+		if (event.ShiftDown()) {
+			patch = m_display->GetImgCoords();
+			//SetPatchCoord(patch.x, patch.y);
+			dcList = wxString::Format("cross,%d,%d;",patch.x, patch.y);
+			((ExposurePanel *) toolpanel)->setPatch(patch);
+		}
 	}
-	if (event.ShiftDown()) {
-		patch = m_display->GetImgCoords();
-	}
-	else {
-		event.Skip();
-		return;
-	}
-	SetPatchCoord(patch.x, patch.y);
-	((ExposurePanel *) toolpanel)->setPatch(patch);
 	event.Skip();
+
 }
 
 
