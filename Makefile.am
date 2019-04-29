@@ -23,7 +23,7 @@ conf:
 
 .PHONY: zip
 zip:
-	zip -j rawproc-@VERSION@-@INNO_SUFFIX@.zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip src/rawproc.conf
+	zip -j rawproc-@VERSION@-@INNO_SUFFIX@.zip src/rawproc$(EXEEXT) src/img$(EXEEXT) src/rawprocdoc.zip src/rawproc.conf src/dcraw.c src/camconst.json
 
 .PHONY: wininstaller
 wininstaller:
@@ -31,5 +31,5 @@ wininstaller:
 
 .PHONY: appimage
 appimage:
-	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif
-	
+	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif src/dcraw.c src/camconst.json
+

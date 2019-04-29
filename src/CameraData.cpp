@@ -3,6 +3,7 @@
 #include "cJSON.h"
 #include <vector>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef USECONFIG
 #include "myConfig.h"
