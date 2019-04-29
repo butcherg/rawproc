@@ -90,6 +90,7 @@ class PicPanel: public wxPanel
 		cmsHTRANSFORM displayTransform;
 		
 		myHistogramPane *histogram;
+		wxTreeCtrl *commandtree;
 
     
 };

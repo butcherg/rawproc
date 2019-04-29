@@ -22,6 +22,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	softproof = thumbdragging = dragging = false;
 	thumbvisible = true;
 	histogram = hgram;
+	commandtree = tree;
 	skipmove=0;
 	oob = 0;
 	dcList.clear();
@@ -355,6 +356,8 @@ void PicPanel::render(wxDC &dc)
 	//dc.DrawBitmap(dimage,picX,picY, false);
 	dc.DrawBitmap(dimage,imageposx,imageposy, false);
 */
+
+	//dclist = PicProcessor::
 
 	//write the tool-supplied plots:
 	if (dcList != "") {
