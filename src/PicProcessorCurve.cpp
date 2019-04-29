@@ -274,7 +274,7 @@ void PicProcessorCurve::displayProcessedPic()
 {
 	if (m_display) {
 		m_display->SetPic(dib, channel);
-		m_display->SetDrawList(dcList);
+//		m_display->SetDrawList(dcList);
 	}
 }
 

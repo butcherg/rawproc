@@ -184,7 +184,7 @@ PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCt
 		dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
 		c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
 	}
-	m_display->SetDrawList(dcList);
+//	m_display->SetDrawList(dcList);
 	//showParams();
 	m_display->Bind(wxEVT_LEFT_DOWN, &PicProcessorRedEye::OnLeftDown, this);
 }
@@ -192,7 +192,7 @@ PicProcessorRedEye::PicProcessorRedEye(wxString name, wxString command, wxTreeCt
 PicProcessorRedEye::~PicProcessorRedEye()
 {
 	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorRedEye::OnLeftDown, this);
-	m_display->SetDrawList("");
+//	m_display->SetDrawList("");
 }
 
 void PicProcessorRedEye::createPanel(wxSimplebook* parent)

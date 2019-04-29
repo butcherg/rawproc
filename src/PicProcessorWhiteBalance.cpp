@@ -396,7 +396,7 @@ PicProcessorWhiteBalance::PicProcessorWhiteBalance(wxString name, wxString comma
 PicProcessorWhiteBalance::~PicProcessorWhiteBalance()
 {
 	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorWhiteBalance::OnLeftDown, this);
-	m_display->SetDrawList("");
+//	m_display->SetDrawList("");
 }
 
 void PicProcessorWhiteBalance::SetPatchCoord(int x, int y)
@@ -518,18 +518,26 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		mark();
 		if (dib->getInfoValue("LibrawMosaiced") == "1") {
 			if (dib->getInfoValue("LibrawCFAPattern") != "") {
-				wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
-				if (optype == multipliers)
+				if (optype == multipliers) {
+					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
-				else if (optype == camera)
+				}
+				else if (optype == camera) {
+					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
-				else
-					m_tree->SetItemText(id, wxString::Format("whitebalance"));
+				}
+				else {
+					wxMessageBox("Error: auto or patch cannot be used prior to demosaic");
+					((WhiteBalancePanel *) toolpanel)->clearSelectors();
+					wbmults = {1.0,1.0,1.0};
+					m_tree->SetItemText(id, wxString::Format("whitebalance:invalid"));
+				}
 			}
 			else {
 				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
 				((WhiteBalancePanel *) toolpanel)->clearSelectors();
 				wbmults = {1.0,1.0,1.0};
+				m_tree->SetItemText(id, wxString::Format("whitebalance:invalid"));
 			}
 		}
 		else {

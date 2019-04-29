@@ -280,7 +280,7 @@ PicProcessorExposure::PicProcessorExposure(wxString name, wxString command, wxTr
 PicProcessorExposure::~PicProcessorExposure()
 {
 	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorExposure::OnLeftDown, this);
-	m_display->SetDrawList("");
+//	m_display->SetDrawList("");
 }
 
 void PicProcessorExposure::SetPatchCoord(int x, int y)
