@@ -1194,7 +1194,7 @@ void rawprocFrm::CommandTreeSetDisplay(wxTreeItemId item, int src)
 	commandtree->SetItemState(item,1);
 	displayitem = item;
 	pic->SetPic( ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer(), ((PicProcessor *) commandtree->GetItemData(item))->getChannel() );
-	pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
+	//pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
 }
 
 bool rawprocFrm::isDownstream(wxTreeItemId here, wxTreeItemId down)
@@ -1237,7 +1237,7 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 		if ((PicProcessor *) commandtree->GetItemData(item))
 			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND) {
 				parambook->SetSelection(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
-				pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
+				//pic->SetDrawList(((PicProcessor *) commandtree->GetItemData(item))->getDrawList() );
 			}
 	}
 	event.Skip();
@@ -2141,6 +2141,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			break;
 		case ID_GROUPTOTOOLLIST:
 			if (event.GetItem() == displayitem) displaylast = true;
+			commandtree->SelectItem(event.GetItem());
 			prev = commandtree->GetPrevSibling(event.GetItem());
 			//next = commandtree->GetNextSibling(event.GetItem());
 			if (!prev.IsOk()) prev = commandtree->GetRootItem();
