@@ -97,14 +97,33 @@ class gImage
 
 		~gImage();
 
-		//image component getters
+		//pixel getters
 		pix getPixel(unsigned x,  unsigned y);
 		std::vector<float> getPixelArray(unsigned x,  unsigned y);
+
+		//image array getters
+
+		//Returns a pointer to a new-allocated char * array of the image, copied from the internal image and, if a profile is specified, 
+		//transformed to it.  Image values are in the format specified in the bits parameter, float, unsigned short, or char, so the 
+		//caller must typecast appropriately to use the data.  Caller must delete [] the array when done with it:
 		char *getImageData(BPP bits, cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
+
+		//Returns a pointer to a new-allocated float * array of the image, copied from the internal image and, if a profile is specified, 
+		//transformed to it.  Caller must delete [] the array when done with it:
 		float * getImageDataFloat(bool unbounded, cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
+
+		//Both of these return a pointer to a char * array of the image, copied from the internal image and transformed 
+		//to the specified profile.  Image values are in the format specified in the bits parameter, float, unsigned short, or char, 
+		//so the caller must typecast appropriately to use the data.  Both copy and transform are done in the LittleCMS cmsTransform.  
+		//The first routine new-allocates the array, the second one malloc-allocates it.  Caller must delete [] or free() the array 
+		//when done with it:
 		char *getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number intent=INTENT_PERCEPTUAL);
+		char *getTransformedImageData(BPP bits, cmsHTRANSFORM transform);
+
+		//These routines return a reference or a pointer, respectively, to the internal image array:
 		std::vector<pix>& getImageData();
 		pix* getImageDataRaw();
+
 
 		//metadata getters
 		unsigned getWidth();
