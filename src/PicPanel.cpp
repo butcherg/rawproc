@@ -76,6 +76,187 @@ bool PicPanel::ToggleToolTip()
 	}
 }
 
+
+/*  new SetPic(), needs work in temporary allocation of imagedata for cmsTransform...
+void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
+{
+	if (dib) {
+		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
+		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
+			((wxFrame *) GetParent())->SetStatusText("display...");
+
+		display_dib = dib;
+		ch = channel;
+		wxImage img;
+
+		//gImage picdib = *dib;
+		gImage *picdib = new gImage(*dib);
+
+		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
+		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
+		thumbh = thumbw = thumbsize;
+		
+		//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
+		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+
+			cmsUInt32Number picformat;
+			if (sizeof(PIXTYPE) == 2) picformat = TYPE_RGB_HALF_FLT; 
+			if (sizeof(PIXTYPE) == 4) picformat = TYPE_RGB_FLT;
+			if (sizeof(PIXTYPE) == 8) picformat = TYPE_RGB_DBL;
+
+			wxString resultstr = "";
+			cmsHPROFILE hImgProfile=NULL, hSoftProofProfile=NULL;
+		
+			wxFileName profilepath;
+			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+		
+			//parm display.cms.displayprofile: Filename of display profile.  Default: none.
+			//template display.cms.displayprofile=iccfile
+			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""))); 
+	
+			if (profilepath.FileExists()) 
+				displayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+			else 
+				displayProfile = NULL;
+		
+			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) 
+				hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
+		
+			if (hImgProfile) {
+				cmsUInt32Number dwflags = 0;
+			
+				//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+				wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
+				cmsUInt32Number intent = INTENT_PERCEPTUAL;
+				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+				if (intentstr == "saturation") intent = INTENT_SATURATION;
+				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+			
+				//parm display.cms.blackpointcompensation: Perform display color transform with black point compensation.  Default=1  
+				if (myConfig::getConfig().getValueOrDefault("display.cms.blackpointcompensation","1") == "1") dwflags = dwflags | cmsFLAGS_BLACKPOINTCOMPENSATION;
+
+				if (softproof) {
+					cmsUInt32Number proofintent;
+					hSoftProofProfile = NULL;
+					dwflags = dwflags | cmsFLAGS_SOFTPROOFING;
+
+					//parm display.cms.softproof.profile: Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.
+					//template display.cms.softproof.profile=iccfile	
+					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.profile","").c_str()));
+					
+					if (profilepath.FileExists()) {
+						hSoftProofProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+
+						//parm display.cms.softproof.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
+						wxString proofintentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.softproof.renderingintent","perceptual"));
+						proofintent = INTENT_PERCEPTUAL;
+						if (proofintentstr == "perceptual") proofintent = INTENT_PERCEPTUAL;
+						if (proofintentstr == "saturation") proofintent = INTENT_SATURATION;
+						if (proofintentstr == "relative_colorimetric") proofintent = INTENT_RELATIVE_COLORIMETRIC;
+						if (proofintentstr == "absolute_colorimetric") proofintent = INTENT_ABSOLUTE_COLORIMETRIC;
+
+						//parm display.cms.softproof.gamutcheck: Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  
+						if (myConfig::getConfig().getValueOrDefault("display.cms.softproof.gamutcheck","0") == "1") dwflags = dwflags | cmsFLAGS_GAMUTCHECK;
+			
+						if (displayProfile) {
+							if (hSoftProofProfile) {
+								if (displayTransform) 
+								displayTransform = cmsCreateProofingTransform(
+									hImgProfile, picformat,
+									displayProfile, picformat,
+									hSoftProofProfile,
+									intent,
+									proofintent,
+									dwflags);
+								resultstr.Append(":softproof");
+							}
+							else resultstr.Append(":soft_error");
+						}
+						else resultstr.Append(":disp_error");
+					}
+					else  resultstr.Append(":file_error");
+				}
+				else {
+					if (displayProfile) {
+						displayTransform = cmsCreateTransform(
+							hImgProfile, picformat,
+							displayProfile, picformat,
+							intent, dwflags);
+						resultstr.Append(":display");
+					}
+					else resultstr.Append(":disp_error");
+				}
+			}
+		
+			
+			if (displayTransform) {
+				//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
+				//unsigned char* im = img.GetData();
+				//unsigned w = img.GetWidth();
+				//unsigned h = img.GetHeight();
+
+				char * im = (char *) picdib->getImageDataRaw();
+				unsigned w = picdib->getWidth();
+				unsigned h = picdib->getHeight();
+				cmsDoTransform(displayTransform, im, im, w*h);
+			
+				//#pragma omp parallel for
+				//for (unsigned y=0; y<h; y++) {
+				//	//unsigned pos = y*w*3;
+				//	//cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
+				//	unsigned pos = y*w;
+				//	cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
+				//}
+
+				((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
+			}
+			else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
+		}
+		else ((wxFrame *) GetParent())->SetStatusText("",1);
+
+		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
+			img = gImage2wxImage(*picdib, oob);
+		else
+			img = gImage2wxImage(*picdib);
+
+		delete picdib;
+		
+		
+		if (image) image->~wxBitmap();
+		image = new wxBitmap(img);
+		imagew = image->GetWidth();
+		imageh = image->GetHeight();
+		
+		if (imagew > imageh)
+			thumbh = thumbw * ((float) imageh / (float) imagew);
+		else
+			thumbw = thumbh * ((float) imagew / (float) imageh);
+		thumbhscale = (float) thumbh / (float) imageh;
+		thumbwscale = (float) thumbw / (float) imagew;
+		thumbnail = new wxBitmap(img.Scale(thumbw,thumbh,wxIMAGE_QUALITY_HIGH));
+
+	
+		//parm histogram.scale: The number of buckets to display in the histogram. Default=256
+		unsigned scale = atoi(myConfig::getConfig().getValueOrDefault("histogram.scale","256").c_str());
+		
+		histogram->SetPic(dib, scale);
+		//parm histogram.singlechannel: 0|1, turns on/off the display of single-channel histogram plot for per-channel curves
+		if (myConfig::getConfig().getValueOrDefault("histogram.singlechannel","1") == "1")
+			histogram->SetChannel(channel);
+		else
+			histogram->SetChannel(CHANNEL_RGB);
+
+		Refresh();
+		((wxFrame *) GetParent())->SetStatusText("");
+
+
+	}
+}
+*/
+
+//  //old SetPic(), does cmsTransform() on wxImage data...
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
 	if (dib) {
@@ -231,6 +412,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		((wxFrame *) GetParent())->SetStatusText("");
 	}
 }
+//
 
 wxBitmap * PicPanel::getBitmap()
 {
