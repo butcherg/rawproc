@@ -314,7 +314,7 @@ class CropPane: public wxPanel
 			e.SetEventObject(this);
 			e.SetString("update");
 			ProcessWindowEvent(e);
-
+			event.Skip();
 		}
 
 	private:
@@ -324,7 +324,7 @@ class CropPane: public wxPanel
 		int ww, iw, wh, ih;
 		int node, cropmode, mousex, mousey;
 		double aspect, wa, ha, iwa, iha;
-		float left, top , bottom, right;
+		double left, top , bottom, right;
 		int cpradius, landingradius;
 		bool isaspect, mousemoved;
 
@@ -353,6 +353,7 @@ class CropPanel: public PicProcPanel
 					}
 				}
 			}
+
 
 			enablebox = new wxCheckBox(this, CROPENABLE, "crop:");
 			enablebox->SetValue(true);
@@ -601,7 +602,7 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *
 		float r = atof(p[2]);
 		float b = atof(p[3]);
 
-		if (l >= 1.0 | t >= 1.0 | r >= 1.0 | b >= 1.0) {  // old image-sized based crop
+		if (l > 1.0 | t > 1.0 | r > 1.0 | b > 1.0) {  // old image-sized based crop
 			int iw = getPreviousPicProcessor()->getProcessedPic().getWidth();
 			int ih = getPreviousPicProcessor()->getProcessedPic().getHeight();
 			l = l / (float) iw;
