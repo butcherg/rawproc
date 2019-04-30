@@ -101,10 +101,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		//parm display.cms: Enable color tranform of the display image, 0|1.  Default=1
 		if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
 
-			cmsUInt32Number picformat;
-			if (sizeof(PIXTYPE) == 2) picformat = TYPE_RGB_HALF_FLT; 
-			if (sizeof(PIXTYPE) == 4) picformat = TYPE_RGB_FLT;
-			if (sizeof(PIXTYPE) == 8) picformat = TYPE_RGB_DBL;
+			cmsUInt32Number informat;
+			if (sizeof(PIXTYPE) == 2) informat = TYPE_RGB_HALF_FLT; 
+			if (sizeof(PIXTYPE) == 4) informat = TYPE_RGB_FLT;
+			if (sizeof(PIXTYPE) == 8) informat = TYPE_RGB_DBL;
 
 			wxString resultstr = "";
 			cmsHPROFILE hImgProfile=NULL, hSoftProofProfile=NULL;
@@ -165,8 +165,8 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 							if (hSoftProofProfile) {
 								if (hImgProfile) {
 									displayTransform = cmsCreateProofingTransform(
-										hImgProfile, picformat,
-										displayProfile, picformat,
+										hImgProfile, informat,
+										displayProfile, TYPE_RGB_8,
 										hSoftProofProfile,
 										intent,
 										proofintent,
@@ -187,44 +187,27 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				else {
 					if (displayProfile) {
 						displayTransform = cmsCreateTransform(
-							hImgProfile, picformat,
-							displayProfile, picformat,
+							hImgProfile, informat,
+							displayProfile, TYPE_RGB_8,
 							intent, dwflags);
 						resultstr.Append(":display");
 					}
-					else resultstr.Append(":disp_error");
+					else resultstr.Append(":xform_error");
 				}
 			}
-		
-			
-			if (displayTransform) {
-				//cmsDoTransform(hTransform, img.GetData(), img.GetData(), img.GetWidth()*img.GetHeight());
-				//unsigned char* im = img.GetData();
-				//unsigned w = img.GetWidth();
-				//unsigned h = img.GetHeight();
 
-				//char * im = (char *) picdib->getImageDataRaw();
-				//unsigned w = picdib->getWidth();
-				//unsigned h = picdib->getHeight();
-				//cmsDoTransform(displayTransform, im, im, w*h);
-			
-				//#pragma omp parallel for
-				//for (unsigned y=0; y<h; y++) {
-				//	//unsigned pos = y*w*3;
-				//	//cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
-				//	unsigned pos = y*w;
-				//	cmsDoTransform(displayTransform, &im[pos], &im[pos], w);
-				//}
+			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
+	
+			//if (displayTransform) 
+			//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
+			//else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
 
-				((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
-			}
-			else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 
-		if (displayTransform)
+		if (displayTransform) 
 			img = gImage2wxImage(*dib, displayTransform, oob);
-		else
+		else 
 			img = img = gImage2wxImage(*dib);
 
 		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
@@ -232,8 +215,6 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		//	img = gImage2wxImage(*picdib, oob);
 		//else
 		//	img = gImage2wxImage(*picdib);
-
-		//delete picdib;
 		
 		
 		if (image) image->~wxBitmap();
