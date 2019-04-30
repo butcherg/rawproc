@@ -322,17 +322,17 @@ wxImage gImage2wxImage(gImage &dib)
 	#pragma omp parallel for
 	for (unsigned pos = 0; pos<size; pos++) {
 		#if defined PIXHALF
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(half_float::half) 256.0_h,0.0_h),255.0_h)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(half_float::half) 256.0_h,0.0_h),255.0_h));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(half_float::half) 256.0_h,0.0_h),255.0_h)); 
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(half_float::half) 255.0_h,0.0_h),255.0_h));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
 		#elif defined PIXFLOAT
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(float) 256.0f,0.0f),255.0f)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(float) 256.0f,0.0f),255.0f));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(float) 256.0f,0.0f),255.0f)); 
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(float) 255.0f,0.0f),255.0f)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(float) 255.0f,0.0f),255.0f));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(float) 255.0f,0.0f),255.0f)); 
 		#else
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(double) 256.0,0.0),255.0)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(double) 256.0,0.0),255.0));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(double) 256.0,0.0),255.0)); 
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(double) 255.0,0.0),255.0)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(double) 255.0,0.0),255.0));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(double) 255.0,0.0),255.0)); 
 		#endif
 	}
 
@@ -372,9 +372,9 @@ wxImage gImage2wxImage(gImage &dib, int oob)
 				dst[i].b = 255;
 			}
 			else {
-				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
-				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
-				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
 			}
 		}
 		else if (oob == 2) { ///at least one channel
@@ -389,15 +389,15 @@ wxImage gImage2wxImage(gImage &dib, int oob)
 				dst[i].b = 255;
 			}
 			else {
-				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
-				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
-				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
 			}
 		}
 		else {
-			dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*256.0,0.0),255.0)); 
-			dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*256.0,0.0),255.0));
-			dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*256.0,0.0),255.0)); 
+			dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+			dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+			dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
 		}
 	}
 
