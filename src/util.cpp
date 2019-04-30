@@ -299,6 +299,14 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 
 struct dpix { char r, g, b; };
 
+wxImage gImage2wxImage(gImage &dib, cmsHTRANSFORM transform, int oob)
+{
+	unsigned h = dib.getHeight();
+	unsigned w =  dib.getWidth();
+	wxImage image(w, h, (unsigned char *) dib.getTransformedImageData(BPP_8, transform, oob));
+	return image;
+}
+
 wxImage gImage2wxImage(gImage &dib)
 {
 	unsigned h = dib.getHeight();
