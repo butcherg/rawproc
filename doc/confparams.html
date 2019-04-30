@@ -45,10 +45,11 @@
 <li><b>input.log</b>:  log the file input operation.  Default=0</li>
 <li><b>input.opensource.parentdirectory</b>:  Enable search of parent directory for source file.  Default=0 </li>
 <li><b>input.opensource.subdirectory</b>:  Enable search of specific directory for source file.  </li>
-<li><b>input.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=1</li>
+<li><b>input.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0</li>
 <li><b>input.png.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.png.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)</li>
 <li><b>input.raw.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
+<li><b>input.raw.default.prompt</b>:  1|0, enable/disable prompt to apply input.raw.default.  Default=1 </li>
 <li><b>input.raw.default</b>:  Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."</li>
 <li><b>input.raw.libraw.*</b>:  Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.</li>
 <li><b>input.raw.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)</li>
@@ -86,7 +87,7 @@
 <li><a name="tool.curve"><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
 <li><a name="tool.curve"><b>tool.curve.rateadapt.threshold</b>:  Specify threshold to turn on rate adaptation, in seconds. Default=0.01</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.</li>
-<li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=1</li>
+<li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=0</li>
 <li><a name="tool.denoise"><b>tool.denoise.algorithm</b>:  nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet</li>
 <li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
