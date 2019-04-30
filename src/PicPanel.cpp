@@ -76,10 +76,15 @@ bool PicPanel::ToggleToolTip()
 	}
 }
 
+#define NEWSETPIC
 
-/*  new SetPic(), needs work in temporary allocation of imagedata for cmsTransform...
+#ifdef NEWSETPIC
+
+//  new SetPic(), 
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
+	cmsHTRANSFORM displayTransform = NULL;
+
 	if (dib) {
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
 		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
@@ -88,9 +93,6 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		display_dib = dib;
 		ch = channel;
 		wxImage img;
-
-		//gImage picdib = *dib;
-		gImage *picdib = new gImage(*dib);
 
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
@@ -161,15 +163,20 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			
 						if (displayProfile) {
 							if (hSoftProofProfile) {
-								if (displayTransform) 
-								displayTransform = cmsCreateProofingTransform(
-									hImgProfile, picformat,
-									displayProfile, picformat,
-									hSoftProofProfile,
-									intent,
-									proofintent,
-									dwflags);
-								resultstr.Append(":softproof");
+								if (hImgProfile) {
+									displayTransform = cmsCreateProofingTransform(
+										hImgProfile, picformat,
+										displayProfile, picformat,
+										hSoftProofProfile,
+										intent,
+										proofintent,
+										dwflags);
+									if (displayTransform)
+										resultstr.Append(":softproof");
+									else
+										resultstr.Append(":xform_error");
+								}
+								else resultstr.Append(":prof_error");
 							}
 							else resultstr.Append(":soft_error");
 						}
@@ -196,10 +203,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				//unsigned w = img.GetWidth();
 				//unsigned h = img.GetHeight();
 
-				char * im = (char *) picdib->getImageDataRaw();
-				unsigned w = picdib->getWidth();
-				unsigned h = picdib->getHeight();
-				cmsDoTransform(displayTransform, im, im, w*h);
+				//char * im = (char *) picdib->getImageDataRaw();
+				//unsigned w = picdib->getWidth();
+				//unsigned h = picdib->getHeight();
+				//cmsDoTransform(displayTransform, im, im, w*h);
 			
 				//#pragma omp parallel for
 				//for (unsigned y=0; y<h; y++) {
@@ -215,13 +222,18 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 
-		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
-		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
-			img = gImage2wxImage(*picdib, oob);
+		if (displayTransform)
+			img = gImage2wxImage(*dib, displayTransform, oob);
 		else
-			img = gImage2wxImage(*picdib);
+			img = img = gImage2wxImage(*dib);
 
-		delete picdib;
+		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
+		//if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
+		//	img = gImage2wxImage(*picdib, oob);
+		//else
+		//	img = gImage2wxImage(*picdib);
+
+		//delete picdib;
 		
 		
 		if (image) image->~wxBitmap();
@@ -254,9 +266,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 	}
 }
-*/
 
-//  //old SetPic(), does cmsTransform() on wxImage data...
+#else
+
+//old SetPic(), does cmsTransform() on wxImage data...
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
 	if (dib) {
@@ -412,7 +425,9 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		((wxFrame *) GetParent())->SetStatusText("");
 	}
 }
-//
+
+#endif //NEWSETPIC
+
 
 wxBitmap * PicPanel::getBitmap()
 {

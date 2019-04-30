@@ -117,7 +117,7 @@ class gImage
 		//so the caller must typecast appropriately to use the data.  Both copy and transform are done in the LittleCMS cmsTransform.  
 		//The first routine new-allocates the array, the second one malloc-allocates it.  Caller must delete [] or free() the array 
 		//when done with it:
-		char *getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number intent=INTENT_PERCEPTUAL);
+		char *getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number intent);
 		char *getTransformedImageData(BPP bits, cmsHTRANSFORM transform);
 
 		//These routines return a reference or a pointer, respectively, to the internal image array:

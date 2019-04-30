@@ -347,7 +347,7 @@ std::vector<float> gImage::getPixelArray(unsigned x,  unsigned y)
 
 
 //structs for making raw images
-struct cpix { char r, g, b; };
+struct cpix { unsigned char r, g, b; };
 struct uspix { unsigned short r, g, b; };
 struct fpix { float r, g, b; };
 
@@ -409,6 +409,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHPROFILE profile, cmsUInt32N
 
 char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 {
+printf("\n  gImage::getTransformedImageData... "); fflush(stdout);
 	//cmsHPROFILE hImgProfile;
 	cmsUInt32Number informat, outformat;
 	//cmsHTRANSFORM hTransform;
@@ -424,7 +425,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 	if (transform != NULL) {
 		if (bits == BPP_16) {
 			//imagedata = new char[w*h*c*2];
-			imagedata = (char *) malloc(w*h*c*2);
+			imagedata = (char *) malloc(w*h*c*sizeof(unsigned short));
 			outformat = TYPE_RGB_16;
 			uspix * imgdata = (uspix *) imagedata;
 			//hTransform = cmsCreateTransform(hImgProfile, informat, profile, outformat, intent, 0);
@@ -435,16 +436,19 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 			}
 		}
 		else if (bits == BPP_8) {
+printf(" BPP_8 malloc, w:%d, h:%d c:%d... ",w,h,c);  fflush(stdout);
 			//imagedata = new char[w*h*c];
 			imagedata = (char *) malloc(w*h*c);
 			outformat = TYPE_RGB_8;
 			cpix * imgdata = (cpix *) imagedata;
 			//hTransform = cmsCreateTransform(hImgProfile, informat, profile, outformat, intent, 0);
-			#pragma omp parallel for
+printf(" loopenter... ");  fflush(stdout);
+			//#pragma omp parallel for
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = y*w;
 				cmsDoTransform(transform, &img[pos], &imgdata[pos], w);
 			}
+printf(" loopexit... ");  fflush(stdout);
 		}
 		else if (bits == BPP_FP | bits == BPP_UFP) {
 			//imagedata = new char[w*h*c*sizeof(float)];
@@ -461,7 +465,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 		else
 			return NULL;
 	}
-
+printf("end.\n"); fflush(stdout);
 	return imagedata;
 }
 

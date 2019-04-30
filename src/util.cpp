@@ -303,7 +303,8 @@ wxImage gImage2wxImage(gImage &dib, cmsHTRANSFORM transform, int oob)
 {
 	unsigned h = dib.getHeight();
 	unsigned w =  dib.getWidth();
-	wxImage image(w, h, (unsigned char *) dib.getTransformedImageData(BPP_8, transform, oob));
+	unsigned char * img = (unsigned char *) dib.getTransformedImageData(BPP_8, transform);
+	wxImage image(w, h, img);
 	return image;
 }
 
