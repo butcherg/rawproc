@@ -413,15 +413,15 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 	char * imagedata = NULL;
 	pix* img = image.data();
 
-	if (sizeof(PIXTYPE) == 2) informat = TYPE_RGB_HALF_FLT; 
-	if (sizeof(PIXTYPE) == 4) informat = TYPE_RGB_FLT;
-	if (sizeof(PIXTYPE) == 8) informat = TYPE_RGB_DBL;
+	//if (sizeof(PIXTYPE) == 2) informat = TYPE_RGB_HALF_FLT; 
+	//if (sizeof(PIXTYPE) == 4) informat = TYPE_RGB_FLT;
+	//if (sizeof(PIXTYPE) == 8) informat = TYPE_RGB_DBL;
 	
 	if (transform != NULL) {
 		if (bits == BPP_16) {
 			//imagedata = new char[w*h*c*2];
 			imagedata = (char *) malloc(w*h*c*sizeof(unsigned short));
-			outformat = TYPE_RGB_16;
+			//outformat = TYPE_RGB_16;
 			uspix * imgdata = (uspix *) imagedata;
 			#pragma omp parallel for
 			for (unsigned y=0; y<h; y++) {
@@ -432,7 +432,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 		else if (bits == BPP_8) {
 			//imagedata = new char[w*h*c];
 			imagedata = (char *) malloc(w*h*c);
-			outformat = TYPE_RGB_8;
+			//outformat = TYPE_RGB_8;
 			cpix * imgdata = (cpix *) imagedata;
 			#pragma omp parallel for
 			for (unsigned y=0; y<h; y++) {
@@ -443,7 +443,7 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 		else if (bits == BPP_FP | bits == BPP_UFP) {
 			//imagedata = new char[w*h*c*sizeof(float)];
 			imagedata = (char *) malloc(w*h*c*sizeof(float));
-			outformat = TYPE_RGB_FLT;
+			//outformat = TYPE_RGB_FLT;
 			fpix * imgdata = (fpix *) imagedata;
 			#pragma omp parallel for
 			for (unsigned y=0; y<h; y++) {
