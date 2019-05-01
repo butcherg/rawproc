@@ -36,7 +36,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	inwindow = false;
 
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
@@ -70,7 +70,7 @@ void myHistogramPane::OnSize(wxSizeEvent& event)
 bool myHistogramPane::ToggleToolTip()
 {
 	if (GetToolTipText() == "") {
-		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bucket\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 		return true;
 	}
 	else {
@@ -132,10 +132,10 @@ void myHistogramPane::RecalcHistogram()
 	b = new wxPoint[hscale];
 	
 
-	//parm histogram.clipbuckets: number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0
-	unsigned clipbuckets = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbuckets","0").c_str()); 
-	unsigned lower = clipbuckets;
-	unsigned upper = (hscale-1)-clipbuckets;
+	//parm histogram.clipbins: number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0
+	unsigned clipbins = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbins","0").c_str()); 
+	unsigned lower = clipbins;
+	unsigned upper = (hscale-1)-clipbins;
 	
 	for (unsigned i=0; i<hscale; i++) {
 		r[i] = wxPoint(i, histogram[i].r);
@@ -309,7 +309,7 @@ void myHistogramPane::render(wxDC&  dc)
 			dc.DrawText(cursorstr,MouseX+1, 2);
 		else 
 			dc.DrawText(cursorstr,MouseX-(dc.GetTextExtent(cursorstr).GetWidth()+1), 2);
-		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2); //ToDo: property to switch between data/bucket...
+		//dc.DrawText(wxString::Format("%d",mlx),MouseX, 2); //ToDo: property to switch between data/bin...
 	}
 
 	long mlr, mlg, mlb;
@@ -322,7 +322,7 @@ void myHistogramPane::render(wxDC&  dc)
 	wxString str, str1;
 
 	if (TextVisible) {
-		wxString bstr = wxString::Format("buckets:%d",hscale);
+		wxString bstr = wxString::Format("bins:%d",hscale);
 		wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
 		int strw = std::min(w-dc.GetTextExtent(bstr).GetWidth(),w-dc.GetTextExtent(rstr).GetWidth());
 		bstr.Append(rstr);
@@ -352,7 +352,7 @@ void myHistogramPane::render(wxDC&  dc)
 //	dc.DrawText(ws, w-ww, h-lineheight-1);
 
 	if (inwindow) 
-		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bucket:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
+		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bin:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
 
 }
 
@@ -441,7 +441,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				EVaxis = true;
 			Refresh();
 			break;
-		case 70: //f - toggle float/bucket cursor label
+		case 70: //f - toggle float/bin cursor label
 			if (FloatCursor)
 				FloatCursor = false;
 			else
