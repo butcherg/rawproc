@@ -79,7 +79,7 @@ bool PicPanel::ToggleToolTip()
 
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
-	cmsHTRANSFORM displayTransform = NULL;
+	cmsHTRANSFORM dispTransform = NULL;
 
 	if (dib) {
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
@@ -160,14 +160,14 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 						if (displayProfile) {
 							if (hSoftProofProfile) {
 								if (hImgProfile) {
-									displayTransform = cmsCreateProofingTransform(
+									dispTransform = cmsCreateProofingTransform(
 										hImgProfile, informat,
 										displayProfile, TYPE_RGB_8,
 										hSoftProofProfile,
 										intent,
 										proofintent,
 										dwflags);
-									if (displayTransform)
+									if (dispTransform)
 										resultstr.Append(":softproof");
 									else
 										resultstr.Append(":xform_error");
@@ -182,7 +182,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				}
 				else {
 					if (displayProfile) {
-						displayTransform = cmsCreateTransform(
+						dispTransform = cmsCreateTransform(
 							hImgProfile, informat,
 							displayProfile, TYPE_RGB_8,
 							intent, dwflags);
@@ -190,11 +190,15 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 					}
 					else resultstr.Append(":xform_error");
 				}
+				displayTransform = cmsCreateTransform(  //for crop and rotate tools...
+							hImgProfile, TYPE_RGB_8,
+							displayProfile, TYPE_RGB_8,
+							intent, dwflags);
 			}
 
 			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
 	
-			//if (displayTransform) 
+			//if (dispTransform) 
 			//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
 			//else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
 
@@ -206,8 +210,8 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "0")
 			localoob = 0;
-		if (displayTransform) 
-			img = gImage2wxImage(*dib, displayTransform, localoob);
+		if (dispTransform) 
+			img = gImage2wxImage(*dib, dispTransform, localoob);
 		else 
 			img = img = gImage2wxImage(*dib, localoob);
 		
