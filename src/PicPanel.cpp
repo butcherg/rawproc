@@ -205,16 +205,15 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		}
 		else ((wxFrame *) GetParent())->SetStatusText("",1);
 
-		if (displayTransform) 
-			img = gImage2wxImage(*dib, displayTransform, oob);
-		else 
-			img = img = gImage2wxImage(*dib);
 
+		int localoob = oob;
 		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
-		//if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1")
-		//	img = gImage2wxImage(*picdib, oob);
-		//else
-		//	img = gImage2wxImage(*picdib);
+		if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "0")
+			localoob = 0;
+		if (displayTransform) 
+			img = gImage2wxImage(*dib, displayTransform, localoob);
+		else 
+			img = img = gImage2wxImage(*dib, localoob);
 		
 		
 		if (image) image->~wxBitmap();

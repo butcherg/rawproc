@@ -297,59 +297,57 @@ wxBitmap HistogramFrom(wxImage img, int width, int height)
 	return bmp;
 }
 
+
+//wxImage transformers:
+
 struct dpix { char r, g, b; };
 
 wxImage gImage2wxImage(gImage &dib, cmsHTRANSFORM transform, int oob)
 {
 	unsigned h = dib.getHeight();
 	unsigned w =  dib.getWidth();
-	unsigned char * img = (unsigned char *) dib.getTransformedImageData(BPP_8, transform);
-	wxImage image(w, h, img);
-	return image;
-}
-
-wxImage gImage2wxImage(gImage &dib)
-{
-	unsigned h = dib.getHeight();
-	unsigned w =  dib.getWidth();
 	unsigned size = w*h;
 
-	std::vector<pix> img = dib.getImageData();
-	wxImage image(w, h);
-	dpix * dst = (dpix *) image.GetData();
-	
+	unsigned char * img = (unsigned char *) dib.getTransformedImageData(BPP_8, transform);
+	wxImage image(w, h, img);
 
-/*
-	#pragma omp parallel for
-	for (unsigned i = 0; i<size; i++) {
-		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
-		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
-		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+	if (oob != 0) {
+		std::vector<pix> img = dib.getImageData();
+		dpix * dst = (dpix *) image.GetData();
+
+		#pragma omp parallel for
+		for (unsigned i = 0; i<size; i++) {
+			if (oob == 1) { //average
+				double g = (img[i].r + img[i].g + img[i].b) / 3.0;
+				if (g > 1.0) {
+					dst[i].r = 255;
+					dst[i].g = 0;
+					dst[i].b = 255;
+				}
+				else if (g < 0.0) {
+					dst[i].r = 0;
+					dst[i].g = 255;
+					dst[i].b = 255;
+				}
+			}
+			else if (oob == 2) { ///at least one channel
+				if (img[i].r > 1.0 | img[i].g > 1.0 | img[i].b > 1.0) {
+					dst[i].r = 255;
+					dst[i].g = 0;
+					dst[i].b = 255;
+				}
+				else if (img[i].r < 0.0 | img[i].g < 0.0 | img[i].b < 0.0) {
+					dst[i].r = 0;
+					dst[i].g = 255;
+					dst[i].b = 255;
+				}
+			}
+		}
 	}
-*/
-
-	#pragma omp parallel for
-	for (unsigned pos = 0; pos<size; pos++) {
-		#if defined PIXHALF
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(half_float::half) 255.0_h,0.0_h),255.0_h));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
-		#elif defined PIXFLOAT
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(float) 255.0f,0.0f),255.0f)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(float) 255.0f,0.0f),255.0f));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(float) 255.0f,0.0f),255.0f)); 
-		#else
-		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(double) 255.0,0.0),255.0)); 
-		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(double) 255.0,0.0),255.0));
-		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(double) 255.0,0.0),255.0)); 
-		#endif
-	}
-
-	//can't use this because wxWidgets deallocates the image with free, rather than delete []...
-	//wxImage image(w, h, (unsigned char *) dib.getImageData(BPP_8));
 
 	return image;
 }
+
 
 wxImage gImage2wxImage(gImage &dib, int oob)
 {
@@ -412,6 +410,50 @@ wxImage gImage2wxImage(gImage &dib, int oob)
 
 	return image;
 }
+
+wxImage gImage2wxImage(gImage &dib)  //original routine, hope to not use anymore...
+{
+	unsigned h = dib.getHeight();
+	unsigned w =  dib.getWidth();
+	unsigned size = w*h;
+
+	std::vector<pix> img = dib.getImageData();
+	wxImage image(w, h);
+	dpix * dst = (dpix *) image.GetData();
+	
+
+/*
+	#pragma omp parallel for
+	for (unsigned i = 0; i<size; i++) {
+		dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+		dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+		dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+	}
+*/
+
+	#pragma omp parallel for
+	for (unsigned pos = 0; pos<size; pos++) {
+		#if defined PIXHALF
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(half_float::half) 255.0_h,0.0_h),255.0_h));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(half_float::half) 255.0_h,0.0_h),255.0_h)); 
+		#elif defined PIXFLOAT
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(float) 255.0f,0.0f),255.0f)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(float) 255.0f,0.0f),255.0f));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(float) 255.0f,0.0f),255.0f)); 
+		#else
+		dst[pos].r = (unsigned char) lrint(fmin(fmax(img[pos].r*(double) 255.0,0.0),255.0)); 
+		dst[pos].g = (unsigned char) lrint(fmin(fmax(img[pos].g*(double) 255.0,0.0),255.0));
+		dst[pos].b = (unsigned char) lrint(fmin(fmax(img[pos].b*(double) 255.0,0.0),255.0)); 
+		#endif
+	}
+
+	//can't use this because wxWidgets deallocates the image with free, rather than delete []...
+	//wxImage image(w, h, (unsigned char *) dib.getImageData(BPP_8));
+
+	return image;
+}
+
 
 
 
