@@ -32,7 +32,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			std::string profilepath =  gImage::getProfilePath(); //myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str();
 
 			if (profstr == NULL) {
-				printf("colorspace: no profile.\n");
+				if (print) printf("colorspace: no profile.\n");
 				return std::string();
 			}
 			else profile = std::string(profstr);
@@ -111,10 +111,10 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 					if (print) printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
 					_mark();
 					if (operation == "convert") {
-						if (dib.ApplyColorspace(cam, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
+						if (dib.ApplyColorspace(cam, intent, bp, threadcount) != GIMAGE_OK) if (print) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
 					}
 					else if (operation == "assign") {
-						if (dib.AssignColorspace(cam)!= GIMAGE_OK) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
+						if (dib.AssignColorspace(cam)!= GIMAGE_OK) if (print) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
 					} 
 					else if (print) printf("Error: unrecognized operator %s ", operation.c_str());
 					sprintf(cs, "%s:%s,%s ",cmd,profile.c_str(),opstr);
@@ -124,7 +124,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				if (print) printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount); fflush(stdout);
 				_mark();
 				if (operation == "convert") {
-					if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) printf("Error: %s (%s)\n", dib.getLastErrorMessage().c_str(), profilepath.append(profile).c_str());
+					if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) if (print) printf("Error: %s (%s)\n", dib.getLastErrorMessage().c_str(), profilepath.append(profile).c_str());
 					sprintf(cs, "%s:%s,%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
 				}
 				else if (operation == "assign") {
