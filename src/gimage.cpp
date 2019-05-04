@@ -2125,7 +2125,7 @@ static inline float Log2( float x)
 
 void gImage::ApplyToneMapGamma(float gamma, int threadcount)
 {
-	double exponent = 1 / gamma;
+	double exponent = 1.0 / gamma;
 	//double v = 255.0 * (double)pow((double)255, -exponent);
 
 	#pragma omp parallel for num_threads(threadcount)
