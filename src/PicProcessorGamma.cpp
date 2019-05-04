@@ -2,11 +2,16 @@
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "myFloatCtrl.h"
+#include "myRowSizer.h"
 #include "util.h"
 #include "gimage/curve.h"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #define GAMMAENABLE 7100
 #define GAMMAID 7101
+#define GAMMACOPY 7102
+#define GAMMAPASTE 7103
 
 class GammaPanel: public PicProcPanel
 {
@@ -15,19 +20,24 @@ class GammaPanel: public PicProcPanel
 		GammaPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
-			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
 			enablebox = new wxCheckBox(this, GAMMAENABLE, "gamma:");
 			enablebox->SetValue(true);
-			b->Add(enablebox, flags);
-			b->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), flags);
-			b->AddSpacer(10);
-
 			gamma = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 
-			b->Add(gamma, flags);
-			SetSizerAndFit(b);
-			b->Layout();
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, GAMMACOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, GAMMAPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			m->NextRow();
+			m->AddRowItem(gamma, flags);
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+
 			SetFocus();
 			t = new wxTimer(this);
 
@@ -35,6 +45,8 @@ class GammaPanel: public PicProcPanel
 			Bind(myFLOATCTRL_CHANGE, &GammaPanel::paramChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &GammaPanel::paramUpdated, this);
 			Bind(wxEVT_CHECKBOX, &GammaPanel::onEnable, this, GAMMAENABLE);
+			Bind(wxEVT_BUTTON, &GammaPanel::OnCopy, this, GAMMACOPY);
+			Bind(wxEVT_BUTTON, &GammaPanel::OnPaste, this, GAMMAPASTE);
 			Refresh();
 			Update();
 		}
@@ -54,6 +66,23 @@ class GammaPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				gamma->SetFloatValue(atof(q->getParams().ToStdString().c_str()));
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -97,7 +126,6 @@ void PicProcessorGamma::createPanel(wxSimplebook* parent)
 
 bool PicProcessorGamma::processPic(bool processnext) 
 {
-	Curve ctrlpts;
 	((wxFrame*) m_display->GetParent())->SetStatusText("gamma...");
 	double gamma = atof(c.c_str());
 	bool result = true;
@@ -108,13 +136,6 @@ bool PicProcessorGamma::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 	
-	double exponent = 1 / gamma;
-	double v = 255.0 * (double)pow((double)255, -exponent);
-	for (int i = 0; i< 256; i+=1) {
-		double color = (double)pow((double)i, exponent) * v;
-		if (color > 255.0) color = 255.0;
-		ctrlpts.insertpoint((double) i, color);
-	}	
 
 	if (dib) delete dib;
 	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
@@ -122,7 +143,7 @@ bool PicProcessorGamma::processPic(bool processnext)
 
 	if (processingenabled) {
 		mark();
-		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		dib->ApplyToneMapGamma(gamma, threadcount);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gamma.log","0") == "1"))
