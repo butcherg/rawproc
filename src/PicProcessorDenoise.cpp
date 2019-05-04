@@ -5,6 +5,8 @@
 #include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "undo.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #include "util.h"
 
@@ -12,6 +14,9 @@
 
 #define DENOISENLMEANS 6001
 #define DENOISEWAVELET 6002
+
+#define DENOISECOPY 6003
+#define DENOISEPASTE 6004
 
 #define SIGMASLIDER 6005
 #define LOCALSLIDER 6006
@@ -68,7 +73,8 @@ class DenoisePanel: public PicProcPanel
 			//Lay out the controls in the panel:
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
-
+			m->AddRowItem(new wxBitmapButton(this, DENOISECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, DENOISEPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -147,6 +153,8 @@ class DenoisePanel: public PicProcPanel
 			SetFocus();
 			t = new wxTimer(this);
 			Bind(wxEVT_BUTTON, &DenoisePanel::OnButton, this);
+			Bind(wxEVT_BUTTON, &DenoisePanel::OnCopy, this, DENOISECOPY);
+			Bind(wxEVT_BUTTON, &DenoisePanel::OnPaste, this, DENOISEPASTE);
 			Bind(wxEVT_RADIOBUTTON, &DenoisePanel::onRadioButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &DenoisePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &DenoisePanel::OnThumbTrack, this);
@@ -173,6 +181,38 @@ class DenoisePanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				bool nlb, wlb;
+				wxArrayString cp = split(q->getParams(),",");
+				if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
+					sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+					local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+					patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
+					nlb=true; wlb=false;
+					algorithm = DENOISENLMEANS;
+					nl->SetValue(true);
+				}
+				if (cp.GetCount() == 2 && cp[0] == "wavelet") {
+					thresh->SetFloatValue(atof(cp[1]));
+					nlb=false; wlb=true;
+					algorithm = DENOISEWAVELET;
+					wl->SetValue(true);
+				}
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 
 		void onRadioButton(wxCommandEvent& event)

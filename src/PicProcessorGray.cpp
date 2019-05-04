@@ -3,14 +3,19 @@
 #include "PicProcessorGray.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "myRowSizer.h"
 #include "undo.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #include "util.h"
 
 #define GRAYENABLE  6200
-#define REDSLIDER   6201
-#define GREENSLIDER 6202
-#define BLUESLIDER  6203
+#define GRAYCOPY    6201
+#define GRAYPASTE   6202
+#define REDSLIDER   6203
+#define GREENSLIDER 6204
+#define BLUESLIDER  6205
 
 class GrayPanel: public PicProcPanel
 {
@@ -19,9 +24,7 @@ class GrayPanel: public PicProcPanel
 		GrayPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
-			wxGridBagSizer *g = new wxGridBagSizer();
-
+			
 			wxArrayString p = split(params,",");
 
 			rd = atof(p[0]);
@@ -30,38 +33,57 @@ class GrayPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, GRAYENABLE, "gray:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "red: "), wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			red = new wxSlider(this, wxID_ANY, rd*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(red , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val1 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",rd), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val1 , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			g->Add(new wxStaticText(this,wxID_ANY, "green: "), wxGBPosition(3,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			green = new wxSlider(this, wxID_ANY, gr*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(green , wxGBPosition(3,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",gr), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val2 , wxGBPosition(3,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-
-			g->Add(new wxStaticText(this,wxID_ANY, "blue: "), wxGBPosition(4,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			blue = new wxSlider(this, wxID_ANY, bl*100.0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(blue , wxGBPosition(4,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			val3 = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f",bl), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val3 , wxGBPosition(4,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			val4 = new wxStaticText(this,wxID_ANY, wxString::Format("Total: %2.2f", rd+gr+bl), wxDefaultPosition, wxSize(-1,-1));
-			g->Add(val4, wxGBPosition(5,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset RGB proportions to defaults");
-			g->Add(btn, wxGBPosition(5,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 
-			SetSizerAndFit(g);
-			g->Layout();
+			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, GRAYCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, GRAYPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "red: ", wxDefaultPosition, wxSize(50,-1)), flags);
+			m->AddRowItem(red, flags);
+			m->AddRowItem(val1, flags);
+			m->NextRow();
+
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "green: ", wxDefaultPosition, wxSize(50,-1)), flags);
+			m->AddRowItem(green, flags);
+			m->AddRowItem(val2, flags);
+			m->NextRow();
+
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "blue: ", wxDefaultPosition, wxSize(50,-1)), flags);
+			m->AddRowItem(blue, flags);
+			m->AddRowItem(val3, flags);
+			m->AddRowItem(btn, flags);
+			m->NextRow();
+
+			m->AddRowItem(val4, flags);
+
+
+			m->End();
+			SetSizerAndFit(m);
+			m->Layout();
+
+
+			//SetSizerAndFit(g);
+			//g->Layout();
 			Refresh();
 			Update();
 			SetFocus();
@@ -70,7 +92,10 @@ class GrayPanel: public PicProcPanel
 			Bind(wxEVT_SCROLL_CHANGED, &GrayPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &GrayPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &GrayPanel::onEnable, this, GRAYENABLE);
-			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);		}
+			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);
+			Bind(wxEVT_BUTTON, &GrayPanel::OnCopy, this, GRAYCOPY);
+			Bind(wxEVT_BUTTON, &GrayPanel::OnPaste, this, GRAYPASTE);
+		}
 
 		~GrayPanel()
 		{
@@ -87,6 +112,36 @@ class GrayPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				wxArrayString p = split(q->getParams(),",");
+	
+				rd = atof(p[0]);
+				gr = atof(p[1]);
+				bl = atof(p[2]);
+				red->SetValue(rd*100.0);
+				green->SetValue(gr*100.0);
+				blue->SetValue(bl*100.0);
+				val1->SetLabel(wxString::Format("%2.2f", rd));
+				val2->SetLabel(wxString::Format("%2.2f", gr));
+				val3->SetLabel(wxString::Format("%2.2f", bl));
+				val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
+
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				Refresh();
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 
 
@@ -122,6 +177,7 @@ class GrayPanel: public PicProcPanel
 
 		void OnButton(wxCommandEvent& event)
 		{
+/*
 			double resetredval = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str());
 			red->SetValue(resetredval*100.0);
 			val1->SetLabel(wxString::Format("%2.2f", resetredval));
@@ -134,8 +190,29 @@ class GrayPanel: public PicProcPanel
 			blue->SetValue(resetblueval*100.0);
 			val3->SetLabel(wxString::Format("%2.2f", resetblueval));
 
+			val4->SetLabel(wxString::Format("Total: %2.2f", red->GetValue()/100.0+green->GetValue()/100.0+blue->GetValue()/100.0));
+
 			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",red->GetValue()/100.0,green->GetValue()/100.0,blue->GetValue()/100.0));
+*/
+
+
+			rd = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str());
+			red->SetValue(rd*100.0);
+			val1->SetLabel(wxString::Format("%2.2f", rd));
+
+			gr = atof(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72").c_str());
+			green->SetValue(gr*100.0);
+			val2->SetLabel(wxString::Format("%2.2f", gr));
+
+			bl = atof(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07").c_str());
+			blue->SetValue(bl*100.0);
+			val3->SetLabel(wxString::Format("%2.2f", bl));
+
+			val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
+
+			q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f",rd,gr,bl));
 			q->processPic();
+			Refresh();
 			event.Skip();
 
 		}
