@@ -21,6 +21,7 @@
 #include "gimage/gimage.h"
 #include "gimage/strutil.h"
 #include "myConfig.h"
+#include "icon.xpm"
 
 IMPLEMENT_APP(rawprocFrmApp)
 
@@ -85,6 +86,7 @@ bool rawprocFrmApp::OnInit()
 	}
 	
 	rawprocFrm* frame = new rawprocFrm(NULL);
+	frame->SetIcon(icon_xpm);
 	SetTopWindow(frame);
 	frame->Show();
 	frame->SetConfigFile(configfilepath);
