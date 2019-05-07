@@ -57,6 +57,7 @@
 
 #include "unchecked.xpm"
 #include "checked.xpm"
+#include "icon.xpm"
 
 #define nullptr 0
 
@@ -2062,6 +2063,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 		info.SetName(_("rawproc\n(development build)"));
 	#endif
 
+	info.SetIcon(icon_xpm);
 	info.SetCopyright(wxT("(C) 2016-2018 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
 	//wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
