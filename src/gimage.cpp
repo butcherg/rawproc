@@ -4092,8 +4092,8 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 
 
 			#pragma omp for
-			for (unsigned y=0; y<h; y+=2) {
-				for (unsigned x=0; x<w; x+=2) {
+			for (unsigned y=0; y<h-1; y+=2) {
+				for (unsigned x=0; x<w-1; x+=2) {
 					unsigned pos[4];
 					pos[0] = x + y*w;  //upper left
 					pos[1] = (x+1) + y*w; //upper right
