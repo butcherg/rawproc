@@ -2251,8 +2251,8 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h; y+=2) {
-		for (unsigned x=0; x<w; x+=2) {
+	for (unsigned y=0; y<h-1; y+=2) {
+		for (unsigned x=0; x<w-1; x+=2) {
 			unsigned pos[4];
 			pos[0] = x + y*w;  //upper left
 			pos[1] = (x+1) + y*w; //upper right
@@ -2431,8 +2431,8 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 	else if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0}; 
 
 	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h; y+=2) {
-		for (unsigned x=0; x<w; x+=2) {
+	for (unsigned y=0; y<h-1; y+=2) {
+		for (unsigned x=0; x<w-1; x+=2) {
 			unsigned Hpos = (x/2) + (y/2)*(w/2);
 			float pix[3] = {0.0, 0.0, 0.0};
 			unsigned pos[4];
@@ -2471,8 +2471,8 @@ bool gImage::ApplyMosaicColor(int threadcount)
 	else if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0}; 
 
 	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h; y+=2) {
-		for (unsigned x=0; x<w; x+=2) {
+	for (unsigned y=0; y<h-1; y+=2) {
+		for (unsigned x=0; x<w-1; x+=2) {
 			unsigned Hpos = (x/2) + (y/2)*(w/2);
 			float pix[3] = {0.0, 0.0, 0.0};
 			unsigned pos[4];
