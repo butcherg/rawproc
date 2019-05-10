@@ -878,11 +878,11 @@ char * _loadRAW(const char *filename,
 	if (P1.filters == 9) cfadim = 6; //fuji x-trans
 
 	unsigned pos;
-	for (unsigned y=0; y<cfadim; y++) {
-		for (unsigned x=0; x<cfadim; x++) {
-			pos = x + y*cfadim;
-			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(x,y)];
-			cfarray[pos] = ndesc[RawProcessor.COLOR(x,y)];
+	for (unsigned r=0; r<cfadim; r++) {
+		for (unsigned c=0; c<cfadim; c++) {
+			pos = c + r*cfadim;
+			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(r,c)];
+			cfarray[pos] = ndesc[RawProcessor.COLOR(r,c)];
 		}
 	}
 	buffer[pos+1]  = '\0';

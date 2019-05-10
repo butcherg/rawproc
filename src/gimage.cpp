@@ -2247,7 +2247,7 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 	
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
 	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 	#pragma omp parallel for num_threads(threadcount)
