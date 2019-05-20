@@ -605,6 +605,12 @@ for (int f=0; f<files.size(); f++)
 		exit(0);
 	}
 
+	else if (strcmp(outfilename,"stats") == 0) {
+		std::string stats = dib.Stats();
+		printf("%s\n",stats.c_str());
+		exit(0);
+	}
+
 
 	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring));
 	printf("\n");
