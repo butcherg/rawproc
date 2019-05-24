@@ -260,10 +260,13 @@ void myHistogramPane::render(wxDC&  dc)
 
 	//parm histogram.ev.zero: Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18
 	EV0 = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.zero","0.18").c_str());
+	if (EV0 == 0.0) EV0 = 0.18;
 	//parm histogram.ev.range: +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)
 	float EVrange = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.range","3.0").c_str());
+	if (EVrange == 0.0) EVrange = 3.0;
 	//parm histogram.ev.increment: Step increment for EV plot.  Default: 1.0
 	float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
+	if (EVinc == 0.0) EVinc = 1.0;
 
 	std::map<float,int> evlist;
 	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
