@@ -133,19 +133,29 @@ std::string myConfig::getValueOrDefault(std::string name, std::string defaultval
 		if (tempconfig.count(name) != 0)
 			return replace_variables(tempconfig[name]);
 	}
-	if (exists(name))
-		return replace_variables(defaultconfig[name]);
-	else
+	if (exists(name)) {
+		if (replace_variables(defaultconfig[name]).empty())
+			return defval;
+		else
+			return replace_variables(defaultconfig[name]);
+	}
+	else {
 		return defval;
+	}
 }
 
 std::string myConfig::getValueOrDefault(std::string section, std::string name, std::string defaultval)
 {
 	std::string defval = defaultval;
-	if (exists(section,name))
-		return replace_variables(sectionconfig[section][name]);
-	else
+	if (exists(section,name)) {
+		if (replace_variables(sectionconfig[section][name]).empty()) 
+			return defval;
+		else
+			return replace_variables(sectionconfig[section][name]);
+	}
+	else {
 		return defval;
+	}
 }
 
 void myConfig::deleteValue(std::string section, std::string name)
