@@ -9,6 +9,7 @@ class PicProcessorGroup: public PicProcessor
 	public:
 		PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
+		void selectFile();
 		bool processPic(bool processnext=true);
 		void loadCommands(wxString commandstring);
 		void setSource(wxString src);

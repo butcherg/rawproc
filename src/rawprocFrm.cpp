@@ -1981,6 +1981,7 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 	try {
 		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
 		p->createPanel(parambook);
+		p->selectFile();
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
 	}

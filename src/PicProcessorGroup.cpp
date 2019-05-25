@@ -64,6 +64,11 @@ class GroupPanel: public PicProcPanel
 
 		void selectFile(wxCommandEvent& event)
 		{
+			selectFile();
+		}
+
+		void selectFile()
+		{
 			wxString commandstring;
 			wxFileName toollistpath;
 			toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
@@ -133,6 +138,11 @@ void PicProcessorGroup::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
+}
+
+void PicProcessorGroup::selectFile()
+{
+	((GroupPanel *) toolpanel)->selectFile();
 }
 
 void PicProcessorGroup::loadCommands(wxString commandstring)
