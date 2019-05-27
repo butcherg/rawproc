@@ -3761,7 +3761,7 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 
 //Image Information:
 
-std::string gImage::Stats()
+std::string gImage::Stats(bool isfloat)
 {
 	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
 	pix maxpix, minpix;
@@ -3793,14 +3793,26 @@ std::string gImage::Stats()
 		}
 	}
 
-	stats_string = string_format("channels:\nrmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\n", 
-		rmin, rmax, gmin, gmax, bmin, bmax);
+	if (isfloat) {
+		stats_string = string_format("channels:\nrmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\n", 
+			rmin, rmax, gmin, gmax, bmin, bmax);
 
-	stats_string.append(string_format("tones:\nmin: %f\tmax: %f\nrmean: %f\ngmean: %f\nbmean: %f\n\n", 
-		tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount));
+		stats_string.append(string_format("tones:\nmin: %f\tmax: %f\nrmean: %f\ngmean: %f\nbmean: %f\n\n", 
+			tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount));
 
-	stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
-		tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
+		stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
+			tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
+	}
+	else {
+		stats_string = string_format("channels:\nrmin: %d\trmax: %d\ngmin: %d\tgmax: %d\nbmin: %d\tbmax: %d\n\n", 
+			int(rmin*65536.0), int(rmax*65536.0), int(gmin*65536.0), int(gmax*65536.0), int(bmin*65536.0), int(bmax*65536.0));
+
+		stats_string.append(string_format("tones:\nmin: %d\tmax: %d\nrmean: %d\ngmean: %d\nbmean: %d\n\n", 
+			int(tmin*65536.0), int(tmax*65536.0),int((rsum/(double)pcount)*65536.0), int((gsum/(double)pcount)*65536.0), int((bsum/(double)pcount)*65536.0)));
+
+		stats_string.append(string_format("pixels (%d &gt; tone &lt; %d):\nbrightest:\t%d,%d,%d\ndarkest:\t%d,%d,%d\n\n",
+			int(tonelowerthreshold*65536.0), int(toneupperthreshold*65536.0), int(maxpix.r*65536.0), int(maxpix.g*65536.0), int(maxpix.b*65536.0), int(minpix.r*65536.0), int(minpix.g*65536.0), int(minpix.b*65536.0)));
+	}
 
 	return stats_string;
 

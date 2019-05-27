@@ -497,6 +497,10 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 
 void rawprocFrm::InfoDialog(wxTreeItemId item)
 {
+	bool floatstats = false;
+	//parm imageinfo.floatstats: Show image statistic as floats corresponding to the internal image, or integers corresponding to the unsigned 16-bit integer of raw formats.  Default=1
+	if (myConfig::getConfig().getValueOrDefault("imageinfo.floatstats","1") == "1")
+		floatstats = true;
 	wxString exif="";
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPic();
 
@@ -537,7 +541,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
 
 	exif.Append("<hr><b>Image Stats:</b><pre>\n");
-	exif.Append(dib.Stats().c_str());
+	exif.Append(dib.Stats(floatstats).c_str());
 	exif.Append("</pre>\n");
 
 	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxSize(400,500));

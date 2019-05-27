@@ -33,6 +33,12 @@ struct histogramdata {
 	long r, g, b;
 };
 
+struct histogram {
+	long rmax, gmax, bmax;
+	unsigned numbins;
+	std::vector<histogramdata> rhist, ghist, bhist;
+};
+
 struct coord {
 	int x, y;
 };
@@ -139,7 +145,7 @@ class gImage
 		static void setProfilePath(std::string ppath);
 		GIMAGE_ERROR getLastError();
 		std::string getLastErrorMessage();
-		std::string Stats();
+		std::string Stats(bool isfloat=true);
 		std::map<std::string,std::string> StatsMap();
 
 		//Setters
