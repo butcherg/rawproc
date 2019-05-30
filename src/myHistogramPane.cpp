@@ -101,6 +101,9 @@ void myHistogramPane::BlankPic()
 
 void myHistogramPane::RecalcHistogram()
 {
+	int w, h;
+	GetSize(&w, &h);
+	h -= 10;
 	blankpic = false;
 	hmax = 0;
 	rlen=hscale; glen=hscale; blen=hscale;
@@ -136,16 +139,19 @@ void myHistogramPane::RecalcHistogram()
 	unsigned clipbins = atoi(myConfig::getConfig().getValueOrDefault("histogram.clipbins","0").c_str()); 
 	unsigned lower = clipbins;
 	unsigned upper = (hscale-1)-clipbins;
-	
+
 	for (unsigned i=0; i<hscale; i++) {
-		r[i] = wxPoint(i, histogram[i].r);
-		g[i] = wxPoint(i, histogram[i].g);
-		b[i] = wxPoint(i, histogram[i].b);
 		if (i >= lower & i <= upper) {
 			if (hmax < histogram[i].r) hmax = histogram[i].r;
 			if (hmax < histogram[i].g) hmax = histogram[i].g;
 			if (hmax < histogram[i].b) hmax = histogram[i].b;
 		}
+	}
+	
+	for (unsigned i=0; i<hscale; i++) {
+		r[i] = wxPoint(i, (((float) histogram[i].r / (float) hmax) * h)+1);
+		g[i] = wxPoint(i, (((float) histogram[i].g / (float) hmax) * h)+1);
+		b[i] = wxPoint(i, (((float) histogram[i].b / (float) hmax) * h)+1);
 	}
 	Refresh();
 
@@ -153,8 +159,11 @@ void myHistogramPane::RecalcHistogram()
 
 void myHistogramPane::SetPic(gImage *dib, unsigned scale)
 {	
+	int w, h;
+	GetSize(&w, &h);
 	db = dib;
-	hscale = scale;
+	//hscale = scale;
+	hscale = w-10;
 	//rlen=scale; glen=scale; blen=scale;
 	RecalcHistogram();	
 }
@@ -198,11 +207,11 @@ void myHistogramPane::render(wxDC&  dc)
 
 //go to histogram coordinates:
 	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
-		dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
+		//dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
 		dc.SetDeviceOrigin (xorigin+3, h-yorigin-lineheight);
 	}
 	else {
-		dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
+		//dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
 		dc.SetDeviceOrigin (xorigin+3, h-yorigin-5);
 	}
 	dc.SetAxisOrientation(true,true);
@@ -215,15 +224,20 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.SetBrush(wxBrush(boundcolor));
 
 		if (Unbounded) 
-			dc.DrawRectangle(zerobucket,0,onebucket-zerobucket,hmax);
+			dc.DrawRectangle(zerobucket,0,onebucket-zerobucket,hmax/w);
 		else
-			dc.DrawRectangle(0,0,hscale,hmax);
+			dc.DrawRectangle(0,0,hscale,hmax/w);
 
 		dc.SetPen(origpen);
 		dc.SetBrush(origbrush);
 	//}
 
 	wxPoint * frontcolor;
+
+	bool bars = true;
+	//parm histogram.depiction: lines|bars. Default=bars
+	//template histogram.depiction=bars|lines
+	if (myConfig::getConfig().getValueOrDefault("histogram.depiction","bars") == "lines") bars = false;
 	
 	unsigned order = ord;
 	for (unsigned i=0; i<3; i++) {
@@ -231,7 +245,10 @@ void myHistogramPane::render(wxDC&  dc)
 			if (r) {
 				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_RED)) {
 					dc.SetPen(wxPen(wxColour(255,0,0),1));
-					dc.DrawLines(rlen,r,0,0);
+					if (bars)
+						for (unsigned i=0; i<rlen; i++) dc.DrawLine(i+1,0,r[i].x,r[i].y);
+					else
+						dc.DrawLines(rlen,r,1,0);
 					if (i==2) frontcolor = r;
 				}
 			}
@@ -240,7 +257,10 @@ void myHistogramPane::render(wxDC&  dc)
 			if (g) {
 				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_GREEN)) {
 					dc.SetPen(wxPen(wxColour(0,255,0),1));
-					dc.DrawLines(glen,g,0,0);
+					if (bars)
+						for (unsigned i=0; i<rlen; i++) dc.DrawLine(i+1,0,g[i].x,g[i].y);
+					else
+						dc.DrawLines(glen,g,1,0);
 					if (i==2) frontcolor = g;
 				}
 			}
@@ -249,7 +269,10 @@ void myHistogramPane::render(wxDC&  dc)
 			if (b) {
 				if ((display_channels == CHANNEL_RGB) | (display_channels == CHANNEL_BLUE)) {
 					dc.SetPen(wxPen(wxColour(0,0,255),1));
-					dc.DrawLines(blen,b,0,0);
+					if (bars)
+						for (unsigned i=0; i<rlen; i++) dc.DrawLine(i+1,0,b[i].x,b[i].y);
+					else
+						dc.DrawLines(blen,b,1,0);
 					if (i==2) frontcolor = b;
 				}
 			}
@@ -260,13 +283,13 @@ void myHistogramPane::render(wxDC&  dc)
 
 	//parm histogram.ev.zero: Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18
 	EV0 = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.zero","0.18").c_str());
-	//if (EV0 == 0.0) EV0 = 0.18;
+	if (EV0 == 0.0) EV0 = 0.18;
 	//parm histogram.ev.range: +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)
 	float EVrange = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.range","3.0").c_str());
-	//if (EVrange == 0.0) EVrange = 3.0;
+	if (EVrange == 0.0) EVrange = 3.0;
 	//parm histogram.ev.increment: Step increment for EV plot.  Default: 1.0
 	float EVinc = atof(myConfig::getConfig().getValueOrDefault("histogram.ev.increment","1.0").c_str());
-	//if (EVinc == 0.0) EVinc = 1.0;
+	if (EVinc == 0.0) EVinc = 1.0;
 
 	std::map<float,int> evlist;
 	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
@@ -304,10 +327,10 @@ void myHistogramPane::render(wxDC&  dc)
 	if (inwindow & !pressedDown) { // & mlx > 0 & mlx < hscale) {
 		dc.DrawLine(MouseX,0,MouseX,h);
 		wxString cursorstr;
-		if (FloatCursor)
+		//if (FloatCursor)
 			cursorstr = wxString::Format("%0.4f",mlf);
-		else
-			cursorstr = wxString::Format("%d",mlx);
+		//else
+		//	cursorstr = wxString::Format("%d",mlx);
 		if (MouseX < w/2)
 			dc.DrawText(cursorstr,MouseX+1, 2);
 		else 
@@ -325,8 +348,9 @@ void myHistogramPane::render(wxDC&  dc)
 	wxString str, str1;
 
 	if (TextVisible) {
-		wxString bstr = wxString::Format("bins:%d",hscale);
-		wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
+		wxString bstr;// = wxString::Format("bins:%d",hscale);
+		//wxString rstr = (Unbounded) ? "\nextent:data" : "\nextent:display"; 
+		wxString rstr = (Unbounded) ? "extent:data" : "extent:display"; 
 		int strw = std::min(w-dc.GetTextExtent(bstr).GetWidth(),w-dc.GetTextExtent(rstr).GetWidth());
 		bstr.Append(rstr);
 		dc.DrawText(bstr,strw, (lineheight*1)+2);
@@ -430,7 +454,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: off");
 			break;
 
-		case 76: // l - toggle lables
+		case 76: // l - toggle labels
 			if (TextVisible)
 				TextVisible = false;
 			else
@@ -444,13 +468,13 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				EVaxis = true;
 			Refresh();
 			break;
-		case 70: //f - toggle float/bin cursor label
-			if (FloatCursor)
-				FloatCursor = false;
-			else
-				FloatCursor = true;
-			Refresh();
-			break;
+		//case 70: //f - toggle float/bin cursor label
+		//	if (FloatCursor)
+		//		FloatCursor = false;
+		//	else
+		//		FloatCursor = true;
+		//	Refresh();
+		//	break;
 		case 314: // <- - pan left
 			if (event.ShiftDown()) xorigin += 10;
 			else if (event.ControlDown()) xorigin += 100;
