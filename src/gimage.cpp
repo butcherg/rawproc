@@ -4028,53 +4028,6 @@ std::vector<long> gImage::BlueHistogram()
 	return histogram;
 }
 
-/*
-std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, int &onebucket, float &dmin, float &dmax)
-{
-	std::map<std::string,std::string> stats = StatsMap();
-	#if defined PIXHALF
-	dmin = fmin((half_float::half) atof(stats["bmin"].c_str()), fmin((half_float::half) atof(stats["rmin"].c_str()),(half_float::half) atof(stats["gmin"].c_str())));
-	dmax = fmax((half_float::half) atof(stats["bmax"].c_str()), fmax((half_float::half) atof(stats["rmax"].c_str()),(half_float::half) atof(stats["gmax"].c_str())));
-	#else
-	dmin = fmin(atof(stats["bmin"].c_str()), fmin(atof(stats["rmin"].c_str()),atof(stats["gmin"].c_str())));
-	dmax = fmax(atof(stats["bmax"].c_str()), fmax(atof(stats["rmax"].c_str()),atof(stats["gmax"].c_str())));
-	#endif
-
-	float inc = (dmax - dmin) / (float) scale;
-	zerobucket = abs(dmin) /inc;
-	onebucket = zerobucket + (1.0 / inc);
-
-	histogramdata zerodat = {0,0,0};
-	std::vector<histogramdata> histogram(scale, zerodat);
-
-	#pragma omp parallel
-	{
-		std::vector<unsigned> pr(scale+1,0);
-		std::vector<unsigned> pg(scale+1,0);
-		std::vector<unsigned> pb(scale+1,0);
-		
-		#pragma omp for
-		for(unsigned y = 0; y < h; y++) {
-			for(unsigned x = 0; x < w; x++) {
-				unsigned pos = x + y*w;
-				pr[(unsigned) ((image[pos].r-dmin)/inc)]++;
-				pg[(unsigned) ((image[pos].g-dmin)/inc)]++;
-				pb[(unsigned) ((image[pos].b-dmin)/inc)]++;
-			}
-		}
-		
-		#pragma omp critical 
-		{
-			for (unsigned i=0; i<scale; i++) {
-				histogram[i].r += pr[i];
-				histogram[i].g += pg[i];
-				histogram[i].b += pb[i];
-			}
-		}
-	}
-	return histogram;
-}
-*/
 
 std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, int &onebucket, float &dmin, float &dmax)
 {
@@ -4093,12 +4046,13 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
-	
+
+
 	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
 
 		std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 		if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
 		if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 		#pragma omp parallel
@@ -4106,7 +4060,6 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 			std::vector<unsigned> pr(scale,0);
 			std::vector<unsigned> pg(scale,0);
 			std::vector<unsigned> pb(scale,0);
-
 
 			#pragma omp for
 			for (unsigned y=0; y<h-1; y+=2) {
@@ -4117,9 +4070,9 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 					pos[2] = x + (y+1)*w; //lower leftfs
 					pos[3] = (x+1) + (y+1)*w;  //lower right
 					for (unsigned i=0; i<q.size(); i++) {
-						if (q[i] == 0) pr[(unsigned) (image[pos[i]].r-dmin)/inc]++;
-						if (q[i] == 1) pg[(unsigned) (image[pos[i]].r-dmin)/inc]++;
-						if (q[i] == 2) pb[(unsigned) (image[pos[i]].r-dmin)/inc]++;
+						if (q[i] == 0) pr[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
+						if (q[i] == 1) pg[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
+						if (q[i] == 2) pb[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
 					}
 				}
 			}
@@ -4168,7 +4121,7 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 }
 
 
-//rgb histogram, scale=number of buckets, 256 or 65536...
+//rgb histogram, scale=number of buckets...
 std::vector<histogramdata> gImage::Histogram(unsigned scale)
 {
 	#if defined PIXHALF
@@ -4186,7 +4139,7 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 
 		std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
 		if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 1, 0, 1};
+		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
 		if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 		#pragma omp parallel

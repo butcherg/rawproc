@@ -294,12 +294,12 @@ class gImage
 		static cmsHPROFILE makeLCMSdcrawProfile(const std::string name, float gamma);
 		static void makeICCProfile(cmsHPROFILE hProfile, char *& profile, cmsUInt32Number  &profilesize);
 
-	protected:
-
 		//demosaic support routines:
 		bool xtranArray(unsigned (&xtarray)[6][6]);
 		bool cfArray(unsigned (&cfarray)[2][2]);
 		bool rgbCam(float (&rgb_cam)[3][4]);
+
+	protected:
 
 		std::vector<float> Compute1DGaussianKernel(const int kernelsize, const float sigma);
 		//void ImageBounds(unsigned *x1, unsigned *x2, unsigned *y1, unsigned *y2, bool cropbounds=false);
