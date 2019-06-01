@@ -80,6 +80,56 @@ class DemosaicPanel: public PicProcPanel
 			xtran_fastb->SetToolTip("");
 #endif
 
+			ImageType imgtype = ((PicProcessorDemosaic *)q)->getImageType();
+
+			halfb->Enable(false);
+			halfresizeb->Enable(false);
+			colorb->Enable(false);
+#ifdef USE_LIBRTPROCESS
+			ahdb->Enable(false);
+			amazeb->Enable(false);
+			dcbb->Enable(false);
+			igvb->Enable(false);
+			lmmseb->Enable(false);
+			rcdb->Enable(false);
+			vngb->Enable(false);
+			xtran_markesteijnb->Enable(false);
+			xtran_fastb->Enable(false);
+			dcb_enhance->Enable(false);
+			dcb_iterations->Enable(false);
+			lmmse_iterations->Enable(false);
+			xtran_markesteijn_passes->Enable(false);
+			xtran_markesteijn_cielab->Enable(false);
+#endif
+
+			switch (imgtype) {
+				case IMAGETYPE_BAYER:
+					halfb->Enable(true);
+					halfresizeb->Enable(true);
+					colorb->Enable(true);
+#ifdef USE_LIBRTPROCESS
+					ahdb->Enable(true);
+					amazeb->Enable(true);
+					dcbb->Enable(true);
+					igvb->Enable(true);
+					lmmseb->Enable(true);
+					rcdb->Enable(true);
+					vngb->Enable(true);
+					dcb_enhance->Enable(true);
+					dcb_iterations->Enable(true);
+					lmmse_iterations->Enable(true);
+#endif
+					break;
+#ifdef USE_LIBRTPROCESS
+				case IMAGETYPE_XTRANS:
+					xtran_markesteijnb->Enable(true);
+					xtran_fastb->Enable(true);
+					xtran_markesteijn_passes->Enable(true);
+					xtran_markesteijn_cielab->Enable(true);
+					break;
+#endif
+			}
+
 			if (params != "") {
 				wxArrayString p = split(params, ",");
 				if (p[0] == "half") 			{ halfb->SetValue(true); 		selected_algorithm = DEMOSAICHALF; }
@@ -104,8 +154,6 @@ class DemosaicPanel: public PicProcPanel
 			else {
 				halfb->SetValue(true); //to-do: change to tool.demosaic.default value 
 			}
-
-			//enableIt();
 
 			//Lay out the controls in the panel:
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
@@ -264,34 +312,8 @@ class DemosaicPanel: public PicProcPanel
 		void algorithmChanged(wxCommandEvent& event)
 		{
 			selected_algorithm = event.GetId();
-			//enableIt();
 			processIt();
 		}
-
-		void enableIt()  //currently not used...
-		{
-#ifdef USE_LIBRTPROCESS
-			dcb_enhance->Enable(false);
-			dcb_iterations->Enable(false);
-			lmmse_iterations->Enable(false);
-			xtran_markesteijn_passes->Enable(false);
-			xtran_markesteijn_cielab->Enable(false);
-			switch (selected_algorithm) {
-				case DEMOSAICDCB:
-					dcb_enhance->Enable(true);
-					dcb_iterations->Enable(true);
-					break;
-				case DEMOSAICLMMSE:
-					lmmse_iterations->Enable(true);
-					break;
-				case DEMOSAICXTRANMARKESTEIJN:
-					xtran_markesteijn_passes->Enable(true);
-					xtran_markesteijn_cielab->Enable(true);
-					break;
-			}
-#endif
-		}
-		
 
 		void processIt()
 		{
@@ -382,10 +404,10 @@ ImageType PicProcessorDemosaic::getImageType()
 	if (imgdib->getInfoValue("LibrawMosaiced") == "1") {
 
 		unsigned cfarray[2][2];	
-		if (!imgdib->cfArray(cfarray)) return IMAGETYPE_BAYER;
+		if (imgdib->cfArray(cfarray)) return IMAGETYPE_BAYER;
 
 		unsigned xtarray[6][6];
-		if (!imgdib->xtranArray(xtarray)) return IMAGETYE_XTRANS;
+		if (imgdib->xtranArray(xtarray)) return IMAGETYPE_XTRANS;
 	}
 
 	return IMAGETYPE_RGB;

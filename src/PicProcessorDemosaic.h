@@ -6,7 +6,7 @@
 enum ImageType {
 	IMAGETYPE_RGB,
 	IMAGETYPE_BAYER,
-	IMAGETYE_XTRANS
+	IMAGETYPE_XTRANS
 };
 
 class PicProcessorDemosaic: public PicProcessor
