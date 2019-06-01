@@ -205,15 +205,10 @@ void myHistogramPane::render(wxDC&  dc)
 	int lineheight = wxSize(dc.GetTextExtent("l")).GetHeight();
 
 
-//go to histogram coordinates:
-	if (EVaxis && !Unbounded) {  //EVAxis currently incorrect for Unbounded...
-		//dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-lineheight)/ (double) hmax));// * wscale);
+	if (EVaxis && !Unbounded)   //EVAxis currently incorrect for Unbounded...
 		dc.SetDeviceOrigin (xorigin+3, h-yorigin-lineheight);
-	}
-	else {
-		//dc.SetLogicalScale(((double) (w-6) / (double) hscale)* wscale, ((double) (h-5)/ (double) hmax)); // * wscale);
+	else 
 		dc.SetDeviceOrigin (xorigin+3, h-yorigin-5);
-	}
 	dc.SetAxisOrientation(true,true);
 
 	//if (something I haven't defined yet) {
@@ -224,9 +219,9 @@ void myHistogramPane::render(wxDC&  dc)
 		dc.SetBrush(wxBrush(boundcolor));
 
 		if (Unbounded) 
-			dc.DrawRectangle(zerobucket,0,onebucket-zerobucket,hmax/w);
+			dc.DrawRectangle(zerobucket,0,onebucket-zerobucket,h);
 		else
-			dc.DrawRectangle(0,0,hscale,hmax/w);
+			dc.DrawRectangle(0,0,hscale,h);
 
 		dc.SetPen(origpen);
 		dc.SetBrush(origbrush);
