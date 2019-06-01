@@ -36,7 +36,7 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	inwindow = false;
 
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
@@ -70,7 +70,7 @@ void myHistogramPane::OnSize(wxSizeEvent& event)
 bool myHistogramPane::ToggleToolTip()
 {
 	if (GetToolTipText() == "") {
-		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
 		return true;
 	}
 	else {
@@ -381,33 +381,7 @@ void myHistogramPane::render(wxDC&  dc)
 
 
 void myHistogramPane::mouseWheelMoved(wxMouseEvent& event) 
-{
-	wxSize s = GetSize();
-	xcenter = event.m_x; ycenter = event.m_y;
-	double inc = 0.1;
-	if (event.ShiftDown()) inc = 1.0;
-	if (event.ControlDown()) inc = 10.0;
-	if (event.GetWheelRotation() > 0) { 
-		wscale += inc;
-		//xorigin -= (inc*event.m_x); 
-		xorigin -= abs(xorigin) * inc;
-//		yorigin -= inc*(s.GetHeight()-event.m_y);
-	}
-	else {
-		wscale -= inc;
-		//xorigin += (inc*event.m_x); 
-		xorigin += abs(xorigin) * inc;
-//		yorigin += inc*(s.GetHeight()-event.m_y);
-	}
-	if (wscale < 1.0) {
-		wscale = 1.0;
-		xorigin = 0;
-		yorigin = 0;
-	}
-
-
-	Refresh();
-	
+{	
 	event.Skip();
 }
 
@@ -423,13 +397,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			RecalcHistogram();
 			Refresh();
 			break;
-		case 116: //T
-		case 82: //r - reset
-			wscale = 1.0;
-			xorigin = 0;
-			yorigin = 0;
-			Refresh();
-			break;
+
 		case WXK_SPACE : // s?
 			if (ord == 1) ord = 2;
 			else if(ord == 2) ord = 3;
@@ -448,7 +416,6 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				else
 					((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: off");
 			break;
-
 		case 76: // l - toggle labels
 			if (TextVisible)
 				TextVisible = false;
@@ -463,13 +430,6 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				EVaxis = true;
 			Refresh();
 			break;
-		//case 70: //f - toggle float/bin cursor label
-		//	if (FloatCursor)
-		//		FloatCursor = false;
-		//	else
-		//		FloatCursor = true;
-		//	Refresh();
-		//	break;
 		case 314: // <- - pan left
 			if (event.ShiftDown()) xorigin += 10;
 			else if (event.ControlDown()) xorigin += 100;
@@ -543,11 +503,6 @@ void myHistogramPane::mouseReleased(wxMouseEvent& event)
 
 void myHistogramPane::mouseDoubleClicked(wxMouseEvent& event)
 {
-	wscale = 1.0;
-	xorigin = 0;
-	yorigin = 0;
-	Refresh();
-	
 	event.Skip();
 }
 
