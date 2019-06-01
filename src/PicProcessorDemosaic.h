@@ -3,6 +3,11 @@
 
 #include "PicProcessor.h"
 
+enum ImageType {
+	IMAGETYPE_RGB,
+	IMAGETYPE_BAYER,
+	IMAGETYE_XTRANS
+};
 
 class PicProcessorDemosaic: public PicProcessor
 {
@@ -10,6 +15,8 @@ class PicProcessorDemosaic: public PicProcessor
 		PicProcessorDemosaic(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
 		bool processPic(bool processnext=true);
+
+		ImageType getImageType();
 };
 
 #endif

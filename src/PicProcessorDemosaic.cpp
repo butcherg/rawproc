@@ -375,6 +375,22 @@ void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
+ImageType PicProcessorDemosaic::getImageType()
+{
+	gImage * imgdib = getPreviousPicProcessor()->getProcessedPicPointer();
+
+	if (imgdib->getInfoValue("LibrawMosaiced") == "1") {
+
+		unsigned cfarray[2][2];	
+		if (!imgdib->cfArray(cfarray)) return IMAGETYPE_BAYER;
+
+		unsigned xtarray[6][6];
+		if (!imgdib->xtranArray(xtarray)) return IMAGETYE_XTRANS;
+	}
+
+	return IMAGETYPE_RGB;
+}
+
 bool PicProcessorDemosaic::processPic(bool processnext) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
