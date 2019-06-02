@@ -1540,7 +1540,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.tone.initialvalue: The initial (and reset button) value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
+		//parm tool.tone.initialvalue: The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
 		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
 		p->createPanel(parambook);
