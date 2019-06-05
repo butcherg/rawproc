@@ -125,6 +125,11 @@
 			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Tone">
+			<param name="Local" value="tone.html">
+			</OBJECT>
+
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Saturate">
 			<param name="Local" value="saturate.html">
 			</OBJECT>

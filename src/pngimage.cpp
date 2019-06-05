@@ -146,7 +146,7 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	color_type = png_get_color_type(png, pinfo);
 	
-	if (color_type != PNG_COLOR_TYPE_RGB_ALPHA & color_type != PNG_COLOR_TYPE_RGB) {
+	if (color_type != PNG_COLOR_TYPE_RGB_ALPHA & color_type != PNG_COLOR_TYPE_RGB & color_type != PNG_COLOR_TYPE_GRAY) {
 		png_destroy_read_struct(&png, &pinfo, NULL);
 		return NULL;
 	}

@@ -779,7 +779,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
 		picdata->createPanel(parambook);
-		CommandTreeSetDisplay(picdata->GetId(), 756);
 		//pic->SetScaleToWidth();
 		if (pic->GetSize().GetWidth() > dib->getWidth()) {
 			pic->SetScale(1.0);
@@ -788,6 +787,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			pic->FitMode(true);
 			SetStatusText("scale: fit",2);
 		}
+		CommandTreeSetDisplay(picdata->GetId(), 790);
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
@@ -1540,7 +1540,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.tone.initialvalue: The initial (and reset button) value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
+		//parm tool.tone.initialvalue: The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
 		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
 		p->createPanel(parambook);

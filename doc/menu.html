@@ -50,6 +50,47 @@ pop-up menu.  A path to exiftool must be present in exif.command in the Properti
 <li><b>Add->(tool):</b> Selecting one of the tools from this menu adds it to the Commands list,
 after the selected tool.  See the sub-topics for more enlightenment on the various image tools.</li><br>
 
+<li><b>Add->Group:</b> A group is a collection of tools, similar to a tool list.  The big difference is that
+a list of tools specified as a group are applied using a copy of the previous tool's image, and only one 
+result image is stored for the group.  Until version 0.9, processing an image in rawproc involved opening 
+the file, then applying a succession of tools in whatever order, and finally saving the resulting image 
+from the  output of the last tool.  Each tool added to the chain contained its own result image, so the 
+tool chain concept is quite a memory hog.  The group tool allows one to specify a list of tools that are 
+used often and apply them in a single tool operation, resulting in a significant reduction in memory use.
+
+<p>Groups can be defined in text files just like tool lists, each tool on a separate line; in fact, the 
+syntax is identical.  A group can also be defined as follows:
+
+<pre>
+group:resize:800;sharpen:1
+</pre>
+
+with the tools separated by semicolons, either in the input.raw.libraw.default property or in an img 
+command line parameter.  Indeed, a rather useful group for input.raw.libraw.default would be:
+
+<pre>
+group:colorspace:camera,assign;subtract:camera;whitebalance:camera;demosaic:ahd;blackwhitepoint:rgb
+</pre>
+
+or in a text file:
+
+<pre>
+colorspace:camera,assign
+subtract:camera
+whitebalance:camera
+demosaic:ahd
+blackwhitepoint:rgb
+</pre>
+
+either which for a raw file would provide a scaled RGB image for further editing.  When a group is
+added to the toolchain, it looks like this in the commands pane:</p>
+
+<p align=left><img src=group-commandlist.png></img></p>
+
+
+
+</li><br>
+
 <li><b>Add->Tool List:</b> Opens a file selector on the directory specified in app.toollistpath (or the 
 current working directory if app.toollistpath is empty) to allow selection of a file containing a list
 of tools to be inserted in the processing chain below the currently selected tool.  The list in the file
