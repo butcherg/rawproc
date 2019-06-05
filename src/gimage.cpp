@@ -4057,9 +4057,9 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 
 		#pragma omp parallel
 		{
-			std::vector<unsigned> pr(scale+1,0);
-			std::vector<unsigned> pg(scale+1,0);
-			std::vector<unsigned> pb(scale+1,0);
+			std::vector<unsigned> pr(scale,0);
+			std::vector<unsigned> pg(scale,0);
+			std::vector<unsigned> pb(scale,0);
 
 			#pragma omp for
 			for (unsigned y=0; y<h-1; y+=2) {
@@ -4070,9 +4070,10 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 					pos[2] = x + (y+1)*w; //lower leftfs
 					pos[3] = (x+1) + (y+1)*w;  //lower right
 					for (unsigned i=0; i<q.size(); i++) {
-						if (q[i] == 0) pr[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
-						if (q[i] == 1) pg[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
-						if (q[i] == 2) pb[(unsigned) ((image[pos[i]].r-dmin)/inc)]++;
+						unsigned bin = std::min((unsigned) ((image[pos[i]].r-dmin)/inc),scale-1);
+						if (q[i] == 0)      pr[bin]++;
+						else if (q[i] == 1) pg[bin]++;
+						else if (q[i] == 2) pb[bin]++;
 					}
 				}
 			}
@@ -4091,17 +4092,17 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 
 		#pragma omp parallel
 		{
-			std::vector<unsigned> pr(scale+1,0);
-			std::vector<unsigned> pg(scale+1,0);
-			std::vector<unsigned> pb(scale+1,0);
+			std::vector<unsigned> pr(scale,0);
+			std::vector<unsigned> pg(scale,0);
+			std::vector<unsigned> pb(scale,0);
 		
 			#pragma omp for
 			for(unsigned y = 0; y < h; y++) {
 				for(unsigned x = 0; x < w; x++) {
 					unsigned pos = x + y*w;
-					pr[(unsigned) ((image[pos].r-dmin)/inc)]++;
-					pg[(unsigned) ((image[pos].g-dmin)/inc)]++;
-					pb[(unsigned) ((image[pos].b-dmin)/inc)]++;
+					pr[std::min((unsigned) ((image[pos].r-dmin)/inc),scale-1)]++;
+					pg[std::min((unsigned) ((image[pos].g-dmin)/inc),scale-1)]++;
+					pb[std::min((unsigned) ((image[pos].b-dmin)/inc),scale-1)]++;
 				}
 			}
 		
