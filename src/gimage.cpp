@@ -2169,25 +2169,45 @@ void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
 	}
 }
 
-void gImage::ApplyToneMapFilmic(bool do_gamma, int threadcount)
+void gImage::ApplyToneMapFilmic(bool do_gamma, bool clip_black, int threadcount)
 {
 	// The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog:
 	// R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2), pow(f,gamma) removed for do_gamma = false
 
-	if (do_gamma) {
-		#pragma omp parallel for num_threads(threadcount)
-		for (unsigned pos=0; pos<image.size(); pos++) {
-			image[pos].r = pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),1/2.2);
-			image[pos].g = pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),1/2.2);
-			image[pos].b = pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),1/2.2);
+	if (clip_black) {
+		if (do_gamma) {
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned pos=0; pos<image.size(); pos++) {
+				image[pos].r = std::max(pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),1/2.2),0.0);
+				image[pos].g = std::max(pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),1/2.2),0.0);
+				image[pos].b = std::max(pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),1/2.2),0.0);
+			}
+		}
+		else {
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned pos=0; pos<image.size(); pos++) {
+				image[pos].r = std::max((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),0.0);
+				image[pos].g = std::max((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),0.0);
+				image[pos].b = std::max((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),0.0);
+			}
 		}
 	}
 	else {
-		#pragma omp parallel for num_threads(threadcount)
-		for (unsigned pos=0; pos<image.size(); pos++) {
-			image[pos].r = (image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06);
-			image[pos].g = (image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06);
-			image[pos].b = (image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06);
+		if (do_gamma) {
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned pos=0; pos<image.size(); pos++) {
+				image[pos].r = pow((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),1/2.2);
+				image[pos].g = pow((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),1/2.2);
+				image[pos].b = pow((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),1/2.2);
+			}
+		}
+		else {
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned pos=0; pos<image.size(); pos++) {
+				image[pos].r = (image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06);
+				image[pos].g = (image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06);
+				image[pos].b = (image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06);
+			}
 		}
 	}
 }
