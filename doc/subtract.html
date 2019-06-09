@@ -1,0 +1,31 @@
+<html><title>Subtract</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css">
+<body>
+
+
+<h3 id="Subtract">Subtract</h3>
+<p>Purpose: Subtracts a value from each channel of each pixel of the image.  Three modes:
+
+<ul>
+
+<li><b>value:</b> Subtracts the value from every channel value of every pixel in the image.  
+Remember, the internal working image is floating point, 0.0 - 1.0, so meaningful subtractions
+are with numbers in that range.  But, you can do what you want...  :D 
+</li>
+
+<li><b>file:</b> Opens the selected image file, and subtracts every corresponding channel value of
+every pixel of it from the working image.  rawproc will not attempt this operation if the two images
+are not the same dimensions.
+</li>
+
+<li><b>camera:</b> Subtracts the value found in the LibrawBlack metadata item from each channel value of each pixel, after converting the LibrawBlack value from integer to floating point scaled to 
+the range 0.0 - 1.0.
+</li>
+
+</ul>
+
+<p align=center><img src=subtract.png></p>
+
+<p><b>Properties:</b> See tool.rotate.* in <a href=confparams.html#tool.rotate>Configuration Properties</a></p>
+
+
+</body></html>

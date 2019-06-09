@@ -1,22 +1,18 @@
 <html><title>BlackWhitePoint</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="BlackWhitePoint">Black/White Point</h3>
-<p>With a curve defined as (0.0, 0,0, 255.0, 255.0), the sliders move the respective endpoint (0.0, 0.0 for 
+
+<p>Purpose: Scales the image data between selectable black and white points.  This tool has three modes:</p>
+<p><ul>
+<li><b>auto/slider:</b> With a curve defined as (0.0, 0,0, 255.0, 255.0), the sliders move the respective endpoint (0.0, 0.0 for 
 black, 255.0,255.0 for white) left or right.  This allows you to 'contrast-stretch' the image, making the 
 pixel values use the full range available.  When you add Black/White Point to the commands list, this tool 
 attempts to find the ends of the image's tone range; if you don't like what it did, you can manually work 
 the sliders to a more satisfactory position.
-
-<p>BlackWhitePoint is applied to all three channels by default, but can be applied to a single channel 
-using the drop-down selector.
-</p>
-
-<p align=center><table><tr><td><img src=bwpoint-curve1.png></td><td></img><img src=bwpoint-curve.png></img></td></tr></table></p>
-
 <p>A configuration file parameter (tool.blackwhitepoint.auto) is available to make this tool do an 
 automatic adjustment when you 
 add it.  The algorithm is based on walking each end of the histogram until a value greater than or equal 
-to a set percentage of the largest "tone bucket", hard-coded to 5% (0.05).  The separate black and white 
+to a set percentage of the largest "tone bucket", default is 5% (0.05).  The separate black and white 
 thresholds are configurable, if you find one or both to consistently clip out data you want to retain.  
 You can also simply just slide the sliders to where you want after auto does it's thing.  Note that 
 "auto" is not the saved parameter, rather the result parameters are in the command line applied 
@@ -25,8 +21,26 @@ to the saved image</p>
 <p>The ReCalculate checkbox enables automatic re-calculation of the auto-calculated black and white points
 whenever the tool is re-processed.  This is useful if upstream tools are added or modified.  Note that, 
 if you've set the points manually, checking this box will do away with those settings replace them with 
-auto-calculated settings.
+auto-calculated settings.</p>
+</li>
+
+<li><b>data:</b>  This mode scales the image data to the min and max of the previous tool's image.
+</li>
+
+<li><b>camera:</b>  This mode scales the image data to the min and max values communicated in the raw file
+metadata.  For rawproc 0.9, these are the Libraw-supplied parameters.
+</li>
+
+</ul></p>
+
+<p>Black/White Point is applied to all three channels by default, but can be applied to a single channel 
+using the drop-down selector.</p>
+<p>The left-hand graphic is the tool parameters pane.  The right-hand graphic illustrates the equivalent 
+operation applied by a curve.
 </p>
+
+<p align=center><table><tr><td><img src=blackwhitepoint.png></td><td></img><img src=bwpoint-curve.png></img></td></tr></table></p>
+
 
 <p><b>Properties:</b> See tool.blackwhitepoint.* in <a href=confparams.html#tool.blackwhitepoint>Configuration Properties</a></p>
 

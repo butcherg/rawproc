@@ -50,18 +50,8 @@
 			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Bright">
-			<param name="Local" value="bright.html">
-			</OBJECT>
-			
-		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Colorspace">
 			<param name="Local" value="colorspace.html">
-			</OBJECT>
-
-		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Contrast">
-			<param name="Local" value="contrast.html">
 			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
@@ -98,11 +88,6 @@
 			<param name="Name" value="Grayscale">
 			<param name="Local" value="gray.html">
 			</OBJECT>
-
-		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Highlight">
-			<param name="Local" value="highlight.html">
-			</OBJECT>
 			
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Lens Correction">
@@ -135,13 +120,13 @@
 			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Shadow">
-			<param name="Local" value="shadow.html">
+			<param name="Name" value="Sharpen">
+			<param name="Local" value="sharpen.html">
 			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Sharpen">
-			<param name="Local" value="sharpen.html">
+			<param name="Name" value="Subtract">
+			<param name="Local" value="subtract.html">
 			</OBJECT>
 			
 		<LI> <OBJECT type="text/sitemap">

@@ -1,9 +1,35 @@
 <html><title>Exposure</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="Exposure">Exposure</h3>
-<p>Use to approximate adjustment of exposure.  The adjustment is in EV, where each whole number is a stop. The tool's range is -5/+5 stops. 
+<p>Purpose: Use to approximate adjustment of image tone in terms of exposure.   
 Please note that this doesn't actually adjust the exposure, that can only be done when the image is 
-exposed in the camera.</p>
+exposed in the camera. Two ways to apply this tool:</p>
+
+<ul>
+
+<li><b>compensation:</b> The slider adjustment is
+expressed in EV, where each whole number is a stop. The tool's range is -5/+5 stops.  The reset
+button returns the setting to 0.0.
+</li>
+
+<li><b>target patch:</b>This method allows one to designate a patch of the image and scale the
+rest of the image with that patch as a 'gray' reference.  The selection is done on the main 
+image pane by moving the mouse cursor to the image location to be used, holding down the Shift key,
+and clicking the left mouse button.  A cross will appear on the image pane to mark the location,
+and the location's xy coordinates will be displayed in the tool pane.  Patch selection must be
+accomplished prior to selecting this mode.  The gray level used to perform the operation is 
+specified in the ev0 box as a number between 0.0 and 1.0; 0.18 is the default, which corresponds to
+the predominant notion of 'middle gray' as 18%.  The patch size is 
+specified as a radius from the center of the center pixel; the default is 1.5, which designates a
+3x3 patch.
+
+<p>Note that the specification of the gray level is tied to the image data range.  The 0.18 default
+is for the internal floating point image's data range of 0.0 to 1.0. 14-bit raw
+data, with a range of 0 to 16383 maps to 0.0 - 0.25 in floating point, so for 14-bit raw files 
+you either need to change ev0 to 0.045 (0.25 x 0.18), or scale the image with the blackwhitepoint tool using the data mode prior to applying patch exposure compensation.
+</p>
+
+</ul>
 
 <p align=center><img src=exposure.png></p>
 

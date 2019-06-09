@@ -1,10 +1,19 @@
 <html><title>Colorspace</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="Colorspace">Colorspace</h3>
-<p>The edit box accepts a .icc file name, which is then used either to transform the image from the 
+
+<p>Purpose: This tool is used to either assign a color profile to an image, or to convert the image from its
+current colorspace to a new one.  This tool has two modes:</p>
+
+<ul>
+<li><b>profile file:</b> The edit box accepts a file name, which is then used either to transform the image from the 
 previous colorspace to the new one (convert) or to attach the profile to the image as a representation 
 of its current colorspace (assign).  Either a full file path name can be specified, or just a filename, 
-in which case the cms.profilepath property is consulted for the path.</p>
+in which case the cms.profilepath property is consulted for the path.
+
+<p>The file can be either 1) an ICC color profile (.icc), either V2 or V4; 2) a JSON file (.json) in the format defined by Anders Torger
+in his dcamprof software (https://www.ludd.ltu.se/~torger/dcamprof.html); 3) a comma-separated list of nine integer numbers 
+that specify D65 color primaries in the form used in David Coffin's dcraw program.
 
 <p>The "Select Profile" button opens a file selector on the directory specified in cms.profilepath.  If a profile is selected
 from this directory, the command will include only the filename; if the selector is switched to a different directory, the command
@@ -14,9 +23,24 @@ will include the full path of the profile.</p>
 out-of-gamut colors.  Note that not all profiles allow use of all rendering intents; the LittleCMS 
 documentation should be consulted for guidance on an informed selection.
 </p>
+</li>
+
+<li><b>assign camera profile:</b>  This mode will use the image metadata camera make and model to look up a set of dcraw-style 
+color primaries from dcraw.c, or RawTherapee's camconst.json, in that order.  Either or both of these files will be searched for
+in the following directories in this order: 1) the pathname specified in tool.colorspace.*path, where '*' is either dcraw or camconst, 2) the
+directory containing the rawproc executable, 3) the OS-specific application configuration path (same place as rawproc.conf).
+If the image metadata contains a camera make/model, it will be displayed in the tool pane.  If one needs to determine if and/or where
+the dcraw.c and camconst.json files are found, clicking the 'list' button in the tool pane will produce such a report dialog.
+
+<p>If a set of primaries are found, they will be displayed at the bottom of the tool pane.</p>
+
+</li>
+</ul>
 
 <p align=center><img src=colorspace.png></p>
 
-<!--<p><b>Properties:</b> See tool.colorspace.* in <a href=confparams.html#tool.colorspace>Configuration Properties</a></p>-->
+<!-- commented out: no tool.colorspace properties at this time (0.9)
+<p><b>Properties:</b> See tool.colorspace.* in <a href=confparams.html#tool.colorspace>Configuration Properties</a></p>
+-->
 
 </body></html>
