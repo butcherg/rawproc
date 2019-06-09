@@ -36,7 +36,9 @@ img "*.NEF:rawdata=crop group:colorspace:camera,assign;subtract:camera;whitebala
 				as a group.  This means nothing to img, which applies each tool the same way either in 
 				a group or by itself, but the resulting processing string tells rawproc to apply it all 
 				as a single group.  This particular group contains all the processing required to 
-				produce the starting RGB image.</li>
+				produce the starting RGB image:
+
+				<ul>
 
 				<li>colorspace:camera,assign: This tool looks up the camera color profile and assigns 
 				it to the image.  "camera" keeps you from having to specify something specific, letting 
@@ -54,6 +56,9 @@ img "*.NEF:rawdata=crop group:colorspace:camera,assign;subtract:camera;whitebala
 				This does not produce the best quality mosaic, but it's darned fast and thus well-suited 
 				to proof work.  The resulting image is half the size of the original, so it is a step 
 				in the eventual direction to resize to 800x600.</li>
+
+				</ul>
+				</li>
 
 				<li>group (the second one): This group contains the tools to turn the starting RGB 
 				image into the proof JPEG.  The particular tools applied in this group bear some 
