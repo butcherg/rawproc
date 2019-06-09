@@ -1,56 +1,33 @@
 <html><title>How to use rawproc</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="Workflow">How to use rawproc</h3>
-<p>Basically, you open an image, apply one or more tools to change it, then save it.  You can apply tools in any order you wish, but you first need to 
-decide on color management.  You need to make this choice before you open your image, as it's set then and not changeable until you open another image.  In
-the configuration parameters, this is done with input.cms; 1=on, 0=off.  Here
-are the key considerations in rawproc for each:</p>
-
-	<ul>
-
-	<li>input.cms=1: Firstly, you should set cms.profilepath to the directory where you keep your profile files.  Otherwise, when you specify a 
-profile you'll have to use its absolute path.  Then, you need to specify profiles for display (display.cms.displayprofile) and output (output.*.cms.profile). 
-Your input image is assumed to contain an ICC profile representative of its color space.  To get there, you need to do one of the following:<br><br>
-
-		<ul>
-			<li>Use input.raw.libraw.colorspace and input.raw.libraw.gamma to compel libraw's dcraw processing to deliver an input image with an assigned output profile and gamma scaling.  You can pick from one of the dcraw -o selections by name, and gamma has a couple of mnemonic assignments as well as the opportunity to specify the power and toe, just like dcraw -g.
-			</li><br>
-
-			<li>Use input.raw.libraw.cameraprofile to assign your calibrated camera profile to the delivered image.  To make this work, you need to set input.raw.libraw.colorspace=raw and input.raw.libraw.gamma=linear, otherwise their settings will modify the delivered image. 
-			</li><br>
-		</ul>
-
-If you're happy with using the assigned profile in the input image for processing, you can proceed from there.  If, on the other hand, you want to assign a proper working profile, the first tool you need to insert in the chain is colorspace, to convert the image to the chosen working profile.
 
 
-<br><br>For output, the appropriate output.*.cms.profile can be set to a .icc you want rawproc to convert your image to upon saving, "*" is either "jpeg" or 
- "tiff" as of 0.6.  If an output.*.cms.profile is not specified, the image is saved with the profile that followed it through processing.
 
-<br><br>For working and output profiles, Elle Stone's profiles work well: https://github.com/ellelstone/elles_icc_profiles.</li><br>
+ 
+<h4>General Processing</h4>
 
-	<li>input.cms=0: If you choose to not use color management, the input image will be displayed and saved without color tranformation, and no profile will be inserted in the output image.</li><br>
+<p>Basically, you open an image, apply one or more tools to change it, then save it.  You can apply tools in any order you wish. </p>
 
-	</ul>
 
-<p>After opening an image, you now just apply tools from the Add menu, in whatever order you like.  As you add tools, they are added to the commands pane  and the corresponding parameters are displayed in the parameters pane.  You can select a previously added tool by clicking on it in the commands pane, and it's parameters then be available for working.  Note the checkbox beside each tool; this is for selecting the displayed image in the main panel.  With this, you can do things like keep the last tool's image in the main pane and go back to a previous tool to work, and each change will re-do the processing chain from the worked tool to the last one, displyaing the cumulative result.</p>
 
-<p>Each time you add a tool, another copy of the worked image is created from the previous tool, and that forms the basis for work done with that tool.  So, as you add tools, you're also building a chain of images.  So, by design, rawproc is a memory hog.  But the goal in that is to allow interactivity with the processing chain so the effect of the processing chain can be observed with a minimum of re-processing. As of 0.6, this mostly works well; in future builds, the management of "dirty" flags will be further optimized to reduce unnecessary re-processing when a tool or its image are selected.</p>
 
-<p>Some tools are slow.  Particularly denoise, followed by sharpen.  I usually don't use either until after I resize the image for web posting, and they 
-both run more quickly on fewer pixels.  A much faster, and very high-quality denoise is found in the libraw/dcraw wavelet denoise, applied image opening. 
-You enable this in the properties with input.raw.libraw.threshold or input.raw.libraw.wavelet_denoise, with a value from 0-1000.  Try 500 to start, then 
-use Re-Open to try stronger/weaker values to taste.</p>
+<p>After opening an image, you now just apply tools from the Add menu, in whatever order you like.  As you add tools, they are added to the commands pane  and the corresponding parameters are displayed in the parameters pane.  You can select a previously added tool by clicking on it in the commands pane, and it's parameters then be available for working.  Note the checkbox beside each tool; this is for selecting the displayed image in the main panel.  With this, you can do things like keep the last tool's image in the main pane and go back to a previous tool to work, and each change will re-do the processing chain from the worked tool to the last one, displaying the cumulative result.</p>
 
-<p>When you save an image, rawproc saves the image from the last tool in the chain, and a list of the applied tools and their parameters in the image metadata.  You can re-apply these tools to the original 
-image by using Open Source to open the saved image; instead of opening the saved image, rawproc will open the original image and re-apply each tool in order, 
-with the saved parameters from the metadata.  You can change around the tools and re-save to the same image, or to another one by changing the file name.</p>
+<p>Each time you add a tool, another copy of the worked image is created from the previous tool, and that forms the basis for work done with that tool.  So, as you add tools, you're also building a chain of images.  So, by design, rawproc is a memory hog.  But the goal in that is to allow interactivity with the processing chain so the effect of the processing chain can be observed with a minimum of re-processing.</p>
 
-<p>Open Source has a couple of properties to aid with directory organization,   input.opensource.parentdirectory and input.opensource.subdirectory.  When a processing chain is saved to an output image's metadata, the input file name is not saved with a path.  input.opensource.parentdirectory is a switch, set it to 1 and if rawproc doesn't find the original image in the same directory as the selected image, it'll look in the parent directory.  Correspondingly, input.opensource.subdirectory is an actual directory name to be used if the original image isn't found in either the current or parent directories. I use 
-the input.opensource.subdirectory, set to "NEFs", and I store my raws in that subdirectory, with the processed images going in the upper directory.  So, 
-when I Open Source a jpeg in the upper directory, the original raw is found in the NEFs subdirectory.</p>
+<p>When you save an image, rawproc saves the image from the last tool in the chain, along with a list of the applied tools 
+and their parameters in the image metadata.  You can re-apply these tools to the original image by using File->Open->Source 
+to open the saved image; instead of opening the saved image, rawproc will open the original image and re-apply each tool in 
+order, with the saved parameters from the metadata.  You can change around the tools and re-save to the same image, or to 
+another one by changing the file name.</p>
 
-<p>rawproc doesn't have a Save As file option by design; you have to pick the save file name each time.  It will prompt you to continue if it is saving over 
-a previous file, but that's the only protection you have from overwriting files.</p>
+<p>File->Open->Source has a couple of properties to aid with directory organization,   input.opensource.parentdirectory and input.opensource.subdirectory.  When a processing chain is saved to an output image's metadata, the input file name is not saved with a path.  input.opensource.parentdirectory is a switch, set it to 1 and if rawproc doesn't find the original image in the same directory as the selected image, it'll look in the parent directory.  Correspondingly, input.opensource.subdirectory is an actual directory name to be used if the original image isn't found in either the current or parent directories. I use 
+the input.opensource.subdirectory, set to "NEFs", and I store my raws in that subdirectory, with the processed images going in the upper directory.  So, when I File->Open->Source a jpeg in the upper directory, the original raw is found in the NEFs 
+subdirectory.</p>
+
+<p>rawproc doesn't have a Save As file option by design; you have to pick the save file name each time.  It will prompt you 
+to continue if it is saving over a previous file, but that's the only protection you have from overwriting files.</p>
 
 <p>rawproc's name belies its flexibility; it can be used to edit any JPEG or TIFF image.  Raw or otherwise, once you open an image, it's just an array
 of pixels...</p>
@@ -61,7 +38,8 @@ the host, the internal floating point representation is either 32-bit float or 1
 plenty of room for tone manipulation to avoid posterization.</p>
 
 <p>Having a desktop shortcut to rawproc (selectable option in the Windows install package) is handy for quick opening of images; with your file explorer, you 
-can review images and open the one you want to edit by dragging it to the rawproc desktop icon.</p>
+can review images and open the one you want to edit by dragging it to the rawproc desktop icon.  Note: in Ubuntu as of 18.04,
+this doesn't work. :( </p>
 
 <p>All of the rawproc tools are multithreaded. The usage of your processor's cores can be specifically controlled with the tool.*.cores parameter, where "*" is the tool name.  "0" tells rawproc to use all available cores, "n" tells rawproc to use a specific 
 number of cores, and "-N" tells rawproc to use all the available cores-N.  The latter is useful for saving one or more cores for interactive processing, 
@@ -74,6 +52,99 @@ current working directory; if one is not found there, it looks in the operating 
 data directory.  For Windows installations, the configuration file is installed and accessed in
 the AppData directory.  You can find the path of the configuration file used by the running rawproc
  on the Help->About dialog.</p>
+
+
+<h4>Groups</h4>
+
+<p>As of version 0.9, rawproc tools for processing raw images have changed significantly.  The objective in these changes
+is to remove dependency on the Libraw dcraw processing, and to put raw-oriented operations in the tool chain.  The latter
+objective is important to establishing a "durable encoding" of the operations required to produce a rendition of an image;
+that is, the tool chain stored in the rendition image's metadata is complete and sufficient to re-open the raw file and
+produce the rendition in a version of rawproc years later.  Also, putting all the raw operations in the tool chain supports
+the "education" goal of rawproc - the user of the program is responsible for the application and ordering of each and every
+tool applied to the raw image to make a pleasing rendition, and in doing so learns both the beneficial and detrimental 
+implications of each application and ordering decision.  Have Fun!!!</p>
+
+<p>That said, there comes a point in one's education where it becomes obvious that certain operations just go in a particular
+order.  rawproc's architecture from the beginning has been to maintain a copy of the result image at each tool in the chain,
+which is quite the consumer of memory resources.  To accommodate this and save memory, rawproc now has a 'group' tool.  When
+one inserts a group in the toolchain, the tool prompts for a filename.  This file should be a text file with a list of 
+tools and their parameters, the same format as the 'tool list'.  The major difference between a tool list and a group is, 
+where a tool list inserts each tool separately in the tool chain, the group applies each tool to the same starting image, and
+maintains only one copy of the image for the result of applying all the tools in the group.  The 'group' menu item 
+description in the menu help page shows the commands pane with a group.  A group an also be specified in an img command line:
+<pre>
+img DSC_0001.NEF:rawdata=crop group:camera,assign;subtract:camera;whitebalance:camera;demosaic:ahd;blackwhitepoint:rgb DSC_0001.jpg
+</pre>
+With this list of tools embedded in the JPEG metadata, rawproc can Open->Source the JPEG, and the raw file is opened and
+the group applied to it.  The group can then be converted to the individual tools, or the last item in the group can be
+extracted to a separate tool with menu items available when 'group' is right-clicked with the mouse.  A group can
+also be specified in input.raw.libraw.default.</p>
+
+<p>Using groups has a couple of implications to consider.  One is beneficial; if you work with very large raw files
+on a not-so-powerful computer, grouping raw operations may be the only way you can get rawproc to work.  The other
+that I've run into is challenging: if you intend to break up a group into individual tools, you should do so before
+you add subsequent operations; the behaviour of break-up is to delete the group and then insert each tool individually.
+This means each of those subsequent operations gets re-done for each insertion, which takes a LOT of time.  I this
+first implementation of group, I tried to mitigate this in various ways, but each introduced memory errors.  I'll
+probably find a clean way to do it, but not for 0.9.</p>
+
+
+<h4>Color Management</h4>
+
+<p>rawproc ascribes to the concepts describe in this article I wrote: https://discuss.pixls.us/t/article-color-management-in-raw-processing/11521. To fully enable managing color, the rawproc internal image class, gImage, has a member called 'profile', which
+is a chunk of memory where an ICC color profile resides, managed with the gImage::ApplyColorspace() and gImage::AssignColorspace()
+methods.  In rawproc, if an opened image file contains an ICC profile, that profile is inserted into 'profile', else 'profile'
+is set to NULL.  In order to do subsequent color management with an opened image, 'profile' cannot be NULL.</p>
+
+<p>rawproc's color management depends largely on the availability of color profile files.  Accordingly, rawproc uses a single
+directory in which to store all the profiles one might use, specified in the cms.profilepath property.  Any place in rawproc
+where a color profile file is prompted for or specified looks to this path to find the file.  An excellent source of working
+and output profiles are Elle Stone's collection, found at https://github.com/ellelstone/elles_icc_profiles. I just cloned
+her repository to my hard drive, and set my cms.profilepath to the profiles/ directory found therein.  To this directory I
+add my camera profiles, and my display profile.</p>
+
+<h5>Input Profiles</h5>
+
+<p>For most raw files, color profile information pertaining to the raw data is not contained in the metadata, go figure.  
+Accordingly, rawprof give one the opportunity to assign one in two ways: 1) lookup of camera-specific color primaries from 
+dcraw and/or RawTherapee, or 2) specification of a .json or .icc file containing the camera-specific color information.  The 
+colorspace tool implements both ways; in my raw processing group, colorspace:camera,assign is my first tool; this looks up 
+the color information in the dcraw.c/camconst.json files, builds a D65 ICC profile from it, and stores it in the internal images's 
+profile.  One can instead specify an ICC camera profile.  Adobe DCPs are not supported in version 0.9.  If one is still using
+the pre-0.9 dcraw processing, a camera profile can be specified in the input.raw.libraw.cameraprofile property.</p>
+
+<p>rawproc used to have an input.cms property that determined whether color management was to be used, decided at the time
+the image was opened.  This has been replaced with display.cms, which determines whether to apply the display profile or
+just display the working image pixels as-is.  This decision is made each time the display pane is rendered, so there's
+no longer a need to decide about color management when an image is opened. cms.profilepath, display.cms.displayprofile, 
+input.*.cms.profile and output.*.cms.profile all still work as before.</p>
+
+<h5>Working Profiles</h5>
+
+<p>For raw files with a camera profile, after demosaicing the image it is advisable to convert it to a working profile 
+before doing any subsequent manipulation.  This is done by adding a colorspace tool that converts the internal image to a 
+profile specified as a file.  Elle Stone's profile collection has a bunch of quite useful working profiles; note that her 
+naming was done to avoid copyright conflicts, and so popular profiles are there but named according to their seminal 
+sources. I use Rec2020-elle-V4-g10.icc.</p>
+
+
+<h5>Display Profiles</h5>
+
+<p>Note that rawproc does NOT use any OS display profile services, it just displays raw pixels to the screen.  If a
+display profile is specified in display.cms.displayprofile, the internal image is converted from its assigned profile
+to it before displaying; if display.cms.displayprofile is not specified, the internal image is displayed as-is.  The
+display profile conversion can be disabled without deleting the filename from display.cms.displayprofile by setting
+display.cms to 0, turn it back on by setting it to 1.</p>
+
+
+<h5>Output Profiles</h5>
+
+<p>When saving to an image file, rawproc will convert the internal image from its assigned profile to the one specified in
+output.*.cms.profile, where '*' is either jpeg, tiff, or png.  That profile will also be saved in the file metadata.  If 
+the appropriate output.*.cms.profile property is empty, the profile assigned to the internal image will be saved in the 
+file metadata.</p>
+
 
 
 </body></html>
