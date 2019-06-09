@@ -19,12 +19,30 @@ Code at https://github.com/butcherg/rawproc, licensed under the GPL V2
 	<li>Lensfun, http://lensfun.sourceforge.net</li>
 </ul>
 
+<h2>Camera Data:</h2>
+<ul>
+	<li>dcraw.c, https://www.cybercom.net/~dcoffin/dcraw/dcraw.c, adobe_coeff table</li>
+	<li>camconst.json, https://github.com/Beep6581/RawTherapee/blob/dev/rtengine/camconst.json</li>
+</ul>
+
 <h2>Algorithms:</h2>
 <ul>
 	<li>Spline Curve: Copyright (C) 2011, 2014 Tino Kluge, http://kluge.in-chemnitz.de/opensource/spline/, GPL2</li>
 	<li>Saturation: adapted from a public-domain function by Darel Rex Finley, http://alienryderflex.com/saturation.html</li>
 	<li>Non-Local Means Denoise: A. Buades, http://www.ipol.im/pub/art/2011/bcm_nlm/; adapted from from an interpretation by
 		David Tschumperlé presented at http://opensource.graphics/, 17 Sep 2015, #4.</li>
+	<li>Wavelet Denoise: David Coffin, dcraw wavelet_denoise() in https://www.cybercom.net/~dcoffin/dcraw/dcraw.c</li>
+	<li>Tone Mapping:
+		<ul>
+		<li>Reinhard: Erik Reinhard, Mike Stark, Peter Shirley and Jim Ferwerda, 'Photographic Tone 
+			Reproduction for Digital Images', ACM Transactions on Graphics, 21(3), 
+			pp 267--276, July 2002 (Proceedings of SIGGRAPH 2002).
+		<li>Filmic: HP Duiker, http://duikerresearch.com/2015/09/filmic-tonemapping-ea-2006, as described in 
+			http://filmicworlds.com/blog/filmic-tonemapping-operators
+		<li>LogGamma: The HEVC version of the ARIB STD-B67 algorithm, as defined in 
+			https://en.wikipedia.org/wiki/Hybrid_Log-Gamma
+		</ul>
+	</li>
 	<li>Rotation: Alan Paeth, "A Fast Algorithm for General Raster Rotation", Graphics Interface '86
 	  http://supercomputingblog.com/graphics/coding-bilinear-interpolation/, and Coding Bilinear Interpolation, 
 	  http://supercomputingblog.com/graphics/coding-bilinear-interpolation/</li>

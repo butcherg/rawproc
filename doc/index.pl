@@ -52,7 +52,7 @@ iframe {
 $toc
 </div>
 <div style="width: 70%; height: 90%; float: right;">
-<iframe style="width: 100%; height: 100%" name=content></iframe>
+<iframe style="width: 100%; height: 100%" name=content src=main.html></iframe>
 </body>
 </html>
 INDEX
