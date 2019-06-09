@@ -2,6 +2,97 @@
 
 <h2 id="Tips">Tips</h2>
 <ul>
+
+	<li>As of version 0.9, here is my raw processing workflow:
+
+		<ol>
+			<li>Copy my day's NEFs to "a directory named for the event/NEFs"</li>
+
+			<li>Run a scrip called 'procpix' in that NEFs directory, which 1)processes each NEF to a 'proof JPEG',
+			that is, a 800x600 JPEG with the processing toolchain embedded in the metadata, and 2) generates
+			a thumbnail for each JPEG, stored in "a directory named for the event/thumbs".  I use the img
+			command line program that comes with rawproc.  The img command to produce the proof looks something 
+			like this:
+<pre>
+img "*.NEF:rawdata=crop group:colorspace:camera,assign;subtract:camera;whitebalance:camera;demosaic:half group:blackwhitepoint:rgb;resize:800;sharpen:1 "../*.jpg"
+</pre>
+			<li>Review the proofs; if any need correcting, or if I see an alternate rendition, I Open->Source 
+			the JPEG in rawproc; it finds the NEF, opens it, and re-applies the processing from the JPEG to
+			use as a starting point.  When I save this update, I'll either save it over the original proof JPEG
+			if it still looks substantially like the original proof, or I'll append the filename with some 
+			descriptor of what the difference is, e.g. DSC_0001-fullsize.jpg for a full sized rendition.</li>
+
+		</ol>
+
+		<p>The individual parts of the img command line bear discussion:
+			<ul>
+				<li>"*.NEF:rawdata=crop": First, the quotes are necessary to keep the command line
+				shell from expanding the wildcard; rawproc does that.  Second, the rawdata=crop tells
+				rawproc to just deliver the raw data (dcraw -D), and the crop value tells rawproc to
+				crop the unexposed margins from the data (the margins for the particular camera are
+				specified in the metadata)</li>
+
+				<li>group (the first one): The remaining string until the next space is to be treated 
+				as a group.  This means nothing to img, which applies each tool the same way either in 
+				a group or by itself, but the resulting processing string tells rawproc to apply it all 
+				as a single group.  This particular group contains all the processing required to 
+				produce the starting RGB image.</li>
+
+				<li>colorspace:camera,assign: This tool looks up the camera color profile and assigns 
+				it to the image.  "camera" keeps you from having to specify something specific, letting 
+				rawproc look it up; you can use the same group with different cameras.</li>
+
+				<li>subtract:camera: This tool subtracts the camera black number from the metadata from 
+				the image.  Some cameras specify it, some don't; the metadata value for cameras that don't
+				use it is 0, so you can specify it and not worry about whether or not...</li>
+
+				<li>whitebalance:camera: This tool does white balance correction using the 'as-shot' 
+				multipliers specified in the metadata.  rawproc knows the difference between a bayer
+				mosaic and a RGB image, and the correct pattern is applied to do the multiplication.</li>
+
+				<li>demosaic:half: This tool applies the so-called 'half' demosaic algorithm to the image.
+				This does not produce the best quality mosaic, but it's darned fast and thus well-suited 
+				to proof work.  The resulting image is half the size of the original, so it is a step 
+				in the eventual direction to resize to 800x600.</li>
+
+				<li>group (the second one): This group contains the tools to turn the starting RGB 
+				image into the proof JPEG.  The particular tools applied in this group bear some 
+				discussion, below.</li>
+
+			</ul>
+
+
+		<p>I'm still considering how to best use groups, but here's where my head is currently at.  First, you'll 
+		notice the image is probably a bit dark and the histogram is bunched up to the left.  The main reason for 
+		this is the difference in scaling between the raw file's original values and rawproc's internal 
+		representation.  Libraw delivers the raw image data as unsigned 16-bit integers, whether the raw data was 
+		10-, 12-, or 14-bit data.  rawproc converts that data to floating point in the range 0.0 to 1.0, respecting 
+		the relationship of floating point 1.0 to the unsigned 16-bit maximum of 65535.  So, for a 14-bit raw file, 
+		the maximum integer value in the data will be 16383 (ignoring camera specific shenanigans), which in 0.0-1.0 			floating point converts to 0.25.  This may seem wrong, but it actually is a good thing in that it provides 
+		room for the image to 'grow' as tools are applied.</p>
+
+		<p>For proofing purposes, the second group scales the data to the floating point 1.0 'display white' per
+		the previous discussion, resizes the image to 800 pixels on its longest side, and applies minimal 
+		sharpening (output sharpening, to restore some acuity). 
+		</p>
+
+		<p>In rawproc, you can go a number of ways with this subsequent processing.  You might be satisfied with the image 
+		tone and color, so you can simply insert tools between the two groups, e.g., crop.  But a lot of times the 
+		processessing can be improved; I'll frequently break up the second group to change the blackwhitepoint
+		scaling, which doesn't yet handle camera saturation clipping very well.  Or, I'll want to do some sort
+		of tone scaling to pull up the shadows, so I'll delete the blackwhitepoint tool and replace it with a 
+		curve, or one of the tone operators.  If your camera profile doesn't behave well (Elle Stone has a good
+		article on that), you should probably insert a colorspace tool to convert to a working profile right after
+		demosaic, before you do anything else to the image.  The basic point is, you can insert or delete tools
+		to your heart's content, to the image's benefit or detriment...  :D</p>
+
+		<p>You'll note that I've left out some things others might consider essential, lenscorrection, for instance.
+		You can easily add this in, either as part of a group or by itself.  My processing is sufficient for 
+		my current needs, and I wanted to keep this discussion simple...</p>
+	</li>
+
+<hr>
+
 	<li>While the program is named rawproc, it works well for editing JPEGs, PNGs and TIFFs too. </li><br>
 	<li>rawproc tools are mostly multithreaded and compiled with as much optimization as is tolerable.  However, 
 		Denoise is a slow tool that becomes unbearably slow with big images; consider using it 

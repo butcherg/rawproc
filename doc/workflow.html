@@ -72,9 +72,9 @@ one inserts a group in the toolchain, the tool prompts for a filename.  This fil
 tools and their parameters, the same format as the 'tool list'.  The major difference between a tool list and a group is, 
 where a tool list inserts each tool separately in the tool chain, the group applies each tool to the same starting image, and
 maintains only one copy of the image for the result of applying all the tools in the group.  The 'group' menu item 
-description in the menu help page shows the commands pane with a group.  A group an also be specified in an img command line:
+description in the menu help page shows the commands pane with a group.  A group can also be specified in an img command line:
 <pre>
-img DSC_0001.NEF:rawdata=crop group:camera,assign;subtract:camera;whitebalance:camera;demosaic:ahd;blackwhitepoint:rgb DSC_0001.jpg
+$ img DSC_0001.NEF:rawdata=crop group:camera,assign;subtract:camera;whitebalance:camera;demosaic:ahd;blackwhitepoint:rgb DSC_0001.jpg
 </pre>
 With this list of tools embedded in the JPEG metadata, rawproc can Open->Source the JPEG, and the raw file is opened and
 the group applied to it.  The group can then be converted to the individual tools, or the last item in the group can be
@@ -105,6 +105,12 @@ her repository to my hard drive, and set my cms.profilepath to the profiles/ dir
 add my camera profiles, and my display profile.</p>
 
 <h5>Input Profiles</h5>
+
+<p>If an opened image file contains a color profile, that profile is inserted into the 'profile' of the internal working 
+image, and that profile is used for subsequent color operations.  If the image file does not contain a color profile, one
+can be assigned through use of the input.*.cms.profile property, where '*' is one of jpeg, tiff, or png.  Even if an image 
+contains a color profile, one can change it right after opening by adding a colorspace tool with the assign operator, and
+the desired profile specified as a file.</p>
 
 <p>For most raw files, color profile information pertaining to the raw data is not contained in the metadata, go figure.  
 Accordingly, rawprof give one the opportunity to assign one in two ways: 1) lookup of camera-specific color primaries from 
