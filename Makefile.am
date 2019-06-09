@@ -16,7 +16,7 @@ docpages:
 	$(srcdir)/doc/confparams.pl $(srcdir)/src > $(srcdir)/doc/confparams.html
 	$(srcdir)/doc/rawparams.pl $(srcdir)/src/rawimage.cpp > $(srcdir)/doc/rawparams.html
 	$(srcdir)/doc/img.pl $(srcdir)/src/img.cpp > $(srcdir)/doc/img.html
-	$(srcdir)/doc/index.pl > $(srcdir)/doc/index.html
+	$(srcdir)/doc/index.pl $(srcdir)/doc > $(srcdir)/doc/index.html
 
 .PHONY: conf
 conf:
