@@ -3,7 +3,14 @@
 
 $toc = "";
 
-open (INFILE, "<", "$ARGV[0]/contents.hhc");
+if ($ARGV[0] eq "") {
+	$path = ".";
+}
+else {
+	$path = $ARGV[0];
+} 
+
+open (INFILE, "<", "$path/contents.hhc");
 
 while ($line = <INFILE>) {
 	$toc .= $line if $line =~ /UL/;
