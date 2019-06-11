@@ -8,7 +8,7 @@
 
 <li><b>NLMeans:</b> Uses a Non-Local Means algorithm as presented by David Tschumperlé, lead developer
 of GMIC, in his blog at http://gmic.eu.  The primary control is sigma (denoise "strength").
-This is a slow algorithm, so a default of 0 (no denoise) is appropriate to keep from cooling 
+This is a slow implementation of the algorithm, so a default of 0 (no denoise) is appropriate to keep from cooling 
 your heels waiting while the algorithm walks the image when you initally add the tool.  
 sigma=10 is a good starting point for a small image.</p>
 <p>The local and patch sliders change the so-called radii of the chunks of the image used to compute the denoised
@@ -17,7 +17,7 @@ image, only the sigma slider will do that.</p>
 </li>
 
 <li><b>Wavelet:</b> Uses the wavelet denoise algorithm cobbled snarfed from David Coffin's dcraw.c.  
-The implementation of this algorithm is significantly faster than NLMeans.
+The implementation of this algorithm is significantly faster than the NLMeans implementation.
 </li>
 
 <p align=center><img src=denoise.png></p>
