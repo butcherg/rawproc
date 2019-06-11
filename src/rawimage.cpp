@@ -881,8 +881,8 @@ char * _loadRAW(const char *filename,
 	for (unsigned r=0; r<cfadim; r++) {
 		for (unsigned c=0; c<cfadim; c++) {
 			pos = c + r*cfadim;
-			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(r,c)];
-			cfarray[pos] = ndesc[RawProcessor.COLOR(r,c)];
+			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(c,r)];
+			cfarray[pos] = ndesc[RawProcessor.COLOR(c,r)];
 		}
 	}
 	buffer[pos+1]  = '\0';
