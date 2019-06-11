@@ -122,6 +122,7 @@ class DemosaicPanel: public PicProcPanel
 					break;
 #ifdef USE_LIBRTPROCESS
 				case IMAGETYPE_XTRANS:
+colorb->Enable(true);
 					xtran_markesteijnb->Enable(true);
 					xtran_fastb->Enable(true);
 					xtran_markesteijn_passes->Enable(true);
@@ -386,7 +387,8 @@ class DemosaicPanel: public PicProcPanel
 
 PicProcessorDemosaic::PicProcessorDemosaic(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	//showParams();
+	if (getImageType() == IMAGETYPE_XTRANS & c.find("xtran") == std::string::npos) 
+		c = "xtran_fast";	
 }
 
 void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
