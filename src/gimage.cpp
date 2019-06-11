@@ -2222,9 +2222,24 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 	double sqrt3 = sqrt(3);
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
-		if (image[pos].r > 0.0) if (image[pos].r > rubicon) image[pos].r = a * log(12*image[pos].r - b) + c; else image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
-		if (image[pos].g > 0.0) if (image[pos].g > rubicon) image[pos].g = a * log(12*image[pos].g - b) + c; else image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
-		if (image[pos].b > 0.0) if (image[pos].b > rubicon) image[pos].b = a * log(12*image[pos].b - b) + c; else image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
+		if (image[pos].r > 0.0) {
+			if (image[pos].r > rubicon) 
+				image[pos].r = a * log(12*image[pos].r - b) + c; 
+			else 
+				image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
+		}
+		if (image[pos].g > 0.0) {
+			if (image[pos].g > rubicon) 
+				image[pos].g = a * log(12*image[pos].g - b) + c; 
+			else 
+				image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
+		}
+		if (image[pos].b > 0.0) {
+			if (image[pos].b > rubicon) 
+				image[pos].b = a * log(12*image[pos].b - b) + c; 
+			else 
+				image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
+		}
 	}
 }
 

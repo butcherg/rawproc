@@ -71,6 +71,8 @@ class TonePanel: public PicProcPanel
 				filmic->SetValue(true);
 			}
 
+			log2b->Enable(false);  //log2 doesn't do anything, yet.
+
 			//Lay out the controls in the panel:
 			myRowColumnSizer *m = new myRowColumnSizer(10,3);
 			m->AddItem(enablebox, wxALIGN_LEFT);
@@ -253,7 +255,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
 			m_tree->SetItemText(id, "tone:filmic");
 			mark();
-			dib->ApplyToneMapFilmic(false, threadcount);
+			dib->ApplyToneMapFilmic(false, true, threadcount);
 			d = duration();
 		}
 
