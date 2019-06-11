@@ -3,6 +3,11 @@
 <h3 id="White Balance">White Balance</h3>
 <p>Provides a selection of methods to white-balance the image:</p>
 <ul>
+<li><b>Multipliers:</b> The channel multipliers, if no other method is specified.  These can be
+changed in the multiplier edit boxes.  The edit boxes support mousewheel changes, where 
+shift-mousehwheel changes in 0.01 increments, ctrl-mousewheel changes in 0.1 increments, and 
+plain mouswheel changes in 0.001 increments.  If Auto, Patch, or Camera is selected and a 
+multiplier is manually altered, that tool is de-selected and Multipliers is selected.</li><br>
 <li><b>Auto:</b> Computes red and blue multipliers based on the "gray world" algorithm, which
 assumes an image tones average to middle gray.</li><br>
 <li><b>Patch:</b> A point in the image can be selected by holding the shift key and clicking
@@ -15,11 +20,7 @@ the demosaic tool), the multipliers are applied using the regular whitebalance o
 multipliers are relevant to the raw, linear image; the colors will be very off if applied to anything 
 other than the raw linear image.  Additionally, for the unmosaiced application, adjusting the camera 
 multipliers in this mode will revert to three-color whitebalance, and the image just won't look nice. </li><br>
-<li><b>Original:</b> The channel multipliers, if no other method is specified.  These can be
-changed in the multiplier edit boxes.  The edit boxes support mousewheel changes, where 
-shift-mousehwheel changes in 0.01 increments, ctrl-mousewheel changes in 0.1 increments, and 
-plain mouswheel changes in 0.001 increments.  If Auto, Patch, or Camera is selected and a 
-multiplier is manually altered, the tool is de-selected.</li><br>
+
 </ul>
 <p align=center><img src=whitebalance.png></p>
 
