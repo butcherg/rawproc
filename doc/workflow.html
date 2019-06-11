@@ -7,14 +7,19 @@
  
 <h4>General Processing</h4>
 
-<p>Basically, you open an image, apply one or more tools to change it, then save it.  You can apply tools in any order you wish. </p>
+<p>Basically, you open an image, apply one or more tools to change it, then save it. After opening an image, you now 
+just apply tools from the Add menu, in whatever order you like.  You can add multiple instances of a tool, if 
+that supports your intent.  As you add tools, they are added to the commands pane  
+and the corresponding parameters are displayed in the parameters pane.  You can select a previously added tool by 
+clicking on it in the commands pane, and it's parameters then be available for working.  Note the checkbox beside 
+each tool; this is for selecting the displayed image in the main panel.  With this, you can do things like keep the 
+last tool's image in the main pane and go back to a previous tool to work, and each change will re-do the processing 
+chain from the worked tool to the last one, displaying the cumulative result.</p>
 
-
-
-
-<p>After opening an image, you now just apply tools from the Add menu, in whatever order you like.  As you add tools, they are added to the commands pane  and the corresponding parameters are displayed in the parameters pane.  You can select a previously added tool by clicking on it in the commands pane, and it's parameters then be available for working.  Note the checkbox beside each tool; this is for selecting the displayed image in the main panel.  With this, you can do things like keep the last tool's image in the main pane and go back to a previous tool to work, and each change will re-do the processing chain from the worked tool to the last one, displaying the cumulative result.</p>
-
-<p>Each time you add a tool, another copy of the worked image is created from the previous tool, and that forms the basis for work done with that tool.  So, as you add tools, you're also building a chain of images.  So, by design, rawproc is a memory hog.  But the goal in that is to allow interactivity with the processing chain so the effect of the processing chain can be observed with a minimum of re-processing.</p>
+<p>Each time you add a tool, another copy of the worked image is created from the previous tool, and that forms the 
+basis for work done with that tool.  So, as you add tools, you're also building a chain of images.  So, by design, 
+rawproc is a memory hog.  But the goal in that is to allow interactivity with the processing chain so the effect 
+of the processing chain can be observed with a minimum of re-processing.</p>
 
 <p>When you save an image, rawproc saves the image from the last tool in the chain, along with a list of the applied tools 
 and their parameters in the image metadata.  You can re-apply these tools to the original image by using File->Open->Source 
@@ -22,15 +27,21 @@ to open the saved image; instead of opening the saved image, rawproc will open t
 order, with the saved parameters from the metadata.  You can change around the tools and re-save to the same image, or to 
 another one by changing the file name.</p>
 
-<p>File->Open->Source has a couple of properties to aid with directory organization,   input.opensource.parentdirectory and input.opensource.subdirectory.  When a processing chain is saved to an output image's metadata, the input file name is not saved with a path.  input.opensource.parentdirectory is a switch, set it to 1 and if rawproc doesn't find the original image in the same directory as the selected image, it'll look in the parent directory.  Correspondingly, input.opensource.subdirectory is an actual directory name to be used if the original image isn't found in either the current or parent directories. I use 
-the input.opensource.subdirectory, set to "NEFs", and I store my raws in that subdirectory, with the processed images going in the upper directory.  So, when I File->Open->Source a jpeg in the upper directory, the original raw is found in the NEFs 
-subdirectory.</p>
+<p>File->Open->Source has a couple of properties to aid with directory organization,   input.opensource.parentdirectory 
+and input.opensource.subdirectory.  When a processing chain is saved to an output image's metadata, the input file name 
+is not saved with a path.  input.opensource.parentdirectory is a switch, set it to 1 and if rawproc doesn't find the 
+original image in the same directory as the selected image, it'll look in the parent directory.  Correspondingly, 
+input.opensource.subdirectory is an actual directory name to be used if the original image isn't found in either the 
+current or parent directories. I use the input.opensource.subdirectory, set to "NEFs", and I store my raws in that 
+subdirectory, with the processed images going in the upper directory.  So, when I File->Open->Source a jpeg in the 
+upper directory, the original raw is found in the NEFs subdirectory.</p>
 
-<p>rawproc doesn't have a Save As file option by design; you have to pick the save file name each time.  It will prompt you 
-to continue if it is saving over a previous file, but that's the only protection you have from overwriting files.</p>
+<p>rawproc doesn't have a Save As file option by design; you have to pick the save file name each time.  It will 
+prompt you to continue if it is saving over a previous file, but that's the only protection you have from overwriting 
+files.</p>
 
-<p>rawproc's name belies its flexibility; it can be used to edit any JPEG or TIFF image.  Raw or otherwise, once you open an image, it's just an array
-of pixels...</p>
+<p>rawproc's name belies its flexibility; it can be used to edit any JPEG or TIFF image.  Raw or otherwise, once you 
+open an image, it's just an array of pixels...</p>
 
 <p>One of the main reasons I wrote rawproc was to make all the tools I used for image editing work well on both 8-bit and 16-bit images.  When you open any image file, 
 the tone values for each pixel are converted to floating point numbers, which means the values range from 0.0 (black) to 1.0 (white).  Depending on 
@@ -41,7 +52,8 @@ plenty of room for tone manipulation to avoid posterization.</p>
 can review images and open the one you want to edit by dragging it to the rawproc desktop icon.  Note: in Ubuntu as of 18.04,
 this doesn't work. :( </p>
 
-<p>All of the rawproc tools are multithreaded. The usage of your processor's cores can be specifically controlled with the tool.*.cores parameter, where "*" is the tool name.  "0" tells rawproc to use all available cores, "n" tells rawproc to use a specific 
+<p>All of the rawproc tools are multithreaded. The usage of your processor's cores can be specifically controlled with 
+the tool.*.cores parameter, where "*" is the tool name.  "0" tells rawproc to use all available cores, "n" tells rawproc to use a specific 
 number of cores, and "-N" tells rawproc to use all the available cores-N.  The latter is useful for saving one or more cores for interactive processing, 
 so you could go and read email while rawproc does denoise, for instance.  Each tool also has a .log parameter, set to 1 will compel rawproc to write a log 
 entry every time that tool does its processing.  That log entry includes the number of cores used for that activity.  Both of these parameters are read each 
