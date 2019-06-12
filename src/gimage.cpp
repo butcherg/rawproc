@@ -2319,26 +2319,19 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 	std::vector<unsigned> q;
 
 	for (unsigned i = 0; i < cfa.size(); i ++) q.push_back(cfa[i] - '0');
-/*	
-	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
-*/
+
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h-1; y+=2) {
 		for (unsigned x=0; x<w-1; x+=2) {
-			unsigned pos[4];
-			pos[0] = x + y*w;  //upper left
-			pos[1] = (x+1) + y*w; //upper right
-			pos[2] = x + (y+1)*w; //lower leftfs
-			pos[3] = (x+1) + (y+1)*w;  //lower right
-			for (unsigned i=0; i<q.size(); i++) {
-				if (q[i] == 0) image[pos[i]].r *= redmult;  //use r, in grayscale, they're all the same...
-				if (q[i] == 1) image[pos[i]].r *= greenmult;  //use r, in grayscale, they're all the same...
-				if (q[i] == 2) image[pos[i]].r *= bluemult;  //use r, in grayscale, they're all the same...
-				if (q[i] == 3) image[pos[i]].r *= greenmult;  //use r, in grayscale, they're all the same...
-				image[pos[i]].g = image[pos[i]].b = image[pos[i]].r;
+			for (unsigned j = 0; j < 2; j++) {
+				for (unsigned k = 0; k < 2; k++) {
+					unsigned pos = (x + j) + (y + k) * w;
+					if (q[j+k*2] == 0) image[pos].r *= redmult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*2] == 1) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*2] == 2) image[pos].r *= bluemult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*2] == 3) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
+					image[pos].g = image[pos].b = image[pos].r;
+				}
 			}
 		}
 	}
