@@ -244,7 +244,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			dib.setInfo(std::string(name),std::string(value));
 		}
 
-		//img <li>blackwhitepoint[:rgb|red|green|blue][,0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.</li>
+		//img <li>blackwhitepoint[:rgb|red|green|blue|data|camera|auto][,0-127,128-255]|[,minwhite] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry. 'data' can be used either as the first parameter or following a channel specification, will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', will use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li>
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			char *c, *b, *w, *m;
 			GIMAGE_CHANNEL channel = CHANNEL_RGB;
