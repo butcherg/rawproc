@@ -15,9 +15,10 @@
 #define BLACKWHITERECALC 6102
 #define BLACKWHITESLIDER 6103
 #define BLACKWHITEDATA   6104
-#define BLACKWHITECAMERA 6105
-#define BLACKWHITECOPY 6106
-#define BLACKWHITEPASTE 6107
+#define BLACKWHITEMINWHITE   6105
+#define BLACKWHITECAMERA 6106
+#define BLACKWHITECOPY 6107
+#define BLACKWHITEPASTE 6108
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -66,16 +67,20 @@ class BlackWhitePointPanel: public PicProcPanel
 			std::map<std::string,std::string> s = img.StatsMap();
 			double datblk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
 			double datwht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+			double minwht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 			int librawblk = atoi(img.getInfoValue("LibrawBlack").c_str());
 			double camblk = librawblk / 65536.0; 
 			int librawwht = atoi(img.getInfoValue("LibrawMaximum").c_str());
 			double camwht = librawwht / 65536.0; 
+
+			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, "min white:");
 
 			
 			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 				chan->SetStringSelection(p[0]);
 				if (p.size() >= 2 && p[1] == "data") {
 					bwmode = BLACKWHITEDATA;
+					if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 					datb->SetValue(true);
 				}
 				else if (p.size() >= 2 && p[1] == "camera") {
@@ -122,10 +127,13 @@ class BlackWhitePointPanel: public PicProcPanel
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-
 			m->NextRow();
 			m->AddRowItem(datb, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht)), flags);
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "        "),flags);
+			m->AddRowItem(minwhite, flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht)), flags.CenterVertical());
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -151,6 +159,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_CHOICE, &BlackWhitePointPanel::channelChanged, this);
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnCheckBox, this, BLACKWHITEAUTORECALC);
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::onEnable, this, BLACKWHITEENABLE);
+			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnMinWhite, this, BLACKWHITEMINWHITE);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 		}
 
@@ -192,6 +201,7 @@ class BlackWhitePointPanel: public PicProcPanel
 					}
 					else if (p.size() >= 2 && p[1] == "camera") {
 						bwmode = BLACKWHITECAMERA;
+						if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 						camb->SetValue(true);
 					}
 					else if (p.size() >= 3) {
@@ -227,6 +237,11 @@ class BlackWhitePointPanel: public PicProcPanel
 			processBW();
 		}
 
+		void OnMinWhite(wxCommandEvent& event)
+		{
+			processBW();
+		}
+
 		void processBW()
 		{
 			switch (bwmode) {
@@ -235,7 +250,10 @@ class BlackWhitePointPanel: public PicProcPanel
 					q->processPic();
 					break;
 				case BLACKWHITEDATA:
-					q->setParams(wxString::Format("%s,data",  chan->GetString(chan->GetSelection())));
+					if (minwhite->GetValue())
+						q->setParams(wxString::Format("%s,data,minwhite",  chan->GetString(chan->GetSelection())));
+					else
+						q->setParams(wxString::Format("%s,data",  chan->GetString(chan->GetSelection())));
 					q->processPic();
 					break;
 				case BLACKWHITECAMERA:
@@ -300,7 +318,7 @@ class BlackWhitePointPanel: public PicProcPanel
 	private:
 		wxChoice *chan;
 		wxSlider *black, *white;
-		wxCheckBox *recalc,*enablebox;
+		wxCheckBox *recalc,*enablebox, *minwhite;
 		wxRadioButton *slideb, *datb, *camb;
 		myDoubleSlider *bwpoint;
 		wxStaticText *val1, *val2;
@@ -425,7 +443,10 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 			}
 			else if (channel == CHANNEL_RGB) {
 				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-				wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+				if (p.size() >= 3 && p[2] == "minwhite")
+					wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+				else
+					wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 			}
 			if (blk < 0.0) blk = 0.0;
 		}

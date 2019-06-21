@@ -246,7 +246,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 		//img <li>blackwhitepoint[:rgb|red|green|blue][,0-127,128-255] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry.</li>
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
-			char *c, *b, *w;
+			char *c, *b, *w, *m;
 			GIMAGE_CHANNEL channel = CHANNEL_RGB;
 			std::string chan;
 			double blk=0.0, wht=255.0;
@@ -271,6 +271,21 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 						wht = bwpts[1];
 
 					}
+				}
+				else if (chan == "data") {
+					std::map<std::string,std::string> s = dib.StatsMap();
+					blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+					wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+					m = strtok(NULL,", ");
+					if (m)
+						if (std::string(m) == "minwhite")
+							wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+				}
+				else if (chan == "camera") {
+					int librawblk = atoi(dib.getInfoValue("LibrawBlack").c_str());
+					blk = librawblk / 65536.0; 
+					int librawwht = atoi(dib.getInfoValue("LibrawMaximum").c_str());
+					wht = librawwht / 65536.0; 
 				}
 				else { //no channel, just black and white:
 					b = c;
