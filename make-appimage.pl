@@ -28,6 +28,8 @@ mkdir $rootdir;
 mkdir "$rootdir/usr";
 mkdir "$rootdir/usr/bin";
 mkdir "$rootdir/usr/lib";
+mkdir "$rootdir/usr/share";
+mkdir "$rootdir/usr/share/metainfo";
 
 
 #copy each arg to bin:
@@ -137,6 +139,7 @@ print OUTFILE $DESKTOP;
 close OUTFILE;
 
 cp "$file-$arch.AppDir/usr/bin/icon.xpm", "$file-$arch.AppDir/.";
+cp "$file-$arch.AppDir/usr/bin/rawproc.appdata.xml", "$file-$arch.AppDir/usr/share/metainfo/.";
 
 $result = `appimagetool-x86_64.AppImage $rootdir $file-$version-$arch.AppImage`;
 $result = `rm -rf $rootdir`;
