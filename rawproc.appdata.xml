@@ -1,0 +1,20 @@
+<component type="desktop-application">
+	<id>rawproc</id>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>GPL-2.0+</project_license>
+	<name>rawproc</name>
+	<summary>Raw image processor for photographic applications</summary>
+	<description>
+		<p>rawproc is a "toolkit" raw processor, one where you open the raw data and apply all the operators necessary to make a viewable image.</p>
+	</description>
+	<launchable type="desktop-id">rawproc.desktop</launchable>
+	<url type="homepage">https://github.com/butcherg/rawproc</url>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://github.com/butcherg/rawproc/blob/master/doc/rawproc.png</image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<id>rawproc.desktop</id>
+	</provides>
+</component>

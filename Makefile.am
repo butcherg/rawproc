@@ -32,5 +32,5 @@ wininstaller:
 
 .PHONY: appimage
 appimage:
-	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif src/dcraw.c src/camconst.json
+	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif $(srcdir)/src/icon.xpm src/dcraw.c src/camconst.json
 
