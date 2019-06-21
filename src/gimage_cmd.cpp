@@ -271,27 +271,38 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 						wht = bwpts[1];
 
 					}
+					char cs[256];
+					sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
+					commandstring += std::string(cs);
 				}
 				else if (chan == "data") {
 					std::map<std::string,std::string> s = dib.StatsMap();
 					blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
 					wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 					m = strtok(NULL,", ");
-					if (m)
-						if (std::string(m) == "minwhite")
+					if (m) {
+						if (std::string(m) == "minwhite") {
 							wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+							commandstring += std::string(cmd) + ":data,minwhite ";
+						}
+					}
+					else commandstring += std::string(cmd) + ":data ";
 				}
 				else if (chan == "camera") {
 					int librawblk = atoi(dib.getInfoValue("LibrawBlack").c_str());
 					blk = librawblk / 65536.0; 
 					int librawwht = atoi(dib.getInfoValue("LibrawMaximum").c_str());
 					wht = librawwht / 65536.0; 
+					commandstring += std::string(cmd) + ":camera ";
 				}
 				else { //no channel, just black and white:
 					b = c;
 					w = strtok(NULL,", ");
 					if (w) wht = atof(w);
 					if (b) blk = atof(b);
+					char cs[256];
+					sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
+					commandstring += std::string(cs);
 				}
 			}
 			else { //no tokens, do auto rgb:
@@ -316,9 +327,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			_mark();
 			dib.ApplyToneLine(blk, wht, channel, threadcount);
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
-			commandstring += std::string(cs);
+			//char cs[256];
+			//sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
+			//commandstring += std::string(cs);
 		}
 
 		//img <li>contrast:[-100 - 100] default: 0 (no-contrast)</li>
