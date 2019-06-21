@@ -43,8 +43,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxSize(70,-1));
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxSize(70,-1));
+			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxDefaultSize);
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxDefaultSize);
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
 			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
