@@ -2069,7 +2069,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	#endif
 
 	info.SetIcon(icon_xpm);
-	info.SetCopyright(wxT("(C) 2016-2018 Glenn Butcher <glenn.butcher@gmail.com>"));
+	info.SetCopyright(wxT("(C) 2016-2019 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
 	//wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxVersionInfo wxversion = wxGetLibraryVersionInfo();
