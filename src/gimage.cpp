@@ -2317,19 +2317,21 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 
 	std::string cfa = imginfo["LibrawCFAArray"];
 	std::vector<unsigned> q;
-
 	for (unsigned i = 0; i < cfa.size(); i ++) q.push_back(cfa[i] - '0');
+	
+	unsigned cfadim = 2;
+	if (q.size() == 36) cfadim = 6;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h-1; y+=2) {
 		for (unsigned x=0; x<w-1; x+=2) {
-			for (unsigned j = 0; j < 2; j++) {
-				for (unsigned k = 0; k < 2; k++) {
+			for (unsigned j = 0; j < cfadim; j++) {
+				for (unsigned k = 0; k < cfadim; k++) {
 					unsigned pos = (x + j) + (y + k) * w;
-					if (q[j+k*2] == 0) image[pos].r *= redmult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*2] == 1) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*2] == 2) image[pos].r *= bluemult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*2] == 3) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*cfadim] == 0) image[pos].r *= redmult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*cfadim] == 1) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*cfadim] == 2) image[pos].r *= bluemult;  //use r, in grayscale, they're all the same...
+					if (q[j+k*cfadim] == 3) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
 					image[pos].g = image[pos].b = image[pos].r;
 				}
 			}
