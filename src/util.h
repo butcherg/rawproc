@@ -12,8 +12,10 @@
 
 #ifdef WIN32
 #define TEXTCTRLHEIGHT 20
+#define TEXTHEIGHT 15
 #else
 #define TEXTCTRLHEIGHT 30
+#define TEXTHEIGHT 25
 #endif
 
 

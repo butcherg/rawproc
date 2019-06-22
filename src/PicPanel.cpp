@@ -20,6 +20,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
 	softproof = thumbdragging = dragging = false;
+	exposurebox = true;
 	thumbvisible = true;
 	histogram = hgram;
 	commandtree = tree;
@@ -89,6 +90,23 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		display_dib = dib;
 		ch = channel;
 		wxImage img;
+
+		exposurestring.Clear();
+		std::string infoitem;
+		infoitem = dib->getInfoValue("ExposureTime");
+		if (infoitem != "") {
+			float sspeed = atof(infoitem.c_str());
+			if (sspeed < 1.0)
+				exposurestring += wxString::Format("1/%dsec  ", int(1/sspeed));
+			else
+				exposurestring += wxString::Format("%dsec  ", int(sspeed));
+		}
+		infoitem = dib->getInfoValue("FNumber");
+		if (infoitem != "") exposurestring += wxString::Format("f%s  ",wxString(infoitem));
+		infoitem = dib->getInfoValue("ISOSpeedRatings");
+		if (infoitem != "") exposurestring += wxString::Format("ISO%s  ",wxString(infoitem));
+		infoitem = dib->getInfoValue("FocalLength");
+		if (infoitem != "") exposurestring += wxString::Format("%smm  ",wxString(infoitem));
 
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
@@ -410,6 +428,21 @@ void PicPanel::render(wxDC &dc)
 				(int) (vieww * thumbwscale),
 				(int) (viewh * thumbhscale));
 	}
+
+	if (exposurebox  & !exposurestring.IsEmpty()) {
+		dc.DestroyClippingRegion();
+		wxPoint p(10,panelh-30);
+		wxSize exp = dc.GetTextExtent(exposurestring);
+		//parm display.exposuredata.backgroundcolor: Sets background color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=192 (light gray)
+		dc.SetBrush(wxBrush(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.backgroundcolor","192")))));
+		//parm display.exposuredata.outlinecolor: Sets border color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=0 (black)
+		dc.SetPen(wxPen(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.outlinecolor","0"))),1));
+		dc.DrawRectangle(p.x-3,p.y-3,exp.GetWidth()+6,exp.GetHeight()+6);
+		//parm display.exposuredata.outlinecolor: Sets text color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=0 (black)
+		dc.SetTextForeground(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.textcolor","0"))));
+		dc.DrawText(exposurestring, p);
+	}
+
 }
 
 void PicPanel::OnMouseWheel(wxMouseEvent& event)
@@ -686,6 +719,17 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				((wxFrame *) GetParent())->SetStatusText("softproof: on");
 			}
 			RefreshPic();
+			break;
+		case 69: //e exposure box toggle
+			if (!exposurestring.IsEmpty()) {
+				if (exposurebox) {
+					exposurebox = false;
+				}
+				else {
+					exposurebox = true;
+				}
+				Refresh();
+			}
 			break;
 	}
 }
