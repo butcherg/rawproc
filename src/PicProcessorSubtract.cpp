@@ -24,8 +24,8 @@ class SubtractPanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			subb = new wxRadioButton(this, SUBTRACTVAL, "value:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP); 
-			fileb = new wxRadioButton(this, SUBTRACTFILE, "file:", wxDefaultPosition, wxDefaultSize);
-			camb = new wxRadioButton(this, SUBTRACTCAMERA, "camera:", wxDefaultPosition, wxDefaultSize);
+			fileb = new wxRadioButton(this, SUBTRACTFILE, "file:");
+			camb = new wxRadioButton(this, SUBTRACTCAMERA, "camera:");
 
 			subtract = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));

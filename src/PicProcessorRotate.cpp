@@ -20,7 +20,7 @@
 class rotateSlider: public wxControl
 {
 	public:
-		rotateSlider(wxWindow *parent, wxWindowID id, int initialvalue, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE) 
+		rotateSlider(wxWindow *parent, wxWindowID id, int initialvalue, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize): wxControl(parent, id, pos, size, wxBORDER_NONE) 
 		{
 			SetBackgroundColour(parent->GetBackgroundColour());
 			initval = initialvalue;
@@ -261,15 +261,15 @@ class RotatePanel: public PicProcPanel
 			
 			r90 = new wxRadioButton(this, ROTATE90, "Rotate 90", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			b->Add(r90 , 0, wxALIGN_LEFT | wxALL, 1);
-			r180 = new wxRadioButton(this, ROTATE180, "Rotate 180", wxDefaultPosition, wxDefaultSize);
+			r180 = new wxRadioButton(this, ROTATE180, "Rotate 180");
 			b->Add(r180 , 0, wxALIGN_LEFT | wxALL, 1);
-			r270 = new wxRadioButton(this, ROTATE270, "Rotate 270", wxDefaultPosition, wxDefaultSize);
+			r270 = new wxRadioButton(this, ROTATE270, "Rotate 270");
 			b->Add(r270 , 0, wxALIGN_LEFT | wxALL, 1);
 			
-			r45 = new wxRadioButton(this, ROTATE45, "Rotate < 45:", wxDefaultPosition, wxDefaultSize);
+			r45 = new wxRadioButton(this, ROTATE45, "Rotate < 45:");
 			b->Add(r45 , 0, wxALIGN_LEFT | wxALL, 1);
 			
-			rotate = new rotateSlider(this, wxID_ANY, initialvalue, wxDefaultPosition, wxDefaultSize);
+			rotate = new rotateSlider(this, wxID_ANY, initialvalue);
 			b->Add(rotate , 0, wxALIGN_LEFT | wxALL, 1);
 			
 			

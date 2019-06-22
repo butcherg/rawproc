@@ -43,11 +43,11 @@ class BlackWhitePointPanel: public PicProcPanel
 			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
 			enablebox->SetValue(true);
 
-			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data", wxDefaultPosition, wxDefaultSize);
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera", wxDefaultPosition, wxDefaultSize);
+			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data:");
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera:");
 			
-			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255, wxDefaultPosition, wxDefaultSize);
+			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255);
 			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
 			if (recalcdefault) recalc->SetValue(true);
 
@@ -140,7 +140,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->AddRowItem(datb, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht)), flags);
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, "        "),flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "               "),flags);
 			m->AddRowItem(minwhite, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht)), flags.CenterVertical());
 

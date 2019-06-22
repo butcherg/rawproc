@@ -56,14 +56,15 @@ class WhiteBalancePanel: public PicProcPanel
 			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			gmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			btn = new wxBitmapButton(this, WBRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn = new wxBitmapButton(this, WBRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 			btn->SetToolTip("Reset multipliers to original values");
+
 
 			//Operator radio buttons:
 			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			ab = new wxRadioButton(this, WBAUTO, "Auto",  wxDefaultPosition, wxDefaultSize);
-			pb = new wxRadioButton(this, WBPATCH, "Patch:",  wxDefaultPosition, wxDefaultSize);
-			cb = new wxRadioButton(this, WBCAMERA, "Camera:",  wxDefaultPosition, wxDefaultSize);
+			ab = new wxRadioButton(this, WBAUTO, "Auto");
+			pb = new wxRadioButton(this, WBPATCH, "Patch:");
+			cb = new wxRadioButton(this, WBCAMERA, "Camera:");
 
 			ab->SetValue(false);
 			ob->Enable(false);
@@ -73,12 +74,12 @@ class WhiteBalancePanel: public PicProcPanel
 			//Operator parameters:
 			origwb = new wxStaticText(this, wxID_ANY, "(none)");
 			autowb = new wxStaticText(this, wxID_ANY, "");
-			patch = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
-			camera = new wxStaticText(this, wxID_ANY, "(none)", wxDefaultPosition, spinsize);
+			patch = new wxStaticText(this, wxID_ANY, "(none)");
+			camera = new wxStaticText(this, wxID_ANY, "(none)");
 
 
 			//Lay out with RowSizer:
-			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
+			wxSizerFlags flags = wxSizerFlags().Left().CenterVertical().Border(wxLEFT|wxRIGHT|wxTOP);
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 			m->AddRowItem(new wxBitmapButton(this, WBCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
@@ -88,15 +89,15 @@ class WhiteBalancePanel: public PicProcPanel
 
 			//multipliers:
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "red mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "red mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(rmult, flags);
 
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "green mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "green mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(gmult, flags);
 
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "blue mult:", wxDefaultPosition, wxSize(80,-1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, "blue mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(bmult, flags);
 			m->AddRowItem(btn, flags);
 
