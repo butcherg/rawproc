@@ -20,7 +20,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
 	softproof = thumbdragging = dragging = false;
-	exposurebox = true;
+
 	thumbvisible = true;
 	histogram = hgram;
 	commandtree = tree;
@@ -30,6 +30,12 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 
 	displayProfile = NULL;
 	displayTransform = NULL;
+
+	//parm display.exposuredata: 0|1, enable/disable exposurebox display at startup.  Exposurebox display can still be toggled on/off with the 'e' key. Default=1
+	if (myConfig::getConfig().getValueOrDefault("display.exposuredata","1") == "1")
+		exposurebox = true;
+	else
+		exposurebox = false;
 
 	//parm app.tooltip: 0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
@@ -433,12 +439,12 @@ void PicPanel::render(wxDC &dc)
 		dc.DestroyClippingRegion();
 		wxPoint p(10,panelh-30);
 		wxSize exp = dc.GetTextExtent(exposurestring);
-		//parm display.exposuredata.backgroundcolor: Sets background color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=192 (light gray)
+		//parm display.exposuredata.backgroundcolor: Sets background color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=192 (light gray)
 		dc.SetBrush(wxBrush(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.backgroundcolor","192")))));
-		//parm display.exposuredata.outlinecolor: Sets border color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=0 (black)
+		//parm display.exposuredata.outlinecolor: Sets border color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)
 		dc.SetPen(wxPen(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.outlinecolor","0"))),1));
 		dc.DrawRectangle(p.x-3,p.y-3,exp.GetWidth()+6,exp.GetHeight()+6);
-		//parm display.exposuredata.outlinecolor: Sets text color of the exposure box.  Uses the r,g,b|t convention for property colors.  Default=0 (black)
+		//parm display.exposuredata.outlinecolor: Sets text color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)
 		dc.SetTextForeground(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("display.exposuredata.textcolor","0"))));
 		dc.DrawText(exposurestring, p);
 	}
