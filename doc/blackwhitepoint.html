@@ -25,7 +25,12 @@ if you've set the points manually, checking this box will do away with those set
 auto-calculated settings.</p>
 </li>
 
-<li><b>data:</b>  This mode scales the image data to the min and max of the previous tool's image.
+<li><b>data:</b>  This mode scales the image data to the min and max of the previous tool's image.  These are the mins and maxes of all three channels, so the black and white point will precisely bound the complete image data.
+	<ul>
+	<li><b>minwhite:</b>If checked, the maxwhite will be the minimum of the three channels's max values.
+	This is useful for scaling image data to the lowest saturation point; if there was saturation clipping,
+	this avoids the dreaded magenta cast.</li>
+	</ul>
 </li>
 
 <li><b>camera:</b>  This mode scales the image data to the min and max values communicated in the raw file

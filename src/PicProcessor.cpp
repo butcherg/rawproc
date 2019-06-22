@@ -105,6 +105,7 @@ PicProcessor::~PicProcessor()
 
 void PicProcessor::createPanel(wxSimplebook* parent)
 {
+	if (groupitem) return;
 	toolpanel = new BlankPanel(parent, this, "");
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
@@ -118,6 +119,7 @@ void PicProcessor::enableGlobalProcessing(bool e)
 
 void PicProcessor::enableProcessing(bool e)
 {
+	if (groupitem) return;
 	if (e) 
 		m_tree->SetItemBold(id,true);
 	else
@@ -151,6 +153,7 @@ std::map<std::string,std::string> PicProcessor::paramMap(std::string params, std
 
 bool PicProcessor::processPic(bool processnext) 
 { 	
+	if (groupitem) return false;
 	if (!global_processing_enabled) return true;
 	if (GetId() != m_tree->GetRootItem()) {
 		if (dib) delete dib;
@@ -165,6 +168,7 @@ bool PicProcessor::processPic(bool processnext)
 
 void PicProcessor::processNext()
 {
+	if (groupitem) return;
 	wxTreeItemId next = m_tree->GetNextSibling(GetId());
 	if (m_tree->GetItemState(GetId()) == 1) {
 		displayProcessedPic();

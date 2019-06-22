@@ -2130,9 +2130,9 @@ void gImage::ApplyToneMapGamma(float gamma, int threadcount)
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned i=0; i< image.size(); i++) {
-		image[i].r = pow(image[i].r,exponent);
-		image[i].g = pow(image[i].g,exponent);
-		image[i].b = pow(image[i].b,exponent);				
+		image[i].r = pow(std::max((float) image[i].r,0.0f),exponent);
+		image[i].g = pow(std::max((float) image[i].g,0.0f),exponent);
+		image[i].b = pow(std::max((float) image[i].b,0.0f),exponent);				
 	}
 }
 

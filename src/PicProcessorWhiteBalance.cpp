@@ -60,10 +60,10 @@ class WhiteBalancePanel: public PicProcPanel
 			btn->SetToolTip("Reset multipliers to original values");
 
 			//Operator radio buttons:
-			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxSize(80,-1), wxRB_GROUP);
-			ab = new wxRadioButton(this, WBAUTO, "Auto",  wxDefaultPosition, wxSize(80,-1));
-			pb = new wxRadioButton(this, WBPATCH, "Patch:",  wxDefaultPosition, wxSize(80,-1));
-			cb = new wxRadioButton(this, WBCAMERA, "Camera:",  wxDefaultPosition, wxSize(80,-1));
+			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			ab = new wxRadioButton(this, WBAUTO, "Auto",  wxDefaultPosition, wxDefaultSize);
+			pb = new wxRadioButton(this, WBPATCH, "Patch:",  wxDefaultPosition, wxDefaultSize);
+			cb = new wxRadioButton(this, WBCAMERA, "Camera:",  wxDefaultPosition, wxDefaultSize);
 
 			ab->SetValue(false);
 			ob->Enable(false);

@@ -28,6 +28,8 @@ mkdir $rootdir;
 mkdir "$rootdir/usr";
 mkdir "$rootdir/usr/bin";
 mkdir "$rootdir/usr/lib";
+mkdir "$rootdir/usr/share";
+mkdir "$rootdir/usr/share/metainfo";
 
 
 #copy each arg to bin:
@@ -127,7 +129,7 @@ $DESKTOP = <<"END_DESKTOP";
 [Desktop Entry]
 Name=$file
 Exec=$file
-Icon=$file
+Icon=icon
 Type=Application
 Categories=Graphics;
 END_DESKTOP
@@ -136,12 +138,8 @@ open OUTFILE, ">$file-$arch.AppDir/$file.desktop";
 print OUTFILE $DESKTOP;
 close OUTFILE;
 
-
-$ICON = '<svg xmlns="http://www.w3.org/2000/svg"/>';
-open OUTFILE, ">$file-$arch.AppDir/$file.svg";
-print OUTFILE $ICON;
-close OUTFILE;
-
+cp "$file-$arch.AppDir/usr/bin/icon.xpm", "$file-$arch.AppDir/.";
+cp "$file-$arch.AppDir/usr/bin/rawproc.appdata.xml", "$file-$arch.AppDir/usr/share/metainfo/.";
 
 $result = `appimagetool-x86_64.AppImage $rootdir $file-$version-$arch.AppImage`;
 $result = `rm -rf $rootdir`;
