@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -106,6 +107,7 @@ std::vector<std::string> fileglob(std::string dspec)
 		if (matchspec(std::string(dp->d_name), dspec) != "")
 			glob.push_back(std::string(dp->d_name));
 	(void)closedir(dirp);
+	std::sort( glob.begin(), glob.end() );
 	return glob;
 }
 
