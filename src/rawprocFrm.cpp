@@ -560,14 +560,14 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	//parm exif.parameters: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.
 	wxString exifparameters = wxString(myConfig::getConfig().getValueOrDefault("exif.parameters","-g -h"));
 
-	wxString command = wxString::Format("%s %s %s",exifcommand, exifparameters, filename.GetFullPath());
+	wxString command = wxString::Format("%s %s \"%s\"",exifcommand, exifparameters, filename.GetFullPath());
 	wxArrayString output;
 	wxArrayString errors;
 	SetStatusText(wxString::Format("Loading metadata using \"%s\"...",command));
 	wxExecute (command, output, errors, wxEXEC_NODISABLE);
 	wxString exif;
 	for (int i=0; i<output.GetCount(); i++) exif.Append(output[i]);
-	SetStatusText("");
+	SetStatusText(filename.GetFullName());
 	myEXIFDialog dlg(this, wxID_ANY, filename.GetFullName(), exif,  wxDefaultPosition, wxSize(500,500));
 	dlg.ShowModal();
 }
