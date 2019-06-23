@@ -244,7 +244,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			dib.setInfo(std::string(name),std::string(value));
 		}
 
-		//img <li>blackwhitepoint[:rgb|red|green|blue|data|camera|auto][,0-127,128-255]|[,minwhite] default: auto blackwhitepoint determination. The calculated points will be used in the metafile entry. 'data' can be used either as the first parameter or following a channel specification, will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', will use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li>
+		//img <li>blackwhitepoint: [auto] | [rgb|red|green|blue,[data[,minwhite]]|[0-127,128-255] | [camera]  Default: auto. <ul><li>If the parameters start with 'auto', a 0-255 black and white point are calculated from the histogram.</li><li>If the parameters start with a channel, they are followed by either a black and white bound specified in the range 0-255, or 'data', which will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', which will instead for white use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li></ul></li>
 		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
 			char *c, *b, *w, *m;
 			GIMAGE_CHANNEL channel = CHANNEL_RGB;
@@ -264,29 +264,49 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue" | chan == "min") {
 					b = strtok(NULL,", ");
 					w = strtok(NULL,", ");
-					wht = 255; blk = 0;
-					if (!b) { //no black/white, compute using channel:
-						std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan);
-						blk = bwpts[0];
-						wht = bwpts[1];
-
-					}
-					char cs[256];
-					sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
-					commandstring += std::string(cs);
-				}
-				else if (chan == "data") {
-					std::map<std::string,std::string> s = dib.StatsMap();
-					blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-					wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-					m = strtok(NULL,", ");
-					if (m) {
-						if (std::string(m) == "minwhite") {
-							wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-							commandstring += std::string(cmd) + ":data,minwhite ";
+					if (std::string(b) == "data") {
+						std::map<std::string,std::string> s = dib.StatsMap();
+						if (chan == "rgb") {
+							blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+							wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+							//m = strtok(NULL,", ");
+							if (w) {
+								if (std::string(w) == "minwhite") {
+									wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+									commandstring += std::string(cmd) + ":rgb,data,minwhite ";
+								}
+								else commandstring += std::string(cmd) + ":rgb,data ";
+							}
+							else commandstring += std::string(cmd) + ":rgb,data ";
+						}
+						else if (chan == "red") {
+							blk = atof(s["rmin"].c_str());
+							wht = atof(s["rmax"].c_str());
+							commandstring += std::string(cmd) + ":red,data ";
+						}
+						else if (chan == "green") {
+							blk = atof(s["gmin"].c_str());
+							wht = atof(s["gmax"].c_str());
+							commandstring += std::string(cmd) + ":green,data ";
+						}
+						else if (chan == "blue") {
+							blk = atof(s["bmin"].c_str());
+							wht = atof(s["bmax"].c_str());
+							commandstring += std::string(cmd) + ":blue,data ";
 						}
 					}
-					else commandstring += std::string(cmd) + ":data ";
+					else {
+						wht = 255; blk = 0;
+						if (!b) { //no black/white, compute using channel:
+							std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan);	
+							blk = bwpts[0];
+							wht = bwpts[1];
+	
+						}
+						char cs[256];
+						sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
+						commandstring += std::string(cs);
+					}
 				}
 				else if (chan == "camera") {
 					int librawblk = atoi(dib.getInfoValue("LibrawBlack").c_str());
@@ -1106,7 +1126,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			} 
 		}
 */
-
+		
 		return commandstring;
 		//else printf("Unrecognized command: %s.  Continuing...\n",cmd); fflush(stdout);
 

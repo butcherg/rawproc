@@ -83,10 +83,6 @@ class BlackWhitePointPanel: public PicProcPanel
 					if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 					datb->SetValue(true);
 				}
-				else if (p.size() >= 2 && p[1] == "camera") {
-					bwmode = BLACKWHITECAMERA;
-					camb->SetValue(true);
-				}
 				else if (p.size() >= 3) {
 					bwmode = BLACKWHITESLIDER;
 					slideb->SetValue(true);
@@ -95,11 +91,6 @@ class BlackWhitePointPanel: public PicProcPanel
 					bwpoint->SetLeftValue(blk);
 					bwpoint->SetRightValue(wht);
 				}
-			}
-			else if (p[0] == "data") {
-				bwmode = BLACKWHITEDATA;
-				if (p.size() >= 2 && p[1] == "minwhite") minwhite->SetValue(true);
-				datb->SetValue(true);
 			}
 			else if (p[0] == "camera") {
 				bwmode = BLACKWHITECAMERA;
@@ -206,12 +197,8 @@ class BlackWhitePointPanel: public PicProcPanel
 					chan->SetStringSelection(p[0]);
 					if (p.size() >= 2 && p[1] == "data") {
 						bwmode = BLACKWHITEDATA;
-						datb->SetValue(true);
-					}
-					else if (p.size() >= 2 && p[1] == "camera") {
-						bwmode = BLACKWHITECAMERA;
 						if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
-						camb->SetValue(true);
+						datb->SetValue(true);
 					}
 					else if (p.size() >= 3) {
 						bwmode = BLACKWHITESLIDER;
@@ -222,11 +209,7 @@ class BlackWhitePointPanel: public PicProcPanel
 						bwpoint->SetRightValue(wht);
 					}
 				}
-				else if (p[0] == "data") {
-					bwmode = BLACKWHITEDATA;
-					if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
-					datb->SetValue(true);
-				}
+
 				else if (p[0] == "camera") {
 					bwmode = BLACKWHITECAMERA;
 					camb->SetValue(true);
@@ -269,13 +252,13 @@ class BlackWhitePointPanel: public PicProcPanel
 					break;
 				case BLACKWHITEDATA:
 					if (minwhite->GetValue())
-						q->setParams(wxString::Format("data,minwhite",  chan->GetString(chan->GetSelection())));
+						q->setParams(wxString::Format("%s,data,minwhite",  chan->GetString(chan->GetSelection())));
 					else
-						q->setParams(wxString::Format("data",  chan->GetString(chan->GetSelection())));
+						q->setParams(wxString::Format("%s,data",  chan->GetString(chan->GetSelection())));
 					q->processPic();
 					break;
 				case BLACKWHITECAMERA:
-					q->setParams(wxString::Format("%s,camera",chan->GetString(chan->GetSelection())));
+					q->setParams("camera");
 					q->processPic();
 					break;
 			}
@@ -468,23 +451,13 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 			}
 			if (blk < 0.0) blk = 0.0;
 		}
-		else if (p[1] == "camera") {
-			blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
-			wht = atof(dib->getInfoValue("LibrawMaximum").c_str())/65536.0;
-		}
+
 		else {
 			blk = atof(p[1]);
 			wht = atof(p[2]);
 		}
 	}
-	else if (p[0] == "data") {
-		std::map<std::string,std::string> s = dib->StatsMap();
-		blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-		if (p.size() >= 2 && p[1] == "minwhite")
-			wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-		else
-			wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-	}
+
 	else if (p[0] == "camera") {
 		blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
 		wht = atof(dib->getInfoValue("LibrawMaximum").c_str())/65536.0;
