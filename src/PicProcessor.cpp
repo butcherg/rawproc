@@ -200,6 +200,7 @@ bool PicProcessor::isDirty()
 
 wxString PicProcessor::getCommand()
 {
+	if (groupitem) return "";
 	if (c.IsEmpty())
 		return wxString::Format("%s ",n);
 	else
@@ -225,6 +226,7 @@ void PicProcessor::setParams(wxString params)
 
 PicProcessor *PicProcessor::getPreviousPicProcessor()
 {
+	if (groupitem) return NULL;
 	wxTreeItemId prev = m_tree->GetPrevSibling(GetId());
 	if (prev.IsOk()) {
 		//return its data
@@ -261,16 +263,19 @@ gImage* PicProcessor::getProcessedPicPointer()
 
 PicPanel *PicProcessor::getDisplay()
 {
+	if (groupitem) return NULL;
 	return m_display;
 }
 
 wxTreeCtrl *PicProcessor::getCommandTree()
 {
+	if (groupitem) return NULL;
 	return m_tree;
 }
 
 wxString PicProcessor::getDrawList()
 {
+	if (groupitem) return "";
 	return dcList;
 }
 
@@ -281,6 +286,7 @@ GIMAGE_CHANNEL PicProcessor::getChannel()
 
 void PicProcessor::displayProcessedPic() 
 {
+	if (groupitem) return;
 	if (m_display) {
 		m_display->SetPic(dib);
 		//m_display->SetDrawList(dcList);
@@ -294,6 +300,7 @@ void PicProcessor::displayDraw(wxDC &dc)
 
 bool PicProcessor::copyParamsToClipboard()
 {
+	if (groupitem) return false;
 	if (wxTheClipboard->Open())
 	{
 		wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%s:%s",n,c)));
@@ -305,6 +312,7 @@ bool PicProcessor::copyParamsToClipboard()
 
 bool PicProcessor::pasteParamsFromClipboard()
 {
+	if (groupitem) return false ;
 	bool result = true;
 	if (wxTheClipboard->Open())
 	{
