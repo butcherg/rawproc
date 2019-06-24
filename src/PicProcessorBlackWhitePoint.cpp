@@ -14,11 +14,12 @@
 #define BLACKWHITEAUTORECALC 6101
 #define BLACKWHITERECALC 6102
 #define BLACKWHITESLIDER 6103
-#define BLACKWHITEDATA   6104
-#define BLACKWHITEMINWHITE   6105
-#define BLACKWHITECAMERA 6106
-#define BLACKWHITECOPY 6107
-#define BLACKWHITEPASTE 6108
+#define BLACKWHITESLIDERAUTO 6104
+#define BLACKWHITEDATA   6105
+#define BLACKWHITEMINWHITE   6106
+#define BLACKWHITECAMERA 6107
+#define BLACKWHITECOPY 6108
+#define BLACKWHITEPASTE 6109
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -78,7 +79,11 @@ class BlackWhitePointPanel: public PicProcPanel
 			
 			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 				chan->SetStringSelection(p[0]);
-				if (p.size() >= 2 && p[1] == "data") {
+				if (p.size() == 1) {
+					bwmode = BLACKWHITESLIDERAUTO;
+					slideb->SetValue(true);
+				}
+				else if (p.size() >= 2 && p[1] == "data") {
 					bwmode = BLACKWHITEDATA;
 					if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 					datb->SetValue(true);
@@ -195,7 +200,11 @@ class BlackWhitePointPanel: public PicProcPanel
 
 				if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 					chan->SetStringSelection(p[0]);
-					if (p.size() >= 2 && p[1] == "data") {
+					if (p.size() == 1) {
+						bwmode = BLACKWHITESLIDERAUTO;
+						slideb->SetValue(true);
+					}
+					else if (p.size() >= 2 && p[1] == "data") {
 						bwmode = BLACKWHITEDATA;
 						if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 						datb->SetValue(true);
@@ -246,6 +255,10 @@ class BlackWhitePointPanel: public PicProcPanel
 		void processBW()
 		{
 			switch (bwmode) {
+				case BLACKWHITESLIDERAUTO:
+					q->setParams("rgb");
+					q->processPic();
+					break;
 				case BLACKWHITESLIDER:
 					q->setParams(wxString::Format("%s,%d,%d",chan->GetString(chan->GetSelection()), bwpoint->GetLeftValue(),bwpoint->GetRightValue()));
 					q->processPic();
@@ -268,6 +281,7 @@ class BlackWhitePointPanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
+			if (bwmode == BLACKWHITESLIDERAUTO) bwmode == BLACKWHITESLIDER;
 			if (bwmode == BLACKWHITESLIDER) t->Start(500,wxTIMER_ONE_SHOT);
 		}
 
