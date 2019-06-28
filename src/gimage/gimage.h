@@ -251,7 +251,7 @@ class gImage
 		void ApplyToneMapGamma(float gamma, int threadcount=0);
 		void ApplyToneMapLog2(int threadcount=0);
 		void ApplyToneMapReinhard(bool channel=true, int threadcount=0);
-		void ApplyToneMapFilmic(bool do_gamma=false, bool clip_black=false, int threadcount=0);
+		void ApplyToneMapFilmic(float A=6.2f, int threadcount=0);
 		void ApplyToneMapLogGamma(int threadcount=0);
 
 		//blur/noise algorithms:

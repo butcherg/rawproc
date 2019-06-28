@@ -30,10 +30,11 @@ class TonePanel: public PicProcPanel
 			gamb = new wxRadioButton(this, TONEGAMMA, "gamma", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			reinb = new wxRadioButton(this, TONEREINHARD, "reinhard");
 			log2b = new wxRadioButton(this, TONELOG2, "log2");
-			hybloggam = new wxRadioButton(this, TONELOGGAM, "loggamma");
-			filmic = new wxRadioButton(this, TONEFILMIC, "filmic");
+			hybloggamb = new wxRadioButton(this, TONELOGGAM, "loggamma");
+			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
 
-			gamma = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
+			gamma = new myFloatCtrl(this, wxID_ANY, 2.2f, 2);
+			filmic = new myFloatCtrl(this, wxID_ANY, 6.2f, 2);
 
 			wxArrayString str;
 			str.Add("channel");
@@ -65,10 +66,10 @@ class TonePanel: public PicProcPanel
 				log2b->SetValue(true);
 			}
 			if (p[0] == "loggamma") {
-				hybloggam->SetValue(true);
+				hybloggamb->SetValue(true);
 			}
 			if (p[0] == "filmic") {
-				filmic->SetValue(true);
+				filmicb->SetValue(true);
 			}
 
 			log2b->Enable(false);  //log2 doesn't do anything, yet.
@@ -87,8 +88,9 @@ class TonePanel: public PicProcPanel
 			m->NextRow();
 			m->AddItem(log2b, wxALIGN_LEFT);
 			m->NextRow();
-			m->AddItem(hybloggam, wxALIGN_LEFT);
+			m->AddItem(hybloggamb, wxALIGN_LEFT);
 			m->NextRow();
+			m->AddItem(filmicb, wxALIGN_LEFT);
 			m->AddItem(filmic, wxALIGN_LEFT);
 
 			SetSizerAndFit(m);
@@ -97,8 +99,8 @@ class TonePanel: public PicProcPanel
 			t = new wxTimer(this);
 
 			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
-			Bind(myFLOATCTRL_CHANGE, &TonePanel::gammaParamChanged, this);
-			Bind(myFLOATCTRL_UPDATE, &TonePanel::gammaParamUpdated, this);
+			Bind(myFLOATCTRL_CHANGE, &TonePanel::floatParamChanged, this);
+			Bind(myFLOATCTRL_UPDATE, &TonePanel::floatParamUpdated, this);
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
@@ -154,7 +156,7 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("loggamma"));
 					break;
 				case TONEFILMIC:
-					q->setParams(wxString::Format("filmic"));
+					q->setParams(wxString::Format("filmic,%0.2f",filmic->GetFloatValue()));
 					break;
 			}
 			q->processPic();
@@ -162,26 +164,27 @@ class TonePanel: public PicProcPanel
 		}
 
 
-		void gammaParamChanged(wxCommandEvent& event)
+		void floatParamChanged(wxCommandEvent& event)
 		{
-			if (gamb->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
+			if (gamb->GetValue() | filmicb->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
 		}
 		
-		void gammaParamUpdated(wxCommandEvent& event)
+		void floatParamUpdated(wxCommandEvent& event)
 		{
-			if (gamb->GetValue()) processTone(TONEGAMMA);
+			if (gamb->GetValue() | filmicb->GetValue()) processTone(TONEGAMMA);
 		}
 		
 		void OnTimer(wxTimerEvent& event)
 		{
-			processTone(TONEGAMMA);
+			if (gamb->GetValue()) processTone(TONEGAMMA);
+			if (filmicb->GetValue()) processTone(TONEFILMIC);
 		}
 
 	private:
 		wxTimer *t;
-		myFloatCtrl *gamma;
+		myFloatCtrl *gamma, *filmic;
 		wxCheckBox *enablebox;
-		wxRadioButton *gamb, *reinb, *log2b, *hybloggam, *filmic;
+		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;
 		wxChoice *reinop;
 
 };
@@ -254,8 +257,10 @@ bool PicProcessorTone::processPic(bool processnext)
 		else if (p[0] == "filmic") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
 			m_tree->SetItemText(id, "tone:filmic");
+			double filmic = 6.2;
+			if (p.size() >= 2) filmic = atof(p[1].c_str());
 			mark();
-			dib->ApplyToneMapFilmic(false, true, threadcount);
+			dib->ApplyToneMapFilmic(filmic, threadcount);
 			d = duration();
 		}
 

@@ -2140,7 +2140,14 @@ void gImage::ApplyToneMapGamma(float gamma, int threadcount)
 
 void gImage::ApplyToneMapLog2(int threadcount)
 {
-	//need to figure this one out...
+	float N = 8.0;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i< image.size(); i++) {
+		image[i].r <= 0.0 ? image[i].r = 0.0 : image[i].r = (log2(image[i].r)+N)/N;
+		image[i].g <= 0.0 ? image[i].g = 0.0 : image[i].g = (log2(image[i].g)+N)/N;
+		image[i].b <= 0.0 ? image[i].b = 0.0 : image[i].b = (log2(image[i].b)+N)/N;
+	}
 }
 
 void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
@@ -2171,6 +2178,25 @@ void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
 	}
 }
 
+void gImage::ApplyToneMapFilmic(float A, int threadcount)
+{
+	//float A = 6.2f;
+	float B = 0.5f;
+	float C = 1.7f;
+	float D = 0.06f;
+
+	float power = 2.2f;
+	float norm = (A+B) / (A+C+D);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned pos=0; pos<image.size(); pos++) {
+		image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / ((image[pos].r*(A*image[pos].r+C) + D)) / norm),1.0/power) : image[pos].r = 0.0;
+		image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / ((image[pos].g*(A*image[pos].g+C) + D)) / norm),1.0/power) : image[pos].g = 0.0;
+		image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / ((image[pos].b*(A*image[pos].b+C) + D)) / norm),1.0/power) : image[pos].b = 0.0;
+	}
+}
+
+/*
 void gImage::ApplyToneMapFilmic(bool do_gamma, bool clip_black, int threadcount)
 {
 	// The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog:
@@ -2188,9 +2214,9 @@ void gImage::ApplyToneMapFilmic(bool do_gamma, bool clip_black, int threadcount)
 		else {
 			#pragma omp parallel for num_threads(threadcount)
 			for (unsigned pos=0; pos<image.size(); pos++) {
-				image[pos].r = std::max((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06),0.0);
-				image[pos].g = std::max((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06),0.0);
-				image[pos].b = std::max((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06),0.0);
+				image[pos].r = std::max((image[pos].r*(6.2*image[pos].r+.5))/(image[pos].r*(6.2*image[pos].r+1.7)+0.06)/0.85,0.0);
+				image[pos].g = std::max((image[pos].g*(6.2*image[pos].g+.5))/(image[pos].g*(6.2*image[pos].g+1.7)+0.06)/0.85,0.0);
+				image[pos].b = std::max((image[pos].b*(6.2*image[pos].b+.5))/(image[pos].b*(6.2*image[pos].b+1.7)+0.06)/0.85,0.0);
 			}
 		}
 	}
@@ -2213,6 +2239,8 @@ void gImage::ApplyToneMapFilmic(bool do_gamma, bool clip_black, int threadcount)
 		}
 	}
 }
+
+*/
 
 void gImage::ApplyToneMapLogGamma(int threadcount)
 {
