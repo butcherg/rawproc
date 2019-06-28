@@ -34,7 +34,10 @@ class TonePanel: public PicProcPanel
 			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
 
 			gamma = new myFloatCtrl(this, wxID_ANY, 2.2f, 2);
-			filmic = new myFloatCtrl(this, wxID_ANY, 6.2f, 2);
+			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", 6.2f, 2);
+			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", 0.5f, 2);
+			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", 1.7f, 2);
+			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", 0.06f, 2);
 
 			wxArrayString str;
 			str.Add("channel");
@@ -91,8 +94,14 @@ class TonePanel: public PicProcPanel
 			m->AddItem(hybloggamb, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmicb, wxALIGN_LEFT);
-			m->AddItem(filmic, wxALIGN_LEFT);
-
+			m->NextRow();
+			m->AddItem(filmicA, wxALIGN_LEFT);
+			m->NextRow();
+			m->AddItem(filmicB, wxALIGN_LEFT);
+			m->NextRow();
+			m->AddItem(filmicC, wxALIGN_LEFT);
+			m->NextRow();
+			m->AddItem(filmicD, wxALIGN_LEFT);
 			SetSizerAndFit(m);
 			m->Layout();
 			SetFocus();
@@ -156,7 +165,7 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("loggamma"));
 					break;
 				case TONEFILMIC:
-					q->setParams(wxString::Format("filmic,%0.2f",filmic->GetFloatValue()));
+					q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue()));
 					break;
 			}
 			q->processPic();
@@ -171,7 +180,8 @@ class TonePanel: public PicProcPanel
 		
 		void floatParamUpdated(wxCommandEvent& event)
 		{
-			if (gamb->GetValue() | filmicb->GetValue()) processTone(TONEGAMMA);
+			if (gamb->GetValue()) processTone(TONEGAMMA);
+			if (filmicb->GetValue()) processTone(TONEFILMIC);
 		}
 		
 		void OnTimer(wxTimerEvent& event)
@@ -182,7 +192,7 @@ class TonePanel: public PicProcPanel
 
 	private:
 		wxTimer *t;
-		myFloatCtrl *gamma, *filmic;
+		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD;
 		wxCheckBox *enablebox;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;
 		wxChoice *reinop;
@@ -257,10 +267,16 @@ bool PicProcessorTone::processPic(bool processnext)
 		else if (p[0] == "filmic") {
 			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
 			m_tree->SetItemText(id, "tone:filmic");
-			double filmic = 6.2;
-			if (p.size() >= 2) filmic = atof(p[1].c_str());
+			double filmicA = 6.2;
+			double filmicB = 0.5;
+			double filmicC = 1.7;
+			double filmicD = 0.06;
+			if (p.size() >= 2) filmicA = atof(p[1].c_str());
+			if (p.size() >= 3) filmicB = atof(p[2].c_str());
+			if (p.size() >= 4) filmicC = atof(p[3].c_str());
+			if (p.size() >= 5) filmicD = atof(p[4].c_str());
 			mark();
-			dib->ApplyToneMapFilmic(filmic, threadcount);
+			dib->ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, threadcount);
 			d = duration();
 		}
 
