@@ -2154,23 +2154,28 @@ void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
 {
 	// The Reinhard algorithm implemented is the basic algorithm:
 	// R(x) = x/(x+1)
-	// Default applies it to each channel, 
+	// Default applies it to each channel, normalized to 0.0-1.0 ( 1/1+1 )
 	// alternate computes the delta tone as a multiplier, which is then applied to the channels 
 
 	if (channel) {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
-			image[pos].r = image[pos].r/(1.0+image[pos].r);
-			image[pos].g = image[pos].g/(1.0+image[pos].g);
-			image[pos].b = image[pos].b/(1.0+image[pos].b);
+			//image[pos].r = image[pos].r/(1.0+image[pos].r);
+			//image[pos].g = image[pos].g/(1.0+image[pos].g);
+			//image[pos].b = image[pos].b/(1.0+image[pos].b);
+
+			image[pos].r = (image[pos].r/(1.0+image[pos].r))/0.5f;
+			image[pos].g = (image[pos].g/(1.0+image[pos].g))/0.5f;
+			image[pos].b = (image[pos].b/(1.0+image[pos].b))/0.5f;
 		}
 	}
 	else {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
-			double T = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
-			double mT = T/(1+T);
-			double dT = mT/T;
+			double L = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
+			double Ld = L/(1+L);
+			//double Ld = L*(1+(L/pow(1,2))) / (1+L);  //chroma-preserving, wip...
+			double dT = Ld/L;
 			image[pos].r *= dT;
 			image[pos].g *= dT;
 			image[pos].b *= dT;
