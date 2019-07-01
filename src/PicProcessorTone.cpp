@@ -34,10 +34,11 @@ class TonePanel: public PicProcPanel
 			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
 
 			gamma = new myFloatCtrl(this, wxID_ANY, 2.2f, 2);
-			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", 6.2f, 2);
-			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", 0.5f, 2);
-			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", 1.7f, 2);
+			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", 6.2f, 1);
+			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", 0.5f, 1);
+			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", 1.7f, 1);
 			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", 0.06f, 2);
+			power   = new myFloatCtrl(this, wxID_ANY, "power:", 2.2f, 1);
 
 			wxArrayString str;
 			str.Add("channel");
@@ -96,6 +97,7 @@ class TonePanel: public PicProcPanel
 			m->AddItem(filmicb, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmicA, wxALIGN_LEFT);
+			m->AddItem(power, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmicB, wxALIGN_LEFT);
 			m->NextRow();
@@ -165,7 +167,7 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("loggamma"));
 					break;
 				case TONEFILMIC:
-					q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue()));
+					q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue()));
 					break;
 			}
 			q->processPic();
@@ -192,7 +194,7 @@ class TonePanel: public PicProcPanel
 
 	private:
 		wxTimer *t;
-		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD;
+		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power;
 		wxCheckBox *enablebox;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;
 		wxChoice *reinop;
@@ -271,12 +273,14 @@ bool PicProcessorTone::processPic(bool processnext)
 			double filmicB = 0.5;
 			double filmicC = 1.7;
 			double filmicD = 0.06;
+			double power = 2.2;
 			if (p.size() >= 2) filmicA = atof(p[1].c_str());
 			if (p.size() >= 3) filmicB = atof(p[2].c_str());
 			if (p.size() >= 4) filmicC = atof(p[3].c_str());
 			if (p.size() >= 5) filmicD = atof(p[4].c_str());
+			if (p.size() >= 6) power = atof(p[5].c_str());
 			mark();
-			dib->ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, threadcount);
+			dib->ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, power, threadcount);
 			d = duration();
 		}
 
