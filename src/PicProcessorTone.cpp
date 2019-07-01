@@ -33,12 +33,19 @@ class TonePanel: public PicProcPanel
 			hybloggamb = new wxRadioButton(this, TONELOGGAM, "loggamma");
 			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
 
-			gamma = new myFloatCtrl(this, wxID_ANY, 2.2f, 2);
-			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", 6.2f, 1);
-			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", 0.5f, 1);
-			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", 1.7f, 1);
-			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", 0.06f, 2);
-			power   = new myFloatCtrl(this, wxID_ANY, "power:", 2.2f, 1);
+			//parm tool.tone.gamma: Default value for gamma tone operator.  Default=2.2
+			gamma = new myFloatCtrl(this, wxID_ANY, atof(myConfig::getConfig().getValueOrDefault("tool.tone.gamma","2.2").c_str()), 2);
+
+			//parm tool.tone.filmic.A: Default value for filmic tone operator A coefficient.  Default=6.2
+			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str()), 1);
+			//parm tool.tone.filmic.B: Default value for filmic tone operator B coefficient.  Default=0.5
+			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str()), 1);
+			//parm tool.tone.filmic.C: Default value for filmic tone operator C coefficient.  Default=1.7
+			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str()), 1);
+			//parm tool.tone.filmic.D: Default value for filmic tone operator D coefficient.  Default=0.06
+			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str()), 2);
+			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=2.2
+			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","2.2").c_str()), 1);
 
 			wxArrayString str;
 			str.Add("channel");
