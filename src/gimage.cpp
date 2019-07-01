@@ -2014,9 +2014,9 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r = (image[pos].r - low) * slope;
-				image[pos].g = (image[pos].g - low) * slope;
-				image[pos].b = (image[pos].b - low) * slope;
+				image[pos].r >= 0.0 ? image[pos].r = (image[pos].r - low) * slope : image[pos].r = 0.0;
+				image[pos].g >= 0.0 ? image[pos].g = (image[pos].g - low) * slope : image[pos].g = 0.0;
+				image[pos].b >= 0.0 ? image[pos].b = (image[pos].b - low) * slope : image[pos].b = 0.0;
 			}
 		}
 	}
@@ -2025,7 +2025,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r = (image[pos].r - low) * slope;
+				image[pos].r >= 0.0 ? image[pos].r = (image[pos].r - low) * slope : image[pos].r = 0.0;
 			}
 		}
 	}
@@ -2034,7 +2034,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].g = (image[pos].g - low) * slope;
+				image[pos].g >= 0.0 ? image[pos].g = (image[pos].g - low) * slope : image[pos].g = 0.0;
 			}
 		}
 	}
@@ -2043,7 +2043,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].b = (image[pos].b - low) * slope;
+				image[pos].b >= 0.0 ? image[pos].b = (image[pos].b - low) * slope : image[pos].b = 0.0;
 			}
 		}
 	}
