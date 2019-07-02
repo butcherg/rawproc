@@ -1,6 +1,7 @@
 #include "PicProcessorTone.h"
 #include "PicProcPanel.h"
 #include "myRowColumnSizer.h"
+#include "myToneCurvePane.h"
 #include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "util.h"
@@ -13,6 +14,21 @@
 #define TONELOG2 7904
 #define TONELOGGAM 7905
 #define TONEFILMIC 7906
+
+class ToneCurveDialog: public wxDialog
+{
+	public:
+		ToneCurveDialog(wxWindow *parent, wxWindowID id, const wxString &title, std::vector<float> xarray, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize):
+		wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+		{
+			wxBoxSizer* s = new wxBoxSizer( wxVERTICAL );
+
+			SetSizerAndFit(s);
+		}
+
+
+		~ToneCurveDialog() {}
+};
 
 class TonePanel: public PicProcPanel
 {
@@ -32,6 +48,8 @@ class TonePanel: public PicProcPanel
 			log2b = new wxRadioButton(this, TONELOG2, "log2");
 			hybloggamb = new wxRadioButton(this, TONELOGGAM, "loggamma");
 			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
+
+			tcpane = new myToneCurvePane(this, wxDefaultPosition, wxSize(110,110));
 
 			//parm tool.tone.gamma: Default value for gamma tone operator.  Default=2.2
 			gamma = new myFloatCtrl(this, wxID_ANY, atof(myConfig::getConfig().getValueOrDefault("tool.tone.gamma","2.2").c_str()), 2);
@@ -83,11 +101,14 @@ class TonePanel: public PicProcPanel
 				filmicb->SetValue(true);
 			}
 
+			tcpane->SetCurve(makeXArray());
+
 			log2b->Enable(false);  //log2 doesn't do anything, yet.
 
 			//Lay out the controls in the panel:
 			myRowColumnSizer *m = new myRowColumnSizer(10,3);
 			m->AddItem(enablebox, wxALIGN_LEFT);
+			m->AddItem(new wxButton(this, wxID_ANY, "Curve"), wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
 			m->NextRow();
@@ -102,15 +123,17 @@ class TonePanel: public PicProcPanel
 			m->AddItem(hybloggamb, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmicb, wxALIGN_LEFT);
-			m->NextRow();
-			m->AddItem(filmicA, wxALIGN_LEFT);
 			m->AddItem(power, wxALIGN_LEFT);
 			m->NextRow();
+			m->AddItem(filmicA, wxALIGN_LEFT);
+			//m->NextRow();
 			m->AddItem(filmicB, wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(filmicC, wxALIGN_LEFT);
-			m->NextRow();
+			//m->NextRow();
 			m->AddItem(filmicD, wxALIGN_LEFT);
+			m->NextRow();
+			m->AddItem(tcpane, wxALIGN_CENTER |wxEXPAND);
 			SetSizerAndFit(m);
 			m->Layout();
 			SetFocus();
@@ -122,6 +145,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
+			Bind(wxEVT_BUTTON, &TonePanel::OnToneCurve, this);
 			Refresh();
 			Update();
 		}
@@ -141,6 +165,14 @@ class TonePanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnToneCurve(wxCommandEvent& event)
+		{
+			//std::vector<float> xarray = makeXArray();
+			//wxString xstr;
+			//for (unsigned i=0; i<xarray.size(); i++) xstr.Append(wxString::Format("%d: %f\n",i, xarray[i]));
+			tcpane->SetCurve(makeXArray());
 		}
 
 		void reinopChanged(wxCommandEvent& event)
@@ -177,6 +209,7 @@ class TonePanel: public PicProcPanel
 					q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue()));
 					break;
 			}
+			tcpane->SetCurve(makeXArray());
 			q->processPic();
 			Refresh();
 		}
@@ -199,13 +232,35 @@ class TonePanel: public PicProcPanel
 			if (filmicb->GetValue()) processTone(TONEFILMIC);
 		}
 
+		std::vector<float> makeXArray()
+		{
+			std::vector<float> xarray;
+			std::map<std::string,std::string> imgdata;
+			gImage X(100,1,3,imgdata);
+			std::vector<pix>& x = X.getImageData();
+			for (unsigned i=0; i<x.size(); i++) x[i].r = (float) i / x.size();
+
+			//in here, insert tone map operation on X
+			if (gamb->GetValue()) X.ApplyToneMapGamma(gamma->GetFloatValue());
+			else if (reinb->GetValue() ) {
+				bool channel = true;
+				if (reinop->GetString(reinop->GetSelection()) == "luminance") channel = false;
+				X.ApplyToneMapReinhard(channel);
+			}
+			else if (hybloggamb->GetValue()) X.ApplyToneMapLogGamma();
+			else if (filmicb->GetValue())  X.ApplyToneMapFilmic(filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue());
+
+			for (unsigned i=0; i<x.size(); i++) xarray.push_back(x[i].r);
+			return xarray;
+		}
+
 	private:
 		wxTimer *t;
 		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power;
 		wxCheckBox *enablebox;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;
 		wxChoice *reinop;
-
+		myToneCurvePane *tcpane;
 };
 
 PicProcessorTone::PicProcessorTone(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
