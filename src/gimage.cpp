@@ -2192,9 +2192,9 @@ void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power,
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
-		image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / ((image[pos].r*(A*image[pos].r+C) + D)) / norm),1.0/power) : image[pos].r = 0.0;
-		image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / ((image[pos].g*(A*image[pos].g+C) + D)) / norm),1.0/power) : image[pos].g = 0.0;
-		image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / ((image[pos].b*(A*image[pos].b+C) + D)) / norm),1.0/power) : image[pos].b = 0.0;
+		image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / ((image[pos].r*(A*image[pos].r+C) + D)) / norm),power) : image[pos].r = 0.0;
+		image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / ((image[pos].g*(A*image[pos].g+C) + D)) / norm),power) : image[pos].g = 0.0;
+		image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / ((image[pos].b*(A*image[pos].b+C) + D)) / norm),power) : image[pos].b = 0.0;
 	}
 }
 
