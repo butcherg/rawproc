@@ -20,9 +20,12 @@ public:
 	myToneCurvePane(wxWindow* parent, const wxPoint &pos, const wxSize &size);
 	~myToneCurvePane();
 	void OnSize(wxSizeEvent& event);
-	//bool ToggleToolTip();
+
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
+
+	void mouseWheelMoved(wxMouseEvent& event);
+	void mouseDoubleClicked(wxMouseEvent& event);
 	
 	void SetCurve(std::vector<float> curve);
  
@@ -32,6 +35,7 @@ public:
 
 private:
 	std::vector<float> c;
+	float scale;
 
 };
  
