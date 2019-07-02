@@ -14,6 +14,7 @@ myToneCurvePane::myToneCurvePane(wxWindow* parent, const wxPoint &pos, const wxS
 	Bind(wxEVT_PAINT, &myToneCurvePane::paintEvent, this);
 	Bind(wxEVT_MOUSEWHEEL, &myToneCurvePane::mouseWheelMoved, this);
 	Bind(wxEVT_LEFT_DCLICK, &myToneCurvePane::mouseDoubleClicked, this);
+
 }
 
 myToneCurvePane::~myToneCurvePane()
@@ -26,6 +27,7 @@ void myToneCurvePane::OnSize(wxSizeEvent& event)
 	event.Skip();
 	Refresh();
 }
+
  
 void myToneCurvePane::paintEvent(wxPaintEvent & evt)
 {

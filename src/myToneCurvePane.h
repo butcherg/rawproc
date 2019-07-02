@@ -26,6 +26,7 @@ public:
 
 	void mouseWheelMoved(wxMouseEvent& event);
 	void mouseDoubleClicked(wxMouseEvent& event);
+
 	
 	void SetCurve(std::vector<float> curve);
  

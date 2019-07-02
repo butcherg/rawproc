@@ -108,6 +108,7 @@ class TonePanel: public PicProcPanel
 			//Lay out the controls in the panel:
 			myRowColumnSizer *m = new myRowColumnSizer(10,3);
 			m->AddItem(enablebox, wxALIGN_LEFT);
+			m->AddItem(new wxButton(this, wxID_ANY, "Curve"), wxALIGN_LEFT);
 			m->NextRow();
 			m->AddItem(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)), wxALIGN_LEFT, 2);
 			m->NextRow();
@@ -144,6 +145,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
+			Bind(wxEVT_BUTTON, &TonePanel::OnToneCurve, this);
 			Refresh();
 			Update();
 		}
@@ -163,6 +165,14 @@ class TonePanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void OnToneCurve(wxCommandEvent& event)
+		{
+			//std::vector<float> xarray = makeXArray();
+			//wxString xstr;
+			//for (unsigned i=0; i<xarray.size(); i++) xstr.Append(wxString::Format("%d: %f\n",i, xarray[i]));
+			tcpane->SetCurve(makeXArray());
 		}
 
 		void reinopChanged(wxCommandEvent& event)
