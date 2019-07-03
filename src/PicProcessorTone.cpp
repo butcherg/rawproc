@@ -101,7 +101,7 @@ class TonePanel: public PicProcPanel
 				filmicb->SetValue(true);
 			}
 
-			tcpane->SetCurve(makeXArray());
+			tcpane->SetCurve(makeXArray(), true);
 
 			log2b->Enable(false);  //log2 doesn't do anything, yet.
 

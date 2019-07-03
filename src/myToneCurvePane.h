@@ -28,7 +28,7 @@ public:
 	void mouseDoubleClicked(wxMouseEvent& event);
 
 	
-	void SetCurve(std::vector<float> curve);
+	void SetCurve(std::vector<float> curve, bool rescale=false);
  
 	void render(wxDC& dc);
  
@@ -36,7 +36,7 @@ public:
 
 private:
 	std::vector<float> c;
-	float scale;
+	float scale, resetscale, scaleincrement;
 
 };
  

@@ -10,7 +10,7 @@
 myToneCurvePane::myToneCurvePane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
  wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
-	scale = 0.1;
+	scale = 1.0;
 	Bind(wxEVT_PAINT, &myToneCurvePane::paintEvent, this);
 	Bind(wxEVT_MOUSEWHEEL, &myToneCurvePane::mouseWheelMoved, this);
 	Bind(wxEVT_LEFT_DCLICK, &myToneCurvePane::mouseDoubleClicked, this);
@@ -41,8 +41,15 @@ void myToneCurvePane::paintNow()
 	render(dc);
 }
 
-void myToneCurvePane::SetCurve(std::vector<float> curve)
+void myToneCurvePane::SetCurve(std::vector<float> curve, bool rescale)
 {	
+	int w,h;
+	GetSize(&w,&h);
+	if (rescale) {
+		scale = (float) w / (float) curve.size();
+		resetscale = scale;
+		scaleincrement = scale / (float) w;
+	}
 	c = curve;
 	paintNow();
 }
@@ -54,10 +61,12 @@ void myToneCurvePane::render(wxDC&  dc)
 	int w, h;
 	GetSize(&w, &h);
 	dc.Clear();
-	dc.DrawText(wxString::Format("%f",scale), w/2, h-10);
+	wxString scaletext = wxString::Format("scale: %0.3f",scale);
+	wxSize ts = dc.GetTextExtent(scaletext);
+	dc.DrawText(scaletext, w-ts.GetWidth()-2, h-ts.GetHeight());
 	dc.SetDeviceOrigin (5, h-5);
 	dc.SetAxisOrientation(true,true);
-	dc.SetLogicalScale(scale, scale);
+	dc.SetLogicalScale(scale, resetscale);
 	wxPoint *cp = new wxPoint[range];
 	for (unsigned i=0; i<range; i++) cp[i] = wxPoint(i, int((float) range *c[i]));
 	dc.SetPen(wxPen(wxColour(255,0,0),linewidth));
@@ -67,14 +76,14 @@ void myToneCurvePane::render(wxDC&  dc)
 
 void myToneCurvePane::mouseWheelMoved(wxMouseEvent& event) 
 {	
-	event.Skip();
-	double increment = 0.05;
-	if (event.ShiftDown()) increment = 0.2;
-	if (event.ControlDown()) increment = 1.0;
+	double increment = scaleincrement;
+	if (event.ShiftDown()) increment *= 10.0;
+	if (event.ControlDown()) increment *= 100.0;
 	if (event.GetWheelRotation() > 0)
 		scale += increment;
 	else
 		scale -= increment;
+	if (scale < resetscale) scale = resetscale;
 	Refresh();
 	
 }
@@ -82,8 +91,7 @@ void myToneCurvePane::mouseWheelMoved(wxMouseEvent& event)
 
 void myToneCurvePane::mouseDoubleClicked(wxMouseEvent& event)
 {
-	event.Skip();
-	scale = 0.1;
+	scale = resetscale;
 	Refresh();
 }
 

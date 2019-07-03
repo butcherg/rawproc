@@ -2188,13 +2188,18 @@ void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power,
 	// The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog:
 	// R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2), where A=6.2, B=0.05, C=1.7, and D=0.06.
 
-	float norm = (A+B) / (A+C+D);
+	//float norm = (A+B) / (A+C+D);
+	float norm = 1;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
-		image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / ((image[pos].r*(A*image[pos].r+C) + D)) / norm),power) : image[pos].r = 0.0;
-		image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / ((image[pos].g*(A*image[pos].g+C) + D)) / norm),power) : image[pos].g = 0.0;
-		image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / ((image[pos].b*(A*image[pos].b+C) + D)) / norm),power) : image[pos].b = 0.0;
+		//image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / (image[pos].r*(A*image[pos].r+C) + D)) / norm,power) : image[pos].r = 0.0;
+		//image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / (image[pos].g*(A*image[pos].g+C) + D)) / norm,power) : image[pos].g = 0.0;
+		//image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / (image[pos].b*(A*image[pos].b+C) + D)) / norm,power) : image[pos].b = 0.0;
+
+		image[pos].r > 0.0 ? image[pos].r = ((image[pos].r*(A*image[pos].r+B)) / (image[pos].r*(A*image[pos].r+C) + D)) / norm : image[pos].r = 0.0;
+		image[pos].g > 0.0 ? image[pos].g = ((image[pos].g*(A*image[pos].g+B)) / (image[pos].g*(A*image[pos].g+C) + D)) / norm : image[pos].g = 0.0;
+		image[pos].b > 0.0 ? image[pos].b = ((image[pos].b*(A*image[pos].b+B)) / (image[pos].b*(A*image[pos].b+C) + D)) / norm : image[pos].b = 0.0;
 	}
 }
 
