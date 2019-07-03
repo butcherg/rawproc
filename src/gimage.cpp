@@ -2150,30 +2150,29 @@ void gImage::ApplyToneMapLog2(int threadcount)
 	}
 }
 
-void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
+void gImage::ApplyToneMapReinhard(bool channel, bool normalize, int threadcount)
 {
 	// The Reinhard algorithm implemented is the basic algorithm:
 	// R(x) = x/(x+1)
 	// Default applies it to each channel, normalized to 0.0-1.0 ( 1/1+1 )
 	// alternate computes the delta tone as a multiplier, which is then applied to the channels 
 
+	float norm = 1.0;
+	if (normalize) norm = 2.0;
+
 	if (channel) {
 		#pragma omp parallel for num_threads(threadcount)
-		for (unsigned pos=0; pos<image.size(); pos++) {
-			//image[pos].r = image[pos].r/(1.0+image[pos].r);
-			//image[pos].g = image[pos].g/(1.0+image[pos].g);
-			//image[pos].b = image[pos].b/(1.0+image[pos].b);
-
-			image[pos].r = (image[pos].r/(1.0+image[pos].r))/0.5f;
-			image[pos].g = (image[pos].g/(1.0+image[pos].g))/0.5f;
-			image[pos].b = (image[pos].b/(1.0+image[pos].b))/0.5f;
+		for (unsigned pos=0; pos<image.size(); pos++) {	
+			image[pos].r = (image[pos].r/(1.0+image[pos].r))*norm;
+			image[pos].g = (image[pos].g/(1.0+image[pos].g))*norm;
+			image[pos].b = (image[pos].b/(1.0+image[pos].b))*norm;
 		}
 	}
 	else {
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned pos=0; pos<image.size(); pos++) {
 			double L = (image[pos].r*0.21) + (image[pos].g*0.72) + (image[pos].b*0.07);
-			double Ld = L/(1+L);
+			double Ld = (L/(1+L));  //*norm;  //not the correct place, wip...
 			//double Ld = L*(1+(L/pow(1,2))) / (1+L);  //chroma-preserving, wip...
 			double dT = Ld/L;
 			image[pos].r *= dT;
@@ -2183,23 +2182,23 @@ void gImage::ApplyToneMapReinhard(bool channel, int threadcount)
 	}
 }
 
-void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power, int threadcount)
+void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power, bool normalize, int threadcount)
 {
 	// The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog:
 	// R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2), where A=6.2, B=0.05, C=1.7, and D=0.06.
+	// normalize=true stretches curve values to cover 0.0 - 1.0
 
-	//float norm = (A+B) / (A+C+D);
-	float norm = 1;
+	float norm;
+	if (normalize)
+		norm = (A+B) / (A+C+D);
+	else
+		norm = 1;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
-		//image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / (image[pos].r*(A*image[pos].r+C) + D)) / norm,power) : image[pos].r = 0.0;
-		//image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / (image[pos].g*(A*image[pos].g+C) + D)) / norm,power) : image[pos].g = 0.0;
-		//image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / (image[pos].b*(A*image[pos].b+C) + D)) / norm,power) : image[pos].b = 0.0;
-
-		image[pos].r > 0.0 ? image[pos].r = ((image[pos].r*(A*image[pos].r+B)) / (image[pos].r*(A*image[pos].r+C) + D)) / norm : image[pos].r = 0.0;
-		image[pos].g > 0.0 ? image[pos].g = ((image[pos].g*(A*image[pos].g+B)) / (image[pos].g*(A*image[pos].g+C) + D)) / norm : image[pos].g = 0.0;
-		image[pos].b > 0.0 ? image[pos].b = ((image[pos].b*(A*image[pos].b+B)) / (image[pos].b*(A*image[pos].b+C) + D)) / norm : image[pos].b = 0.0;
+		image[pos].r > 0.0 ? image[pos].r = pow(((image[pos].r*(A*image[pos].r+B)) / (image[pos].r*(A*image[pos].r+C) + D)),power) / norm : image[pos].r = 0.0;
+		image[pos].g > 0.0 ? image[pos].g = pow(((image[pos].g*(A*image[pos].g+B)) / (image[pos].g*(A*image[pos].g+C) + D)),power) / norm : image[pos].g = 0.0;
+		image[pos].b > 0.0 ? image[pos].b = pow(((image[pos].b*(A*image[pos].b+B)) / (image[pos].b*(A*image[pos].b+C) + D)),power) / norm : image[pos].b = 0.0;
 	}
 }
 

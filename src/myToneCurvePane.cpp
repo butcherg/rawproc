@@ -61,15 +61,21 @@ void myToneCurvePane::render(wxDC&  dc)
 	int w, h;
 	GetSize(&w, &h);
 	dc.Clear();
-	wxString scaletext = wxString::Format("scale: %0.3f",scale);
-	wxSize ts = dc.GetTextExtent(scaletext);
-	dc.DrawText(scaletext, w-ts.GetWidth()-2, h-ts.GetHeight());
-	dc.SetDeviceOrigin (5, h-5);
+	//wxString scaletext = wxString::Format("scale: %0.3f",scale);
+	//wxSize ts = dc.GetTextExtent(scaletext);
+	//dc.DrawText(scaletext, w-ts.GetWidth()-2, h-ts.GetHeight());
+	dc.SetDeviceOrigin (0, h);
 	dc.SetAxisOrientation(true,true);
-	dc.SetLogicalScale(scale, resetscale);
+	//dc.SetLogicalScale(scale, resetscale);
+	dc.SetLogicalScale(scale, scale);
 	wxPoint *cp = new wxPoint[range];
-	for (unsigned i=0; i<range; i++) cp[i] = wxPoint(i, int((float) range *c[i]));
-	dc.SetPen(wxPen(wxColour(255,0,0),linewidth));
+	for (unsigned i=0; i<range; i++) cp[i] = wxPoint(i, int((float) range*c[i]));
+	unsigned gridcolor = 192;
+	dc.SetPen(wxPen(wxColour(gridcolor,gridcolor,gridcolor),linewidth,wxPENSTYLE_DOT));
+	dc.DrawLine(range*0.25,0,range*0.25,range);
+	dc.DrawLine(range*0.5,0,range*0.5,range);
+	dc.DrawLine(range*0.75,0,range*0.75,range);
+	dc.SetPen(wxPen(wxColour(0,0,0),linewidth));
 	dc.DrawLines(c.size(),cp,1,1);
 	delete [] cp;
 }
