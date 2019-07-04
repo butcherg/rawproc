@@ -8,7 +8,6 @@
 #include "gimage/curve.h"
 #include "copy.xpm"
 #include "paste.xpm"
-#include "curve.xpm"
 
 #define TONEENABLE 7900
 #define TONEID 7901
@@ -77,20 +76,20 @@ class TonePanel: public PicProcPanel
 			gamma = new myFloatCtrl(this, wxID_ANY, atof(myConfig::getConfig().getValueOrDefault("tool.tone.gamma","2.2").c_str()), 2);
 
 			//parm tool.tone.filmic.A: Default value for filmic tone operator A coefficient.  Default=6.2
-			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str()), 1);
+			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.B: Default value for filmic tone operator B coefficient.  Default=0.5
-			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str()), 1);
+			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.C: Default value for filmic tone operator C coefficient.  Default=1.7
-			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str()), 1);
+			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.D: Default value for filmic tone operator D coefficient.  Default=0.06
-			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str()), 2);
+			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str()), 2, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
 
 			wxArrayString str;
 			str.Add("channel");
 			str.Add("luminance");
-			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT), str);
+			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(85,TEXTCTRLHEIGHT), str);
 
 			wxArrayString p = split(params,",");
 			setPanel(p);
@@ -127,12 +126,12 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(filmicb, flags);
 			m->AddRowItem(power, flags);
 			m->NextRow(); 
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, "          "), flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "     "), flags);
 			m->AddRowItem(filmicA, flags);
 			//m->NextRow();
 			m->AddRowItem(filmicB, flags);
 			m->NextRow(); 
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, "          "), flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "     "), flags);
 			m->AddRowItem(filmicC, flags);
 			//m->NextRow();
 			m->AddRowItem(filmicD, flags);
