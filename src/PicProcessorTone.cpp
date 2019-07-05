@@ -78,7 +78,7 @@ class TonePanel: public PicProcPanel
 			//parm tool.tone.filmic.A: Default value for filmic tone operator A coefficient.  Default=6.2
 			filmicA = new myFloatCtrl(this, wxID_ANY, "A:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.B: Default value for filmic tone operator B coefficient.  Default=0.5
-			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
+			filmicB = new myFloatCtrl(this, wxID_ANY, "B:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str()), 2, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.C: Default value for filmic tone operator C coefficient.  Default=1.7
 			filmicC = new myFloatCtrl(this, wxID_ANY, "C:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.D: Default value for filmic tone operator D coefficient.  Default=0.06
