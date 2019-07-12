@@ -8,6 +8,7 @@
 #include "gimage/curve.h"
 #include "copy.xpm"
 #include "paste.xpm"
+#include "undo.xpm"
 
 #define TONEENABLE 7900
 #define TONEID 7901
@@ -20,6 +21,7 @@
 #define TONEFILMIC 7908
 #define TONECURVE 7909
 #define TONENORM 7910
+#define TONEFILMICRESET 7911
 
 class ToneCurveDialog: public wxDialog
 {
@@ -104,27 +106,34 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 			m->AddRowItem(new wxBitmapButton(this, TONECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->AddRowItem(new wxBitmapButton(this, TONEPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+
+			//gamma:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(gamb, flags);
 			m->AddRowItem(gamma, flags);
+
+			//reinhard:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(reinb, flags);
 			m->AddRowItem(reinop, flags);
+
+			//hybrid log-gamma:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
-			//m->AddRowItem(log2b, flags);
-			//m->NextRow();
 			m->AddRowItem(hybloggamb, flags);
+
+			//filmic:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-			m->NextRow();
+			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(filmicb, flags);
-			m->AddRowItem(power, flags);
+			m->AddRowItem(power, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, TONEFILMICRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(); 
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "     "), flags);
 			m->AddRowItem(filmicA, flags);
@@ -144,6 +153,7 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(tcpane, wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP));
 			m->AddRowItem(tonenorm, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "  "), wxSizerFlags(1).Left());
+
 			m->End();
 			SetSizerAndFit(m);
 			m->Layout();
@@ -154,6 +164,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &TonePanel::OnCopy, this, TONECOPY);
 			Bind(wxEVT_BUTTON, &TonePanel::OnPaste, this, TONEPASTE);
+			Bind(wxEVT_BUTTON, &TonePanel::OnReset, this, TONEFILMICRESET);
 			Bind(myFLOATCTRL_CHANGE, &TonePanel::floatParamChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &TonePanel::floatParamUpdated, this);
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
@@ -260,6 +271,21 @@ class TonePanel: public PicProcPanel
 				q->processPic();
 			}
 			event.Skip();
+		}
+
+		void OnReset(wxCommandEvent& event)
+		{
+			if (event.GetId() == TONEFILMICRESET) {
+				wxArrayString p;
+				p.Add("filmic");
+				p.Add(wxString(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2")));
+				p.Add(wxString(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5")));
+				p.Add(wxString(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7")));
+				p.Add(wxString(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06")));
+				p.Add(wxString(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0")));
+				setPanel(p);
+				if (tonemode == TONEFILMIC) processTone(TONEFILMIC);
+			}
 		}
 
 		void OnButton(wxCommandEvent& event)
