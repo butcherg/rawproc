@@ -5,16 +5,26 @@
 with.  I still use a manually-constructed per-image curve for my tone transforms, but some of these hold promise if used in 
 the right place.</p>
 <p align=center><img src=tone.png></img></p>
-<p>
-All of the functions are normalized to work on 0.0-1.0 encoded floating point images.
+
+<p>Available tone operators:
 <ul>
 <li>gamma: The same function as in the original gamma tool, which will eventually be removed.  Default: 1.0, or no-change.</li>
 <li>reinhart: Applies the simple Reinhart function, val / (1-val), to either the individual channels, or as a computed 
 change to the luminance of each pixel.  Default: channel</li>
-<li>log2: An attempt at a normalized log2 curve. For 0.9, it is disabled.</li>
 <li>loggamma: The HEVC version of the ARIB STD-B67 algorithm, as defined in https://en.wikipedia.org/wiki/Hybrid_Log-Gamma</li>
 <li>filmic: The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog: R(x) = pow(x(6.2x+.5))/(x(6.2x+1.7)+0.06)</li>
 </ul>
+</p>
+
+<p>
+The curve plot at the bottom of the tool pane graphically depicts the chosen tone curve.  The curve is computed using the 
+actual tone curve operation, applied to a synthetic one-row image with monotonically increasing tone values from 0.0 - 1.0.
+The curve can be zoomed using the mouse scroll wheel; Shift-scroll and Ctrl-scroll increase the zoom rate by 10 and 100, respectively.
+The zoom scale can be reset to 1.0 by double-clicking in the curve plot.
+</p>
+
+<p>The norm checkbox enables/disables normalization to 0.0 - 1.0 of reinhard and filmic, which by themselves never reach 1.0.
+The loggamma operator does this by definition, per the HEVC specification.  gamma is hard-coded to normalize.
 </p>
 
 <p><b>Properties:</b> See tool.tone.* in <a href=confparams.html#tool.tone>Configuration Properties</a></p>
