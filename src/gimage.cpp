@@ -4523,6 +4523,34 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	return lasterror;
 }
 
+GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string params)
+{
+	BPP bitfmt = BPP_8;
+	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
+	std::map<std::string, std::string> p = parseparams(params);
+	if (p.find("channelformat") != p.end()) {
+		if (p["channelformat"] == "8bit")  bitfmt = BPP_8;
+		if (p["channelformat"] == "16bit") bitfmt = BPP_16;
+		if (p["channelformat"] == "float") bitfmt = BPP_FP;
+		if (p["channelformat"] == "unboundedfloat") bitfmt = BPP_UFP;
+	}
+
+	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
+
+	if (ftype == FILETYPE_TIFF) {
+		return saveTIFF(filename, bitfmt, params);
+	}
+	if (ftype == FILETYPE_JPEG) {
+		return saveJPEG(filename, bitfmt, params);
+	}
+	if (ftype == FILETYPE_PNG) {
+		return savePNG(filename, bitfmt, params);
+	}
+	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+	return lasterror;
+}
+
+
 
 GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
