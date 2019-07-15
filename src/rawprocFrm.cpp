@@ -1118,8 +1118,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			}
 			else {
-				WxStatusBar1->SetStatusText(wxString::Format("Saving %s...",fname));
-				dib->saveImageFile(fname, std::string(configparams.c_str()));
+				WxStatusBar1->SetStatusText(wxString::Format("Saving %s (no embedded profile)...",fname));
+				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
 			}
 			
 			wxFileName tmpname(fname);
