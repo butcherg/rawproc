@@ -452,15 +452,15 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 {
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	std::vector<double> wbmults;
-	int patchx, patchy; double patchrad;
+	float patchx, patchy; double patchrad;
 	((wxFrame*) m_display->GetParent())->SetStatusText("white balance...");
 	
 	optypes optype = automatic; 
 	wxArrayString p = split(c, ",");
 	if (p.GetCount() > 0) {
 		if (p[0] == "patch"){  //patch, with 'patch' parameter
-			patchx = atoi(p[1]);
-			patchy = atoi(p[2]);
+			patchx = atof(p[1]);
+			patchy = atof(p[2]);
 			patchrad =  atof(p[3]);
 			optype = imgpatch;
 		}
@@ -551,7 +551,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 				m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
 			}
 			else if (optype == imgpatch) {
-				wbmults = dib->ApplyPatchWhiteBalance((float) patchx, (float) patchy, patchrad, threadcount);
+				wbmults = dib->ApplyPatchWhiteBalance(patchx, patchy, patchrad, threadcount);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:patch"));
 			}
 			else if (optype == automatic) {
