@@ -2338,10 +2338,16 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 
 
 //uses a patch from the image presumed to represent neutral or white:
-std::vector<double>  gImage::ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount)
-{	
+std::vector<double>  gImage::ApplyPatchWhiteBalance(float patchx, float patchy, double patchradius, int threadcount)
+{
+	//handle percentage coordinates:
+	if (patchx <= 1.0 & patchy <= 1.0) {
+		patchx = (float) w * patchx;
+		patchy = (float) h * patchy;
+	}
+
 	double redmult = 1.0, greenmult = 1.0, bluemult = 1.0;
-	std::vector<double> a = CalculatePatchMeans(patchx, patchy, patchradius);
+	std::vector<double> a = CalculatePatchMeans( (int) patchx, (int) patchy, patchradius);
 	redmult = a[1] / a[0]; // gm/rm
 	bluemult = a[1] / a[2]; // gm/bm
 

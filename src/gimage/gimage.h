@@ -225,8 +225,8 @@ class gImage
 
 		//white balance algorithms:
 		std::vector<double> ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
+		std::vector<double> ApplyPatchWhiteBalance(float patchx, float patchy, double patchradius, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
-		std::vector<double> ApplyWhiteBalance(unsigned patchx, unsigned patchy, double patchradius, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(int threadcount=0);
 
 		//demosaic algorithms:

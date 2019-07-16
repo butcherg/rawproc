@@ -551,7 +551,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 				m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
 			}
 			else if (optype == imgpatch) {
-				wbmults = dib->ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+				wbmults = dib->ApplyPatchWhiteBalance((float) patchx, (float) patchy, patchrad, threadcount);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:patch"));
 			}
 			else if (optype == automatic) {
