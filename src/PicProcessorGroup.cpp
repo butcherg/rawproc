@@ -9,6 +9,7 @@
 
 #define GROUPENABLE 8200
 #define GROUPFILESELECT 8201
+#define GROUPUPDATE 8202
 
 class GroupPanel: public PicProcPanel
 {
@@ -21,7 +22,11 @@ class GroupPanel: public PicProcPanel
 			enablebox = new wxCheckBox(this, GROUPENABLE, "group:");
 			enablebox->SetValue(true);
 
-			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
+			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
+			setEdit(params);
+			//wxString editstring = params;
+			//editstring.Replace(";","\n");
+			//edit->SetValue(editstring);
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
@@ -30,9 +35,11 @@ class GroupPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
-			//m->AddRowItem(edit, flags);
-			//m->NextRow();
+
 			m->AddRowItem(new wxButton(this, GROUPFILESELECT, "Select File"), flags);
+			m->AddRowItem(new wxButton(this, GROUPUPDATE, "Update Group"), flags);
+			m->NextRow();
+			m->AddRowItem(edit, flags);
 			m->End();
 
 			SetSizerAndFit(m);
@@ -41,6 +48,7 @@ class GroupPanel: public PicProcPanel
 
 			Bind(wxEVT_CHECKBOX, &GroupPanel::onEnable, this, GROUPENABLE);
 			Bind(wxEVT_BUTTON, &GroupPanel::selectFile, this, GROUPFILESELECT);
+			Bind(wxEVT_BUTTON, &GroupPanel::updateGroup, this, GROUPUPDATE);
 			Refresh();
 			Update();
 		}
@@ -60,6 +68,21 @@ class GroupPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+
+		void updateGroup(wxCommandEvent& event)
+		{
+			wxString commandstring = edit->GetValue();
+			commandstring.Replace("\n",";");
+			((PicProcessorGroup *) q)->loadCommands(commandstring);
+			((PicProcessorGroup *) q)->setSource("");
+			q->processPic();
+		}
+
+		void setEdit(wxString commandstring)
+		{
+			commandstring.Replace(";","\n");
+			edit->SetValue(commandstring);
 		}
 
 		void selectFile(wxCommandEvent& event)
@@ -100,7 +123,7 @@ class GroupPanel: public PicProcPanel
 				}
 				myConfig::getConfig().enableTempConfig(false);
 				toolfile.Close();
-				//edit->SetValue(filepath.GetFullName());
+				setEdit(commandstring);
 				((PicProcessorGroup *) q)->loadCommands(commandstring);
 				((PicProcessorGroup *) q)->setSource(filepath.GetFullName());
 				q->processPic();
