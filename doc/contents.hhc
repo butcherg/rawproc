@@ -102,6 +102,11 @@
 				<param name="Name" value="Grayscale">
 				<param name="Local" value="gray.html">
 				</OBJECT>
+
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Group">
+				<param name="Local" value="group.html">
+				</OBJECT>
 				
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Lens Correction">
