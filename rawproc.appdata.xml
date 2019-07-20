@@ -1,5 +1,5 @@
 <component type="desktop-application">
-	<id>rawproc</id>
+	<id>net.pulpitrock.rawproc</id>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-2.0+</project_license>
 	<name>rawproc</name>
