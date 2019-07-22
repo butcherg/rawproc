@@ -612,7 +612,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else return id;
 	id = p->GetId();
 	p->createPanel(parambook);
-	//p->processPic();  //redundant??
+	if (name != "group") p->processPic();  
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
 	if (display) CommandTreeSetDisplay(id, 592);
