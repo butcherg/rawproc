@@ -669,6 +669,8 @@ void PicPanel::SetColorManagement(bool b)
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	int mx, my, border, dimagex, dimagey;
+	float increment, minscale, maxscale;
 	event.Skip();
 	//if (blank) return;
 	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
@@ -736,6 +738,110 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				}
 				Refresh();
 			}
+			break;
+		case 45: //-
+			fit=false;
+			//int mx = event.m_x;
+			//int my = event.m_y;
+
+			//int mx, my;
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			//double 
+			increment = 0.05;
+			if (event.ShiftDown()) increment = 0.2;
+			//if (event.ControlDown()) increment = 1.0;
+
+			//int 
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			//if (event.GetWheelRotation() > 0)
+			//	scale += increment;
+			//else
+				scale -= increment;
+
+			//parm display.minscale: Smallest panel image size.  Default=0.1, or 10%
+			//float 
+			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
+			//parm display.maxscale: Smallest panel image size.  Default=5.0, or 500%
+			//float 
+			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
+			if (scale < minscale) 
+				scale = minscale;
+			else if (scale > maxscale) 
+				scale = maxscale; 
+		
+			//keep center of panel in the center...
+			//int 
+			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
+			//int 
+			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
+			viewposx += dimagex;
+			viewposy += dimagey;
+
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+
+			event.Skip();
+			Refresh();
+			break;
+		case 61: //+
+			fit=false;
+			//int mx = event.m_x;
+			//int my = event.m_y;
+
+			//int mx, my;
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			//double 
+			increment = 0.05;
+			if (event.ShiftDown()) increment = 0.2;
+			//if (event.ControlDown()) increment = 1.0;
+
+			//int 
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			//if (event.GetWheelRotation() > 0)
+				scale += increment;
+			//else
+			//	scale -= increment;
+
+			//parm display.minscale: Smallest panel image size.  Default=0.1, or 10%
+			//float 
+			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
+			//parm display.maxscale: Smallest panel image size.  Default=5.0, or 500%
+			//float 
+			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
+			if (scale < minscale) 
+				scale = minscale;
+			else if (scale > maxscale) 
+				scale = maxscale; 
+		
+			//keep center of panel in the center...
+			//int 
+			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
+			//int 
+			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
+			viewposx += dimagex;
+			viewposy += dimagey;
+
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+
+			event.Skip();
+			Refresh();
 			break;
 	}
 }
