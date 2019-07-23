@@ -142,6 +142,6 @@ cp "$file-$arch.AppDir/usr/bin/icon.xpm", "$file-$arch.AppDir/.";
 cp "$file-$arch.AppDir/usr/bin/rawproc.appdata.xml", "$file-$arch.AppDir/usr/share/metainfo/.";
 
 $result = `appimagetool-x86_64.AppImage --no-appstream $rootdir $file-$version-$arch.AppImage`;
-#$result = `rm -rf $rootdir`;
+$result = `rm -rf $rootdir`;
 
 

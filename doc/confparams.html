@@ -121,6 +121,12 @@
 <li><a name="tool.shadow"><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
 <li><a name="tool.shadow"><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
+<li><a name="tool.tone"><b>tool.tone.filmic.A</b>:  Default value for filmic tone operator A coefficient.  Default=6.2</li>
+<li><a name="tool.tone"><b>tool.tone.filmic.B</b>:  Default value for filmic tone operator B coefficient.  Default=0.5</li>
+<li><a name="tool.tone"><b>tool.tone.filmic.C</b>:  Default value for filmic tone operator C coefficient.  Default=1.7</li>
+<li><a name="tool.tone"><b>tool.tone.filmic.D</b>:  Default value for filmic tone operator D coefficient.  Default=0.06</li>
+<li><a name="tool.tone"><b>tool.tone.filmic.power</b>:  Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0</li>
+<li><a name="tool.tone"><b>tool.tone.gamma</b>:  Default value for gamma tone operator.  Default=2.2</li>
 <li><a name="tool.tone"><b>tool.tone.initialvalue</b>:  The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
@@ -132,4 +138,4 @@
 <p>For the output.*.parameters properties, the following are available.  Specify them
 as name=value pairs, separated by semicolons.</p>
 <ul>
-<li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li><br><li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br><li><b>excludeicc</b>: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li><br><li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li></ul></body></html>
+<li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li><br><li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br><li><b>excludeicc</b>: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li><br><li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li></ul></body></html>

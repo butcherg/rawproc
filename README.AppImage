@@ -16,7 +16,7 @@ at the github release page.
 
 Once built/downloaded, the AppImage can be executed in the normal way:
 
-$ rawproc0.8Dev-x86_64.AppImage
+$ rawproc0.9rc1-x86_64.AppImage
 
 Any rawproc command line parameters can be specified after the AppImage name.
 The executable in the AppImage will look in all the standard places for a 
