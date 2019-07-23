@@ -739,33 +739,19 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				Refresh();
 			}
 			break;
-		case 45: //-
+		case 45: //- zoom out
 			fit=false;
-			//int mx = event.m_x;
-			//int my = event.m_y;
-
-			//int mx, my;
 			GetSize(&mx,&my);
 			mx /= 2; my /=2;
 
-			//double 
 			increment = 0.05;
 			if (event.ShiftDown()) increment = 0.2;
-			//if (event.ControlDown()) increment = 1.0;
 
-			//int 
 			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
-			//if (event.GetWheelRotation() > 0)
-			//	scale += increment;
-			//else
-				scale -= increment;
+			scale -= increment;
 
-			//parm display.minscale: Smallest panel image size.  Default=0.1, or 10%
-			//float 
 			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
-			//parm display.maxscale: Smallest panel image size.  Default=5.0, or 500%
-			//float 
 			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
 			if (scale < minscale) 
 				scale = minscale;
@@ -773,9 +759,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				scale = maxscale; 
 		
 			//keep center of panel in the center...
-			//int 
 			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
-			//int 
 			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
 			viewposx += dimagex;
 			viewposy += dimagey;
@@ -791,33 +775,20 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			event.Skip();
 			Refresh();
 			break;
-		case 61: //+
+		case 61: //+ zoom in
 			fit=false;
-			//int mx = event.m_x;
-			//int my = event.m_y;
 
-			//int mx, my;
 			GetSize(&mx,&my);
 			mx /= 2; my /=2;
 
-			//double 
 			increment = 0.05;
 			if (event.ShiftDown()) increment = 0.2;
-			//if (event.ControlDown()) increment = 1.0;
 
-			//int 
 			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
-			//if (event.GetWheelRotation() > 0)
-				scale += increment;
-			//else
-			//	scale -= increment;
+			scale += increment;
 
-			//parm display.minscale: Smallest panel image size.  Default=0.1, or 10%
-			//float 
 			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
-			//parm display.maxscale: Smallest panel image size.  Default=5.0, or 500%
-			//float 
 			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
 			if (scale < minscale) 
 				scale = minscale;
@@ -825,9 +796,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				scale = maxscale; 
 		
 			//keep center of panel in the center...
-			//int 
 			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
-			//int 
 			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
 			viewposx += dimagex;
 			viewposy += dimagey;
