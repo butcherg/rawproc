@@ -17,6 +17,23 @@
 #include "gimage/gimage.h"
 #include "nikonlensid.h"
 
+void printBits(size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+
+    for (i=size-1;i>=0;i--)
+    {
+        for (j=7;j>=0;j--)
+        {
+            byte = (b[i] >> j) & 1;
+            printf("%u", byte);
+        }
+    }
+    puts("");
+}
+
 
 #ifdef USE_DCRAW
 //char dcrawversion[128] = "dcraw";
@@ -881,8 +898,8 @@ char * _loadRAW(const char *filename,
 	for (unsigned r=0; r<cfadim; r++) {
 		for (unsigned c=0; c<cfadim; c++) {
 			pos = c + r*cfadim;
-			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(c,r)];
-			cfarray[pos] = ndesc[RawProcessor.COLOR(c,r)];
+			buffer[pos]  = P1.cdesc[RawProcessor.COLOR(r,c)];
+			cfarray[pos] = ndesc[RawProcessor.COLOR(r,c)];
 		}
 	}
 	buffer[pos+1]  = '\0';

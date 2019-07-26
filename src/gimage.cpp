@@ -2433,10 +2433,10 @@ bool gImage::xtranArray(unsigned (&xtarray)[6][6])
 	if (imginfo.find("LibrawCFAArray") != imginfo.end()) {
 		std::string cfstr = imginfo["LibrawCFAArray"];
 		if (cfstr.size() == 36) { //x-trans 6x6 array
-			for (int y=0; y<6; y++) {
-				for (int x=0; x<6; x++) {
-					int pos = x + y*6;
-					xtarray[x][y] = (unsigned) (cfstr[pos] - '0');
+			for (int r=0; r<6; r++) {
+				for (int c=0; c<6; c++) {
+					int pos = c + r*6;
+					xtarray[r][c] = (unsigned) (cfstr[pos] - '0');
 				}
 			}
 			return true;
@@ -2451,10 +2451,10 @@ bool gImage::cfArray(unsigned (&cfarray)[2][2])
 	if (imginfo.find("LibrawCFAArray") != imginfo.end()) {
 		std::string cfstr = imginfo["LibrawCFAArray"];
 		if (cfstr.size() == 4) { //bayer 2x2 array
-			for (int y=0; y<2; y++) {
-				for (int x=0; x<2; x++) {
-					int pos = x + y*2;
-					cfarray[x][y] = (unsigned) (cfstr[pos] - '0');
+			for (int r=0; r<2; r++) {
+				for (int c=0; c<2; c++) {
+					int pos = c + r*2;
+					cfarray[r][c] = (unsigned) (cfstr[pos] - '0');
 				}
 			}
 			return true;
