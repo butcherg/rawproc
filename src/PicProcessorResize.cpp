@@ -66,7 +66,7 @@ class ResizePanel: public PicProcPanel
 			g->Layout();
 
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(myINTEGERCTRL_UPDATE, &ResizePanel::paramChanged, this);
 			Bind(myINTEGERCTRL_CHANGE, &ResizePanel::onWheel, this);
 			Bind(wxEVT_TIMER, &ResizePanel::OnTimer, this);
@@ -77,11 +77,6 @@ class ResizePanel: public PicProcPanel
 #endif
 			Refresh();
 			Update();
-		}
-
-		~ResizePanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -101,10 +96,10 @@ class ResizePanel: public PicProcPanel
 				if (blurbox->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
 			}
 			else {
-				t->Start(500,wxTIMER_ONE_SHOT);
+				t.Start(500,wxTIMER_ONE_SHOT);
 			}
 #else
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 #endif
 		}
 
@@ -141,7 +136,7 @@ class ResizePanel: public PicProcPanel
 #endif
 		wxRadioBox *algoselect;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

@@ -65,11 +65,12 @@ class CurvePanel: public PicProcPanel
 			Refresh();
 		}
 
-
+/*
 		~CurvePanel()
 		{
-			curve->~CurvePane();
+
 		}
+*/
 
 		void onEnable(wxCommandEvent& event)
 		{

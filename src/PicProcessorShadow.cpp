@@ -50,17 +50,12 @@ class ShadowPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &ShadowPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ShadowPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ShadowPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &ShadowPanel::onEnable, this, SHADOWENABLE);
 			Bind(wxEVT_TIMER, &ShadowPanel::OnTimer,  this);
-		}
-
-		~ShadowPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -79,7 +74,7 @@ class ShadowPanel: public PicProcPanel
 		{
 			val1->SetLabel(wxString::Format("%4d", shadow->GetValue()));
 			val2->SetLabel(wxString::Format("%4d", threshold->GetValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -121,7 +116,7 @@ class ShadowPanel: public PicProcPanel
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

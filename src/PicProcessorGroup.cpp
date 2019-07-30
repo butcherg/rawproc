@@ -52,12 +52,12 @@ class GroupPanel: public PicProcPanel
 			Refresh();
 			Update();
 		}
-
+/*
 		~GroupPanel()
 		{
 
 		}
-
+*/
 		void onEnable(wxCommandEvent& event)
 		{
 			if (enablebox->GetValue()) {

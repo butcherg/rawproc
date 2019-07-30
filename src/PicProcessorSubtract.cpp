@@ -89,7 +89,7 @@ class SubtractPanel: public PicProcPanel
 
 
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 
 			Bind(wxEVT_TIMER, &SubtractPanel::OnTimer, this);
 			Bind(wxEVT_TEXT_ENTER,&SubtractPanel::fileChanged, this);
@@ -100,11 +100,6 @@ class SubtractPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &SubtractPanel::selectDarkFile, this);
 			Refresh();
 			Update();
-		}
-
-		~SubtractPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -167,7 +162,7 @@ class SubtractPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			if (submode == SUBTRACTVAL) t->Start(500,wxTIMER_ONE_SHOT);
+			if (submode == SUBTRACTVAL) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void paramUpdated(wxCommandEvent& event)
@@ -186,7 +181,7 @@ class SubtractPanel: public PicProcPanel
 		wxTextCtrl *darkfile;
 		myFloatCtrl *subtract;
 		wxStaticText *cam;
-		wxTimer *t;
+		wxTimer t;
 		float camval;
 		int submode;
 

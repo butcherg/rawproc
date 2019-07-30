@@ -39,7 +39,7 @@ class ContrastPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &ContrastPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &ContrastPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &ContrastPanel::OnThumbTrack, this);
@@ -47,10 +47,6 @@ class ContrastPanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &ContrastPanel::OnTimer,  this);
 		}
 
-		~ContrastPanel()
-		{
-			t->~wxTimer();
-		}
 /*
 		void paramChanged(wxCommandEvent& event)
 		{
@@ -75,7 +71,7 @@ class ContrastPanel: public PicProcPanel
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", contrast->GetValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -106,7 +102,7 @@ class ContrastPanel: public PicProcPanel
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

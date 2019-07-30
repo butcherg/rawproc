@@ -187,7 +187,7 @@ class WhiteBalancePanel: public PicProcPanel
 
 
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 
 			Bind(wxEVT_TIMER, &WhiteBalancePanel::OnTimer, this);
 			Bind(wxEVT_RADIOBUTTON, &WhiteBalancePanel::OnButton, this);
@@ -201,11 +201,6 @@ class WhiteBalancePanel: public PicProcPanel
 
 			Refresh();
 			Update();
-		}
-
-		~WhiteBalancePanel()
-		{
-			t->~wxTimer();
 		}
 		
 		void OnReset(wxCommandEvent& event)
@@ -355,7 +350,7 @@ class WhiteBalancePanel: public PicProcPanel
 			pb->SetValue(false);
 			cb->SetValue(false);
 			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
@@ -375,7 +370,7 @@ class WhiteBalancePanel: public PicProcPanel
 		wxCheckBox *enablebox;
 		myFloatCtrl *rmult, *gmult ,*bmult;
 		wxBitmapButton *btn;
-		wxTimer *t;
+		wxTimer t;
 		unsigned patx, paty;
 		double patrad;
 		double orgr, orgg, orgb; //original multipliers, none if new tool

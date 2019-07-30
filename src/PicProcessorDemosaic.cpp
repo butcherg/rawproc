@@ -202,7 +202,7 @@ colorb->Enable(true);
 			Refresh();
 			Update();
 
-			t = new wxTimer(this);
+			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this);
@@ -212,11 +212,6 @@ colorb->Enable(true);
 			Bind(myINTEGERCTRL_UPDATE, &DemosaicPanel::paramChanged, this);
 			Bind(myINTEGERCTRL_CHANGE, &DemosaicPanel::onWheel, this);
 			Bind(wxEVT_TIMER, &DemosaicPanel::OnTimer, this);
-		}
-
-		~DemosaicPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -296,7 +291,7 @@ colorb->Enable(true);
 
 		void onWheel(wxCommandEvent& event)
 		{
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
@@ -375,7 +370,7 @@ colorb->Enable(true);
 		wxRadioBox *operselect;
 		wxRadioButton *halfb, *halfresizeb, *colorb;
 		int selected_algorithm;
-		wxTimer *t;
+		wxTimer t;
 
 #ifdef USE_LIBRTPROCESS
 		wxRadioButton *ahdb, *amazeb, *dcbb, *igvb, *lmmseb, *rcdb, *vngb, *xtran_markesteijnb, *xtran_fastb;

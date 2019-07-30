@@ -39,7 +39,7 @@ class GammaPanel: public PicProcPanel
 			m->Layout();
 
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 
 			Bind(wxEVT_TIMER, &GammaPanel::OnTimer, this);
 			Bind(myFLOATCTRL_CHANGE, &GammaPanel::paramChanged, this);
@@ -49,11 +49,6 @@ class GammaPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &GammaPanel::OnPaste, this, GAMMAPASTE);
 			Refresh();
 			Update();
-		}
-
-		~GammaPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -88,7 +83,7 @@ class GammaPanel: public PicProcPanel
 		void paramChanged(wxCommandEvent& event)
 		{
 			q->setParams(wxString::Format("%0.2f", gamma->GetFloatValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void paramUpdated(wxCommandEvent& event)
@@ -107,7 +102,7 @@ class GammaPanel: public PicProcPanel
 	private:
 		wxCheckBox *enablebox;
 		myFloatCtrl *gamma;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

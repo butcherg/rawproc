@@ -36,17 +36,11 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 	wxFont font(wxFontInfo(fontsize).Family(wxFONTFAMILY_SWISS));
 	SetFont(font);
 	SetSize(parent->GetSize());
-//	b = new wxBoxSizer(wxVERTICAL); 
-//	g = new wxGridBagSizer();
+
 	SetBackgroundColour(parent->GetBackgroundColour());
 	Bind(wxEVT_LEFT_DOWN, &PicProcPanel::OnLeftDown, this);
 }
 
-PicProcPanel::~PicProcPanel()
-{
-//	if (b) b->~wxBoxSizer();
-//	if (g) g->~wxGridBagSizer();
-}
 
 void PicProcPanel::setRateAdapt(bool r)
 {

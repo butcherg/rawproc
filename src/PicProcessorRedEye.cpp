@@ -76,18 +76,13 @@ class RedEyePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &RedEyePanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &RedEyePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &RedEyePanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnCheckBox, this, REDEYEDESAT);
 			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnEnable, this, REDEYEENABLE);
 			Bind(wxEVT_TIMER, &RedEyePanel::OnTimer,  this);
-		}
-
-		~RedEyePanel()
-		{
-			t->~wxTimer();
 		}
 
 		void OnEnable(wxCommandEvent& event)
@@ -107,7 +102,7 @@ class RedEyePanel: public PicProcPanel
 			val1->SetLabel(wxString::Format("%2.2f", (float) threshold->GetValue() / 10.0));
 			val2->SetLabel(wxString::Format("%d", radius->GetValue()));
 			val3->SetLabel(wxString::Format("%2.2f", (float) desatpct->GetValue() / 100.0));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -157,7 +152,7 @@ class RedEyePanel: public PicProcPanel
 		wxCheckBox *desat, *enablebox;
 		wxStaticText *val1, *val2, *val3;
 		wxBitmapButton *btn1, *btn2, *btn3;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

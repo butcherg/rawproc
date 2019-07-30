@@ -385,11 +385,6 @@ class CropPanel: public PicProcPanel
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 		}
 
-		~CropPanel()
-		{
-
-		}
-
 		void onEnable(wxCommandEvent& event)
 		{
 			if (enablebox->GetValue()) {

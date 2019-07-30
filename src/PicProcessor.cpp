@@ -17,11 +17,6 @@ class BlankPanel: public PicProcPanel
 			SetSizerAndFit(b);
 		}
 
-		~BlankPanel()
-		{
-			//panel->~wxPanel();
-		}
-
 	private:
 		wxPanel *panel;
 

@@ -154,7 +154,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_RADIOBUTTON, &BlackWhitePointPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnButton, this, BLACKWHITERECALC);
 			Bind(wxEVT_BUTTON, &BlackWhitePointPanel::OnCopy, this, BLACKWHITECOPY);
@@ -166,11 +166,6 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::onEnable, this, BLACKWHITEENABLE);
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnMinWhite, this, BLACKWHITEMINWHITE);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
-		}
-
-		~BlackWhitePointPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -282,7 +277,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		void OnChanged(wxCommandEvent& event)
 		{
 			if (bwmode == BLACKWHITESLIDERAUTO) bwmode == BLACKWHITESLIDER;
-			if (bwmode == BLACKWHITESLIDER) t->Start(500,wxTIMER_ONE_SHOT);
+			if (bwmode == BLACKWHITESLIDER) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -339,7 +334,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		wxStaticText *val1, *val2;
 		wxBitmapButton *btn1, * btn2;
 		int bwmode;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

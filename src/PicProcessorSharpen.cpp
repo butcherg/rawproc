@@ -38,17 +38,12 @@ class SharpenPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &SharpenPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &SharpenPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &SharpenPanel::onEnable, this, SHARPENENABLE);
 			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);
-		}
-
-		~SharpenPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -66,7 +61,7 @@ class SharpenPanel: public PicProcPanel
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -97,7 +92,7 @@ class SharpenPanel: public PicProcPanel
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 
 };

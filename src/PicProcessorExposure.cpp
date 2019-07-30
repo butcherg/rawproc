@@ -98,7 +98,7 @@ class ExposurePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this, EXPOSUREUNDO);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnCopy, this, EXPOSURECOPY);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnPaste, this, EXPOSUREPASTE);
@@ -111,11 +111,6 @@ class ExposurePanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);
 			
 			//processEV();
-		}
-
-		~ExposurePanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -169,12 +164,12 @@ class ExposurePanel: public PicProcPanel
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%2.2f", (ev->GetValue()-50.0)/10.0));
-			if (expmode == EXPOSUREEV) t->Start(500,wxTIMER_ONE_SHOT);
+			if (expmode == EXPOSUREEV) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 		
 		void OnFloatChange(wxCommandEvent& event)
 		{
-			if (expmode == EXPOSURETARGETEV) t->Start(500,wxTIMER_ONE_SHOT);
+			if (expmode == EXPOSURETARGETEV) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 		
 		void OnFloatUpdate(wxCommandEvent& event)
@@ -266,7 +261,7 @@ class ExposurePanel: public PicProcPanel
 		myFloatCtrl *radius, *ev0;
 		unsigned patx, paty;
 		double patrad;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

@@ -25,7 +25,6 @@ class PicProcPanel: public wxScrolledWindow //wxPanel
 
 	public:
 		PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params);
-		~PicProcPanel();
 		wxString getParams();
 		void setRateAdapt(bool r);
 		virtual void SetPic(PicProcessor *proc) {}
@@ -34,8 +33,6 @@ class PicProcPanel: public wxScrolledWindow //wxPanel
 
 	protected:
 		PicProcessor *q;
-		//wxBoxSizer *b;
-		//wxGridBagSizer *g;
 		wxString p;
 		bool rateAdapt;
 

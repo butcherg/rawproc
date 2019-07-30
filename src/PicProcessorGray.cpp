@@ -87,7 +87,7 @@ class GrayPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &GrayPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &GrayPanel::OnThumbTrack, this);
@@ -95,11 +95,6 @@ class GrayPanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &GrayPanel::OnTimer,  this);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnCopy, this, GRAYCOPY);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnPaste, this, GRAYPASTE);
-		}
-
-		~GrayPanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -154,7 +149,7 @@ class GrayPanel: public PicProcPanel
 			val2->SetLabel(wxString::Format("%2.2f", gr));
 			val3->SetLabel(wxString::Format("%2.2f", bl));
 			val4->SetLabel(wxString::Format("Total: %2.2f", rd+gr+bl));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -226,7 +221,7 @@ class GrayPanel: public PicProcPanel
 		wxStaticText *val1, *val2, *val3, *val4;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

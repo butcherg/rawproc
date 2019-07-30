@@ -143,11 +143,6 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &ColorspacePanel::camstatusDialog, this, COLORCAMERASTATUS);
 		}
 
-		~ColorspacePanel()
-		{
-
-		}
-
 		void onEnable(wxCommandEvent& event)
 		{
 			if (enablebox->GetValue()) {

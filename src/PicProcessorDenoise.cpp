@@ -151,7 +151,7 @@ class DenoisePanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &DenoisePanel::OnButton, this);
 			Bind(wxEVT_BUTTON, &DenoisePanel::OnCopy, this, DENOISECOPY);
 			Bind(wxEVT_BUTTON, &DenoisePanel::OnPaste, this, DENOISEPASTE);
@@ -164,11 +164,6 @@ class DenoisePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &DenoisePanel::onEnable, this, DENOISEENABLE);
 			//Bind(wxEVT_MOUSEWHEEL,&DenoisePanel::onWheel, this);
 			//Bind(wxEVT_TEXT_ENTER, &DenoisePanel::paramChanged, this);
-		}
-
-		~DenoisePanel()
-		{
-			t->~wxTimer();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -244,14 +239,14 @@ class DenoisePanel: public PicProcPanel
 				btn2->Enable(false);
 				algorithm = DENOISEWAVELET;
 			}
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void onWheel(wxCommandEvent& event)
 		{
 			if (thresh->GetFloatValue() < 0.0) thresh->SetFloatValue(0.0);
 			if (thresh->GetFloatValue() > 1.0) thresh->SetFloatValue(1.0);
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 
 			event.Skip();
 		}
@@ -261,7 +256,7 @@ class DenoisePanel: public PicProcPanel
 			if (event.GetId() == SIGMASLIDER) val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
 			if (event.GetId() == LOCALSLIDER) val1->SetLabel(wxString::Format("%3d", local->GetValue()));
 			if (event.GetId() == PATCHSLIDER) val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
-			if (event.GetId() == SIGMASLIDER) t->Start(500,wxTIMER_ONE_SHOT);
+			if (event.GetId() == SIGMASLIDER) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
@@ -324,7 +319,7 @@ class DenoisePanel: public PicProcPanel
 		wxStaticText *val, *val1, *val2;
 		wxBitmapButton *btn, *btn1, *btn2;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 

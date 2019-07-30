@@ -159,7 +159,7 @@ class TonePanel: public PicProcPanel
 			m->Layout();
 
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 
 			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &TonePanel::OnCopy, this, TONECOPY);
@@ -173,11 +173,6 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
 			Refresh();
 			Update();
-		}
-
-		~TonePanel()
-		{
-			t->~wxTimer();
 		}
 
 		void setPanel(wxArrayString p)
@@ -335,7 +330,7 @@ class TonePanel: public PicProcPanel
 
 		void floatParamChanged(wxCommandEvent& event)
 		{
-			if (gamb->GetValue() | filmicb->GetValue()) t->Start(500,wxTIMER_ONE_SHOT);
+			if (gamb->GetValue() | filmicb->GetValue()) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 		
 		void floatParamUpdated(wxCommandEvent& event)
@@ -373,7 +368,7 @@ class TonePanel: public PicProcPanel
 		}
 
 	private:
-		wxTimer *t;
+		wxTimer t;
 		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power;
 		wxCheckBox *enablebox, *tonenorm;
 		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;

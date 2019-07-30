@@ -163,11 +163,6 @@ class myLensDialog: public wxDialog
 			
 		}
 		
-		~myLensDialog()
-		{
-			if (list) list->Destroy();
-		}
-		
 		void EndDialog(wxCommandEvent& event)
 		{
 			if (event.GetId() == wxID_OK)

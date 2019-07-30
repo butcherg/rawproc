@@ -37,7 +37,7 @@ class BrightPanel: public PicProcPanel
 			Refresh();
 			Update();
 			SetFocus();
-			t = new wxTimer(this);
+			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &BrightPanel::OnButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &BrightPanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &BrightPanel::OnThumbTrack, this);
@@ -45,15 +45,11 @@ class BrightPanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &BrightPanel::OnTimer,  this);
 		}
 
-		~BrightPanel()
-		{
-			t->~wxTimer();
-		}
 
 		void OnChanged(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", bright->GetValue()));
-			t->Start(500,wxTIMER_ONE_SHOT);
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -96,7 +92,7 @@ class BrightPanel: public PicProcPanel
 		wxStaticText *val;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
-		wxTimer *t;
+		wxTimer t;
 
 };
 
