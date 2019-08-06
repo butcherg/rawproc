@@ -658,7 +658,8 @@ wxString rawprocFrm::AssembleCommand()
 		cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
 		iter = commandtree->GetNextChild(root, cookie);
 		while (iter.IsOk()) {
-			cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
+			if (((PicProcessor *)commandtree->GetItemData(iter))->isEnabled()) 
+				cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
 			iter = commandtree->GetNextChild(root, cookie);
 		}
 	}

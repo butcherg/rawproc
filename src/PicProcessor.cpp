@@ -122,6 +122,11 @@ void PicProcessor::enableProcessing(bool e)
 	processingenabled = e;
 }
 
+bool PicProcessor::isEnabled()
+{
+	return processingenabled;
+}
+
 PicProcPanel* PicProcessor::getPanel()
 {
 	return toolpanel;

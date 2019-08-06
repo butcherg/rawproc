@@ -50,6 +50,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getDrawList();
 		wxTreeCtrl *getCommandTree();
 		void enableProcessing(bool e);
+		bool isEnabled();
 		GIMAGE_CHANNEL getChannel();
 		//void setDirty();
 		//bool isDirty();
