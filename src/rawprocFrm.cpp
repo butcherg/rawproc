@@ -498,6 +498,7 @@ PicProcessor * rawprocFrm::GetItemProcessor(wxTreeItemId item)
 void rawprocFrm::InfoDialog(wxTreeItemId item)
 {
 	bool floatstats = false;
+	float exp = 0.0, apt = 0.0;
 	//parm imageinfo.floatstats: Show image statistic as floats corresponding to the internal image, or integers corresponding to the unsigned 16-bit integer of raw formats.  Default=1
 	if (myConfig::getConfig().getValueOrDefault("imageinfo.floatstats","1") == "1")
 		floatstats = true;
@@ -513,10 +514,11 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 	for (std::map<std::string,std::string>::iterator it=e.begin(); it!=e.end(); ++it) {
 		if (it->first == "ExifTag") continue;
 		if (it->first.find("Libraw") != std::string::npos) if (librawinclude == 0) continue;
+		if (it->first == "FNumber") apt = atof(it->second.c_str()); 
 		if (it->first == "ExposureTime") {
-			float exp = atof(it->second.c_str());
-			if (exp > 1.0)
-				exif.Append(wxString::Format("<b>%s:</b> 1/%f sec<br>\n",it->first.c_str(),exp));
+			exp = atof(it->second.c_str());
+			if (exp >= 1.0)
+				exif.Append(wxString::Format("<b>%s:</b> %f sec<br>\n",it->first.c_str(),exp));
 			else
 				exif.Append(wxString::Format("<b>%s:</b> 1/%d sec<br>\n",it->first.c_str(),int(1.0/exp)));
 		}
@@ -524,6 +526,8 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
 	}
 	char buff[4096];
+
+	exif.Append(wxString::Format("<br><b>Camera EV:</b> %0.2f<br>\n",log2(pow(apt,2)/exp)));
 
 
 	char *profile = dib.getProfile();
@@ -536,9 +540,9 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s<br>\n", wxString(buff)));
 			cmsCloseProfile(icc);
 		}
-		else exif.Append(wxString::Format("<br>\nICC Profile: failed (%d)<br>\n",profile_length));
+		else exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> failed (%d)<br>\n",profile_length));
 	}
-	else exif.Append(wxString::Format("<br>\nICC Profile: None (%d)<br>\n",profile_length));
+	else exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> None (%d)<br>\n",profile_length));
 
 	exif.Append("<hr><b>Image Stats:</b><pre>\n");
 	exif.Append(dib.Stats(floatstats).c_str());
