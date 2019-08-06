@@ -75,6 +75,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			double camwht = librawwht / 65536.0; 
 
 			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, "min white:");
+			datvals= new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht));
+			datminwht = new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht));
 
 			
 			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
@@ -134,11 +136,11 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(datb, flags);
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht)), flags);
+			m->AddRowItem(datvals, flags);
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "               "),flags);
 			m->AddRowItem(minwhite, flags);
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht)), flags.CenterVertical());
+			m->AddRowItem(datminwht, flags.CenterVertical());
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -272,7 +274,12 @@ class BlackWhitePointPanel: public PicProcPanel
 			}
 		}
 
-
+		void updateVals(float black, float white, float minwhite)
+		{
+			datvals->SetLabel(wxString::Format("black: %f\nwhite: %f",black, white));
+			datminwht->SetLabel(wxString::Format("%f",minwhite));
+			Refresh();
+		}
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -331,7 +338,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		wxCheckBox *recalc,*enablebox, *minwhite;
 		wxRadioButton *slideb, *datb, *camb;
 		myDoubleSlider *bwpoint;
-		wxStaticText *val1, *val2;
+		wxStaticText *val1, *val2, *datvals, *datminwht;
 		wxBitmapButton *btn1, * btn2;
 		int bwmode;
 		wxTimer t;
@@ -421,7 +428,8 @@ void PicProcessorBlackWhitePoint::reCalc()
 
 bool PicProcessorBlackWhitePoint::processPic(bool processnext) 
 {
-	double blk, wht; 
+	double blk, wht;
+	float maxwht, minwht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
 	if (dib) delete dib;
@@ -452,13 +460,16 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 				wht = atof(s["bmax"].c_str());
 			}
 			else if (channel == CHANNEL_RGB) {
+				maxwht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+				minwht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
 				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
 				if (p.size() >= 3 && p[2] == "minwhite")
-					wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+					wht = minwht;
 				else
-					wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+					wht = maxwht;
 			}
 			if (blk < 0.0) blk = 0.0;
+			((BlackWhitePointPanel *) toolpanel)->updateVals(blk,wht,minwht);
 		}
 
 		else {
