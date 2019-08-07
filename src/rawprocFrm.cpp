@@ -1720,8 +1720,8 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Crop tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1");
 		return;
 	}
 	SetStatusText("");
