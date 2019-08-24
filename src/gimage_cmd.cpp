@@ -138,6 +138,59 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 			commandstring += std::string(cs);
 		}
+
+		else if (strcmp(cmd,"tone") == 0) {
+			//tone:filmic,6.20,0.50,1.70,0.06,1.00,norm 
+			char *c = strtok(NULL, " ");
+			std::vector<std::string> p = split(std::string(c), ",");
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tone.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("tone: %s (%d threads)... ",p[0].c_str(),threadcount); fflush(stdout);
+
+			_mark();
+			if (p[0] == "gamma") {
+				double gamma = 1.0;
+				if (p.size() >= 2) gamma = atof(p[1].c_str());
+				dib.ApplyToneMapGamma(gamma, threadcount);
+			}
+			else if (p[0] == "reinhard") {
+				bool channel = true;
+				if (p.size() >= 2) if (p[1] == "luminance") channel = false;
+				bool norm = false;
+				if (p.size() >= 3) if (p[2] == "norm") norm = true;
+				dib.ApplyToneMapReinhard(channel, norm, threadcount);
+			}
+			else if (p[0] == "log2") {
+				dib.ApplyToneMapLog2(threadcount);
+			}
+			else if (p[0] == "loggamma") {
+				dib.ApplyToneMapLogGamma(threadcount);
+			}
+			else if (p[0] == "filmic") {
+				double filmicA = 6.2;
+				double filmicB = 0.5;
+				double filmicC = 1.7;
+				double filmicD = 0.06;
+				double power = 2.2;
+				bool norm = false;
+				if (p.size() >= 2) filmicA = atof(p[1].c_str());
+				if (p.size() >= 3) filmicB = atof(p[2].c_str());
+				if (p.size() >= 4) filmicC = atof(p[3].c_str());
+				if (p.size() >= 5) filmicD = atof(p[4].c_str());
+				if (p.size() >= 6) power = atof(p[5].c_str());
+				if (p.size() >= 7 && p[6] == "norm") norm = true;
+				dib.ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, power, norm, threadcount);
+			}
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+
+			char cs[256];
+			sprintf(cs, "tone:%s ",c);
+			commandstring += std::string(cs);
+		}
 		
 		//img <li>group:command;command;...</li>
 		else if (strcmp(cmd,"group") == 0) {
