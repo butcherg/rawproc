@@ -179,12 +179,16 @@ bool contains(const char * buf, const char * str)
 std::vector<std::string> split(std::string s, std::string delim)
 {
 	std::vector<std::string> v;
+	if (s.find(delim) == std::string::npos) {
+		v.push_back(s);
+		return v;
+	}
 	size_t pos=0;
 	size_t start;
 	while (pos < s.length()) {
 		start = pos;
 		pos = s.find(delim,pos);
-		if (pos == s.npos) {
+		if (pos == std::string::npos) {
 			v.push_back(s.substr(start,s.length()-start));
 			return v;
 		}
