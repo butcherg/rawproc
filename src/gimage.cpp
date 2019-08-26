@@ -738,6 +738,8 @@ GIMAGE_FILETYPE gImage::getFileType(const char * filename)
 {
 	std::string fname = filename;
 	std::vector<std::string> fpieces =  split(fname, ".");
+	if (fpieces.size() < 1) return FILETYPE_BAD_FILENAME;
+
 	std::string ext = fpieces.back();
 
 	if (	(ext.compare("tif")  == 0) | 
