@@ -177,7 +177,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 		if (wxFileName::DirExists(startpath))
 			openfilepath = startpath;
 
-	SetDropTarget(new myFileDropTarget(this));
+	//SetDropTarget(new myFileDropTarget(this));
 
 	CreateGUIControls();
 #if defined(_OPENMP)
@@ -1382,16 +1382,6 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 
 //Menu Items (keep last in file)
 
-
-/*
-bool rawprocFrm::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
-{
-	wxFileName f(filenames[0]);
-	wxSetWorkingDirectory (f.GetPath());
-	openfilepath = f.GetPath();
-	OpenFile(filenames[0]);
-}
-*/
 
 
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
