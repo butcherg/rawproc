@@ -10,9 +10,26 @@ the right place.</p>
 <ul>
 <li>gamma: The same function as in the original gamma tool, which will eventually be removed.  Default: 1.0, or no-change.</li>
 <li>reinhart: Applies the simple Reinhart function, val / (1-val), to either the individual channels, or as a computed 
-change to the luminance of each pixel.  Default: channel</li>
-<li>loggamma: The HEVC version of the ARIB STD-B67 algorithm, as defined in https://en.wikipedia.org/wiki/Hybrid_Log-Gamma</li>
-<li>filmic: The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog: R(x) = pow(x(6.2x+.5))/(x(6.2x+1.7)+0.06)</li>
+change to the luminance of each pixel.  Default: channel.</li>
+<li>loggamma: The HEVC version of the ARIB STD-B67 algorithm, as defined in https://en.wikipedia.org/wiki/Hybrid_Log-Gamma.</li>
+<li>filmic: The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog: <pre>
+R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2)
+</pre>  
+rawproc parameterizes the coefficients as follows: 
+<pre>
+y = pow((x(Ax+B))/(x(Ax+C))+D,Power)
+</pre>
+
+Usage notes:
+<ul>
+	<li>The Power coefficient is really a gamma, used in Hable's blog post to compare filmic to Reinhard.  
+	Setting it to 1.0 nulls its effect.</li>
+	<li>A affects the middle part of the curve.</li>
+	<li>B affects the toe of the curve, flattening it as the value is reduced.</li>
+	<li>C affects the shoulder of the curve.</li>
+	<li>D inversely affects the middle part of the curve.</li>
+</ul>
+</li>
 </ul>
 </p>
 
