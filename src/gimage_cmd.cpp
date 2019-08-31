@@ -139,6 +139,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
+		//img <li>tone:operator,[param...]</li>
 		else if (strcmp(cmd,"tone") == 0) {
 			//tone:filmic,6.20,0.50,1.70,0.06,1.00,norm 
 			char *c = strtok(NULL, " ");
