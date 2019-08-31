@@ -24,7 +24,7 @@ while ($line = <INFILE>) {
 			#$line =~ s/value=//;
 			$line =~ s/<//;
 			$line =~ s/>//;
-			$line =~ s/"//;
+			$line =~ s/"//g;
 			@tokens = split "=", $line;
 			if ($line =~ /Name/)  {$title = $tokens[2];}
 			if ($line =~ /Local/) {$url = $tokens[2];}
