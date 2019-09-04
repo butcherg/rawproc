@@ -154,12 +154,27 @@ mkdir build-linux
 cd build-linux
 ../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
 make
-make doc
 sudo make install
 </pre>
 
 ...and there you go, rawproc, img, and exif binaries will be installed in
 /usr/local/bin.
+
+## Other Tasks
+
+If you're building from source in either Linux or MSYS2, you'll also need to build and manually install your configuration and help files.  In the build directory:
+
+<pre>
+make doc
+make conf
+sudo cp src/rawprocdoc.zip /usr/local/bin/.
+mkdir ~/.rawproc
+cp src/rawproc.conf ~/.rawproc/.
+</pre>
+
+Right now, rawproc will only look for its help file in the directory containing the executable.  rawproc will look for 
+a rawproc.conf in a few places, but the best place to put it is in a ~/.rawproc directory.  Future versions will use that
+directory as a default for other stuff, like cms.profilepath and the lensfun database.
 
 ## Building img without rawproc
 
