@@ -469,7 +469,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 					wht = maxwht;
 			}
 			if (blk < 0.0) blk = 0.0;
-			((BlackWhitePointPanel *) toolpanel)->updateVals(blk,wht,minwht);
+			//((BlackWhitePointPanel *) toolpanel)->updateVals(blk,wht,minwht);
 		}
 
 		else {
