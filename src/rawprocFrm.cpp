@@ -177,7 +177,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 		if (wxFileName::DirExists(startpath))
 			openfilepath = startpath;
 
-	//SetDropTarget(new myFileDropTarget(this));
+	SetDropTarget(new myFileDropTarget(this));
 
 	CreateGUIControls();
 #if defined(_OPENMP)
