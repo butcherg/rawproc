@@ -224,6 +224,7 @@ bool PicProcessorGroup::processPic(bool processnext)
 			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("group command: %s",p[i]));
 			do_cmd(*dib, p[i].ToStdString(), "", false);
 		}
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.group.log","0") == "1"))

@@ -249,6 +249,7 @@ bool PicProcessorCurve::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneCurve(ctrlpts, channel, threadcount);
+		m_display->SetModified(true);
 		float d = durationf();
 
 		toolpanel->setRateAdapt(false);

@@ -369,11 +369,15 @@ bool PicProcessorExposure::processPic(bool processnext)
 		mark();
 		if (expv) {
 			m_tree->SetItemText(id, "exposure:ev");
-			if (ev != 0.0) dib->ApplyExposureCompensation(ev, threadcount);
+			if (ev != 0.0) {
+				dib->ApplyExposureCompensation(ev, threadcount);
+				m_display->SetModified(true);
+			}
 		}
 		else {
 			m_tree->SetItemText(id, "exposure:patch");
 			float stops = dib->ApplyExposureCompensation(x, y, radius, ev, threadcount);
+			m_display->SetModified(true);
 			((ExposurePanel *) toolpanel)->setStops(stops);
 		}
 		wxString d = duration();

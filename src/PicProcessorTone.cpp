@@ -416,6 +416,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			if (p.size() >= 2) gamma = atof(p[1].c_str());
 			mark();
 			dib->ApplyToneMapGamma(gamma, threadcount);
+			m_display->SetModified(true);
 			d = duration();
 
 		}
@@ -424,6 +425,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			m_tree->SetItemText(id, "tone:loggamma");
 			mark();
 			dib->ApplyToneMapLogGamma(threadcount);
+			m_display->SetModified(true);
 			d = duration();
 
 		}
@@ -432,6 +434,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			m_tree->SetItemText(id, "tone:log2");
 			mark();
 			dib->ApplyToneMapLog2(threadcount);
+			m_display->SetModified(true);
 			d = duration();
 		}
 		else if (p[0] == "reinhard") {
@@ -443,6 +446,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			if (p.size() >= 3) if (p[2] == "norm") norm = true;
 			mark();
 			dib->ApplyToneMapReinhard(channel, norm, threadcount);
+			m_display->SetModified(true);
 			d = duration();
 		}
 		else if (p[0] == "filmic") {
@@ -462,6 +466,7 @@ bool PicProcessorTone::processPic(bool processnext)
 			if (p.size() >= 7 && p[6] == "norm") norm = true;
 			mark();
 			dib->ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, power, norm, threadcount);
+			m_display->SetModified(true);
 			d = duration();
 		}
 

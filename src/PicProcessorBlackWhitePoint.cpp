@@ -502,6 +502,7 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		dib->ApplyToneLine(blk, wht, channel, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		//parm tool.all.log: Turns on logging for all tools.  Default=0

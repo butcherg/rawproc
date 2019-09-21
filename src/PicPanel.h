@@ -52,6 +52,8 @@ class PicPanel: public wxPanel
 		coord GetImgCoords();
 		void SetDrawList(wxString list);
 		void FitMode(bool f);
+		void SetModified(bool m);
+		bool Modified();
 		void OnMouseWheel(wxMouseEvent& event);
 		void OnMouseMove(wxMouseEvent& event);
 		void OnLeftUp(wxMouseEvent& event);
@@ -73,6 +75,8 @@ class PicPanel: public wxPanel
 		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip, exposurebox;
 		int skipmove;
 		int oob;
+		
+		bool modified;
 
 		double scale;
 		wxBitmap *image, *thumbnail;

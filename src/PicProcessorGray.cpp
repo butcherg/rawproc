@@ -261,6 +261,7 @@ bool PicProcessorGray::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		dib->ApplyGray(r, g, b, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))

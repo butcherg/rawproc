@@ -163,6 +163,7 @@ bool PicProcessorShadow::processPic(bool processnext)
 	if (processingenabled) {
 	mark();
 		dib->ApplyToneCurve(ctrlpts.getControlPoints(), threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.shadow.log","0") == "1"))

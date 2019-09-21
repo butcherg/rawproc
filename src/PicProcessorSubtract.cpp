@@ -245,6 +245,7 @@ bool PicProcessorSubtract::processPic(bool processnext)
 		if (p["value"] == "file") {
 			if (wxFileName::FileExists(wxString(p["filename"]))) {
 				if (dib->ApplySubtract(p["filename"].c_str(), threadcount)) {
+					m_display->SetModified(true);
 					result = true;
 				}
 				else {
@@ -259,6 +260,7 @@ bool PicProcessorSubtract::processPic(bool processnext)
 		}
 		else {
 			dib->ApplySubtract(subtract, threadcount);
+			m_display->SetModified(true);
 			result = true;
 		}
 

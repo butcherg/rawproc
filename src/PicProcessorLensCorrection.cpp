@@ -632,7 +632,8 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 					}
 				}
 			}
-
+			
+			m_display->SetModified(true);
 			wxString d = duration();
 
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))

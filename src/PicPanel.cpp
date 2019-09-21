@@ -83,6 +83,20 @@ bool PicPanel::ToggleToolTip()
 	}
 }
 
+void PicPanel::SetModified(bool m)
+{
+	modified = m;
+	if (modified)
+		((wxFrame *) GetParent())->SetStatusText("Modified",STATUS_MODIFIED);
+	else
+		((wxFrame *) GetParent())->SetStatusText("",STATUS_MODIFIED);
+}
+
+bool PicPanel::Modified()
+{
+	return modified;
+}
+
 
 void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 {
@@ -220,14 +234,14 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 							intent, dwflags);
 			}
 
-			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
+			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),STATUS_CMS);
 	
 			//if (dispTransform) 
-			//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),1);
-			//else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",1);
+			//	((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),STATUS_CMS);
+			//else ((wxFrame *) GetParent())->SetStatusText("CMS:xform_error",STATUS_CMS);
 
 		}
-		else ((wxFrame *) GetParent())->SetStatusText("",1);
+		else ((wxFrame *) GetParent())->SetStatusText("",STATUS_CMS);
 
 
 		int localoob = oob;
@@ -296,9 +310,9 @@ void PicPanel::setStatusBar()
 		((wxFrame *) GetParent())->SetStatusText("");
 
 	if (fit)
-		((wxFrame *) GetParent())->SetStatusText("scale: fit",2);
+		((wxFrame *) GetParent())->SetStatusText("scale: fit",STATUS_SCALE);
 	else
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),2);
+		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),STATUS_SCALE);
 }
 
 void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)

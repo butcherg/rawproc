@@ -516,10 +516,12 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 			if (dib->getInfoValue("LibrawCFAPattern") != "") {
 				if (optype == multipliers) {
 					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+					m_display->SetModified(true);
 					m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
 				}
 				else if (optype == camera) {
 					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+					m_display->SetModified(true);
 					m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
 				}
 				else {
@@ -539,18 +541,22 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 		else {
 			if (optype == multipliers) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				m_display->SetModified(true);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
 			} 
 			else if (optype == camera) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				m_display->SetModified(true);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
 			}
 			else if (optype == imgpatch) {
 				wbmults = dib->ApplyPatchWhiteBalance(patchx, patchy, patchrad, threadcount);
+				m_display->SetModified(true);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:patch"));
 			}
 			else if (optype == automatic) {
 				wbmults = dib->ApplyWhiteBalance(threadcount);
+				m_display->SetModified(true);
 				m_tree->SetItemText(id, wxString::Format("whitebalance:auto"));
 			}
 		}

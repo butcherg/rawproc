@@ -18,6 +18,10 @@
 #define TEXTHEIGHT 25
 #endif
 
+#define STATUS_MODIFIED 1
+#define STATUS_CMS 2
+#define STATUS_SCALE 3
+
 
 bool ImageContainsRawprocCommand(wxString fname);
 

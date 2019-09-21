@@ -653,6 +653,7 @@ bool PicProcessorCrop::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		dib->ApplyCrop(left, top, right, bottom, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))

@@ -298,8 +298,8 @@ void rawprocFrm::CreateGUIControls()
 	SetMenuBar(WxMenuBar1);
 
 	WxStatusBar1 = new wxStatusBar(this, ID_WXSTATUSBAR1);
-	int widths[3] = {-1,130, 130};
-	WxStatusBar1->SetFieldsCount (3, widths);
+	int widths[4] = {-1,130, 130, 130};
+	WxStatusBar1->SetFieldsCount (4, widths);
 
 	SetStatusBar(WxStatusBar1);
 	SetTitle(_("rawproc"));
@@ -445,6 +445,9 @@ void rawprocFrm::SetStartPath(wxString path)
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
+	if (pic->Modified())
+		if (wxMessageBox("Image is modified, abandon exit to save?", "Confirm", wxYES_NO, this) == wxYES) 
+			return;
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
@@ -462,6 +465,9 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
+	if (pic->Modified())
+		if (wxMessageBox("Image is modified, abandon exit to save?", "Confirm", wxYES_NO, this) == wxYES) 
+			return;
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
@@ -770,6 +776,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			return;
 		}
 		
+		pic->SetModified(false);
+		
 		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
 			WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
@@ -790,7 +798,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		}
 		else {
 			pic->FitMode(true);
-			SetStatusText("scale: fit",2);
+			SetStatusText("scale: fit",STATUS_SCALE);
 		}
 		CommandTreeSetDisplay(picdata->GetId(), 790);
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
@@ -938,6 +946,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 			
+			pic->SetModified(false);
+			
 			if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
 				WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
 				dib->NormalizeRotation();
@@ -956,7 +966,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				pic->FitMode(true);
-				SetStatusText("scale: fit",2);
+				SetStatusText("scale: fit",STATUS_SCALE);
 			}
 
 			
@@ -1126,6 +1136,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				WxStatusBar1->SetStatusText(wxString::Format("Saving %s (no embedded profile)...",fname));
 				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
 			}
+			
+			pic->SetModified(false);
 			
 			wxFileName tmpname(fname);
 			
@@ -1315,7 +1327,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	case 70: //F - fit image to window
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
-		SetStatusText("scale: fit",2);
+		SetStatusText("scale: fit",STATUS_SCALE);
 		break;
 	case 67: //c - copy selected command and its parameters to the clipboard
 		if (commandtree->IsEmpty()) return;

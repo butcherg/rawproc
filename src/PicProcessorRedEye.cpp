@@ -260,6 +260,7 @@ bool PicProcessorRedEye::processPic(bool processnext)
 	if (processingenabled) {
 		mark();
 		dib->ApplyRedeye(points, threshold, radius, desat, desatpct, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.redeye.log","0") == "1"))

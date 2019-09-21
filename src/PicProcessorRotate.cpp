@@ -523,6 +523,7 @@ bool PicProcessorRotate::processPic(bool processnext)
 		else if ((int) angle == 180) dib->ApplyRotate180(threadcount);
 		else if ((int) angle == 90) dib->ApplyRotate90(threadcount);
 		else dib->ApplyRotate(angle, autocrop, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))

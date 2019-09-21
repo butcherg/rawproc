@@ -127,6 +127,7 @@ bool PicProcessorSaturation::processPic(bool processnext)
 	if (processingenabled & saturation != 1.0) {
 		mark();
 		dib->ApplySaturate(saturation, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.saturate.log","0") == "1"))

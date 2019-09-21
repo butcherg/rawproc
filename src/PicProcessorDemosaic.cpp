@@ -430,18 +430,26 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 
 	if (processingenabled) {
 		mark();
-		if (p[0] == "color")
+		if (p[0] == "color") {
 			result = dib->ApplyMosaicColor(threadcount);
-		else if (p[0] == "half")
+			m_display->SetModified(true);
+		}
+		else if (p[0] == "half") {
 			result = dib->ApplyDemosaicHalf(false, threadcount);
-		else if (p[0] == "half_resize")
+			m_display->SetModified(true);
+		}
+		else if (p[0] == "half_resize") {
 			result = dib->ApplyDemosaicHalf(true, threadcount);
+			m_display->SetModified(true);
+		}
 #ifdef USE_LIBRTPROCESS
 		else if (p[0] == "vng") {
 			result = dib->ApplyDemosaicVNG(threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "rcd") {
 			result = dib->ApplyDemosaicRCD(threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "dcb") {
 			int iterations = 1;
@@ -449,6 +457,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			bool dcb_enhance = false;
 			if (p.GetCount() >= 3) if (p[2] == "1") dcb_enhance = true;
 			result = dib->ApplyDemosaicDCB(iterations, dcb_enhance, threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "amaze") {
 			double initGain = 1.0;
@@ -456,20 +465,25 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			float inputScale = 1.0;
 			float outputScale = 1.0;
 			result = dib->ApplyDemosaicAMAZE(initGain, border, inputScale, outputScale, threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "igv") {
 			result = dib->ApplyDemosaicIGV(threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "ahd") {
 			result = dib->ApplyDemosaicAHD(threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "lmmse") { 
 			int iterations = 1;
 			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
 			result = dib->ApplyDemosaicLMMSE(iterations, threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "xtran_fast") {
 			result = dib->ApplyDemosaicXTRANSFAST(threadcount);
+			m_display->SetModified(true);
 		}
 		else if (p[0] == "xtran_markesteijn") { 
 			int passes = 1;
@@ -477,6 +491,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 			bool useCieLab = false;
 			if (p.GetCount() >= 3) if (p[2] == "1") useCieLab = true;
 			result = dib->ApplyDemosaicXTRANSMARKESTEIJN(passes, useCieLab, threadcount);
+			m_display->SetModified(true);
 		}
 #endif
 		else {

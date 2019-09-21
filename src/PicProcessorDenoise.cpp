@@ -381,10 +381,18 @@ bool PicProcessorDenoise::processPic(bool processnext)
 
 	if (processingenabled) { 
 		mark();
-		if (algorithm == DENOISENLMEANS)
-			if (sigma > 0.0) dib->ApplyNLMeans(sigma,local, patch, threadcount);
-		if (algorithm == DENOISEWAVELET)
-			if (threshold > 0.0) dib->ApplyWaveletDenoise(threshold, threadcount);
+		if (algorithm == DENOISENLMEANS) {
+			if (sigma > 0.0) { 
+				dib->ApplyNLMeans(sigma,local, patch, threadcount);
+				m_display->SetModified(true);
+			}
+		}
+		else if (algorithm == DENOISEWAVELET) {
+			if (threshold > 0.0) {
+				dib->ApplyWaveletDenoise(threshold, threadcount);
+				m_display->SetModified(true);
+			}
+		}
 		wxString d = duration();
 		m_tree->SetItemText(id, wxString::Format("denoise:%s",cp[0]));
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))

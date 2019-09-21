@@ -438,6 +438,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 					case GIMAGE_OK:
 						result = true;
 						m_tree->SetItemText(id, wxString::Format("colorspace:profile,convert"));
+						m_display->SetModified(true);
 						break;
 					case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
 						wxMessageBox("ColorSpace apply: no input profile in image.");
@@ -508,7 +509,10 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 						wxMessageBox("ColorSpace convert failed.");
 						result = false;
 					}
-					else m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
+					else {
+						m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
+						m_display->SetModified(true);
+					}
 					wxString d = duration();
 
 					if (result) 

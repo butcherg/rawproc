@@ -146,6 +146,7 @@ bool PicProcessorSharpen::processPic(bool processnext)
 	if (global_processing_enabled & processingenabled & sharp > 1.0) {
 		mark();
 		dib->ApplyConvolutionKernel(kernel, threadcount);
+		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
