@@ -446,7 +446,7 @@ void rawprocFrm::SetStartPath(wxString path)
 void rawprocFrm::OnClose(wxCloseEvent& event)
 {
 	if (pic->Modified())
-		if (wxMessageBox("Image is modified, abandon exit to save?", "Confirm", wxYES_NO, this) == wxYES) 
+		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
@@ -466,7 +466,7 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
 	if (pic->Modified())
-		if (wxMessageBox("Image is modified, abandon exit to save?", "Confirm", wxYES_NO, this) == wxYES) 
+		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
