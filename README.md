@@ -116,7 +116,7 @@ Now, you have the files to proceed with ./configure... make... etc.
 If you're on a Debian/Ubuntu or derivatives, install these packages:
 
 <pre>
-sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev libraw-dev
+sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev liblensfun-dev libraw-dev
 </pre>
 
 If you want to enjoy the fruits of librtprocess, the nascent effort to package the Raw Therapee
