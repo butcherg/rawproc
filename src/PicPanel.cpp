@@ -118,7 +118,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		if (infoitem != "") {
 			sspeed = atof(infoitem.c_str());
 			if (sspeed < 1.0)
-				exposurestring += wxString::Format("1/%dsec  ", int(1/sspeed));
+				exposurestring += wxString::Format("1/%dsec  ", int(round(1.0/sspeed)));
 			else
 				exposurestring += wxString::Format("%dsec  ", int(sspeed));
 		}
