@@ -1509,10 +1509,7 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 	if (!myConfig::getConfig().flush()) SetStatusText("Write to configuration file failed.");
 
 	//check for properties that should update immediately:
-	if (propname.Find("display.cms") != wxNOT_FOUND)
-		if (!commandtree->IsEmpty())
-			pic->RefreshPic();
-	if (propname.Find("display.outofbound") != wxNOT_FOUND)
+	if (propname.Find("display.") != wxNOT_FOUND)
 		pic->RefreshPic();
 	if (propname.Find("histogram") != wxNOT_FOUND)
 		pic->RefreshPic();
