@@ -363,6 +363,10 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 								blk = bwpts[0];
 								wht = bwpts[1];
 							}
+							else {
+								blk = atof(b);
+								wht = atof(w);
+							}
 							char cs[256];
 							sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
 							commandstring += std::string(cs);
