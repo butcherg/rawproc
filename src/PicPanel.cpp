@@ -110,7 +110,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		display_dib = dib;
 		ch = channel;
 		wxImage img;
-		float sspeed, aperture;
+		float sspeed, aperture, iso;
 
 		exposurestring.Clear();
 		std::string infoitem;
@@ -126,10 +126,15 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		aperture = atof(infoitem.c_str());
 		if (infoitem != "") exposurestring += wxString::Format("f%s  ",wxString(infoitem));
 		infoitem = dib->getInfoValue("ISOSpeedRatings");
+		iso = atof(infoitem.c_str());
 		if (infoitem != "") exposurestring += wxString::Format("ISO%s  ",wxString(infoitem));
 		infoitem = dib->getInfoValue("FocalLength");
 		if (infoitem != "") exposurestring += wxString::Format("%smm  ",wxString(infoitem));
-		exposurestring.Append(wxString::Format("EV: %0.1f",log2(pow(aperture,2)/sspeed)));
+
+		//parm display.info.evlv: Add either/both EV (Exposure Value, Wikipedia definition) or LV (Light Value, exiftool definition) to the information string. "EV" and/or "LV" need to be in the property value, you can separate them with blanks, a comma, or just run them together.  Default: blank. 
+		wxString evlv = wxString(myConfig::getConfig().getValueOrDefault("display.info.evlv",""));
+		if (evlv.Find("EV") != wxNOT_FOUND) exposurestring.Append(wxString::Format("EV%0.1f ",log2(pow(aperture,2)/sspeed)));
+		if (evlv.Find("LV") != wxNOT_FOUND) exposurestring.Append(wxString::Format("LV%0.1f ",2 * log2(aperture) - log2(sspeed) - log2(iso/100)));
 
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
