@@ -110,23 +110,26 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		display_dib = dib;
 		ch = channel;
 		wxImage img;
+		float sspeed, aperture;
 
 		exposurestring.Clear();
 		std::string infoitem;
 		infoitem = dib->getInfoValue("ExposureTime");
 		if (infoitem != "") {
-			float sspeed = atof(infoitem.c_str());
+			sspeed = atof(infoitem.c_str());
 			if (sspeed < 1.0)
 				exposurestring += wxString::Format("1/%dsec  ", int(1/sspeed));
 			else
 				exposurestring += wxString::Format("%dsec  ", int(sspeed));
 		}
 		infoitem = dib->getInfoValue("FNumber");
+		aperture = atof(infoitem.c_str());
 		if (infoitem != "") exposurestring += wxString::Format("f%s  ",wxString(infoitem));
 		infoitem = dib->getInfoValue("ISOSpeedRatings");
 		if (infoitem != "") exposurestring += wxString::Format("ISO%s  ",wxString(infoitem));
 		infoitem = dib->getInfoValue("FocalLength");
 		if (infoitem != "") exposurestring += wxString::Format("%smm  ",wxString(infoitem));
+		exposurestring.Append(wxString::Format("EV: %0.1f",log2(pow(aperture,2)/sspeed)));
 
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
