@@ -508,7 +508,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
-				primary_source = c.getItem(makemodel, "source");
+				primary_source = c.getItem(makemodel, "primary_source");
 				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
 			}
 			
