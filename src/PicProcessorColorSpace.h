@@ -16,7 +16,7 @@ class PicProcessorColorSpace: public PicProcessor
 
 	private:
 		wxString openfilepath;
-		wxString dcraw_primaries, camdat_status;
+		wxString dcraw_primaries, primary_source, camdat_status;
 };
 
 #endif

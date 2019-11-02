@@ -39,6 +39,7 @@ void CameraData::parseDcraw(std::string filename)
 				camdat[makemodel]["maximum"] = t[2];
 				result = fgets(buf, 255, f); 
 				camdat[makemodel]["dcraw_matrix"] = split(split(std::string(buf), "{ ")[1], " }")[0];
+				camdat[makemodel]["source"] = "dcraw.c";
 				i++;
 			}
 			result = fgets(buf, 255, f); 
@@ -75,6 +76,7 @@ void CameraData::parseCamconst(std::string filename)
 	if (!json) return;
 
 	std::string makemodel, name, value;
+	std::string source = "camconst.json";
 
 	cJSON * camlist = cJSON_GetObjectItemCaseSensitive(json,"camera_constants");
 	if (camlist) {
@@ -98,6 +100,7 @@ void CameraData::parseCamconst(std::string filename)
 				if (cJSON_IsString(item)) value = std::string(item->valuestring);
 
 				camdat[makemodel][name] =  value;
+				camdat[makemodel]["source"] = "camconst.json";
 				i++;
 
 			}

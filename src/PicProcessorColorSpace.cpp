@@ -69,6 +69,7 @@ class ColorspacePanel: public PicProcPanel
 
 			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
+			primarysource = new wxStaticText(this,wxID_ANY, "");
 			camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			camdatstatus->SetToolTip("Open a dialog to review the sources found and loaded for camera data");
 
@@ -124,6 +125,8 @@ class ColorspacePanel: public PicProcPanel
 			m->AddRowItem(camdatstatus, flags);
 			m->NextRow();
 			m->AddRowItem(primaries, flags);
+			m->NextRow();
+			m->AddRowItem(primarysource, flags);
 			m->End();
 			SetSizerAndFit(m);
 			m->Layout();
@@ -230,8 +233,16 @@ class ColorspacePanel: public PicProcPanel
 		void setPrimaries(wxString primstring)
 		{
 			primaries->SetLabel(primstring);
-			//Update();
 			primaries->Refresh();
+		}
+
+		void setSource(wxString primary_source)
+		{
+			if (!primary_source.IsEmpty())
+				primarysource->SetLabel(wxString::Format("Source: %s",primary_source));
+			else
+				primarysource->SetLabel("");
+			primarysource->Refresh();
 		}
 
 		void setMode(int mode)
@@ -340,7 +351,7 @@ class ColorspacePanel: public PicProcPanel
 		wxRadioButton *profileb, *camb;
 		wxTextCtrl *edit;
 		wxRadioBox *operselect, *intentselect;
-		wxStaticText *makemodel, *primaries;
+		wxStaticText *makemodel, *primaries, *primarysource;
 		wxString camdat_status;
 		wxBitmapButton *camdatstatus;
 		int cpmode;
@@ -497,6 +508,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
+				primary_source = c.getItem(makemodel, "source");
 				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
 			}
 			
@@ -514,12 +526,14 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 						int(atof(primaries[6].c_str()) * 10000),
 						int(atof(primaries[7].c_str()) * 10000),
 						int(atof(primaries[8].c_str()) * 10000));
+					primary_source = "LibRaw";
 				}
 			}
 
 			if (!dcraw_primaries.empty()) {
 				std::string cam =  dcraw_primaries.ToStdString();
 				((ColorspacePanel *) toolpanel)->setPrimaries(dcraw_primaries);
+				((ColorspacePanel *) toolpanel)->setSource(primary_source);
 				if (cp[1] == "convert") {
 					if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
 						wxMessageBox("ColorSpace convert failed.");
