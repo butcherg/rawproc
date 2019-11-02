@@ -106,8 +106,24 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				cam = c.getItem(makemodel, "dcraw_matrix");
 
+				if (cam.empty()) { //if not found in dcraw.c or camconst.json, look in the LibRaw metadata:
+					std::string libraw_primaries = dib.getInfoValue("LibrawCamXYZ");
+					std::vector<std::string> primaries = split(libraw_primaries, ",");
+					if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
+						cam = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
+							int(atof(primaries[0].c_str()) * 10000),
+							int(atof(primaries[1].c_str()) * 10000),
+							int(atof(primaries[2].c_str()) * 10000),
+							int(atof(primaries[3].c_str()) * 10000),
+							int(atof(primaries[4].c_str()) * 10000),
+							int(atof(primaries[5].c_str()) * 10000),
+							int(atof(primaries[6].c_str()) * 10000),
+							int(atof(primaries[7].c_str()) * 10000),
+							int(atof(primaries[8].c_str()) * 10000));
+					}
+				}
 
-				if (cam != "") {
+				if (!cam.empty()) {
 					if (print) printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
 					_mark();
 					if (operation == "convert") {
