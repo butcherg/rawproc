@@ -36,6 +36,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		~PicProcessor();
 
 		virtual bool processPic(bool processnext=true);
+		virtual bool processPic(gImage *processdib);
 		void processNext();
 		wxString getCommand();
 		wxString getParams();

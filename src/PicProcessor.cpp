@@ -151,6 +151,11 @@ std::map<std::string,std::string> PicProcessor::paramMap(std::string params, std
 	return p;
 }
 
+bool PicProcessor::processPic(gImage *processdib)
+{
+	return true;
+}
+
 bool PicProcessor::processPic(bool processnext) 
 { 	
 	if (groupitem) return false;
@@ -160,6 +165,8 @@ bool PicProcessor::processPic(bool processnext)
 		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
 	}
 	dirty = false;
+
+	processPic(dib);
 	
 	if (processnext) processNext();
 
