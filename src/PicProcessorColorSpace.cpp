@@ -491,7 +491,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			std::string dcrawpath;
 			std::string camconstpath;
 
-			if (dcraw_primaries == "") {
+			if (dcraw_primaries == "") { //Look in dcraw.c and camconst.json
 				CameraData c;
 				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
 				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
@@ -499,6 +499,23 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				dcraw_primaries = c.getItem(makemodel, "dcraw_matrix");
 				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
+			}
+			
+			if (dcraw_primaries == "") { //Last resort, look in the LibRaw metadata
+				std::string libraw_primaries = dib->getInfoValue("LibrawCamXYZ");
+				std::vector<std::string> primaries = split(libraw_primaries, ",");
+				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
+					dcraw_primaries = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
+						int(atof(primaries[0].c_str()) * 10000),
+						int(atof(primaries[1].c_str()) * 10000),
+						int(atof(primaries[2].c_str()) * 10000),
+						int(atof(primaries[3].c_str()) * 10000),
+						int(atof(primaries[4].c_str()) * 10000),
+						int(atof(primaries[5].c_str()) * 10000),
+						int(atof(primaries[6].c_str()) * 10000),
+						int(atof(primaries[7].c_str()) * 10000),
+						int(atof(primaries[8].c_str()) * 10000));
+				}
 			}
 
 			if (dcraw_primaries != "") {
