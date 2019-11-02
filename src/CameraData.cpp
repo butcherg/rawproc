@@ -112,7 +112,10 @@ void CameraData::parseCamconst(std::string filename)
 
 std::string CameraData::getItem(std::string makemodel, std::string itemname)
 {
-	return camdat[makemodel][itemname];
+	if (camdat.find(makemodel) != camdat.end())
+		if (camdat[makemodel].find(itemname) != camdat[makemodel].end())
+			return camdat[makemodel][itemname];
+	return std::string();
 }
 
 std::string CameraData::getStatus()

@@ -349,7 +349,6 @@ class ColorspacePanel: public PicProcPanel
 
 PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
-	dcraw_primaries = "";
 	//showParams();
 }
 
@@ -491,7 +490,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 			std::string dcrawpath;
 			std::string camconstpath;
 
-			if (dcraw_primaries == "") { //Look in dcraw.c and camconst.json
+			if (dcraw_primaries.empty()) { //Look in dcraw.c and camconst.json
 				CameraData c;
 				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
 				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
@@ -501,7 +500,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
 			}
 			
-			if (dcraw_primaries == "") { //Last resort, look in the LibRaw metadata
+			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
 				std::string libraw_primaries = dib->getInfoValue("LibrawCamXYZ");
 				std::vector<std::string> primaries = split(libraw_primaries, ",");
 				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
@@ -518,7 +517,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 				}
 			}
 
-			if (dcraw_primaries != "") {
+			if (!dcraw_primaries.empty()) {
 				std::string cam =  dcraw_primaries.ToStdString();
 				((ColorspacePanel *) toolpanel)->setPrimaries(dcraw_primaries);
 				if (cp[1] == "convert") {
