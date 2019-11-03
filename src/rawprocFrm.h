@@ -158,14 +158,9 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void OpenFile(wxString fname);  //, wxString params="");
 	void OpenFileSource(wxString fname);
 
-	void Mnugamma1006Click(wxCommandEvent& event);
-	void Mnubright1007Click(wxCommandEvent& event);
-	void Mnucontrast1008Click(wxCommandEvent& event);
 	void MnusaturateClick(wxCommandEvent& event);
 	void MnuexposureClick(wxCommandEvent& event);
 	void Mnucurve1010Click(wxCommandEvent& event);
-	void MnuShadow1015Click(wxCommandEvent& event);
-	void MnuHighlightClick(wxCommandEvent& event);
 	void MnuGrayClick(wxCommandEvent& event);
 	void MnuCropClick(wxCommandEvent& event);
 	void MnuResizeClick(wxCommandEvent& event);

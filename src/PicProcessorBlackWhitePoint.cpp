@@ -428,7 +428,6 @@ void PicProcessorBlackWhitePoint::reCalc()
 
 bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
 {
-printf("PicProcessorBlackWhitePoint::processPicture(gImage *processdib)...\n");
 	double blk, wht;
 	float maxwht, minwht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
