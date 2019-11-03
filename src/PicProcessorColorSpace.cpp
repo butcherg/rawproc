@@ -382,8 +382,11 @@ wxString PicProcessorColorSpace::getOpenFilePath()
 	return openfilepath;
 }
 
-bool PicProcessorColorSpace::processPic(bool processnext) 
+//group: bool PicProcessorColorSpace::processPic(bool processnext) 
+//group: {
+bool PicProcessorColorSpace::processPicture(gImage *processdib) 
 {
+printf("PicProcessorColorSpace::processPicture(gImage *processdib)...\n");
 	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
 	bool result = true;
 	GIMAGE_ERROR ret;
@@ -418,8 +421,10 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	//group: if (dib) delete dib;
+	//group: dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
+
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -603,7 +608,7 @@ bool PicProcessorColorSpace::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
+	//group: if (processnext) processNext();
 	
 	return result;
 }
