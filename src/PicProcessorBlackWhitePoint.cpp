@@ -426,14 +426,15 @@ void PicProcessorBlackWhitePoint::reCalc()
 	setParams(wxString::Format("%s,%d,%d",p[0],(unsigned) blk, (unsigned) wht));
 }
 
-bool PicProcessorBlackWhitePoint::processPic(bool processnext) 
+bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
 {
+printf("PicProcessorBlackWhitePoint::processPicture(gImage *processdib)...\n");
 	double blk, wht;
 	float maxwht, minwht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
+
 	if (!global_processing_enabled) return true;
 
 	if (recalc) {
@@ -514,7 +515,6 @@ bool PicProcessorBlackWhitePoint::processPic(bool processnext)
 	dirty=false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 
 	return result;
 }

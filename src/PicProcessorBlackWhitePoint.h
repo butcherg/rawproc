@@ -13,7 +13,7 @@ class PicProcessorBlackWhitePoint: public PicProcessor
 		void setChannel(wxString chan);
 		void reCalc();
 		void setReCalc(bool r);
-		bool processPic(bool processnext=true);
+		bool processPicture(gImage *processdib);
 		void displayProcessedPic();
 		
 	private:
