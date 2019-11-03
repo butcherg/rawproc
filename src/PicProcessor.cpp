@@ -151,24 +151,24 @@ std::map<std::string,std::string> PicProcessor::paramMap(std::string params, std
 	return p;
 }
 
-bool PicProcessor::processPic(gImage *processdib)
+bool PicProcessor::processPicture(gImage *processdib)
 {
+printf("PicProcessor::processPicture(gImage *processdib)...\n");
 	return true;
 }
 
 bool PicProcessor::processPic(bool processnext) 
-{ 	
+{ 
+printf("PicProcessor::processPic(bool processnext)...\n");
 	if (groupitem) return false;
 	if (!global_processing_enabled) return true;
 	if (GetId() != m_tree->GetRootItem()) {
 		if (dib) delete dib;
 		dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+		processPicture(dib);
+		if (processnext) processNext();
 	}
 	dirty = false;
-
-	processPic(dib);
-	
-	if (processnext) processNext();
 
 	return true;
 }
