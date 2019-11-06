@@ -239,7 +239,7 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorGray::processPic(bool processnext) 
+bool PicProcessorGray::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("gray...");
 	wxArrayString cp = split(getParams(),",");
@@ -254,8 +254,7 @@ bool PicProcessorGray::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -271,7 +270,6 @@ bool PicProcessorGray::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

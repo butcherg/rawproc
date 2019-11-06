@@ -12,7 +12,7 @@ class PicProcessorExposure: public PicProcessor
 		void createPanel(wxSimplebook* parent);
 		void SetPatchCoord(int x, int y);
 		void OnLeftDown(wxMouseEvent& event);
-		bool processPic(bool processnext=true);
+		bool processPicture(gImage *processdib);
 
 	private:
 		coord patch;

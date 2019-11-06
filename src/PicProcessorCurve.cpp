@@ -231,7 +231,7 @@ void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
 	ctrlpts = ctpts;
 }
 
-bool PicProcessorCurve::processPic(bool processnext) 
+bool PicProcessorCurve::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("curve...");
 	bool result = true;
@@ -242,8 +242,7 @@ bool PicProcessorCurve::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -266,7 +265,6 @@ bool PicProcessorCurve::processPic(bool processnext)
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 
 	return result;
 }

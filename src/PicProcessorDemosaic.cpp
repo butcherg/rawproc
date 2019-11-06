@@ -410,7 +410,7 @@ ImageType PicProcessorDemosaic::getImageType()
 	return IMAGETYPE_RGB;
 }
 
-bool PicProcessorDemosaic::processPic(bool processnext) 
+bool PicProcessorDemosaic::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
 	bool result = false;
@@ -424,8 +424,7 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 	
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -520,7 +519,6 @@ bool PicProcessorDemosaic::processPic(bool processnext)
 	}
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

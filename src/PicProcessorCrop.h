@@ -10,7 +10,7 @@ class PicProcessorCrop: public PicProcessor
 		PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *display); 
 		void createPanel(wxSimplebook* parent);
-		bool processPic(bool processnext=true);
+		bool processPicture(gImage *processdib);
 };
 
 #endif

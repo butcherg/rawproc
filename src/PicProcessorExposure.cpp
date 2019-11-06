@@ -306,7 +306,7 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorExposure::processPic(bool processnext) 
+bool PicProcessorExposure::processPicture(gImage *processdib) 
 {
 	double ev;
 	int x=0, y=0;
@@ -360,8 +360,7 @@ bool PicProcessorExposure::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -389,7 +388,6 @@ bool PicProcessorExposure::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

@@ -15,7 +15,7 @@ class PicProcessorLensCorrection: public PicProcessor
 		void createPanel(wxSimplebook* parent);
 		void setAlternates(wxString acam, wxString alens);
 		lfDatabase * getLensDatabase();
-		bool processPic(bool processnext=true);
+		bool processPicture(gImage *processdib);
 
 	private:
 		wxString metadatacamera, metadatamount, metadatalens, altcamera, altmount, altlens;

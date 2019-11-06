@@ -242,7 +242,7 @@ void PicProcessorRedEye::setDesat(bool d)
 }
 
 
-bool PicProcessorRedEye::processPic(bool processnext) 
+bool PicProcessorRedEye::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("redeye...");
 	bool result = true;
@@ -253,8 +253,7 @@ bool PicProcessorRedEye::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -270,7 +269,6 @@ bool PicProcessorRedEye::processPic(bool processnext)
 	dirty=false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 
 	return result;
 }

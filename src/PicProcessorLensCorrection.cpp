@@ -447,7 +447,7 @@ lfDatabase * PicProcessorLensCorrection::getLensDatabase()
 	return ldb;
 }
 
-bool PicProcessorLensCorrection::processPic(bool processnext) 
+bool PicProcessorLensCorrection::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("lenscorrection...");
 	bool result = true;
@@ -488,8 +488,7 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	std::map<std::string, std::string> info = dib->getInfo();
@@ -643,7 +642,7 @@ bool PicProcessorLensCorrection::processPic(bool processnext)
 	}
 
 	dirty = false;
-	if (processnext) processNext();
+
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	
 	return result;

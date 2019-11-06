@@ -621,7 +621,7 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 	toolpanel->Refresh();
 }
 
-bool PicProcessorCrop::processPic(bool processnext) 
+bool PicProcessorCrop::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
@@ -639,8 +639,7 @@ bool PicProcessorCrop::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	int iw = dib->getWidth();
@@ -664,7 +663,6 @@ bool PicProcessorCrop::processPic(bool processnext)
 
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }
