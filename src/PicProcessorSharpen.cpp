@@ -111,7 +111,7 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSharpen::processPic(bool processnext) 
+bool PicProcessorSharpen::processPicture(gImage *processdib) 
 {
 	double kernel[3][3] =
 	{
@@ -139,8 +139,7 @@ bool PicProcessorSharpen::processPic(bool processnext)
 	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
 
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (global_processing_enabled & processingenabled & sharp > 1.0) {
@@ -157,7 +156,6 @@ bool PicProcessorSharpen::processPic(bool processnext)
 	dirty = false;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 
 	return result;
 }

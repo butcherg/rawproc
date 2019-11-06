@@ -177,7 +177,7 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorResize::processPic(bool processnext) 
+bool PicProcessorResize::processPicture(gImage *processdib) 
 {
 	wxString algo;
 	bool blur = false;
@@ -196,8 +196,7 @@ bool PicProcessorResize::processPic(bool processnext)
 		}
 	}
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	bool result = true;
@@ -239,7 +238,6 @@ bool PicProcessorResize::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

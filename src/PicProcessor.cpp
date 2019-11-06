@@ -159,7 +159,6 @@ printf("PicProcessor::processPicture(gImage *processdib)...\n");
 
 bool PicProcessor::processPic(bool processnext) 
 { 
-printf("PicProcessor::processPic(bool processnext)...\n");
 	if (groupitem) return false;
 	if (!global_processing_enabled) return true;
 	if (GetId() != m_tree->GetRootItem()) {

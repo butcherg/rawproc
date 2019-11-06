@@ -391,7 +391,7 @@ void PicProcessorTone::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorTone::processPic(bool processnext) 
+bool PicProcessorTone::processPicture(gImage *processdib) 
 {
 	wxString d;
 	wxArrayString p = split(c,",");
@@ -403,8 +403,7 @@ bool PicProcessorTone::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 	
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 
@@ -477,7 +476,6 @@ bool PicProcessorTone::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

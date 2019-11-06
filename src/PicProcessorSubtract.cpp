@@ -201,7 +201,7 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSubtract::processPic(bool processnext) 
+bool PicProcessorSubtract::processPicture(gImage *processdib) 
 {
 	double subtract;
 	wxFileName fname;
@@ -230,10 +230,8 @@ bool PicProcessorSubtract::processPic(bool processnext)
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-	
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -274,7 +272,6 @@ bool PicProcessorSubtract::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

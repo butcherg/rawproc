@@ -443,7 +443,7 @@ std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 	return multipliers;
 }
 
-bool PicProcessorWhiteBalance::processPic(bool processnext) 
+bool PicProcessorWhiteBalance::processPicture(gImage *processdib) 
 {
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	std::vector<double> wbmults;
@@ -506,8 +506,7 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled) {
@@ -572,7 +571,6 @@ bool PicProcessorWhiteBalance::processPic(bool processnext)
 	dirty = false;
 
 	//((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

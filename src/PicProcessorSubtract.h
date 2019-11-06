@@ -9,7 +9,7 @@ class PicProcessorSubtract: public PicProcessor
 	public:
 		PicProcessorSubtract(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
-		bool processPic(bool processnext=true);
+		bool processPicture(gImage *processdib);
 };
 
 #endif

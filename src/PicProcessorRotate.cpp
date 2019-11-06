@@ -494,7 +494,7 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorRotate::processPic(bool processnext) 
+bool PicProcessorRotate::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
 	bool autocrop = false;
@@ -513,8 +513,7 @@ bool PicProcessorRotate::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled & angle != 0.0) {
@@ -533,7 +532,6 @@ bool PicProcessorRotate::processPic(bool processnext)
 	dirty = false;
 		
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }

@@ -108,7 +108,7 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
-bool PicProcessorSaturation::processPic(bool processnext) 
+bool PicProcessorSaturation::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
 	double saturation = atof(c.c_str());
@@ -120,8 +120,7 @@ bool PicProcessorSaturation::processPic(bool processnext)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	if (dib) delete dib;
-	dib = new gImage(getPreviousPicProcessor()->getProcessedPic());
+	dib = processdib;
 	if (!global_processing_enabled) return true;
 
 	if (processingenabled & saturation != 1.0) {
@@ -138,7 +137,6 @@ bool PicProcessorSaturation::processPic(bool processnext)
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	if (processnext) processNext();
 	
 	return result;
 }
