@@ -486,12 +486,11 @@ PicProcessorRotate::PicProcessorRotate(wxString name, wxString command, wxTreeCt
 	//showParams();
 }
 
-void PicProcessorRotate::createPanel(wxSimplebook* parent)
+void PicProcessorRotate::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new RotatePanel(parent, this, c);
+	toolpanel = new RotatePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorRotate::processPicture(gImage *processdib) 

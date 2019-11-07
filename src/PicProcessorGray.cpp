@@ -231,12 +231,11 @@ PicProcessorGray::PicProcessorGray(wxString name, wxString command, wxTreeCtrl *
 	//showParams();
 }
 
-void PicProcessorGray::createPanel(wxSimplebook* parent)
+void PicProcessorGray::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new GrayPanel(parent, this, c);
+	toolpanel = new GrayPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorGray::processPicture(gImage *processdib) 

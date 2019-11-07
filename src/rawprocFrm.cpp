@@ -595,10 +595,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return id;
 	id = p->GetId();
-	if (name == "blackwhitepoint")
-		p->createPanel(parambook, p);
-	else
-		p->createPanel(parambook);
+	p->createPanel(parambook, p);
 	if (name != "group") p->processPic();  
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
@@ -768,7 +765,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 
 		PicProcessor *picdata = new PicProcessor(filename.GetFullName(), configparams, commandtree, pic, dib);
-		picdata->createPanel(parambook);
+		picdata->createPanel(parambook, picdata);
 		//pic->SetScaleToWidth();
 		if (pic->GetSize().GetWidth() > dib->getWidth()) {
 			pic->SetScale(1.0);
@@ -951,7 +948,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
 
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
-			picdata->createPanel(parambook);
+			picdata->createPanel(parambook, picdata);
 			if (incdisplay) CommandTreeSetDisplay(picdata->GetId(),933);
 			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
 
@@ -1537,7 +1534,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", cmd, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		p->setOpenFilePath(openfilepath);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1855);
@@ -1558,7 +1555,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1689);
 	}
@@ -1573,7 +1570,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();  //comment out, don't need to process new tool
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
 	}
@@ -1594,7 +1591,7 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half"));
 #endif
 		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1906);
 	}
@@ -1627,7 +1624,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 			cmd = wxString::Format("wavelet,%s",threshold);
 		}
 		PicProcessorDenoise *p = new PicProcessorDenoise("denoise", cmd, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1806);
 	}
@@ -1644,7 +1641,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 		//parm tool.exposure.initialvalue: The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
 		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		if (val != "0.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1589);
 	}
@@ -1666,7 +1663,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		wxString b =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07"));
 		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
 		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1669);
 	}
@@ -1681,7 +1678,7 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->selectFile();
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
@@ -1710,7 +1707,7 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 		//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
 		wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
 		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		if (defaults != "") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
 	}
@@ -1719,9 +1716,6 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	}
 }
 #endif
-
-
-
 
 void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 {
@@ -1739,7 +1733,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		
 		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
 		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1831);
 	}
@@ -1759,7 +1753,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		pic->SetScale(1.0);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1710);
@@ -1782,7 +1776,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
 		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0"));
 		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();  //not sure why rotate has an initial value.....
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1733);
 	}
@@ -1799,7 +1793,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
 		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		if (val != "1.0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
 	}
@@ -1816,7 +1810,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
 		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0"));
 		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		if (defval != "0") p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
 	}
@@ -1831,7 +1825,7 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "0.0", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
 	}
@@ -1848,7 +1842,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 		//parm tool.tone.initialvalue: The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
 		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
 		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
@@ -1864,7 +1858,7 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 	SetStatusText("");
 	try {
 		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
-		p->createPanel(parambook);
+		p->createPanel(parambook, p);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1921);
 	}

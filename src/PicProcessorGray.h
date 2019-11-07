@@ -9,7 +9,7 @@ class PicProcessorGray: public PicProcessor
 {
 	public:
 		PicProcessorGray(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
-		void createPanel(wxSimplebook* parent);
+		void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		bool processPicture(gImage *processdib);
 
 	private:

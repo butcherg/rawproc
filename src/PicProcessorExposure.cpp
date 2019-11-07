@@ -297,13 +297,11 @@ void PicProcessorExposure::OnLeftDown(wxMouseEvent& event)
 
 }
 
-
-void PicProcessorExposure::createPanel(wxSimplebook* parent)
+void PicProcessorExposure::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new ExposurePanel(parent, this, c);
+	toolpanel = new ExposurePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorExposure::processPicture(gImage *processdib) 

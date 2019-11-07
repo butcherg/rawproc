@@ -155,12 +155,11 @@ PicProcessorGroup::PicProcessorGroup(wxString name, wxString command, wxTreeCtrl
 	loadCommands(command);
 }
 
-void PicProcessorGroup::createPanel(wxSimplebook* parent)
+void PicProcessorGroup::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new GroupPanel(parent, this, c);
+	toolpanel = new GroupPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 void PicProcessorGroup::selectFile()

@@ -12,7 +12,7 @@ class PicProcessorLensCorrection: public PicProcessor
 	public:
 		PicProcessorLensCorrection(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		~PicProcessorLensCorrection();
-		void createPanel(wxSimplebook* parent);
+		void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		void setAlternates(wxString acam, wxString alens);
 		lfDatabase * getLensDatabase();
 		bool processPicture(gImage *processdib);

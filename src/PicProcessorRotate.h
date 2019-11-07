@@ -8,7 +8,7 @@ class PicProcessorRotate: public PicProcessor
 {
 	public:
 		PicProcessorRotate(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
-		void createPanel(wxSimplebook* parent);
+		void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		bool processPicture(gImage *processdib);
 };
 

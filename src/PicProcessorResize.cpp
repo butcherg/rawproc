@@ -169,12 +169,11 @@ PicProcessorResize::PicProcessorResize(wxString name, wxString command, wxTreeCt
 	setParams(wxString::Format("%s,%s,%s",x,y,algo));
 }
 
-void PicProcessorResize::createPanel(wxSimplebook* parent)
+void PicProcessorResize::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new ResizePanel(parent, this, c);
+	toolpanel = new ResizePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorResize::processPicture(gImage *processdib) 

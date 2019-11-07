@@ -614,9 +614,9 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxTreeCtrl *tree, PicPanel *di
 
 }
 
-void PicProcessorCrop::createPanel(wxSimplebook* parent)
+void PicProcessorCrop::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new CropPanel(parent, this, c);
+	toolpanel = new CropPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 }

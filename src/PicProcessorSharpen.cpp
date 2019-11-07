@@ -103,12 +103,11 @@ PicProcessorSharpen::PicProcessorSharpen(wxString name, wxString command, wxTree
 	//showParams();
 }
 
-void PicProcessorSharpen::createPanel(wxSimplebook* parent)
+void PicProcessorSharpen::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new SharpenPanel(parent, this, c);
+	toolpanel = new SharpenPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorSharpen::processPicture(gImage *processdib) 

@@ -363,13 +363,12 @@ PicProcessorColorSpace::PicProcessorColorSpace(wxString name, wxString command, 
 	//showParams();
 }
 
-void PicProcessorColorSpace::createPanel(wxSimplebook* parent)
+void PicProcessorColorSpace::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new ColorspacePanel(parent, this, c);
+	toolpanel = new ColorspacePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	if (getPreviousPicProcessor()->getProcessedPic().getProfile() == NULL) ((ColorspacePanel *) toolpanel)->EnableConvert(false);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 void PicProcessorColorSpace::setOpenFilePath(wxString path)

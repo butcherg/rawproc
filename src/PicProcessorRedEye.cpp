@@ -190,12 +190,11 @@ PicProcessorRedEye::~PicProcessorRedEye()
 //	m_display->SetDrawList("");
 }
 
-void PicProcessorRedEye::createPanel(wxSimplebook* parent)
+void PicProcessorRedEye::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new RedEyePanel(parent, this, c);
+	toolpanel = new RedEyePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 wxString PicProcessorRedEye::buildCommand()

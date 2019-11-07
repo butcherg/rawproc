@@ -192,13 +192,12 @@ PicProcessorSubtract::PicProcessorSubtract(wxString name, wxString command, wxTr
 	//showParams();
 }
 
-void PicProcessorSubtract::createPanel(wxSimplebook* parent)
+void PicProcessorSubtract::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new SubtractPanel(parent, this, c);
+	toolpanel = new SubtractPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	((SubtractPanel *) toolpanel)->setCameraVal(atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorSubtract::processPicture(gImage *processdib) 

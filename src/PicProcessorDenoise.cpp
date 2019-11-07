@@ -329,12 +329,11 @@ PicProcessorDenoise::PicProcessorDenoise(wxString name, wxString command, wxTree
 	//showParams();
 }
 
-void PicProcessorDenoise::createPanel(wxSimplebook* parent)
+void PicProcessorDenoise::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new DenoisePanel(parent, this, c);
+	toolpanel = new DenoisePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorDenoise::processPicture(gImage *processdib) 

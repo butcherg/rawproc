@@ -424,15 +424,14 @@ PicProcessorLensCorrection::~PicProcessorLensCorrection()
 	if (ldb) lf_db_destroy (ldb);
 }
 
-void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
+void PicProcessorLensCorrection::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
 	if (lfok) {
 		gImage &idib = getPreviousPicProcessor()->getProcessedPic();
 		wxString metadata = wxString::Format("Camera: %s\nLens: %s",metadatacamera, metadatalens);
-		toolpanel = new LensCorrectionPanel(parent, this, c, metadata);
+		toolpanel = new LensCorrectionPanel(parent, proc, c, metadata);
 		parent->ShowNewPage(toolpanel);
 		toolpanel->Refresh();
-		toolpanel->Update();
 	}
 }
 

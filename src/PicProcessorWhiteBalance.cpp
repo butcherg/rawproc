@@ -413,12 +413,11 @@ void PicProcessorWhiteBalance::OnLeftDown(wxMouseEvent& event)
 	event.Skip();
 }
 
-void PicProcessorWhiteBalance::createPanel(wxSimplebook* parent)
+void PicProcessorWhiteBalance::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new WhiteBalancePanel(parent, this, c);
+	toolpanel = new WhiteBalancePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 

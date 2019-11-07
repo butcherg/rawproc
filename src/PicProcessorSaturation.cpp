@@ -100,12 +100,11 @@ PicProcessorSaturation::PicProcessorSaturation(wxString name, wxString command, 
 	//showParams();
 }
 
-void PicProcessorSaturation::createPanel(wxSimplebook* parent)
+void PicProcessorSaturation::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new SaturationPanel(parent, this, c);
+	toolpanel = new SaturationPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorSaturation::processPicture(gImage *processdib) 

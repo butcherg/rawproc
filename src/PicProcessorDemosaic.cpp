@@ -386,12 +386,11 @@ PicProcessorDemosaic::PicProcessorDemosaic(wxString name, wxString command, wxTr
 		c = "xtran_fast";	
 }
 
-void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
+void PicProcessorDemosaic::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new DemosaicPanel(parent, this, c);
+	toolpanel = new DemosaicPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 ImageType PicProcessorDemosaic::getImageType()

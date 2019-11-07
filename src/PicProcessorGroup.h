@@ -8,7 +8,7 @@ class PicProcessorGroup: public PicProcessor
 {
 	public:
 		PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
-		void createPanel(wxSimplebook* parent);
+		void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		void selectFile();
 		bool processPicture(gImage *processdib);
 		void loadCommands(wxString commandstring);

@@ -98,6 +98,7 @@ PicProcessor::~PicProcessor()
 	if (!groupitem) if (dib) delete dib;
 }
 
+/*
 void PicProcessor::createPanel(wxSimplebook* parent)
 {
 	if (groupitem) return;
@@ -105,6 +106,7 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 }
+*/
 
 void PicProcessor::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {

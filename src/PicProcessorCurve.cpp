@@ -200,12 +200,11 @@ PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl
 	//showParams();
 }
 
-void PicProcessorCurve::createPanel(wxSimplebook* parent)
+void PicProcessorCurve::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new CurvePanel(parent, this, c);
+	toolpanel = new CurvePanel(parent,proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 void PicProcessorCurve::setControlPoints(std::vector<cp> ctpts)

@@ -383,12 +383,11 @@ PicProcessorTone::PicProcessorTone(wxString name, wxString command, wxTreeCtrl *
 	//showParams();
 }
 
-void PicProcessorTone::createPanel(wxSimplebook* parent)
+void PicProcessorTone::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new TonePanel(parent, this, c);
+	toolpanel = new TonePanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
 }
 
 bool PicProcessorTone::processPicture(gImage *processdib) 
