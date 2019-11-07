@@ -595,7 +595,10 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return id;
 	id = p->GetId();
-	p->createPanel(parambook);
+	if (name == "blackwhitepoint")
+		p->createPanel(parambook, p);
+	else
+		p->createPanel(parambook);
 	if (name != "group") p->processPic();  
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
@@ -1493,95 +1496,54 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 }
 
 
-void rawprocFrm::MnuTone(wxCommandEvent& event)
+
+//Image Operation Menu Invocations: ******************************************
+
+void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.tone.initialvalue: The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
-		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
-		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
+		PicProcessorBlackWhitePoint *p;
+		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
+		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1") {
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb", commandtree, pic);
+			p->createPanel(parambook, p);
+			p->processPic();
+		}
+		else {
+			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb,0,255", commandtree, pic);
+			p->createPanel(parambook, p);
+		}
+
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1734);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
+{
+	wxString cmd = "(none),-,-";
+
+	if (commandtree->IsEmpty()) return;
+
+	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
+		wxMessageBox("Note: Image does not have a source profile, only 'assign' is valid");
+		cmd = "(none),assign,-";
+	}
+
+	SetStatusText("");
+	try {
+		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
+		p->setOpenFilePath(openfilepath);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1855);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding tone tool failed: %s",e.what()));
-	}
-
-}
-
-
-void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
-		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
-		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
-		p->createPanel(parambook);
-		if (val != "1.0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
-	}
-}
-
-void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		//parm tool.exposure.initialvalue: The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0
-		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
-		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
-		p->createPanel(parambook);
-		if (val != "0.0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1589);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
-	}
-}
-
-
-void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
-		p->createPanel(parambook);
-		//p->processPic();  //comment out, don't need to process new tool
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
-	}
-}
-
-
-void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
-		wxString r =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21"));
-		//parm tool.gray.g: The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72
-		wxString g =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72"));
-		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
-		wxString b =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07"));
-		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
-		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
-		p->createPanel(parambook);
-		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1669);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
 	}
 }
 
@@ -1605,87 +1567,39 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	}
 }
 
-void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
+void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
-		return;
-	}
 	SetStatusText("");
 	try {
-		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
+		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();  //comment out, don't need to process new tool
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		//parm tool.demosaic.default: Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.
+#ifdef USE_LIBRTPROCESS
+		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd"));
+#else
+		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half"));
+#endif
+		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		pic->SetScale(1.0);
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1710);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1906);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
-	}
-}
-
-void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		PicProcessorBlackWhitePoint *p;
-		//parm tool.blackwhitepoint.auto: Invoke auto calculation of inital black and white point values, based on a percent-pixels threshold.  Currently, this behavior is only invoked when the tool is added, so re-application requires deleting and re-adding the tool.  Default=0
-		if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.auto","0") == "1") {
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb", commandtree, pic);
-			p->createPanel(parambook);
-			p->processPic();
-		}
-		else {
-			p = new PicProcessorBlackWhitePoint("blackwhitepoint", "rgb,0,255", commandtree, pic);
-			p->createPanel(parambook);
-		}
-
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1734);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
-	}
-}
-
-void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	SetStatusText("");
-	try {
-		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
-		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0"));
-		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
-		p->createPanel(parambook);
-		if (defval != "0") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
-	}
-}
-
-void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
-{
-	if (commandtree->IsEmpty()) return;
-	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1");
-		return;
-	}
-	SetStatusText("");
-	try {
-		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
-		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0"));
-		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
-		p->createPanel(parambook);
-		//p->processPic();  //not sure why rotate has an initial value.....
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1733);
-	}
-	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
 	}
 }
 
@@ -1722,55 +1636,60 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 	}
 }
 
-void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
+void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
-		wxString threshold =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5"));
-		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
-		wxString radius =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50"));
-		//parm tool.redeye.desaturation: The initial (and reset button) desaturation toggle.  Default=0
-		wxString desat =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturation","0"));
-		//parm tool.redeye.desaturationpercent: The initial (and reset button) desaturation percent.  Default=1.0
-		wxString desatpct =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturationpercent","1.0"));
-		
-		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
-		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
+		//parm tool.exposure.initialvalue: The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0"));
+		PicProcessorExposure *p = new PicProcessorExposure("exposure",val, commandtree, pic);
 		p->createPanel(parambook);
-		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1831);
+		if (val != "0.0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1589);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
 	}
 }
 
-void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
+void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
-	wxString cmd = "(none),-,-";
-
 	if (commandtree->IsEmpty()) return;
-
-	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
-		wxMessageBox("Note: Image does not have a source profile, only 'assign' is valid");
-		cmd = "(none),assign,-";
-	}
-
 	SetStatusText("");
 	try {
-		PicProcessorColorSpace *p = new PicProcessorColorSpace("colorspace", cmd, commandtree, pic);
+		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
+		wxString r =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21"));
+		//parm tool.gray.g: The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72
+		wxString g =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72"));
+		//parm tool.gray.b: The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07
+		wxString b =  wxString(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07"));
+		wxString cmd= wxString::Format("%s,%s,%s",r,g,b);
+		PicProcessorGray *p = new PicProcessorGray("gray",cmd, commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
-		p->setOpenFilePath(openfilepath);
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1855);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1669);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
 	}
 }
 
+void rawprocFrm::MnuGroup(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
+		p->createPanel(parambook);
+		p->selectFile();
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding group tool failed: %s",e.what()));
+	}
+}
 
 #ifdef USE_LENSFUN
 void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
@@ -1801,39 +1720,108 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 }
 #endif
 
-void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
+
+
+
+void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		//parm tool.demosaic.default: Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.
-#ifdef USE_LIBRTPROCESS
-		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd"));
-#else
-		wxString d =  wxString(myConfig::getConfig().getValueOrDefault("tool.demosaic.default","half"));
-#endif
-		PicProcessorDemosaic *p = new PicProcessorDemosaic("demosaic", d, commandtree, pic);
+		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
+		wxString threshold =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5"));
+		//parm tool.redeye.radius: Defines the initial (and reset button) limit of the patch size.  Default=50
+		wxString radius =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50"));
+		//parm tool.redeye.desaturation: The initial (and reset button) desaturation toggle.  Default=0
+		wxString desat =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturation","0"));
+		//parm tool.redeye.desaturationpercent: The initial (and reset button) desaturation percent.  Default=1.0
+		wxString desatpct =  wxString(myConfig::getConfig().getValueOrDefault("tool.redeye.desaturationpercent","1.0"));
+		
+		wxString cmd = wxString::Format("%s,%s,%s,%s",threshold,radius,desat,desatpct);
+		PicProcessorRedEye *p = new PicProcessorRedEye("redeye", cmd, commandtree, pic);
 		p->createPanel(parambook);
-		p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1906);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1831);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
 	}
 }
 
-void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
+void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+		return;
+	}
+	SetStatusText("");
+	try {
+		PicProcessorResize *p = new PicProcessorResize("resize", "", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		pic->SetScale(1.0);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1710);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1");
+		return;
+	}
+	SetStatusText("");
+	try {
+		//parm tool.rotate.initialvalue: The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0
+		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0"));
+		PicProcessorRotate *p = new PicProcessorRotate("rotate", defval, commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();  //not sure why rotate has an initial value.....
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1733);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
+		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0"));
+		PicProcessorSaturation *p = new PicProcessorSaturation("saturation",val, commandtree, pic);
 		p->createPanel(parambook);
-		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1921);
+		if (val != "1.0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
+	}
+}
+
+void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
+		wxString defval =  wxString(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0"));
+		PicProcessorSharpen *p = new PicProcessorSharpen("sharpen", defval, commandtree, pic);
+		p->createPanel(parambook);
+		if (defval != "0") p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
 	}
 }
 
@@ -1852,21 +1840,45 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	}
 }
 
-void rawprocFrm::MnuGroup(wxCommandEvent& event)
+void rawprocFrm::MnuTone(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorGroup *p = new PicProcessorGroup("group", "", commandtree, pic);
+		//parm tool.tone.initialvalue: The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0
+		wxString val = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.initialvalue","gamma,1.0"));
+		PicProcessorTone *p = new PicProcessorTone("tone",val, commandtree, pic);
 		p->createPanel(parambook);
-		p->selectFile();
-		//p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding group tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format("Error: Adding tone tool failed: %s",e.what()));
+	}
+
+}
+
+void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorWhiteBalance *p = new PicProcessorWhiteBalance("whitebalance", "", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1921);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
 	}
 }
+
+//End of Image Operations ************************************************
+
+
+
+
+
 
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
