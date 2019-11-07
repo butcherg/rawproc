@@ -390,9 +390,9 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	}
 }
 
-void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
+void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
-	toolpanel = new BlackWhitePointPanel(parent, this, c);
+	toolpanel = new BlackWhitePointPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();

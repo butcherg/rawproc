@@ -9,7 +9,7 @@ class PicProcessorBlackWhitePoint: public PicProcessor
 {
 	public:
 		PicProcessorBlackWhitePoint(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
-		void createPanel(wxSimplebook* parent);
+		void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		void setChannel(wxString chan);
 		void reCalc();
 		void setReCalc(bool r);
