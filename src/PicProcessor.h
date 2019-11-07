@@ -43,6 +43,7 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		wxString getParams();
 		wxString getName();
 		virtual void createPanel(wxSimplebook* parent);
+		virtual void createPanel(wxSimplebook* parent, PicProcessor* proc);
 		virtual PicProcPanel* getPanel();
 		PicProcessor *getPreviousPicProcessor();
 		gImage& getProcessedPic();

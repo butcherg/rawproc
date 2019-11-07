@@ -104,7 +104,13 @@ void PicProcessor::createPanel(wxSimplebook* parent)
 	toolpanel = new BlankPanel(parent, this, "");
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
-	toolpanel->Update();
+}
+
+void PicProcessor::createPanel(wxSimplebook* parent, PicProcessor* proc)
+{
+	toolpanel = new BlankPanel(parent, proc, "");
+	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
 }
 
 void PicProcessor::enableGlobalProcessing(bool e)
