@@ -19,29 +19,29 @@
 #include <wx/stdpaths.h>
 #include <wx/statline.h>
 
-
-#include "PicProcessorSaturation.h"
-#include "PicProcessorExposure.h"
-#include "PicProcessorCurve.h"
-#include "PicProcessorGray.h"
-#include "PicProcessorCrop.h"
-#include "PicProcessorResize.h"
 #include "PicProcessorBlackWhitePoint.h"
-#include "PicProcessorSharpen.h"
-#include "PicProcessorRotate.h"
-#include "PicProcessorDenoise.h"
-#include "PicProcessorRedEye.h"
 #include "PicProcessorColorSpace.h"
-#include "PicProcessorWhiteBalance.h"
-#include "PicProcessorTone.h"
-#include "PicProcessorSubtract.h"
+#include "PicProcessorCrop.h"
+#include "PicProcessorCurve.h"
+#include "PicProcessorDemosaic.h"
+#include "PicProcessorDenoise.h"
+#include "PicProcessorExposure.h"
+#include "PicProcessorGray.h"
 #include "PicProcessorGroup.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
 #include <lensfun/lensfun.h>
 #endif
-#include "PicProcessorDemosaic.h"
+#include "PicProcessorRedEye.h"
+#include "PicProcessorResize.h"
+#include "PicProcessorRotate.h"
+#include "PicProcessorSaturation.h"
+#include "PicProcessorSharpen.h"
+#include "PicProcessorSubtract.h"
+#include "PicProcessorTone.h"
+#include "PicProcessorWhiteBalance.h"
+
 #include "myHistogramDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
@@ -596,7 +596,10 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else return id;
 	id = p->GetId();
 	p->createPanel(parambook, p);
-	if (name != "group") p->processPic();  
+	if (name != "group") {
+		p->loadCommands(command);
+		p->processPic();  
+	}
 	if (name == "colorspace") pic->SetProfile(p->getProcessedPicPointer());
 	if (name == "resize") pic->SetScale(1.0);
 	if (display) CommandTreeSetDisplay(id, 592);

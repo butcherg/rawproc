@@ -17,6 +17,7 @@ class PicProcessorGroup: public PicProcessor
 
 	private:
 		wxString source;
+		wxSimplebook *parambook;
 };
 
 #endif

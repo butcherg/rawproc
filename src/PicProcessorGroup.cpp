@@ -1,4 +1,28 @@
 #include "PicProcessorGroup.h"
+
+#include "PicProcessorBlackWhitePoint.h"
+#include "PicProcessorColorSpace.h"
+#include "PicProcessorCrop.h"
+#include "PicProcessorCurve.h"
+#include "PicProcessorDemosaic.h"
+#include "PicProcessorDenoise.h"
+#include "PicProcessorExposure.h"
+#include "PicProcessorGray.h"
+//#include "PicProcessorGroup.h"
+#ifdef USE_LENSFUN
+#include "PicProcessorLensCorrection.h"
+#include <locale.h>
+#include <lensfun/lensfun.h>
+#endif
+#include "PicProcessorRedEye.h"
+#include "PicProcessorResize.h"
+#include "PicProcessorRotate.h"
+#include "PicProcessorSaturation.h"
+#include "PicProcessorSharpen.h"
+#include "PicProcessorSubtract.h"
+#include "PicProcessorTone.h"
+#include "PicProcessorWhiteBalance.h"
+
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "myRowSizer.h"
@@ -152,11 +176,12 @@ public:
 PicProcessorGroup::PicProcessorGroup(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display)
 {
 	//showParams();
-	loadCommands(command);
+	//loadCommands(command);
 }
 
 void PicProcessorGroup::createPanel(wxSimplebook* parent, PicProcessor* proc)
 {
+	parambook = parent;
 	toolpanel = new GroupPanel(parent, proc, c);
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
@@ -169,7 +194,7 @@ void PicProcessorGroup::selectFile()
 
 void PicProcessorGroup::loadCommands(wxString commandstring)
 {
-	PicProcessor *item;
+	PicProcessor *p;
 	if (id.IsOk() & m_tree->GetSelection() == id) { 
 		m_tree->DeleteChildren(id);
 		wxArrayString p = split(commandstring,";");
@@ -182,7 +207,33 @@ void PicProcessorGroup::loadCommands(wxString commandstring)
 			}
 			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1])));	
 			//m_tree->SetItemBold(m_tree->AppendItem(id, nc[0], -1, -1, new GroupData(nc[0],nc[1], m_tree, m_display, id)));	
-			item = new PicProcessorGroupItem(nc[0],nc[1], m_tree, m_display, id);
+			//item = new PicProcessorGroupItem(nc[0],nc[1], m_tree, m_display, id);
+
+			if (nc[0] == "blackwhitepoint")		p = new PicProcessorBlackWhitePoint(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "colorspace")		p = new PicProcessorColorSpace(nc[0], nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "crop")       	p = new PicProcessorCrop(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "curve")		p = new PicProcessorCurve(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "demosaic")		p = new PicProcessorDemosaic(nc[0], nc[1],  m_tree, m_display, id);
+			else if (nc[0]name == "denoise")	p = new PicProcessorDenoise(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "exposure")		p = new PicProcessorExposure(nc[0], nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "gray")       	p = new PicProcessorGray(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0]name == "group")		p = new PicProcessorGroup(nc[0], nc[1],  m_tree, m_display, id);
+#ifdef USE_LENSFUN
+			else if (nc[0] == "lenscorrection")	p = new PicProcessorLensCorrection(nc[0], command,  m_tree, m_display, id);
+#endif
+			else if (nc[0] == "redeye")		p = new PicProcessorRedEye("redeye",nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "resize")		p = new PicProcessorResize(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "rotate")		p = new PicProcessorRotate(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "saturation") 	p = new PicProcessorSaturation(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "sharpen")     	p = new PicProcessorSharpen(nc[0],nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "subtract")		p = new PicProcessorSubtract(nc[0], nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "tone")		p = new PicProcessorTone(nc[0], nc[1],  m_tree, m_display, id);
+			else if (nc[0] == "whitebalance")	p = new PicProcessorWhiteBalance(nc[0], nc[1],  m_tree, m_display, id);
+			else {
+				wxMessageBox(wxString::Format("Unrecognized command: %s", nc[0]));
+				return;
+			}
+			p->createPanel(parambook, this);  //this points the group item back to the group image
 		}
 		m_tree->Expand(id);
 		c = commandstring;
