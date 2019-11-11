@@ -92,6 +92,12 @@ enum GIMAGE_ERROR {
 	GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM
 };
 
+enum LIBRTPROCESS_PREPOST { 
+	LIBRTPROCESS_DEMOSAIC=0,
+	LIBRTPROCESS_CACORRECT=2,
+	LIBRTPROCESS_HLRECOVERY=4
+};
+
 
 class gImage 
 {
@@ -236,15 +242,15 @@ class gImage
 
 
 #ifdef USE_LIBRTPROCESS
-		bool ApplyDemosaicVNG(int threadcount=0);
-		bool ApplyDemosaicRCD(int threadcount=0);
-		bool ApplyDemosaicDCB(int iterations, bool dcb_enhance=false, int threadcount=0);
-		bool ApplyDemosaicAMAZE(double initGain=1.0, int border=0, float inputScale=1.0, float outputScale=1.0, int threadcount=0);
-		bool ApplyDemosaicIGV(int threadcount=0);
-		bool ApplyDemosaicAHD(int threadcount=0);
-		bool ApplyDemosaicLMMSE(int iterations=1, int threadcount=0);
-		bool ApplyDemosaicXTRANSFAST(int threadcount=0);
-		bool ApplyDemosaicXTRANSMARKESTEIJN(int passes=1, bool useCieLab=false, int threadcount=0);
+		bool ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
+		bool ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
+		bool ApplyDemosaicDCB(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int iterations=1, bool dcb_enhance=false, int threadcount=0);
+		bool ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, double initGain=1.0, int border=0, float inputScale=1.0, float outputScale=1.0, int threadcount=0);
+		bool ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
+		bool ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
+		bool ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int iterations=1, int threadcount=0);
+		bool ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
+		bool ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int passes=1, bool useCieLab=false, int threadcount=0);
 #endif
 
 		//tonemap algorithms:

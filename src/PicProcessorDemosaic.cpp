@@ -415,6 +415,8 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
 	bool result = false;
 
+	LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
+
 	wxArrayString p = split(c,",");
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str());
@@ -443,11 +445,11 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 		}
 #ifdef USE_LIBRTPROCESS
 		else if (p[0] == "vng") {
-			result = dib->ApplyDemosaicVNG(threadcount);
+			result = dib->ApplyDemosaicVNG(prepost, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "rcd") {
-			result = dib->ApplyDemosaicRCD(threadcount);
+			result = dib->ApplyDemosaicRCD(prepost, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "dcb") {
@@ -455,7 +457,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
 			bool dcb_enhance = false;
 			if (p.GetCount() >= 3) if (p[2] == "1") dcb_enhance = true;
-			result = dib->ApplyDemosaicDCB(iterations, dcb_enhance, threadcount);
+			result = dib->ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "amaze") {
@@ -463,25 +465,25 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 			int border = 0;
 			float inputScale = 1.0;
 			float outputScale = 1.0;
-			result = dib->ApplyDemosaicAMAZE(initGain, border, inputScale, outputScale, threadcount);
+			result = dib->ApplyDemosaicAMAZE(prepost, initGain, border, inputScale, outputScale, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "igv") {
-			result = dib->ApplyDemosaicIGV(threadcount);
+			result = dib->ApplyDemosaicIGV(prepost, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "ahd") {
-			result = dib->ApplyDemosaicAHD(threadcount);
+			result = dib->ApplyDemosaicAHD(prepost, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "lmmse") { 
 			int iterations = 1;
 			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
-			result = dib->ApplyDemosaicLMMSE(iterations, threadcount);
+			result = dib->ApplyDemosaicLMMSE(prepost, iterations, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "xtran_fast") {
-			result = dib->ApplyDemosaicXTRANSFAST(threadcount);
+			result = dib->ApplyDemosaicXTRANSFAST(prepost, threadcount);
 			m_display->SetModified(true);
 		}
 		else if (p[0] == "xtran_markesteijn") { 
@@ -489,7 +491,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 			if (p.GetCount() >= 2) passes = atoi(p[1].c_str());
 			bool useCieLab = false;
 			if (p.GetCount() >= 3) if (p[2] == "1") useCieLab = true;
-			result = dib->ApplyDemosaicXTRANSMARKESTEIJN(passes, useCieLab, threadcount);
+			result = dib->ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
 			m_display->SetModified(true);
 		}
 #endif

@@ -2577,7 +2577,7 @@ bool gImage::ApplyMosaicColor(int threadcount)
 #ifdef USE_LIBRTPROCESS
 
 
-bool gImage::ApplyDemosaicVNG(int threadcount)
+bool gImage::ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2634,7 +2634,7 @@ bool gImage::ApplyDemosaicVNG(int threadcount)
 	return true;
 }
 
-bool gImage::ApplyDemosaicRCD(int threadcount)
+bool gImage::ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2682,7 +2682,7 @@ bool gImage::ApplyDemosaicRCD(int threadcount)
 	return true;
 }
 
-bool gImage::ApplyDemosaicDCB(int iterations, bool dcb_enhance, int threadcount)
+bool gImage::ApplyDemosaicDCB(LIBRTPROCESS_PREPOST prepost, int iterations, bool dcb_enhance, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2725,7 +2725,7 @@ bool gImage::ApplyDemosaicDCB(int iterations, bool dcb_enhance, int threadcount)
 }
 
 
-bool gImage::ApplyDemosaicAMAZE(double initGain, int border, float inputScale, float outputScale, int threadcount)
+bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, int border, float inputScale, float outputScale, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2767,7 +2767,7 @@ bool gImage::ApplyDemosaicAMAZE(double initGain, int border, float inputScale, f
 	return true;
 }
 
-bool gImage::ApplyDemosaicIGV(int threadcount)
+bool gImage::ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2809,7 +2809,7 @@ bool gImage::ApplyDemosaicIGV(int threadcount)
 	return true;
 }
 
-bool gImage::ApplyDemosaicAHD(int threadcount)
+bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2855,7 +2855,7 @@ bool gImage::ApplyDemosaicAHD(int threadcount)
 }
 
 
-bool gImage::ApplyDemosaicLMMSE(int iterations, int threadcount)
+bool gImage::ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost, int iterations, int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
@@ -2897,7 +2897,7 @@ bool gImage::ApplyDemosaicLMMSE(int iterations, int threadcount)
 	return true;
 }
 
-bool gImage::ApplyDemosaicXTRANSFAST(int threadcount)
+bool gImage::ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
 	unsigned xtarray[6][6];
 	if (!xtranArray(xtarray)) return false;
@@ -2934,7 +2934,7 @@ bool gImage::ApplyDemosaicXTRANSFAST(int threadcount)
 	return true;
 }
 
-bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(int passes, bool useCieLab, int threadcount)
+bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int passes, bool useCieLab, int threadcount)
 {
 	unsigned xtarray[6][6];
 	if (!xtranArray(xtarray)) return false;

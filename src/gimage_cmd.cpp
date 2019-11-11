@@ -249,9 +249,23 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
-		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd] default: ahd</li>
+		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd][,prepost=[cacorrect][,hlrecovery]][,params=p1[,p2..]] default: ahd</li>
 		else if (strcmp(cmd,"demosaic") == 0) {  
 			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd").c_str();
+			LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
+			int passes = 1;
+			int iterations = 1;
+			bool dcb_enhance = false;
+			float initgain = 1.0;
+			
+/*
+			char *pstr = strtok(NULL," ");
+			if (pstr) {
+
+			}
+			std::string p = std::string
+*/
+
 			char *d = strtok(NULL," ");
 			if (d) demosaic = d;
 
@@ -271,23 +285,23 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				dib.ApplyDemosaicHalf(true, threadcount);
 #ifdef USE_LIBRTPROCESS
 			else if (demosaic == "vng")
-				dib.ApplyDemosaicVNG(threadcount);
+				dib.ApplyDemosaicVNG(prepost, threadcount);
 			else if (demosaic == "amaze")
-				dib.ApplyDemosaicAMAZE(1.0, 0, 1.0, 1.0, threadcount);
+				dib.ApplyDemosaicAMAZE(prepost, 1.0, 0, 1.0, 1.0, threadcount);
 			else if (demosaic == "dcb")
-				dib.ApplyDemosaicDCB(1, false, threadcount);
+				dib.ApplyDemosaicDCB(prepost, 1, false, threadcount);
 			else if (demosaic == "rcd")
-				dib.ApplyDemosaicRCD(threadcount);
+				dib.ApplyDemosaicRCD(prepost, threadcount);
 			else if (demosaic == "igv")
-				dib.ApplyDemosaicIGV(threadcount);
+				dib.ApplyDemosaicIGV(prepost, threadcount);
 			else if (demosaic == "lmmse")
-				dib.ApplyDemosaicLMMSE(1, threadcount);
+				dib.ApplyDemosaicLMMSE(prepost, 1, threadcount);
 			else if (demosaic == "ahd")
-				dib.ApplyDemosaicAHD(threadcount);
+				dib.ApplyDemosaicAHD(prepost, threadcount);
 			else if (demosaic == "xtran_fast") 
-				dib.ApplyDemosaicXTRANSFAST(threadcount);
+				dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
 			else if (demosaic == "xtran_markesteijn") 
-				dib.ApplyDemosaicXTRANSMARKESTEIJN(1, false, threadcount);
+				dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, 1, false, threadcount);
 #endif
 			else {
 				if (print) printf("Error: unrecognized algorithm");
