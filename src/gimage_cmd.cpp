@@ -249,25 +249,47 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
-		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd][,prepost=[cacorrect][,hlrecovery]][,params=p1[,p2..]] default: ahd</li>
+		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd][,prepost=[cacorrect][,hlrecovery]][,params=p1[,p2..]] default: ahd<br>Alternatively, name=val pairs: algorithm=half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd, cacorrect, hlrecovery, passes=#, iterations=#, dcb_enhance, usecielab, initgain</li>
 		else if (strcmp(cmd,"demosaic") == 0) {  
 			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd").c_str();
 			LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
+			//int prepost = LIBRTPROCESS_DEMOSAIC;
 			int passes = 1;
 			int iterations = 1;
 			bool dcb_enhance = false;
+			bool usecielab = false;
 			float initgain = 1.0;
+
+			bool nameval = false;
 			
-/*
-			char *pstr = strtok(NULL," ");
-			if (pstr) {
 
+			std::string pstr = std::string(strtok(NULL, " "));
+			if (pstr.find("=") != std::string::npos) {
+				nameval = true;
+				std::map<std::string, std::string> params =  parseparams(pstr);
+				if (params.find("algorithm") != params.end()) demosaic = params["algorithm"];
+				if (params.find("passes") != params.end()) passes = atoi(params["passes"].c_str());
+				if (params.find("iterations") != params.end()) iterations = atoi(params["iterations"].c_str());
+				if (params.find("dcb_enhance") != params.end()) 
+					if (params["dcb_enhance"] == "1")
+						dcb_enhance = true;
+				if (params.find("usecielab") != params.end()) 
+					if (params["usecielab"] == "1")
+						usecielab = true;
+				if (params.find("initgain") != params.end()) initgain = atof(params["initgain"].c_str());
+
+				if (params.find("cacorrect") != params.end()) 
+					if (params["cacorrect"] == "1") 
+						prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_CACORRECT);
+				if (params.find("hlrecovery") != params.end()) 
+					if (params["hlrecovery"] == "1") 
+						prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_HLRECOVERY);
 			}
-			std::string p = std::string
-*/
+			else demosaic = pstr;
 
-			char *d = strtok(NULL," ");
-			if (d) demosaic = d;
+
+			//char *d = strtok(NULL," ");
+			//if (d) demosaic = d;
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str());
 			if (threadcount == 0) 
@@ -287,21 +309,21 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			else if (demosaic == "vng")
 				dib.ApplyDemosaicVNG(prepost, threadcount);
 			else if (demosaic == "amaze")
-				dib.ApplyDemosaicAMAZE(prepost, 1.0, 0, 1.0, 1.0, threadcount);
+				dib.ApplyDemosaicAMAZE(prepost, initgain, 0, 1.0, 1.0, threadcount);
 			else if (demosaic == "dcb")
-				dib.ApplyDemosaicDCB(prepost, 1, false, threadcount);
+				dib.ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
 			else if (demosaic == "rcd")
 				dib.ApplyDemosaicRCD(prepost, threadcount);
 			else if (demosaic == "igv")
 				dib.ApplyDemosaicIGV(prepost, threadcount);
 			else if (demosaic == "lmmse")
-				dib.ApplyDemosaicLMMSE(prepost, 1, threadcount);
+				dib.ApplyDemosaicLMMSE(prepost, iterations, threadcount);
 			else if (demosaic == "ahd")
 				dib.ApplyDemosaicAHD(prepost, threadcount);
 			else if (demosaic == "xtran_fast") 
 				dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
 			else if (demosaic == "xtran_markesteijn") 
-				dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, 1, false, threadcount);
+				dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, usecielab, threadcount);
 #endif
 			else {
 				if (print) printf("Error: unrecognized algorithm");
