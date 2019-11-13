@@ -2430,6 +2430,8 @@ void RT_free(float ** rawdata)
 
 // Demosaic helpers:
 
+double fitParams[2][2][16];
+
 bool gImage::xtranArray(unsigned (&xtarray)[6][6])
 {
 	if (imginfo.find("LibrawCFAArray") != imginfo.end()) {
@@ -2834,8 +2836,27 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 			rawdata[y][x] = image[pos].r * 65535.f;
 		}
 	}
-	
+
+	//if ((prepost & LIBRTPROCESS_CACORRECT) == LIBRTPROCESS_CACORRECT)
+		CA_correct(0,0,w,h, true, 1, 0.0, 0.0, true, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
+		
 	ahd_demosaic (w, h, rawdata, red, green, blue, cfarray, rgb_cam, f);
+
+	//if ((prepost & LIBRTPROCESS_HLRECOVERY) == LIBRTPROCESS_HLRECOVERY) {
+		float chmax[3];	
+		std::map<std::string,std::string> stats =  StatsMap();
+		chmax[0] = atof(stats["rmax"].c_str()); chmax[1] = atof(stats["gmax"].c_str()); chmax[2] = atof(stats["bmax"].c_str()); 
+		float clmax[3];
+		std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+		//clmax[0] = 0.25 * atof(camwb[0].c_str());
+		//clmax[1] = 0.25 * atof(camwb[1].c_str());
+		//clmax[2] = 0.25 * atof(camwb[2].c_str());
+		clmax[0] = atof(camwb[0].c_str());
+		clmax[1] = atof(camwb[1].c_str());
+		clmax[2] = atof(camwb[2].c_str());
+		HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
+	//}
+
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
