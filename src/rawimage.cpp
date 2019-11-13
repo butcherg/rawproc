@@ -860,6 +860,9 @@ char * _loadRAW(const char *filename,
 	//Normalized libraw white balance:
 	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
 	info["LibrawWhiteBalance"] = buffer;
+	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0], C.cam_mul[1], C.cam_mul[2]);
+	info["LibrawCamMult"] = buffer;
+
 
 	//Black level, for subtraction
 	snprintf(buffer, 4096, "%d", C.black);
