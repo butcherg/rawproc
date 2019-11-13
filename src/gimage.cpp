@@ -2487,6 +2487,18 @@ bool gImage::rgbCam(float (&rgb_cam)[3][4])
 	else return false;
 }
 
+float gImage::channelMax(float **channel, int w, int h)
+{
+	float max = 0;
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			if (max < channel[y][x]) 
+				max = channel[y][x];
+		}
+	}
+	return max;
+}
+
 
 bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 {
@@ -2833,7 +2845,7 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
-			rawdata[y][x] = image[pos].r * 65535.f;
+			rawdata[y][x] = image[pos].r; // * 65535.f;
 		}
 	}
 
@@ -2845,15 +2857,21 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	//if ((prepost & LIBRTPROCESS_HLRECOVERY) == LIBRTPROCESS_HLRECOVERY) {
 		float chmax[3];	
 		std::map<std::string,std::string> stats =  StatsMap();
-		chmax[0] = atof(stats["rmax"].c_str()); chmax[1] = atof(stats["gmax"].c_str()); chmax[2] = atof(stats["bmax"].c_str()); 
+		//chmax[0] = atof(stats["rmax"].c_str()); 
+		//chmax[1] = atof(stats["gmax"].c_str()); 
+		//chmax[2] = atof(stats["bmax"].c_str()); 
+		chmax[0] = channelMax(red,   w,h);
+		chmax[1] = channelMax(green, w,h);
+		chmax[2] = channelMax(blue,  w,h);
 		float clmax[3];
 		std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
-		//clmax[0] = 0.25 * atof(camwb[0].c_str());
-		//clmax[1] = 0.25 * atof(camwb[1].c_str());
-		//clmax[2] = 0.25 * atof(camwb[2].c_str());
-		clmax[0] = atof(camwb[0].c_str());
-		clmax[1] = atof(camwb[1].c_str());
-		clmax[2] = atof(camwb[2].c_str());
+		clmax[0] = 0.25 * atof(camwb[0].c_str());
+		clmax[1] = 0.25 * atof(camwb[1].c_str());
+		clmax[2] = 0.25 * atof(camwb[2].c_str());
+		//clmax[0] = 0.25;
+		//clmax[1] = 0.25;
+		//clmax[2] = 0.25;
+printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f   clmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 		HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
 	//}
 
@@ -2862,9 +2880,9 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
-			image[pos].r = red[y][x]   / 65535.f;
-			image[pos].g = green[y][x] / 65535.f;
-			image[pos].b = blue[y][x]  / 65535.f;
+			image[pos].r = red[y][x]; //  / 65535.f;
+			image[pos].g = green[y][x]; // / 65535.f;
+			image[pos].b = blue[y][x]; //  / 65535.f;
 		}
 	}
 

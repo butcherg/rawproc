@@ -304,6 +304,7 @@ class gImage
 		bool xtranArray(unsigned (&xtarray)[6][6]);
 		bool cfArray(unsigned (&cfarray)[2][2]);
 		bool rgbCam(float (&rgb_cam)[3][4]);
+		float channelMax(float **channel, int w, int h);
 
 	protected:
 
