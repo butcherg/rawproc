@@ -249,6 +249,9 @@ class gImage
 		bool ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int iterations=1, int threadcount=0);
 		bool ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
 		bool ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int passes=1, bool useCieLab=false, int threadcount=0);
+		bool ApplyCACorrect( int threadcount);
+		bool ApplyHLRecover(int threadcount);
+
 #endif
 
 		//tonemap algorithms:
@@ -304,7 +307,6 @@ class gImage
 		bool xtranArray(unsigned (&xtarray)[6][6]);
 		bool cfArray(unsigned (&cfarray)[2][2]);
 		bool rgbCam(float (&rgb_cam)[3][4]);
-		float channelMax(float **channel, int w, int h);
 
 	protected:
 

@@ -36,6 +36,8 @@
 #include "PicProcessorTone.h"
 #include "PicProcessorSubtract.h"
 #include "PicProcessorGroup.h"
+#include "PicProcessorCACorrect.h"
+#include "PicProcessorHLRecover.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -101,6 +103,8 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_TONE, rawprocFrm::MnuTone)
 	EVT_MENU(ID_MNU_SUBTRACT, rawprocFrm::MnuSubtract)
 	EVT_MENU(ID_MNU_GROUP, rawprocFrm::MnuGroup)
+	EVT_MENU(ID_MNU_CACORRECT, rawprocFrm::MnuCACorrect)
+	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #endif
@@ -243,6 +247,7 @@ void rawprocFrm::CreateGUIControls()
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CACORRECT,	_("CACorrect"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,	_("Colorspace"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
@@ -251,6 +256,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
 
 #ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
@@ -575,6 +581,8 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 
 	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
 	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
+	else if (name == "cacorrect")		p = new PicProcessorCACorrect("cacorrect",command, commandtree, pic);
+	else if (name == "hlrecover")		p = new PicProcessorHLRecover("hlrecover",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
 	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
@@ -1510,6 +1518,47 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 	}
 
 }
+
+void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	//if (imginfo["Libraw::Mosaiced"] == "0") {
+	//	wxMessageBox("Error: CACorrect can only be applied to raw data, before demosaic.");
+	//	return;
+	//}
+	SetStatusText("");
+	try {
+		PicProcessorCACorrect *p = new PicProcessorCACorrect("cacorrect","", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding cacorrect tool failed: %s",e.what()));
+	}
+
+}
+
+void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	//if (imginfo["Libraw::Mosaiced"] == "0") {
+	//	wxMessageBox("Error: HLRecover can only be applied to RGB data, after demosaic.");
+	//	return;
+	//}
+	SetStatusText("");
+	try {
+		PicProcessorHLRecover *p = new PicProcessorHLRecover("hlrecover","", commandtree, pic);
+		p->createPanel(parambook);
+		p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format("Error: Adding hlrecover tool failed: %s",e.what()));
+	}
+
+}
+
 
 
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)

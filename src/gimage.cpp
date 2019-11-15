@@ -2430,7 +2430,7 @@ void RT_free(float ** rawdata)
 
 // Demosaic helpers:
 
-double fitParams[2][2][16];
+
 
 bool gImage::xtranArray(unsigned (&xtarray)[6][6])
 {
@@ -2485,18 +2485,6 @@ bool gImage::rgbCam(float (&rgb_cam)[3][4])
 		return true;
 	}
 	else return false;
-}
-
-float gImage::channelMax(float **channel, int w, int h)
-{
-	float max = 0;
-	for (unsigned y=0; y<h; y++) {
-		for (unsigned x=0; x<w; x++) {
-			if (max < channel[y][x]) 
-				max = channel[y][x];
-		}
-	}
-	return max;
 }
 
 
@@ -2825,6 +2813,8 @@ bool gImage::ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost, int threadcount)
 
 bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 {
+	double fitParams[2][2][16];
+
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
 
@@ -2849,31 +2839,42 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 		}
 	}
 
-	//if ((prepost & LIBRTPROCESS_CACORRECT) == LIBRTPROCESS_CACORRECT)
+	prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_CACORRECT);
+	prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_HLRECOVERY);
+
+	if ((prepost & LIBRTPROCESS_CACORRECT) == LIBRTPROCESS_CACORRECT) {
+		printf("CA_correct...\n"); fflush(stdout);
 		CA_correct(0,0,w,h, true, 1, 0.0, 0.0, true, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
-		
+	}
+
+	printf("ahd_demosaic...\n"); fflush(stdout);
 	ahd_demosaic (w, h, rawdata, red, green, blue, cfarray, rgb_cam, f);
 
-	//if ((prepost & LIBRTPROCESS_HLRECOVERY) == LIBRTPROCESS_HLRECOVERY) {
-		float chmax[3];	
-		std::map<std::string,std::string> stats =  StatsMap();
-		//chmax[0] = atof(stats["rmax"].c_str()); 
-		//chmax[1] = atof(stats["gmax"].c_str()); 
-		//chmax[2] = atof(stats["bmax"].c_str()); 
-		chmax[0] = channelMax(red,   w,h);
-		chmax[1] = channelMax(green, w,h);
-		chmax[2] = channelMax(blue,  w,h);
+	if ((prepost & LIBRTPROCESS_HLRECOVERY) == LIBRTPROCESS_HLRECOVERY) {
+		printf("HL_recovery...\n"); fflush(stdout);
+
+		float chmax[3] = {0.0, 0.0, 0.0};
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				if (chmax[0] < red[y][x]) chmax[0] = red[y][x];
+				if (chmax[1] < green[y][x]) chmax[1] = green[y][x];
+				if (chmax[2] < blue[y][x]) chmax[2] = blue[y][x];
+			}
+		}
+
 		float clmax[3];
 		std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
-		clmax[0] = 0.25 * atof(camwb[0].c_str());
-		clmax[1] = 0.25 * atof(camwb[1].c_str());
-		clmax[2] = 0.25 * atof(camwb[2].c_str());
-		//clmax[0] = 0.25;
-		//clmax[1] = 0.25;
-		//clmax[2] = 0.25;
-printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f   clmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
+		//clmax[0] = 0.25 * atof(camwb[0].c_str());
+		//clmax[1] = 0.25 * atof(camwb[1].c_str());
+		//clmax[2] = 0.25 * atof(camwb[2].c_str());
+		clmax[0] = 0.25;
+		clmax[1] = 0.25;
+		clmax[2] = 0.25;
+
+printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 		HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
-	//}
+	}
+	printf("done.\n\n"); fflush(stdout);
 
 
 	#pragma omp parallel for num_threads(threadcount)
@@ -3010,6 +3011,99 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	return true;
+}
+
+bool gImage::ApplyCACorrect( int threadcount)
+{
+	if (imginfo["Libraw::Mosaiced"] == "0") return false;  //Mosaic data only
+
+	unsigned cfarray[2][2];
+	if (!cfArray(cfarray)) return false;   //Bayer data only... ?
+	for (int y=0; y<2; y++) //convert to 3-color
+		for (int x=0; x<2; x++) 
+			if (cfarray[y][x] == 3) cfarray[y][x] = 1;
+
+	double fitParams[2][2][16];
+	float ** rawdata = RT_malloc(w, h);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			unsigned pos = x + y*w;
+			rawdata[y][x] = image[pos].r;
+		}
+	}
+
+	printf("CA_correct...\n"); fflush(stdout);
+	CA_correct(0,0,w,h, true, 1, 0.0, 0.0, true, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
+	printf("done.\n\n"); fflush(stdout);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			unsigned pos = x + y*w;
+			image[pos].r = rawdata[y][x];
+		}
+	}
+
+	RT_free(rawdata);
+	return true;
+}
+
+bool gImage::ApplyHLRecover(int threadcount)
+{
+	if (imginfo["Libraw::Mosaiced"] == "1") return false;  //RGB data only
+
+	float ** red = RT_malloc(w, h);
+	float ** green = RT_malloc(w, h);
+	float ** blue = RT_malloc(w, h);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			unsigned pos = x + y*w;
+			red[y][x]   = image[pos].r;
+			green[y][x] = image[pos].g;
+			blue[y][x]  = image[pos].b;
+		}
+	}
+
+	float chmax[3] = {0.0, 0.0, 0.0};
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			if (chmax[0] < red[y][x]) chmax[0] = red[y][x];
+			if (chmax[1] < green[y][x]) chmax[1] = green[y][x];
+			if (chmax[2] < blue[y][x]) chmax[2] = blue[y][x];
+		}
+	}
+
+	float clmax[3];
+	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+	//clmax[0] = 0.25 * atof(camwb[0].c_str());
+	//clmax[1] = 0.25 * atof(camwb[1].c_str());
+	//clmax[2] = 0.25 * atof(camwb[2].c_str());
+	clmax[0] = 0.25;
+	clmax[1] = 0.25;
+	clmax[2] = 0.25;
+
+printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
+
+	HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			unsigned pos = x + y*w;
+			image[pos].r = red[y][x];
+			image[pos].g = green[y][x];
+			image[pos].b = blue[y][x];
+		}
+	}
+
+	RT_free(blue);
+	RT_free(green);
+	RT_free(red);
 	return true;
 }
 
