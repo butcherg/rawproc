@@ -3035,10 +3035,8 @@ bool gImage::ApplyCACorrect( int threadcount)
 		}
 	}
 
-	printf("CA_correct...\n"); fflush(stdout);
 	CA_correct(0,0,w,h, true, 1, 0.0, 0.0, true, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
-	printf("done.\n\n"); fflush(stdout);
-
+	
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
@@ -3059,35 +3057,41 @@ bool gImage::ApplyHLRecover(int threadcount)
 	float ** green = RT_malloc(w, h);
 	float ** blue = RT_malloc(w, h);
 
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h; y++) {
-		for (unsigned x=0; x<w; x++) {
-			unsigned pos = x + y*w;
-			red[y][x]   = image[pos].r;
-			green[y][x] = image[pos].g;
-			blue[y][x]  = image[pos].b;
-		}
-	}
-
 	float chmax[3] = {0.0, 0.0, 0.0};
-	for (unsigned y=0; y<h; y++) {
-		for (unsigned x=0; x<w; x++) {
-			if (chmax[0] < red[y][x]) chmax[0] = red[y][x];
-			if (chmax[1] < green[y][x]) chmax[1] = green[y][x];
-			if (chmax[2] < blue[y][x]) chmax[2] = blue[y][x];
+
+	#pragma omp parallel num_threads(threadcount)
+	{
+		float ra = 0; float ga = 0; float ba = 0;
+	
+		#pragma omp for 
+		for (unsigned y=0; y<h; y++) {
+			for (unsigned x=0; x<w; x++) {
+				unsigned pos = x + y*w;
+				red[y][x]   = image[pos].r;
+				green[y][x] = image[pos].g;
+				blue[y][x]  = image[pos].b;
+
+				if (ra < image[pos].r) ra = image[pos].r;
+				if (ga < image[pos].g) ga = image[pos].g;
+				if (ba < image[pos].b) ba = image[pos].b;
+			}
+		}
+
+		#pragma omp critical
+		{
+			if (ra > chmax[0]) chmax[0] = ra;
+			if (ga > chmax[1]) chmax[1] = ga;
+			if (ba > chmax[2]) chmax[2] = ba;
 		}
 	}
 
 	float clmax[3];
 	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
-	//clmax[0] = 0.25 * atof(camwb[0].c_str());
-	//clmax[1] = 0.25 * atof(camwb[1].c_str());
-	//clmax[2] = 0.25 * atof(camwb[2].c_str());
-	clmax[0] = 0.25;
-	clmax[1] = 0.25;
-	clmax[2] = 0.25;
+	clmax[0] = 0.25 * atof(camwb[0].c_str());
+	clmax[1] = 0.25 * atof(camwb[1].c_str());
+	clmax[2] = 0.25 * atof(camwb[2].c_str());
 
-printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
+	//printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 
 	HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
 

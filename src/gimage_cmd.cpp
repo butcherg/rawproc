@@ -364,6 +364,40 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
+		//img <li>hlrecover - Use unclipped channels to reconstruct highlights. Use only before demosaic.</li>
+		else if (strcmp(cmd,"cacorrect") == 0) {  
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.clcorrect.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("clcorrect: (%d threads)... ",threadcount); fflush(stdout);
+
+			_mark();
+			dib.ApplyCACorrect(threadcount);
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			char cs[256];
+			sprintf(cs, "%s ",cmd);
+			commandstring += std::string(cs);
+		}
+
+		//img <li>hlrecover - Use unclipped channels to reconstruct highlights.  Use only after demosaic</li>
+		else if (strcmp(cmd,"hlrecover") == 0) {  
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.hlrecover.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("hlrecover: (%d threads)... ",threadcount); fflush(stdout);
+
+			_mark();
+			dib.ApplyHLRecover(threadcount);
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			char cs[256];
+			sprintf(cs, "%s ",cmd);
+			commandstring += std::string(cs);
+		}
+
 		//img <li>addexif:tagname,value - tagname must be valid EXIF tag for it to survive the file save...</li>
 		else if (strcmp(cmd,"addexif") == 0) {  
 			char *name = strtok(NULL, ",");
