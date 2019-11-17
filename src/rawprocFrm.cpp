@@ -1283,8 +1283,8 @@ void rawprocFrm::CommandTreeDeleteSubsequent(wxTreeItemId item)
 		next = commandtree->GetNextSibling(item);
 	while (next.IsOk()) {
 		wxTreeItemId following = commandtree->GetNextSibling(next);
-		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(next))->getPanel()));
-       	commandtree->Delete(next);
+		parambook->DeletePage(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(next))->getPanel())); 
+	      	commandtree->Delete(next);
 		next = following;
 	}
 }
