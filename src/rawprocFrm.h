@@ -200,6 +200,11 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void OnSize(wxSizeEvent& event);
 	void CharEvent(wxKeyEvent& event);
 	wxString getOpenFilePath();
+
+	wxFileName getFileName();
+	wxFileName getSourceFileName();
+	wxString getRootTool();  //returns input filename and any input processing params (':')
+	wxString getToolChain();
 		
 	private:
 		void OnClose(wxCloseEvent& event);

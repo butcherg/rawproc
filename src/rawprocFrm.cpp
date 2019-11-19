@@ -664,6 +664,43 @@ wxString rawprocFrm::getOpenFilePath()
 	return openfilepath;
 }
 
+wxFileName rawprocFrm::getFileName()
+{
+	return filename;
+}
+
+wxFileName rawprocFrm::getSourceFileName()
+{
+	return sourcefilename;
+}
+
+wxString rawprocFrm::getRootTool()
+{
+	wxTreeItemId root = commandtree->GetRootItem();
+	if (root.IsOk()) return ((PicProcessor *)commandtree->GetItemData(root))->getCommand();
+	return "";
+}
+
+wxString rawprocFrm::getToolChain()
+{
+	wxString cmd;
+	wxTreeItemIdValue cookie;
+	wxTreeItemId root = commandtree->GetRootItem();
+
+	wxTreeItemId iter = commandtree->GetFirstChild(root, cookie);
+	if (iter.IsOk()) {
+		cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
+		iter = commandtree->GetNextChild(root, cookie);
+		while (iter.IsOk()) {
+			if (((PicProcessor *)commandtree->GetItemData(iter))->isEnabled()) 
+				cmd.Append(wxString::Format("%s",((PicProcessor *)commandtree->GetItemData(iter))->getCommand()));
+			iter = commandtree->GetNextChild(root, cookie);
+		}
+	}
+
+	return cmd;
+}
+
 void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 {
 #ifdef USE_DCRAW
