@@ -49,6 +49,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera:");
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255);
+			//parm tool.blackwhitepoint.floatlabel: 0|1, if 1, turns label into a fractional value of the maxvalue.  Default=0
+			if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.floatlabel","0") == "1")
+				bwpoint->SetFloatLabel(true);
 			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
 			if (recalcdefault) recalc->SetValue(true);
 

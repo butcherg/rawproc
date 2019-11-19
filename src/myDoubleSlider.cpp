@@ -1,6 +1,7 @@
 
 
 #include "myDoubleSlider.h"
+#include "myConfig.h"
 #include "thumb_up.xpm"
 #include "thumb_down.xpm"
 
@@ -27,6 +28,7 @@ myDoubleSlider::myDoubleSlider(wxWindow *parent,
 	upthumb = wxBitmap(thumb_up_xpm);
 	downthumb = wxBitmap(thumb_down_xpm);
 	selectedslider = 0;
+	floatlabel = false;
 	Bind(wxEVT_PAINT, &myDoubleSlider::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN,&myDoubleSlider::OnLeftDown, this);
 	Bind(wxEVT_MOTION,&myDoubleSlider::OnMotion, this);
@@ -35,6 +37,11 @@ myDoubleSlider::myDoubleSlider(wxWindow *parent,
 	Bind(wxEVT_MOUSEWHEEL, &myDoubleSlider::OnWheel, this);
 	Refresh();
 	Update();
+}
+
+void myDoubleSlider::SetFloatLabel(bool f)
+{
+	floatlabel = f;
 }
 
 void myDoubleSlider::SetLeftValue(int lval)
@@ -142,23 +149,41 @@ void myDoubleSlider::render(wxDC& dc)
 	dc.DrawLine(SLIDER_MARGIN,h/2,   w-SLIDER_MARGIN+1, h/2);
 	dc.SetPen(*wxLIGHT_GREY_PEN);
 	dc.DrawLine(SLIDER_MARGIN,h/2+1, w-SLIDER_MARGIN+1, h/2+1);
-	
 
 	//left slider:
-	dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
+	if (floatlabel)
+		dc.GetTextExtent(wxString::Format("%f",(float)leftval/(float)maxval), &tw, &th);
+	else
+		dc.GetTextExtent(wxString::Format("%d",leftval), &tw, &th);
 	DrawUpThumb(dc,SLIDER_MARGIN+leftval-4, h*0.5+2);
 	if (leftval < maxval/2)
-		dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
+		if (floatlabel)
+			dc.DrawText(wxString::Format("%f",(float)leftval/(float)maxval),SLIDER_MARGIN+leftval+8, h*0.5+5);
+		else
+			dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval+8, h*0.5+5);
 	else
-		dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval-tw-7, h*0.5+5);
+		if (floatlabel)
+			dc.DrawText(wxString::Format("%f",(float)leftval/(float)maxval),SLIDER_MARGIN+leftval-tw-7, h*0.5+5);
+		else
+			dc.DrawText(wxString::Format("%d",leftval),SLIDER_MARGIN+leftval-tw-7, h*0.5+5);
 	
 	//right slider:
-	dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
+	if (floatlabel)
+		dc.GetTextExtent(wxString::Format("%f",(float)rightval/(float)maxval), &tw, &th);
+	else
+		dc.GetTextExtent(wxString::Format("%d",rightval), &tw, &th);
 	DrawDownThumb(dc,SLIDER_MARGIN+rightval-4, h*0.5-th-8);
 	if (rightval < maxval/2)
-		dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval+8, h*0.5-th-4);
+		if (floatlabel)
+			dc.DrawText(wxString::Format("%f",(float)rightval/(float)maxval),SLIDER_MARGIN+rightval+8, h*0.5-th-4);
+		else
+			dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval+8, h*0.5-th-4);
+		
 	else
-		dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
+		if (floatlabel)
+			dc.DrawText(wxString::Format("%f",(float)rightval/(float)maxval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
+		else
+			dc.DrawText(wxString::Format("%d",rightval),SLIDER_MARGIN+rightval-tw-7, h*0.5-th-4);
 }
 
 

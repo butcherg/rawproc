@@ -24,6 +24,7 @@ public:
 	int GetRightValue();
 	void SetLeftValue(int lval);
 	void SetRightValue(int rval);
+	void SetFloatLabel(bool f);
 	wxSize DoGetBestSize();	
 	void OnPaint(wxPaintEvent&);
 	void OnLeftDown(wxMouseEvent& event);
@@ -44,6 +45,7 @@ private:
 	int selectedslider;
 	int prevx, prevy;
 	wxBitmap upthumb, downthumb;
+	bool floatlabel;
 
 };
 
