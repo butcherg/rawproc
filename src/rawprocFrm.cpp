@@ -45,6 +45,7 @@
 #endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
+#include "myBatchDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
 #include "util.h"
@@ -94,6 +95,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_Copy,rawprocFrm::MnuCopy1202Click)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
+	EVT_MENU(ID_MNU_BATCH,rawprocFrm::MnuBatchClick)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
@@ -241,6 +243,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_EDITMnu_Obj, _("Edit"));
 
 	
@@ -1507,6 +1510,12 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 void rawprocFrm::MnuEXIF(wxCommandEvent& event)
 {
 	EXIFDialog(filename);
+}
+
+void rawprocFrm::MnuBatchClick(wxCommandEvent& event)
+{
+	myBatchDialog dlg(this, wxID_ANY, "Batch");
+	dlg.ShowModal();
 }
 
 void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
