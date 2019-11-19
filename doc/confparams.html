@@ -25,6 +25,7 @@
 <li><b>display.exposuredata.outlinecolor</b>:  Sets border color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)</li>
 <li><b>display.exposuredata.outlinecolor</b>:  Sets text color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)</li>
 <li><b>display.exposuredata</b>:  0|1, enable/disable exposurebox display at startup.  Exposurebox display can still be toggled on/off with the 'e' key. Default=1</li>
+<li><b>display.info.evlv</b>:  Add either/both EV (Exposure Value, Wikipedia definition) or LV (Light Value, exiftool definition) to the information string. "EV" and/or "LV" need to be in the property value, you can separate them with blanks, a comma, or just run them together.  Default: blank. </li>
 <li><b>display.maxscale</b>:  Smallest panel image size.  Default=5.0, or 500%</li>
 <li><b>display.minscale</b>:  Smallest panel image size.  Default=0.1, or 10%</li>
 <li><b>display.outofbound.black=r,g,b</b>:  RGB color to use for out-of-lower-bound pixels.  Default: 255,0,255 (cyan)</li>
@@ -83,10 +84,9 @@
 <li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.automode</b>:  The calculation mode for auto.  tone=find the points based on the tone; min=find the points based on the min of the channel maxes. Default: tone</li>
 <li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.autorecalcdefault</b>:  0/1, default setting for recalc when the tool is added.  Default=0</li>
 <li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.blackthreshold</b>:  The percent threshold used by the auto algorithm for the black adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
+<li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.floatlabel</b>:  0|1, if 1, turns label into a fractional value of the maxvalue.  Default=0</li>
 <li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.whiteinitialvalue</b>:  The initial whitepoint setting, or the starting point in the histogram for walking down to the white threshold in auto.  Use to bypass bunched clipped highlights.  Default=255</li>
 <li><a name="tool.blackwhitepoint"><b>tool.blackwhitepoint.whitethreshold</b>:  The percent threshold used by the auto algorithm for the white adjustment. Only used when the blackwhitepoint tool is created. Default=0.05</li>
-<li><a name="tool.bright"><b>tool.bright.initialvalue</b>:  The initial (and reset button) value of the bright tool, 0=no change.  Default=0</li>
-<li><a name="tool.contrast"><b>tool.contrast.initialvalue</b>:  The initial (and reset button) value of the contrast tool, 0=no change.  Default=0</li>
 <li><a name="tool.crop"><b>tool.crop.controlpointradius</b>:  Radius of the rectangle displayed to indicate a control point.  Default=7</li>
 <li><a name="tool.crop"><b>tool.crop.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point rectangle.  Default=7</li>
 <li><a name="tool.curve"><b>tool.curve.controlpointradius</b>:  Radius of the circle displayed to indicate a control point.  Default=5</li>
@@ -101,12 +101,9 @@
 <li><a name="tool.denoise"><b>tool.denoise.threshold</b>:  Defines the initial value of the threshold for wavelet denoise.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
-<li><a name="tool.gamma"><b>tool.gamma.initialvalue</b>:  The initial (and reset button) value of the gamma tool, 1.0=no change (linear).  Default=2.2</li>
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
 <li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
 <li><a name="tool.gray"><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
-<li><a name="tool.highlight"><b>tool.highlight.level</b>:  The initial (and reset button) value of the highlight tool, 0=no change.  Default=0</li>
-<li><a name="tool.highlight"><b>tool.highlight.threshold</b>:  The initial (and reset button) value of the highlight curve threshold.  Default=192</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: none.</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
@@ -118,8 +115,6 @@
 <li><a name="tool.resize"><b>tool.resize.y</b>:  Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li>
 <li><a name="tool.rotate"><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
 <li><a name="tool.saturate"><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
-<li><a name="tool.shadow"><b>tool.shadow.level</b>:  The initial (and reset button) value of the shadow tool, 0=no change.  Default=0</li>
-<li><a name="tool.shadow"><b>tool.shadow.threshold</b>:  The initial (and reset button) value of the shadow curve threshold.  Default=64</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.A</b>:  Default value for filmic tone operator A coefficient.  Default=6.2</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.B</b>:  Default value for filmic tone operator B coefficient.  Default=0.5</li>
