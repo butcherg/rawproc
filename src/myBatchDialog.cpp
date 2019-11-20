@@ -1,6 +1,7 @@
 #include "myBatchDialog.h"
 #include "rawprocFrm.h"
 #include "myRowSizer.h"
+#include "myConfig.h"
 #include "util.h"
 
 //#include <wx/stattext.h>
@@ -48,8 +49,10 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 
 wxString myBatchDialog::ConstructCommand()
 {
-	wxString term = "gnome-terminal --";
-	wxString img = "/home/glenn/ImageStuff/rawproc9/rawproc/build-linux/src/img";
+	//wxString term = "gnome-terminal --";
+	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand",""));
+	//wxString img = "/home/glenn/ImageStuff/rawproc9/rawproc/build-linux/src/img";
+	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
 	wxString pause = "read line";
 	wxString toolchainstr = "\"" + toolchain->GetValue() + "\"";
 	toolchainstr.Replace(" ","\" \"");
