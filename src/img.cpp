@@ -102,10 +102,32 @@ std::vector<std::string> fileglob(std::string dspec)
 {
 	std::vector<std::string> glob;
 	struct dirent *dp;
-	DIR *dirp = opendir(".");
-	while ((dp = readdir(dirp)) != NULL)
-		if (matchspec(std::string(dp->d_name), dspec) != "")
+	std::string path = getpath(dspec).c_str();
+	std::string filepattern = getfile(dspec).c_str();
+	DIR *dirp = opendir(path.c_str());
+	while ((dp = readdir(dirp)) != NULL) 
+		if (matchspec(std::string(dp->d_name), filepattern) != "") 
 			glob.push_back(std::string(dp->d_name));
+	(void)closedir(dirp);
+	std::sort( glob.begin(), glob.end() );
+	return glob;
+}
+
+std::vector<std::string> variantglob(std::string dspec)
+{
+	std::vector<std::string> glob;
+	struct dirent *dp;
+	std::string path = getpath(dspec).c_str();
+	std::string filepattern = getfile(dspec).c_str();
+	std::string variantsuffix = filepattern.substr(1);
+
+	DIR *dirp = opendir(path.c_str());
+	while ((dp = readdir(dirp)) != NULL) {
+		std::string variant = matchspec(std::string(dp->d_name), filepattern);
+		if (variant != "") {
+			glob.push_back(variant);
+		}
+	}
 	(void)closedir(dirp);
 	std::sort( glob.begin(), glob.end() );
 	return glob;
@@ -471,12 +493,11 @@ int main (int argc, char **argv)
 
 	if (countchar(infile[0],'*') == 1) {
 		if (countchar(outfile[0],'*') == 1) {
-			std::vector<std::string> flist = fileglob(infile[0]);
-			for (int i=0; i<flist.size(); i++) {
-				std::string variant = matchspec(flist[i], infile[0]);
-				if (variant == "") continue;
+			std::vector<std::string> vlist = variantglob(infile[0]);
+			for (int i=0; i<vlist.size(); i++) {
+				std::string variant = vlist[i];
 				fnames f;
-				f.infile = flist[i];
+				f.infile = makename(variant,infile[0]);
 				f.outfile = makename(variant,outfile[0]);
 				f.variant = variant;
 				files.push_back(f);
@@ -495,7 +516,7 @@ int main (int argc, char **argv)
 		f.outfile = outfile[0];
 		files.push_back(f);
 	}
-	
+
 
 //list of commands to apply to each input file
 std::vector<std::string> commands;
@@ -504,7 +525,7 @@ for (int i = optind; i<argc-1; i++) {
 }
 
 int count = 0;
-
+printf("number of files: %ld\n", files.size());
 for (int f=0; f<files.size(); f++)
 {
 
