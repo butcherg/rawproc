@@ -533,12 +533,12 @@ for (int f=0; f<files.size(); f++)
 	strncpy(iname, files[f].infile.c_str(), 255);
 	
 	if (!force && file_exists(files[f].outfile.c_str())) {
-		printf("Output file %s exists, skipping %s...\n",files[f].outfile.c_str(), iname);
+		printf("%d/%ld: Output file %s exists, skipping %s...\n",f+1, files.size(), files[f].outfile.c_str(), iname);
 		continue;
 	}
 	
 	if (!file_exists(iname)) {
-		printf("Input file %s doesn't exist...\n", iname);
+		printf("%d/%ld: Input file %s doesn't exist...\n",f+1, files.size(), iname);
 		continue;
 	}
 
@@ -546,7 +546,7 @@ for (int f=0; f<files.size(); f++)
 
 	commandstring = "rawproc-img ";
 
-	printf("%d: Loading file %s %s... ",count, iname, infile[1].c_str());
+	printf("%d/%ld: Loading file %s %s... ",f+1, files.size(), iname, infile[1].c_str());
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
@@ -640,6 +640,10 @@ for (int f=0; f<files.size(); f++)
 
 }
 
+if (count == 1)
+	printf("%d file processed.\n",count);
+else
+	printf("%d files processed.\n",count);
 
 	return 0;
 }
