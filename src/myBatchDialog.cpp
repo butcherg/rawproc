@@ -19,9 +19,11 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	wxFileName outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
 	inputspec.SetName("*");	
 	outputspec.SetName("*");
+	wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
+	if (roottool != "") roottool = ":"+roottool;
 
 	//directory = new wxTextCtrl(this, wxID_ANY, wxFileName::GetCwd(), wxDefaultPosition, wxSize(500,25));
-	inputfilespec = new wxTextCtrl(this, wxID_ANY, inputspec.GetFullPath(), wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
+	inputfilespec = new wxTextCtrl(this, wxID_ANY, inputspec.GetFullPath()+roottool, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
 	//inputfilespec = new wxTextCtrl(this, wxID_ANY, ((rawprocFrm *) parent)->getRootTool(), wxDefaultPosition, wxSize(500,25));
 	outputfilespec = new wxTextCtrl(this, wxID_ANY, outputspec.GetFullPath(), wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
 	toolchain = new wxTextCtrl(this, wxID_ANY, ((rawprocFrm *) parent)->getToolChain(), wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
