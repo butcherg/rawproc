@@ -49,14 +49,12 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 
 wxString myBatchDialog::ConstructCommand()
 {
-	//wxString term = "gnome-terminal --";
 	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand",""));
-	//wxString img = "/home/glenn/ImageStuff/rawproc9/rawproc/build-linux/src/img";
 	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
 	wxString pause = "read line";
-	wxString toolchainstr = "\"" + toolchain->GetValue() + "\"";
+	wxString toolchainstr = toolchain->GetValue().Trim();
+	toolchainstr = "\"" + toolchainstr + "\"";
 	toolchainstr.Replace(" ","\" \"");
-	//return wxString::Format("%s %s \"%s\" %s \"%s\"",term,img,inputfilespec->GetValue(),toolchainstr,outputfilespec->GetValue());
 	return wxString::Format("%s %s \"%s\" %s \"%s\"",term,img,inputfilespec->GetValue(),toolchainstr,outputfilespec->GetValue());
 }
 
