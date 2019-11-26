@@ -883,11 +883,14 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		wxArrayString token = split(script, " ");
 			
 		if (token[1].Contains(":")) {
-			wxArrayString fparams = split(token[1],":");
+			//wxArrayString fparams = split(token[1],":");
+			//std::vector<std::string> fparams = bifurcate(token[1].ToStdString(), ':', true);
+			wxArrayString fparams = inputfilecommand(token[1]);
 			if (fparams.GetCount() >1) {
-				oparams = fparams[1];
+			//if (fparams.size() >1) {
+				oparams = wxString(fparams[1]);
 			}
-			ofilename = fparams[0];
+			ofilename = wxString(fparams[0]);
 		}
 		else ofilename = token[1];
 				
