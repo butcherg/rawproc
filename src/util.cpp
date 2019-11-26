@@ -33,6 +33,38 @@ wxArrayString split(wxString str, wxString delim)
 	return a;
 }
 
+wxArrayString inputfilecommand(wxString str)
+{
+	//designed to distinguish between Windows drive name colons and colons prepending the input command string
+	wxArrayString filecmd;
+	wxArrayString ic = split(str, ":");
+	if (ic.GetCount() == 0) {
+		filecmd.Add("");
+		filecmd.Add("");
+		return filecmd;
+	}
+	if (ic.GetCount() == 1) {
+		filecmd.Add(ic[0]);
+		filecmd.Add("");
+		return filecmd;
+	}
+	else if (ic.GetCount() == 2) {
+		filecmd.Add(ic[0]);
+		filecmd.Add(ic[1]);
+		return filecmd;
+	}
+	else {
+		wxString filepath = ic[0];
+		for (int i=1; i<ic.GetCount() - 1; i++) {
+			filepath.Append(":");
+			filepath.Append(ic[i]);
+		}
+		filecmd.Add(filepath);
+		filecmd.Add(ic[ic.GetCount() - 1]);
+		return filecmd;
+	}
+}
+
 wxString paramString(wxString filter)
 {
 	wxString paramstr, name, val;
