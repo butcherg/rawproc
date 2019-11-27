@@ -160,6 +160,8 @@ bool force = false;
 
 bool saveFile (gImage &savedib, std::string outfilename, std::string params, std::string commandstring)
 {
+
+	gImage dib = savedib;
 	GIMAGE_FILETYPE filetype = gImage::getFileNameType(outfilename.c_str());
 	
 	std::string profilepath = myConfig::getConfig().getValueOrDefault("cms.profilepath","");
