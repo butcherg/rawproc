@@ -160,8 +160,6 @@ bool force = false;
 
 bool saveFile (gImage &savedib, std::string outfilename, std::string params, std::string commandstring)
 {
-
-	gImage dib = savedib;
 	GIMAGE_FILETYPE filetype = gImage::getFileNameType(outfilename.c_str());
 	
 	std::string profilepath = myConfig::getConfig().getValueOrDefault("cms.profilepath","");
@@ -555,7 +553,7 @@ for (int f=0; f<files.size(); f++)
 	}
 	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
 
-	commandstring += std::string(iname);
+	commandstring += getfile(std::string(iname));
 	if (infile[1] != "") commandstring += ":" + infile[1];
 	commandstring += " ";
 
