@@ -13,6 +13,10 @@
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
 <li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1</li>
+<li><b>batch.imgcommand.options = (command line options)</b>:  If present, the specified command line switches will be appended to the imgcommand. For rawproc's img, see the help file for valid options.</li>
+<li><b>batch.termcommand.options = (command line options)</b>:  If present, the specified command line switches will be appended to the termcommand. For wxcmd, use '-x' to autodismiss the batch command when it is complete.</li>
+<li><b>batch.termcommand.options</b>:  [options], inserts the specified command line options after the term command, before the batch command. Use -x for wxcmd to exit after the batch command is complete.</li>
+<li><b>batch.termcommand</b>:  path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
 <li><b>display.cms.displayprofile</b>:  Filename of display profile.  Default: none.</li>
