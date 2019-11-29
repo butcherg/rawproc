@@ -31,6 +31,7 @@ wxString paramString(wxString filter);
 wxString rawParamString(wxString filter);
 wxArrayString paramList(wxString filter);
 
+wxArrayString getDirs(wxString path, wxString namespec = "*");
 
 void paramAppend(wxString name, wxString value, wxString &paramstring);
 wxArrayString paramSplit(wxString paramstring);

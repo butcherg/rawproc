@@ -15,6 +15,7 @@
 #endif
 
 #include <wx/tokenzr.h>
+#include <wx/dir.h>
 #include <vector>
 
 #include "gimage/gimage.h"
@@ -63,6 +64,19 @@ wxArrayString inputfilecommand(wxString str)
 		filecmd.Add(ic[ic.GetCount() - 1]);
 		return filecmd;
 	}
+}
+
+wxArrayString getDirs(wxString path, wxString namespec)
+{
+	wxArrayString dirlist;
+	wxDir dir(path);
+	wxString dirname;
+	bool cont = dir.GetFirst(&dirname, wxEmptyString, wxDIR_DIRS);
+	while(cont) {
+		if (wxMatchWild(namespec, dirname, false)) dirlist.Add(dirname);
+		cont = dir.GetNext(&dirname);
+	}
+	return dirlist;
 }
 
 wxString paramString(wxString filter)
