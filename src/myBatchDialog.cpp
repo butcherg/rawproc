@@ -18,10 +18,10 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	wxFileName dirspec = wxFileName(wxFileName::GetCwd(), "");
 	wxFileName inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
 	wxFileName outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
-	inputspec.SetName("*");	
-	outputspec.SetName("*");
 	inputspec.MakeRelativeTo();
 	outputspec.MakeRelativeTo();
+	inputspec.SetName("*");	
+	outputspec.SetName("*");
 	wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
 	if (roottool != "") roottool = ":"+roottool;
 
