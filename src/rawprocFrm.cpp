@@ -181,6 +181,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	omp_set_dynamic(0);
 #endif
 	deleting = false;
+	opensource = false;
+	open=false;
 	displayitem.Unset();
 
 	wxImageList *states;
@@ -360,6 +362,16 @@ void rawprocFrm::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
 	Refresh();
+}
+
+bool rawprocFrm::isOpenSource()
+{
+	return opensource;
+}
+
+bool rawprocFrm::isOpen()
+{
+	return open;
 }
 
 void rawprocFrm::SetBackground()
@@ -858,6 +870,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		}
 		
 		opensource = false;
+		open = true;
 
 		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
 	}
@@ -1015,6 +1028,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()),945);
 			
 			opensource = true;
+			open = false;
 
 			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
 		}

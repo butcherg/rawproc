@@ -203,6 +203,8 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void CharEvent(wxKeyEvent& event);
 	wxString getOpenFilePath();
 
+	bool isOpen();
+	bool isOpenSource();
 	wxFileName getFileName();
 	wxFileName getSourceFileName();
 	wxString getRootTool();  //returns input filename and any input processing params (':')
@@ -233,6 +235,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 
 		bool deleting;
 		bool opensource;
+		bool open;
 		//wxTreeItemId olditem;
 		wxTreeItemId displayitem;
 		wxFileName filename, sourcefilename;

@@ -15,28 +15,61 @@
 myBatchDialog::myBatchDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
 wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
 {
-	wxFileName dirspec = wxFileName(wxFileName::GetCwd(), "");
-	wxFileName inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
-	wxFileName outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
-	inputspec.MakeRelativeTo();
-	outputspec.MakeRelativeTo();
-	inputspec.SetName("*");	
-	outputspec.SetName("*");
-	wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
-	if (roottool != "") roottool = ":"+roottool;
+	wxFileName dirspec, inputspec, outputspec;
+	wxString ispec, ospec, tchain;
+	dirspec = wxFileName(wxFileName::GetCwd(), "");
+	if (((rawprocFrm *) parent)->isOpenSource()) {
+		inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
+		outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
+		inputspec.MakeRelativeTo();
+		outputspec.MakeRelativeTo();
+		inputspec.SetName("*");	
+		outputspec.SetName("*");
+		wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
+		if (roottool != "") roottool = ":"+roottool;
+		ispec = inputspec.GetFullPath()+roottool;
+		ospec = outputspec.GetFullPath();
+		tchain = ((rawprocFrm *) parent)->getToolChain();
+	}
+	else if (((rawprocFrm *) parent)->isOpen()) {
+		inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
+		inputspec.MakeRelativeTo();
+		inputspec.SetName("*");	
+		wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
+		if (roottool != "") roottool = ":"+roottool;
+		ispec = inputspec.GetFullPath()+roottool;
+		tchain = ((rawprocFrm *) parent)->getToolChain();
+	}
+	else {
+		//parm batch.inputspec: Path/file specification for input.  Append input processing with a ':', e.g., *.NEF:rawdata=crop.  Default: None, you need to specify your own.
+		ispec = wxString(myConfig::getConfig().getValueOrDefault("batch.inputspec",""));
+		//parm batch.outputspec: Path/file specification for output.  Append output processing with a ':', e.g., *.jpg:quality=75.  Default: None, you need to specify your own.
+		ospec = wxString(myConfig::getConfig().getValueOrDefault("batch.outputspec",""));
+		//parm batch.toolchain: The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.
+		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain",""));
+	}
 
 	directory = new wxTextCtrl(this, wxID_ANY, wxFileName::GetCwd(), wxDefaultPosition, wxSize(500,25));
-	inputfilespec = new wxTextCtrl(this, wxID_ANY, inputspec.GetFullPath()+roottool, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
-	outputfilespec = new wxTextCtrl(this, wxID_ANY, outputspec.GetFullPath(), wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
-	toolchain = new wxTextCtrl(this, wxID_ANY, ((rawprocFrm *) parent)->getToolChain(), wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
+	inputfilespec = new wxTextCtrl(this, wxID_ANY, ispec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
+	outputfilespec = new wxTextCtrl(this, wxID_ANY, ospec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
+	toolchain = new wxTextCtrl(this, wxID_ANY, tchain, wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
 
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+	wxSizerFlags labelflags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 	myRowSizer *s = new myRowSizer(wxSizerFlags().Expand());
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Directory:"),labelflags);
+	s->NextRow();
 	s->AddRowItem(directory,flags);
+	s->NextRow();
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Input File Specification:"),labelflags);
 	s->NextRow();
 	s->AddRowItem(inputfilespec,flags);
 	s->NextRow();
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Output File Specification:"),labelflags);
+	s->NextRow();
 	s->AddRowItem(outputfilespec,flags);
+	s->NextRow();
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Tool Chain:"),labelflags);
 	s->NextRow();
 	s->AddRowItem(toolchain,flags);
 	s->NextRow();

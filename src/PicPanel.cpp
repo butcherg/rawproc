@@ -19,7 +19,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = false;
+	softproof = thumbdragging = dragging = modified = false;
 
 	thumbvisible = true;
 	histogram = hgram;
