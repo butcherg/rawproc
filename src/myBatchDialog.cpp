@@ -3,6 +3,7 @@
 #include "myRowSizer.h"
 #include "myConfig.h"
 #include "util.h"
+#include "folder.xpm"
 
 //#include <wx/stattext.h>
 #include "wx/process.h"
@@ -11,6 +12,7 @@
 
 #define BATCHPROCESS 2010
 #define BATCHSHOW 2011
+#define BATCHCWD 2012
 
 myBatchDialog::myBatchDialog(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size):
 wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
@@ -69,7 +71,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain",""));
 	}
 
-	directory = new wxTextCtrl(this, wxID_ANY, wxFileName::GetCwd(), wxDefaultPosition, wxSize(500,25));
+	directory = new wxTextCtrl(this, wxID_ANY, wxFileName::GetCwd(), wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
 	inputfilespec = new wxTextCtrl(this, wxID_ANY, ispec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
 	outputfilespec = new wxTextCtrl(this, wxID_ANY, ospec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
 	toolchain = new wxTextCtrl(this, wxID_ANY, tchain, wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
@@ -80,6 +82,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Directory:"),labelflags);
 	s->NextRow();
 	s->AddRowItem(directory,flags);
+	s->AddRowItem(new wxBitmapButton(this, BATCHCWD, wxBitmap(folder_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 	s->NextRow();
 	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Input File Specification:"),labelflags);
 	s->NextRow();
@@ -101,6 +104,16 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 
 	Bind(wxEVT_BUTTON, &myBatchDialog::OnProcess, this, BATCHPROCESS);
 	Bind(wxEVT_BUTTON, &myBatchDialog::OnShow, this, BATCHSHOW);
+	Bind(wxEVT_BUTTON, &myBatchDialog::OnDirSelect, this, BATCHCWD);
+}
+
+void myBatchDialog::OnDirSelect(wxCommandEvent& event)
+{
+	const wxString& dir = wxDirSelector("Select Batch Working Directory", directory->GetValue());
+	if ( !dir.empty() ) {
+		directory->SetValue(dir);
+		directory->Refresh();
+	}
 }
 
 wxString myBatchDialog::ConstructCommand()
