@@ -102,7 +102,9 @@ wxString myBatchDialog::ConstructCommand()
 
 void myBatchDialog::OnProcess(wxCommandEvent& event)
 {
-	wxExecute(ConstructCommand());
+	wxExecuteEnv env;
+	env.cwd = directory->GetValue();
+	wxExecute(ConstructCommand(),wxEXEC_ASYNC,NULL,&env);
 }
 
 void myBatchDialog::OnShow(wxCommandEvent& event)
