@@ -6,7 +6,7 @@ AM_CPPFLAGS=-DBUILDDATE='$(bdate)'
 nobase_include_HEADERS = gimage/gimage.h gimage/curve.h gimage/half.hpp gimage/strutil.h
 EXTRA_DIST = checked.xpm unchecked.xpm thumb_down.xpm thumb_up.xpm run.xpm undo.xpm 
 
-bin_PROGRAMS = rawproc img exif
+bin_PROGRAMS = rawproc img exif wxcmd
 
 rawproc_SOURCES =  curve.cpp CurvePane.cpp CameraData.cpp elapsedtime.cpp gimage.cpp gimage_cmd.cpp jpegexif.cpp jpegimage.cpp myBatchDialog.cpp myConfig.cpp myDoubleSlider.cpp myEXIFDialog.cpp myHistogramDialog.cpp myHistogramPane.cpp myPropertyDialog.cpp myRowSizer.cpp myRowColumnSizer.cpp myFloatCtrl.cpp myIntegerCtrl.cpp myToneCurvePane.cpp PicPanel.cpp PicProcessorCACorrect.cpp PicProcessorHLRecover.cpp PicProcessorGroup.cpp PicProcessorSubtract.cpp PicProcessorDemosaic.cpp PicProcessorBlackWhitePoint.cpp PicProcessorColorSpace.cpp PicProcessor.cpp PicProcessorCrop.cpp PicProcessorCurve.cpp PicProcessorDenoise.cpp PicProcessorExposure.cpp PicProcessorTone.cpp PicProcessorGray.cpp PicProcessorRedEye.cpp PicProcessorResize.cpp PicProcessorRotate.cpp PicProcessorSaturation.cpp PicProcessorSharpen.cpp PicProcessorWhiteBalance.cpp PicProcPanel.cpp pngimage.cpp rawimage.cpp rawprocApp.cpp rawprocFrm.cpp strutil.cpp tiffimage.cpp util.cpp cJSON.c
 
@@ -18,6 +18,9 @@ endif
 
 rawproc_LDADD = @WX_LIBS@
 
+wxcmd_SOURCES = wxcmd.cpp
+
+wxcmd_LDADD = @WX_LIBS@
 
 img_SOURCES = img.cpp curve.cpp CameraData.cpp elapsedtime.cpp gimage.cpp gimage_cmd.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp tiffimage.cpp cJSON.c
 

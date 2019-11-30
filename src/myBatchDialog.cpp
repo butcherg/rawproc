@@ -120,7 +120,7 @@ wxString myBatchDialog::ConstructCommand()
 {
 	//parm batch.termcommand: path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)
 	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand","wxcmd"));
-	//batch.imgcommand: path/executable for the img command line raw processor. Default: img (somewhere in $PATH)
+	//parm batch.imgcommand: path/executable for the img command line raw processor. Default: img (somewhere in $PATH)
 	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
 	//parm batch.termcommand.options: [options], inserts the specified command line options after the term command, before the batch command. Use -x for wxcmd to exit after the batch command is complete.
 	//parm batch.termcommand.options = (command line options): If present, the specified command line switches will be appended to the termcommand. For wxcmd, use '-x' to autodismiss the batch command when it is complete.

@@ -50,6 +50,7 @@ Name: "{userappdata}\rawproc"
 [Files]
 Source: "src\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
+Source: "src\wxcmd.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
 Source: "src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
 Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
