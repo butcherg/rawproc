@@ -18,27 +18,47 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	wxFileName dirspec, inputspec, outputspec;
 	wxString ispec, ospec, tchain;
 	dirspec = wxFileName(wxFileName::GetCwd(), "");
+	
 	if (((rawprocFrm *) parent)->isOpenSource()) {
+		
 		inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
-		outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
 		inputspec.MakeRelativeTo();
-		outputspec.MakeRelativeTo();
 		inputspec.SetName("*");	
-		outputspec.SetName("*");
 		wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
 		if (roottool != "") roottool = ":"+roottool;
 		ispec = inputspec.GetFullPath()+roottool;
+		
+		outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
+		outputspec.MakeRelativeTo();
+		outputspec.SetName("*");
 		ospec = outputspec.GetFullPath();
+		
+
 		tchain = ((rawprocFrm *) parent)->getToolChain();
+		
 	}
 	else if (((rawprocFrm *) parent)->isOpen()) {
+		
 		inputspec = ((rawprocFrm *) parent)->getFileName().GetFullPath();
 		inputspec.MakeRelativeTo();
 		inputspec.SetName("*");	
 		wxString roottool = inputfilecommand(((rawprocFrm *) parent)->getRootTool())[1];
 		if (roottool != "") roottool = ":"+roottool;
 		ispec = inputspec.GetFullPath()+roottool;
+		
+		if (((rawprocFrm *) parent)->getSourceFileName().GetFullPath() != wxEmptyString) {
+			outputspec = ((rawprocFrm *) parent)->getSourceFileName().GetFullPath();
+			outputspec.MakeRelativeTo();
+			outputspec.SetName("*");
+			ospec = outputspec.GetFullPath();
+		}
+		else {
+			ospec = wxString(myConfig::getConfig().getValueOrDefault("batch.outputspec",""));
+		}
+		
+
 		tchain = ((rawprocFrm *) parent)->getToolChain();
+		
 	}
 	else {
 		//parm batch.inputspec: Path/file specification for input.  Append input processing with a ':', e.g., *.NEF:rawdata=crop.  Default: None, you need to specify your own.

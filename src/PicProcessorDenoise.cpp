@@ -158,7 +158,7 @@ class DenoisePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &DenoisePanel::onRadioButton, this);
 			Bind(wxEVT_SCROLL_CHANGED, &DenoisePanel::OnChanged, this);
 			Bind(wxEVT_SCROLL_THUMBTRACK, &DenoisePanel::OnThumbTrack, this);
-			//Bind(myFLOATCTRL_UPDATE, &DenoisePanel::paramChanged, this);
+			Bind(myFLOATCTRL_UPDATE, &DenoisePanel::paramChanged, this);
 			Bind(myFLOATCTRL_CHANGE, &DenoisePanel::onWheel, this);
 			Bind(wxEVT_TIMER, &DenoisePanel::OnTimer,  this);
 			Bind(wxEVT_CHECKBOX, &DenoisePanel::onEnable, this, DENOISEENABLE);
