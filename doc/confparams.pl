@@ -22,6 +22,9 @@ foreach $line (@conf) {
 	if ($terms[0] eq 'tool') {
 		print "<li><a name=\"$terms[0].$terms[1]\"><b>$parm</b>: $stuff</li>\n";
 	}
+	elsif ($terms[0] eq 'batch') {
+		print "<li><a name=\"$terms[0]\"><b>$parm</b>: $stuff</li>\n";
+	}
 	else {
 		print "<li><b>$parm</b>: $stuff</li>\n";
 	}

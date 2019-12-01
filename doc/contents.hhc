@@ -182,11 +182,18 @@
 			<param name="ID" value=38>
 			<param name="Local" value="img.html">
 			</OBJECT>
+			
+		<LI> 
+			<OBJECT type="text/sitemap">
+			<param name="Name" value="Batch Processing">
+			<param name="ID" value=39>
+			<param name="Local" value="batch.html">
+			</OBJECT>
 
 		<LI> 
 			<OBJECT type="text/sitemap">
 			<param name="Name" value="Tips">
-			<param name="ID" value=39>
+			<param name="ID" value=40>
 			<param name="Local" value="tips.html">
 			</OBJECT>
 

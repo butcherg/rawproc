@@ -163,6 +163,11 @@
 			<param name="Name" value="img Command Line Program">
 			<param name="Local" value="img.html">
 			</OBJECT>
+			
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Batch Processing">
+			<param name="Local" value="batch.html">
+			</OBJECT>
 
 		<LI> 
 			<OBJECT type="text/sitemap">
