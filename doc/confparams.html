@@ -13,12 +13,9 @@
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
 <li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1</li>
-<li><a name="batch"><b>batch.imgcommand.options = (command line options)</b>:  If present, the specified command line switches will be appended to the imgcommand. For rawproc's img, see the help file for valid options.</li>
 <li><a name="batch"><b>batch.imgcommand</b>:  path/executable for the img command line raw processor. Default: img (somewhere in $PATH)</li>
 <li><a name="batch"><b>batch.inputspec</b>:  Path/file specification for input.  Append input processing with a ':', e.g., *.NEF:rawdata=crop.  Default: None, you need to specify your own.</li>
 <li><a name="batch"><b>batch.outputspec</b>:  Path/file specification for output.  Append output processing with a ':', e.g., *.jpg:quality=75.  Default: None, you need to specify your own.</li>
-<li><a name="batch"><b>batch.termcommand.options = (command line options)</b>:  If present, the specified command line switches will be appended to the termcommand. For wxcmd, use '-x' to autodismiss the batch command when it is complete.</li>
-<li><a name="batch"><b>batch.termcommand.options</b>:  [options], inserts the specified command line options after the term command, before the batch command. Use -x for wxcmd to exit after the batch command is complete.</li>
 <li><a name="batch"><b>batch.termcommand</b>:  path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)</li>
 <li><a name="batch"><b>batch.toolchain</b>:  The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
