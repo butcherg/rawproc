@@ -20,6 +20,11 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	wxFileName dirspec, inputspec, outputspec;
 	wxString ispec, ospec, tchain;
 	dirspec = wxFileName(wxFileName::GetCwd(), "");
+
+	//parm batch.termcommand: path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)
+	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand","wxcmd"));
+	//parm batch.imgcommand: path/executable for the img command line raw processor. Default: img (somewhere in $PATH)
+	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
 	
 	if (((rawprocFrm *) parent)->isOpenSource()) {
 		
@@ -71,9 +76,11 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain",""));
 	}
 
+	termcmd = new wxTextCtrl(this, wxID_ANY, term, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
+	imgcmd =  new wxTextCtrl(this, wxID_ANY, img, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
 	directory = new wxTextCtrl(this, wxID_ANY, wxFileName::GetCwd(), wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
-	inputfilespec = new wxTextCtrl(this, wxID_ANY, ispec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
-	outputfilespec = new wxTextCtrl(this, wxID_ANY, ospec, wxDefaultPosition, wxSize(500,TEXTHEIGHT+5));
+	inputfilespec = new wxTextCtrl(this, wxID_ANY, ispec, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
+	outputfilespec = new wxTextCtrl(this, wxID_ANY, ospec, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
 	toolchain = new wxTextCtrl(this, wxID_ANY, tchain, wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
 
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -81,21 +88,30 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	myRowSizer *s = new myRowSizer(wxSizerFlags().Expand());
 	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Directory:"),labelflags);
 	s->NextRow();
+
 	s->AddRowItem(directory,flags);
 	s->AddRowItem(new wxBitmapButton(this, BATCHCWD, wxBitmap(folder_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 	s->NextRow();
-	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Input File Specification:"),labelflags);
+
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Term Commmand:",wxDefaultPosition, wxSize(250,-1)),labelflags);
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Img Command:",wxDefaultPosition, wxSize(250,-1)),labelflags);
+	s->NextRow();
+	s->AddRowItem(termcmd,flags);
+	s->AddRowItem(imgcmd,flags);
+	s->NextRow();
+
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Input File Specification:",wxDefaultPosition, wxSize(250,-1)),labelflags);
+	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Output File Specification:",wxDefaultPosition, wxSize(250,-1)),labelflags);
 	s->NextRow();
 	s->AddRowItem(inputfilespec,flags);
-	s->NextRow();
-	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Output File Specification:"),labelflags);
-	s->NextRow();
 	s->AddRowItem(outputfilespec,flags);
 	s->NextRow();
+
 	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Tool Chain:"),labelflags);
 	s->NextRow();
 	s->AddRowItem(toolchain,flags);
 	s->NextRow();
+
 	s->AddRowItem(new wxButton(this, wxID_OK, "Dismiss", wxDefaultPosition, wxDefaultSize),flags);
 	s->AddRowItem(new wxButton(this, BATCHPROCESS, "Process", wxDefaultPosition, wxDefaultSize),flags);
 	s->AddRowItem(new wxButton(this, BATCHSHOW, "Show", wxDefaultPosition, wxDefaultSize),flags);
@@ -118,15 +134,8 @@ void myBatchDialog::OnDirSelect(wxCommandEvent& event)
 
 wxString myBatchDialog::ConstructCommand()
 {
-	//parm batch.termcommand: path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)
 	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand","wxcmd"));
-	//parm batch.imgcommand: path/executable for the img command line raw processor. Default: img (somewhere in $PATH)
 	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
-	//parm batch.termcommand.options: [options], inserts the specified command line options after the term command, before the batch command. Use -x for wxcmd to exit after the batch command is complete.
-	//parm batch.termcommand.options = (command line options): If present, the specified command line switches will be appended to the termcommand. For wxcmd, use '-x' to autodismiss the batch command when it is complete.
-	if (myConfig::getConfig().exists("batch.termcommand.options")) term += " " + wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand.options",""));
-	//parm batch.imgcommand.options = (command line options): If present, the specified command line switches will be appended to the imgcommand. For rawproc's img, see the help file for valid options.
-	if (myConfig::getConfig().exists("batch.imgcommand.options")) img += " " + wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand.options",""));
 	wxString toolchainstr = toolchain->GetValue().Trim();
 	toolchainstr = "\"" + toolchainstr + "\"";
 	toolchainstr.Replace(" ","\" \"");

@@ -14,7 +14,7 @@ class myBatchDialog: public wxDialog
 		void OnShow(wxCommandEvent& event);
 
 	private:
-		wxTextCtrl *directory, *inputfilespec, *outputfilespec, *toolchain;
+		wxTextCtrl *termcmd, *imgcmd, *directory, *inputfilespec, *outputfilespec, *toolchain;
 		wxButton *process, *dismiss;
 		
 
