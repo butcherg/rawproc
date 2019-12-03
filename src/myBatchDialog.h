@@ -16,6 +16,7 @@ class myBatchDialog: public wxDialog
 	private:
 		wxTextCtrl *termcmd, *imgcmd, *directory, *inputfilespec, *outputfilespec, *toolchain;
 		wxButton *process, *dismiss;
+		wxStaticText *toolchaintxt;
 		
 
 };

@@ -18,7 +18,7 @@ myBatchDialog::myBatchDialog(wxWindow *parent, wxWindowID id, const wxString &ti
 wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxRESIZE_BORDER)
 {
 	wxFileName dirspec, inputspec, outputspec;
-	wxString ispec, ospec, tchain;
+	wxString ispec, ospec, tchain, tchainsource;
 	dirspec = wxFileName(wxFileName::GetCwd(), "");
 
 	//parm batch.termcommand: path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)
@@ -42,6 +42,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 		
 
 		tchain = ((rawprocFrm *) parent)->getToolChain();
+		tchainsource = "(Source: processed image)";
 		
 	}
 	else if (((rawprocFrm *) parent)->isOpen()) {
@@ -65,6 +66,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 		
 
 		tchain = ((rawprocFrm *) parent)->getToolChain();
+		tchainsource = "(Source: processed image)";
 		
 	}
 	else {
@@ -74,6 +76,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 		ospec = wxString(myConfig::getConfig().getValueOrDefault("batch.outputspec",""));
 		//parm batch.toolchain: The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.
 		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain",""));
+		tchainsource = "(Source: batch.toolchain property)";
 	}
 
 	termcmd = new wxTextCtrl(this, wxID_ANY, term, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
@@ -82,6 +85,7 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	inputfilespec = new wxTextCtrl(this, wxID_ANY, ispec, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
 	outputfilespec = new wxTextCtrl(this, wxID_ANY, ospec, wxDefaultPosition, wxSize(250,TEXTHEIGHT+5));
 	toolchain = new wxTextCtrl(this, wxID_ANY, tchain, wxDefaultPosition, wxSize(500,TEXTHEIGHT*4), wxTE_MULTILINE);
+	toolchaintxt = new wxStaticText(this, wxID_ANY, "Tool Chain: " + tchainsource);
 
 	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 	wxSizerFlags labelflags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
@@ -107,7 +111,8 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	s->AddRowItem(outputfilespec,flags);
 	s->NextRow();
 
-	s->AddRowItem(new wxStaticText(this, wxID_ANY, "Tool Chain:"),labelflags);
+	//s->AddRowItem(new wxStaticText(this, wxID_ANY, "Tool Chain:"),labelflags);
+	s->AddRowItem(toolchaintxt, labelflags);
 	s->NextRow();
 	s->AddRowItem(toolchain,flags);
 	s->NextRow();
