@@ -2,6 +2,8 @@
 #include "PicProcessorSharpen.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "myRowSizer.h"
+#include "myFloatCtrl.h"
 #include "undo.xpm"
 #include "util.h"
 
@@ -16,32 +18,53 @@ class SharpenPanel: public PicProcPanel
 		{
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			wxGridBagSizer *g = new wxGridBagSizer();
 
 			int initialvalue = atoi(params.c_str());
 
 			enablebox = new wxCheckBox(this, SHARPENENABLE, "sharpen:");
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			sharp = new wxSlider(this, wxID_ANY, initialvalue, 0, 10, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(sharp , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			sharpval = new myFloatCtrl(this, wxID_ANY, 0.0, 1, wxDefaultPosition,wxDefaultSize);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
-			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			for (int r=0; r<3; r++)
+				for (int c=0; c<3; c++)
+					kernel[r][c] = new wxStaticText(this, wxID_ANY, "0.00", wxDefaultPosition, wxSize(30,-1),wxALIGN_RIGHT);
+			
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-			SetSizerAndFit(g);
-			g->Layout();
+			m->NextRow();
+			m->AddRowItem(sharpval, flags);
+			m->AddRowItem(btn, flags);
+			
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "Kernel:"), flags);
+			m->NextRow();
+			m->AddRowItem(kernel[0][0], flags);
+			m->AddRowItem(kernel[0][1], flags);
+			m->AddRowItem(kernel[0][2], flags);
+			m->NextRow();
+			m->AddRowItem(kernel[1][0], flags);
+			m->AddRowItem(kernel[1][1], flags);
+			m->AddRowItem(kernel[1][2], flags);
+			m->NextRow();
+			m->AddRowItem(kernel[2][0], flags);
+			m->AddRowItem(kernel[2][1], flags);
+			m->AddRowItem(kernel[2][2], flags);
+			
+			m->End();
+			SetSizerAndFit(m);
+
 			Refresh();
 			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
-			Bind(wxEVT_SCROLL_CHANGED, &SharpenPanel::OnChanged, this);
-			Bind(wxEVT_SCROLL_THUMBTRACK, &SharpenPanel::OnThumbTrack, this);
+			Bind(myFLOATCTRL_CHANGE,&SharpenPanel::OnChanged, this);
+			Bind(myFLOATCTRL_UPDATE,&SharpenPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &SharpenPanel::onEnable, this, SHARPENENABLE);
 			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);
 		}
@@ -60,18 +83,27 @@ class SharpenPanel: public PicProcPanel
 
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+			float val = sharpval->GetFloatValue();
+			if (val < 0.0) sharpval->SetFloatValue(0.0);
+			if (val > 10.0) sharpval->SetFloatValue(10.0);
 			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+
+		}
+		
+		void paramChanged(wxCommandEvent& event)
+		{
+			q->setParams(wxString::Format("%f",sharpval->GetFloatValue()));
+			q->processPic();
+			event.Skip();
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d",sharp->GetValue()));
+			q->setParams(wxString::Format("%f",sharpval->GetFloatValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -79,20 +111,26 @@ class SharpenPanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			int resetval = atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
-			sharp->SetValue(resetval);
-			q->setParams(wxString::Format("%d",resetval));
-			val->SetLabel(wxString::Format("%4d", resetval));
+			sharpval->SetFloatValue((float) resetval);
+			q->setParams(wxString::Format("%f",sharpval->GetFloatValue()));
 			q->processPic();
 			event.Skip();
+		}
+		
+		void setKernel(double k[3][3])
+		{
+			for (int r=0; r<3; r++)
+				for (int c=0; c<3; c++)
+					kernel[r][c]->SetLabel(wxString::Format("%0.2f",k[r][c]+0.0));
 		}
 
 
 	private:
-		wxSlider *sharp;
-		wxStaticText *val;
+		myFloatCtrl *sharpval;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		wxTimer t;
+		wxStaticText * kernel[3][3];
 
 
 };
@@ -128,6 +166,8 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 	kernel[2][1] = x;
 	kernel[1][1] = sharp;
 	bool result = true;
+	
+	((SharpenPanel *) toolpanel)->setKernel(kernel);
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
 
@@ -142,7 +182,7 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 	dib = processdib;
 	if (!global_processing_enabled) return true;
 
-	if (global_processing_enabled & processingenabled & sharp > 1.0) {
+	if (global_processing_enabled & processingenabled & sharp > 0.0) {
 		mark();
 		dib->ApplyConvolutionKernel(kernel, threadcount);
 		m_display->SetModified(true);
