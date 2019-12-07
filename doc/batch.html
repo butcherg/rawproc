@@ -1,9 +1,72 @@
 <html><title>Batch Processing</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="Batch">Batch Processing</h3>
-<p>Batch processing...</p>
+<p>This dialog allows one to kick off a batch job, ostensibly of <a href=img.html>img</a>, to process multple images.</p>
 
+<p align=center><img src=batch.png></p>
 
+<p>The fields work as follows:
+<ul>
+	<li><b>Directory:</b> Specifies the working directory within which to kick off the batch job. If
+	an image was opened in rawproc, this will be the directory from which it came; if no image is
+	opened, the path is taken from the app.start.path property. The directory path can be modified by
+	clicking the folder button.</li>
+	<li><b>Term Command:</b> Specifies the program to be used to "shell" the img program.  rawproc comes with
+	a simple GUI-based shell called wxcmd, which is designed to run a single command or script. The entry
+	is taken from the batch.termcommand property, which defaults to "wxcmd".  This implies wxcmd is in the $PATH
+	variable.  One can modify this property to include a full path, as well as command line options for the term
+	command.  wxcmd will take one switch, '-x' which tells it to exit after the batch job is done, otherwise wxcmd's
+	window stays open until dismissed.  The term command is kicked off as a process separate from rawproc; if left
+	open after the batch command is finished, the shell window will persist after rawproc is exited.</li>
+	<li><b>Img Command:</b> Specifies the program to be used to do the image modification.  The entry is taken
+	from the batch.imgcommand property,which defaults to "img".  See the img help page for the switches it will take.</li>
+	<li><b>Input File Specification:</b>Whatever is specified here will be inserted as the input to the img command, 
+	the first parameter after 'img'.  If there is no file opened in rawproc, this entry will be populated from the 
+	batch.inputspec property; otherwise, a wildcard specification, e.g., "*.NEF" will be created from the opened file name.</li>
+	<li><b>Output File Specification:</b> Whatever is specified here will be inserted as the output to the img command,
+	the last parameter of the command line.  If an opened file in rawproc has been saved, or a open-source file has been opened,
+	a wildcard specification, e.g., "*.jpg", will be created from the saved (or open-sourced) file name/path. Otherwise,
+	the entry will be populated from the batch.outputspec property.</li>
+	<li><b>Tool Chain:</b> If there is an opened file in rawproc, this entry is populated with the toolchain applied
+	to it as of the opening of the batch dialog.  If not, this entry is populated with the toolchain specified in the
+	batch.toolchain property.</li>
+	<li><b>Dismiss Button:</b> Dismisses the batch dialog.  If a batch job is in work, it will continue to run.</li>
+	<li><b>Process Button:</b> Kicks of the batch job as a separate process.</li>
+	<li><b>Show Button:</b> Displays a dialog box with the complete command line executed by the Process button, and
+	copies it to the system clipboard.</li>
+</ul>
+</p>
+
+<p>The wxcmd window from the execution of the above batch dialog looks like this:</p>
+
+<p align=center><img src=wxcmd.png></p>
+
+<p>The "WXCMD: PROCESS TERMINATED." line was inserted by wxcmd when the batch job was complete; otherwise all the text
+in the wxcmd window was from the execution of img with the input file spec, the toolchain and the output file spec from
+the batch dialog.  The wxcmd buttons do the following:
+<ul>
+	<li><b>Kill and Dismiss:</b> This button will kill the batch job at whatever point the button was pressed, and 
+	dismiss the wxcmd window.  This button will just dismiss the wxcmd window if the batch job is already complete.</li>
+	<li><b>Kill:</b> This button will kill the batch job at whatever point the button was pressed.  The wxcmd window
+	will remain open to be dismissed separately.  If the button is pressed during a batch execution, 
+	"WXCMD: KILL SIGNAL SENT TO PROCESS." will be inserted in the wxcmd window. Note that the place this message is
+	inserted probably will not correspond to where the batch job terminates.  If the button is pressed after the 
+	batch job is complete, "WXCMD: PROCESS ALREADY DEAD." will be inserted in the wxcmd window.
+	will be inserted in the wxcmd window.</li>
+</ul>
+</p>
+
+<p>Remember, the wxcmd window is a separate process, so you might want to specify "wxcmd -x" in the batch.termcommand
+property so these windows don't collect on the desktop.</p> 
+
+<p>Here's the use case that compelled me to add this capability.  When I shoot a session or day's worth of images, I
+batch process them to proof JPEGs with a separate script.  The JPEGs end up in the top directory for the session, and the
+raw files are in a subdirectory called 'NEFs' (Nikon raws...).  I'll review the proofs, and open-source any in rawproc to 
+which I want to do further work.  If I then want to apply the same processing to a group of other images in the same session,
+I'll open a batch dialog which will contain the processing tool chain and the input and output file specs appropriate to the
+working directory.  I'll then delete the JPEGs I want to re-process, and then kick off the batch job.  img by default will
+skip ouput files that already exist, so the batch job will simply re-process the images where I deleted the proof JPEGs, with
+the new processing from rawproc.  The above batch dialog and wxcmd screenshots depict just this use case...</p>
 
 <p><b>Properties:</b> See batch.* in <a href=confparams.html#batch>Configuration Properties</a></p>
 
