@@ -205,7 +205,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				double filmicA = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str());
 				double filmicB = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str());
 				double filmicC = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str());
-				double filmicD = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","0.6").c_str());
+				double filmicD = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str());
 				double power =   atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str());;
 				bool norm = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.norm","1") == "1" ? true : false;
 				if (p.size() >= 2) filmicA = atof(p[1].c_str());
