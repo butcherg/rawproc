@@ -167,14 +167,14 @@ void wxCmdFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void wxCmdFrame::OnDismiss(wxCommandEvent& event)
 {
-	if (wxProcess::Exists(pid)) wxProcess::Kill(pid);
+	if (wxProcess::Exists(pid)) wxProcess::Kill(pid, wxSIGKILL);
 	Close(true);
 }
 
 void wxCmdFrame::OnKill(wxCommandEvent& event)
 {
 	if (wxProcess::Exists(pid)) {
-		wxProcess::Kill(pid);
+		wxProcess::Kill(pid, wxSIGKILL);
 		Append("WXCMD: KILL SIGNAL SENT TO PROCESS.");
 	}
 	else Append("WXCMD: PROCESS ALREADY DEAD.");
