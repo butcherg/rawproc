@@ -1353,8 +1353,8 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	//wxTreeItemId item, prev, next, newitem;
 	switch (event.GetKeyCode()) {
         case 127:  //Delete
-	case 8: //Backspace
-		//CommandTreeDeleteItem(commandtree->GetSelection());
+	//case 8: //Backspace
+		CommandTreeDeleteItem(commandtree->GetSelection());
         	break;
         //case 315: //Up Arrow
         //	MoveBefore(commandtree->GetSelection());
