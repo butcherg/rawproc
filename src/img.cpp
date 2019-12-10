@@ -524,8 +524,20 @@ for (int i = optind; i<argc-1; i++) {
 	commands.push_back(std::string(argv[i]));
 }
 
+int alreadyexist = 0;
+if (!force) {
+	for (int f=0; f<files.size(); f++) {
+		if (file_exists(files[f].outfile.c_str())) alreadyexist++;
+	}
+}
+int toprocess = files.size() - alreadyexist;
+
+
+printf("number of input files to be processed: %d\n", toprocess);
+if (!force)  printf("number of output files that already exist, skipping: %d\n",alreadyexist);
+printf("\n"); fflush(stdout);
+
 int count = 0;
-printf("number of files: %ld\n", files.size());
 for (int f=0; f<files.size(); f++)
 {
 
@@ -533,12 +545,12 @@ for (int f=0; f<files.size(); f++)
 	strncpy(iname, files[f].infile.c_str(), 255);
 	
 	if (!force && file_exists(files[f].outfile.c_str())) {
-		printf("%d/%ld: Output file %s exists, skipping %s...\n",f+1, files.size(), files[f].outfile.c_str(), iname);
+		//printf("%d/%d: Output file %s exists, skipping %s...\n",f+1, toprocess, files[f].outfile.c_str(), iname);
 		continue;
 	}
 	
 	if (!file_exists(iname)) {
-		printf("%d/%ld: Input file %s doesn't exist...\n",f+1, files.size(), iname);
+		printf("%d/%d: Input file %s doesn't exist...\n",f+1, toprocess, iname);
 		continue;
 	}
 
@@ -546,14 +558,14 @@ for (int f=0; f<files.size(); f++)
 
 	commandstring = "rawproc-img ";
 
-	printf("%d/%ld: Loading file %s %s... ",f+1, files.size(), iname, infile[1].c_str());
+	printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
-		printf("error: (%fsec) - Image not loaded correctly\n",_duration());
+		printf("error: (%fsec) - Image not loaded correctly\n",_duration()); fflush(stdout);
 		continue;
 	}
-	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight());
+	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight()); fflush(stdout);
 
 	commandstring += getfile(std::string(iname));
 	if (infile[1] != "") commandstring += ":" + infile[1];
@@ -573,7 +585,8 @@ for (int f=0; f<files.size(); f++)
 				commandstring += cmdstr;
 			}
 			else {
-				printf("Error: unrecognized command.\n");
+				printf("Error: unrecognized command.\n"); 
+				fflush(stdout);
 				exit(1);
 			}
 		}
@@ -582,10 +595,10 @@ for (int f=0; f<files.size(); f++)
 	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
 	//printf("Orientation: %d\n", orientation);
 	if (orientation != 1) {
-		printf("Normalizing image orientation from %d...",orientation);
+		printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
 		_mark();
 		dib.NormalizeRotation();
-		printf("done. (%fsec)\n",_duration());
+		printf("done. (%fsec)\n",_duration()); fflush(stdout);
 	}
 
 	char outfilename[256];
@@ -598,21 +611,26 @@ for (int f=0; f<files.size(); f++)
 			if (it->first == "ExposureTime") {
 				if (atof(it->second.c_str()) < 1.0) {
 					printf("%s: 1/%d\n",it->first.c_str(), int(round(1.0/atof(it->second.c_str()))));
+					fflush(stdout);
 				}
 			}
-			else
-				printf("%s: %s\n",it->first.c_str(), it->second.c_str());
+			else {
+				printf("%s: %s\n",it->first.c_str(), it->second.c_str()); 
+				fflush(stdout);
+			}
 		}
-		printf("\n");
+		printf("\n"); fflush(stdout);
 		exit(0);
 	}
 
 	else if (strcmp(outfilename,"histogram") == 0) {
 		std::vector<long> h = dib.Histogram();
 		printf("%ld",h[0]);
-		for (int i = 1; i < h.size(); i++)
-			printf(",%ld",h[i]);
-		printf("\n");
+		for (int i = 1; i < h.size(); i++) {
+			printf(",%ld",h[i]); 
+			fflush(stdout);
+		}
+		printf("\n"); fflush(stdout);
 		exit(0);
 	}
 
@@ -622,15 +640,16 @@ for (int f=0; f<files.size(); f++)
 		printf("%ld",h[0]);
 		for (int i = 1; i < h.size(); i++) {
 			prev += h[i];
-			printf(",%ld",prev);
+			printf(",%ld",prev); 
+			fflush(stdout);
 		}
-		printf("\n");
+		printf("\n"); fflush(stdout);
 		exit(0);
 	}
 
 	else if (strcmp(outfilename,"stats") == 0) {
 		std::string stats = dib.Stats();
-		printf("%s\n",stats.c_str());
+		printf("%s\n",stats.c_str()); fflush(stdout);
 		exit(0);
 	}
 
@@ -640,10 +659,14 @@ for (int f=0; f<files.size(); f++)
 
 }
 
-if (count == 1)
-	printf("%d file processed.\n",count);
-else
-	printf("%d files processed.\n",count);
+if (count == 1) {
+	printf("%d file processed.\n",count); 
+	fflush(stdout);
+}
+else {
+	printf("%d files processed.\n",count); 
+	fflush(stdout);
+}
 
 	return 0;
 }
