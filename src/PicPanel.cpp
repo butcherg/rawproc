@@ -2,6 +2,7 @@
 #include "PicPanel.h"
 #include "util.h"
 #include <vector>
+#include <cmath>
 #include "PicProcessor.h"
 #include "myConfig.h"
 #include <wx/clipbrd.h>
@@ -131,10 +132,12 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		infoitem = dib->getInfoValue("FocalLength");
 		if (infoitem != "") exposurestring += wxString::Format("%smm  ",wxString(infoitem));
 
+		float ev = log2(pow(aperture,2)/sspeed);
+		float lv = 2 * log2(aperture) - log2(sspeed) - log2(iso/100);
 		//parm display.info.evlv: Add either/both EV (Exposure Value, Wikipedia definition) or LV (Light Value, exiftool definition) to the information string. "EV" and/or "LV" need to be in the property value, you can separate them with blanks, a comma, or just run them together.  Default: blank. 
 		wxString evlv = wxString(myConfig::getConfig().getValueOrDefault("display.info.evlv",""));
-		if (evlv.Find("EV") != wxNOT_FOUND) exposurestring.Append(wxString::Format("EV%0.1f ",log2(pow(aperture,2)/sspeed)));
-		if (evlv.Find("LV") != wxNOT_FOUND) exposurestring.Append(wxString::Format("LV%0.1f ",2 * log2(aperture) - log2(sspeed) - log2(iso/100)));
+		if (evlv.Find("EV") != wxNOT_FOUND & !std::isnan(ev)) exposurestring.Append(wxString::Format("EV%0.1f ",ev));
+		if (evlv.Find("LV") != wxNOT_FOUND & !std::isnan(lv)) exposurestring.Append(wxString::Format("LV%0.1f ",lv));
 
 		//parm display.thumbsize: The largest dimension of the thumbnail. Default=150
 		unsigned thumbsize = atoi(myConfig::getConfig().getValueOrDefault("display.thumbsize","150").c_str());
