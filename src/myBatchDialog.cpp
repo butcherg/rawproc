@@ -139,8 +139,8 @@ void myBatchDialog::OnDirSelect(wxCommandEvent& event)
 
 wxString myBatchDialog::ConstructCommand()
 {
-	wxString term = wxString(myConfig::getConfig().getValueOrDefault("batch.termcommand","wxcmd"));
-	wxString img = wxString(myConfig::getConfig().getValueOrDefault("batch.imgcommand","img"));
+	wxString term = termcmd->GetValue().Trim();
+	wxString img = imgcmd->GetValue().Trim();
 	wxString toolchainstr = toolchain->GetValue().Trim();
 	toolchainstr = "\"" + toolchainstr + "\"";
 	toolchainstr.Replace(" ","\" \"");
