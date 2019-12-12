@@ -2501,13 +2501,15 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
 			unsigned Hpos = (x/2) + (y/2)*(w/2);
 			float pix[4] = {0.0, 0.0, 0.0, 0.0};
-			for (unsigned i=0; i<arraydim; i++) {
+			for (unsigned i=0; i<arraydim; i++) {  //walk the 2x2 image subset, collect the channel values 
 				for (unsigned j=0; j<arraydim; j++) {
 					int pos = (x+i) + (y+j) * w;
 					pix[cfarray[i][j]] += image[pos].r;
 				}
 			}
-			pix[1] = (pix[1] + pix[3]) / 2.0;
+			pix[1] = (pix[1] + pix[3]) / 2.0; //make a single green of G1 and G2
+
+			//put the result in the appropriate place in the halfsize image:
 			halfimage[Hpos].r = pix[0];
 			halfimage[Hpos].g = pix[1];
 			halfimage[Hpos].b = pix[2];
@@ -4024,12 +4026,45 @@ std::string gImage::Stats(bool isfloat)
 
 }
 
+/*
+//CFA walk for pre-demosaic, from the half demosaic method...
+	unsigned cfarray[2][2];
+	if (!cfArray(cfarray)) return false;  //only set up for Bayer raws
+	int arraydim = 2;
+
+	std::vector<pix> halfimage;
+	halfimage.resize((h/2)*(w/2));
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+			unsigned Hpos = (x/2) + (y/2)*(w/2);
+			float pix[4] = {0.0, 0.0, 0.0, 0.0};
+			for (unsigned i=0; i<arraydim; i++) {  //walk the 2x2 image subset, collect the channel values 
+				for (unsigned j=0; j<arraydim; j++) {
+					int pos = (x+i) + (y+j) * w;
+					pix[cfarray[i][j]] += image[pos].r;
+				}
+			}
+			pix[1] = (pix[1] + pix[3]) / 2.0; //make a single green of G1 and G2
+
+			//put the result in the appropriate place in the halfsize image:
+			halfimage[Hpos].r = pix[0];
+			halfimage[Hpos].g = pix[1];
+			halfimage[Hpos].b = pix[2];
+		}
+	}
+
+*/
+
 std::map<std::string,std::string> gImage::StatsMap()
 {
-	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
+	double rmin, rmax, gmin, gmax, bmin, bmax, g1min, g1max, g2min, g2max;
+	rmin=rmax=image[0].r; gmin=gmax=g1min=g1max=g2min=g2max=image[0].g; bmin=bmax=image[0].b;
+	double tmin, tmax, rmean, gmean, bmean; 
+	double rsum=0.0, gsum=0.0, bsum=0.0;
 	pix maxpix, minpix;
 	long pcount = 0;
-	rmin = image[0].r; rmax = image[0].r; gmin=image[0].g; gmax = image[0].g; bmin = image[0].b; bmax = image[0].b;
 	tmin = SCALE_CURVE; tmax = 0.0;
 	int iter = 0;
 
@@ -4037,45 +4072,130 @@ std::map<std::string,std::string> gImage::StatsMap()
 	double toneupperthreshold = 0.95; 
 	double tonelowerthreshold = 0.0;
 
-	#pragma omp parallel for 
-	for(unsigned y = 1; y < h; y++) {
-		for(unsigned x = 1; x < w; x++) {
-			unsigned pos = x + y*w;
-			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
-			pcount++;
-			if (image[pos].r > rmax) rmax = image[pos].r;
-			if (image[pos].g > gmax) gmax = image[pos].g;
-			if (image[pos].b > bmax) bmax = image[pos].b;
-			if (image[pos].r < rmin) rmin = image[pos].r;
-			if (image[pos].g < gmin) gmin = image[pos].g;
-			if (image[pos].b < bmin) bmin = image[pos].b;
-			double tone = (image[pos].r + image[pos].g + image[pos].b) / 3.0; 
-			if (tone > tmax & tone < toneupperthreshold) {tmax = tone; maxpix = image[pos];}
-			if (tone < tmin & tone > tonelowerthreshold) {tmin = tone; minpix = image[pos];}
-			iter++;
+	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1")  //R,G,B has to be collected on the mosaic pattern
+	{
+		double prmin, prmax, pg1min, pg1max, pg2min, pg2max, pbmin, pbmax;
+		prmin=prmax=image[0].r;
+		pg1min=pg1max=image[0].g;
+		pg2min=pg2max=image[0].g;
+		pbmin=pbmax=image[0].b;
+
+		unsigned cfarray[2][2];
+		unsigned xtarray[6][6];
+		int arraydim = 0;
+
+		if (!cfArray(cfarray)) {
+			arraydim = 2;
+			for (unsigned i=0; i<arraydim; i++)
+				for (unsigned j=0; j<arraydim; j++)
+					xtarray[i][j] = cfarray[i][j];
 		}
+		else if (!xtranArray(xtarray)) {
+			arraydim = 6; 
+		}
+		else return stats_map;
+
+		#pragma omp parallel
+		{
+			#pragma omp parallel for 
+			for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+				for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+					unsigned Hpos = (x/2) + (y/2)*(w/2);
+					float pix[4] = {0.0, 0.0, 0.0, 0.0};
+					for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
+						for (unsigned j=0; j<arraydim; j++) {
+							int pos = (x+i) + (y+j) * w;
+							switch (xtarray[i][j]) {
+								case 0:
+									if (image[pos].r > prmax) prmax = image[pos].r; //r is identical to g and b for pre-demosaic...
+									if (image[pos].r < prmin) prmin = image[pos].r;
+									break;
+								case 1:
+									if (image[pos].r > pg1max) pg1max = image[pos].r;
+									if (image[pos].r < pg1min) pg1min = image[pos].r;
+									break;
+								case 2:
+									if (image[pos].r > pbmax) pbmax = image[pos].r;
+									if (image[pos].r < pbmin) pbmin = image[pos].r;
+									break;
+								case 3:
+									if (image[pos].r > pg2max) pg2max = image[pos].r;
+									if (image[pos].r < pg2min) pg2min = image[pos].r;
+									break;
+							}
+						}
+					}
+				}
+			}
+
+			#pragma omp critical
+			{
+				if (prmax > rmax) rmax = prmax; if (prmin < rmin) rmin = prmin;
+				if (pg1max > g1max) g1max = pg1max; if (pg1min < g1min) g1min = pg1min;
+				if (pg2max > g2max) g2max = pg2max; if (pg2min < g2min) g2min = pg2min;
+				if (pbmax > bmax) bmax = pbmax; if (pbmin < bmin) bmin = pbmin;
+			}
+		}
+
+		//channel mins/maxs:
+		stats_map["rmin"] = tostr(rmin); stats_map["rmax"] = tostr(rmax);
+		stats_map["g1min"] = tostr(g1min); stats_map["g1max"] = tostr(g1max);
+		stats_map["g2min"] = tostr(g2min); stats_map["g2max"] = tostr(g2max);
+		stats_map["gmin"] = tostr(std::min(g1min, g2min)); stats_map["gmax"] = tostr(std::max(g1max, g2max));
+		stats_map["bmin"] = tostr(bmin); stats_map["bmax"] = tostr(bmax);
+
+	}
+	else {
+
+		#pragma omp parallel
+		{
+			double prmin, prmax, pgmin, pgmax, pbmin, pbmax;
+			prmin=prmax=image[0].r;
+			pgmin=pgmax=image[0].g;
+			pbmin=pbmax=image[0].b;
+
+			#pragma omp for 
+			for(unsigned y = 1; y < h; y++) {
+				for(unsigned x = 1; x < w; x++) {
+					unsigned pos = x + y*w;
+					rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
+					pcount++;
+					if (image[pos].r > prmax) prmax = image[pos].r;
+					if (image[pos].g > pgmax) pgmax = image[pos].g;
+					if (image[pos].b > pbmax) pbmax = image[pos].b;
+					if (image[pos].r < prmin) prmin = image[pos].r;
+					if (image[pos].g < pgmin) pgmin = image[pos].g;
+					if (image[pos].b < pbmin) pbmin = image[pos].b;
+					double tone = (image[pos].r + image[pos].g + image[pos].b) / 3.0; 
+					if (tone > tmax & tone < toneupperthreshold) {tmax = tone; maxpix = image[pos];}
+					if (tone < tmin & tone > tonelowerthreshold) {tmin = tone; minpix = image[pos];}
+					iter++;
+				}
+			}
+
+			#pragma omp critical
+			{
+				if (prmax > rmax) rmax = prmax; if (prmin < rmin) rmin = prmin;
+				if (pgmax > gmax) gmax = pgmax; if (pgmin < gmin) gmin = pgmin;
+				if (pbmax > bmax) bmax = pbmax; if (pbmin < bmin) bmin = pbmin;
+			}
+		}
+
+		//channel mins/maxs:
+		stats_map["rmin"] = tostr(rmin); stats_map["rmax"] = tostr(rmax);
+		stats_map["gmin"] = tostr(gmin); stats_map["gmax"] = tostr(gmax);
+		stats_map["bmin"] = tostr(bmin); stats_map["bmax"] = tostr(bmax);
+
+		//tone min/max:
+		stats_map["tmin"] = tostr(tmin); stats_map["tmax"] = tostr(tmax);
+
+		//channel means:
+		stats_map["rmean"] = tostr(rsum/(double)pcount);
+		stats_map["gmean"] = tostr(gsum/(double)pcount);
+		stats_map["bmean"] = tostr(bsum/(double)pcount);
 	}
 
-	//channel mins/maxs:
-	stats_map["rmin"] = tostr(rmin); stats_map["rmax"] = tostr(rmax);
-	stats_map["gmin"] = tostr(gmin); stats_map["gmax"] = tostr(gmax);
-	stats_map["bmin"] = tostr(bmin); stats_map["bmax"] = tostr(bmax);
-
-	//tone min/max:
-	stats_map["tmin"] = tostr(tmin); stats_map["tmax"] = tostr(tmax);
-
-	//channel means:
-	stats_map["rmean"] = tostr(rsum/(double)pcount);
-	stats_map["gmean"] = tostr(gsum/(double)pcount);
-	stats_map["bmean"] = tostr(bsum/(double)pcount);
-
-	stats_map["bmean"] = tostr(bsum/(double)pcount);
-
-	//stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
-	//	tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
-
 	return stats_map;
-
 }
 
 //calculate averages of red, green, and blue channels:
@@ -4298,7 +4418,7 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 			}
 		}
 	}
-	else {
+	else { //R,G,B has to be collected on the RGB pattern
 
 		#pragma omp parallel
 		{
