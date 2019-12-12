@@ -4084,6 +4084,8 @@ std::vector<double> gImage::CalculateChannelMeans()
 	std::vector<double> rgbmeans;
 	double rsum=0.0, gsum=0.0, bsum=0.0;
 	long pcount = 0;
+
+	#pragma omp parallel for 
 	for(unsigned y = 1; y < h; y++) {
 		for(unsigned x = 1; x < w; x++) {
 			unsigned pos = x + y*w;
@@ -4093,9 +4095,11 @@ std::vector<double> gImage::CalculateChannelMeans()
 			pcount++;
 		}
 	}
+
 	rgbmeans.push_back(rsum / (double) pcount);
 	rgbmeans.push_back(gsum / (double) pcount);
 	rgbmeans.push_back(bsum / (double) pcount);
+
 	return rgbmeans;
 }
 
