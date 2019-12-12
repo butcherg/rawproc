@@ -2065,21 +2065,21 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 // black.  Also, subtracting a dark frame is useful in low-light applications
 // such as astrophotography.  So, ApplySubtract, in two forms...
 // 
-void gImage::ApplySubtract(double subtract, int threadcount)
+void gImage::ApplySubtract(double subtract, bool clampblack, int threadcount)
 {
-	if (subtract == 0.0) return;  //why bother...
+	//if (subtract == 0.0) return;  //why bother...
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			image[pos].r -= subtract;
-			image[pos].g -= subtract;
-			image[pos].b -= subtract;
+			image[pos].r -= subtract; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+			image[pos].g -= subtract; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+			image[pos].b -= subtract; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
 		}
 	}
 }
 
-bool gImage::ApplySubtract(std::string filename, int threadcount)
+bool gImage::ApplySubtract(std::string filename, bool clampblack, int threadcount)
 {
 	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
 	if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
@@ -2088,9 +2088,9 @@ bool gImage::ApplySubtract(std::string filename, int threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r -= dark[pos].r;
-				image[pos].g -= dark[pos].g;
-				image[pos].b -= dark[pos].b;
+				image[pos].r -= dark[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g -= dark[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b -= dark[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
 			}
 		}
 		return true;
