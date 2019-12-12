@@ -2487,8 +2487,6 @@ bool gImage::rgbCam(float (&rgb_cam)[3][4])
 	else return false;
 }
 
-
-
 bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 {
 	unsigned cfarray[2][2];
@@ -2497,8 +2495,6 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
-
-	if (imginfo.find("LibrawCFAPattern") == imginfo.end()) return false;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
@@ -2531,43 +2527,37 @@ bool gImage::ApplyMosaicColor(int threadcount)
 {
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;
-
-	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-
-	if (imginfo.find("LibrawCFAPattern") == imginfo.end()) return false;
-
-	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1}; 
-	else if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1}; 
-	else if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0}; 
+	int arraydim = 2;
 
 	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h-1; y+=2) {
-		for (unsigned x=0; x<w-1; x+=2) {
+	for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
 			unsigned Hpos = (x/2) + (y/2)*(w/2);
-			float pix[3] = {0.0, 0.0, 0.0};
-			unsigned pos[4];
-			pos[0] = x + y*w;  //upper left
-			pos[1] = (x+1) + y*w; //upper right
-			pos[2] = x + (y+1)*w; //lower left
-			pos[3] = (x+1) + (y+1)*w;  //lower right
-			for (unsigned i=0; i<q.size(); i++) {
-				switch (q[i]) {
-					case 0:  //red
-						image[pos[i]].g = 0.0;
-						image[pos[i]].b = 0.0;
-						break;
-					case 1:  //green
-						image[pos[i]].r = 0.0;
-						image[pos[i]].b = 0.0;
-						break;
-					case 2:  //blue
-						image[pos[i]].r = 0.0;
-						image[pos[i]].g = 0.0;
-						break;
+			float pix[4] = {0.0, 0.0, 0.0, 0.0};
+			for (unsigned i=0; i<arraydim; i++) {
+				for (unsigned j=0; j<arraydim; j++) {
+					int pos = (x+i) + (y+j) * w;
+					switch (cfarray[i][j]) {
+						case 0:  //red
+							image[pos].g = 0.0;
+							image[pos].b = 0.0;
+							break;
+						case 1:  //green
+						case 3:
+							image[pos].r = 0.0;
+							image[pos].b = 0.0;
+							break;
+						case 2:  //blue
+							image[pos].r = 0.0;
+							image[pos].g = 0.0;
+							break;
+					}
 				}
-				}
+			}
 		}
 	}
+
+
 	c = 3;
 	return true;
 }
