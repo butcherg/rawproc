@@ -68,10 +68,10 @@ class BlackWhitePointPanel: public PicProcPanel
 			wht = 255.0;
 
 			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
-			std::map<std::string,std::string> s = img.StatsMap();
-			double datblk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-			double datwht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-			double minwht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+			std::map<std::string,float> s = img.StatsMap();
+			double datblk = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
+			double datwht = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
+			double minwht = fmin(fmin(s["rmax"],s["gmax"]),s["bmax"]);
 			int librawblk = atoi(img.getInfoValue("LibrawBlack").c_str());
 			double camblk = librawblk / 65536.0; 
 			int librawwht = atoi(img.getInfoValue("LibrawMaximum").c_str());
@@ -449,23 +449,23 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 	if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
 		setChannel(p[0]);
 		if (p[1] == "data") {
-			std::map<std::string,std::string> s = dib->StatsMap();
+			std::map<std::string,float> s = dib->StatsMap();
 			if (channel == CHANNEL_RED) {
-				blk = atof(s["rmin"].c_str());
-				wht = atof(s["rmax"].c_str());
+				blk = s["rmin"];
+				wht = s["rmax"];
 			} 
 			else if (channel == CHANNEL_GREEN) {
-				blk = atof(s["gmin"].c_str());
-				wht = atof(s["gmax"].c_str());
+				blk = s["gmin"];
+				wht = s["gmax"];
 			}
 			else if (channel == CHANNEL_BLUE) {
-				blk = atof(s["bmin"].c_str());
-				wht = atof(s["bmax"].c_str());
+				blk = s["bmin"];
+				wht = s["bmax"];
 			}
 			else if (channel == CHANNEL_RGB) {
-				maxwht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-				minwht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
-				blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
+				maxwht = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
+				minwht = fmin(fmin(s["rmax"],s["gmax"]),s["bmax"]);
+				blk = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
 				if (p.size() >= 3 && p[2] == "minwhite")
 					wht = minwht;
 				else

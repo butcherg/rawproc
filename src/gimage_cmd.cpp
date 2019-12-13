@@ -454,14 +454,14 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 					else {
 						w = strtok(NULL,", ");
 						if (std::string(b) == "data") {
-							std::map<std::string,std::string> s = dib.StatsMap();
+							std::map<std::string,float> s = dib.StatsMap();
 							if (chan == "rgb") {
-								blk = fmin(fmin(atof(s["rmin"].c_str()),atof(s["gmin"].c_str())),atof(s["bmin"].c_str()));
-								wht = fmax(fmax(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+								blk = std::min(std::min(s["rmin"],s["gmin"]),s["bmin"]);
+								wht = std::max(std::max(s["rmax"],s["gmax"]),s["bmax"]);
 								//m = strtok(NULL,", ");
 								if (w) {
 									if (std::string(w) == "minwhite") {
-										wht = fmin(fmin(atof(s["rmax"].c_str()),atof(s["gmax"].c_str())),atof(s["bmax"].c_str()));
+										wht = std::min(std::min(s["rmax"],s["gmax"]),s["bmax"]);
 										commandstring += std::string(cmd) + ":rgb,data,minwhite ";
 									}
 									else commandstring += std::string(cmd) + ":rgb,data ";
@@ -469,18 +469,18 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 								else commandstring += std::string(cmd) + ":rgb,data ";
 							}
 							else if (chan == "red") {
-								blk = atof(s["rmin"].c_str());
-								wht = atof(s["rmax"].c_str());
+								blk = s["rmin"];
+								wht = s["rmax"];
 								commandstring += std::string(cmd) + ":red,data ";
 							}
 							else if (chan == "green") {
-								blk = atof(s["gmin"].c_str());
-								wht = atof(s["gmax"].c_str());
+								blk = s["gmin"];
+								wht = s["gmax"];
 								commandstring += std::string(cmd) + ":green,data ";
 							}
 							else if (chan == "blue") {
-								blk = atof(s["bmin"].c_str());
-								wht = atof(s["bmax"].c_str());
+								blk = s["bmin"];
+								wht = s["bmax"];
 								commandstring += std::string(cmd) + ":blue,data ";
 							}
 						}

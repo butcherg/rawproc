@@ -153,7 +153,7 @@ class gImage
 		GIMAGE_ERROR getLastError();
 		std::string getLastErrorMessage();
 		std::string Stats(bool isfloat=true);
-		std::map<std::string,std::string> StatsMap();
+		std::map<std::string,float> StatsMap();
 
 		//Setters
 		void setInfo(std::string name, std::string value);
