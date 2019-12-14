@@ -2737,8 +2737,15 @@ bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, i
 			rawdata[y][x] = image[pos].r * 65535.f;
 		}
 	}
+
+	//this short-circuits the initGain parameter...
+	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+	double camwbR = atof(camwb[0].c_str());
+	double camwbG = atof(camwb[1].c_str());
+	double camwbB = atof(camwb[2].c_str());
+	double initialGain = fmax(camwbR,fmax(camwbG,camwbB)) / fmin(camwbR,fmin(camwbG,camwbB));
 	
-	amaze_demosaic (w, h,0,0,w,h, rawdata, red, green, blue, cfarray, f, initGain, border, inputScale, outputScale);
+	amaze_demosaic (w, h,0,0,w,h, rawdata, red, green, blue, cfarray, f, initialGain, border, inputScale, outputScale);
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
@@ -4002,12 +4009,20 @@ std::string gImage::Stats(bool isfloat)
 		if (statmap.find("bmax") != statmap.end()) stats_string += string_format("\tbmax:  % 11.6f",statmap["bmax"]);
 		stats_string += "\n";
 	}
-	
-	if (statmap.find("rmean") != statmap.end()) {
+
+	if (statmap.find("g1mean") != statmap.end()) {
 		stats_string += "\nchannel means:\n";
-		stats_string += string_format("rmean:  % 11.6f\n",statmap["rmean"]);
-		if (statmap.find("gmean") != statmap.end()) stats_string += string_format("gmean:  % 11.6f\n",statmap["gmean"]);
-		if (statmap.find("bmean") != statmap.end()) stats_string += string_format("bmean:  % 11.6f\n",statmap["bmean"]);
+		if (statmap.find("rmean") != statmap.end())  stats_string += string_format("rmean:  % 11.6f\n",statmap["rmean"]);
+		if (statmap.find("g1mean") != statmap.end()) stats_string += string_format("g1mean: % 11.6f\n",statmap["g1mean"]);
+		if (statmap.find("g2mean") != statmap.end()) stats_string += string_format("g2mean: % 11.6f\n",statmap["g2mean"]);
+		if (statmap.find("bmean") != statmap.end())  stats_string += string_format("bmean:  % 11.6f\n",statmap["bmean"]);
+				
+	}
+	else if (statmap.find("gmean") != statmap.end()) {
+		stats_string += "\nchannel means:\n";
+		if (statmap.find("rmean") != statmap.end()) stats_string +=  string_format("rmean:  % 11.6f\n",statmap["rmean"]);
+		if (statmap.find("gmean") != statmap.end()) stats_string +=  string_format("gmean:  % 11.6f\n",statmap["gmean"]);
+		if (statmap.find("bmean") != statmap.end()) stats_string +=  string_format("bmean:  % 11.6f\n",statmap["bmean"]);
 	}
 	
 	if (statmap.find("tmin") != statmap.end()) {
@@ -4020,72 +4035,13 @@ std::string gImage::Stats(bool isfloat)
 	return stats_string;
 }
 
-
-/*
-std::string gImage::Stats(bool isfloat)
-{
-	double rmin, rmax, gmin, gmax, bmin, bmax, tmin, tmax, rmean, gmean, bmean, rsum=0.0, gsum=0.0, bsum=0.0;
-	pix maxpix, minpix;
-	long pcount = 0;
-	rmin = image[0].r; rmax = image[0].r; gmin=image[0].g; gmax = image[0].g; bmin = image[0].b; bmax = image[0].b;
-	tmin = SCALE_CURVE; tmax = 0.0;
-	int iter = 0;
-
-	std::string stats_string;
-	double toneupperthreshold = 0.95; 
-	double tonelowerthreshold = 0.0;
-
-	#pragma omp parallel for 
-	for(unsigned y = 1; y < h; y++) {
-		for(unsigned x = 1; x < w; x++) {
-			unsigned pos = x + y*w;
-			rsum += image[pos].r; gsum += image[pos].g; bsum += image[pos].b;
-			pcount++;
-			if (image[pos].r > rmax) rmax = image[pos].r;
-			if (image[pos].g > gmax) gmax = image[pos].g;
-			if (image[pos].b > bmax) bmax = image[pos].b;
-			if (image[pos].r < rmin) rmin = image[pos].r;
-			if (image[pos].g < gmin) gmin = image[pos].g;
-			if (image[pos].b < bmin) bmin = image[pos].b;
-			double tone = (image[pos].r + image[pos].g + image[pos].b) / 3.0; 
-			if (tone > tmax & tone < toneupperthreshold) {tmax = tone; maxpix = image[pos];}
-			if (tone < tmin & tone > tonelowerthreshold) {tmin = tone; minpix = image[pos];}
-			iter++;
-		}
-	}
-
-	if (isfloat) {
-		stats_string = string_format("channels:\nrmin: %f\trmax: %f\ngmin: %f\tgmax: %f\nbmin: %f\tbmax: %f\n\n", 
-			rmin, rmax, gmin, gmax, bmin, bmax);
-
-		stats_string.append(string_format("tones:\nmin: %f\tmax: %f\nrmean: %f\ngmean: %f\nbmean: %f\n\n", 
-			tmin, tmax,rsum/(double)pcount, gsum/(double)pcount, bsum/(double)pcount));
-
-		stats_string.append(string_format("pixels (%f &gt; tone &lt; %f):\nbrightest:\t%f,%f,%f\ndarkest:\t%f,%f,%f\n\n",
-			tonelowerthreshold, toneupperthreshold, maxpix.r, maxpix.g, maxpix.b, minpix.r, minpix.g, minpix.b));
-	}
-	else {
-		stats_string = string_format("channels:\nrmin: %d\trmax: %d\ngmin: %d\tgmax: %d\nbmin: %d\tbmax: %d\n\n", 
-			int(rmin*65536.0), int(rmax*65536.0), int(gmin*65536.0), int(gmax*65536.0), int(bmin*65536.0), int(bmax*65536.0));
-
-		stats_string.append(string_format("tones:\nmin: %d\tmax: %d\nrmean: %d\ngmean: %d\nbmean: %d\n\n", 
-			int(tmin*65536.0), int(tmax*65536.0),int((rsum/(double)pcount)*65536.0), int((gsum/(double)pcount)*65536.0), int((bsum/(double)pcount)*65536.0)));
-
-		stats_string.append(string_format("pixels (%d &gt; tone &lt; %d):\nbrightest:\t%d,%d,%d\ndarkest:\t%d,%d,%d\n\n",
-			int(tonelowerthreshold*65536.0), int(toneupperthreshold*65536.0), int(maxpix.r*65536.0), int(maxpix.g*65536.0), int(maxpix.b*65536.0), int(minpix.r*65536.0), int(minpix.g*65536.0), int(minpix.b*65536.0)));
-	}
-
-	return stats_string;
-
-}
-*/
-
 std::map<std::string,float> gImage::StatsMap()
 {
 	double rmin, rmax, gmin, gmax, bmin, bmax, g1min, g1max, g2min, g2max;
 	rmin=rmax=image[0].r; gmin=gmax=g1min=g1max=g2min=g2max=image[0].g; bmin=bmax=image[0].b;
 	double tmin=1.0, tmax=0.0, rmean, gmean, bmean; 
-	double rsum=0.0, gsum=0.0, bsum=0.0;
+	double rsum=0.0, g1sum=0.0, g2sum=0.0, gsum=0.0, bsum=0.0; 
+	long rcount=0, g1count=0, g2count=0, gcount=0, bcount=0;
 	
 	pix maxpix, minpix;
 	long pcount = 0;
@@ -4098,11 +4054,7 @@ std::map<std::string,float> gImage::StatsMap()
 
 	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1")  //R,G,B has to be collected on the mosaic pattern
 	{
-		double prmin, prmax, pg1min, pg1max, pg2min, pg2max, pbmin, pbmax;
-		prmin=prmax=image[0].r;
-		pg1min=pg1max=image[0].g;
-		pg2min=pg2max=image[0].g;
-		pbmin=pbmax=image[0].b;
+
 
 		unsigned cfarray[2][2];
 		unsigned xtarray[6][6];
@@ -4121,6 +4073,15 @@ std::map<std::string,float> gImage::StatsMap()
 
 		#pragma omp parallel
 		{
+			double prmin, prmax, pg1min, pg1max, pg2min, pg2max, pbmin, pbmax, prsum, pg1sum, pg2sum, pbsum;
+			prmin=prmax=image[0].r;
+			pg1min=pg1max=image[0].g;
+			pg2min=pg2max=image[0].g;
+			pbmin=pbmax=image[0].b;
+			prsum=pg1sum=pg2sum=pbsum=0.0;
+
+			long prcount=0, pg1count=0, pg2count=0, pbcount=0;
+
 			#pragma omp parallel for 
 			for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 				for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
@@ -4133,18 +4094,26 @@ std::map<std::string,float> gImage::StatsMap()
 								case 0:
 									if (image[pos].r > prmax) prmax = image[pos].r; 
 									if (image[pos].r < prmin) prmin = image[pos].r;
+									prsum += image[pos].r;
+									prcount++;
 									break;
 								case 1:
 									if (image[pos].r > pg1max) pg1max = image[pos].r;
 									if (image[pos].r < pg1min) pg1min = image[pos].r;
+									pg1sum += image[pos].r;
+									pg1count++;
 									break;
 								case 2:
 									if (image[pos].r > pbmax) pbmax = image[pos].r;
 									if (image[pos].r < pbmin) pbmin = image[pos].r;
+									pg2sum += image[pos].r;
+									pg2count++;
 									break;
 								case 3:
 									if (image[pos].r > pg2max) pg2max = image[pos].r;
 									if (image[pos].r < pg2min) pg2min = image[pos].r;
+									pbsum += image[pos].r;
+									pbcount++;
 									break;
 							}
 						}
@@ -4158,6 +4127,8 @@ std::map<std::string,float> gImage::StatsMap()
 				if (pg1max > g1max) g1max = pg1max; if (pg1min < g1min) g1min = pg1min;
 				if (pg2max > g2max) g2max = pg2max; if (pg2min < g2min) g2min = pg2min;
 				if (pbmax > bmax) bmax = pbmax; if (pbmin < bmin) bmin = pbmin;
+				rsum += prsum; g1sum += pg1sum; g2sum += pg2sum; bsum += pbsum; 
+				rcount += prcount; g1count += pg1count; g2count += pg2count; bcount += pbcount;
 			}
 		}
 
@@ -4167,6 +4138,10 @@ std::map<std::string,float> gImage::StatsMap()
 		stats_map["g2min"] = g2min; stats_map["g2max"] = g2max;
 		stats_map["gmin"] = std::min(g1min, g2min); stats_map["gmax"] = std::max(g1max, g2max);
 		stats_map["bmin"] = bmin; stats_map["bmax"] = bmax;
+		stats_map["rmean"] = rsum / (double) rcount;
+		stats_map["g1mean"] = g1sum / (double) g1count;
+		stats_map["g2mean"] = g2sum / (double) g2count;
+		stats_map["bmean"] = bsum / (double) bcount;
 
 	}
 	else {
