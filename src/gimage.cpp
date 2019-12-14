@@ -4411,10 +4411,20 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 
 	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
 
-		std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-		if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-		if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+		unsigned cfarray[2][2];
+		unsigned xtarray[6][6];
+		int arraydim = 0;
+
+		if (cfArray(cfarray)) {
+			arraydim = 2;
+			for (unsigned i=0; i<arraydim; i++)
+				for (unsigned j=0; j<arraydim; j++)
+					xtarray[i][j] = cfarray[i][j];
+		}
+		else if (xtranArray(xtarray)) {
+			arraydim = 6; 
+		}
+		else return histogram;
 
 		#pragma omp parallel
 		{
@@ -4422,32 +4432,47 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 			std::vector<unsigned> pg(scale,0);
 			std::vector<unsigned> pb(scale,0);
 
-			#pragma omp for
-			for (unsigned y=0; y<h-1; y+=2) {
-				for (unsigned x=0; x<w-1; x+=2) {
-					unsigned pos[4];
-					pos[0] = x + y*w;  //upper left
-					pos[1] = (x+1) + y*w; //upper right
-					pos[2] = x + (y+1)*w; //lower leftfs
-					pos[3] = (x+1) + (y+1)*w;  //lower right
-					for (unsigned i=0; i<q.size(); i++) {
-						unsigned bin = std::min((unsigned) ((image[pos[i]].r-dmin)/inc),scale-1);
-						if (q[i] == 0)      pr[bin]++;
-						else if (q[i] == 1) pg[bin]++;
-						else if (q[i] == 2) pb[bin]++;
+			std::vector<unsigned> pg1(scale,0);
+			std::vector<unsigned> pg2(scale,0);
+
+			#pragma omp parallel for 
+			for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+				for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+					unsigned Hpos = (x/2) + (y/2)*(w/2);
+					float pix[4] = {0.0, 0.0, 0.0, 0.0};
+					for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
+						for (unsigned j=0; j<arraydim; j++) {
+							int pos = (x+i) + (y+j) * w;
+							unsigned bin = std::min((unsigned) ((image[pos].r-dmin)/inc),scale-1);
+							switch (xtarray[i][j]) {
+								case 0:
+									pr[bin]++;
+									break;
+								case 1:
+									pg1[bin]++;
+									break;
+								case 2:
+									pb[bin]++;
+									break;
+								case 3:
+									pg2[bin]++;
+									break;
+							}
+						}
 					}
 				}
 			}
-			
-			#pragma omp critical 
+
+			#pragma omp critical
 			{
 				for (unsigned i=0; i<scale; i++) {
 					histogram[i].r += pr[i];
-					histogram[i].g += pg[i];
+					histogram[i].g += (pg1[i]+pg2[i])/2.0;
 					histogram[i].b += pb[i];
 				}
 			}
 		}
+
 	}
 	else { //R,G,B has to be collected on the RGB pattern
 
