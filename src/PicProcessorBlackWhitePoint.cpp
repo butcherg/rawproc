@@ -471,8 +471,8 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 				else
 					wht = maxwht;
 			}
-			if (blk < 0.0) blk = 0.0;
-			//((BlackWhitePointPanel *) toolpanel)->updateVals(blk,wht,minwht);
+			//if (blk < 0.0) blk = 0.0;
+			((BlackWhitePointPanel *) toolpanel)->updateVals(blk,wht,minwht);
 		}
 
 		else {
