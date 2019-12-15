@@ -574,7 +574,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	wxString command = wxString::Format("%s %s \"%s\"",exifcommand, exifparameters, filename.GetFullPath());
 	wxArrayString output;
 	wxArrayString errors;
-	SetStatusText(wxString::Format("Loading metadata using \"%s\"...",command));
+	SetStatusText(wxString::Format(_("Loading metadata using \"%s\"..."),command));
 	wxExecute (command, output, errors, wxEXEC_NODISABLE);
 	wxString exif;
 	for (int i=0; i<output.GetCount(); i++) exif.Append(output[i]);
@@ -723,7 +723,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 #endif
 	filename.Assign(fname);
 	if (!filename.FileExists()) {
-		wxMessageBox(wxString::Format("Error: %s not found.",filename.GetFullName()));
+		wxMessageBox(wxString::Format(_("Error: %s not found."),filename.GetFullName()));
 		return;
 	}
 	sourcefilename.Clear();
@@ -788,10 +788,10 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.png.cms.profile","")));
 		}
 
-		SetStatusText(wxString::Format("Loading file:%s params:%s",filename.GetFullName(), configparams));
+		SetStatusText(wxString::Format(_("Loading file:%s params:%s"),filename.GetFullName(), configparams));
 
 		if (!wxFileName::FileExists(fname)) {
-			wxMessageBox(wxString::Format("Error: Source file %s not found", filename.GetFullName()));
+			wxMessageBox(wxString::Format(_("Error: Source file %s not found"), filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
@@ -805,7 +805,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		dib = new gImage(gImage::loadImageFile(fname.c_str(), (std::string) configparams.c_str()));
 		wxString loadtime = duration();
 		if (dib->getWidth() == 0) {
-			wxMessageBox(wxString::Format("Error: File %s not loaded successfully", filename.GetFullName()));
+			wxMessageBox(wxString::Format(_("Error: File %s not loaded successfully"), filename.GetFullName()));
 			SetStatusText("");
 			return;
 		}
@@ -814,7 +814,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		
 		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
 		if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
-			WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
+			WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
 			dib->NormalizeRotation();
 		}
 		
@@ -849,7 +849,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			int applydefault = wxYES;
 			//parm input.raw.default.prompt: 1|0, enable/disable prompt to apply input.raw.default.  Default=1 
 			if (myConfig::getConfig().getValueOrDefault("input.raw.default.prompt","1") == "1") 
-				applydefault = wxMessageBox(wxString::Format("Apply %s to raw file?",raw_default), "input.raw.default", wxYES_NO, this);
+				applydefault = wxMessageBox(wxString::Format(_("Apply %s to raw file?"),raw_default), "input.raw.default", wxYES_NO, this);
 			if (applydefault == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				try {
@@ -864,7 +864,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 					if (!incdisplay) CommandTreeSetDisplay(commandtree->GetLastChild(commandtree->GetRootItem()),787);
 				}
 				catch (std::exception& e) {
-					wxMessageBox(wxString::Format("Error: Adding tool failed: %s",e.what()));
+					wxMessageBox(wxString::Format(_("Error: Adding tool failed: %s"),e.what()));
 				}
 			}
 		}
@@ -872,10 +872,10 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		opensource = false;
 		open = true;
 
-		SetStatusText(wxString::Format("File:%s opened.",filename.GetFullName()));
+		SetStatusText(wxString::Format(_("File:%s opened."),filename.GetFullName()));
 	}
 	else {
-		SetStatusText(wxString::Format("%s file type unknown.",filename.GetFullName() ));
+		SetStatusText(wxString::Format(_("%s file type unknown."),filename.GetFullName() ));
 	}
 }
 
@@ -908,10 +908,10 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		else ofilename = token[1];
 				
 		if (token[0].Find("rawproc") == wxNOT_FOUND) {
-			wxMessageBox(wxString::Format("Source script not found in %s, aborting Open Source.", filename.GetFullName().c_str()) );
+			wxMessageBox(wxString::Format(_("Source script not found in %s, aborting Open Source."), filename.GetFullName().c_str()) );
 		}
 		else {
-			SetStatusText(wxString::Format("Source script found, loading source file %s...",ofilename) );
+			SetStatusText(wxString::Format(_("Source script found, loading source file %s..."),ofilename) );
 
 			if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
 				//parm input.opensource.subdirectory: Enable search of specific directory for source file.  
@@ -921,7 +921,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					if (findfilesubdir.Normalize()) {
 						findfilesubdir.AppendDir(subdir);  //see if source file is in the parent directory
 						if (findfilesubdir.Exists()) {
-							//SetStatusText(wxString::Format("Loading source file %s from %s directory...",ofilename,subdir) );
+							//SetStatusText(wxString::Format(_("Loading source file %s from %s directory..."),ofilename,subdir) );
 							ofilename = findfilesubdir.GetFullPath();
 						}
 					}
@@ -932,11 +932,11 @@ void rawprocFrm::OpenFileSource(wxString fname)
 							if (findfileparentdir.Normalize()) {
 								findfileparentdir.RemoveLastDir();  //see if source file is in the parent directory
 								if (findfileparentdir.Exists()) {
-									//SetStatusText(wxString::Format("Loading source file %s from parent directory...",ofilename) );
+									//SetStatusText(wxString::Format(_("Loading source file %s from parent directory..."),ofilename) );
 									ofilename = findfileparentdir.GetFullPath();
 								}
 								else {
-									wxMessageBox(wxString::Format("Error: Source file %s not found in source, parent or sub directory", ofilename));
+									wxMessageBox(wxString::Format(_("Error: Source file %s not found in source, parent or sub directory"), ofilename));
 									SetStatusText("");
 									return;
 								}
@@ -945,7 +945,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 					}
 				}
 //				else {
-//					wxMessageBox(wxString::Format("Error: Source file %s not found", ofilename));
+//					wxMessageBox(wxString::Format(_("Error: Source file %s not found"), ofilename));
 //					SetStatusText("");
 //					return;
 //				}
@@ -973,13 +973,13 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			pic->BlankPic();
 			histogram->BlankPic();
 			parambook->DeleteAllPages();
-			SetStatusText(wxString::Format("Loading file:%s params:%s",ofilename, oparams));
+			SetStatusText(wxString::Format(_("Loading file:%s params:%s"),ofilename, oparams));
 
 			mark();
 			dib = new gImage(gImage::loadImageFile(ofilename.c_str(), (std::string) oparams.c_str()));
 			wxString loadtime = duration();
 			if (dib->getWidth() == 0) {
-				wxMessageBox(wxString::Format("Error: File %s load failed", ofilename));
+				wxMessageBox(wxString::Format(_("Error: File %s load failed"), ofilename));
 				SetStatusText("");
 				return;
 			}
@@ -987,7 +987,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			pic->SetModified(false);
 			
 			if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
-				WxStatusBar1->SetStatusText(wxString::Format("Normalizing image orientation..."));
+				WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
 				dib->NormalizeRotation();
 			}
 			
@@ -995,7 +995,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			sourcefilename.Assign(fname);
 			
 			if (myConfig::getConfig().getValueOrDefault("input.log","0") == "1")
-				log(wxString::Format("file input,filename=%s,imagesize=%dx%d,time=%s",filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
+				log(wxString::Format(_("file input,filename=%s,imagesize=%dx%d,time=%s"),filename.GetFullName(),dib->getWidth(), dib->getHeight(),loadtime));
 
 
 			//pic->SetScaleToWidth();
@@ -1004,7 +1004,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			}
 			else {
 				pic->FitMode(true);
-				SetStatusText("scale: fit",STATUS_SCALE);
+				SetStatusText(_("scale: fit"),STATUS_SCALE);
 			}
 
 			
@@ -1030,12 +1030,12 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			opensource = true;
 			open = false;
 
-			SetStatusText(wxString::Format("Source of file:%s opened.",sourcefilename.GetFullName()));
+			SetStatusText(wxString::Format(_("Source of file:%s opened."),sourcefilename.GetFullName()));
 		}
 			
 	}
 	else {
-		wxMessageBox(wxString::Format("No source script found in %s, aborting Open Source.",fname ));
+		wxMessageBox(wxString::Format(_("No source script found in %s, aborting Open Source."),fname ));
 	}
 
 	SetStatusText("");
@@ -1052,20 +1052,20 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector("Save image...",filename.GetPath(),filename.GetName(),filename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);  // 
+		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png"),wxFD_SAVE);  // 
 	else
-		fname = wxFileSelector("Save image...",sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),"JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png",wxFD_SAVE);  // 
+		fname = wxFileSelector(_("Save image..."),sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png"),wxFD_SAVE);  // 
 
 	if ( !fname.empty() )
 	{
 		if (wxFileName::FileExists(fname)) 
-			if (wxMessageBox("File exists; overwrite?", "Confirm", wxYES_NO, this) == wxNO)
+			if (wxMessageBox(_("File exists; overwrite?"), _("Confirm"), wxYES_NO, this) == wxNO)
 				return;
 			
 			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname);
 			
 			if (filetype == FILETYPE_UNKNOWN) {
-				wxMessageBox("Error: invalid file type");
+				wxMessageBox(_("Error: invalid file type"));
 				return;
 			}
 			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
@@ -1074,7 +1074,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
 
 			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
-			wxString versionstr = "(dev build)";
+			wxString versionstr = _("(dev build)");
 			#ifdef VERSION
 				versionstr = VERSION;
 			#endif
@@ -1082,7 +1082,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
 			if (myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") {
-				WxStatusBar1->SetStatusText(wxString::Format("Orienting image for output..."));
+				WxStatusBar1->SetStatusText(wxString::Format(_("Orienting image for output...")));
 				dib->NormalizeRotation();
 			}
 
@@ -1153,18 +1153,18 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
 				if (dib->getProfile()) {
 					if (profile) {
-						WxStatusBar1->SetStatusText(wxString::Format("Saving %s converting to color profile %s, rendering intent %s...",fname, profilepath.GetFullName(), intentstr));
+						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
 						dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
 					}
 					else {
-						wxMessageBox(wxString::Format("No CMS profile file found, saving with the assigned internal color profile..."));
-						WxStatusBar1->SetStatusText(wxString::Format("Saving %s with working profile...",fname));
+						wxMessageBox(wxString::Format(_("No CMS profile file found, saving with the assigned internal color profile...")));
+						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s with working profile..."),fname));
 						dib->saveImageFile(fname, std::string(configparams.c_str()));
 					}
 				}
 				else {
-					wxMessageBox(wxString::Format("No internal working profile found, saving without a color profile..."));
-					WxStatusBar1->SetStatusText(wxString::Format("Saving %s without a color profile...",fname));
+					wxMessageBox(wxString::Format(_("No internal working profile found, saving without a color profile...")));
+					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
 					dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
 
@@ -1172,7 +1172,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 			}
 			else {
-				WxStatusBar1->SetStatusText(wxString::Format("Saving %s (no embedded profile)...",fname));
+				WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
 				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
 			}
 			
@@ -1183,7 +1183,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			if (thumbdir != "") {
 				wxFileName thumb(tmpname.GetPath(wxPATH_GET_SEPARATOR)+thumbdir, tmpname.GetFullName());
 				if (thumb.DirExists()) {
-					WxStatusBar1->SetStatusText(wxString::Format("Saving thumbnail %s...",fname));
+					WxStatusBar1->SetStatusText(wxString::Format(_("Saving thumbnail %s..."),fname));
 					gImage thumbdib = *dib;
 					ApplyOps(thumbdib, thumbparams);
 					thumbdib.saveImageFile(thumb.GetFullPath());
@@ -1208,7 +1208,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 	bool incdisplay=false;
 	if (myConfig::getConfig().getValueOrDefault("app.incrementaldisplay","0") == "1") incdisplay = true;
 
-	wxString fname = wxFileSelector("Open Tool List...", toollistpath.GetPath());
+	wxString fname = wxFileSelector(_("Open Tool List..."), toollistpath.GetPath());
 	if (fname == "") return;
 
 	wxTextFile toolfile(fname);
@@ -1228,7 +1228,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 					wxSafeYield(this);
 				}
 				else {
-					wxMessageBox(wxString::Format("Unknown command: %s.  Aborting tool list insertion.",cmd[0]));
+					wxMessageBox(wxString::Format(_("Unknown command: %s.  Aborting tool list insertion."),cmd[0]));
 					myConfig::getConfig().enableTempConfig(false);
 					toolfile.Close();
 					return;
@@ -1241,7 +1241,7 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		myConfig::getConfig().enableTempConfig(false);
 		toolfile.Close();
 	}
-	else wxMessageBox("Error: tool file not found.");
+	else wxMessageBox(_("Error: tool file not found."));
 
 }
 
@@ -1366,7 +1366,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	case 70: //F - fit image to window
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
-		SetStatusText("scale: fit",STATUS_SCALE);
+		SetStatusText(_("scale: fit"),STATUS_SCALE);
 		break;
 	case 67: //c - copy selected command and its parameters to the clipboard
 		if (commandtree->IsEmpty()) return;
@@ -1375,7 +1375,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 			if (wxTheClipboard->Open()) {
 				wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 				wxTheClipboard->Close();
-				SetStatusText(wxString::Format("%s copied to clipboard.",cmd));
+				SetStatusText(wxString::Format(_("%s copied to clipboard."),cmd));
 			}
 		}
 		break;
@@ -1388,9 +1388,9 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 					wxTheClipboard->GetData( data );
 					wxArrayString s = split(data.GetText(), ":");
 					if (AddItem(s[0], s[1]).IsOk())
-						SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
+						SetStatusText(wxString::Format(_("%s pasted to command tree."),data.GetText()));
 					else
-						SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
+						SetStatusText(wxString::Format(_("Error: %s not a valid command."),data.GetText()));
 				}
 				wxTheClipboard->Close();
 			}
@@ -1405,12 +1405,12 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 				wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 				wxTheClipboard->Close();
 				CommandTreeDeleteItem(commandtree->GetSelection());
-				SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
+				SetStatusText(wxString::Format(_("%s cut from command tree and copied to clipboard."),cmd));
 			}
 		}
 		break;
 	case 80: //p - process command
-		WxStatusBar1->SetStatusText("processing...");
+		WxStatusBar1->SetStatusText(_("processing..."));
 		((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->processPic();
 		WxStatusBar1->SetStatusText("");
 		break;
@@ -1438,7 +1438,7 @@ void rawprocFrm::CommandTreeEndDrag(wxTreeEvent& event)
 void rawprocFrm::Mnuopen1003Click(wxCommandEvent& event)
 
 {
-	wxString fname = wxFileSelector("Open Image...", openfilepath);	
+	wxString fname = wxFileSelector(_("Open Image..."), openfilepath);	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
@@ -1453,7 +1453,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 	wxString cmdstring = AssembleCommand();
 	if (filename.IsOk() && filename.FileExists()) {
 		if (opensource) {
-			int result = wxMessageBox(wxString::Format("Open source file %s with the old processing?\n\nSelecting No will open the source file with current Properties parameters and the current processing chain.\n\nCancel aborts the whole thing.",filename.GetFullName()), "Re-Open", wxYES_NO |wxCANCEL, this);
+			int result = wxMessageBox(wxString::Format(_("Open source file %s with the old processing?\n\nSelecting No will open the source file with current Properties parameters and the current processing chain.\n\nCancel aborts the whole thing."),filename.GetFullName()), _("Re-Open"), wxYES_NO |wxCANCEL, this);
 			if (result == wxYES) {
 				OpenFileSource(sourcefilename.GetFullPath());
 			}
@@ -1465,7 +1465,7 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 					if (AddItem(cmd[0], cmd[1]).IsOk()) 
 						wxSafeYield(this);
 					else
-						wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+						wxMessageBox(wxString::Format(_("Unknown command: %s"),cmd[0]));
 				}
 			}
 		}
@@ -1473,27 +1473,27 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 			OpenFile(filename.GetFullPath());
 			wxArrayString token = split(cmdstring, " ");
 			if (token.GetCount() > 2) {
-				if (wxMessageBox("Re-apply processing chain?", "Re-Open", wxYES_NO, this) == wxYES) {
+				if (wxMessageBox(_("Re-apply processing chain?"), _("Re-Open"), wxYES_NO, this) == wxYES) {
 					for (int i=2; i<token.GetCount(); i++) {
 						wxArrayString cmd = split(token[i], ":");					
 						if (AddItem(cmd[0], cmd[1]).IsOk()) 
 							wxSafeYield(this);
 						else
-							wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+							wxMessageBox(wxString::Format(_("Unknown command: %s"),cmd[0]));
 					}
 				}
 			}
 		}
 	}
 	else {
-		wxMessageBox("No file to re-open.");
+		wxMessageBox(_("No file to re-open."));
 	}
 }
 
 
 void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 {
-	wxString fname = wxFileSelector("Open Image source...", openfilepath);	
+	wxString fname = wxFileSelector(_("Open Image source..."), openfilepath);	
 	if ( !fname.empty() ) { 
 		wxFileName f(fname);
 		wxSetWorkingDirectory (f.GetPath());
@@ -1507,11 +1507,11 @@ void rawprocFrm::Mnuopensource1004Click(wxCommandEvent& event)
 void rawprocFrm::MnuProperties(wxCommandEvent& event)
 {
 	if (configfile == "(none)") {
-		wxMessageBox("No configuration file found.");
+		wxMessageBox(_("No configuration file found."));
 		return;
 	}
 	if (propdiag == nullptr) {
-		propdiag = new PropertyDialog(this, wxID_ANY, "Properties", wxDefaultPosition, wxSize(640,480));
+		propdiag = new PropertyDialog(this, wxID_ANY, _("Properties"), wxDefaultPosition, wxSize(640,480));
 		propdiag->LoadConfig();
 		Bind(wxEVT_PG_CHANGED,&rawprocFrm::UpdateConfig,this);
 	}
@@ -1520,7 +1520,7 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 		propdiag->Show();
 	}
 	else {
-		wxMessageBox("Failed to create Properties dialog");
+		wxMessageBox(_("Failed to create Properties dialog"));
 	}
 }
 
@@ -1531,7 +1531,7 @@ void rawprocFrm::MnuEXIF(wxCommandEvent& event)
 
 void rawprocFrm::MnuBatchClick(wxCommandEvent& event)
 {
-	myBatchDialog dlg(this, wxID_ANY, "Batch");
+	myBatchDialog dlg(this, wxID_ANY, _("Batch"));
 	dlg.ShowModal();
 }
 
@@ -1549,9 +1549,9 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 	else 
 		propval = event.GetPropertyValue().GetString();
 
-	SetStatusText(wxString::Format("Changed %s to %s.", propname, propval));
+	SetStatusText(wxString::Format(_("Changed %s to %s."), propname, propval));
 	myConfig::getConfig().setValue((const char  *) propname.mb_str(), (const char  *) propval.mb_str());
-	if (!myConfig::getConfig().flush()) SetStatusText("Write to configuration file failed.");
+	if (!myConfig::getConfig().flush()) SetStatusText(_("Write to configuration file failed."));
 
 	//check for properties that should update immediately:
 	if (propname.Find("display.") != wxNOT_FOUND)
@@ -1577,7 +1577,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding tone tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding tone tool failed: %s"),e.what()));
 	}
 
 }
@@ -1586,7 +1586,7 @@ void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	//if (imginfo["Libraw::Mosaiced"] == "0") {
-	//	wxMessageBox("Error: CACorrect can only be applied to raw data, before demosaic.");
+	//	wxMessageBox(_("Error: CACorrect can only be applied to raw data, before demosaic."));
 	//	return;
 	//}
 	SetStatusText("");
@@ -1597,7 +1597,7 @@ void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding cacorrect tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding cacorrect tool failed: %s"),e.what()));
 	}
 
 }
@@ -1606,7 +1606,7 @@ void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	//if (imginfo["Libraw::Mosaiced"] == "0") {
-	//	wxMessageBox("Error: HLRecover can only be applied to RGB data, after demosaic.");
+	//	wxMessageBox(_("Error: HLRecover can only be applied to RGB data, after demosaic."));
 	//	return;
 	//}
 	SetStatusText("");
@@ -1617,7 +1617,7 @@ void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding hlrecover tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding hlrecover tool failed: %s"),e.what()));
 	}
 
 }
@@ -1637,7 +1637,7 @@ void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1572);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding saturation tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding saturation tool failed: %s"),e.what()));
 	}
 }
 
@@ -1654,7 +1654,7 @@ void rawprocFrm::MnuexposureClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1589);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding exposure tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding exposure tool failed: %s"),e.what()));
 	}
 }
 
@@ -1670,7 +1670,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding curve tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding curve tool failed: %s"),e.what()));
 	}
 }
 
@@ -1693,7 +1693,7 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1669);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding grayscale tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding grayscale tool failed: %s"),e.what()));
 	}
 }
 
@@ -1702,7 +1702,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
 	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1");
+		wxMessageBox(_("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
@@ -1713,7 +1713,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1689);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding crop tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding crop tool failed: %s"),e.what()));
 	}
 }
 
@@ -1722,7 +1722,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
 	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1");
+		wxMessageBox(_("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
@@ -1734,7 +1734,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1710);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding resize tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding resize tool failed: %s"),e.what()));
 	}
 }
 
@@ -1758,7 +1758,7 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1734);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding blackwhitepoint tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding blackwhitepoint tool failed: %s"),e.what()));
 	}
 }
 
@@ -1775,7 +1775,7 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding sharpen tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding sharpen tool failed: %s"),e.what()));
 	}
 }
 
@@ -1784,7 +1784,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
 	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1");
+		wxMessageBox(_("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
@@ -1797,7 +1797,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1733);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding rotate tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding rotate tool failed: %s"),e.what()));
 	}
 }
 
@@ -1830,7 +1830,7 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1806);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding denoise tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding denoise tool failed: %s"),e.what()));
 	}
 }
 
@@ -1855,7 +1855,7 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1831);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding redeye tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding redeye tool failed: %s"),e.what()));
 	}
 }
 
@@ -1866,7 +1866,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 
 	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
-		wxMessageBox("Note: Image does not have a source profile, only 'assign' is valid");
+		wxMessageBox(_("Note: Image does not have a source profile, only 'assign' is valid"));
 		cmd = "(none),assign,-";
 	}
 
@@ -1879,7 +1879,7 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1855);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding colorspace tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding colorspace tool failed: %s"),e.what()));
 	}
 }
 
@@ -1892,7 +1892,7 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	lfError e;
 	struct lfDatabase *ldb = lf_db_new ();
 	if (lf_db_load (ldb) != LF_NO_ERROR) {
-		wxMessageBox("Error: Cannot open lens correction database.") ;
+		wxMessageBox(_("Error: Cannot open lens correction database.")) ;
 		if (ldb) lf_db_destroy (ldb);
 		return;
 	}
@@ -1908,7 +1908,7 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding lenscorrection tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));
 	}
 }
 #endif
@@ -1930,7 +1930,7 @@ void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1906);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding demosaic tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding demosaic tool failed: %s"),e.what()));
 	}
 }
 
@@ -1945,7 +1945,7 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1921);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding white balance tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding white balance tool failed: %s"),e.what()));
 	}
 }
 
@@ -1960,7 +1960,7 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding subtract tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding subtract tool failed: %s"),e.what()));
 	}
 }
 
@@ -1976,7 +1976,7 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
 	}
 	catch (std::exception& e) {
-		wxMessageBox(wxString::Format("Error: Adding group tool failed: %s",e.what()));
+		wxMessageBox(wxString::Format(_("Error: Adding group tool failed: %s"),e.what()));
 	}
 }
 
@@ -1992,7 +1992,7 @@ void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 		wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 		wxTheClipboard->Close();
 		CommandTreeDeleteItem(commandtree->GetSelection());
-		SetStatusText(wxString::Format("%s cut from command tree and copied to clipboard.",cmd));
+		SetStatusText(wxString::Format(_("%s cut from command tree and copied to clipboard."),cmd));
 	}
 }
 
@@ -2004,7 +2004,7 @@ void rawprocFrm::MnuCopy1202Click(wxCommandEvent& event)
 	{
 		wxTheClipboard->SetData( new wxTextDataObject(cmd) );
 		wxTheClipboard->Close();
-		SetStatusText(wxString::Format("%s copied to clipboard.",cmd));
+		SetStatusText(wxString::Format(_("%s copied to clipboard."),cmd));
 	}
 }
 
@@ -2019,9 +2019,9 @@ void rawprocFrm::MnuPaste1203Click(wxCommandEvent& event)
 			wxTheClipboard->GetData( data );
 			wxArrayString s = split(data.GetText(), ":");
 			if (AddItem(s[0], s[1]).IsOk())
-				SetStatusText(wxString::Format("%s pasted to command tree.",data.GetText()));
+				SetStatusText(wxString::Format(_("%s pasted to command tree."),data.GetText()));
 			else
-				SetStatusText(wxString::Format("Error: %s not a valid command.",data.GetText()));
+				SetStatusText(wxString::Format(_("Error: %s not a valid command."),data.GetText()));
 		}
 		wxTheClipboard->Close();
 	}
@@ -2037,10 +2037,10 @@ void rawprocFrm::MnuShowCommand1010Click(wxCommandEvent& event)
 	}
 	else if (diagtype == "html") {
 		wxString cmd = "<p>" + AssembleCommand() + "</p>";
-		myEXIFDialog dlg(this, wxID_ANY, "Image Command", cmd,  wxDefaultPosition, wxSize(400,200));
+		myEXIFDialog dlg(this, wxID_ANY, _("Image Command"), cmd,  wxDefaultPosition, wxSize(400,200));
 		dlg.ShowModal();
 	}
-	else wxMessageBox("Invalid dialog type for Show Command... (menu.showcommand.type)");
+	else wxMessageBox(_("Invalid dialog type for Show Command... (menu.showcommand.type)"));
 }
 
 void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
@@ -2055,7 +2055,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	#endif
 
 	info.SetIcon(icon_xpm);
-	info.SetCopyright(wxT("(C) 2016-2019 Glenn Butcher <glenn.butcher@gmail.com>"));
+	info.SetCopyright(_("(C) 2016-2019 Glenn Butcher <glenn.butcher@gmail.com>"));
 	
 	//wxString WxWidgetsVersion = wxGetLibraryVersionInfo().GetVersionString();
 	wxVersionInfo wxversion = wxGetLibraryVersionInfo();
@@ -2068,9 +2068,9 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
 #ifdef BUILDDATE
 	wxString builddate = wxString(BUILDDATE);
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s", WxWidgetsVersion, libraries.c_str(),pixtype, configfile, builddate));
+	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile, builddate));
 #else
-	info.SetDescription(wxString::Format("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s", WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
+	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 #endif
 
 	wxAboutBox(info, this);
@@ -2092,7 +2092,7 @@ void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 void rawprocFrm::showHistogram(wxTreeItemId item)
 {
 	gImage *g = ((PicProcessor *) commandtree->GetItemData(item))->getProcessedPicPointer();
-	SetStatusText("Building histogram...");
+	SetStatusText(_("Building histogram..."));
 	myHistogramDialog hdiag(this, wxID_ANY, "Histogram", g , wxDefaultPosition, wxDefaultSize);  //wxSize(500,300));
 	SetStatusText("");
 	hdiag.ShowModal();
@@ -2107,16 +2107,16 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 	PicProcessorGroup *g;
 	if (commandtree->GetItemText(commandtree->GetItemParent(event.GetItem())) == "group") return;  
 	wxMenu mnu;
- 	mnu.Append(ID_EXIF, "Image Information...");
- 	mnu.Append(ID_HISTOGRAM, "Full Histogram...");
+ 	mnu.Append(ID_EXIF, _("Image Information..."));
+ 	mnu.Append(ID_HISTOGRAM, _("Full Histogram..."));
 	mnu.AppendSeparator();
-	mnu.Append(ID_DELETE, "Delete");
-	mnu.Append(ID_DELETESUBSEQUENT, "Delete subsequent...");
+	mnu.Append(ID_DELETE, _("Delete"));
+	mnu.Append(ID_DELETESUBSEQUENT, _("Delete subsequent..."));
 	//if (commandtree->GetItemText(event.GetItem()) == "group") {
 	if (bifurcate(commandtree->GetItemText(event.GetItem()).ToStdString(), ':')[0] == "group") {
 		mnu.AppendSeparator();
-		mnu.Append(ID_GROUPTOTOOLLIST, "Convert group to toollist");
-		mnu.Append(ID_GROUPLASTTOTOOL, "Convert last group item to tool");
+		mnu.Append(ID_GROUPTOTOOLLIST, _("Convert group to toollist"));
+		mnu.Append(ID_GROUPLASTTOTOOL, _("Convert last group item to tool"));
 	}	
 	switch (GetPopupMenuSelectionFromUser(mnu)) {
 		case ID_EXIF:
@@ -2124,7 +2124,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 			break;
 		case ID_HISTOGRAM:
 			showHistogram(event.GetItem());
-			//wxMessageBox("Not there yet, press 't' to toggle the thumbnail histogram...");
+			//wxMessageBox(_("Not there yet, press 't' to toggle the thumbnail histogram..."));
 			break;
 		case ID_DELETE:
 			CommandTreeDeleteItem(event.GetItem());
@@ -2148,7 +2148,7 @@ void rawprocFrm::CommandTreePopup(wxTreeEvent& event)
 				if (id.IsOk()) 
 					wxSafeYield(this);
 				else
-					wxMessageBox(wxString::Format("Unknown command: %s",cmd[0]));
+					wxMessageBox(wxString::Format(_("Unknown command: %s"),cmd[0]));
 				if (i==0) first = id;
 			}
 			//PicProcessor::enableGlobalProcessing(true);  //not ready for prime time
