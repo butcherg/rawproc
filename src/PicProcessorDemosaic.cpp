@@ -43,22 +43,22 @@ class DemosaicPanel: public PicProcPanel
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
-			enablebox = new wxCheckBox(this, DEMOSAICENABLE, "demosaic:");
+			enablebox = new wxCheckBox(this, DEMOSAICENABLE, _("demosaic:"));
 			enablebox->SetValue(true);
 
 			halfb = new wxRadioButton(this, DEMOSAICHALF, "half", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			halfb->SetToolTip("Turns each bayer quad into a single RGB pixel. Demosaiced mage is half the size of the original.  Fast.");
+			halfb->SetToolTip(_("Turns each bayer quad into a single RGB pixel. Demosaiced mage is half the size of the original.  Fast."));
 			halfresizeb = new wxRadioButton(this, DEMOSAICHALFRESIZE, "half_resize");
-			halfresizeb->SetToolTip("Does half, then resizes to the original width and height. Somewhat fast, low quality.");
+			halfresizeb->SetToolTip(_("Does half, then resizes to the original width and height. Somewhat fast, low quality."));
 			colorb = new wxRadioButton(this, DEMOSAICCOLOR, "color");
-			colorb->SetToolTip("Doesn't do demosaic, colors the image according to the bayer array");
+			colorb->SetToolTip(_("Doesn't do demosaic, colors the image according to the bayer array"));
 
 #ifdef USE_LIBRTPROCESS
 			//ahdb, amazeb, dcbb, igvb, lmmseb, rcdb, vngb, xtran_markesteijnb, xtran_fastb
 			ahdb = new wxRadioButton(this, DEMOSAICAHD, "ahd");
-			ahdb->SetToolTip("");
+			ahdb->SetToolTip(_("dcraw standard, good all-round performance. Fast enough."));
 			amazeb = new wxRadioButton(this, DEMOSAICAMAZE, "amaze");
-			amazeb->SetToolTip("Good for low ISO images, architectural images. Fast.");
+			amazeb->SetToolTip(_("Good for low ISO images, architectural images. Fast."));
 			dcbb = new wxRadioButton(this, DEMOSAICDCB, "dcb:");
 			dcbb->SetToolTip("");
 				dcb_iterations = new myIntegerCtrl(this, wxID_ANY, "iterations:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
@@ -69,9 +69,9 @@ class DemosaicPanel: public PicProcPanel
 			lmmseb->SetToolTip("");
 				lmmse_iterations = new myIntegerCtrl(this, wxID_ANY, "iterations:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
 			rcdb = new wxRadioButton(this, DEMOSAICRCD, "rcd");
-			rcdb->SetToolTip("Good for low ISO images, nature images. Faster than amaze.");
+			rcdb->SetToolTip(_("Good for low ISO images, nature images. Faster than amaze."));
 			vngb = new wxRadioButton(this, DEMOSAICVNG, "vng");
-			vngb->SetToolTip("Slow, good for medium ISO images.");
+			vngb->SetToolTip(_("Slow, good for medium ISO images."));
 			xtran_markesteijnb = new wxRadioButton(this, DEMOSAICXTRANMARKESTEIJN, "xtran_markesteijn:");
 				xtran_markesteijn_passes = new myIntegerCtrl(this, wxID_ANY, "passes:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
 				xtran_markesteijn_cielab = new wxCheckBox(this, wxID_ANY, "cielab:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -148,7 +148,7 @@ colorb->Enable(true);
 				else if (p[0] == "xtran_fast") 		{ xtran_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
 #endif
 				else {
-					wxMessageBox(wxString::Format("%s is not a valid demosaic algorithm.  Setting to default.",p[0].mb_str()));
+					wxMessageBox(wxString::Format(_("%s is not a valid demosaic algorithm.  Setting to default."),p[0].mb_str()));
 					halfb->SetValue(true); //to-do: change to tool.demosaic.default value 
 				}
 			}
@@ -229,7 +229,7 @@ colorb->Enable(true);
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -277,15 +277,15 @@ colorb->Enable(true);
 										}
 					else if (p[0] == "xtran_fast") 		{ xtran_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
 #endif
-					else wxMessageBox(wxString::Format("%s is not a valid demosaic algorithm.",p[0].mb_str()));
+					else wxMessageBox(wxString::Format(_("%s is not a valid demosaic algorithm."),p[0].mb_str()));
 
 				}
 
 
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 
@@ -412,7 +412,7 @@ ImageType PicProcessorDemosaic::getImageType()
 
 bool PicProcessorDemosaic::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("demosaic...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("demosaic..."));
 	bool result = false;
 
 	LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
@@ -496,7 +496,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 		}
 #endif
 		else {
-			wxMessageBox(wxString::Format("Unknown demosaic algorithm: %s",p[0].c_str()));
+			wxMessageBox(wxString::Format(_("Unknown demosaic algorithm: %s"),p[0].c_str()));
 			result = false;
 		}
 
@@ -507,17 +507,17 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 
 			//parm tool.demosaic.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=0
 			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
-				((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("Normalizing image orientation..."));
+				((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
 				dib->NormalizeRotation(threadcount);
 			}
 
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
-				log(wxString::Format("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+				log(wxString::Format(_("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 
 			dirty = false;
 
 		}
-		else wxMessageBox(wxString::Format("Demosaic algorithm %s didn't work on this image.",p[0].c_str()));
+		else wxMessageBox(wxString::Format(_("Demosaic algorithm %s didn't work on this image."),p[0].c_str()));
 	}
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

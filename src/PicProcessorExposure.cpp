@@ -28,22 +28,22 @@ class ExposurePanel: public PicProcPanel
 
 			patx = 0; paty=0;
 
-			enablebox = new wxCheckBox(this, EXPOSUREENABLE, "exposure:");
+			enablebox = new wxCheckBox(this, EXPOSUREENABLE, _("exposure:"));
 			enablebox->SetValue(true);
 
-			evb = new wxRadioButton(this, EXPOSUREEV, "compensation", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			evtgtb = new wxRadioButton(this, EXPOSURETARGETEV, "target patch");
+			evb = new wxRadioButton(this, EXPOSUREEV, _("compensation"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			evtgtb = new wxRadioButton(this, EXPOSURETARGETEV, _("target patch"));
 
 			ev = new wxSlider(this, wxID_ANY, 0, 0, 100, wxPoint(10, 30), wxSize(140, -1));
 			val = new wxStaticText(this,wxID_ANY, "0.0", wxDefaultPosition, wxSize(30, -1));
 			btn = new wxBitmapButton(this, EXPOSUREUNDO, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn->SetToolTip("Reset to default");
+			btn->SetToolTip(_("Reset to default"));
 			
-			patch  = new wxStaticText(this, wxID_ANY, " patch xy: -- ");
-			radius = new myFloatCtrl(this, wxID_ANY, " radius: ", 1.5, 1, wxDefaultPosition, wxSize(40, -1));
+			patch  = new wxStaticText(this, wxID_ANY, _(" patch xy: -- "));
+			radius = new myFloatCtrl(this, wxID_ANY, _(" radius: "), 1.5, 1, wxDefaultPosition, wxSize(40, -1));
 			radius->SetIncrement(1.0);
-			ev0    = new myFloatCtrl(this, wxID_ANY, " ev0: ", 0.18, 2, wxDefaultPosition, wxSize(40, -1));
-			stops  = new wxStaticText(this, wxID_ANY, "stops: --");
+			ev0    = new myFloatCtrl(this, wxID_ANY, _(" ev0: "), 0.18, 2, wxDefaultPosition, wxSize(40, -1));
+			stops  = new wxStaticText(this, wxID_ANY, _("stops: --"));
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "ev");
 
@@ -60,7 +60,7 @@ class ExposurePanel: public PicProcPanel
 				std::vector<std::string> patstr = split(p["patch"],",");
 				patx = atoi(patstr[0].c_str());
 				paty = atoi(patstr[1].c_str());
-				patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+				patch->SetLabel(wxString::Format(_(" patch xy: %d,%d"),patx, paty));
 				radius->SetFloatValue(atof(p["radius"].c_str()));
 				ev0->SetFloatValue(atof(p["ev0"].c_str()));
 			}
@@ -128,7 +128,7 @@ class ExposurePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -149,15 +149,15 @@ class ExposurePanel: public PicProcPanel
 					std::vector<std::string> patstr = split(p["patch"],",");
 					patx = atoi(patstr[0].c_str());
 					paty = atoi(patstr[1].c_str());
-					patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+					patch->SetLabel(wxString::Format(_(" patch xy: %d,%d"),patx, paty));
 					radius->SetFloatValue(atof(p["radius"].c_str()));
 					ev0->SetFloatValue(atof(p["ev0"].c_str()));
 				}
 
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(_("Invalid Paste"));
 		}
 
 
@@ -202,7 +202,7 @@ class ExposurePanel: public PicProcPanel
 			if (event.GetId() == EXPOSURETARGETEV) {
 				if (patx == 0) {
 					evb->SetValue(true);
-					wxMessageBox("Select a patch first...");
+					wxMessageBox(_("Select a patch first..."));
 					return;
 				}
 			}
@@ -235,7 +235,7 @@ class ExposurePanel: public PicProcPanel
 
 			patx = p.x;
 			paty = p.y;
-			patch->SetLabel(wxString::Format(" patch xy: %d,%d",patx, paty));
+			patch->SetLabel(wxString::Format(_(" patch xy: %d,%d"),patx, paty));
 			GetSizer()->Layout();
 
 			if (expmode == EXPOSURETARGETEV) processEV();
@@ -245,7 +245,7 @@ class ExposurePanel: public PicProcPanel
 		void setStops(float s)
 		{
 			if (stops) {
-				stops->SetLabel(wxString::Format("stops: %0.1f",s));
+				stops->SetLabel(wxString::Format(_("stops: %0.1f"),s));
 				GetSizer()->Layout();
 			}
 		}
@@ -351,7 +351,7 @@ bool PicProcessorExposure::processPicture(gImage *processdib)
 
 
 	
-	((wxFrame*) m_display->GetParent())->SetStatusText("exposure...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("exposure..."));
 	bool result = true;
 	
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
@@ -367,14 +367,14 @@ bool PicProcessorExposure::processPicture(gImage *processdib)
 
 		mark();
 		if (expv) {
-			m_tree->SetItemText(id, "exposure:ev");
+			m_tree->SetItemText(id, _("exposure:ev"));
 			if (ev != 0.0) {
 				dib->ApplyExposureCompensation(ev, threadcount);
 				m_display->SetModified(true);
 			}
 		}
 		else {
-			m_tree->SetItemText(id, "exposure:patch");
+			m_tree->SetItemText(id, _("exposure:patch"));
 			float stops = dib->ApplyExposureCompensation(x, y, radius, ev, threadcount);
 			m_display->SetModified(true);
 			((ExposurePanel *) toolpanel)->setStops(stops);
@@ -382,7 +382,7 @@ bool PicProcessorExposure::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.exposure.log","0") == "1"))
-			log(wxString::Format("tool=exposure_compensation,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=exposure_compensation,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

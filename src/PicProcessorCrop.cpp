@@ -355,7 +355,7 @@ class CropPanel: public PicProcPanel
 			}
 
 
-			enablebox = new wxCheckBox(this, CROPENABLE, "crop:");
+			enablebox = new wxCheckBox(this, CROPENABLE, _("crop:"));
 			enablebox->SetValue(true);
 			cpane = new CropPane(this, wxID_ANY, img, params);
 			
@@ -400,7 +400,7 @@ class CropPanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -409,9 +409,9 @@ class CropPanel: public PicProcPanel
 			if (q->pasteParamsFromClipboard()) {
 				cpane->setParams(q->getParams());
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 		
@@ -656,7 +656,7 @@ bool PicProcessorCrop::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))
-			log(wxString::Format("tool=crop,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=crop,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

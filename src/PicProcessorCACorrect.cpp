@@ -20,7 +20,7 @@ class CACorrectPanel: public PicProcPanel
 
 			int initialvalue = atoi(params.c_str());
 
-			enablebox = new wxCheckBox(this, CACORRECTENENABLE, "cacorrect:");
+			enablebox = new wxCheckBox(this, CACORRECTENENABLE, _("cacorrect:"));
 			enablebox->SetValue(true);
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
@@ -122,7 +122,7 @@ bool PicProcessorCACorrect::processPicture(gImage *processdib)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("cacorrect..."));
+	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("cacorrect...")));
 
 	dib = processdib;
 	if (!global_processing_enabled) return true;
@@ -134,7 +134,7 @@ bool PicProcessorCACorrect::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.cacorrect.log","0") == "1"))
-			log(wxString::Format("tool=cacorrect,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=cacorrect,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
 

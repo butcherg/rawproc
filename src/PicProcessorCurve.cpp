@@ -31,7 +31,7 @@ class CurvePanel: public PicProcPanel
 			str.Add("tone"); 
 			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 
-			enablebox = new wxCheckBox(this, CURVEENABLE, "curve:");
+			enablebox = new wxCheckBox(this, CURVEENABLE, _("curve:"));
 			enablebox->SetValue(true);
 			curve = new CurvePane(this, params);
 
@@ -87,7 +87,7 @@ class CurvePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -133,9 +133,9 @@ class CurvePanel: public PicProcPanel
 				}
 */
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 
@@ -233,7 +233,7 @@ void PicProcessorCurve::setParams(std::vector<cp> ctpts, wxString params)
 
 bool PicProcessorCurve::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("curve...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("curve..."));
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
@@ -259,7 +259,7 @@ bool PicProcessorCurve::processPicture(gImage *processdib)
 				toolpanel->setRateAdapt(true);
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.curve.log","0") == "1"))
-			log(wxString::Format("tool=curve,imagesize=%dx%d,threads=%d,time=%0.3f",dib->getWidth(), dib->getHeight(), threadcount, d));
+			log(wxString::Format(_("tool=curve,imagesize=%dx%d,threads=%d,time=%0.3f"),dib->getWidth(), dib->getHeight(), threadcount, d));
 	}
 
 	dirty = false;

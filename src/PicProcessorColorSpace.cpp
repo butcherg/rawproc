@@ -33,11 +33,11 @@ class ColorspacePanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
 
-			enablebox = new wxCheckBox(this, COLORENABLE, "colorspace:");
+			enablebox = new wxCheckBox(this, COLORENABLE, _("colorspace:"));
 			enablebox->SetValue(true);
 
-			profileb = new wxRadioButton(this, COLORPROFILE, "profile file:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			camb = new wxRadioButton(this, COLORCAMERA, "assign camera profile:");
+			profileb = new wxRadioButton(this, COLORPROFILE, _("profile file:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			camb = new wxRadioButton(this, COLORCAMERA, _("assign camera profile:"));
 			
 			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(-1,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 
@@ -45,7 +45,7 @@ class ColorspacePanel: public PicProcPanel
 			opers.Add("convert");
 			opers.Add("assign");
 
-			operselect = new wxRadioBox (this, COLOROP, "Operation", wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
+			operselect = new wxRadioBox (this, COLOROP, _("operation"), wxDefaultPosition, wxDefaultSize,  opers, 1, wxRA_SPECIFY_COLS);
 			if (parms[1] != "-") operselect->SetSelection(operselect->FindString(parms[1]));
 			
 			wxArrayString intents;
@@ -54,12 +54,12 @@ class ColorspacePanel: public PicProcPanel
 			intents.Add("relative_colorimetric");
 			intents.Add("absolute_colorimetric");
 			
-			intentselect = new wxRadioBox (this, COLORINTENT, "Rendering Intent", wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
+			intentselect = new wxRadioBox (this, COLORINTENT, _("rendering Intent"), wxDefaultPosition, wxDefaultSize,  intents, 1, wxRA_SPECIFY_COLS);
 			intentselect->SetSelection(intentselect->FindString("relative_colorimetric"));  //default
 			if (parms[2] != "-") intentselect->SetSelection(intentselect->FindString(parms[2]));
 			if (parms[1] == "assign") intentselect->Enable(false);
 			
-			bpc = new wxCheckBox(this, COLORBPC, "black point compensation");
+			bpc = new wxCheckBox(this, COLORBPC, _("black point compensation"));
 			//bpc->SetValue(bpc);
 
 			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
@@ -71,7 +71,7 @@ class ColorspacePanel: public PicProcPanel
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
 			primarysource = new wxStaticText(this,wxID_ANY, "");
 			camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			camdatstatus->SetToolTip("Open a dialog to review the sources found and loaded for camera data");
+			camdatstatus->SetToolTip(_("Open a dialog to review the sources found and loaded for camera data"));
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "profile,op,intent,bpc");
 
@@ -161,7 +161,7 @@ class ColorspacePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -189,9 +189,9 @@ class ColorspacePanel: public PicProcPanel
 				}
 
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 
@@ -239,7 +239,7 @@ class ColorspacePanel: public PicProcPanel
 		void setSource(wxString primary_source)
 		{
 			if (!primary_source.IsEmpty())
-				primarysource->SetLabel(wxString::Format("Source: %s",primary_source));
+				primarysource->SetLabel(wxString::Format(_("Source: %s"),primary_source));
 			else
 				primarysource->SetLabel("");
 			primarysource->Refresh();
@@ -275,7 +275,7 @@ class ColorspacePanel: public PicProcPanel
 #ifdef WIN32
 			pname.SetVolume(pname.GetVolume().MakeUpper());
 #endif
-			fname.Assign(wxFileSelector("Select profile", pname.GetPath()));
+			fname.Assign(wxFileSelector(_("Select profile"), pname.GetPath()));
 			
 			wxString operstr = operselect->GetString(operselect->GetSelection());
 			wxString intentstr = intentselect->GetString(intentselect->GetSelection());
@@ -313,7 +313,7 @@ class ColorspacePanel: public PicProcPanel
 		void camstatusDialog(wxCommandEvent& event)
 		{
 			if (camdat_status != "") {
-				myEXIFDialog dlg(this, wxID_ANY, "Camera Data Status", camdat_status,  wxDefaultPosition, wxSize(500,250));
+				myEXIFDialog dlg(this, wxID_ANY, _("Camera Data Status"), camdat_status,  wxDefaultPosition, wxSize(500,250));
 				dlg.ShowModal();
 			}
 		}
@@ -384,7 +384,7 @@ wxString PicProcessorColorSpace::getOpenFilePath()
 
 bool PicProcessorColorSpace::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("colorspace...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("colorspace..."));
 	bool result = true;
 	GIMAGE_ERROR ret;
 	
@@ -446,25 +446,25 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 				switch (ret) {
 					case GIMAGE_OK:
 						result = true;
-						m_tree->SetItemText(id, wxString::Format("colorspace:profile,convert"));
+						m_tree->SetItemText(id, wxString::Format(_("colorspace:profile,convert")));
 						m_display->SetModified(true);
 						break;
 					case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
-						wxMessageBox("ColorSpace apply: no input profile in image.");
+						wxMessageBox(_("ColorSpace apply: no input profile in image."));
 						result = false;
 						break;
 					case GIMAGE_APPLYCOLORSPACE_BADINTENT:
-						wxMessageBox("ColorSpace apply: input/output profile doesn't support rendering intent.");
+						wxMessageBox(_("ColorSpace apply: input/output profile doesn't support rendering intent."));
 						result = false;
 						break;
 /*
 					case 3:
-					wxMessageBox("ColorSpace apply: output profile doesn't support rendering intent.");
+					wxMessageBox(_("ColorSpace apply: output profile doesn't support rendering intent."));
 						result = false;
 						break;
 */
 					case GIMAGE_APPLYCOLORSPACE_BADTRANSFORM:
-						wxMessageBox("ColorSpace apply: colorspace transform creation failed.");
+						wxMessageBox(_("ColorSpace apply: colorspace transform creation failed."));
 						result = false;
 						break;
 					default:
@@ -474,19 +474,19 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 
 				if (result)
 					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-							log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+							log(wxString::Format(_("tool=colorspace_convert,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 			}
 			else if (cp[1] == "assign") {
 				if (dib->AssignColorspace(std::string(fname.GetFullPath().c_str())) != GIMAGE_OK) {
-					wxMessageBox("ColorSpace assign failed.");
+					wxMessageBox(_("ColorSpace assign failed."));
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:profile,assign"));
+				else m_tree->SetItemText(id, wxString::Format(_("colorspace:profile,assign")));
 				wxString d = duration();
 
 				if (result) 
 					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-						log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+						log(wxString::Format(_("tool=colorspace_assign,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
 			}
 	
 		}
@@ -535,67 +535,67 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 				((ColorspacePanel *) toolpanel)->setSource(primary_source);
 				if (cp[1] == "convert") {
 					if (dib->ApplyColorspace(cam,intent, bpc, threadcount) != GIMAGE_OK) {
-						wxMessageBox("ColorSpace convert failed.");
+						wxMessageBox(_("ColorSpace convert failed."));
 						result = false;
 					}
 					else {
-						m_tree->SetItemText(id, wxString::Format("colorspace:camera,convert"));
+						m_tree->SetItemText(id, wxString::Format(_("colorspace:camera,convert")));
 						m_display->SetModified(true);
 					}
 					wxString d = duration();
 
 					if (result) 
 						if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-							log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+							log(wxString::Format(_("tool=colorspace_convert,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
 				}
 				else if (cp[1] == "assign") {
 					if (dib->AssignColorspace(cam) != GIMAGE_OK) {
-						wxMessageBox("ColorSpace assign failed.");
+						wxMessageBox(_("ColorSpace assign failed."));
 						result = false;
 					}
-					else m_tree->SetItemText(id, wxString::Format("colorspace:camera,assign"));
+					else m_tree->SetItemText(id, wxString::Format(_("colorspace:camera,assign")));
 					wxString d = duration();
 
 					if (result) 
 						if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-							log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+							log(wxString::Format(_("tool=colorspace_assign,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
 				}
 			}
 			else {
 				((ColorspacePanel *) toolpanel)->setMode(COLORPROFILE);
-				wxMessageBox(wxString::Format("primaries not found for -%s-",wxString(makemodel)));
+				wxMessageBox(wxString::Format(_("primaries not found for -%s-"),wxString(makemodel)));
 			}
 		}
 
 		else if (cp[0].Freq(',') == 8 ) { //comma-separated adobe_coeff string (e.g., e.g., D7000: 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181), make a D65 profile from it
 			if (cp[1] == "convert") {
 				if (dib->ApplyColorspace(cp[0].ToStdString(),intent, bpc, threadcount) != GIMAGE_OK) {
-					wxMessageBox("ColorSpace convert failed.");
+					wxMessageBox(_("ColorSpace convert failed."));
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:dcraw,convert"));
+				else m_tree->SetItemText(id, wxString::Format(_("colorspace:dcraw,convert")));
 				wxString d = duration();
 
 				if (result) 
 					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-						log(wxString::Format("tool=colorspace_convert,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+						log(wxString::Format(_("tool=colorspace_convert,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
 			}
 			else if (cp[1] == "assign") {
 				if (dib->AssignColorspace(cp[0].ToStdString()) != GIMAGE_OK) {
-					wxMessageBox("ColorSpace assign failed.");
+					wxMessageBox(_("ColorSpace assign failed."));
 					result = false;
 				}
-				else m_tree->SetItemText(id, wxString::Format("colorspace:dcraw,assign"));
+				else m_tree->SetItemText(id, wxString::Format(_("colorspace:dcraw,assign")));
 				wxString d = duration();
 
 				if (result) 
 					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
-						log(wxString::Format("tool=colorspace_assign,imagesize=%dx%d,time=%s",dib->getWidth(), dib->getHeight(),d));
+						log(wxString::Format(_("tool=colorspace_assign,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
 			}
 		}
 
 		else if (cp[0] != "(none)") {
-			wxMessageBox(wxString::Format("profile %s not found.",fname.GetFullName().c_str()));
+			wxMessageBox(wxString::Format(_("profile %s not found."),fname.GetFullName().c_str()));
 		}
 	}  //processingenabled
 	

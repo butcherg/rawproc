@@ -20,12 +20,12 @@ class SubtractPanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
-			enablebox = new wxCheckBox(this, SUBTRACTENABLE, "subtract:");
+			enablebox = new wxCheckBox(this, SUBTRACTENABLE, _("subtract:"));
 			enablebox->SetValue(true);
 
-			subb = new wxRadioButton(this, SUBTRACTVAL, "value:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP); 
-			fileb = new wxRadioButton(this, SUBTRACTFILE, "file:");
-			camb = new wxRadioButton(this, SUBTRACTCAMERA, "camera:");
+			subb = new wxRadioButton(this, SUBTRACTVAL, _("value:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP); 
+			fileb = new wxRadioButton(this, SUBTRACTFILE, _("file:"));
+			camb = new wxRadioButton(this, SUBTRACTCAMERA, _("camera:"));
 
 			subtract = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
@@ -73,7 +73,7 @@ class SubtractPanel: public PicProcPanel
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(darkfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
-			m->AddRowItem(new wxButton(this, wxID_ANY, "Select"), flags);
+			m->AddRowItem(new wxButton(this, wxID_ANY, _("Select")), flags);
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -124,7 +124,7 @@ class SubtractPanel: public PicProcPanel
 		void selectDarkFile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			fname.Assign(wxFileSelector("Select dark file"));
+			fname.Assign(wxFileSelector(_("Select dark file")));
 			darkfile->SetValue(fname.GetFullName());
 			if (submode == SUBTRACTFILE) processSUB();
 		}
@@ -207,19 +207,19 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 	wxFileName fname;
 	//gImage darkfile;
 
-	((wxFrame*) m_display->GetParent())->SetStatusText("subtract...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("subtract..."));
 
 	std::map<std::string,std::string> p = paramMap(c.ToStdString(), "value,filename");
 
 	if (p["value"] == "camera") {
-		m_tree->SetItemText(id, "subtract:camera");
+		m_tree->SetItemText(id, _("subtract:camera"));
 		subtract = atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0;
 	}
 	else if (p["value"] == "file") {
-		m_tree->SetItemText(id, "subtract:file");
+		m_tree->SetItemText(id, _("subtract:file"));
 	}
 	else {
-		m_tree->SetItemText(id, "subtract:val");
+		m_tree->SetItemText(id, _("subtract:val"));
 		subtract = atof(p["value"].c_str());
 	}
 
@@ -247,12 +247,12 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 					result = true;
 				}
 				else {
-					wxMessageBox("dark image subtraction not successful.");
+					wxMessageBox(_("dark image subtraction not successful."));
 					result = false;
 				}
 			}
 			else {
-				wxMessageBox("dark image file not found.");
+				wxMessageBox(_("dark image file not found."));
 				result = false;
 			}
 		}
@@ -266,7 +266,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 
 		if (result) 
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.subtract.log","0") == "1"))
-				log(wxString::Format("tool=subtract,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+				log(wxString::Format(_("tool=subtract,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

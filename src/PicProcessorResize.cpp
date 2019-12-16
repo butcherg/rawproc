@@ -29,20 +29,20 @@ class ResizePanel: public PicProcPanel
 			algos.Add("lanczos3");
 			wxArrayString p = split(params,",");
 
-			enablebox = new wxCheckBox(this, RESIZEENABLE, "resize:");
+			enablebox = new wxCheckBox(this, RESIZEENABLE, _("resize:"));
 			enablebox->SetValue(true);
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,2), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			widthedit = new myIntegerCtrl(this, wxID_ANY, "width:", atoi(p[0].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
-			widthedit->SetToolTip("width in pixels, 0 preserves aspect.\nIf you use the spin arrows, type Enter to update the image.");
+			widthedit = new myIntegerCtrl(this, wxID_ANY, _("width:"), atoi(p[0].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
+			widthedit->SetToolTip(_("width in pixels, 0 preserves aspect.\nIf you type a number, type Enter to update the image."));
 			g->Add(widthedit, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
-			heightedit = new myIntegerCtrl(this, wxID_ANY, "height:", atoi(p[1].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
-			heightedit->SetToolTip("height in pixels, 0 preserves aspect. \nIf you use the spin arrows, type Enter to update the image.");
+			heightedit = new myIntegerCtrl(this, wxID_ANY, _("height:"), atoi(p[1].c_str()), 0, 100000, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
+			heightedit->SetToolTip(_("height in pixels, 0 preserves aspect. \nIf you type a number, type Enter to update the image."));
 			g->Add(heightedit, wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);		
 
-			algoselect = new wxRadioBox (this, wxID_ANY, "Resize Algorithm", wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
+			algoselect = new wxRadioBox (this, wxID_ANY, _("Resize Algorithm"), wxDefaultPosition, wxDefaultSize,  algos, 1, wxRA_SPECIFY_COLS);
 			algoselect->SetSelection(algoselect->FindString(wxString(myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","lanczos3"))));
 			if (p.size() >=3) {
 				for (int i=0; i<algos.size(); i++) {
@@ -53,11 +53,11 @@ class ResizePanel: public PicProcPanel
 
 #ifdef PREBLUR
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(5,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
-			blurbox = new wxCheckBox(this, BLURENABLE, "enable pre-blur:");
+			blurbox = new wxCheckBox(this, BLURENABLE, _("enable pre-blur:"));
 			blurbox->SetValue(false);
 			g->Add(blurbox, wxGBPosition(6,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 3);
 			blursigma = new myFloatCtrl(this, BLURSIGMA, 1.0, 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
-			g->Add(new wxStaticText(this,wxID_ANY, "sigma:"), wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(new wxStaticText(this,wxID_ANY, _("sigma:")), wxGBPosition(7,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			g->Add(blursigma, wxGBPosition(7,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			//blurkernel= ...
 #endif
@@ -183,7 +183,7 @@ bool PicProcessorResize::processPicture(gImage *processdib)
 	bool blur = false;
 	float sigma = 1.0;
 	unsigned kernelsize = 3;
-	((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("resize..."));
 	wxArrayString cp = split(getParams(),",");
 	int width =  atoi(cp[0]);
 	int height =  atoi(cp[1]);
@@ -222,9 +222,9 @@ bool PicProcessorResize::processPicture(gImage *processdib)
 		mark();
 #ifdef PREBLUR
 		if (blur) {
-			((wxFrame*) m_display->GetParent())->SetStatusText("resize... with pre-blur...");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("resize, with pre-blur..."));
 			dib->ApplyGaussianBlur(sigma, kernelsize, threadcount);
-			((wxFrame*) m_display->GetParent())->SetStatusText("resize...");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("resize..."));
 		}
 #endif
 		dib->ApplyResize(width, height, filter, threadcount);
@@ -232,7 +232,7 @@ bool PicProcessorResize::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
-			log(wxString::Format("tool=resize,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=resize,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

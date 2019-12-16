@@ -19,7 +19,7 @@ class GroupPanel: public PicProcPanel
 		{
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
-			enablebox = new wxCheckBox(this, GROUPENABLE, "group:");
+			enablebox = new wxCheckBox(this, GROUPENABLE, _("group:"));
 			enablebox->SetValue(true);
 
 			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
@@ -36,8 +36,8 @@ class GroupPanel: public PicProcPanel
 
 			m->NextRow();
 
-			m->AddRowItem(new wxButton(this, GROUPFILESELECT, "Select File"), flags);
-			m->AddRowItem(new wxButton(this, GROUPUPDATE, "Update Group"), flags);
+			m->AddRowItem(new wxButton(this, GROUPFILESELECT, _("Select File")), flags);
+			m->AddRowItem(new wxButton(this, GROUPUPDATE, _("Update Group")), flags);
 			m->NextRow();
 			m->AddRowItem(edit, flags);
 			m->End();
@@ -96,7 +96,7 @@ class GroupPanel: public PicProcPanel
 			wxFileName toollistpath;
 			toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
 
-			wxString fname = wxFileSelector("Open Tool List...", toollistpath.GetPath());
+			wxString fname = wxFileSelector(_("Open Tool List..."), toollistpath.GetPath());
 			if (fname == "") return;
 			wxFileName filepath(fname);
 
@@ -128,7 +128,7 @@ class GroupPanel: public PicProcPanel
 				((PicProcessorGroup *) q)->setSource(filepath.GetFullName());
 				q->processPic();
 			}
-			else wxMessageBox("Error: tool file not found.");
+			else wxMessageBox(_("Error: tool file not found."));
 		}
 
 
@@ -203,7 +203,7 @@ wxString PicProcessorGroup::getSource()
 
 bool PicProcessorGroup::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("group...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("group..."));
 
 	bool result = true;
 	wxArrayString p = split(wxString(c),";");
@@ -220,14 +220,14 @@ bool PicProcessorGroup::processPicture(gImage *processdib)
 	if (processingenabled) {
 		mark();
 		for (int i=0; i<p.size(); i++) {
-			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("group command: %s",p[i]));
+			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("group command: %s"),p[i]));
 			do_cmd(*dib, p[i].ToStdString(), "", false);
 		}
 		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.group.log","0") == "1"))
-			log(wxString::Format("tool=group,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=group,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

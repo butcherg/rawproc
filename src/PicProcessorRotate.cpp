@@ -31,7 +31,7 @@ class rotateSlider: public wxControl
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.1f",initialvalue/10.0), wxDefaultPosition, wxSize(30, -1));
 			s->Add(val, 0, wxALIGN_LEFT | wxALL, 1);
 			btn = new wxBitmapButton(this, ROTATERESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn->SetToolTip("Reset to default");
+			btn->SetToolTip(_("Reset to default"));
 			s->Add(btn, 0, wxALIGN_LEFT | wxALL, 1);
 			
 			SetSizerAndFit(s);
@@ -251,7 +251,7 @@ class RotatePanel: public PicProcPanel
 				if (tok[1] == "autocrop")
 					acrop = true;
 				
-			enablebox = new wxCheckBox(this, ROTATEENABLE, "rotate:");
+			enablebox = new wxCheckBox(this, ROTATEENABLE, _("rotate:"));
 			enablebox->SetValue(true);
 			b->Add(enablebox, 0, wxALIGN_LEFT | wxALL, 3);
 			b->Add(new wxStaticLine(this, wxID_ANY,  wxDefaultPosition, wxSize(280,2)), 0,  wxALIGN_LEFT | wxBOTTOM, 10);
@@ -259,21 +259,21 @@ class RotatePanel: public PicProcPanel
 			//preview = new RotatePreview(this,i,initialvalue, acrop);
 			//b->Add(preview , 1, wxEXPAND | wxALIGN_CENTER_VERTICAL |wxALIGN_CENTER_HORIZONTAL | wxALL, 1);  // wxSHAPED |
 			
-			r90 = new wxRadioButton(this, ROTATE90, "Rotate 90", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			r90 = new wxRadioButton(this, ROTATE90, _("Rotate 90"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			b->Add(r90 , 0, wxALIGN_LEFT | wxALL, 1);
-			r180 = new wxRadioButton(this, ROTATE180, "Rotate 180");
+			r180 = new wxRadioButton(this, ROTATE180, _("Rotate 180"));
 			b->Add(r180 , 0, wxALIGN_LEFT | wxALL, 1);
-			r270 = new wxRadioButton(this, ROTATE270, "Rotate 270");
+			r270 = new wxRadioButton(this, ROTATE270, _("Rotate 270"));
 			b->Add(r270 , 0, wxALIGN_LEFT | wxALL, 1);
 			
-			r45 = new wxRadioButton(this, ROTATE45, "Rotate < 45:");
+			r45 = new wxRadioButton(this, ROTATE45, _("Rotate < 45:"));
 			b->Add(r45 , 0, wxALIGN_LEFT | wxALL, 1);
 			
 			rotate = new rotateSlider(this, wxID_ANY, initialvalue);
 			b->Add(rotate , 0, wxALIGN_LEFT | wxALL, 1);
 			
 			
-			autocrop = new wxCheckBox(this, ROTATEAUTOCROP, "autocrop");
+			autocrop = new wxCheckBox(this, ROTATEAUTOCROP, _("autocrop"));
 			b->Add(autocrop , 0, wxALIGN_LEFT | wxALL, 1);
 			autocrop->SetValue(acrop);
 
@@ -496,7 +496,7 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 
 bool PicProcessorRotate::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("rotate...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("rotate..."));
 	bool autocrop = false;
 	
 	wxArrayString t = split(c, ",");
@@ -526,7 +526,7 @@ bool PicProcessorRotate::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
-			log(wxString::Format("tool=rotate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=rotate,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

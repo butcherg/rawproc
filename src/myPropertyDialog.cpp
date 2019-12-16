@@ -228,15 +228,15 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 			if (!PropExists(add->GetName())) {
 				pg->Append(new wxStringProperty(add->GetName(), add->GetName(), add->GetValue()));
 				pg->Sort();
-				wxMessageBox(wxString::Format("Changed %s to %s.", add->GetName(), add->GetValue()));
+				wxMessageBox(wxString::Format(_("Changed %s to %s."), add->GetName(), add->GetValue()));
 				myConfig::getConfig().setValue((const char  *) add->GetName().mb_str(),  (const char  *) add->GetValue().mb_str());
-				if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
+				if (!myConfig::getConfig().flush()) wxMessageBox(_("Write to configuration file failed."));
 			}
 			else
-				wxMessageBox("Property already exists.");
+				wxMessageBox(_("Property already exists."));
 		}
 		else
-			wxMessageBox("No name specified.");
+			wxMessageBox(_("No name specified."));
 	}
 	add->~AddDialog();
 	
@@ -248,11 +248,11 @@ void PropertyDialog::DelProp(wxCommandEvent& event)
 	wxPGProperty* p = pg->GetSelectedProperty();
 	if (p) {
 		wxString name = p->GetName();
-		int answer = wxMessageBox(wxString::Format("Delete %s?",name), "Confirm",wxYES_NO | wxCANCEL, this);
+		int answer = wxMessageBox(wxString::Format(_("Delete %s?"),name), _("Confirm"),wxYES_NO | wxCANCEL, this);
 		if (answer == wxYES) {
 			pg->DeleteProperty(p);
 			myConfig::getConfig().deleteValue((const char  *) name.mb_str());
-			if (!myConfig::getConfig().flush()) wxMessageBox("Write to configuration file failed.");
+			if (!myConfig::getConfig().flush()) wxMessageBox(_("Write to configuration file failed."));
 		}
 	}
 }

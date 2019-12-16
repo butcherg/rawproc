@@ -50,21 +50,21 @@ class WhiteBalancePanel: public PicProcPanel
 			//parm tool.whitebalance.increment: (float), maximum multiplier value.  Default=0.001
 			double increment = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.increment","0.001").c_str());
 
-			enablebox = new wxCheckBox(this, WBENABLE, "white balance:");
+			enablebox = new wxCheckBox(this, WBENABLE, _("white balance:"));
 			enablebox->SetValue(true);
 
 			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			gmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			btn = new wxBitmapButton(this, WBRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-			btn->SetToolTip("Reset multipliers to original values");
+			btn->SetToolTip(_("Reset multipliers to original values"));
 
 
 			//Operator radio buttons:
-			ob = new wxRadioButton(this, WBORIGINAL, "Multipliers:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			ab = new wxRadioButton(this, WBAUTO, "Auto");
-			pb = new wxRadioButton(this, WBPATCH, "Patch:");
-			cb = new wxRadioButton(this, WBCAMERA, "Camera:");
+			ob = new wxRadioButton(this, WBORIGINAL, _("Multipliers:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			ab = new wxRadioButton(this, WBAUTO, _("Auto"));
+			pb = new wxRadioButton(this, WBPATCH, _("Patch:"));
+			cb = new wxRadioButton(this, WBCAMERA, _("Camera:"));
 
 			ab->SetValue(false);
 			ob->Enable(false);
@@ -89,15 +89,15 @@ class WhiteBalancePanel: public PicProcPanel
 
 			//multipliers:
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "red mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("red mult:"), wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(rmult, flags);
 
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "green mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("green mult:"), wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(gmult, flags);
 
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "blue mult:", wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("blue mult:"), wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(bmult, flags);
 			m->AddRowItem(btn, flags);
 
@@ -183,7 +183,7 @@ class WhiteBalancePanel: public PicProcPanel
 			}
 
 			else 
-				wxMessageBox("Error: ill-formed param string");
+				wxMessageBox(_("Error: ill-formed param string"));
 
 
 			SetFocus();
@@ -230,7 +230,7 @@ class WhiteBalancePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -262,9 +262,9 @@ class WhiteBalancePanel: public PicProcPanel
 				
 				}
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 
@@ -448,7 +448,7 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
 	std::vector<double> wbmults;
 	float patchx, patchy; double patchrad;
-	((wxFrame*) m_display->GetParent())->SetStatusText("white balance...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("white balance..."));
 	
 	optypes optype = automatic; 
 	wxArrayString p = split(c, ",");
@@ -516,47 +516,47 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 				if (optype == multipliers) {
 					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					m_display->SetModified(true);
-					m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
+					m_tree->SetItemText(id, wxString::Format(_("whitebalance:multipliers")));
 				}
 				else if (optype == camera) {
 					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					m_display->SetModified(true);
-					m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
+					m_tree->SetItemText(id, wxString::Format(_("whitebalance:camera")));
 				}
 				else {
-					wxMessageBox("Error: auto or patch cannot be used prior to demosaic");
+					wxMessageBox(_("Error: auto or patch cannot be used prior to demosaic"));
 					((WhiteBalancePanel *) toolpanel)->clearSelectors();
 					wbmults = {1.0,1.0,1.0};
-					m_tree->SetItemText(id, wxString::Format("whitebalance:invalid"));
+					m_tree->SetItemText(id, wxString::Format(_("whitebalance:invalid")));
 				}
 			}
 			else {
-				wxMessageBox("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)");
+				wxMessageBox(_("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)"));
 				((WhiteBalancePanel *) toolpanel)->clearSelectors();
 				wbmults = {1.0,1.0,1.0};
-				m_tree->SetItemText(id, wxString::Format("whitebalance:invalid"));
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:invalid")));
 			}
 		}
 		else {
 			if (optype == multipliers) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 				m_display->SetModified(true);
-				m_tree->SetItemText(id, wxString::Format("whitebalance:multipliers"));
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:multipliers")));
 			} 
 			else if (optype == camera) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 				m_display->SetModified(true);
-				m_tree->SetItemText(id, wxString::Format("whitebalance:camera"));
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:camera")));
 			}
 			else if (optype == imgpatch) {
 				wbmults = dib->ApplyPatchWhiteBalance(patchx, patchy, patchrad, threadcount);
 				m_display->SetModified(true);
-				m_tree->SetItemText(id, wxString::Format("whitebalance:patch"));
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:patch")));
 			}
 			else if (optype == automatic) {
 				wbmults = dib->ApplyWhiteBalance(threadcount);
 				m_display->SetModified(true);
-				m_tree->SetItemText(id, wxString::Format("whitebalance:auto"));
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:auto")));
 			}
 		}
 
@@ -565,7 +565,7 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.whitebalance.log","0") == "1"))
-			log(wxString::Format("tool=whitebalance,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=whitebalance,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

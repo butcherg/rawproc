@@ -18,7 +18,7 @@ class SaturationPanel: public PicProcPanel
 
 			double initialvalue = atof(params.c_str());
 
-			enablebox = new wxCheckBox(this, SATURATIONENABLE, "saturation:");
+			enablebox = new wxCheckBox(this, SATURATIONENABLE, _("saturation:"));
 			enablebox->SetValue(true);
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
@@ -28,7 +28,7 @@ class SaturationPanel: public PicProcPanel
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
 			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn->SetToolTip("Reset to default");
+			btn->SetToolTip(_("Reset to default"));
 			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
@@ -110,7 +110,7 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 
 bool PicProcessorSaturation::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("saturation...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("saturation..."));
 	double saturation = atof(c.c_str());
 	bool result = true;
 	
@@ -130,7 +130,7 @@ bool PicProcessorSaturation::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.saturate.log","0") == "1"))
-			log(wxString::Format("tool=saturate,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=saturate,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
 	

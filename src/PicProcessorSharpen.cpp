@@ -21,12 +21,12 @@ class SharpenPanel: public PicProcPanel
 
 			int initialvalue = atoi(params.c_str());
 
-			enablebox = new wxCheckBox(this, SHARPENENABLE, "sharpen:");
+			enablebox = new wxCheckBox(this, SHARPENENABLE, _("sharpen:"));
 			enablebox->SetValue(true);
 
 			sharpval = new myFloatCtrl(this, wxID_ANY, 0.0, 1, wxDefaultPosition,wxDefaultSize);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			btn->SetToolTip("Reset to default");
+			btn->SetToolTip(_("Reset to default"));
 			for (int r=0; r<3; r++)
 				for (int c=0; c<3; c++)
 					kernel[r][c] = new wxStaticText(this, wxID_ANY, "0.00", wxDefaultPosition, wxSize(30,-1),wxALIGN_RIGHT);
@@ -41,7 +41,7 @@ class SharpenPanel: public PicProcPanel
 			m->AddRowItem(btn, flags);
 			
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, "Kernel:"), flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("Kernel:")), flags);
 			m->NextRow();
 			m->AddRowItem(kernel[0][0], flags);
 			m->AddRowItem(kernel[0][1], flags);
@@ -176,7 +176,7 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 	else if (threadcount < 0) 
 		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format("sharpen..."));
+	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("sharpen...")));
 
 
 	dib = processdib;
@@ -189,7 +189,7 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
-			log(wxString::Format("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=sharpen,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 
 	}
 

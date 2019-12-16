@@ -58,17 +58,17 @@ class TonePanel: public PicProcPanel
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
 
-			enablebox = new wxCheckBox(this, TONEENABLE, "tone:");
+			enablebox = new wxCheckBox(this, TONEENABLE, _("tone:"));
 			enablebox->SetValue(true);
 
 			//All the radio buttons in the same group:
-			gamb = new wxRadioButton(this, TONEGAMMA, "gamma", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			reinb = new wxRadioButton(this, TONEREINHARD, "reinhard");
+			gamb = new wxRadioButton(this, TONEGAMMA, _("gamma"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			reinb = new wxRadioButton(this, TONEREINHARD, _("reinhard"));
 			//log2b = new wxRadioButton(this, TONELOG2, "log2");
-			hybloggamb = new wxRadioButton(this, TONELOGGAM, "loggamma");
-			filmicb = new wxRadioButton(this, TONEFILMIC, "filmic");
+			hybloggamb = new wxRadioButton(this, TONELOGGAM, _("loggamma"));
+			filmicb = new wxRadioButton(this, TONEFILMIC, _("filmic"));
 
-			tonenorm = new wxCheckBox(this, TONENORM, "norm:");
+			tonenorm = new wxCheckBox(this, TONENORM, _("norm:"));
 			tonenorm->SetValue(false);
 
 			tcpane = new myToneCurvePane(this, wxDefaultPosition, wxSize(130,130));
@@ -147,7 +147,7 @@ class TonePanel: public PicProcPanel
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, "tone curve:"), flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("tone curve:")), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "  "), wxSizerFlags(1).Left());
 			m->AddRowItem(tcpane, wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP));
@@ -241,7 +241,7 @@ class TonePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -251,9 +251,9 @@ class TonePanel: public PicProcPanel
 				wxArrayString p = split(q->getParams(),",");
 				setPanel(p);
 				processTone(event.GetId());
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 		void reinopChanged(wxCommandEvent& event)
@@ -409,8 +409,8 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 
 	if (processingenabled) {
 		if (p[0] == "gamma") {
-			((wxFrame*) m_display->GetParent())->SetStatusText("tone: gamma...");
-			m_tree->SetItemText(id, "tone:gamma");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: gamma..."));
+			m_tree->SetItemText(id, _("tone:gamma"));
 			double gamma = 1.0;
 			if (p.size() >= 2) gamma = atof(p[1].c_str());
 			mark();
@@ -420,8 +420,8 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 
 		}
 		else if (p[0] == "loggamma") {
-			((wxFrame*) m_display->GetParent())->SetStatusText("tone: hybrid log gamma...");
-			m_tree->SetItemText(id, "tone:loggamma");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: hybrid log gamma..."));
+			m_tree->SetItemText(id, _("tone:loggamma"));
 			mark();
 			dib->ApplyToneMapLogGamma(threadcount);
 			m_display->SetModified(true);
@@ -429,16 +429,16 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 
 		}
 		else if (p[0] == "log2") {
-			((wxFrame*) m_display->GetParent())->SetStatusText("tone: log2...");
-			m_tree->SetItemText(id, "tone:log2");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: log2..."));
+			m_tree->SetItemText(id, _("tone:log2"));
 			mark();
 			dib->ApplyToneMapLog2(threadcount);
 			m_display->SetModified(true);
 			d = duration();
 		}
 		else if (p[0] == "reinhard") {
-			((wxFrame*) m_display->GetParent())->SetStatusText("tone: reinhard...");
-			m_tree->SetItemText(id, "tone:reinhard");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: reinhard..."));
+			m_tree->SetItemText(id, _("tone:reinhard"));
 			bool channel = true;
 			if (p.size() >= 2) if (p[1] == "luminance") channel = false;
 			bool norm = false;
@@ -449,8 +449,8 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 			d = duration();
 		}
 		else if (p[0] == "filmic") {
-			((wxFrame*) m_display->GetParent())->SetStatusText("tone: filmic...");
-			m_tree->SetItemText(id, "tone:filmic");
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: filmic..."));
+			m_tree->SetItemText(id, _("tone:filmic"));
 			double filmicA = 6.2;
 			double filmicB = 0.5;
 			double filmicC = 1.7;
@@ -470,7 +470,7 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 		}
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.tone.log","0") == "1"))
-			log(wxString::Format("tool=tone:%s,imagesize=%dx%d,threads=%d,time=%s",p[0],dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=tone:%s,imagesize=%dx%d,threads=%d,time=%s"),p[0],dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty = false;

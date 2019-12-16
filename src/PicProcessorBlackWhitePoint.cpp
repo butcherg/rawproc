@@ -41,18 +41,18 @@ class BlackWhitePointPanel: public PicProcPanel
 
 			SetSize(parent->GetSize());
 			
-			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, "black/white:");
+			enablebox = new wxCheckBox(this, BLACKWHITEENABLE, _("black/white:"));
 			enablebox->SetValue(true);
 
-			slideb = new wxRadioButton(this, BLACKWHITESLIDER, "auto/slider:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			datb   = new wxRadioButton(this, BLACKWHITEDATA,   "data:");
-			camb   = new wxRadioButton(this, BLACKWHITECAMERA, "camera:");
+			slideb = new wxRadioButton(this, BLACKWHITESLIDER, _("auto/slider:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			datb   = new wxRadioButton(this, BLACKWHITEDATA,   _("data:"));
+			camb   = new wxRadioButton(this, BLACKWHITECAMERA, _("camera:"));
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255);
 			//parm tool.blackwhitepoint.floatlabel: 0|1, if 1, turns label into a fractional value of the maxvalue.  Default=0
 			if (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.floatlabel","0") == "1")
 				bwpoint->SetFloatLabel(true);
-			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, "auto recalc");
+			recalc = new wxCheckBox(this, BLACKWHITEAUTORECALC, _("auto recalc"));
 			if (recalcdefault) recalc->SetValue(true);
 
 			wxArrayString str;
@@ -77,8 +77,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			int librawwht = atoi(img.getInfoValue("LibrawMaximum").c_str());
 			double camwht = librawwht / 65536.0; 
 
-			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, "min white:");
-			datvals= new wxStaticText(this, wxID_ANY, wxString::Format("black: %f\nwhite: %f",datblk, datwht));
+			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, _("min white:"));
+			datvals= new wxStaticText(this, wxID_ANY, wxString::Format(_("black: %f\nwhite: %f"),datblk, datwht));
 			datminwht = new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht));
 
 			
@@ -150,7 +150,7 @@ class BlackWhitePointPanel: public PicProcPanel
 
 			m->NextRow();
 			m->AddRowItem(camb, flags);
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format("black: %f (%d)\nwhite: %f (%d)",camblk, librawblk, camwht,librawwht)), flags);
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format(_("black: %f (%d)\nwhite: %f (%d)"),camblk, librawblk, camwht,librawwht)), flags);
 			m->End();
 
 			SetSizerAndFit(m);
@@ -188,7 +188,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -236,9 +236,9 @@ class BlackWhitePointPanel: public PicProcPanel
 				}
 
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 		void OnRadioButton(wxCommandEvent& event)
@@ -413,7 +413,7 @@ void PicProcessorBlackWhitePoint::setChannel(wxString chan)
 	if (chan == "red")   channel = CHANNEL_RED;
 	if (chan == "green") channel = CHANNEL_GREEN;
 	if (chan == "blue")  channel = CHANNEL_BLUE;
-	m_tree->SetItemText(id, wxString::Format("blackwhitepoint:%s",chan));
+	m_tree->SetItemText(id, wxString::Format(_("blackwhitepoint:%s"),chan));
 }
 
 void PicProcessorBlackWhitePoint::reCalc()
@@ -433,7 +433,7 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 {
 	double blk, wht;
 	float maxwht, minwht; 
-	((wxFrame*) m_display->GetParent())->SetStatusText("black/white point...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("black/white point..."));
 
 	dib = processdib;
 
@@ -511,7 +511,7 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		//parm tool.all.log: Turns on logging for all tools.  Default=0
 		//parm tool.*.log: Turns on logging for the specified tool.  Default=0
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.log","0") == "1"))
-			log(wxString::Format("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s",dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty=false;

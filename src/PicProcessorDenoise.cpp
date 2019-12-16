@@ -43,11 +43,11 @@ class DenoisePanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 
-			enablebox = new wxCheckBox(this, DENOISEENABLE, "denoise:");
+			enablebox = new wxCheckBox(this, DENOISEENABLE, _("denoise:"));
 			enablebox->SetValue(true);
 
 
-			nl = new wxRadioButton(this, DENOISENLMEANS, "NLMeans:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			nl = new wxRadioButton(this, DENOISENLMEANS, _("NLMeans:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			nl->SetValue(true);
 
 			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(110, -1));
@@ -66,8 +66,8 @@ class DenoisePanel: public PicProcPanel
 			btn2->SetToolTip("Reset to default");
 			
 
-			wl = new wxRadioButton(this, DENOISEWAVELET, "Wavelet:");
-			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, "threshold:", thresholdval, 4, wxDefaultPosition, spinsize);
+			wl = new wxRadioButton(this, DENOISEWAVELET, _("Wavelet:"));
+			thresh = new myFloatCtrl(this, WAVELETTHRESHOLD, _("threshold:"), thresholdval, 4, wxDefaultPosition, spinsize);
 			
 			
 			//Lay out the controls in the panel:
@@ -82,7 +82,7 @@ class DenoisePanel: public PicProcPanel
 			m->AddRowItem(nl, flags);
 
 			m->NextRow();			
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "sigma: ", wxDefaultPosition,wxSize(50, -1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("sigma: "), wxDefaultPosition,wxSize(50, -1)), flags);
 
 			m->AddRowItem(sigma, flags);
 			m->AddRowItem(val, flags);
@@ -92,14 +92,14 @@ class DenoisePanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, ""), flags);
 
 			m->NextRow();		
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "local: ", wxDefaultPosition,wxSize(50, -1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("local: "), wxDefaultPosition,wxSize(50, -1)), flags);
 
 			m->AddRowItem(local, flags);
 			m->AddRowItem(val1, flags);
 			m->AddRowItem(btn1, flags);
 
 			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,wxID_ANY, "patch: ", wxDefaultPosition,wxSize(50, -1)), flags);
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("patch: "), wxDefaultPosition,wxSize(50, -1)), flags);
 
 			m->AddRowItem(patch, flags);
 			m->AddRowItem(val2, flags);
@@ -181,7 +181,7 @@ class DenoisePanel: public PicProcPanel
 		void OnCopy(wxCommandEvent& event)
 		{
 			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Copied command to clipboard: %s",q->getCommand()));
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
 			
 		}
 
@@ -205,9 +205,9 @@ class DenoisePanel: public PicProcPanel
 					wl->SetValue(true);
 				}
 				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format("Pasted command from clipboard: %s",q->getCommand()));
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
-			else wxMessageBox(wxString::Format("Invalid Paste"));
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
 		void onRadioButton(wxCommandEvent& event)
@@ -339,7 +339,7 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDenoise::processPicture(gImage *processdib) 
 {
-	((wxFrame*) m_display->GetParent())->SetStatusText("denoise...");
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise..."));
 
 	int algorithm = DENOISENLMEANS;
 	double sigma = 0.0;
@@ -381,12 +381,14 @@ bool PicProcessorDenoise::processPicture(gImage *processdib)
 	if (processingenabled) { 
 		mark();
 		if (algorithm == DENOISENLMEANS) {
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise:nlmeans"));
 			if (sigma > 0.0) { 
 				dib->ApplyNLMeans(sigma,local, patch, threadcount);
 				m_display->SetModified(true);
 			}
 		}
 		else if (algorithm == DENOISEWAVELET) {
+			((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise:wavelet"));
 			if (threshold > 0.0) {
 				dib->ApplyWaveletDenoise(threshold, threadcount);
 				m_display->SetModified(true);
@@ -396,9 +398,9 @@ bool PicProcessorDenoise::processPicture(gImage *processdib)
 		m_tree->SetItemText(id, wxString::Format("denoise:%s",cp[0]));
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))
 			if (algorithm == DENOISENLMEANS)
-				log(wxString::Format("tool=denoise_nlmeans,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s",sigma,local,patch,dib->getWidth(),dib->getHeight(),threadcount,d));
+				log(wxString::Format(_("tool=denoise_nlmeans,sigma=%2.2f,local=%d,patch=%d,imagesize=%dx%d,threads=%d,time=%s"),sigma,local,patch,dib->getWidth(),dib->getHeight(),threadcount,d));
 			if (algorithm == DENOISEWAVELET)
-				log(wxString::Format("tool=denoise_wavelet,threshold=%f, imagesize=%dx%d,threads=%d,time=%s",threshold,dib->getWidth(),dib->getHeight(),threadcount,d));
+				log(wxString::Format(_("tool=denoise_wavelet,threshold=%f, imagesize=%dx%d,threads=%d,time=%s"),threshold,dib->getWidth(),dib->getHeight(),threadcount,d));
 	}
 
 	dirty=false;
