@@ -2057,7 +2057,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 
 
 
-// Subtract
+// Subtract and Add
 //
 // Credit: Kindergarten, if I recall correctly...
 //
@@ -2067,7 +2067,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 // 
 void gImage::ApplySubtract(double subtract, bool clampblack, int threadcount)
 {
-	//if (subtract == 0.0) return;  //why bother...
+	//if (subtract == 0.0) return;  //why bother... 12/2019: bother if clampblack...
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
@@ -2100,6 +2100,119 @@ bool gImage::ApplySubtract(std::string filename, bool clampblack, int threadcoun
 	}
 }
 
+bool gImage::ApplySubtract(gImage& subtractimage, bool clampblack, int threadcount)
+{
+	if (subtractimage.getWidth() == w & subtractimage.getHeight() == h) { 
+		std::vector<pix> &subtract = subtractimage.getImageData();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r -= subtract[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g -= subtract[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b -= subtract[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+void gImage::ApplyAdd(double add, bool clampblack, int threadcount)
+{
+	//if (add == 0.0) return;  //why bother... 12/2019: bother if clampblack...
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+			image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+			image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+		}
+	}
+}
+
+bool gImage::ApplyAdd(std::string filename, bool clampblack, int threadcount)
+{
+	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
+	if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
+		std::vector<pix> &dark = darkfile.getImageData();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r += dark[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g += dark[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b += dark[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
+{
+	if (addimage.getWidth() == w & addimage.getHeight() == h) { 
+		std::vector<pix> &add = addimage.getImageData();
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r += add[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g += add[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b += add[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+
+
+// HaldCLUT
+//
+// Concept: http://www.quelsolaar.com/technology/clut.html
+// Application: http://rawpedia.rawtherapee.com/Film_Simulation
+//
+// Work In Progress
+// 
+bool gImage::ApplyHaldCLUT(std::string filename, int threadcount)
+{
+	gImage hclut = gImage::loadImageFile(filename.c_str(), "");
+	if (hclut.getWidth() != hclut.getHeight()) return false;
+
+	float dim = hclut.getWidth();
+	float level = cbrt((float) hclut.getWidth());
+
+	std::vector<pix> &hc = hclut.getImageData();
+
+printf("ApplyHaldCLUT: level=%f, dim=%f dim/level=%f\n", level,dim,dim/level);
+	float level2 = level*level;
+	float level3 = level2*level;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			unsigned hx = (image[pos].r * level3) + (image[pos].g * level2);
+			unsigned hy = image[pos].b * level + image[pos].g / level;
+			unsigned hcpos = hx + hy * dim;
+			//unsigned hcpos = (unsigned) (image[pos].b * level) + (image[pos].g * level) * level + (image[pos].r * level) * level2;
+			image[pos] = hc[hcpos];
+		}
+	}
+	return true;
+}
 
 
 // ToneMapping

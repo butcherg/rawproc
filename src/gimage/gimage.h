@@ -203,6 +203,14 @@ class gImage
 		void ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount=0);
 		void ApplySharpen(double strength, int threadcount=0);
 
+		//math operations:
+		void ApplySubtract(double subtract, bool clampblack=false, int threadcount=0);
+		bool ApplySubtract(std::string filename, bool clampblack=false, int threadcount=0);
+		bool ApplySubtract(gImage& subtractimage, bool clampblack=false, int threadcount=0);
+		void ApplyAdd(double add, bool clampblack=true, int threadcount=0);
+		bool ApplyAdd(std::string filename, bool clampblack=true, int threadcount=0);
+		bool ApplyAdd(gImage& addimage, bool clampblack=true, int threadcount=0);
+
 
 		//basic color/tone operations:
 		void ApplySaturate(double saturate, int threadcount=0);
@@ -211,8 +219,7 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount=0);
-		void ApplySubtract(double subtract, bool clampblack=true, int threadcount=0);
-		bool ApplySubtract(std::string filename, bool clampblack=true, int threadcount=0);
+		bool ApplyHaldCLUT(std::string filename, int threadcount=0);
 
 
 		//image geometry algorithms:
