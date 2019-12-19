@@ -242,7 +242,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 
 		if (p["value"] == "file") {
 			if (wxFileName::FileExists(wxString(p["filename"]))) {
-				if (dib->ApplySubtract(p["filename"].c_str(), threadcount)) {
+				if (dib->ApplySubtract(p["filename"].c_str(), true, threadcount)) {
 					m_display->SetModified(true);
 					result = true;
 				}
@@ -257,7 +257,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			}
 		}
 		else {
-			dib->ApplySubtract(subtract, threadcount);
+			dib->ApplySubtract(subtract, true, threadcount);
 			m_display->SetModified(true);
 			result = true;
 		}
