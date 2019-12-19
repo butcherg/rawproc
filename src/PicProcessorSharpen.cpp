@@ -270,7 +270,7 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 			if (sigma > 0.0) {
 				mark();
 				gImage blur = gImage(*dib);
-				blur.ApplyGaussianBlur(sigma, (int) radius);
+				blur.ApplyGaussianBlur(sigma, (int) (radius*2.0));
 				gImage mask = gImage(*dib);
 				mask.ApplySubtract(blur);
 				dib->ApplyAdd(mask);
