@@ -1111,7 +1111,7 @@ void gImage::Apply2DConvolutionKernel(std::vector<float> kernel, int kerneldimen
 void gImage::ApplyGaussianBlur(double sigma, unsigned kernelsize, int threadcount)
 {
 	std::vector<float> kernel;
-	kernel =  Compute1DGaussianKernel(sigma, kernelsize);
+	kernel =  Compute1DGaussianKernel(kernelsize, sigma);
 	Apply1DConvolutionKernel(kernel, threadcount);
 }
 
