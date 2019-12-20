@@ -60,6 +60,8 @@ class SharpenPanel: public PicProcPanel
 					sharpmode = SHARPENUSM;
 					if (p.size() >= 2) sigma->SetFloatValue(atof(p[1].c_str()));
 					if (p.size() >= 3) radius->SetFloatValue(atof(p[2].c_str()));
+					sigma->Enable(true);
+					radius->Enable(true);
 				}
 				else {
 					convb->SetValue(true);
@@ -77,6 +79,7 @@ class SharpenPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("sigma:")), flags);
 			m->AddRowItem(sigma, flags);
+			m->NextRow();
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("radius:")), flags);
 			m->AddRowItem(radius, flags);
 			m->NextRow(wxSizerFlags().Expand());
