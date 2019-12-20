@@ -692,22 +692,59 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 		//img <li>sharpen:[0 - 10, default: 0 (no-sharpen)</li>
 		else if (strcmp(cmd,"sharpen") == 0) {  
-			double sharp= atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
-			char *s = strtok(NULL," ");
-			if (s) sharp = atof(s);
+			double sharp  = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
+			double sigma  = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.sigma","0").c_str());
+			double radius = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.radius","1.5").c_str());
+
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
 			if (threadcount == 0) 
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("sharp: %0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
+			
+			char *d = strtok(NULL,", ");
+			if (strcmp(d, "usm") == 0) {
+				char *s = strtok(NULL,", ");
+				char *r = strtok(NULL," ");
+				if (s) sigma = atof(s);
+				if (r) radius = atof(r);
+				if (print) printf("sharp: usm,%0.2f,%0.2f (%d threads)... ",sigma,radius, threadcount); fflush(stdout);
+				_mark();
+				gImage blur = gImage(dib);
+				blur.ApplyGaussianBlur(sigma, (int) (radius*2.0));
+				gImage mask = gImage(dib);
+				mask.ApplySubtract(blur);
+				dib.ApplyAdd(mask);
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:usm%0.2f,%0.2f ",cmd, sigma,radius);
+				commandstring += std::string(cs);
+			}
+			else if (strcmp(d, "convolution") == 0) {
+				char *s = strtok(NULL," ");
+				if (s) sharp = atof(s);
+				if (print) printf("sharp: convolution,%0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
+				_mark();
+				dib.ApplySharpen(sharp, threadcount);
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:convolution,%0.2f ",cmd, sharp);
+				commandstring += std::string(cs);
+			}
+			else { //default convolution, only strength
+				sharp = atof(d);
+				if (print) printf("sharp: %0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
+				_mark();
+				dib.ApplySharpen(sharp, threadcount);
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:%0.2f ",cmd, sharp);
+				commandstring += std::string(cs);
+			}
+			
 
-			_mark();
-			dib.ApplySharpen(sharp, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.0f ",cmd, sharp);
-			commandstring += std::string(cs);
+			
+
 		}
 
 		//img <li>crop:x,y,w,y  no defaults</li>
@@ -764,26 +801,50 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			double sigma= atof(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
 			int local = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
 			int patch = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
-			char *s = strtok(NULL,", ");
-			char *l = strtok(NULL,", ");
-			char *p = strtok(NULL," ");
-			if (s) sigma = atof(s);
-			if (l) local = atoi(l);
-			if (p) patch = atoi(p);
+			float threshold = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.001").c_str());
 
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.cores","0").c_str());
 			if (threadcount == 0) 
 				threadcount = gImage::ThreadCount();
 			else if (threadcount < 0) 
 				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("denoise: %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
 
-			_mark();
-			dib.ApplyNLMeans(sigma, local, patch, threadcount);  
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.1f,%d,%d ",cmd, sigma, 3, 1);
-			commandstring += std::string(cs);
+			char *d = strtok(NULL,", ");
+			if (strcmp(d, "nlmeans") == 0) {
+				char *s = strtok(NULL,", ");
+				char *l = strtok(NULL,", ");
+				char *p = strtok(NULL," ");
+				if (s) sigma = atof(s);
+				if (l) local = atoi(l);
+				if (p) patch = atoi(p);
+				if (print) printf("denoise: nlmieans, %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
+				_mark();
+				dib.ApplyNLMeans(sigma, local, patch, threadcount);  
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:nlmeans,%0.1f,%d,%d ",cmd, sigma, local, patch);
+				commandstring += std::string(cs);
+			}
+			else if (strcmp(d, "wavelet") == 0) {
+				char *t = strtok(NULL,", ");
+				if (t) threshold = atof(t);
+				if (print) printf("denoise: wavelet, %0.2f (%d threads)... ",threshold,threadcount); fflush(stdout);
+				dib.ApplyWaveletDenoise(threshold, threadcount);
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:wavelet,%0.1f ",cmd, threshold, local, patch);
+				commandstring += std::string(cs);
+			}
+			else { //default is nlmeans, with only sigma specified
+				sigma = atof(d);
+				if (print) printf("denoise: nlmieans, %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
+				_mark();
+				dib.ApplyNLMeans(sigma, local, patch, threadcount);  
+				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+				char cs[256];
+				sprintf(cs, "%s:nlmeans,%0.1f,%d,%d ",cmd, sigma, local, patch);
+				commandstring += std::string(cs);
+			}
 		}
 
 		//img <li>tint:[r,g,b] default: 0,0,0 (doesn't have a corresponding tool in rawproc)</li>
