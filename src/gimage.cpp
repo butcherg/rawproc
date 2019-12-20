@@ -2191,23 +2191,28 @@ bool gImage::ApplyHaldCLUT(std::string filename, int threadcount)
 	gImage hclut = gImage::loadImageFile(filename.c_str(), "");
 	if (hclut.getWidth() != hclut.getHeight()) return false;
 
-	float dim = hclut.getWidth();
-	float level = cbrt((float) hclut.getWidth());
+	unsigned dim = hclut.getWidth();
+	unsigned level = (unsigned) cbrt((float) hclut.getWidth());
 
 	std::vector<pix> &hc = hclut.getImageData();
 
-printf("ApplyHaldCLUT: level=%f, dim=%f dim/level=%f\n", level,dim,dim/level);
-	float level2 = level*level;
-	float level3 = level2*level;
+printf("ApplyHaldCLUT: level=%d, dim=%d dim/level=%d\n", level,dim,dim/level);
+	unsigned level2 = level*level;
+	unsigned level3 = level2*level;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			unsigned hx = (image[pos].r * level3) + (image[pos].g * level2);
-			unsigned hy = image[pos].b * level + image[pos].g / level;
+			unsigned r = (unsigned) (image[pos].r * level2);
+			unsigned g = (unsigned) (image[pos].g * level2);
+			unsigned b = (unsigned) (image[pos].b * level2);
+
+			//from http://im.snibgo.com/edithald.htm
+			unsigned hx = r % level2 + (g % level) * level;
+			unsigned hy = b * level + g / level;
+
 			unsigned hcpos = hx + hy * dim;
-			//unsigned hcpos = (unsigned) (image[pos].b * level) + (image[pos].g * level) * level + (image[pos].r * level) * level2;
 			image[pos] = hc[hcpos];
 		}
 	}
