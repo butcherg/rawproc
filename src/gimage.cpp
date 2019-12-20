@@ -2177,12 +2177,13 @@ bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
 }
 
 
-
+bool low = true;
 
 // HaldCLUT
 //
 // Concept: http://www.quelsolaar.com/technology/clut.html
 // Application: http://rawpedia.rawtherapee.com/Film_Simulation
+// Math: http://im.snibgo.com/edithald.htm
 //
 // Work In Progress
 // 
@@ -2191,31 +2192,52 @@ bool gImage::ApplyHaldCLUT(std::string filename, int threadcount)
 	gImage hclut = gImage::loadImageFile(filename.c_str(), "");
 	if (hclut.getWidth() != hclut.getHeight()) return false;
 
-	unsigned dim = hclut.getWidth();
-	unsigned level = (unsigned) cbrt((float) hclut.getWidth());
+	float dim = (float) hclut.getWidth();
+	float level = cbrt((float) hclut.getWidth());
 
 	std::vector<pix> &hc = hclut.getImageData();
 
-printf("ApplyHaldCLUT: level=%d, dim=%d dim/level=%d\n", level,dim,dim/level);
-	unsigned level2 = level*level;
-	unsigned level3 = level2*level;
+	float level2 = level*level;
+	float level3 = level2*level;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			unsigned r = (unsigned) (image[pos].r * level2);
-			unsigned g = (unsigned) (image[pos].g * level2);
-			unsigned b = (unsigned) (image[pos].b * level2);
+			float r = image[pos].r * level2;
+			float g = image[pos].g * level2;
+			float b = image[pos].b * level2;
 
-			//from http://im.snibgo.com/edithald.htm
-			unsigned hx = r % level2 + (g % level) * level;
-			unsigned hy = b * level + g / level;
+			unsigned hxl = trunc(fmod(r, level2) + fmod(g, level) * level);
+			unsigned hyl = trunc(b * level + g / level);
 
-			unsigned hcpos = hx + hy * dim;
-			image[pos] = hc[hcpos];
+			unsigned hxu = ceil(fmod(r, level2) + fmod(g, level) * level);
+			unsigned hyu = ceil(b * level + g / level);
+
+			float fhx = fmod(r, level2) + fmod(g, level) * level;
+			float fhy = b * level + g / level;
+			fhx = fhx - (long)fhx;
+			fhy = fhy - (long)fhy;
+
+			unsigned hl = hxl + hyl * dim;
+			unsigned hu = hxu + hyu * dim;
+
+			pix pl = hc[hl];
+			pix pu;
+			if (hu < hc.size()) 
+				pu = hc[hu];
+			else 
+				pu = hc[hl];
+
+			pl.r = pl.r + (pu.r-pl.r)*fhx;
+			pl.g = pl.g + (pu.g-pl.g)*fhy;
+			pl.b = pl.b + (pu.b-pl.b)*fhy;
+		
+			image[pos] = pl;
+
 		}
 	}
+	if (low) low = false; else low = true;
 	return true;
 }
 
