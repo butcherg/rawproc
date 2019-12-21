@@ -10,6 +10,8 @@
 #include "paste.xpm"
 #include "undo.xpm"
 
+#include <wx/clipbrd.h>
+
 #define TONEENABLE 7900
 #define TONEID 7901
 #define TONECOPY 7902
@@ -22,6 +24,7 @@
 #define TONECURVE 7909
 #define TONENORM 7910
 #define TONEFILMICRESET 7911
+#define TONECURVECOPY 7912
 
 class ToneCurveDialog: public wxDialog
 {
@@ -68,7 +71,7 @@ class TonePanel: public PicProcPanel
 			hybloggamb = new wxRadioButton(this, TONELOGGAM, _("loggamma"));
 			filmicb = new wxRadioButton(this, TONEFILMIC, _("filmic"));
 
-			tonenorm = new wxCheckBox(this, TONENORM, _("norm:"));
+			tonenorm = new wxCheckBox(this, TONENORM, _("norm"));
 			tonenorm->SetValue(false);
 
 			tcpane = new myToneCurvePane(this, wxDefaultPosition, wxSize(130,130));
@@ -96,7 +99,7 @@ class TonePanel: public PicProcPanel
 			wxArrayString p = split(params,",");
 			setPanel(p);
 
-			tcpane->SetCurve(makeXArray(), true);
+			tcpane->SetCurve(makeXArray(10000), true);
 
 			//log2b->Enable(false);  //log2 doesn't do anything, yet.
 
@@ -146,8 +149,10 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(filmicD, flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-			m->NextRow();
-			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("tone curve:")), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("tone curve:")), wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("copy curve:")), flags);
+			m->AddRowItem(new wxBitmapButton(this, TONECURVECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "  "), wxSizerFlags(1).Left());
 			m->AddRowItem(tcpane, wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP));
@@ -165,6 +170,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &TonePanel::OnCopy, this, TONECOPY);
 			Bind(wxEVT_BUTTON, &TonePanel::OnPaste, this, TONEPASTE);
 			Bind(wxEVT_BUTTON, &TonePanel::OnReset, this, TONEFILMICRESET);
+			Bind(wxEVT_BUTTON, &TonePanel::OnCurveCopy, this, TONECURVECOPY);
 			Bind(myFLOATCTRL_CHANGE, &TonePanel::floatParamChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &TonePanel::floatParamUpdated, this);
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
@@ -245,6 +251,30 @@ class TonePanel: public PicProcPanel
 			
 		}
 
+		void OnCurveCopy(wxCommandEvent& event)
+		{
+			//parm tool.tone.curve.arraysize - number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256
+			unsigned arraysize = atoi(myConfig::getConfig().getValueOrDefault("tool.tone.curve.arraysize","256").c_str());
+			std::vector<float> cdat =  makeXArray(arraysize);
+			wxString cdatstr;
+			//parm tool.tone.curve.direction - horizontal|vertical.  If horizontal, a comma-separated list.  If vertical, one number per line.  Default: vertical.
+			bool vertical = (myConfig::getConfig().getValueOrDefault("tool.tone.curve.direction","vertical") == "vertical") ? true : false;
+			if (vertical) {
+				for (unsigned i=0; i<cdat.size(); i++) cdatstr.Append(wxString::Format("%f\n",cdat[i]));
+			}
+			else {
+				cdatstr.Append(wxString::Format("%f",cdat[0]));
+				for (unsigned i=1; i<cdat.size(); i++) cdatstr.Append(wxString::Format(",%f",cdat[i]));
+			}
+			if (wxTheClipboard->Open())
+			{
+				wxTheClipboard->SetData( new wxTextDataObject(cdatstr));
+				wxTheClipboard->Close();
+			}
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied curve to clipboard")));
+			
+		}
+
 		void OnPaste(wxCommandEvent& event)
 		{
 			if (q->pasteParamsFromClipboard()) {
@@ -321,8 +351,8 @@ class TonePanel: public PicProcPanel
 						q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue()));
 					break;
 			}
-			//if (tc) tc->SetCurve(makeXArray());
-			tcpane->SetCurve(makeXArray());
+			//if (tc) tc->SetCurve(makeXArray(10000));
+			tcpane->SetCurve(makeXArray(10000));
 			q->processPic();
 			Refresh();
 		}
@@ -345,11 +375,11 @@ class TonePanel: public PicProcPanel
 			if (filmicb->GetValue()) processTone(TONEFILMIC);
 		}
 
-		std::vector<float> makeXArray()
+		std::vector<float> makeXArray(unsigned arraysize)
 		{
 			std::vector<float> xarray;
 			std::map<std::string,std::string> imgdata;
-			gImage X(10000,1,3,imgdata);
+			gImage X(arraysize,1,3,imgdata);
 			std::vector<pix>& x = X.getImageData();
 			for (unsigned i=0; i<x.size(); i++) x[i].r = (float) i / x.size();
 
