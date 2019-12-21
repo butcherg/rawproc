@@ -2177,7 +2177,83 @@ bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
 }
 
 
-bool low = true;
+pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
+{
+	pix output;
+	//pix * clut = clutimage.getImageDataRaw();
+	std::vector<pix>& clut = clutimage.getImageData();
+	float color, red, green, blue;
+	int i, j;
+	float tmp[6], r, g, b;
+	level *= level;
+
+	red = input.r * (float)(level - 1);
+	if(red > level - 2)
+		red = (float)level - 2;
+	if(red < 0)
+		red = 0;
+
+	green = input.g * (float)(level - 1);
+	if(green > level - 2)
+		green = (float)level - 2;
+	if(green < 0)
+		green = 0;
+
+	blue = input.b * (float)(level - 1);
+	if(blue > level - 2)
+		blue = (float)level - 2;
+	if(blue < 0)
+		blue = 0;
+
+	r = input.r * (float)(level - 1) - red;
+	g = input.g * (float)(level - 1) - green;
+	b = input.b * (float)(level - 1) - blue;
+
+	color = red + green * level + blue * level * level;
+
+	i = color; // * 3;
+	j = (color + 1); // * 3;
+
+	tmp[0] = clut[i].r * (1 - r) + clut[j].r * r;
+	tmp[1] = clut[i].g * (1 - r) + clut[j].g * r;
+	tmp[2] = clut[i].b * (1 - r) + clut[j].b * r;
+
+	i = (color + level); // * 3;
+	j = (color + level + 1); // * 3;
+
+	tmp[3] = clut[i].r * (1 - r) + clut[j].r * r;
+	tmp[4] = clut[i].g * (1 - r) + clut[j].g * r;
+	tmp[5] = clut[i].b * (1 - r) + clut[j].b * r;
+
+	output.r = tmp[0] * (1 - g) + tmp[3] * g;
+	output.g = tmp[1] * (1 - g) + tmp[4] * g;
+	output.b = tmp[2] * (1 - g) + tmp[5] * g;
+
+	i = (color + level * level); // * 3;
+	j = (color + level * level + 1); // * 3;
+
+	tmp[0] = clut[i].r * (1 - r) + clut[j].r * r;
+	tmp[1] = clut[i].g * (1 - r) + clut[j].g * r;
+	tmp[2] = clut[i].b * (1 - r) + clut[j].b * r;
+
+	i = (color + level + level * level); // * 3;
+	j = (color + level + level * level + 1); // * 3;
+
+	tmp[3] = clut[i].r * (1 - r) + clut[j].r * r;
+	tmp[4] = clut[i].g * (1 - r) + clut[j].g * r;
+	tmp[5] = clut[i].b * (1 - r) + clut[j].b * r;
+
+	tmp[0] = tmp[0] * (1 - g) + tmp[3] * g;
+	tmp[1] = tmp[1] * (1 - g) + tmp[4] * g;
+	tmp[2] = tmp[2] * (1 - g) + tmp[5] * g;
+
+	output.r = output.r * (1 - b) + tmp[0] * b;
+	output.g = output.g * (1 - b) + tmp[1] * b;
+	output.b = output.b * (1 - b) + tmp[2] * b;
+
+	return output;
+}
+
 
 // HaldCLUT
 //
@@ -2189,55 +2265,24 @@ bool low = true;
 // 
 bool gImage::ApplyHaldCLUT(std::string filename, int threadcount)
 {
+printf("loading %s... ",filename.c_str());
 	gImage hclut = gImage::loadImageFile(filename.c_str(), "");
+printf("done.\n");
 	if (hclut.getWidth() != hclut.getHeight()) return false;
 
-	float dim = (float) hclut.getWidth();
-	float level = cbrt((float) hclut.getWidth());
-
-	std::vector<pix> &hc = hclut.getImageData();
-
-	float level2 = level*level;
-	float level3 = level2*level;
+	int x = hclut.getWidth();
+	unsigned int level;
+	for(level = 1; level * level * level < x; level++);
+	if (level * level * level > x) return false;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			float r = image[pos].r * level2;
-			float g = image[pos].g * level2;
-			float b = image[pos].b * level2;
-
-			unsigned hxl = trunc(fmod(r, level2) + fmod(g, level) * level);
-			unsigned hyl = trunc(b * level + g / level);
-
-			unsigned hxu = ceil(fmod(r, level2) + fmod(g, level) * level);
-			unsigned hyu = ceil(b * level + g / level);
-
-			float fhx = fmod(r, level2) + fmod(g, level) * level;
-			float fhy = b * level + g / level;
-			fhx = fhx - (long)fhx;
-			fhy = fhy - (long)fhy;
-
-			unsigned hl = hxl + hyl * dim;
-			unsigned hu = hxu + hyu * dim;
-
-			pix pl = hc[hl];
-			pix pu;
-			if (hu < hc.size()) 
-				pu = hc[hu];
-			else 
-				pu = hc[hl];
-
-			pl.r = pl.r + (pu.r-pl.r)*fhx;
-			pl.g = pl.g + (pu.g-pl.g)*fhy;
-			pl.b = pl.b + (pu.b-pl.b)*fhy;
-		
-			image[pos] = pl;
-
+			image[pos] = correct_pixel(image[pos], hclut, level);
 		}
 	}
-	if (low) low = false; else low = true;
+
 	return true;
 }
 
