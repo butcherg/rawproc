@@ -832,7 +832,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				dib.ApplyWaveletDenoise(threshold, threadcount);
 				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 				char cs[256];
-				sprintf(cs, "%s:wavelet,%0.1f ",cmd, threshold, local, patch);
+				sprintf(cs, "%s:wavelet,%0.1f ",cmd, threshold);
 				commandstring += std::string(cs);
 			}
 			else { //default is nlmeans, with only sigma specified
