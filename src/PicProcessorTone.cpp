@@ -255,16 +255,24 @@ class TonePanel: public PicProcPanel
 		{
 			//parm tool.tone.curve.arraysize - number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256
 			unsigned arraysize = atoi(myConfig::getConfig().getValueOrDefault("tool.tone.curve.arraysize","256").c_str());
-			std::vector<float> cdat =  makeXArray(arraysize);
+
 			wxString cdatstr;
-			//parm tool.tone.curve.direction - horizontal|vertical.  If horizontal, a comma-separated list.  If vertical, one number per line.  Default: vertical.
-			bool vertical = (myConfig::getConfig().getValueOrDefault("tool.tone.curve.direction","vertical") == "vertical") ? true : false;
-			if (vertical) {
-				for (unsigned i=0; i<cdat.size(); i++) cdatstr.Append(wxString::Format("%f\n",cdat[i]));
-			}
-			else {
+			//parm tool.tone.curve.type - horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.
+			std::string datatype = myConfig::getConfig().getValueOrDefault("tool.tone.curve.type","vertical");
+			if (datatype == "horizontal") {
+				std::vector<float> cdat =  makeXArray(arraysize);
 				cdatstr.Append(wxString::Format("%f",cdat[0]));
 				for (unsigned i=1; i<cdat.size(); i++) cdatstr.Append(wxString::Format(",%f",cdat[i]));
+			}
+			else if (datatype == "curvetool") {
+				std::vector<float> cdat =  makeXArray(255);
+				cdatstr.Append(wxString::Format("curve:rgb,0,0"));
+				for (unsigned i=1; i<255; i+=255/arraysize) cdatstr.Append(wxString::Format(",%d,%d",i, (int) (cdat[i]*255.0)));
+				
+			}
+			else { //default to vertical
+				std::vector<float> cdat =  makeXArray(arraysize);
+				for (unsigned i=0; i<cdat.size(); i++) cdatstr.Append(wxString::Format("%f\n",cdat[i]));
 			}
 			if (wxTheClipboard->Open())
 			{

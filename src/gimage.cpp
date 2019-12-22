@@ -2180,7 +2180,6 @@ bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
 pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
 {
 	pix output;
-	//pix * clut = clutimage.getImageDataRaw();
 	std::vector<pix>& clut = clutimage.getImageData();
 	float color, red, green, blue;
 	int i, j;
