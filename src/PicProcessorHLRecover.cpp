@@ -17,6 +17,7 @@ class HLRecoverPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxGridBagSizer *g = new wxGridBagSizer();
+			bool low = true;
 
 			int initialvalue = atoi(params.c_str());
 
@@ -29,9 +30,9 @@ class HLRecoverPanel: public PicProcPanel
 			//g->Add(sharp , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			//val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
 			//g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			//btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			//btn->SetToolTip("Reset to default");
-			//g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			g->Layout();
@@ -39,7 +40,7 @@ class HLRecoverPanel: public PicProcPanel
 			Update();
 			SetFocus();
 			//t.SetOwner(this);
-			//Bind(wxEVT_BUTTON, &HLRecoverPanel::OnButton, this);
+			Bind(wxEVT_BUTTON, &HLRecoverPanel::OnButton, this);
 			//Bind(wxEVT_SCROLL_CHANGED, &HLRecoverPanel::OnChanged, this);
 			//Bind(wxEVT_SCROLL_THUMBTRACK, &HLRecoverPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &HLRecoverPanel::onEnable, this, HLRECOVERENABLE);
@@ -57,13 +58,12 @@ class HLRecoverPanel: public PicProcPanel
 				q->processPic();
 			}
 		}
-/*
+
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
-			t.Start(500,wxTIMER_ONE_SHOT);
+			q->processPic();
 		}
-
+/*
 		void OnThumbTrack(wxCommandEvent& event)
 		{
 			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
@@ -75,24 +75,26 @@ class HLRecoverPanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
+*/
 
 		void OnButton(wxCommandEvent& event)
 		{
-			int resetval = atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
-			sharp->SetValue(resetval);
-			q->setParams(wxString::Format("%d",resetval));
-			val->SetLabel(wxString::Format("%4d", resetval));
+			//int resetval = atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
+			//sharp->SetValue(resetval);
+			//q->setParams(wxString::Format("%d",resetval));
+			//val->SetLabel(wxString::Format("%4d", resetval));
 			q->processPic();
 			event.Skip();
 		}
-*/
+
 
 	private:
 		//wxSlider *sharp;
 		//wxStaticText *val;
-		//wxBitmapButton *btn;
+		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		//wxTimer t;
+		bool low;
 
 
 };
@@ -129,7 +131,9 @@ bool PicProcessorHLRecover::processPicture(gImage *processdib)
 
 	if (global_processing_enabled & processingenabled) {
 		mark();
-		dib->ApplyHLRecover(threadcount);
+		//dib->ApplyHLRecover(threadcount);
+		if (!dib->ApplyHaldCLUT("/home/glenn/Photography/Hald_CLUT_Identity.png", threadcount)) wxMessageBox("HaldCLUT didn't work, for some reason...");
+
 		m_display->SetModified(true);
 		wxString d = duration();
 

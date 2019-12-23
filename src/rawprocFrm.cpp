@@ -1591,7 +1591,7 @@ void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 	//}
 	SetStatusText("");
 	try {
-		PicProcessorCACorrect *p = new PicProcessorCACorrect("cacorrect","", commandtree, pic);
+		PicProcessorCACorrect *p = new PicProcessorCACorrect("cacorrect","auto,1", commandtree, pic);
 		p->createPanel(parambook);
 		p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1510);
