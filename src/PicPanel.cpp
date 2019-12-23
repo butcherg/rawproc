@@ -20,7 +20,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = modified = false;
+	softproof = thumbdragging = dragging = modified = pixelbox = false;
 
 	thumbvisible = true;
 	histogram = hgram;
@@ -306,14 +306,16 @@ wxBitmap * PicPanel::getBitmap()
 
 void PicPanel::setStatusBar()
 {
-	if (display_dib)
-		struct pix p = display_dib->getPixel(imagex, imagey);
-	else
-		return;
+	if (!display_dib) return;
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh) {
 		struct pix p = display_dib->getPixel(imagex, imagey);
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b));
+		wxString stext = wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b);
+		if (pixelbox) {
+			struct pix sp = display_dib->getPixel(selectedx, selectedy);
+			stext.Append(wxString::Format("   selected: xy%d,%d rgb:%f,%f,%f",selectedx, selectedy, sp.r, sp.g, sp.b));
+		}
+		((wxFrame *) GetParent())->SetStatusText(stext);
 		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
 		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
 	}
@@ -424,6 +426,7 @@ void PicPanel::render(wxDC &dc)
 
 	PicProcessor *selected = PicProcessor::getSelectedPicProcessor(commandtree);
 	if (selected) dcList = selected->getDrawList();
+	if (!pixbox.IsEmpty()) dcList.Append(pixbox);
 
 	//write the tool-supplied plots:
 	if (dcList != "") {
@@ -438,6 +441,18 @@ void PicPanel::render(wxDC &dc)
 				int py = (atoi(c[2].c_str())-viewposy) * scale + imageposy;
 				dc.DrawLine(px-10, py, px+10, py);
 				dc.DrawLine(px, py-10, px, py+10);
+			}
+			if (c[0] == "box") {
+				if (c.GetCount() < 3) continue;
+				int px = (atoi(c[1].c_str())-viewposx) * scale + imageposx;
+				int py = (atoi(c[2].c_str())-viewposy) * scale + imageposy;
+				dc.DrawLine(px-10, py, px+10, py);
+				dc.DrawLine(px, py-10, px, py+10);
+
+				dc.DrawLine(px, py, px+scale, py);
+				dc.DrawLine(px+scale, py, px+scale, py+scale);
+				dc.DrawLine(px+scale, py+scale, px, py+scale);
+				dc.DrawLine(px, py+scale, px, py);
 			}
 		}
 	}
@@ -619,6 +634,12 @@ void PicPanel::OnLeftDown(wxMouseEvent& event)
 	mousex = mx;
 	mousey = my;
 
+	if (event.ShiftDown() && pixelbox) {
+		selectedx = imagex;
+		selectedy = imagey;
+		pixbox = wxString::Format("box,%d,%d;",selectedx, selectedy);
+	}
+
 	setStatusBar();
 	event.Skip();
 }
@@ -694,6 +715,7 @@ void PicPanel::SetColorManagement(bool b)
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	struct pix p;
 	int mx, my, border, dimagex, dimagey;
 	float increment, minscale, maxscale;
 	event.Skip();
@@ -737,9 +759,23 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
 				else if (oob == 2)
 					((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
-				SetPic(display_dib, ch);
-				Refresh();
+				RefreshPic();
 			}
+			break;
+
+		case 80: //p - pixel navigator toggle
+			if (pixelbox) {
+				pixbox.Empty();
+				pixelbox = false;
+				((wxFrame *) GetParent())->SetStatusText("pixelbox: off");
+			}
+			else {
+				pixelbox = true;
+				((wxFrame *) GetParent())->SetStatusText("pixelbox: on");
+
+			}
+			RefreshPic();
+			setStatusBar();
 			break;
 
 		case 83: //s softproof toggle

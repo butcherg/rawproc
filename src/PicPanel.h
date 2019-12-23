@@ -72,7 +72,7 @@ class PicPanel: public wxPanel
 		GIMAGE_CHANNEL ch;
 
 		int mousex, mousey;
-		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip, exposurebox;
+		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip, exposurebox, pixelbox;
 		int skipmove;
 		int oob;
 		
@@ -83,11 +83,11 @@ class PicPanel: public wxPanel
 
 		double imgctrx, imgctry;
 		int viewposx, viewposy;
-		int imageposx, imageposy, imagex, imagey, imagew, imageh, vieww, viewh;
+		int imageposx, imageposy, imagex, imagey, selectedx, selectedy, imagew, imageh, vieww, viewh;
 		int thumbw, thumbh;
 		double thumbwscale, thumbhscale;
 		
-		wxString dcList, exposurestring;
+		wxString dcList, pixbox, exposurestring;
 		
 		bool colormgt;
 		cmsHPROFILE displayProfile;
