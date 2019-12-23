@@ -3203,7 +3203,7 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 	return true;
 }
 
-bool gImage::ApplyCACorrect( int threadcount)
+bool gImage::ApplyCACorrect(const bool autoCA, size_t autoIterations, const double cared, const double cablue, bool avoidColourshift, int threadcount)
 {
 	if (imginfo["Libraw::Mosaiced"] == "0") return false;  //Mosaic data only
 
@@ -3224,7 +3224,7 @@ bool gImage::ApplyCACorrect( int threadcount)
 		}
 	}
 
-	CA_correct(0,0,w,h, true, 1, 0.0, 0.0, true, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
+	CA_correct(0,0,w,h, autoCA, autoIterations, cared, cablue, avoidColourshift, rawdata, rawdata, cfarray, f, fitParams, false, 1.0, 1.0);
 	
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {

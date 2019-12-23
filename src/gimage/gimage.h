@@ -256,8 +256,8 @@ class gImage
 		bool ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int iterations=1, int threadcount=0);
 		bool ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
 		bool ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int passes=1, bool useCieLab=false, int threadcount=0);
-		bool ApplyCACorrect( int threadcount);
-		bool ApplyHLRecover(int threadcount);
+		bool ApplyCACorrect(const bool autoCA=true, size_t autoIterations=1, const double cared=0.0, const double cablue=0.0, bool avoidColourshift=true, int threadcount=0);
+		bool ApplyHLRecover(int threadcount=0);
 
 #endif
 
