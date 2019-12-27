@@ -271,6 +271,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 	wxString curvedata;
 	wxCommandEvent e(myCURVE_UPDATE);
 	//wxMessageBox(wxString::Format("%d",event.GetKeyCode()));
+	event.Skip();
 	switch (event.GetKeyCode()) {
 		case 84: //t - toggle tooltip
 			if (ToggleToolTip())
@@ -299,7 +300,6 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 			((wxFrame *) GetGrandParent()->GetParent())->SetStatusText("curve Y data copied to clipboard");
 			break;
 	}
-	event.Skip();
 }
 
 wxString CurvePane::getControlPoints()

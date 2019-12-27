@@ -388,6 +388,7 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 void myHistogramPane::keyPressed(wxKeyEvent& event) 
 {
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
+	event.Skip();
 	switch (event.GetKeyCode()) {
 		case 68: //d - bounded/unbounded histogram
 			if (Unbounded)
@@ -459,9 +460,6 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			((wxFrame *) GetParent())->SetStatusText("histogram data copied to clipboard");
 			break;
 	}
-
-	
-	event.Skip();
 }
  
 void myHistogramPane::mouseDown(wxMouseEvent& event) 

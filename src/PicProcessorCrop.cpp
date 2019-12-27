@@ -451,6 +451,7 @@ class CropPanel: public PicProcPanel
 /*
 		void OnKey(wxKeyEvent& event)
 		{
+			event.Skip();
 			int newleft, newright, newtop, newbottom;
 			int k = event.GetKeyCode();
 

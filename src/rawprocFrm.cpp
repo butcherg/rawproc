@@ -1351,6 +1351,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 	wxString cmd;
 	SetStatusText("");
 	//wxTreeItemId item, prev, next, newitem;
+	event.Skip();
 	switch (event.GetKeyCode()) {
         case 127:  //Delete
 	//case 8: //Backspace
@@ -1416,7 +1417,6 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		break;
 	}
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
-	//event.Skip();
 }
 
 
@@ -2186,7 +2186,7 @@ void rawprocFrm::SetConfigFile(wxString cfile)
 
 void rawprocFrm::CharEvent(wxKeyEvent& event)
 {
-	
+	event.Skip();
 }
 
 
