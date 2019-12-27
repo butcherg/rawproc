@@ -2,12 +2,21 @@
 #include "PicProcessorCACorrect.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "myRowSizer.h"
+#include "myFloatCtrl.h"
+#include "myIntegerCtrl.h"
 #include "undo.xpm"
+#include "copy.xpm"
+#include "paste.xpm"
 #include "util.h"
 
 #include <vector>
 
 #define CACORRECTENENABLE 8300
+#define CACORRECTAUTOCA 8301
+#define CACORRECTAVOIDCS  8302
+#define CACORRECTCOPY 8303
+#define CACORRECTPASTE 8304
 
 class CACorrectPanel: public PicProcPanel
 {
@@ -15,35 +24,67 @@ class CACorrectPanel: public PicProcPanel
 		CACorrectPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			SetSize(parent->GetSize());
-			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			wxGridBagSizer *g = new wxGridBagSizer();
-
-			int initialvalue = atoi(params.c_str());
 
 			enablebox = new wxCheckBox(this, CACORRECTENENABLE, _("cacorrect:"));
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			//sharp = new wxSlider(this, wxID_ANY, initialvalue, 0, 10, wxPoint(10, 30), wxSize(140, -1));
-			//g->Add(sharp , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			//val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
-			//g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			//btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			//btn->SetToolTip("Reset to default");
-			//g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			red = new myFloatCtrl(this, wxID_ANY, _("red:"), 0.0, 3);
+			blue  = new myFloatCtrl(this, wxID_ANY, _("blue:"), 0.0, 3);
+			autoca  = new wxCheckBox(this, CACORRECTAUTOCA, _("auto-correct"));
+			iterations = new myIntegerCtrl(this, wxID_ANY, _("iterations:"), 1, 1, 100);
+			avoidcs = new wxCheckBox(this, CACORRECTAVOIDCS, _("avoid color-shift"));
 
-			SetSizerAndFit(g);
-			g->Layout();
+			wxArrayString p = split(params,",");
+			if (p.size() > 0 && p[0] == "auto") {
+				red->Enable(false);
+				blue->Enable(false);
+				iterations->Enable(true);
+				autoca->SetValue(true);
+				if (p.size() >= 2) iterations->SetIntegerValue(atoi(p[1].c_str()));
+ 
+			}
+			else {
+				red->Enable(true);
+				blue->Enable(true);
+				iterations->Enable(false);
+				if (p.size() > 0) red->SetFloatValue(atof(p[0].c_str()));
+				if (p.size() >= 2) blue->SetFloatValue(atof(p[1].c_str()));
+				autoca->SetValue(false);
+			}
+			if (params.Find("avoidcs") != wxNOT_FOUND) avoidcs->SetValue(true);
+
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, CACORRECTCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, CACORRECTPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(red,flags);
+			m->NextRow();
+			m->AddRowItem(blue,flags);
+			m->NextRow();
+			m->AddRowItem(autoca,flags);
+			m->AddRowItem(iterations,flags);
+			m->NextRow();
+			m->AddRowItem(avoidcs,flags);
+			m->End();
+
+			SetSizerAndFit(m);
 			Refresh();
-			Update();
-			SetFocus();
-			//t.SetOwner(this);
-			//Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
-			//Bind(wxEVT_SCROLL_CHANGED, &SharpenPanel::OnChanged, this);
-			//Bind(wxEVT_SCROLL_THUMBTRACK, &SharpenPanel::OnThumbTrack, this);
+			t.SetOwner(this);
+
+			Bind(myFLOATCTRL_CHANGE, &CACorrectPanel::OnChanged, this);
+			Bind(myFLOATCTRL_UPDATE, &CACorrectPanel::OnThumbTrack, this);
+			Bind(myINTEGERCTRL_CHANGE, &CACorrectPanel::OnChanged, this);
+			Bind(myINTEGERCTRL_UPDATE, &CACorrectPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &CACorrectPanel::onEnable, this, CACORRECTENENABLE);
-			//Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);
+			Bind(wxEVT_BUTTON, &CACorrectPanel::OnCopy, this, CACORRECTCOPY);
+			Bind(wxEVT_BUTTON, &CACorrectPanel::OnPaste, this, CACORRECTPASTE);
+			Bind(wxEVT_CHECKBOX, &CACorrectPanel::OnAutoCA, this, CACORRECTAUTOCA);
+			Bind(wxEVT_CHECKBOX, &CACorrectPanel::OnAvoidCS, this, CACORRECTAVOIDCS);
+			Bind(wxEVT_TIMER, &CACorrectPanel::OnTimer,  this);
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -57,44 +98,100 @@ class CACorrectPanel: public PicProcPanel
 				q->processPic();
 			}
 		}
-/*
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				wxString parms = q->getParams();
+				wxArrayString p = split(parms,",");
+				if (p[0] == "auto") {
+					red->Enable(false);
+					blue->Enable(false);
+					autoca->SetValue(true);
+					if (p.size() >= 2) iterations->SetIntegerValue(atoi(p[1].c_str()));
+				}
+				else {
+					red->Enable(true);
+					blue->Enable(true);
+					red->SetFloatValue(atof(p[0].c_str()));
+					if (p.size() >= 2) blue->SetFloatValue(atof(p[1].c_str()));
+					autoca->SetValue(false);
+				}
+				if (parms.Find("avoidcs") == wxNOT_FOUND) 
+					avoidcs->SetValue(false);
+				else 
+					avoidcs->SetValue(true);
+
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
+		}
+
+
 		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+			if (red->GetFloatValue() < 0.0) red->SetFloatValue(0.0);
+			if (blue->GetFloatValue() < 0.0) blue->SetFloatValue(0.0);
 			t.Start(500,wxTIMER_ONE_SHOT);
+		}
+
+		void processCA()
+		{
+			wxString avoidcolorshift;
+			if (avoidcs->GetValue()) avoidcolorshift = ",avoidcs";
+			if (autoca->GetValue())
+				q->setParams(wxString::Format("auto,%d%s",iterations->GetIntegerValue(), avoidcolorshift));
+			else
+				q->setParams(wxString::Format("%f,%f%s",red->GetFloatValue(), blue->GetFloatValue(), avoidcolorshift));
+			q->processPic();
 		}
 
 		void OnThumbTrack(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%4d", sharp->GetValue()));
+			processCA();
+			event.Skip();
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d",sharp->GetValue()));
-			q->processPic();
-			event.Skip();
+			processCA();
 		}
 
-		void OnButton(wxCommandEvent& event)
+		void OnAutoCA(wxCommandEvent& event) 
 		{
-			int resetval = atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
-			sharp->SetValue(resetval);
-			q->setParams(wxString::Format("%d",resetval));
-			val->SetLabel(wxString::Format("%4d", resetval));
-			q->processPic();
-			event.Skip();
+			if (autoca->GetValue()) {
+				red->Enable(false);
+				blue->Enable(false);
+				iterations->Enable(true);
+			}
+			else {
+				red->Enable(true);
+				blue->Enable(true);
+				iterations->Enable(false);
+			}
+			processCA();
 		}
-*/
+
+		void OnAvoidCS(wxCommandEvent& event)
+		{
+			processCA();
+		}
 
 	private:
-		//wxSlider *sharp;
-		//wxStaticText *val;
-		//wxBitmapButton *btn;
-		wxCheckBox *enablebox;
-		//wxTimer t;
+		myFloatCtrl *blue, *red;
+		myIntegerCtrl *iterations;
+		wxCheckBox *enablebox, *autoca, *avoidcs;
+		wxTimer t;
 
-
+//bool gImage::ApplyCACorrect(const bool autoCA, size_t autoIterations, const double cared, const double cablue, bool avoidColourshift, int threadcount)
 };
 
 
@@ -116,7 +213,6 @@ bool PicProcessorCACorrect::processPicture(gImage *processdib)
 	bool result = true;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.cacorrect.cores","0").c_str());
-
 	if (threadcount == 0) 
 		threadcount = gImage::ThreadCount();
 	else if (threadcount < 0) 
@@ -127,9 +223,23 @@ bool PicProcessorCACorrect::processPicture(gImage *processdib)
 	dib = processdib;
 	if (!global_processing_enabled) return true;
 
+	double cared = 0.0, cablue =  0.0;
+	bool autoca = true, avoidcs = false;
+	int iterations = 1;
+	wxArrayString p = split(getParams(),",");
+
+	if (p[0] == "auto") {
+		if (p.size() >= 2 && p[1] != "avoidcs") iterations = atoi(p[1].c_str());
+	}
+	else {
+		cared = atof(p[0].c_str());
+		if (p.size() >= 2) cablue = atof(p[1].c_str());
+	}
+	if (getParams().Find("avoidcs") != wxNOT_FOUND) avoidcs = true;
+
 	if (global_processing_enabled & processingenabled) {
 		mark();
-		dib->ApplyCACorrect(threadcount);
+		dib->ApplyCACorrect(autoca, iterations, cared, cablue, avoidcs, threadcount);
 		m_display->SetModified(true);
 		wxString d = duration();
 
