@@ -730,9 +730,12 @@ void PicPanel::SetColorManagement(bool b)
 
 void PicPanel::OnKey(wxKeyEvent& event)
 {
+	float dimagex, dimagey, increment, maxscale, minscale;
+
 	int panincrement = 1;
 	if (event.ShiftDown()) panincrement = 10;
 	if (event.ControlDown()) panincrement = 100;
+
 	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
 	int mx, my;
@@ -746,22 +749,185 @@ void PicPanel::OnKey(wxKeyEvent& event)
 		// WXK_BACK, so check for them explicitly.
 		if ( uc >= 32 )
 		{
-			//wxLogMessage("You pressed '%c'", uc);
+			switch (uc) {
+
+				case 45: //- zoom out
+					fit=false;
+					GetSize(&mx,&my);
+					mx /= 2; my /=2;
+
+					increment = 0.5;
+					if (event.ShiftDown()) increment = 1.0;
+
+					border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+					scale -= increment;
+
+					minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
+					maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
+					if (scale < minscale) 
+						scale = minscale;
+					else if (scale > maxscale) 
+						scale = maxscale; 
+		
+					//keep center of panel in the center...
+					dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
+					dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
+					viewposx += dimagex;
+					viewposy += dimagey;
+
+					imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+					imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+					mousex = mx;
+					mousey = my;
+
+					setStatusBar();
+					Refresh();
+					break;
+
+				case 61: //+ zoom in
+					fit=false;
+
+					GetSize(&mx,&my);
+					mx /= 2; my /=2;
+
+					increment = 0.05;
+					if (event.ShiftDown()) increment = 0.2;
+
+					border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+					scale += increment;
+
+					minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
+					maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
+					if (scale < minscale) 
+						scale = minscale;
+					else if (scale > maxscale) 
+						scale = maxscale; 
+
+					//keep center of panel in the center...
+					dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
+					dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
+					viewposx += dimagex;
+					viewposy += dimagey;
+
+					imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+					imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+					mousex = mx;
+					mousey = my;
+
+					setStatusBar();
+					Refresh();
+					break;
+
+
+				case 67: //c - with Ctrl-, copy RGB at the x,y
+					if (event.ControlDown()) 
+						if (display_dib)
+							if (wxTheClipboard->Open()) {
+								struct pix p = display_dib->getPixel(imagex, imagey);
+								wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
+								wxTheClipboard->Close();
+								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
+							}
+					break;
+
+				case 69: //e exposure box toggle
+					if (!exposurestring.IsEmpty()) {
+						if (exposurebox) {
+							exposurebox = false;
+						}
+						else {
+							exposurebox = true;
+						}
+						Refresh();
+					}
+					break;
+
+				case 102: //f
+				case 70:  //F - fit image to window
+					SetScaleToWidth();
+					FitMode(true);
+					setStatusBar();
+					Refresh();
+					break;
+
+				case 72:  //h - toggle display thumbnail 
+					if (thumbvisible)
+						thumbvisible = false;
+					else
+						thumbvisible = true;
+					Refresh();
+					break;
+
+				case 79: //o oob toggle
+					if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
+						oob++;
+						if (oob > 2) oob = 0;
+						if (oob == 0)
+							((wxFrame *) GetParent())->SetStatusText("out-of-bound: off");
+						else if (oob == 1)
+							((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
+						else if (oob == 2)
+							((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
+						RefreshPic();
+					}
+					break;
+
+				case 80: //p - pixel navigator toggle
+					if (pixelbox) {
+						pixbox.Empty();
+						pixelbox = false;
+						((wxFrame *) GetParent())->SetStatusText("pixelbox: off");
+					}
+					else {
+						pixelbox = true;
+						((wxFrame *) GetParent())->SetStatusText("pixelbox: on");
+					}
+					RefreshPic();
+					setStatusBar();
+					break;
+
+				case 83: //s softproof toggle
+					if (softproof) {
+						softproof = false;
+						((wxFrame *) GetParent())->SetStatusText("softproof: off");
+					}
+					else {
+						softproof = true;
+						((wxFrame *) GetParent())->SetStatusText("softproof: on");
+					}
+					RefreshPic();
+					break;
+
+				case 116: //t
+				case 84: //T - toggle tooltip
+						if (ToggleToolTip())
+							((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: on");
+						else
+							((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: off");
+					break;
+			}
 		}
 		else
 		{
-			// It's a control character
-			//...
+			// It's a control character, < WXK_START
+			switch (uc)
+			{
+				case WXK_TAB:
+					printf("PicPanel: tab key...\n"); fflush(stdout);
+					event.Skip();
+					break;
+			}
 		}
 	}
 	else // No Unicode equivalent.
 	{
-		// It's a special key, deal with all the known ones:
+		// It's a special key, > WXK_START, deal with all the known ones:
 		switch ( event.GetKeyCode() )
 		{
-			case WXK_TAB:
-				event.Skip();
-				break;
 			case WXK_LEFT:
 				fit=false;
 
@@ -777,6 +943,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				setStatusBar();
 				Refresh();
 				break;
+
 			case WXK_RIGHT:
 				fit=false;
 
@@ -793,270 +960,44 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				Refresh();
 				break;
 
+			case WXK_DOWN:
+				fit=false;
+
+				mx /= 2; my /=2;
+
+				viewposy += panincrement;
+				imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+				imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+				mousex = mx;
+				mousey = my;
+
+				setStatusBar();
+				Refresh();
+				break;
+
+			case WXK_UP:
+				fit=false;
+
+				mx /= 2; my /=2;
+
+				viewposy += -panincrement;
+				imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+				imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+				mousex = mx;
+				mousey = my;
+
+				setStatusBar();
+				Refresh();
+				break;
+
+
 		}
 	}
 	event.Skip();
 }
 
-
-/*
-void PicPanel::OnKey(wxKeyEvent& event)
-{
-	struct pix p;
-	int mx, my, border, dimagex, dimagey, panincrement;
-	float increment, minscale, maxscale;
-	//event.Skip();
-	//if (blank) return;
-	((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel-top: keycode=%d", event.GetKeyCode()));
-	panincrement = 1;
-	if (event.ShiftDown()) panincrement = 10;
-	if (event.ControlDown()) panincrement = 100;
-	switch (event.GetKeyCode()) {
-		case WXK_TAB:
-			event.Skip();
-			break;
-
-		case 102: //f
-		case 70: //F - fit image to window
-			SetScaleToWidth();
-			FitMode(true);
-			setStatusBar();
-			Refresh();
-			break;
-
-		case WXK_LEFT: // left arrow
-		//case 328: // keypad left arrow, numlock
-		//case 376: // keypad left arrow
-			fit=false;
-
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			viewposx += -panincrement;
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-		case WXK_UP: // up arrow
-		//case 332: // keypad up arrow, numlock
-		case 377: // keypad up arrow
-			fit=false;
-
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			viewposy += -panincrement;
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-		case WXK_RIGHT: // right arrow
-		//case 330: // keypad right arrow, numlock
-		//case 378: // keypad right arrow
-			fit=false;
-
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			viewposx += panincrement;
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-		case WXK_DOWN: // down arrow
-		//case 326: // keypad down arrow, numlock
-		//case 379: // keypad down arrow
-			fit=false;
-
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			viewposy += panincrement;
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-
-		case 116: //t
-		case 84: //T - toggle tooltip
-				if (ToggleToolTip())
-					((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: on");
-				else
-					((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: off");
-			break;
-
-		case 72: //h - toggle display thumbnail 
-			if (thumbvisible)
-				thumbvisible = false;
-			else
-				thumbvisible = true;
-			Refresh();
-			break;
-
-		case 67: //c - with Ctrl-, copy RGB at the x,y
-			if (event.ControlDown()) 
-				if (display_dib)
-					if (wxTheClipboard->Open()) {
-						struct pix p = display_dib->getPixel(imagex, imagey);
-						wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
-						wxTheClipboard->Close();
-						((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
-					}
-			break;
-
-		case 79: //o oob toggle
-			if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
-				oob++;
-				if (oob > 2) oob = 0;
-				if (oob == 0)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: off");
-				else if (oob == 1)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: average");
-				else if (oob == 2)
-					((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
-				RefreshPic();
-			}
-			break;
-
-		case 80: //p - pixel navigator toggle
-			if (pixelbox) {
-				pixbox.Empty();
-				pixelbox = false;
-				((wxFrame *) GetParent())->SetStatusText("pixelbox: off");
-			}
-			else {
-				pixelbox = true;
-				((wxFrame *) GetParent())->SetStatusText("pixelbox: on");
-
-			}
-			RefreshPic();
-			setStatusBar();
-			break;
-
-		case 83: //s softproof toggle
-			if (softproof) {
-				softproof = false;
-				((wxFrame *) GetParent())->SetStatusText("softproof: off");
-			}
-			else {
-				softproof = true;
-				((wxFrame *) GetParent())->SetStatusText("softproof: on");
-			}
-			RefreshPic();
-			break;
-		case 69: //e exposure box toggle
-			if (!exposurestring.IsEmpty()) {
-				if (exposurebox) {
-					exposurebox = false;
-				}
-				else {
-					exposurebox = true;
-				}
-				Refresh();
-			}
-			break;
-		case 45: //- zoom out
-			fit=false;
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			increment = 0.5;
-			if (event.ShiftDown()) increment = 1.0;
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			scale -= increment;
-
-			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
-			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
-			if (scale < minscale) 
-				scale = minscale;
-			else if (scale > maxscale) 
-				scale = maxscale; 
-		
-			//keep center of panel in the center...
-			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
-			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
-			viewposx += dimagex;
-			viewposy += dimagey;
-
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-		case 61: //+ zoom in
-			fit=false;
-
-			GetSize(&mx,&my);
-			mx /= 2; my /=2;
-
-			increment = 0.05;
-			if (event.ShiftDown()) increment = 0.2;
-
-			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
-
-			scale += increment;
-
-			minscale = atof(myConfig::getConfig().getValueOrDefault("display.minscale","0.1").c_str());
-			maxscale = atof(myConfig::getConfig().getValueOrDefault("display.maxscale","5.0").c_str());
-			if (scale < minscale) 
-				scale = minscale;
-			else if (scale > maxscale) 
-				scale = maxscale; 
-		
-			//keep center of panel in the center...
-			dimagex = imagex - ((((mx-border) - imageposx) / scale) + (viewposx));
-			dimagey = imagey - ((((my-border) - imageposy) / scale) + (viewposy));
-			viewposx += dimagex;
-			viewposy += dimagey;
-
-			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
-			imagey = (((my-border) - imageposy) / scale) + (viewposy);
-
-			mousex = mx;
-			mousey = my;
-
-			setStatusBar();
-			Refresh();
-			break;
-	}
-}
-*/
 
 void PicPanel::SetScale(double s)
 {
