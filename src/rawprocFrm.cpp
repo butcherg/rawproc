@@ -221,6 +221,7 @@ void rawprocFrm::CreateGUIControls()
 {
 #ifndef SIZERLAYOUT
 	mgr.SetManagedWindow(this);
+	mgr.SetFlags(wxAUI_MGR_ALLOW_ACTIVE_PANE | wxAUI_MGR_DEFAULT);
 #endif
 	//Do not add custom code between
 	//GUI Items Creation Start and GUI Items Creation End
@@ -321,9 +322,9 @@ void rawprocFrm::CreateGUIControls()
 	int dockwidth = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.dock.width","300")).c_str());
 
 	//Image manipulation panels:
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT);  
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT | wxTAB_TRAVERSAL | wxBORDER_RAISED);  
 	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(dockwidth,150));
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,350), wxBORDER_SUNKEN);
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,350), wxBORDER_SUNKEN | wxTAB_TRAVERSAL);
 
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
@@ -349,12 +350,15 @@ void rawprocFrm::CreateGUIControls()
 	SetSizerAndFit(hs);
 #else
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
-	mgr.AddPane(pic, wxCENTER);
+	mgr.AddPane(pic, wxAuiPaneInfo().Center().Caption("Image").CloseButton(false).Movable(false));
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(histogram,   pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.Resizable());  //Fixed());    //ToDo: myHistogramPane needs a sizer to preserve aspect...  ??
 	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
+	commandtree->SetFocus();
 	mgr.Update();
 #endif
+
+
 
 }
 
@@ -873,6 +877,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		open = true;
 
 		SetStatusText(wxString::Format(_("File:%s opened."),filename.GetFullName()));
+		commandtree->SetFocus();
 	}
 	else {
 		SetStatusText(wxString::Format(_("%s file type unknown."),filename.GetFullName() ));
@@ -1031,6 +1036,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			open = false;
 
 			SetStatusText(wxString::Format(_("Source of file:%s opened."),sourcefilename.GetFullName()));
+			commandtree->SetFocus();
 		}
 			
 	}
@@ -1285,8 +1291,13 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 //wxEVT_TREE_SEL_CHANGING
 void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
 {
-	std::string parentitem = bifurcate(commandtree->GetItemText(commandtree->GetItemParent(event.GetItem())).ToStdString(), ':')[0];
-	if (parentitem == "group") event.Veto();
+	wxTreeItemId parentitem = commandtree->GetItemParent(event.GetItem());
+	std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
+	if (parentitemlabel == "group") {
+		//event.Veto();
+		commandtree->SelectItem(parentitem);
+	}
+	event.Skip();
 }
 
 //wxEVT_TREE_SEL_CHANGED
@@ -1368,6 +1379,7 @@ void rawprocFrm::CommandTreeKeyDown(wxTreeEvent& event)
 		pic->SetScaleToWidth();
 		pic->FitMode(true);
 		SetStatusText(_("scale: fit"),STATUS_SCALE);
+		pic->Refresh();
 		break;
 	case 67: //c - copy selected command and its parameters to the clipboard
 		if (commandtree->IsEmpty()) return;

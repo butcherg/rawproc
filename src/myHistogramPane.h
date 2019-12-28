@@ -43,6 +43,8 @@ public:
 	void mouseLeftWindow(wxMouseEvent& event);
 	void keyPressed(wxKeyEvent& event);
 	//void keyReleased(wxKeyEvent& event);
+	void OnGetFocus(wxFocusEvent& event);
+	void OnLoseFocus(wxFocusEvent& event);
 
 private:
 	bool blankpic, pressedDown;

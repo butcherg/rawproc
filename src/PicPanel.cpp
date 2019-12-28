@@ -8,7 +8,7 @@
 #include <wx/clipbrd.h>
 
 
-PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740)) 
+PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740), wxTAB_TRAVERSAL |wxBORDER_RAISED) 
 {
 
 	SetDoubleBuffered(true); 
@@ -55,6 +55,8 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	Bind(wxEVT_LEAVE_WINDOW, &PicPanel::OnMouseLeave,  this);
 	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
+	Bind(wxEVT_SET_FOCUS, &PicPanel::OnGetFocus,  this);
+	Bind(wxEVT_KILL_FOCUS, &PicPanel::OnLoseFocus,  this);
 		
 	//t = new wxTimer(this);
 }
@@ -70,6 +72,18 @@ void PicPanel::OnSize(wxSizeEvent& event)
 {
 	Refresh();
 	event.Skip();
+}
+
+void PicPanel::OnGetFocus(wxFocusEvent& event)
+{
+	SetWindowStyle(wxTAB_TRAVERSAL | wxBORDER_RAISED);
+	Refresh();
+}
+
+void PicPanel::OnLoseFocus(wxFocusEvent& event)
+{
+	SetWindowStyle(wxTAB_TRAVERSAL | wxBORDER_SUNKEN);
+	Refresh();
 }
 
 bool PicPanel::ToggleToolTip()
@@ -716,12 +730,110 @@ void PicPanel::SetColorManagement(bool b)
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	struct pix p;
-	int mx, my, border, dimagex, dimagey;
+	int mx, my, border, dimagex, dimagey, panincrement;
 	float increment, minscale, maxscale;
-	event.Skip();
+	//event.Skip();
 	//if (blank) return;
-	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel: keycode=%d", event.GetKeyCode()));
+	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel-top: keycode=%d", event.GetKeyCode()));
+	panincrement = 1;
+	if (event.ShiftDown()) panincrement = 10;
+	if (event.ControlDown()) panincrement = 100;
 	switch (event.GetKeyCode()) {
+		case WXK_TAB:
+			event.Skip();
+			break;
+
+		case 102: //f
+		case 70: //F - fit image to window
+			SetScaleToWidth();
+			FitMode(true);
+			setStatusBar();
+			Refresh();
+			break;
+
+		case WXK_LEFT: // left arrow
+		//case 328: // keypad left arrow, numlock
+		//case 376: // keypad left arrow
+			fit=false;
+
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			viewposx += -panincrement;
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+			Refresh();
+			break;
+		case WXK_UP: // up arrow
+		//case 332: // keypad up arrow, numlock
+		case 377: // keypad up arrow
+			fit=false;
+
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			
+
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			viewposy += -panincrement;
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+			Refresh();
+			break;
+		case WXK_RIGHT: // right arrow
+		//case 330: // keypad right arrow, numlock
+		//case 378: // keypad right arrow
+			fit=false;
+
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			viewposx += panincrement;
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+			Refresh();
+			break;
+		case WXK_DOWN: // down arrow
+		//case 326: // keypad down arrow, numlock
+		//case 379: // keypad down arrow
+			fit=false;
+
+			GetSize(&mx,&my);
+			mx /= 2; my /=2;
+
+			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
+
+			viewposy += panincrement;
+			imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+			imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+			mousex = mx;
+			mousey = my;
+
+			setStatusBar();
+			Refresh();
+			break;
+
 		case 116: //t
 		case 84: //T - toggle tooltip
 				if (ToggleToolTip())
@@ -805,8 +917,8 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			GetSize(&mx,&my);
 			mx /= 2; my /=2;
 
-			increment = 0.05;
-			if (event.ShiftDown()) increment = 0.2;
+			increment = 0.5;
+			if (event.ShiftDown()) increment = 1.0;
 
 			border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
@@ -832,8 +944,6 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			mousey = my;
 
 			setStatusBar();
-
-			event.Skip();
 			Refresh();
 			break;
 		case 61: //+ zoom in
@@ -869,8 +979,6 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			mousey = my;
 
 			setStatusBar();
-
-			event.Skip();
 			Refresh();
 			break;
 	}

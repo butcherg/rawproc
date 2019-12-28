@@ -8,7 +8,7 @@
 
 
 myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
+ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN | wxTAB_TRAVERSAL)
 {
 	int fr=0, fg=0, fb=0;
 	blankpic = true;
@@ -51,6 +51,8 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
 	Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
 	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
+	Bind(wxEVT_SET_FOCUS, &myHistogramPane::OnGetFocus,  this);
+	Bind(wxEVT_KILL_FOCUS, &myHistogramPane::OnLoseFocus,  this);
 }
 
 
@@ -64,6 +66,16 @@ myHistogramPane::~myHistogramPane()
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
 	event.Skip();
+	Refresh();
+}
+
+void myHistogramPane::OnGetFocus(wxFocusEvent& event)
+{
+	Refresh();
+}
+
+void myHistogramPane::OnLoseFocus(wxFocusEvent& event)
+{
 	Refresh();
 }
 
@@ -388,8 +400,12 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 void myHistogramPane::keyPressed(wxKeyEvent& event) 
 {
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
-	event.Skip();
+	//event.Skip();
 	switch (event.GetKeyCode()) {
+		case WXK_TAB:
+			event.Skip();
+			break;
+
 		case 68: //d - bounded/unbounded histogram
 			if (Unbounded)
 				Unbounded = false;

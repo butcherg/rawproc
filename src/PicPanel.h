@@ -64,6 +64,8 @@ class PicPanel: public wxPanel
 		void OnMouseEnter(wxMouseEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
 		void OnTimer(wxTimerEvent& event);
+		void OnGetFocus(wxFocusEvent& event);
+		void OnLoseFocus(wxFocusEvent& event);
 
 		void setStatusBar();
         
