@@ -356,10 +356,16 @@ void rawprocFrm::CreateGUIControls()
 	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
 	commandtree->SetFocus();
 	mgr.Update();
+	mgr.Bind(wxEVT_AUI_PANE_ACTIVATED, &rawprocFrm::OnAUIActivate, this);
 #endif
 
 
 
+}
+
+void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
+{
+	event.GetPane()->window->SetFocus();
 }
 
 void rawprocFrm::OnSize(wxSizeEvent& event)
