@@ -53,7 +53,9 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	Bind(wxEVT_MOUSEWHEEL, &PicPanel::OnMouseWheel,  this);
 	Bind(wxEVT_ENTER_WINDOW, &PicPanel::OnMouseEnter,  this);
 	Bind(wxEVT_LEAVE_WINDOW, &PicPanel::OnMouseLeave,  this);
-	Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
+	//Bind(wxEVT_KEY_DOWN, &PicPanel::OnKey,  this);
+	//Bind(wxEVT_CHAR, &PicPanel::OnKey,  this);
+	Bind(wxEVT_CHAR_HOOK, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
 	Bind(wxEVT_SET_FOCUS, &PicPanel::OnGetFocus,  this);
 	Bind(wxEVT_KILL_FOCUS, &PicPanel::OnLoseFocus,  this);
@@ -726,7 +728,78 @@ void PicPanel::SetColorManagement(bool b)
 	RefreshPic();
 }
 
+void PicPanel::OnKey(wxKeyEvent& event)
+{
+	int panincrement = 1;
+	if (event.ShiftDown()) panincrement = 10;
+	if (event.ControlDown()) panincrement = 100;
+	int border = atoi(myConfig::getConfig().getValueOrDefault("display.panelborder","5").c_str());
 
+	int mx, my;
+	GetSize(&mx,&my);
+	
+	wxChar uc = event.GetUnicodeKey();
+	if ( uc != WXK_NONE )
+	{
+		// It's a "normal" character. Notice that this includes
+		// control characters in 1..31 range, e.g. WXK_RETURN or
+		// WXK_BACK, so check for them explicitly.
+		if ( uc >= 32 )
+		{
+			//wxLogMessage("You pressed '%c'", uc);
+		}
+		else
+		{
+			// It's a control character
+			//...
+		}
+	}
+	else // No Unicode equivalent.
+	{
+		// It's a special key, deal with all the known ones:
+		switch ( event.GetKeyCode() )
+		{
+			case WXK_TAB:
+				event.Skip();
+				break;
+			case WXK_LEFT:
+				fit=false;
+
+				mx /= 2; my /=2;
+
+				viewposx += -panincrement;
+				imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+				imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+				mousex = mx;
+				mousey = my;
+
+				setStatusBar();
+				Refresh();
+				break;
+			case WXK_RIGHT:
+				fit=false;
+
+				mx /= 2; my /=2;
+
+				viewposx += panincrement;
+				imagex = (((mx-border) - imageposx) / scale) + (viewposx);
+				imagey = (((my-border) - imageposy) / scale) + (viewposy);
+
+				mousex = mx;
+				mousey = my;
+
+				setStatusBar();
+				Refresh();
+				break;
+
+		}
+	}
+	event.Skip();
+}
+
+
+/*
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	struct pix p;
@@ -734,7 +807,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 	float increment, minscale, maxscale;
 	//event.Skip();
 	//if (blank) return;
-	//((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel-top: keycode=%d", event.GetKeyCode()));
+	((wxFrame *) GetParent())->SetStatusText(wxString::Format("PicPanel-top: keycode=%d", event.GetKeyCode()));
 	panincrement = 1;
 	if (event.ShiftDown()) panincrement = 10;
 	if (event.ControlDown()) panincrement = 100;
@@ -983,6 +1056,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			break;
 	}
 }
+*/
 
 void PicPanel::SetScale(double s)
 {
