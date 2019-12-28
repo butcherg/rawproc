@@ -403,6 +403,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 	//event.Skip();
 	switch (event.GetKeyCode()) {
 		case WXK_TAB:
+			printf("myHistogramPane: tab key...\n"); fflush(stdout);
 			event.Skip();
 			break;
 

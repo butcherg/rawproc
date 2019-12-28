@@ -65,9 +65,9 @@ void PicProcPanel::OnLeftDown(wxMouseEvent& event)
 
 void PicProcPanel::keyPressed(wxKeyEvent& event) 
 {
-printf("PicProcPanel::keyPressed!!!\n");
 	switch (event.GetKeyCode()) {
 		case WXK_TAB:
+			printf("PicProcPanel: tab key...\n"); fflush(stdout);
 			event.Skip();
 			break;
 		default:
