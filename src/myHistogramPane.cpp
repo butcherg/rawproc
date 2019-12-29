@@ -387,6 +387,122 @@ void myHistogramPane::mouseWheelMoved(wxMouseEvent& event)
 
 void myHistogramPane::keyPressed(wxKeyEvent& event) 
 {
+	wxString hist;
+	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
+	wxChar uc = event.GetUnicodeKey();
+	if ( uc != WXK_NONE )
+	{
+		// It's a "normal" character. Notice that this includes
+		// control characters in 1..31 range, e.g. WXK_RETURN or
+		// WXK_BACK, so check for them explicitly.
+		if ( uc >= 32 )
+		{
+			switch (uc) {
+				case WXK_SPACE : // - order of channels
+					if (ord == 1) ord = 2;
+					else if(ord == 2) ord = 3;
+					else if(ord == 3) ord = 1;
+					Refresh();
+					break;
+
+				case 67: // c - with Ctrl, copy 256-scale histogram to clipboard
+					if (!event.ControlDown()) break;
+
+					hist.Append(wxString::Format("red:%d", (int) histogram[0].r));
+					for (int i = 1; i< histogram.size(); i++) 
+						hist.Append(wxString::Format(",%d", (int) histogram[i].r));
+					hist.Append("\n");
+					hist.Append(wxString::Format("green:%d", (int) histogram[0].g));
+					for (int i = 1; i< histogram.size(); i++) 
+						hist.Append(wxString::Format(",%d", (int) histogram[i].g));
+					hist.Append("\n");
+					hist.Append(wxString::Format("blue:%d", (int) histogram[0].b));
+					for (int i = 1; i< histogram.size(); i++) 
+						hist.Append(wxString::Format(",%d", (int) histogram[i].b));
+					hist.Append("\n");
+					if (wxTheClipboard->Open())
+					{
+						wxTheClipboard->SetData( new wxTextDataObject(hist) );
+						wxTheClipboard->Close();
+					}
+					((wxFrame *) GetParent())->SetStatusText("histogram data copied to clipboard");
+					break;
+
+				case 68: //d - bounded/unbounded histogram
+					if (Unbounded)
+						Unbounded = false;
+					else
+						Unbounded = true;
+					RecalcHistogram();
+					Refresh();
+					break;
+
+				case 69: //e - toggle EV stop lines
+					if (EVaxis)
+						EVaxis = false;
+					else
+						EVaxis = true;
+					Refresh();
+					break;
+
+
+				case 76: // l - toggle labels
+					if (TextVisible)
+						TextVisible = false;
+					else
+						TextVisible = true;
+					Refresh();
+					break;
+
+				case 84: //t - toggle tooltip
+						if (ToggleToolTip())
+							((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: on");
+						else
+							((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: off");
+					break;
+
+
+
+
+
+			}
+		}
+		else
+		{
+			// It's a control character, < WXK_START
+			switch (uc)
+			{
+				case WXK_TAB:  //placeholder for tab work...
+					event.Skip();
+					break;
+			}
+		}
+	}
+	else // No Unicode equivalent.
+	{
+		// It's a special key, > WXK_START, deal with all the known ones:
+		switch ( event.GetKeyCode() )
+		{
+			case WXK_RIGHT: //-> - pan right
+				if (event.ShiftDown()) xorigin -= 10;
+				else if (event.ControlDown()) xorigin -= 100;
+				else xorigin -= 1;
+				Refresh();
+				break;
+
+			case WXK_LEFT: // <- - pan left
+				if (event.ShiftDown()) xorigin += 10;
+				else if (event.ControlDown()) xorigin += 100;
+				else xorigin += 1;
+				Refresh();
+				break;
+		}
+	}
+}
+
+/*
+void myHistogramPane::keyPressed(wxKeyEvent& event) 
+{
 	//wxMessageBox(wxString::Format("keycode: %d", event.GetKeyCode()));
 	//event.Skip();
 	switch (event.GetKeyCode()) {
@@ -466,6 +582,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 			break;
 	}
 }
+*/
  
 void myHistogramPane::mouseDown(wxMouseEvent& event) 
 {

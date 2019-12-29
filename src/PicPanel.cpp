@@ -902,11 +902,9 @@ void PicPanel::OnKey(wxKeyEvent& event)
 			// It's a control character, < WXK_START
 			switch (uc)
 			{
-				//case WXK_TAB:
-				//	printf("PicPanel: tab key...\n"); fflush(stdout);
-				//	commandtree->SetFocus();
-				//	//event.Skip();
-				//	break;
+				case WXK_TAB:
+					event.Skip();
+					break;
 			}
 		}
 	}

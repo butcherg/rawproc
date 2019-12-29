@@ -177,10 +177,41 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &TonePanel::OnNorm, this, TONENORM);
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
-			Refresh();
-			Update();
+			Bind(wxEVT_CHAR_HOOK, &TonePanel::OnKey,  this);
 		}
 
+		void OnKey(wxKeyEvent& event)
+		{
+			wxChar uc = event.GetUnicodeKey();
+			if ( uc != WXK_NONE )
+			{
+				// It's a "normal" character. Notice that this includes
+				// control characters in 1..31 range, e.g. WXK_RETURN or
+				// WXK_BACK, so check for them explicitly.
+				if ( uc >= 32 )
+				{
+					switch (uc) {
+					}
+				}
+				else
+				{
+					// It's a control character, < WXK_START
+					switch (uc)
+					{
+						case WXK_TAB:
+							event.Skip();
+							break;
+					}
+				}
+			}
+			else // No Unicode equivalent.
+			{
+				// It's a special key, > WXK_START, deal with all the known ones:
+				switch ( event.GetKeyCode() )
+				{
+				}
+			}
+		}
 		void setPanel(wxArrayString p)
 		{
 			if (p[0] == "gamma") {

@@ -114,7 +114,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_CHAR(rawprocFrm::CharEvent)
-	EVT_CHAR_HOOK(rawprocFrm::CharEvent)
+	//EVT_CHAR_HOOK(rawprocFrm::CharEvent)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
@@ -357,7 +357,7 @@ void rawprocFrm::CreateGUIControls()
 	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
 	commandtree->SetFocus();
 	mgr.Update();
-	//mgr.Bind(wxEVT_AUI_PANE_ACTIVATED, &rawprocFrm::OnAUIActivate, this);
+	mgr.Bind(wxEVT_AUI_PANE_ACTIVATED, &rawprocFrm::OnAUIActivate, this);
 #endif
 
 
@@ -366,8 +366,8 @@ void rawprocFrm::CreateGUIControls()
 
 void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 {
-	//event.GetPane()->window->SetFocus();
-	//printf("OnAUIActivate: %s\n", event.GetPane()->name.ToStdString().c_str()); fflush(stdout);
+	event.GetPane()->window->SetFocus();
+	printf("OnAUIActivate: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
 }
 
 void rawprocFrm::OnSize(wxSizeEvent& event)
@@ -2223,12 +2223,7 @@ void rawprocFrm::CharEvent(wxKeyEvent& event)
 			switch (uc)
 			{
 				case WXK_TAB:
-					printf("rawprocFrm: tab key...\n"); fflush(stdout);
-					if (NavigateIn())
-						SetStatusText("Yes!!!");
-					else
-						SetStatusText("No...");
-					event.Skip();
+					//NavigateIn(); //maybe needed for Win32...  ??
 					break;
 			}
 		}

@@ -164,6 +164,40 @@ class DenoisePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &DenoisePanel::onEnable, this, DENOISEENABLE);
 			//Bind(wxEVT_MOUSEWHEEL,&DenoisePanel::onWheel, this);
 			//Bind(wxEVT_TEXT_ENTER, &DenoisePanel::paramChanged, this);
+			Bind(wxEVT_CHAR_HOOK, &DenoisePanel::OnKey,  this);
+		}
+
+		void OnKey(wxKeyEvent& event)
+		{
+			wxChar uc = event.GetUnicodeKey();
+			if ( uc != WXK_NONE )
+			{
+				// It's a "normal" character. Notice that this includes
+				// control characters in 1..31 range, e.g. WXK_RETURN or
+				// WXK_BACK, so check for them explicitly.
+				if ( uc >= 32 )
+				{
+					switch (uc) {
+					}
+				}
+				else
+				{
+					// It's a control character, < WXK_START
+					switch (uc)
+					{
+						case WXK_TAB:
+							event.Skip();
+							break;
+					}
+				}
+			}
+			else // No Unicode equivalent.
+			{
+				// It's a special key, > WXK_START, deal with all the known ones:
+				switch ( event.GetKeyCode() )
+				{
+				}
+			}
 		}
 
 		void onEnable(wxCommandEvent& event)

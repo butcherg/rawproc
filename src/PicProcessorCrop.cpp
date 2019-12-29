@@ -381,71 +381,41 @@ class CropPanel: public PicProcPanel
 			Bind(myCROP_UPDATE, &CropPanel::OnCropUpdate, this);
 			Bind(wxEVT_BUTTON, &CropPanel::OnCopy, this, CROPCOPY);
 			Bind(wxEVT_BUTTON, &CropPanel::OnPaste, this, CROPPASTE);
-			//Bind(wxEVT_CHAR, &CropPanel::OnKey, this);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
+			Bind(wxEVT_CHAR_HOOK, &CropPanel::OnKey,  this);
 		}
 
-		void onEnable(wxCommandEvent& event)
+		void OnKey(wxKeyEvent& event)
 		{
-			if (enablebox->GetValue()) {
-				q->enableProcessing(true);
-				q->processPic();
-			}
-			else {
-				q->enableProcessing(false);
-				q->processPic();
-			}
-		}
-
-		void OnCopy(wxCommandEvent& event)
-		{
-			q->copyParamsToClipboard();
-			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
-			
-		}
-
-		void OnPaste(wxCommandEvent& event)
-		{
-			if (q->pasteParamsFromClipboard()) {
-				cpane->setParams(q->getParams());
-				q->processPic();
-				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
-			}
-			else wxMessageBox(wxString::Format(_("Invalid Paste")));
-		}
-
-		
-		
-		void OnCommandtreeSelChanged(wxTreeEvent& event)
-		{
-			wxImage img;
-			event.Skip();
-			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
-
-			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
-				hTransform = q->getDisplay()->GetDisplayTransform();
-				if (hTransform) {
-					unsigned char* im = img.GetData();
-					unsigned w = img.GetWidth();
-					unsigned h = img.GetHeight();
-					#pragma omp parallel for
-					for (unsigned y=0; y<h; y++) {
-						unsigned pos = y*w*3;
-						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+			wxChar uc = event.GetUnicodeKey();
+			if ( uc != WXK_NONE )
+			{
+				// It's a "normal" character. Notice that this includes
+				// control characters in 1..31 range, e.g. WXK_RETURN or
+				// WXK_BACK, so check for them explicitly.
+				if ( uc >= 32 )
+				{
+					switch (uc) {
+					}
+				}
+				else
+				{
+					// It's a control character, < WXK_START
+					switch (uc)
+					{
+						case WXK_TAB:
+							event.Skip();
+							break;
 					}
 				}
 			}
-
-			Refresh();
-		}
-
-
-
-
-		void OnCropUpdate(wxCommandEvent& event)
-		{
-			q->setParams(cpane->getParams());
-			q->processPic();
+			else // No Unicode equivalent.
+			{
+				// It's a special key, > WXK_START, deal with all the known ones:
+				switch ( event.GetKeyCode() )
+				{
+				}
+			}
 		}
 
 /*
@@ -577,6 +547,72 @@ class CropPanel: public PicProcPanel
 			}
 		}
 */
+
+
+
+		void onEnable(wxCommandEvent& event)
+		{
+			if (enablebox->GetValue()) {
+				q->enableProcessing(true);
+				q->processPic();
+			}
+			else {
+				q->enableProcessing(false);
+				q->processPic();
+			}
+		}
+
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
+			
+		}
+
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				cpane->setParams(q->getParams());
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
+			}
+			else wxMessageBox(wxString::Format(_("Invalid Paste")));
+		}
+
+		
+		
+		void OnCommandtreeSelChanged(wxTreeEvent& event)
+		{
+			wxImage img;
+			event.Skip();
+			img = gImage2wxImage(q->getPreviousPicProcessor()->getProcessedPic());
+
+			if (myConfig::getConfig().getValueOrDefault("display.cms","1") == "1") {
+				hTransform = q->getDisplay()->GetDisplayTransform();
+				if (hTransform) {
+					unsigned char* im = img.GetData();
+					unsigned w = img.GetWidth();
+					unsigned h = img.GetHeight();
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w*3;
+						cmsDoTransform(hTransform, &im[pos], &im[pos], w);
+					}
+				}
+			}
+
+			Refresh();
+		}
+
+
+
+
+		void OnCropUpdate(wxCommandEvent& event)
+		{
+			q->setParams(cpane->getParams());
+			q->processPic();
+		}
+
 
 	private:
 		cmsHTRANSFORM hTransform;
