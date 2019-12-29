@@ -41,6 +41,43 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 	Bind(wxEVT_LEFT_DOWN, &PicProcPanel::OnLeftDown, this);
 }
 
+//This OnKey() is specifically organized to trap the arrow keys, so they don't participate
+//in pane switching...
+void PicProcPanel::OnKey(wxKeyEvent& event)
+{
+	wxChar uc = event.GetUnicodeKey();
+	if ( uc != WXK_NONE )
+	{
+		// It's a "normal" character. Notice that this includes
+		// control characters in 1..31 range, e.g. WXK_RETURN or
+		// WXK_BACK, so check for them explicitly.
+		if ( uc >= 32 )
+		{
+			switch (uc) {
+			}
+		}
+		else
+		{
+			// It's a control character, < WXK_START
+			switch (uc)
+			{
+				case WXK_TAB:
+					event.Skip();
+					break;
+			}
+		}
+		event.Skip();
+	}
+	else // No Unicode equivalent.
+	{
+		// It's a special key, > WXK_START, deal with all the known ones:
+		switch ( event.GetKeyCode() )
+		{
+		}
+	}
+}
+
+
 
 void PicProcPanel::setRateAdapt(bool r)
 {

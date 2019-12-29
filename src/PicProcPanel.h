@@ -28,6 +28,7 @@ class PicProcPanel: public wxScrolledWindow //wxPanel
 		wxString getParams();
 		void setRateAdapt(bool r);
 		virtual void SetPic(PicProcessor *proc) {}
+		virtual void OnKey(wxKeyEvent& event);
 		void OnSize(wxSizeEvent& event);
 		void OnLeftDown(wxMouseEvent& event);
 

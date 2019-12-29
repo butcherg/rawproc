@@ -291,7 +291,7 @@ void rawprocFrm::CreateGUIControls()
 	SetMenuBar(WxMenuBar1);
 
 	WxStatusBar1 = new wxStatusBar(this, ID_WXSTATUSBAR1);
-	int widths[4] = {-1,130, 130, 130};
+	int widths[4] = {-1,130, 130, 200};
 	WxStatusBar1->SetFieldsCount (4, widths);
 
 	SetStatusBar(WxStatusBar1);
@@ -358,15 +358,21 @@ void rawprocFrm::CreateGUIControls()
 	commandtree->SetFocus();
 	mgr.Update();
 	mgr.Bind(wxEVT_AUI_PANE_ACTIVATED, &rawprocFrm::OnAUIActivate, this);
+	mgr.Bind(wxEVT_AUI_PANE_BUTTON, &rawprocFrm::OnPaneButton, this);
 #endif
 
 
 
 }
 
+void rawprocFrm::OnPaneButton(wxAuiManagerEvent& event)
+{
+	printf("OnAUIButton: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
+}
+
 void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 {
-	event.GetPane()->window->SetFocus();
+	//if (!event.GetPane()->window->HasFocus()) event.GetPane()->window->SetFocus();
 	printf("OnAUIActivate: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
 }
 

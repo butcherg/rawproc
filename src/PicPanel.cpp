@@ -324,10 +324,20 @@ void PicPanel::setStatusBar()
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
 
+	wxString states;
 	if (fit)
-		((wxFrame *) GetParent())->SetStatusText("scale: fit",STATUS_SCALE);
+		states.Append("scale: fit");
 	else
-		((wxFrame *) GetParent())->SetStatusText(wxString::Format("scale: %.0f%%", scale*100),STATUS_SCALE);
+		states.Append(wxString::Format("scale: %.0f%%", scale*100));
+
+	if (oob == 1)
+		states.Append("  oob:avg");
+	else if (oob == 2) 
+		states.Append("  oob:1");
+
+	if (softproof) states.Append("  soft");
+
+	((wxFrame *) GetParent())->SetStatusText(states,STATUS_SCALE);
 }
 
 void PicPanel::drawBox(wxDC &dc, int x, int y, int w,int h)
@@ -859,6 +869,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 						else if (oob == 2)
 							((wxFrame *) GetParent())->SetStatusText("out-of-bound: at least one channel");
 						RefreshPic();
+						setStatusBar();
 					}
 					break;
 

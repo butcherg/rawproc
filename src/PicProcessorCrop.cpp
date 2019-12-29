@@ -385,6 +385,7 @@ class CropPanel: public PicProcPanel
 			Bind(wxEVT_CHAR_HOOK, &CropPanel::OnKey,  this);
 		}
 
+/* Use this to reorg the old OnKey method:
 		void OnKey(wxKeyEvent& event)
 		{
 			wxChar uc = event.GetUnicodeKey();
@@ -403,11 +404,10 @@ class CropPanel: public PicProcPanel
 					// It's a control character, < WXK_START
 					switch (uc)
 					{
-						case WXK_TAB:
-							event.Skip();
-							break;
+
 					}
 				}
+				event.Skip();
 			}
 			else // No Unicode equivalent.
 			{
@@ -417,6 +417,7 @@ class CropPanel: public PicProcPanel
 				}
 			}
 		}
+*/
 
 /*
 		void OnKey(wxKeyEvent& event)
