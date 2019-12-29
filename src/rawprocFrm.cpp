@@ -113,7 +113,8 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
-	EVT_CHAR(rawprocFrm::CharEvent)
+	//EVT_CHAR(rawprocFrm::CharEvent)
+	EVT_CHAR_HOOK(rawprocFrm::CharEvent)
 	//EVT_TREE_DELETE_ITEM(ID_COMMANDTREE, rawprocFrm::CommandTreeDeleteItem)
 	EVT_TREE_BEGIN_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeBeginDrag)
 	EVT_TREE_END_DRAG(ID_COMMANDTREE, rawprocFrm::CommandTreeEndDrag)
@@ -366,6 +367,7 @@ void rawprocFrm::CreateGUIControls()
 void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 {
 	event.GetPane()->window->SetFocus();
+	printf("OnAUIActivate: %s\n", event.GetPane()->name.ToStdString().c_str()); fflush(stdout);
 }
 
 void rawprocFrm::OnSize(wxSizeEvent& event)
@@ -2204,6 +2206,40 @@ void rawprocFrm::SetConfigFile(wxString cfile)
 
 void rawprocFrm::CharEvent(wxKeyEvent& event)
 {
+	wxChar uc = event.GetUnicodeKey();
+	if ( uc != WXK_NONE )
+	{
+		// It's a "normal" character. Notice that this includes
+		// control characters in 1..31 range, e.g. WXK_RETURN or
+		// WXK_BACK, so check for them explicitly.
+		if ( uc >= 32 )
+		{
+			switch (uc) {
+			}
+		}
+		else
+		{
+			// It's a control character, < WXK_START
+			switch (uc)
+			{
+				case WXK_TAB:
+					printf("rawprocFrm: tab key...\n"); fflush(stdout);
+					if (NavigateIn())
+						SetStatusText("Yes!!!");
+					else
+						SetStatusText("No...");
+					event.Skip();
+					break;
+			}
+		}
+	}
+	else // No Unicode equivalent.
+	{
+		// It's a special key, > WXK_START, deal with all the known ones:
+		switch ( event.GetKeyCode() )
+		{
+		}
+	}
 	event.Skip();
 }
 

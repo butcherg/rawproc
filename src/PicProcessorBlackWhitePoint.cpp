@@ -171,7 +171,16 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::onEnable, this, BLACKWHITEENABLE);
 			Bind(wxEVT_CHECKBOX, &BlackWhitePointPanel::OnMinWhite, this, BLACKWHITEMINWHITE);
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
+			Bind(wxEVT_SET_FOCUS, &BlackWhitePointPanel::handleFocus, this);
 		}
+		
+		void handleFocus(wxFocusEvent& event)
+		{
+			printf("BlackWhitePointPanel: gain focus...\n"); fflush(stdout);
+			GetParent()->SetFocus();
+			event.Skip();
+		}
+
 
 		void onEnable(wxCommandEvent& event)
 		{

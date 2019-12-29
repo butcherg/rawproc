@@ -51,8 +51,6 @@ myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxS
 	Bind(wxEVT_MOUSEWHEEL, &myHistogramPane::mouseWheelMoved, this);
 	Bind(wxEVT_SIZE, &myHistogramPane::OnSize, this);
 	Bind(wxEVT_PAINT, &myHistogramPane::paintEvent, this);
-	Bind(wxEVT_SET_FOCUS, &myHistogramPane::OnGetFocus,  this);
-	Bind(wxEVT_KILL_FOCUS, &myHistogramPane::OnLoseFocus,  this);
 }
 
 
@@ -66,16 +64,6 @@ myHistogramPane::~myHistogramPane()
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
 	event.Skip();
-	Refresh();
-}
-
-void myHistogramPane::OnGetFocus(wxFocusEvent& event)
-{
-	Refresh();
-}
-
-void myHistogramPane::OnLoseFocus(wxFocusEvent& event)
-{
 	Refresh();
 }
 

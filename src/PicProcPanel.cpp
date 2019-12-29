@@ -39,8 +39,6 @@ PicProcPanel::PicProcPanel(wxWindow *parent, PicProcessor *proc, wxString params
 
 	SetBackgroundColour(parent->GetBackgroundColour());
 	Bind(wxEVT_LEFT_DOWN, &PicProcPanel::OnLeftDown, this);
-	Bind(wxEVT_KEY_DOWN, &PicProcPanel::keyPressed, this);
-	Bind(wxEVT_KEY_UP, &PicProcPanel::keyPressed, this);
 }
 
 
@@ -62,20 +60,6 @@ void PicProcPanel::OnLeftDown(wxMouseEvent& event)
 	SetFocus();
 	Refresh();
 }
-
-void PicProcPanel::keyPressed(wxKeyEvent& event) 
-{
-	switch (event.GetKeyCode()) {
-		case WXK_TAB:
-			printf("PicProcPanel: tab key...\n"); fflush(stdout);
-			event.Skip();
-			break;
-		default:
-			event.Skip(false);
-			break;
-	}
-}
-
 
 wxString PicProcPanel::getParams()
 {
