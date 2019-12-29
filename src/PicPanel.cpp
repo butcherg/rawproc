@@ -57,8 +57,6 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	//Bind(wxEVT_CHAR, &PicPanel::OnKey,  this);
 	Bind(wxEVT_CHAR_HOOK, &PicPanel::OnKey,  this);
 	Bind(wxEVT_TIMER, &PicPanel::OnTimer,  this);
-	Bind(wxEVT_SET_FOCUS, &PicPanel::OnGetFocus,  this);
-	Bind(wxEVT_KILL_FOCUS, &PicPanel::OnLoseFocus,  this);
 		
 	//t = new wxTimer(this);
 }
@@ -74,18 +72,6 @@ void PicPanel::OnSize(wxSizeEvent& event)
 {
 	Refresh();
 	event.Skip();
-}
-
-void PicPanel::OnGetFocus(wxFocusEvent& event)
-{
-	SetWindowStyle(wxTAB_TRAVERSAL | wxBORDER_RAISED);
-	Refresh();
-}
-
-void PicPanel::OnLoseFocus(wxFocusEvent& event)
-{
-	SetWindowStyle(wxTAB_TRAVERSAL | wxBORDER_SUNKEN);
-	Refresh();
 }
 
 bool PicPanel::ToggleToolTip()
@@ -996,7 +982,6 @@ void PicPanel::OnKey(wxKeyEvent& event)
 
 		}
 	}
-	event.Skip();
 }
 
 
