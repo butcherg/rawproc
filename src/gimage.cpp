@@ -4101,6 +4101,8 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 	cmsHPROFILE hImgProf;
 	if (std::count(iccfile.begin(), iccfile.end(), ',') == 8)
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
+	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
+		hImgProf = makeLCMSProfile(iccfile, 1.0);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	
@@ -4137,6 +4139,8 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 	cmsHPROFILE hImgProf;
 	if (std::count(iccfile.begin(), iccfile.end(), ',') == 8)
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
+	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
+		hImgProf = makeLCMSProfile(iccfile, 1.0);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	if (hImgProf) {

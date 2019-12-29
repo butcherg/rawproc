@@ -147,40 +147,6 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_CHAR_HOOK, &ColorspacePanel::OnKey,  this);
 		}
 
-		void OnKey(wxKeyEvent& event)
-		{
-			wxChar uc = event.GetUnicodeKey();
-			if ( uc != WXK_NONE )
-			{
-				// It's a "normal" character. Notice that this includes
-				// control characters in 1..31 range, e.g. WXK_RETURN or
-				// WXK_BACK, so check for them explicitly.
-				if ( uc >= 32 )
-				{
-					switch (uc) {
-					}
-				}
-				else
-				{
-					// It's a control character, < WXK_START
-					switch (uc)
-					{
-						case WXK_TAB:
-							event.Skip();
-							break;
-					}
-				}
-			}
-			else // No Unicode equivalent.
-			{
-				// It's a special key, > WXK_START, deal with all the known ones:
-				switch ( event.GetKeyCode() )
-				{
-				}
-			}
-		}
-
-
 		void onEnable(wxCommandEvent& event)
 		{
 			if (enablebox->GetValue()) {
@@ -626,6 +592,25 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 				if (result) 
 					if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
 						log(wxString::Format(_("tool=colorspace_assign,imagesize=%dx%d,time=%s"),dib->getWidth(), dib->getHeight(),d));
+			}
+		}
+
+		else if (cp[0] == "srgb" | cp[0] == "wide" | cp[0] == "adobe" | cp[0] == "prophoto" | cp[0] == "identity") {
+			if (cp[1] == "convert") {
+				if (dib->ApplyColorspace(cp[0].ToStdString(), intent, bpc, threadcount) != GIMAGE_OK) {
+					wxMessageBox(_("ColorSpace convert failed."));
+					result = false;
+				}
+				else m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,convert"),wxString(cp[0])));
+				wxString d = duration();
+			}
+			else if (cp[1] == "assign") {
+				if (dib->AssignColorspace(cp[0].ToStdString()) != GIMAGE_OK) {
+					wxMessageBox(_("ColorSpace assign failed."));
+					result = false;
+				}
+				else m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,assign"),wxString(cp[0])));
+				wxString d = duration();
 			}
 		}
 
