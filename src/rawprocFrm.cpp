@@ -222,7 +222,11 @@ void rawprocFrm::CreateGUIControls()
 {
 #ifndef SIZERLAYOUT
 	mgr.SetManagedWindow(this);
+#ifdef WIN32 //until I can figure out why tab traversal doesn't work in Windows...
+	mgr.SetFlags(wxAUI_MGR_DEFAULT);
+#else
 	mgr.SetFlags(wxAUI_MGR_ALLOW_ACTIVE_PANE | wxAUI_MGR_DEFAULT);
+#endif
 #endif
 	//Do not add custom code between
 	//GUI Items Creation Start and GUI Items Creation End
@@ -366,7 +370,11 @@ void rawprocFrm::CreateGUIControls()
 	Layout();
 #else
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
+#ifdef WIN32
+	mgr.AddPane(pic, wxAuiPaneInfo().Center().CloseButton(false).Movable(false));
+#else
 	mgr.AddPane(pic, wxAuiPaneInfo().Center().Caption("Image").CloseButton(false).Movable(false));
+#endif
 	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
 	mgr.AddPane(histogram,   pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.Resizable());  //Fixed());    //ToDo: myHistogramPane needs a sizer to preserve aspect...  ??
 	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
@@ -383,13 +391,12 @@ void rawprocFrm::CreateGUIControls()
 #ifndef SIZERLAYOUT
 void rawprocFrm::OnPaneButton(wxAuiManagerEvent& event)
 {
-	printf("OnAUIButton: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
+	//printf("OnAUIButton: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
 }
 
 void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 {
-	//if (!event.GetPane()->window->HasFocus()) event.GetPane()->window->SetFocus();
-	printf("OnAUIActivate: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
+	//printf("OnAUIActivate: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
 }
 #endif
 
