@@ -322,10 +322,19 @@ void rawprocFrm::CreateGUIControls()
 	//parm app.dock.width: Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300
 	int dockwidth = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.dock.width","300")).c_str());
 
+	//parm app.toolchain.height: Specifies height of tool chain at startup. Change requires restarting rawproc.  Default=200
+	int toolheight = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.toolchain.height","200")).c_str());
+	//parm app.histogram.height: Specifies height of histogram at startup. Change requires restarting rawproc.  Default=150
+	int histheight = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.histogram.height","150")).c_str());
+	//parm app.parampane.height: Specifies height of parameter pane at startup. Change requires restarting rawproc. However, parameter pane will grow vertically if the rawproc application window is resized.  Default=350
+	int parmheight = atoi(wxString(myConfig::getConfig().getValueOrDefault("app.parampane.height","350")).c_str());
+
 	//Image manipulation panels:
-	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,200), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT | wxTAB_TRAVERSAL | wxBORDER_RAISED);  
-	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(dockwidth,150));
-	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,350), wxBORDER_SUNKEN | wxTAB_TRAVERSAL);
+	//commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,toolheight), wxTR_DEFAULT_STYLE | wxTR_HAS_VARIABLE_ROW_HEIGHT | wxTAB_TRAVERSAL | wxBORDER_RAISED);  
+	commandtree = new wxTreeCtrl(this, ID_COMMANDTREE, wxDefaultPosition, wxSize(dockwidth,toolheight), wxBORDER_SUNKEN | wxTR_HAS_VARIABLE_ROW_HEIGHT);  
+	histogram = new myHistogramPane(this, wxDefaultPosition,wxSize(dockwidth,histheight));
+	parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,parmheight), wxBORDER_SUNKEN | wxTAB_TRAVERSAL);
+	//parambook = new wxSimplebook(this, wxID_ANY, wxDefaultPosition,wxSize(dockwidth,parmheight));
 
 	//Main picture panel:
 	pic = new PicPanel(this, commandtree, histogram);
@@ -336,19 +345,25 @@ void rawprocFrm::CreateGUIControls()
 	commandtree->SetFont(font);
 
 #ifdef SIZERLAYOUT
-	wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).FixedMinSize();  
+	wxSizerFlags paneflags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxBOTTOM, 5); //.FixedMinSize();  
+	wxSizerFlags headerflags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP, 5); //.FixedMinSize();  
+	wxSizerFlags paramflags = wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxBOTTOM, 5).Expand(); //.FixedMinSize();  
+	wxSizerFlags imageflags = wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM, 5).Expand(); //.FixedMinSize(); 
+
 	hs = new wxBoxSizer(wxHORIZONTAL);
 	vs = new wxBoxSizer(wxVERTICAL);
-	vs->Add(new wxStaticText(this,wxID_ANY, "Commands:", wxDefaultPosition, wxSize(100,20)), flags);
-	vs->Add(commandtree, flags);
-	vs->Add(new wxStaticText(this,wxID_ANY, "Histogram:", wxDefaultPosition, wxSize(100,20)), flags);
-	vs->Add(histogram, flags);
-	vs->Add(new wxStaticText(this,wxID_ANY, "Parameters:", wxDefaultPosition, wxSize(100,20)), flags);
-	vs->Add(parambook, flags);
-	hs->Add(vs, flags);
-	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), flags.Expand());
-	hs->Add(pic, flags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Tool Chain:", wxDefaultPosition, wxSize(100,20)), headerflags);
+	vs->Add(commandtree, paneflags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Histogram:", wxDefaultPosition, wxSize(100,20)), headerflags);
+	vs->Add(histogram, paneflags);
+	vs->Add(new wxStaticText(this,wxID_ANY, "Parameters:", wxDefaultPosition, wxSize(100,20)), headerflags);
+	vs->Add(parambook, paramflags);
+
+	hs->Add(vs, wxSizerFlags().Expand());
+	hs->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), headerflags.Expand());
+	hs->Add(pic, imageflags);
 	SetSizerAndFit(hs);
+	Layout();
 #else
 	wxAuiPaneInfo pinfo = wxAuiPaneInfo().Left().CloseButton(false);
 	mgr.AddPane(pic, wxAuiPaneInfo().Center().Caption("Image").CloseButton(false).Movable(false));
@@ -365,6 +380,7 @@ void rawprocFrm::CreateGUIControls()
 
 }
 
+#ifndef SIZERLAYOUT
 void rawprocFrm::OnPaneButton(wxAuiManagerEvent& event)
 {
 	printf("OnAUIButton: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
@@ -375,6 +391,7 @@ void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 	//if (!event.GetPane()->window->HasFocus()) event.GetPane()->window->SetFocus();
 	printf("OnAUIActivate: %s\n", event.GetPane()->caption.ToStdString().c_str()); fflush(stdout);
 }
+#endif
 
 void rawprocFrm::OnSize(wxSizeEvent& event)
 {

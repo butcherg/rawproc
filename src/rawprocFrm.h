@@ -32,7 +32,7 @@
 
 ////Dialog Style Start
 #undef rawprocFrm_STYLE
-#define rawprocFrm_STYLE wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX
+#define rawprocFrm_STYLE wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX |wxTAB_TRAVERSAL
 ////Dialog Style End
 
 #include <wx/filename.h>
@@ -53,6 +53,8 @@
 #include "PicPanel.h"
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"
+
+//#define SIZERLAYOUT
 
 
 class rawprocFrm : public wxFrame //, wxFileDropTarget
@@ -135,8 +137,10 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 		};
 		
 	public:
+#ifndef SIZERLAYOUT
 	void OnAUIActivate(wxAuiManagerEvent& event);
 	void OnPaneButton(wxAuiManagerEvent& event);
+#endif
 	//PicProcessor *  AddItem(wxString name, wxString command, bool display=true);
 	wxTreeItemId AddItem(wxString name, wxString command, bool display=true);
 	void ApplyOps(gImage &dib, wxString operations);

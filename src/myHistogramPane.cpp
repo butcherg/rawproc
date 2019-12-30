@@ -8,7 +8,7 @@
 
 
 myHistogramPane::myHistogramPane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN | wxTAB_TRAVERSAL)
+wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 {
 	int fr=0, fg=0, fb=0;
 	blankpic = true;
