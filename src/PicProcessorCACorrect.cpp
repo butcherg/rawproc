@@ -23,6 +23,7 @@ class CACorrectPanel: public PicProcPanel
 	public:
 		CACorrectPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 
 			enablebox = new wxCheckBox(this, CACORRECTENENABLE, _("cacorrect:"));
@@ -86,6 +87,7 @@ class CACorrectPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &CACorrectPanel::OnAvoidCS, this, CACORRECTAVOIDCS);
 			Bind(wxEVT_TIMER, &CACorrectPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &CACorrectPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

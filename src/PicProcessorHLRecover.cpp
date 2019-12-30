@@ -14,6 +14,7 @@ class HLRecoverPanel: public PicProcPanel
 	public:
 		HLRecoverPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxGridBagSizer *g = new wxGridBagSizer();
@@ -35,9 +36,6 @@ class HLRecoverPanel: public PicProcPanel
 			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
-			g->Layout();
-			Refresh();
-			Update();
 			SetFocus();
 			//t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &HLRecoverPanel::OnButton, this);
@@ -46,6 +44,7 @@ class HLRecoverPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &HLRecoverPanel::onEnable, this, HLRECOVERENABLE);
 			//Bind(wxEVT_TIMER, &HLRecoverPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &HLRecoverPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

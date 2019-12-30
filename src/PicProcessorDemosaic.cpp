@@ -39,6 +39,7 @@ class DemosaicPanel: public PicProcPanel
 	public:
 		DemosaicPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT).Expand();
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
@@ -213,6 +214,7 @@ colorb->Enable(true);
 			Bind(myINTEGERCTRL_CHANGE, &DemosaicPanel::onWheel, this);
 			Bind(wxEVT_TIMER, &DemosaicPanel::OnTimer, this);
 			Bind(wxEVT_CHAR_HOOK, &DemosaicPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

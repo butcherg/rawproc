@@ -23,6 +23,7 @@ class CurvePanel: public PicProcPanel
 
 		CurvePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxArrayString str;
 			str.Add("rgb");
 			str.Add("red");
@@ -62,8 +63,8 @@ class CurvePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &CurvePanel::onEnable, this, CURVEENABLE);
 			Bind(wxEVT_BUTTON, &CurvePanel::OnCopy, this, CURVECOPY);
 			Bind(wxEVT_BUTTON, &CurvePanel::OnPaste, this, CURVEPASTE);
-			Refresh();
 			Bind(wxEVT_CHAR_HOOK, &CurvePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

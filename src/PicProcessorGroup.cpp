@@ -17,6 +17,7 @@ class GroupPanel: public PicProcPanel
 	public:
 		GroupPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
 			enablebox = new wxCheckBox(this, GROUPENABLE, _("group:"));
@@ -43,13 +44,12 @@ class GroupPanel: public PicProcPanel
 			m->End();
 
 			SetSizerAndFit(m);
-			m->Layout();
-			SetFocus();
 
 			Bind(wxEVT_CHECKBOX, &GroupPanel::onEnable, this, GROUPENABLE);
 			Bind(wxEVT_BUTTON, &GroupPanel::selectFile, this, GROUPFILESELECT);
 			Bind(wxEVT_BUTTON, &GroupPanel::updateGroup, this, GROUPUPDATE);
 			Bind(wxEVT_CHAR_HOOK, &GroupPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

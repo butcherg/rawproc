@@ -29,6 +29,7 @@ class ColorspacePanel: public PicProcPanel
 	public:
 		ColorspacePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			camdat_status = "";
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxArrayString parms = split(params, ",");
@@ -145,6 +146,7 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &ColorspacePanel::onEnable, this, COLORENABLE);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::camstatusDialog, this, COLORCAMERASTATUS);
 			Bind(wxEVT_CHAR_HOOK, &ColorspacePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

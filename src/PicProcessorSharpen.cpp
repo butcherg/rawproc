@@ -18,6 +18,7 @@ class SharpenPanel: public PicProcPanel
 	public:
 		SharpenPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 
@@ -109,9 +110,6 @@ class SharpenPanel: public PicProcPanel
 			
 			m->End();
 			SetSizerAndFit(m);
-
-			Refresh();
-			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &SharpenPanel::OnButton, this);
@@ -121,6 +119,7 @@ class SharpenPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &SharpenPanel::onEnable, this, SHARPENENABLE);
 			Bind(wxEVT_TIMER, &SharpenPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SharpenPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

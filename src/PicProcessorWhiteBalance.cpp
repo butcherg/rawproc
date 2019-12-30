@@ -36,6 +36,7 @@ class WhiteBalancePanel: public PicProcPanel
 	public:
 		WhiteBalancePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			double rm, gm, bm;
 			wxSize spinsize(130, TEXTCTRLHEIGHT);
 			
@@ -126,9 +127,6 @@ class WhiteBalancePanel: public PicProcPanel
 
 			m->End();
 			SetSizerAndFit(m);
-			m->Layout();
-
-			
 
 			//if camera multipliers are available in the metadata:
 			camr = 1.0; camg = 1.0; camb = 1.0;
@@ -185,7 +183,6 @@ class WhiteBalancePanel: public PicProcPanel
 			else 
 				wxMessageBox(_("Error: ill-formed param string"));
 
-
 			SetFocus();
 			t.SetOwner(this);
 
@@ -198,6 +195,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnCopy, this, WBCOPY);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnPaste, this, WBPASTE);
 			Bind(wxEVT_CHAR_HOOK, &WhiteBalancePanel::OnKey,  this);
+			Thaw();
 		}
 		
 		void OnReset(wxCommandEvent& event)

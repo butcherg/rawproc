@@ -79,13 +79,7 @@ class GrayPanel: public PicProcPanel
 
 			m->End();
 			SetSizerAndFit(m);
-			m->Layout();
 
-
-			//SetSizerAndFit(g);
-			//g->Layout();
-			Refresh();
-			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnButton, this);
@@ -96,6 +90,7 @@ class GrayPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &GrayPanel::OnCopy, this, GRAYCOPY);
 			Bind(wxEVT_BUTTON, &GrayPanel::OnPaste, this, GRAYPASTE);
 			Bind(wxEVT_CHAR_HOOK, &GrayPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

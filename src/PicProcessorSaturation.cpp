@@ -12,6 +12,7 @@ class SaturationPanel: public PicProcPanel
 	public:
 		SaturationPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxGridBagSizer *g = new wxGridBagSizer();
@@ -32,9 +33,6 @@ class SaturationPanel: public PicProcPanel
 			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
-			g->Layout();
-			Refresh();
-			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
@@ -43,6 +41,7 @@ class SaturationPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &SaturationPanel::onEnable, this, SATURATIONENABLE);
 			Bind(wxEVT_TIMER, &SaturationPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SaturationPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

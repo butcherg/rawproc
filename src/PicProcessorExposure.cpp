@@ -22,6 +22,7 @@ class ExposurePanel: public PicProcPanel
 	public:
 		ExposurePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxALL, 3).CenterVertical();
@@ -95,8 +96,6 @@ class ExposurePanel: public PicProcPanel
 			SetSizerAndFit(m);
 			m->Layout();
 
-			Refresh();
-			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &ExposurePanel::OnButton, this, EXPOSUREUNDO);
@@ -110,6 +109,7 @@ class ExposurePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &ExposurePanel::onEnable, this, EXPOSUREENABLE);
 			Bind(wxEVT_TIMER, &ExposurePanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &ExposurePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

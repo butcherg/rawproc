@@ -33,6 +33,7 @@ class DenoisePanel: public PicProcPanel
 	public:
 		DenoisePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			algorithm = DENOISENLMEANS;
 			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
 			int localval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
@@ -145,11 +146,8 @@ class DenoisePanel: public PicProcPanel
 			btn2->Enable(nlb);
 			thresh->Enable(wlb);
 
-			//SetSizerAndFit(g);
 			SetSizerAndFit(m);
-			//g->Layout();
-			Refresh();
-			Update();
+			
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &DenoisePanel::OnButton, this);
@@ -165,6 +163,7 @@ class DenoisePanel: public PicProcPanel
 			//Bind(wxEVT_MOUSEWHEEL,&DenoisePanel::onWheel, this);
 			//Bind(wxEVT_TEXT_ENTER, &DenoisePanel::paramChanged, this);
 			Bind(wxEVT_CHAR_HOOK, &DenoisePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

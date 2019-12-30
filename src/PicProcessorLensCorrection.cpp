@@ -281,11 +281,8 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxButton(this, LENSCORRECTION_APPLY, _("Apply"), wxDefaultPosition, wxSize(70,-1)), flags);
 			m->End();
-			SetSizerAndFit(m);
-			m->Layout();
 
-			Refresh();
-			Update();
+			SetSizerAndFit(m);
 			SetFocus();
 			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
@@ -294,6 +291,7 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_APPLY);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
 			Bind(wxEVT_CHAR_HOOK, &LensCorrectionPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

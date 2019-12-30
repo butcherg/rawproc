@@ -58,6 +58,7 @@ class TonePanel: public PicProcPanel
 	public:
 		TonePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			//wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
 
@@ -161,8 +162,6 @@ class TonePanel: public PicProcPanel
 
 			m->End();
 			SetSizerAndFit(m);
-			m->Layout();
-
 			SetFocus();
 			t.SetOwner(this);
 
@@ -178,6 +177,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &TonePanel::OnButton, this);
 			Bind(wxEVT_CHOICE, &TonePanel::reinopChanged, this);
 			Bind(wxEVT_CHAR_HOOK, &TonePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void setPanel(wxArrayString p)

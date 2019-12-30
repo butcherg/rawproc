@@ -335,6 +335,7 @@ class CropPanel: public PicProcPanel
 	public:
 		CropPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxImage img;
 			SetDoubleBuffered(true);
 
@@ -383,6 +384,7 @@ class CropPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &CropPanel::OnPaste, this, CROPPASTE);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_CHAR_HOOK, &CropPanel::OnKey,  this);
+			Thaw();
 		}
 
 /* Use this to reorg the old OnKey method:

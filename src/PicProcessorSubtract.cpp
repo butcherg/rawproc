@@ -17,6 +17,7 @@ class SubtractPanel: public PicProcPanel
 	public:
 		SubtractPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
@@ -85,9 +86,6 @@ class SubtractPanel: public PicProcPanel
 
 			m->End();
 			SetSizerAndFit(m);
-			m->Layout();
-
-
 			SetFocus();
 			t.SetOwner(this);
 
@@ -99,6 +97,7 @@ class SubtractPanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &SubtractPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &SubtractPanel::selectDarkFile, this);
 			Bind(wxEVT_CHAR_HOOK, &SubtractPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)

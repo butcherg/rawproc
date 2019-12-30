@@ -14,6 +14,7 @@ class RedEyePanel: public PicProcPanel
 	public:
 		RedEyePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxGridBagSizer *g = new wxGridBagSizer();
@@ -72,9 +73,6 @@ class RedEyePanel: public PicProcPanel
 			g->Add(new wxStaticText(this, wxID_ANY, help), wxGBPosition(8,0), wxGBSpan(1,4), wxALIGN_LEFT | wxALL, 5);
 			
 			SetSizerAndFit(g);
-			g->Layout();
-			Refresh();
-			Update();
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &RedEyePanel::OnButton, this);
@@ -84,6 +82,7 @@ class RedEyePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &RedEyePanel::OnEnable, this, REDEYEENABLE);
 			Bind(wxEVT_TIMER, &RedEyePanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &RedEyePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void OnEnable(wxCommandEvent& event)

@@ -26,6 +26,7 @@ class BlackWhitePointPanel: public PicProcPanel
 	public:
 		BlackWhitePointPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			int blk=0, wht=255;
 			wxArrayString p = split(params,",");
 
@@ -173,6 +174,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_TIMER, &BlackWhitePointPanel::OnTimer,  this);
 			Bind(wxEVT_SET_FOCUS, &BlackWhitePointPanel::handleFocus, this);
 			Bind(wxEVT_CHAR_HOOK, &BlackWhitePointPanel::OnKey,  this);
+			Thaw();
 		}
 
 		void handleFocus(wxFocusEvent& event)

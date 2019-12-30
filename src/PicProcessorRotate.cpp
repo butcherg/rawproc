@@ -302,13 +302,8 @@ class RotatePanel: public PicProcPanel
 			else r45->SetValue(true);
 			
 			rotateSelection();
-
 			SetSizerAndFit(b);
-
-			Refresh();
-			Update();
 			SetFocus();
-
 			t.SetOwner(this);
 			//Bind(wxEVT_SIZE,&RotatePanel::OnSize, this);
 			rotate->Bind(wxEVT_BUTTON, &RotatePanel::OnButton, this);
@@ -321,6 +316,7 @@ class RotatePanel: public PicProcPanel
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &RotatePanel::OnKey,  this);
+			Thaw();
 		}
 
 		~RotatePanel()

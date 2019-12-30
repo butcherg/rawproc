@@ -17,6 +17,7 @@ class ResizePanel: public PicProcPanel
 	public:
 		ResizePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM).Expand();
 			wxGridBagSizer *g = new wxGridBagSizer();
 
@@ -63,8 +64,6 @@ class ResizePanel: public PicProcPanel
 #endif
 
 			SetSizerAndFit(g);
-			g->Layout();
-
 			SetFocus();
 			t.SetOwner(this);
 			Bind(myINTEGERCTRL_UPDATE, &ResizePanel::paramChanged, this);
@@ -76,6 +75,7 @@ class ResizePanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &ResizePanel::paramChanged, this, BLURENABLE);
 #endif
 			Bind(wxEVT_CHAR_HOOK, &ResizePanel::OnKey,  this);
+			Thaw();
 		}
 
 		void onEnable(wxCommandEvent& event)
