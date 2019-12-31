@@ -6,6 +6,68 @@
 #include "PicProcessor.h"
 #include "myConfig.h"
 #include <wx/clipbrd.h>
+#include <wx/minifram.h>
+#include <wx/frame.h>
+
+class mySnapshotWindow: public wxFrame
+{
+public:
+	mySnapshotWindow (wxWindow *parent, wxWindowID id, const wxString &title, wxBitmap snapshot, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize): wxFrame(parent, id, title, pos, size, wxCLOSE_BOX | wxCAPTION)
+	{
+		wxSize sz = snapshot.GetSize();
+		snap = snapshot;
+		Bind(wxEVT_PAINT, &mySnapshotWindow::OnPaint,  this);
+		Bind(wxEVT_SIZE, &mySnapshotWindow::OnSize, this);
+		SetClientSize(sz.GetWidth(),sz.GetHeight());
+		Refresh();
+	}
+
+	void OnSize(wxSizeEvent& event) 
+	{
+		Refresh();
+		event.Skip();
+	}
+
+
+	void OnPaint(wxPaintEvent & event)
+	{
+		wxPaintDC dc(this);
+		dc.DrawBitmap(snap, 0,0); 
+	}
+
+private:
+	wxBitmap snap;
+};
+
+class mySnapshotDialog: public wxDialog
+{
+public:
+	mySnapshotDialog (wxWindow *parent, wxWindowID id, const wxString &title, wxBitmap snapshot, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize): wxDialog(parent, id, title, pos, size, wxCLOSE_BOX | wxCAPTION)
+	{
+		wxSize sz = snapshot.GetSize();
+		snap = snapshot;
+		Bind(wxEVT_PAINT, &mySnapshotDialog::OnPaint,  this);
+		Bind(wxEVT_SIZE, &mySnapshotDialog::OnSize, this);
+		SetClientSize(sz.GetWidth(),sz.GetHeight());
+		Refresh();
+	}
+
+	void OnSize(wxSizeEvent& event) 
+	{
+		Refresh();
+		event.Skip();
+	}
+
+
+	void OnPaint(wxPaintEvent & event)
+	{
+		wxPaintDC dc(this);
+		dc.DrawBitmap(snap, 0,0); 
+	}
+
+private:
+	wxBitmap snap;
+};
 
 
 PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(1000,740), wxTAB_TRAVERSAL |wxBORDER_RAISED) 
@@ -20,7 +82,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = modified = pixelbox = false;
+	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = false;
 
 	thumbvisible = true;
 	histogram = hgram;
@@ -400,12 +462,38 @@ void PicPanel::render(wxDC &dc)
 
 	//setStatusBar();
 
-//
 	//write the display image:
-	wxMemoryDC mdc;
-	mdc.SelectObject(*image);
-	dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
-	mdc.SelectObject(wxNullBitmap);
+	{
+		wxMemoryDC mdc;
+		mdc.SelectObject(*image);
+		dc.StretchBlit(imageposx,imageposy, panelw, panelh, &mdc, viewposx, viewposy, vieww, viewh);
+		mdc.SelectObject(wxNullBitmap);
+	}
+
+	if (snapshot) {
+		int snapw, snaph;
+		if (scaledimagew <= panelw & scaledimageh <= panelh) {
+			snapw = scaledimagew;
+			snaph = scaledimageh;
+		}
+		else {
+			snapw = panelw;
+			snaph = panelh;
+		}
+		wxBitmap snap(snapw, snaph);
+		wxMemoryDC mydc, paneldc;
+		paneldc.SelectObject(*image);
+		mydc.SelectObject(snap);
+		mydc.StretchBlit(0,0, panelw, panelh, &paneldc, viewposx, viewposy, vieww, viewh);
+		mydc.SelectObject(wxNullBitmap);
+		paneldc.SelectObject(wxNullBitmap);
+		mySnapshotWindow *d = new mySnapshotWindow (NULL, wxID_ANY, "Snapshot", snap);
+		d->Show();
+		//d->Refresh();
+		snapshot = false;
+	}
+
+
 //
 /*
 	//write the display image, slowly.  Legacy (circa v8) code for reference, doesn't work quite right here:
@@ -855,6 +943,11 @@ void PicPanel::OnKey(wxKeyEvent& event)
 						thumbvisible = false;
 					else
 						thumbvisible = true;
+					Refresh();
+					break;
+
+				case 78: //n snapshot
+					snapshot = true;
 					Refresh();
 					break;
 

@@ -72,7 +72,7 @@ class PicPanel: public wxPanel
 		GIMAGE_CHANNEL ch;
 
 		int mousex, mousey;
-		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip, exposurebox, pixelbox;
+		bool dragging, thumbdragging, thumbvisible, fit, softproof, tooltip, exposurebox, pixelbox, snapshot;
 		int skipmove;
 		int oob;
 		
