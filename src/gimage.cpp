@@ -3274,8 +3274,9 @@ bool gImage::ApplyHLRecover(int threadcount)
 		}
 	}
 
-	float clmax[3];
+	float clmax[3]; // = {1.0, 1.0, 1.0}; // in case I want to hard-code them for testing...
 	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+	//float clippoint = atof(getInfoValue("LibrawMaximum").c_str()) / 65536.0;
 	float clippoint = 1.0;
 	clmax[0] = clippoint * atof(camwb[0].c_str());
 	clmax[1] = clippoint * atof(camwb[1].c_str());
