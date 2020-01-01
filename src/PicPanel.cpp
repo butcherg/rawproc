@@ -470,7 +470,8 @@ void PicPanel::render(wxDC &dc)
 		mdc.SelectObject(wxNullBitmap);
 	}
 
-	if (snapshot) {
+	//parm display.snapshot: 1|0, enables|disables the 'n' key and snapshooting of the display.  Default: 0
+	if (snapshot & myConfig::getConfig().getValueOrDefault("display.snapshot","0") == "1") {
 		int snapw, snaph;
 		if (scaledimagew <= panelw & scaledimageh <= panelh) {
 			snapw = scaledimagew;
@@ -487,12 +488,10 @@ void PicPanel::render(wxDC &dc)
 		mydc.StretchBlit(0,0, panelw, panelh, &paneldc, viewposx, viewposy, vieww, viewh);
 		mydc.SelectObject(wxNullBitmap);
 		paneldc.SelectObject(wxNullBitmap);
-		mySnapshotWindow *d = new mySnapshotWindow (NULL, wxID_ANY, "Snapshot", snap);
+		mySnapshotDialog *d = new mySnapshotDialog (this, wxID_ANY, "Snapshot", snap);
 		d->Show();
-		//d->Refresh();
-		snapshot = false;
 	}
-
+	snapshot = false;
 
 //
 /*
