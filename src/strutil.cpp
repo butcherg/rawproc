@@ -5,6 +5,7 @@
 #include <map>
 #include <iostream>
 #include <sstream> 
+#include <regex>
 
 #include <locale>
 #include <codecvt>
@@ -35,6 +36,12 @@ std::string to_utf8(std::wstring wstr)
 {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	return converter.to_bytes(wstr);
+}
+
+bool isFloat(std::string str)
+{
+	std::regex e ("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$");
+	return std::regex_match (str,e);
 }
 
 

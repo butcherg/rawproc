@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+bool isFloat(std::string str);
+
 std::string tostr(double t);
 std::string tostr(unsigned short t);
 
