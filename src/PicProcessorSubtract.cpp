@@ -110,7 +110,7 @@ class SubtractPanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &SubtractPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &SubtractPanel::selectDarkFile, this);
 			Bind(wxEVT_CHAR_HOOK, &SubtractPanel::OnKey,  this);
-			Bind(wxEVT_CHOICE, &SubtractPanel::OnChoice,  this);
+			Bind(wxEVT_CHOICE, &SubtractPanel::onChoice,  this);
 			Thaw();
 		}
 
@@ -126,7 +126,7 @@ class SubtractPanel: public PicProcPanel
 			}
 		}
 		
-		void onEnable(wxCommandEvent& event)
+		void onChoice(wxCommandEvent& event)
 		{
 			processSUB();
 		}
