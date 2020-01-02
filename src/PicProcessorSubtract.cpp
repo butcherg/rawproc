@@ -132,6 +132,13 @@ class SubtractPanel: public PicProcPanel
 			Refresh();
 		}
 
+		void setCameraVal(wxString str)
+		{
+			cam->SetLabel(str);
+			Refresh();
+		}
+
+
 		void selectDarkFile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
@@ -217,7 +224,27 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new SubtractPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
-	((SubtractPanel *) toolpanel)->setCameraVal(atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0);
+	gImage dib = getPreviousPicProcessor()->getProcessedPic();
+	int subtract = atoi(dib.getInfoValue("LibrawBlack").c_str());
+	if (subtract != 0) {
+		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%f (%d)", (float) subtract / 65536.0, subtract));
+	}
+	else {
+		float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
+		std::vector<std::string> s = split(dib.getInfoValue("LibrawPerChannelBlack"),",");
+		if (s.size() >= 4) {
+			if (s[0] =="0" & s[1] =="0" & s[2] =="0" & s[3] =="0") {
+				((SubtractPanel *) toolpanel)->setCameraVal("--");
+			}
+			else {
+				subr = atof(s[0].c_str());
+				subg1 = atof(s[0].c_str());
+				subb = atof(s[0].c_str());
+				subg2 = atof(s[0].c_str());
+				((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%s,%s,%s,%s (%d,%d,%d,%d)",wxString(s[0]),wxString(s[1]),wxString(s[2]),wxString(s[3]),subr,subg1,subg2,subb));
+			}
+		}
+	}
 	toolpanel->Refresh();
 	toolpanel->Update();
 }
@@ -247,18 +274,63 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 		std::vector<std::string> p = split(c.ToStdString(),",");
 		std::string param = p[0];
 	
-		if (param == "rgb" | param == "red" | param == "green" | param == "blue") {
-			m_tree->SetItemText(id, _("subtract:val"));
+		if (param == "rgb") {
+			m_tree->SetItemText(id, _("subtract:rgb,val"));
 			setChannel(wxString(param));
 			if (p.size() >=2) subtract = atof(p[1].c_str());
-			setChannel(param);
-			dib->ApplySubtract(subtract, channel, true, threadcount);
+			dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+			m_display->SetModified(true);
+			result = true;
+		}
+		else if (param == "red") {
+			m_tree->SetItemText(id, _("subtract:red,val"));
+			setChannel(wxString(param));
+			if (p.size() >=2) subtract = atof(p[1].c_str());
+			dib->ApplySubtract(subtract, 0.0, 0.0, 0.0, true, threadcount);
+			m_display->SetModified(true);
+			result = true;
+		}
+		else if (param == "green") {
+			m_tree->SetItemText(id, _("subtract:green,val"));
+			setChannel(wxString(param));
+			if (p.size() >=2) subtract = atof(p[1].c_str());
+			dib->ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
+			m_display->SetModified(true);
+			result = true;
+		}
+		else if (param == "blue") {
+			m_tree->SetItemText(id, _("subtract:blue,val"));
+			setChannel(wxString(param));
+			if (p.size() >=2) subtract = atof(p[1].c_str());
+			dib->ApplySubtract(0.0, 0.0, 0.0, subtract, true, threadcount);
 			m_display->SetModified(true);
 			result = true;
 		}
 		else if (param == "camera") {
 			m_tree->SetItemText(id, _("subtract:camera"));
-			subtract = atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0;
+			int subval = atoi(dib->getInfoValue("LibrawBlack").c_str());
+			if (subval != 0) {
+				subtract = (float) subval / 65536.0;
+				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+			}
+			else {
+				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
+				std::vector<std::string> s = split(dib->getInfoValue("LibrawPerChannelBlack"),",");
+				if (s[0] =="0" | s[1] =="0" | s[2] =="0" & s[3] =="0") {
+					result = false;
+				}
+				else if (s.size() >= 4) {
+					subr = atof(s[0].c_str());
+					subg1 = atof(s[0].c_str());
+					subb = atof(s[0].c_str());
+					subg2 = atof(s[0].c_str());
+					dib->ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
+					m_display->SetModified(true);
+					result = true;
+				}
+				else result = false;
+			}
+
 			setChannel("rgb");
 			dib->ApplySubtract(subtract, channel, true, threadcount);
 			m_display->SetModified(true);

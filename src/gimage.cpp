@@ -2061,10 +2061,75 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 //
 // Credit: Kindergarten, if I recall correctly...
 //
-// A lot of cameras require subtraction of a particular value to establish
+// A lot of cameras require subtraction of a particular value or values to establish
 // black.  Also, subtracting a dark frame is useful in low-light applications
-// such as astrophotography.  So, ApplySubtract, in two forms...
+// such as astrophotography.  So, ApplySubtract, in a few forms...
 // 
+
+//This version does both CFA and RGB images; to use for RGB, use g1 and set g2 to 0.0.  Can also
+//be used for per-channel subtraction, just zero out the unmodified channels.
+void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg2, double subtractb, bool clampblack, int threadcount)
+{
+	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1")  
+	{
+
+
+		unsigned cfarray[2][2];
+		unsigned xtarray[6][6];
+		int arraydim = 0;
+
+		if (cfArray(cfarray)) {
+			arraydim = 2;
+			for (unsigned i=0; i<arraydim; i++)
+				for (unsigned j=0; j<arraydim; j++)
+					xtarray[i][j] = cfarray[i][j];
+		}
+		else if (xtranArray(xtarray)) {
+			arraydim = 6; 
+		}
+		else return;
+
+		#pragma omp parallel for 
+		for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+			for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+				//unsigned Hpos = (x/2) + (y/2)*(w/2);
+				for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
+					for (unsigned j=0; j<arraydim; j++) {
+						int pos = (x+i) + (y+j) * w;
+						float val;
+						switch (xtarray[i][j]) {
+							float val;
+							case 0: //r
+								val = image[pos].r - subtractr; 
+								break;
+							case 1: //g or g1
+								val = image[pos].r - subtractg1; 
+								break;
+							case 2:  //b
+								val = image[pos].r - subtractb; 
+								break;
+							case 3: // g2
+								val = image[pos].r - subtractg2; 
+								break;
+						}
+						if (clampblack & val < 0.0) val = 0.0;
+						image[pos].g = image[pos].b = val; 
+					}
+				}
+			}
+		}
+	}
+	else { //simple walk of RGB pixels
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned i=0; i<image.size(); i++) {
+			image[i].r -= subtractr; if (clampblack & image[i].r < 0.0) image[i].r = 0.0;
+			image[i].g -= subtractg1; if (clampblack & image[i].g < 0.0) image[i].g = 0.0;
+			image[i].b -= subtractb; if (clampblack & image[i].b < 0.0) image[i].b = 0.0;
+		}
+	}
+}
+
+//subtract a single value over an entire RGB image
 void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
 {
 	//if (subtract == 0.0) return;  //why bother... 12/2019: bother if clampblack...
@@ -2108,6 +2173,7 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 	}
 }
 
+//this version subtracts a RGB dark frame image, loaded from a rawproc/valid file, from the RGB array of the gImage instance:
 bool gImage::ApplySubtract(std::string filename, bool clampblack, int threadcount)
 {
 	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
@@ -2129,6 +2195,7 @@ bool gImage::ApplySubtract(std::string filename, bool clampblack, int threadcoun
 	}
 }
 
+//this version does the same thing as the previous method, but uses a pre-loaded gImage:
 bool gImage::ApplySubtract(gImage& subtractimage, bool clampblack, int threadcount)
 {
 	if (subtractimage.getWidth() == w & subtractimage.getHeight() == h) { 
@@ -2149,6 +2216,7 @@ bool gImage::ApplySubtract(gImage& subtractimage, bool clampblack, int threadcou
 	}
 }
 
+//equivalents of ApplySubtract, for addition...
 
 void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
 {
