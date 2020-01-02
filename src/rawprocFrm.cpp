@@ -1714,7 +1714,7 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorCurve *p = new PicProcessorCurve("curve","0.0,0.0,255.0,255.0", commandtree, pic);
+		PicProcessorCurve *p = new PicProcessorCurve("curve","rgb,0.0,0.0,255.0,255.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();  //comment out, don't need to process new tool
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1605);
@@ -2004,7 +2004,7 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "0.0", commandtree, pic);
+		PicProcessorSubtract *p = new PicProcessorSubtract("subtract", "rgb,0.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
