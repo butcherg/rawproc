@@ -2065,16 +2065,45 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 // black.  Also, subtracting a dark frame is useful in low-light applications
 // such as astrophotography.  So, ApplySubtract, in two forms...
 // 
-void gImage::ApplySubtract(double subtract, bool clampblack, int threadcount)
+void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
 {
 	//if (subtract == 0.0) return;  //why bother... 12/2019: bother if clampblack...
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned x=0; x<w; x++) {
-		for (unsigned y=0; y<h; y++) {
-			unsigned pos = x + y*w;
-			image[pos].r -= subtract; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
-			image[pos].g -= subtract; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
-			image[pos].b -= subtract; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+	if (channel == CHANNEL_RGB) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r -= subtract; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g -= subtract; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b -= subtract; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_RED) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r -= subtract; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_GREEN) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].g -= subtract; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_BLUE) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].b -= subtract; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
 		}
 	}
 }
@@ -2121,16 +2150,45 @@ bool gImage::ApplySubtract(gImage& subtractimage, bool clampblack, int threadcou
 }
 
 
-void gImage::ApplyAdd(double add, bool clampblack, int threadcount)
+void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
 {
 	//if (add == 0.0) return;  //why bother... 12/2019: bother if clampblack...
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned x=0; x<w; x++) {
-		for (unsigned y=0; y<h; y++) {
-			unsigned pos = x + y*w;
-			image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
-			image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
-			image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+	if (channel == CHANNEL_RGB) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_RED) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_GREEN) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+			}
+		}
+	}
+	else if (channel == CHANNEL_BLUE) {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+			}
 		}
 	}
 }

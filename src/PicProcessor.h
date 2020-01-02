@@ -54,6 +54,8 @@ class PicProcessor: public wxTreeItemData//, public wxEvtHandler
 		void enableProcessing(bool e);
 		bool isEnabled();
 		GIMAGE_CHANNEL getChannel();
+		wxString getChannelText();
+		void setChannel(wxString chan);
 		//void setDirty();
 		//bool isDirty();
 		virtual void displayProcessedPic();

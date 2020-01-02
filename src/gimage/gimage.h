@@ -204,10 +204,10 @@ class gImage
 		void ApplySharpen(double strength, int threadcount=0);
 
 		//math operations:
-		void ApplySubtract(double subtract, bool clampblack=false, int threadcount=0);
+		void ApplySubtract(double subtract, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampblack=false, int threadcount=0);
 		bool ApplySubtract(std::string filename, bool clampblack=false, int threadcount=0);
 		bool ApplySubtract(gImage& subtractimage, bool clampblack=false, int threadcount=0);
-		void ApplyAdd(double add, bool clampblack=true, int threadcount=0);
+		void ApplyAdd(double add, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampblack=true, int threadcount=0);
 		bool ApplyAdd(std::string filename, bool clampblack=true, int threadcount=0);
 		bool ApplyAdd(gImage& addimage, bool clampblack=true, int threadcount=0);
 

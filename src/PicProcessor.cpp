@@ -344,4 +344,21 @@ bool PicProcessor::pasteParamsFromClipboard()
 	return result;
 }
 
+void PicProcessor::setChannel(wxString chan)
+{
+	if (chan == "rgb")   channel = CHANNEL_RGB;
+	if (chan == "red")   channel = CHANNEL_RED;
+	if (chan == "green") channel = CHANNEL_GREEN;
+	if (chan == "blue")  channel = CHANNEL_BLUE;
+	if (chan == "tone")  channel = CHANNEL_TONE;
+}
+
+wxString PicProcessor::getChannelText()
+{
+	if (channel == CHANNEL_RGB) return "rgb";
+	if (channel == CHANNEL_RED) return "red";
+	if (channel == CHANNEL_GREEN) return  "green";
+	if (channel == CHANNEL_BLUE) return "blue";
+	if (channel == CHANNEL_TONE) return "tone";
+}
 

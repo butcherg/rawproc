@@ -4,6 +4,7 @@
 #include "myConfig.h"
 #include "myFloatCtrl.h"
 #include "util.h"
+#include "gimage/strutil.h"
 #include "gimage/curve.h"
 
 #define SUBTRACTENABLE 8100
@@ -23,41 +24,53 @@ class SubtractPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, SUBTRACTENABLE, _("subtract:"));
 			enablebox->SetValue(true);
+			
+			wxArrayString str;
+			str.Add("rgb");
+			str.Add("red");
+			str.Add("green");
+			str.Add("blue");
+			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			chan->SetStringSelection("rgb");
 
 			subb = new wxRadioButton(this, SUBTRACTVAL, _("value:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP); 
 			fileb = new wxRadioButton(this, SUBTRACTFILE, _("file:"));
 			camb = new wxRadioButton(this, SUBTRACTCAMERA, _("camera:"));
+			subb->SetValue(true);
 
-			subtract = new myFloatCtrl(this, wxID_ANY, atof(p.ToStdString().c_str()), 2);
+			subtract = new myFloatCtrl(this, wxID_ANY, 0.0, 2);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
 			cam = new wxStaticText(this, wxID_ANY, "--");
 
-			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "value,filename");
+			std::vector<std::string> p = split(params.ToStdString(),",");
+			std::string param = p[0];
 
-			if (p.find("value") != p.end())
-				if (p["value"] == "camera") {
-					submode = SUBTRACTCAMERA;
-					camb->SetValue(true);
-				}
-				else if (p["value"] == "file" & p.find("filename") != p.end()) {
-					submode = SUBTRACTFILE;
-					fileb->SetValue(true);
-					darkfile->SetValue(wxString(p["filename"]));
-				}
-				else {
-					submode = SUBTRACTVAL;
-					subb->SetValue(true);
-					subtract->SetFloatValue(atof(p["subtract"].c_str()));
-				}
-			else {
+			if (isFloat(param)) {
 				submode = SUBTRACTVAL;
 				subb->SetValue(true);
-				subtract->SetFloatValue(0.0);
+				subtract->SetFloatValue(atof(param.c_str()));
 			}
-
+			else if (param == "rgb" | param == "red" | param == "green" | param == "blue") {
+				submode = SUBTRACTVAL;
+				subb->SetValue(true);
+				if (p.size() >= 2) 
+					if (isFloat(p[1])) subtract->SetFloatValue(atof(p[1].c_str()));
+			}
+			else if (param == "camera") {
+				submode = SUBTRACTCAMERA;
+				camb->SetValue(true);
+				chan->Enable(false);
+			}
+			else {
+				submode = SUBTRACTFILE;
+				fileb->SetValue(true);
+				darkfile->SetValue(wxString(param));
+				chan->Enable(false);
+			}
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(chan, wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -132,7 +145,7 @@ class SubtractPanel: public PicProcPanel
 			float evval;
 			switch (submode) {
 				case SUBTRACTVAL:
-					q->setParams(wxString::Format("%f",subtract->GetFloatValue()));
+					q->setParams(wxString::Format("%s,%f",chan->GetString(chan->GetSelection()),subtract->GetFloatValue()));
 					q->processPic();
 					break;
 				case SUBTRACTFILE:
@@ -150,6 +163,15 @@ class SubtractPanel: public PicProcPanel
 		void OnRadioButton(wxCommandEvent& event)
 		{
 			submode = event.GetId();
+			switch (submode) {
+				case SUBTRACTVAL:
+					chan->Enable(true);
+					break;
+				case SUBTRACTCAMERA:
+				case SUBTRACTFILE:
+					chan->Enable(false);
+					break;
+			}
 			processSUB();
 		}
 		
@@ -174,6 +196,7 @@ class SubtractPanel: public PicProcPanel
 		}
 
 	private:
+		wxChoice *chan;
 		wxCheckBox *enablebox;
 		wxRadioButton *subb, *fileb, *camb;
 		wxTextCtrl *darkfile;
@@ -207,20 +230,6 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("subtract..."));
 
-	std::map<std::string,std::string> p = paramMap(c.ToStdString(), "value,filename");
-
-	if (p["value"] == "camera") {
-		m_tree->SetItemText(id, _("subtract:camera"));
-		subtract = atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0;
-	}
-	else if (p["value"] == "file") {
-		m_tree->SetItemText(id, _("subtract:file"));
-	}
-	else {
-		m_tree->SetItemText(id, _("subtract:val"));
-		subtract = atof(p["value"].c_str());
-	}
-
 	bool result = false;
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
@@ -231,16 +240,33 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 
 	dib = processdib;
 	if (!global_processing_enabled) return true;
-
+	
 	if (processingenabled) {
+		
 		mark();
-
-		std::vector<pix> &img = dib->getImageData();
-		unsigned w = dib->getWidth(); unsigned h = dib->getHeight();
-
-		if (p["value"] == "file") {
-			if (wxFileName::FileExists(wxString(p["filename"]))) {
-				if (dib->ApplySubtract(p["filename"].c_str(), true, threadcount)) {
+		std::vector<std::string> p = split(c.ToStdString(),",");
+		std::string param = p[0];
+	
+		if (param == "rgb" | param == "red" | param == "green" | param == "blue") {
+			m_tree->SetItemText(id, _("subtract:val"));
+			setChannel(wxString(param));
+			if (p.size() >=2) subtract = atof(p[1].c_str());
+			dib->ApplySubtract(subtract, channel, true, threadcount);
+			m_display->SetModified(true);
+			result = true;
+		}
+		else if (param == "camera") {
+			m_tree->SetItemText(id, _("subtract:camera"));
+			subtract = atof(getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawBlack").c_str()) / 65536.0;
+			setChannel("rgb");
+			dib->ApplySubtract(subtract, channel, true, threadcount);
+			m_display->SetModified(true);
+			result = true;
+		}
+		else {
+			m_tree->SetItemText(id, _("subtract:file"));
+			if (wxFileName::FileExists(wxString(param))) {
+				if (dib->ApplySubtract(param.c_str(), true, threadcount)) {
 					m_display->SetModified(true);
 					result = true;
 				}
@@ -254,17 +280,12 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 				result = false;
 			}
 		}
-		else {
-			dib->ApplySubtract(subtract, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
-		}
-
 		wxString d = duration();
 
 		if (result) 
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.subtract.log","0") == "1"))
 				log(wxString::Format(_("tool=subtract,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
+
 	}
 
 	dirty = false;

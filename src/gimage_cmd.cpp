@@ -1122,7 +1122,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			if (strcmp(v,"file") == 0)
 				dib.ApplySubtract(std::string(filename), threadcount);  
 			else
-				dib.ApplySubtract(subtract, threadcount);  
+				dib.ApplySubtract(subtract, CHANNEL_RGB, true, threadcount);  
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 
 

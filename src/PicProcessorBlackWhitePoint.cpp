@@ -419,15 +419,6 @@ void PicProcessorBlackWhitePoint::setReCalc(bool r)
 	if (recalc) reCalc();
 }
 
-void PicProcessorBlackWhitePoint::setChannel(wxString chan)
-{
-	if (chan == "rgb")   channel = CHANNEL_RGB;
-	if (chan == "red")   channel = CHANNEL_RED;
-	if (chan == "green") channel = CHANNEL_GREEN;
-	if (chan == "blue")  channel = CHANNEL_BLUE;
-	m_tree->SetItemText(id, wxString::Format(_("blackwhitepoint:%s"),chan));
-}
-
 void PicProcessorBlackWhitePoint::reCalc()
 {
 	double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
@@ -463,18 +454,22 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		if (p[1] == "data") {
 			std::map<std::string,float> s = dib->StatsMap();
 			if (channel == CHANNEL_RED) {
+				m_tree->SetItemText(id, _("blackwhitepoint:red,data"));
 				blk = s["rmin"];
 				wht = s["rmax"];
 			} 
 			else if (channel == CHANNEL_GREEN) {
+				m_tree->SetItemText(id, _("blackwhitepoint:green,data"));
 				blk = s["gmin"];
 				wht = s["gmax"];
 			}
 			else if (channel == CHANNEL_BLUE) {
+				m_tree->SetItemText(id, _("blackwhitepoint:blue,data"));
 				blk = s["bmin"];
 				wht = s["bmax"];
 			}
 			else if (channel == CHANNEL_RGB) {
+				m_tree->SetItemText(id, _("blackwhitepoint:rgb,data"));
 				maxwht = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
 				minwht = fmin(fmin(s["rmax"],s["gmax"]),s["bmax"]);
 				blk = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
@@ -488,16 +483,19 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		}
 
 		else {
+			m_tree->SetItemText(id, _("blackwhitepoint:rgb"));
 			blk = atof(p[1]);
 			wht = atof(p[2]);
 		}
 	}
 
 	else if (p[0] == "camera") {
+		m_tree->SetItemText(id, _("blackwhitepoint:camera"));
 		blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
 		wht = atof(dib->getInfoValue("LibrawMaximum").c_str())/65536.0;
 	}
 	else {
+		m_tree->SetItemText(id, _("blackwhitepoint:rgb"));
 		setChannel("rgb");
 		blk = atof(p[0]);
 		wht = atof(p[1]);
