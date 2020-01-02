@@ -368,9 +368,9 @@ class BlackWhitePointPanel: public PicProcPanel
 						q->setParams(wxString::Format("%s,data,minwhite",chan->GetString(chan->GetSelection())));
 					else
 						q->setParams(wxString::Format("%s,data",chan->GetString(chan->GetSelection())));
+					processBW();
 					break;
 			}
-				
 		}
 
 		void OnButton(wxCommandEvent& event)

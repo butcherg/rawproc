@@ -110,6 +110,7 @@ class SubtractPanel: public PicProcPanel
 			Bind(wxEVT_RADIOBUTTON, &SubtractPanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &SubtractPanel::selectDarkFile, this);
 			Bind(wxEVT_CHAR_HOOK, &SubtractPanel::OnKey,  this);
+			Bind(wxEVT_CHOICE, &SubtractPanel::OnChoice,  this);
 			Thaw();
 		}
 
@@ -123,6 +124,11 @@ class SubtractPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+		
+		void onEnable(wxCommandEvent& event)
+		{
+			processSUB();
 		}
 
 		void setCameraVal(float val)
