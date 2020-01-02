@@ -251,6 +251,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			m_tree->SetItemText(id, _("subtract:val"));
 			setChannel(wxString(param));
 			if (p.size() >=2) subtract = atof(p[1].c_str());
+			setChannel(param);
 			dib->ApplySubtract(subtract, channel, true, threadcount);
 			m_display->SetModified(true);
 			result = true;
