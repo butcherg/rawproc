@@ -2133,7 +2133,6 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 {
 	//if (subtract == 0.0) return;  //why bother... 12/2019: bother if clampblack...
 	if (channel == CHANNEL_RGB) {
-		printf("ApplySubtract: rgb\n"); fflush(stdout);
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
@@ -2145,7 +2144,6 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 		}
 	}
 	else if (channel == CHANNEL_RED) {
-		printf("ApplySubtract: red\n"); fflush(stdout);
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
@@ -2155,7 +2153,6 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 		}
 	}
 	else if (channel == CHANNEL_GREEN) {
-		printf("ApplySubtract: green\n"); fflush(stdout);
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
@@ -2165,7 +2162,6 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 		}
 	}
 	else if (channel == CHANNEL_BLUE) {
-		printf("ApplySubtract: blue\n"); fflush(stdout);
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
@@ -4123,7 +4119,7 @@ void gImage::ApplyResize(std::string params, int threadcount)
 	char *hstr = strtok(NULL,", ");
 	char *astr = strtok(NULL," ");
 	if (wstr == NULL) {
-		printf("Error: resize needs at least one parameter.\n");
+		return
 	}
 	else {
 		if (wstr) w = atoi(wstr);
