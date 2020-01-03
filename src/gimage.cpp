@@ -2098,7 +2098,6 @@ void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg
 						int pos = (x+i) + (y+j) * w;
 						float val;
 						switch (xtarray[i][j]) {
-							float val;
 							case 0: //r
 								val = image[pos].r - subtractr; 
 								break;
@@ -2113,7 +2112,7 @@ void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg
 								break;
 						}
 						if (clampblack & val < 0.0) val = 0.0;
-						image[pos].g = image[pos].b = val; 
+						image[pos].r = image[pos].g = image[pos].b = val; 
 					}
 				}
 			}

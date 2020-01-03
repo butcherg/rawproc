@@ -318,6 +318,8 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			if (subval != 0) {
 				subtract = (float) subval / 65536.0;
 				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+				m_display->SetModified(true);
+				result = true;
 			}
 			else {
 				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
@@ -336,11 +338,6 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 				}
 				else result = false;
 			}
-
-			setChannel("rgb");
-			dib->ApplySubtract(subtract, channel, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
 		}
 		else {
 			m_tree->SetItemText(id, _("subtract:file"));
