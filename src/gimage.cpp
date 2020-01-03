@@ -4119,7 +4119,7 @@ void gImage::ApplyResize(std::string params, int threadcount)
 	char *hstr = strtok(NULL,", ");
 	char *astr = strtok(NULL," ");
 	if (wstr == NULL) {
-		return
+		return;
 	}
 	else {
 		if (wstr) w = atoi(wstr);
