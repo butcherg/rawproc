@@ -515,7 +515,7 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 			}
 			
 			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
-				std::string libraw_primaries = dib->getInfoValue("LibrawCamXYZ");
+				std::string libraw_primaries = dib->getInfoValue("Libraw.CamXYZ");
 				std::vector<std::string> primaries = split(libraw_primaries, ",");
 				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
 					dcraw_primaries = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",

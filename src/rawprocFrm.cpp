@@ -1635,7 +1635,7 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	//if (imginfo["Libraw::Mosaiced"] == "0") {
+	//if (imginfo["Libraw.Mosaiced"] == "0") {
 	//	wxMessageBox(_("Error: CACorrect can only be applied to raw data, before demosaic."));
 	//	return;
 	//}
@@ -1655,7 +1655,7 @@ void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	//if (imginfo["Libraw::Mosaiced"] == "0") {
+	//if (imginfo["Libraw.Mosaiced"] == "0") {
 	//	wxMessageBox(_("Error: HLRecover can only be applied to RGB data, after demosaic."));
 	//	return;
 	//}
@@ -1751,7 +1751,7 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
 		wxMessageBox(_("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
@@ -1771,7 +1771,7 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
 		wxMessageBox(_("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1"));
 		return;
 	}
@@ -1833,7 +1833,7 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("LibrawMosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
 		wxMessageBox(_("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}

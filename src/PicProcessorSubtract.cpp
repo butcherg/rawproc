@@ -231,13 +231,13 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 	toolpanel = new SubtractPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
 	gImage dib = getPreviousPicProcessor()->getProcessedPic();
-	int subtract = atoi(dib.getInfoValue("LibrawBlack").c_str());
+	int subtract = atoi(dib.getInfoValue("Libraw.Black").c_str());
 	if (subtract != 0) {
 		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%f (%d)", (float) subtract / 65536.0, subtract));
 	}
 	else {
 		float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
-		std::vector<std::string> s = split(dib.getInfoValue("LibrawPerChannelBlack"),",");
+		std::vector<std::string> s = split(dib.getInfoValue("Libraw.PerChannelBlack"),",");
 		if (s.size() >= 4) {
 			if (s[0] =="0" & s[1] =="0" & s[2] =="0" & s[3] =="0") {
 				((SubtractPanel *) toolpanel)->setCameraVal("--");
@@ -314,7 +314,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 		}
 		else if (param == "camera") {
 			m_tree->SetItemText(id, _("subtract:camera"));
-			int subval = atoi(dib->getInfoValue("LibrawBlack").c_str());
+			int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
 			if (subval != 0) {
 				subtract = (float) subval / 65536.0;
 				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
@@ -323,7 +323,7 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			}
 			else {
 				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
-				std::vector<std::string> s = split(dib->getInfoValue("LibrawPerChannelBlack"),",");
+				std::vector<std::string> s = split(dib->getInfoValue("Libraw.PerChannelBlack"),",");
 				if (s[0] =="0" | s[1] =="0" | s[2] =="0" & s[3] =="0") {
 					result = false;
 				}

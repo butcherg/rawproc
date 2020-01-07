@@ -107,7 +107,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				cam = c.getItem(makemodel, "dcraw_matrix");
 
 				if (cam.empty()) { //if not found in dcraw.c or camconst.json, look in the LibRaw metadata:
-					std::string libraw_primaries = dib.getInfoValue("LibrawCamXYZ");
+					std::string libraw_primaries = dib.getInfoValue("Libraw.CamXYZ");
 					std::vector<std::string> primaries = split(libraw_primaries, ",");
 					if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
 						cam = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
@@ -371,7 +371,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				if (print) printf("Error: unrecognized algorithm");
 				return std::string();
 			}
-			dib.setInfo("LibrawMosaiced","0");
+			dib.setInfo("Libraw.Mosaiced","0");
 			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
 				if (print) printf("normalizing rotation... "); fflush(stdout);
 				dib.NormalizeRotation(threadcount);
@@ -502,9 +502,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 					}
 				}
 				else if (chan == "camera") {
-					int librawblk = atoi(dib.getInfoValue("LibrawBlack").c_str());
+					int librawblk = atoi(dib.getInfoValue("Libraw.Black").c_str());
 					blk = librawblk / 65536.0; 
-					int librawwht = atoi(dib.getInfoValue("LibrawMaximum").c_str());
+					int librawwht = atoi(dib.getInfoValue("Libraw.Maximum").c_str());
 					wht = librawwht / 65536.0; 
 					commandstring += std::string(cmd) + ":camera ";
 				}
@@ -890,7 +890,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			char *p = strtok(NULL, " ");
 			if (p) {
 				std::vector<std::string> parm = split(std::string(p),",");
-				if (dib.getInfoValue("LibrawMosaiced") == "0") {
+				if (dib.getInfoValue("Libraw.Mosaiced") == "0") {
 					if (parm[0] == "auto") {
 						op = "auto";
 						if (print) printf("whitebalance: %s (%d threads)... ",op.c_str(),threadcount); fflush(stdout);
@@ -912,7 +912,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 					}
 					else if (parm[0] == "camera") {
 						op = "camera";
-						std::string cameraWB = dib.getInfoValue("LibrawWhiteBalance");
+						std::string cameraWB = dib.getInfoValue("Libraw.WhiteBalance");
 						if (cameraWB != "") {
 							std::vector<std::string> m = split(cameraWB,",");
 							redmult   = atof(m[0].c_str());
@@ -939,7 +939,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				else {
 					if (parm[0] == "camera") {
 						op = "camera";
-						std::string cameraWB = dib.getInfoValue("LibrawWhiteBalance");
+						std::string cameraWB = dib.getInfoValue("Libraw.WhiteBalance");
 						if (cameraWB != "") {
 							std::vector<std::string> m = split(cameraWB,",");
 							redmult   = atof(m[0].c_str());
@@ -1099,7 +1099,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			char *f = strtok(NULL," ");
 
 			if (strcmp(v,"camera") == 0) {
-				subtract = atof(dib.getInfoValue("LibrawBlack").c_str()) / 65536.0;
+				subtract = atof(dib.getInfoValue("Libraw.Black").c_str()) / 65536.0;
 				sprintf(cs, "%s:camera ",cmd);
 			}
 			else if (strcmp(v,"file") == 0) {

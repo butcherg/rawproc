@@ -428,7 +428,7 @@ enum optypes {
 std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 {
 	std::vector<double> multipliers;
-	std::string cameraWBstring = getPreviousPicProcessor()->getProcessedPic().getInfoValue("LibrawWhiteBalance");
+	std::string cameraWBstring = getPreviousPicProcessor()->getProcessedPic().getInfoValue("Libraw.WhiteBalance");
 	if (cameraWBstring != "") {
 		wxArrayString multstrings = split(wxString(cameraWBstring.c_str()), ",");
 		for (int i = 0; i < multstrings.GetCount(); i++) {
@@ -506,8 +506,8 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 
 	if (processingenabled) {
 		mark();
-		if (dib->getInfoValue("LibrawMosaiced") == "1") {
-			if (dib->getInfoValue("LibrawCFAPattern") != "") {
+		if (dib->getInfoValue("Libraw.Mosaiced") == "1") {
+			if (dib->getInfoValue("Libraw.CFAPattern") != "") {
 				if (optype == multipliers) {
 					wbmults = dib->ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
 					m_display->SetModified(true);
@@ -526,7 +526,7 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 				}
 			}
 			else {
-				wxMessageBox(_("Error: No bayer pattern available in metadata (LibrawCFAPattern is empty)"));
+				wxMessageBox(_("Error: No bayer pattern available in metadata (Libraw.CFAPattern is empty)"));
 				((WhiteBalancePanel *) toolpanel)->clearSelectors();
 				wbmults = {1.0,1.0,1.0};
 				m_tree->SetItemText(id, wxString::Format(_("whitebalance:invalid")));

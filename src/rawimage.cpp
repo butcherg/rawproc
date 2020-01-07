@@ -294,7 +294,7 @@ char * _loadRAW(const char *filename,
 		}
 		if (nvpair[0] == "Filter pattern") {
 			nvpair[1].erase(nvpair[1].find("/"),1);
-			info["LibrawCFAPattern"] =  nvpair[1];
+			info["Libraw.CFAPattern"] =  nvpair[1];
 		}
 		if (nvpair[0] == "Timestamp") {
 			std::vector<std::string> ts = split(nvpair[1]," "); //parse dcraw timestamp
@@ -324,7 +324,7 @@ char * _loadRAW(const char *filename,
 		}
 		if (nvpair[0] == "Daylight multipliers") {
 			//for (unsigned i=0; i<nvpair[1].size(); i++) if (nvpair[1][i] == ' ') nvpair[1][i] = ',';
-			//info["LibrawWhiteBalance"] = nvpair[1];
+			//info["Libraw.WhiteBalance"] = nvpair[1];
 			std::vector<std::string> mults = split(nvpair[1], " ");
 			if (mults.size() >=3) {
 				double rmult = atof(mults[0].c_str());
@@ -333,11 +333,11 @@ char * _loadRAW(const char *filename,
 				rmult /= gmult;
 				bmult /= gmult;
 				gmult = 1.0;
-				info["LibrawWhiteBalance"] = tostr(rmult);
-				info["LibrawWhiteBalance"].append(",");
-				info["LibrawWhiteBalance"].append(tostr(gmult));
-				info["LibrawWhiteBalance"].append(",");
-				info["LibrawWhiteBalance"].append(tostr(bmult));
+				info["Libraw.WhiteBalance"] = tostr(rmult);
+				info["Libraw.WhiteBalance"].append(",");
+				info["Libraw.WhiteBalance"].append(tostr(gmult));
+				info["Libraw.WhiteBalance"].append(",");
+				info["Libraw.WhiteBalance"].append(tostr(bmult));
 			}
 		}
 		info["Orientation"] = "1";
@@ -859,40 +859,40 @@ char * _loadRAW(const char *filename,
 
 	//Normalized libraw white balance:
 	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0]/C.cam_mul[1], C.cam_mul[1]/C.cam_mul[1], C.cam_mul[2]/C.cam_mul[1]);
-	info["LibrawWhiteBalance"] = buffer;
+	info["Libraw.WhiteBalance"] = buffer;
 	snprintf(buffer, 4096, "%f,%f,%f", C.cam_mul[0], C.cam_mul[1], C.cam_mul[2]);
-	info["LibrawCamMult"] = buffer;
+	info["Libraw.CamMult"] = buffer;
 
 
 	//Black level, for subtraction
 	snprintf(buffer, 4096, "%d", C.black);
-	info["LibrawBlack"] = buffer;
+	info["Libraw.Black"] = buffer;
 
 	//per-channel black correction:
 	snprintf(buffer, 4096, "%d,%d,%d,%d",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
-	info["LibrawPerChannelBlack"] = buffer;
+	info["Libraw.PerChannelBlack"] = buffer;
 
 	//Maximum pixel value:
 	snprintf(buffer, 4096, "%d", C.maximum);
-	info["LibrawMaximum"] = buffer;
+	info["Libraw.Maximum"] = buffer;
 
 	//cam_xyz matrix:
 	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cam_xyz[0][0],C.cam_xyz[0][1],C.cam_xyz[0][2],
 		C.cam_xyz[1][0],C.cam_xyz[1][1],C.cam_xyz[1][2],
 		C.cam_xyz[2][0],C.cam_xyz[2][1],C.cam_xyz[2][2]);
-	info["LibrawCamXYZ"] = buffer;
+	info["Libraw.CamXYZ"] = buffer;
 
 	//rgb_cam matrix:
 	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.rgb_cam[0][0],C.rgb_cam[0][1],C.rgb_cam[0][2],
 		C.rgb_cam[1][0],C.rgb_cam[1][1],C.rgb_cam[1][2],
 		C.rgb_cam[2][0],C.rgb_cam[2][1],C.rgb_cam[2][2]);
-	info["LibrawRGBCam"] = buffer;
+	info["Libraw.RGBCam"] = buffer;
 
 	//camera matrix:
 	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.cmatrix[0][0],C.cmatrix[0][1],C.cmatrix[0][2],
 		C.cmatrix[1][0],C.cmatrix[1][1],C.cmatrix[1][2],
 		C.cmatrix[2][0],C.cmatrix[2][1],C.cmatrix[2][2]);
-	info["LibrawCameraMatrix"] = buffer;
+	info["Libraw.CameraMatrix"] = buffer;
 
 	int cfadim = 2;			 //bayer
 	if (P1.filters == 9) cfadim = 6; //fuji x-trans
@@ -908,8 +908,8 @@ char * _loadRAW(const char *filename,
 	buffer[pos+1]  = '\0';
 	cfarray[pos+1] = '\0';
 
-	info["LibrawCFAPattern"] =  buffer;
-	info["LibrawCFAArray"] =  cfarray;
+	info["Libraw.CFAPattern"] =  buffer;
+	info["Libraw.CFAArray"] =  cfarray;
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
@@ -946,13 +946,13 @@ char * _loadRAW(const char *filename,
 	*icclength = 0;
 	
 	if (rawdata) {
-		info["Librawraw_width"] = tostr(S.raw_width);
-		info["Librawraw_height"] = tostr(S.raw_height);
-		info["Librawwidth"] = tostr(S.width);
-		info["Librawheight"] = tostr(S.height);
-		info["Librawtop_margin"] = tostr(S.top_margin);
-		info["Librawleft_margin"] = tostr(S.left_margin);
-		info["LibrawMosaiced"] = "1";
+		info["Libraw.raw_width"] = tostr(S.raw_width);
+		info["Libraw.raw_height"] = tostr(S.raw_height);
+		info["Libraw.width"] = tostr(S.width);
+		info["Libraw.height"] = tostr(S.height);
+		info["Libraw.top_margin"] = tostr(S.top_margin);
+		info["Libraw.left_margin"] = tostr(S.left_margin);
+		info["Libraw.Mosaiced"] = "1";
 
 
 		*numcolors = 1;

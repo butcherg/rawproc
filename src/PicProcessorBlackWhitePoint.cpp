@@ -73,9 +73,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			double datblk = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
 			double datwht = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
 			double minwht = fmin(fmin(s["rmax"],s["gmax"]),s["bmax"]);
-			int librawblk = atoi(img.getInfoValue("LibrawBlack").c_str());
+			int librawblk = atoi(img.getInfoValue("Libraw.Black").c_str());
 			double camblk = librawblk / 65536.0; 
-			int librawwht = atoi(img.getInfoValue("LibrawMaximum").c_str());
+			int librawwht = atoi(img.getInfoValue("Libraw.Maximum").c_str());
 			double camwht = librawwht / 65536.0; 
 
 			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, _("min white:"));
@@ -526,8 +526,8 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 
 	else if (p[0] == "camera") {
 		m_tree->SetItemText(id, _("blackwhitepoint:camera"));
-		blk = atof(dib->getInfoValue("LibrawBlack").c_str())/65536.0;
-		wht = atof(dib->getInfoValue("LibrawMaximum").c_str())/65536.0;
+		blk = atof(dib->getInfoValue("Libraw.Black").c_str())/65536.0;
+		wht = atof(dib->getInfoValue("Libraw.Maximum").c_str())/65536.0;
 	}
 	else {
 		m_tree->SetItemText(id, _("blackwhitepoint:rgb"));

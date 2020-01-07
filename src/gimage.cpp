@@ -2070,7 +2070,7 @@ void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int 
 //be used for per-channel subtraction, just zero out the unmodified channels.
 void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg2, double subtractb, bool clampblack, int threadcount)
 {
-	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1")  
+	if (imginfo.find("Libraw.Mosaiced") != imginfo.end() && imginfo["Libraw.Mosaiced"] == "1")  
 	{
 
 
@@ -2581,12 +2581,12 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
 {
 	std::vector<double> a = {0.0, 0.0, 0.0};
-	if (imginfo.find("LibrawCFAPattern") == imginfo.end()) return a;
+	if (imginfo.find("Libraw.CFAPattern") == imginfo.end()) return a;
 	
 	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-	if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-	if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-	if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+	if (imginfo["Libraw.CFAPattern"] == "GRBG") q = {1, 0, 2, 1};
+	if (imginfo["Libraw.CFAPattern"] == "GBRG") q = {1, 2, 0, 1};
+	if (imginfo["Libraw.CFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h-1; y+=2) {
@@ -2615,9 +2615,9 @@ std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double gree
 std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
 {
 	std::vector<double> a = {0.0, 0.0, 0.0};
-	if (imginfo.find("LibrawCFAArray") == imginfo.end()) return a;
+	if (imginfo.find("Libraw.CFAArray") == imginfo.end()) return a;
 
-	std::string cfa = imginfo["LibrawCFAArray"];
+	std::string cfa = imginfo["Libraw.CFAArray"];
 	std::vector<unsigned> q;
 	for (unsigned i = 0; i < cfa.size(); i ++) q.push_back(cfa[i] - '0');
 	
@@ -2743,8 +2743,8 @@ void RT_free(float ** rawdata)
 
 bool gImage::xtranArray(unsigned (&xtarray)[6][6])
 {
-	if (imginfo.find("LibrawCFAArray") != imginfo.end()) {
-		std::string cfstr = imginfo["LibrawCFAArray"];
+	if (imginfo.find("Libraw.CFAArray") != imginfo.end()) {
+		std::string cfstr = imginfo["Libraw.CFAArray"];
 		if (cfstr.size() == 36) { //x-trans 6x6 array
 			for (int r=0; r<6; r++) {
 				for (int c=0; c<6; c++) {
@@ -2761,8 +2761,8 @@ bool gImage::xtranArray(unsigned (&xtarray)[6][6])
 
 bool gImage::cfArray(unsigned (&cfarray)[2][2])
 {
-	if (imginfo.find("LibrawCFAArray") != imginfo.end()) {
-		std::string cfstr = imginfo["LibrawCFAArray"];
+	if (imginfo.find("Libraw.CFAArray") != imginfo.end()) {
+		std::string cfstr = imginfo["Libraw.CFAArray"];
 		if (cfstr.size() == 4) { //bayer 2x2 array
 			for (int r=0; r<2; r++) {
 				for (int c=0; c<2; c++) {
@@ -2779,8 +2779,8 @@ bool gImage::cfArray(unsigned (&cfarray)[2][2])
 
 bool gImage::rgbCam(float (&rgb_cam)[3][4])
 {
-	if (imginfo.find("LibrawRGBCam") != imginfo.end()) {
-		std::string rgb_cam_str = imginfo["LibrawRGBCam"];
+	if (imginfo.find("Libraw.RGBCam") != imginfo.end()) {
+		std::string rgb_cam_str = imginfo["Libraw.RGBCam"];
 		std::vector<std::string> rgb_cam_list  = split(rgb_cam_str, ",");
 		rgb_cam[0][0] = atof(rgb_cam_list[0].c_str());
 		rgb_cam[0][1] = atof(rgb_cam_list[1].c_str());
@@ -3048,7 +3048,7 @@ bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, i
 	}
 
 	//this short-circuits the initGain parameter...
-	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+	std::vector<std::string> camwb = split(getInfoValue("Libraw.WhiteBalance"), ",");
 	double camwbR = atof(camwb[0].c_str());
 	double camwbG = atof(camwb[1].c_str());
 	double camwbB = atof(camwb[2].c_str());
@@ -3182,7 +3182,7 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 		}	
 
 		float clmax[3];
-		std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
+		std::vector<std::string> camwb = split(getInfoValue("Libraw.WhiteBalance"), ",");
 		float clippoint = 1.0;
 		clmax[0] = clippoint * atof(camwb[0].c_str());
 		clmax[1] = clippoint * atof(camwb[1].c_str());
@@ -3330,7 +3330,7 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 
 bool gImage::ApplyCACorrect(const bool autoCA, size_t autoIterations, const double cared, const double cablue, bool avoidColourshift, int threadcount)
 {
-	if (imginfo["Libraw::Mosaiced"] == "0") return false;  //Mosaic data only
+	if (imginfo["Libraw.Mosaiced"] == "0") return false;  //Mosaic data only
 
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;   //Bayer data only... ?
@@ -3365,7 +3365,7 @@ bool gImage::ApplyCACorrect(const bool autoCA, size_t autoIterations, const doub
 
 bool gImage::ApplyHLRecover(int threadcount)
 {
-	if (imginfo["Libraw::Mosaiced"] == "1") return false;  //RGB data only
+	if (imginfo["Libraw.Mosaiced"] == "1") return false;  //RGB data only
 
 	float ** red = RT_malloc(w, h);
 	float ** green = RT_malloc(w, h);
@@ -3400,8 +3400,8 @@ bool gImage::ApplyHLRecover(int threadcount)
 	}
 
 	float clmax[3]; // = {1.0, 1.0, 1.0}; // in case I want to hard-code them for testing...
-	std::vector<std::string> camwb = split(getInfoValue("LibrawWhiteBalance"), ",");
-	//float clippoint = atof(getInfoValue("LibrawMaximum").c_str()) / 65536.0;
+	std::vector<std::string> camwb = split(getInfoValue("Libraw.WhiteBalance"), ",");
+	//float clippoint = atof(getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
 	float clippoint = 1.0;
 	clmax[0] = clippoint * atof(camwb[0].c_str());
 	clmax[1] = clippoint * atof(camwb[1].c_str());
@@ -4366,7 +4366,7 @@ std::map<std::string,float> gImage::StatsMap()
 	double toneupperthreshold = 1.0; 
 	double tonelowerthreshold = 0.0;
 
-	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1")  //R,G,B has to be collected on the mosaic pattern
+	if (imginfo.find("Libraw.Mosaiced") != imginfo.end() && imginfo["Libraw.Mosaiced"] == "1")  //R,G,B has to be collected on the mosaic pattern
 	{
 
 
@@ -4698,7 +4698,7 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 	std::vector<histogramdata> histogram(scale, zerodat);
 
 
-	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
+	if (imginfo.find("Libraw.Mosaiced") != imginfo.end() && imginfo["Libraw.Mosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
 
 		unsigned cfarray[2][2];
 		unsigned xtarray[6][6];
@@ -4811,12 +4811,12 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale)
 	histogramdata zerodat = {0,0,0};
 	std::vector<histogramdata> histogram(scale, zerodat);
 
-	if (imginfo.find("LibrawMosaiced") != imginfo.end() && imginfo["LibrawMosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
+	if (imginfo.find("Libraw.Mosaiced") != imginfo.end() && imginfo["Libraw.Mosaiced"] == "1") { //R,G,B has to be collected on the mosaic pattern
 
 		std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-		if (imginfo["LibrawCFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-		if (imginfo["LibrawCFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-		if (imginfo["LibrawCFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+		if (imginfo["Libraw.CFAPattern"] == "GRBG") q = {1, 0, 2, 1};
+		if (imginfo["Libraw.CFAPattern"] == "GBRG") q = {1, 2, 0, 1};
+		if (imginfo["Libraw.CFAPattern"] == "BGGR") q = {2, 1, 1, 0};
 
 		#pragma omp parallel
 		{

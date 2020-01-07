@@ -401,7 +401,7 @@ ImageType PicProcessorDemosaic::getImageType()
 {
 	gImage * imgdib = getPreviousPicProcessor()->getProcessedPicPointer();
 
-	if (imgdib->getInfoValue("LibrawMosaiced") == "1") {
+	if (imgdib->getInfoValue("Libraw.Mosaiced") == "1") {
 
 		unsigned cfarray[2][2];	
 		if (imgdib->cfArray(cfarray)) return IMAGETYPE_BAYER;
@@ -506,7 +506,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 		if (result) {
 			wxString d = duration();
 			m_tree->SetItemText(id, wxString::Format("demosaic:%s",p[0].c_str()));
-			dib->setInfo("LibrawMosaiced", "0");
+			dib->setInfo("Libraw.Mosaiced", "0");
 
 			//parm tool.demosaic.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=0
 			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
