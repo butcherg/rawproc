@@ -2411,6 +2411,32 @@ printf("done.\n");
 }
 
 
+// Normalization
+//
+// Credit:
+// GMIC -normalize: https://gmic.eu/tutorial/_normalize.shtml
+//
+// Scaling image data sometimes is more appropriate to do as "compression"
+// or "expansion" from the data min/max to a new min/max.
+//
+void gImage::ApplyNormalization(float newmin, float newmax, int threadcount)
+{
+	std::map<std::string,float> s = StatsMap();
+	float dmin = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
+	float dmax = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
+	
+	float newdiff = newmax - newmin;
+	float ddiff = dmax - dmin;
+	
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i<image.size(); i++) {
+		image[i].r = newdiff * ((image[i].r - dmin) / ddiff) + newmin;
+		image[i].g = newdiff * ((image[i].g - dmin) / ddiff) + newmin;
+		image[i].b = newdiff * ((image[i].b - dmin) / ddiff) + newmin;
+	}
+}
+
+
 // ToneMapping
 //
 // Credit: 

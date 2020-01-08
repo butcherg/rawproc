@@ -741,10 +741,6 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				sprintf(cs, "%s:%0.2f ",cmd, sharp);
 				commandstring += std::string(cs);
 			}
-			
-
-			
-
 		}
 
 		//img <li>crop:x,y,w,y  no defaults</li>
@@ -1089,6 +1085,31 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			sprintf(cs, "%s:%0.1f ",cmd, ev);
 			commandstring += std::string(cs);
 		}
+		
+		//img <li>normalize:newmin,newmax default: 0.0,1.0</li>
+		else if (strcmp(cmd,"normalize") == 0) {
+			double min = atof(myConfig::getConfig().getValueOrDefault("tool.normalize.min","0.0").c_str());
+			double max = atof(myConfig::getConfig().getValueOrDefault("tool.normalize.max","1.0").c_str());
+			char *mn = strtok(NULL,", ");
+			char *mx = strtok(NULL," ");
+			if (mn) min = atof(mn);
+			if (mx) max = atof(mx);
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("normalization: %f,%f (%d threads)... ",min,max,threadcount); fflush(stdout);
+
+			_mark();
+			dib.ApplyNormalization(min, max, threadcount); 
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			char cs[256];
+			sprintf(cs, "%s:%f,%f ",cmd, min, max);
+			commandstring += std::string(cs);
+		}
+
 
 		//img <li>subtract:val|camera|file,filename  val=a float value, "camera" retrieves the camera </li>
 		else if (strcmp(cmd,"subtract") == 0) {
