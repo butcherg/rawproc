@@ -1217,7 +1217,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			}
 			else {
 				WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
-				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
+				dib->saveImageFile(fname, std::string(configparams.c_str())+";excludeicc");
 			}
 			
 			pic->SetModified(false);
