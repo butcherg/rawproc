@@ -360,5 +360,6 @@ wxString PicProcessor::getChannelText()
 	if (channel == CHANNEL_GREEN) return  "green";
 	if (channel == CHANNEL_BLUE) return "blue";
 	if (channel == CHANNEL_TONE) return "tone";
+	return "rgb";
 }
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <lcms2.h>
+#include <exiv2/exiv2.hpp>
 #include "curve.h"
 
 #if defined PIXhalf
@@ -155,10 +156,22 @@ class gImage
 		std::string Stats(bool isfloat=true);
 		std::map<std::string,float> StatsMap();
 
+		//tags=all: get all data; tags=none: return an empty container; else get specific tags listed, comma-separated.
+		Exiv2::ExifData getExifData(std::string tags);
+		Exiv2::IptcData getIptcData(std::string tags);
+		Exiv2::XmpData getXmpData(std::string tags);
+
+		Exiv2::ExifData& getExifData();
+		Exiv2::IptcData& getIptcData();
+		Exiv2::XmpData& getXmpData();
+
 		//Setters
 		void setInfo(std::string name, std::string value);
 		void setProfile(char * prof, unsigned proflength);
 		void deleteProfile();
+		void setExifData(Exiv2::ExifData exifData);
+		void setIptcData(Exiv2::IptcData iptcData);
+		void setXmpData(Exiv2::XmpData xmpData);
 
 		//calculators:
 		std::vector<double> CalculateChannelMeans();
@@ -331,8 +344,12 @@ class gImage
 		std::vector<pix> image;
 		unsigned w, h, c;
 		BPP b;
-		std::map<std::string,std::string> imginfo;
 
+		std::map<std::string,std::string> imginfo;
+		Exiv2::ExifData exifdata;
+		Exiv2::IptcData iptcdata;
+		Exiv2::XmpData xmpdata;
+		
 		char *profile;
 		unsigned profile_length;
 		
