@@ -126,6 +126,15 @@ PKG_CHECK_MODULES([LCMS2],[lcms2], [
 	AC_MSG_ERROR([not found.])
 ])
 
+#exiv2:
+PKG_CHECK_MODULES([EXIV2],[exiv2], [
+	CPPFLAGS="$EXIV2_CFLAGS $CPPFLAGS"
+	LIBS="$EXIV2_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
+
+
 
 #libraw-dcraw:
 AC_ARG_ENABLE([dcraw],

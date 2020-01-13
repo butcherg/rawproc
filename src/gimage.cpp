@@ -87,6 +87,10 @@ gImage::gImage(const gImage &o)
 	h = o.h;
 	c = o.c;
 	b = o.b;
+
+	exifdata = o.exifdata;
+	iptcdata = o.iptcdata;
+	xmpdata = o.xmpdata;
 	
 	imginfo = o.imginfo;
 	image = o.image;
@@ -870,6 +874,96 @@ int gImage::ThreadCount()
 void gImage::setInfo(std::string name, std::string value)
 {
 	imginfo[name] = value;
+}
+
+//Exif/IPTC/XMP getters/setters;
+
+void gImage::setExifData(Exiv2::ExifData exifData)
+{
+	exifdata = exifData;
+}
+
+void gImage::setIptcData(Exiv2::IptcData iptcData)
+{
+	iptcdata = iptcData;
+}
+
+void gImage::setXmpData(Exiv2::XmpData xmpData)
+{
+	xmpdata  = xmpData;
+}
+
+Exiv2::ExifData gImage::getExifData(std::string tags)
+{
+	Exiv2::ExifData e;
+	if (tags == "all")
+		return exifdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::ExifData::iterator j = exifdata.findKey(Exiv2::ExifKey(*i));
+			if (j != exifdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e; //default: 'none'
+}
+
+Exiv2::IptcData gImage::getIptcData(std::string tags)
+{
+	Exiv2::IptcData e;
+	if (tags == "all")
+		return iptcdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::IptcData::iterator j = iptcdata.findKey(Exiv2::IptcKey(*i));
+			if (j != iptcdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e;
+}
+
+Exiv2::XmpData gImage::getXmpData(std::string tags)
+{
+	Exiv2::XmpData e;
+	if (tags == "all")
+		return xmpdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::XmpData::iterator j = xmpdata.findKey(Exiv2::XmpKey(*i));
+			if (j != xmpdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e;
+}
+
+//return a reference to the member:
+Exiv2::ExifData& gImage::getExifData()
+{
+	return exifdata;
+}
+
+Exiv2::IptcData& gImage::getIptcData()
+{
+	return iptcdata;
+}
+
+Exiv2::XmpData& gImage::getXmpData()
+{
+	return xmpdata;
 }
 
 void gImage::setProfile(char * prof, unsigned proflength)
@@ -4984,12 +5078,22 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 gImage gImage::loadImageFile(const char * filename, std::string params)
 {
+	gImage im;
 	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
 
-	if (ext == FILETYPE_TIFF) return gImage::loadTIFF(filename, params);
-	else if (ext == FILETYPE_JPEG) return gImage::loadJPEG(filename, params);
-	else if (ext == FILETYPE_PNG) return gImage::loadPNG(filename, params);
-	else return gImage::loadRAW(filename, params);
+	if (ext == FILETYPE_TIFF) im = gImage::loadTIFF(filename, params);
+	else if (ext == FILETYPE_JPEG) im = gImage::loadJPEG(filename, params);
+	else if (ext == FILETYPE_PNG) im = gImage::loadPNG(filename, params);
+	else im = gImage::loadRAW(filename, params);
+
+	Exiv2::Image::AutoPtr img = Exiv2::ImageFactory::open(filename);
+	assert(img.get() != 0);
+	img->readMetadata();
+	if (img->exifData().count() > 0) im.setExifData(img->exifData());
+	if (img->iptcData().count() > 0) im.setIptcData(img->iptcData());
+	if (img->xmpData().count() > 0) im.setXmpData(img->xmpData());
+
+	return im;
 }
 
 std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filename)
@@ -5127,6 +5231,7 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
+	std::string exiftags, iptctags, xmptags;
 	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
@@ -5135,28 +5240,51 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 		if (p["channelformat"] == "float") bitfmt = BPP_FP;
 		if (p["channelformat"] == "unboundedfloat") bitfmt = BPP_UFP;
 	}
+	if (p.find("exiftags") != p.end()) 
+		exiftags = p["exiftags"];
+	if (p.find("iptctags") != p.end()) 
+		iptctags = p["iptctags"];
+	if (p.find("exiftags") != p.end()) 
+		xmptags = p["xmptags"];
+
+	params += ";excludeexif;excludeicc";  //in favor of using exiv2, below.  ToDo: remove metadata saves in image writers, change excludeexif to disable exiv2 also
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
 
 	if (ftype == FILETYPE_TIFF) {
 		if (profile)
-			return saveTIFF(filename, bitfmt, params, profile, intent);
+			lasterror = saveTIFF(filename, bitfmt, params, profile, intent);
 		else
-			return saveTIFF(filename, bitfmt, params);
+			lasterror = saveTIFF(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_JPEG) {
+	else if (ftype == FILETYPE_JPEG) {
 		if (profile)
-			return saveJPEG(filename, bitfmt, params, profile, intent);
+			lasterror = saveJPEG(filename, bitfmt, params, profile, intent);
 		else
-			return saveJPEG(filename, bitfmt, params);
+			lasterror = saveJPEG(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_PNG) {
+	else if (ftype == FILETYPE_PNG) {
 		if (profile)
-			return savePNG(filename, bitfmt, params, profile, intent);
+			lasterror = savePNG(filename, bitfmt, params, profile, intent);
 		else
-			return savePNG(filename, bitfmt, params);
+			lasterror = savePNG(filename, bitfmt, params);
 	}
-	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+	else lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+
+	if (lasterror != GIMAGE_UNSUPPORTED_FILEFORMAT) {
+		try {
+			Exiv2::Image::AutoPtr img = Exiv2::ImageFactory::open(filename);
+			assert(img.get() != 0);
+			if (exifdata.count() > 0) img->setExifData(getExifData(exiftags));
+			if (iptcdata.count() > 0) img->setIptcData(getIptcData(iptctags));
+			if (xmpdata.count() > 0) img->setXmpData(getXmpData(xmptags));
+			img->writeMetadata();
+		}
+		catch (Exiv2::AnyError& e) {
+			std::cout << "Caught Exiv2 exception '" << e << "'\n";
+		}
+	}
+
 	return lasterror;
 }
 

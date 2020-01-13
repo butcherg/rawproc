@@ -1093,6 +1093,13 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	cmsHPROFILE profile;
 
 	wxFileName profilepath;
+	//parm output.metadata.exiftags: List of exiv2-convention Exif tags to extract from the original image metadata for inclusion in the output image. 
+	wxString exiftags = wxString(myConfig::getConfig().getValueOrDefault("output.metadata.exiftags","Exif.Image.ImageDescription"));
+	//parm output.metadata.iptctags: List of exiv2-convention IPTC tags to extract from the original image metadata for inclusion in the output image. 
+	wxString iptctags = wxString(myConfig::getConfig().getValueOrDefault("output.metadata.iptctags",""));
+	//parm output.metadata.xmptags: List of exiv2-convention XMP tags to extract from the original image metadata for inclusion in the output image. 
+	wxString xmptags = wxString(myConfig::getConfig().getValueOrDefault("output.metadata.xmptags",""));
+
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 	if (!sourcefilename.IsOk()) 
@@ -1117,7 +1124,12 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			else
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
 
-			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
+			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());  //ToDo: delete when imageinfo is no longer needed...
+			//parm output.embedtoolchain: 1|0, if set, the rawproc toolchain that was applied to the input image to make the output image will be inserted into the Exif ImageDescription tag.  Default: 1
+			if (myConfig::getConfig().getValueOrDefault("output.embedtoolchain","1") == "1") 
+				dib->getExifData()["Exif.Image.ImageDescription"] = (std::string) AssembleCommand().c_str();  //ToDo: change to setting the ExifData extract instead of the source image ExifData...
+				dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());
+
 			wxString versionstr = _("(dev build)");
 			#ifdef VERSION
 				versionstr = VERSION;
@@ -1138,6 +1150,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			if (filetype == FILETYPE_JPEG) {
 				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
 				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
+				//parm output.*.metadata.*tags: List of exiv2-convention Exif tags to extract from the original image metadata for inclusion in the output image type (jpeg,tiff,png).  Default: value from the corresponding output.metadata.*tags
+				exiftags = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.metadata.exiftags",exiftags.ToStdString()));
+				iptctags = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.metadata.iptctags",iptctags.ToStdString()));
+				xmptags = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.metadata.xmptags",xmptags.ToStdString()));
 				thumbdir = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.directory",thumbdir.ToStdString());
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.parameters",thumbparams.ToStdString());
 			}
@@ -1145,6 +1161,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			if (filetype == FILETYPE_TIFF) {
 				//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul>
 				configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
+				exiftags = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.metadata.exiftags",exiftags.ToStdString()));
+				iptctags = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.metadata.iptctags",iptctags.ToStdString()));
+				xmptags = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.metadata.xmptags",xmptags.ToStdString()));
 				thumbdir = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.directory",thumbdir.ToStdString());
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.parameters",thumbparams.ToStdString());
 			}
@@ -1152,9 +1171,16 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			if (filetype == FILETYPE_PNG) {
 				//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul>
 				configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
+				exiftags = wxString(myConfig::getConfig().getValueOrDefault("output.png.metadata.exiftags",exiftags.ToStdString()));
+				iptctags = wxString(myConfig::getConfig().getValueOrDefault("output.png.metadata.iptctags",iptctags.ToStdString()));
+				xmptags = wxString(myConfig::getConfig().getValueOrDefault("output.png.metadata.xmptags",xmptags.ToStdString()));
 				thumbdir = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.directory",thumbdir.ToStdString());
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
 			}
+
+			if (!exiftags.empty()) configparams += ";exiftags=" + exiftags;
+			if (!iptctags.empty()) configparams += ";iptctags=" + iptctags;
+			if (!xmptags.empty())  configparams += ";xmptags="  + xmptags;
 
 			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
 			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
