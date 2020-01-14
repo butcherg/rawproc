@@ -1124,29 +1124,40 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			else
 				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
 
+
+			//metadata output: build list of tags with which to populate the metadata
+
+			wxString apptags = "Exif.Image.Orientation"; //always include this one.
+
 			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());  //ToDo: delete when imageinfo is no longer needed...
 			//parm output.embedtoolchain: 1|0, if set, the rawproc toolchain that was applied to the input image to make the output image will be inserted into the Exif ImageDescription tag.  Default: 1
-			if (myConfig::getConfig().getValueOrDefault("output.embedtoolchain","1") == "1") 
+			if (myConfig::getConfig().getValueOrDefault("output.embedtoolchain","1") == "1") {
 				dib->getExifData()["Exif.Image.ImageDescription"] = (std::string) AssembleCommand().c_str();  //ToDo: change to setting the ExifData extract instead of the source image ExifData...
-				dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());
+				apptags += ",Exif.Image.ImageDescription";  //add to the list
+			}
 
 			wxString versionstr = _("(dev build)");
 			#ifdef VERSION
 				versionstr = VERSION;
 			#endif
 			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",versionstr).c_str());
+			apptags += ",Exif.Image.Software"; //add to the list
 			
 			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
 			if (myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") {
 				WxStatusBar1->SetStatusText(wxString::Format(_("Orienting image for output...")));
 				dib->NormalizeRotation();
 			}
+			dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());  //ToDo: move Orientation mgt to exifdata.
 
+			//configparams will contain any user-specified output parameters, including what metadata tags to include in the file.
 			wxString configparams;
+
 			//parm output.*.thumbnails.directory: *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.
 			wxString thumbdir = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.directory","");
 			//parm output.*.thumbnails.parameters: *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.
 			wxString thumbparams = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.parameters","");
+
 			if (filetype == FILETYPE_JPEG) {
 				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
 				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
@@ -1178,7 +1189,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
 			}
 
-			if (!exiftags.empty()) configparams += ";exiftags=" + exiftags;
+			configparams += ";exiftags=" + apptags; //there's always at least one thing (Orientation) in here...
+			if (!exiftags.empty()) configparams += "," + exiftags;  //add anything the user specified
 			if (!iptctags.empty()) configparams += ";iptctags=" + iptctags;
 			if (!xmptags.empty())  configparams += ";xmptags="  + xmptags;
 
