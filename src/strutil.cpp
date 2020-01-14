@@ -40,7 +40,7 @@ std::string to_utf8(std::wstring wstr)
 
 bool isFloat(std::string str)
 {
-	std::regex e ("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$");
+	std::regex e ("^[-+]?[0-9]*.?[0-9]+([eE][-+]?[0-9]+)?$");
 	return std::regex_match (str,e);
 }
 
