@@ -3,6 +3,7 @@
 #include "PicProcessorBlackWhitePoint.h"
 #include "PicProcPanel.h"
 #include "myDoubleSlider.h"
+#include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "myRowSizer.h"
 #include "undo.xpm"
@@ -17,9 +18,10 @@
 #define BLACKWHITESLIDERAUTO 6104
 #define BLACKWHITEDATA   6105
 #define BLACKWHITEMINWHITE   6106
-#define BLACKWHITECAMERA 6107
-#define BLACKWHITECOPY 6108
-#define BLACKWHITEPASTE 6109
+#define BLACKWHITENORM   6107
+#define BLACKWHITECAMERA 6108
+#define BLACKWHITECOPY 6109
+#define BLACKWHITEPASTE 6110
 
 class BlackWhitePointPanel: public PicProcPanel
 {
@@ -48,6 +50,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			slideb = new wxRadioButton(this, BLACKWHITESLIDER, _("auto/slider:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			datb   = new wxRadioButton(this, BLACKWHITEDATA,   _("data:"));
 			camb   = new wxRadioButton(this, BLACKWHITECAMERA, _("camera:"));
+			normb  = new wxRadioButton(this, BLACKWHITENORM, _("normalize:"));
 			
 			bwpoint = new myDoubleSlider(this, wxID_ANY, blk, wht, 0, 255);
 			//parm tool.blackwhitepoint.floatlabel: 0|1, if 1, turns label into a fractional value of the maxvalue.  Default=0
@@ -67,6 +70,9 @@ class BlackWhitePointPanel: public PicProcPanel
 			slideb->SetValue(true);
 			blk = 0.0;
 			wht = 255.0;
+
+			normmin = new myFloatCtrl(this, wxID_ANY, "min", 0.0, 3);
+			normmax = new myFloatCtrl(this, wxID_ANY, "max", 1.0, 3);
 
 			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
 			std::map<std::string,float> s = img.StatsMap();
@@ -97,8 +103,8 @@ class BlackWhitePointPanel: public PicProcPanel
 				else if (p.size() >= 3) {
 					bwmode = BLACKWHITESLIDER;
 					slideb->SetValue(true);
-					blk = atoi(p[1]);
-					wht = atoi(p[2]);
+					blk = atoi(p[1].c_str());
+					wht = atoi(p[2].c_str());
 					bwpoint->SetLeftValue(blk);
 					bwpoint->SetRightValue(wht);
 				}
@@ -107,13 +113,21 @@ class BlackWhitePointPanel: public PicProcPanel
 				bwmode = BLACKWHITECAMERA;
 				camb->SetValue(true);
 			}
+			else if (p[0] == "norm") {
+				bwmode = BLACKWHITENORM;
+				normb->SetValue(true);
+				if (p.size() >= 3) {
+					normmin->SetFloatValue(atof(p[1].c_str()));
+					normmax->SetFloatValue(atof(p[2].c_str()));
+				}
+			}
 			else {
 				chan->SetSelection(chan->FindString("rgb"));
 				bwmode = BLACKWHITESLIDER;
 				slideb->SetValue(true);
 				if (p.size() >= 3) {
-					blk = atoi(p[0]);
-					wht = atoi(p[1]);
+					blk = atoi(p[0].c_str());
+					wht = atoi(p[1].c_str());
 					bwpoint->SetLeftValue(blk);
 					bwpoint->SetRightValue(wht);
 				}
@@ -152,6 +166,15 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(camb, flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, wxString::Format(_("black: %f (%d)\nwhite: %f (%d)"),camblk, librawblk, camwht,librawwht)), flags);
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+			m->NextRow();
+			m->AddRowItem(normb, flags);
+			m->NextRow();
+			m->AddRowItem(normmin, flags);
+			m->AddRowItem(normmax, flags);
 			m->End();
 
 			SetSizerAndFit(m);
@@ -221,11 +244,19 @@ class BlackWhitePointPanel: public PicProcPanel
 						if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
 						datb->SetValue(true);
 					}
+					else if (p[0] == "norm") {
+						bwmode = BLACKWHITENORM;
+						normb->SetValue(true);
+						if (p.size() >= 3) {
+							normmin->SetFloatValue(atof(p[1].c_str()));
+							normmax->SetFloatValue(atof(p[2].c_str()));
+						}
+					}
 					else if (p.size() >= 3) {
 						bwmode = BLACKWHITESLIDER;
 						slideb->SetValue(true);
-						blk = atoi(p[1]);
-						wht = atoi(p[2]);
+						blk = atoi(p[1].c_str());
+						wht = atoi(p[2].c_str());
 						bwpoint->SetLeftValue(blk);
 						bwpoint->SetRightValue(wht);
 					}
@@ -240,8 +271,8 @@ class BlackWhitePointPanel: public PicProcPanel
 					bwmode = BLACKWHITESLIDER;
 					slideb->SetValue(true);
 					if (p.size() >= 3) {
-						blk = atoi(p[0]);
-						wht = atoi(p[1]);
+						blk = atoi(p[0].c_str());
+						wht = atoi(p[1].c_str());
 						bwpoint->SetLeftValue(blk);
 						bwpoint->SetRightValue(wht);
 					}
@@ -286,6 +317,10 @@ class BlackWhitePointPanel: public PicProcPanel
 					q->setParams("camera");
 					q->processPic();
 					break;
+				case BLACKWHITENORM:
+					q->setParams(wxString::Format("norm,%0.3f,%0.3f",normmin->GetFloatValue(),normmax->GetFloatValue()));
+					q->processPic();
+					break;
 			}
 		}
 
@@ -323,8 +358,8 @@ class BlackWhitePointPanel: public PicProcPanel
 		void updateSliders()
 		{
 			wxArrayString p = split(q->getParams(),",");
-			bwpoint->SetLeftValue(atoi(p[1]));
-			bwpoint->SetRightValue(atoi(p[2]));
+			bwpoint->SetLeftValue(atoi(p[1].c_str()));
+			bwpoint->SetRightValue(atoi(p[2].c_str()));
 		}
 		
 		void channelChanged(wxCommandEvent& event)
@@ -386,8 +421,9 @@ class BlackWhitePointPanel: public PicProcPanel
 		wxChoice *chan;
 		wxSlider *black, *white;
 		wxCheckBox *recalc,*enablebox, *minwhite;
-		wxRadioButton *slideb, *datb, *camb;
+		wxRadioButton *slideb, *datb, *camb, *normb;
 		myDoubleSlider *bwpoint;
+		myFloatCtrl *normmin, *normmax;
 		wxStaticText *val1, *val2, *datvals, *datminwht;
 		wxBitmapButton *btn1, * btn2;
 		int bwmode;
@@ -469,7 +505,7 @@ void PicProcessorBlackWhitePoint::reCalc()
 
 bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
 {
-	double blk, wht;
+	double blk, wht, normmin, normmax;
 	float maxwht, minwht; 
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("black/white point..."));
 
@@ -519,8 +555,8 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 
 		else {
 			m_tree->SetItemText(id, _("blackwhitepoint:rgb"));
-			blk = atof(p[1]);
-			wht = atof(p[2]);
+			blk = atof(p[1].c_str());
+			wht = atof(p[2].c_str());
 		}
 	}
 
@@ -529,11 +565,16 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		blk = atof(dib->getInfoValue("Libraw.Black").c_str())/65536.0;
 		wht = atof(dib->getInfoValue("Libraw.Maximum").c_str())/65536.0;
 	}
+	else if (p[0] == "norm") {
+		m_tree->SetItemText(id, _("blackwhitepoint:norm"));
+		normmin = atof(p[1].c_str());
+		normmax = atof(p[2].c_str());
+	}
 	else {
 		m_tree->SetItemText(id, _("blackwhitepoint:rgb"));
 		setChannel("rgb");
-		blk = atof(p[0]);
-		wht = atof(p[1]);
+		blk = atof(p[0].c_str());
+		wht = atof(p[1].c_str());
 	}
 
 	bool result = true;
@@ -549,14 +590,17 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 
 	if (processingenabled) {
 		mark();
-		dib->ApplyToneLine(blk, wht, channel, threadcount);
+		if (p[0] =="norm")
+			 dib->ApplyNormalization(normmin, normmax, threadcount);
+		else
+			dib->ApplyToneLine(blk, wht, channel, threadcount);
 		m_display->SetModified(true);
 		wxString d = duration();
 
 		//parm tool.all.log: Turns on logging for all tools.  Default=0
 		//parm tool.*.log: Turns on logging for the specified tool.  Default=0
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.log","0") == "1"))
-			log(wxString::Format(_("tool=blackwhitepoint,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
+			log(wxString::Format(_("tool=blackwhitepoint,%s,imagesize=%dx%d,threads=%d,time=%s"),p[0].c_str(),dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
 	dirty=false;
