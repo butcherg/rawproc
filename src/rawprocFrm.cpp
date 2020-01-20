@@ -636,26 +636,32 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
+	if (name == "saturation") 			p = new PicProcessorSaturation("saturation",command, commandtree, pic);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "cacorrect")		p = new PicProcessorCACorrect("cacorrect",command, commandtree, pic);
 	else if (name == "hlrecover")		p = new PicProcessorHLRecover("hlrecover",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
-	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
-	else if (name == "group")		p = new PicProcessorGroup("group", command, commandtree, pic);
+	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN
-	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
+	else if (name == "lenscorrection")	{
+		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
+		if (lfdb)
+			p = new PicProcessorLensCorrection(lfdb, "lenscorrection", command, commandtree, pic);
+		else
+			return id;
+	}
 #endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return id;
@@ -1941,15 +1947,15 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	
 	SetStatusText("");
 	try {
-		//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
-		wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
-		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
-		if (p->isOk()) {
+		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
+		if (lfdb) {
+			//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
+			wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
+			PicProcessorLensCorrection *p = new PicProcessorLensCorrection(lfdb, "lenscorrection", defaults, commandtree, pic);
 			p->createPanel(parambook);
 			if (defaults != "") p->processPic();
 			if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
 		}
-		else delete p;
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));

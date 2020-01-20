@@ -371,7 +371,63 @@ class LensCorrectionPanel: public PicProcPanel
 
 };
 
-PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
+lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
+{
+printf("findLensfunDatabase: enter...\n"); fflush(stdout);
+	bool lfok = false;
+	lfError e;
+	lfDatabase * lfdb = new lfDatabase();
+
+	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
+	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+
+#ifdef LF_0395
+	if (lensfundatadir != "") {
+		printf("findLensfunDatabase: looking for a database in tool.lenscorrection.databasepath...\n"); fflush(stdout);
+		e = lfdb->Load(lensfundatadir.c_str());
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
+		if (e == LF_NO_ERROR) lfok = true;
+	}
+	else {
+		e = lfdb->Load();
+		printf("findLensfunDatabase: looking for a database in the system locations...\n"); fflush(stdout);
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
+		if (e == LF_NO_ERROR) lfok = true;
+	}
+		
+#else
+	if (lensfundatadir != "") {
+		if (lfdb->LoadDirectory(lensfundatadir.c_str())) {
+			e = LF_NO_ERROR;
+			lfok = true;
+		}
+		else {
+			wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s, trying standard directories..."),wxString(lensfundatadir)));
+			lfok = false;
+		}
+	}
+	if (!lfok) {
+		if (lfdb->Load() != LF_NO_ERROR) {
+			wxMessageBox(_("Error: Cannot open lens correction database at any standard directory")) ;
+			lfok = false;
+		}
+		else lfok = true;
+	}
+#endif
+
+	if (!lfok) {
+		printf("findLensfunDatabase: lf not okay...\n"); fflush(stdout);
+		lfdb->~lfDatabase();
+		return NULL;
+	}
+	printf("findLensfunDatabase: lf okay!!!\n"); fflush(stdout);
+	return lfdb;
+	
+}
+
+PicProcessorLensCorrection::PicProcessorLensCorrection(lfDatabase * lfdatabase, wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	lfok = false;
 	setlocale (LC_ALL, "");		
@@ -379,26 +435,26 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 	altcamera.clear();
 	altlens.clear();
 	
-	lfError e;
-	//ldb = lf_db_new ();
-	//if (lf_db_load (ldb) != LF_NO_ERROR) {
+	//lfError e;
 
-	ldb = new lfDatabase();
+	//ldb = new lfDatabase();
+	ldb = lfdatabase;
+	
+/*
 	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
 	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
 
 #ifdef LF_0395
-	lfok = false;
 	if (lensfundatadir != "") {
 		e = ldb->Load(lensfundatadir.c_str());
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s,"wxString(lensfundatadir)));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect",wxString(lensfundatadir)));
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
 		if (e == LF_NO_ERROR) lfok = true;
 	}
 	else {
 		e = ldb->Load();
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location"));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect"));
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
 		if (e == LF_NO_ERROR) lfok = true;
 	}
 		
@@ -421,6 +477,12 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 		else lfok = true;
 	}
 #endif
+
+	if (!lfok) {
+		ldb->Destroy();
+		return;
+	}
+*/
 
 	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
 	std::map<std::string,std::string> info = idib.getInfo();
@@ -552,7 +614,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 
 			if (success) {
 #ifdef LF_0395
-				lfModifier *mod = new lfModifier (lens->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
+				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
 
 				// Enable desired modifications
 				int modflags = 0;
@@ -560,7 +622,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				if (ModifyFlags & LF_MODIFY_TCA)
 					modflags |= mod->EnableTCACorrection(lens, atof(info["FocalLength"].c_str()));
 				if (ModifyFlags & LF_MODIFY_VIGNETTING)
-					modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str(), 1000.0);
+					modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
 				if (ModifyFlags & LF_MODIFY_DISTORTION)
 					modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
 				if (ModifyFlags & LF_MODIFY_GEOMETRY)
