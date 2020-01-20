@@ -23,6 +23,7 @@
 #define LENSCORRECTION_APPLY	6310
 
 //from darktable: src/iop/lens.cc
+//use to conditionally compile against lensfun 0.3.2/0.3.95
 #if LF_VERSION == ((0 << 24) | (3 << 16) | (95 << 8) | 0)
 #define LF_0395
 #endif
@@ -382,9 +383,26 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 	//ldb = lf_db_new ();
 	//if (lf_db_load (ldb) != LF_NO_ERROR) {
 
-	ldb = lfDatabase::Create();
+	ldb = new lfDatabase();
 	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
 	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+
+#ifdef LF_0395
+	lfok = false;
+	if (lensfundatadir != "") {
+		e = ldb->Load(lensfundatadir.c_str());
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s,"wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect",wxString(lensfundatadir)));
+		if (e == LF_NO_ERROR) lfok = true;
+	}
+	else {
+		e = ldb->Load();
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location"));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect"));
+		if (e == LF_NO_ERROR) lfok = true;
+	}
+		
+#else
 	if (lensfundatadir != "") {
 		if (ldb->LoadDirectory(lensfundatadir.c_str())) {
 			e = LF_NO_ERROR;
@@ -402,6 +420,7 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 		}
 		else lfok = true;
 	}
+#endif
 
 	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
 	std::map<std::string,std::string> info = idib.getInfo();
@@ -422,6 +441,11 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(wxString name, wxString c
 PicProcessorLensCorrection::~PicProcessorLensCorrection()
 {
 	if (ldb) lf_db_destroy (ldb);
+}
+
+bool PicProcessorLensCorrection::isOk()
+{
+	return lfok;
 }
 
 void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
@@ -527,6 +551,24 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 			}
 
 			if (success) {
+#ifdef LF_0395
+				lfModifier *mod = new lfModifier (lens->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
+
+				// Enable desired modifications
+				int modflags = 0;
+
+				if (ModifyFlags & LF_MODIFY_TCA)
+					modflags |= mod->EnableTCACorrection(lens, atof(info["FocalLength"].c_str()));
+				if (ModifyFlags & LF_MODIFY_VIGNETTING)
+					modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str(), 1000.0);
+				if (ModifyFlags & LF_MODIFY_DISTORTION)
+					modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
+				if (ModifyFlags & LF_MODIFY_GEOMETRY)
+					modflags |= mod->EnableProjectionTransform(lens, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
+				if (ModifyFlags & LF_MODIFY_SCALE)
+					modflags |= mod->EnableScaling(1.0);
+
+#else
 				lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
 				int modflags = mod->Initialize (
 	        			lens, 
@@ -534,17 +576,14 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 					atof(info["FocalLength"].c_str()), 
 					atof(info["FNumber"].c_str()),
 	        			1.0f, //opts.Distance
-					0.0f, //opts.Scale, 
+					1.0f, //opts.Scale, 
 					LF_RECTILINEAR, //opts.TargetGeom,
 					ModifyFlags, 
 					false //opts.Inverse
 				);
 
-				#ifdef LF_0395
-				if (ModifyFlags & LF_MODIFY_SCALE) mod->EnableScaling(0.0);
-				#else
 				if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
-				#endif
+#endif
 
 				unsigned w = dib->getWidth();
 				unsigned h = dib->getHeight();

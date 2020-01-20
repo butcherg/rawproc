@@ -1939,23 +1939,17 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	
-	lfError e;
-	struct lfDatabase *ldb = lf_db_new ();
-	if (lf_db_load (ldb) != LF_NO_ERROR) {
-		wxMessageBox(_("Error: Cannot open lens correction database.")) ;
-		if (ldb) lf_db_destroy (ldb);
-		return;
-	}
-	if (ldb) lf_db_destroy (ldb);
-
 	SetStatusText("");
 	try {
 		//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
 		wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
 		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
-		p->createPanel(parambook);
-		if (defaults != "") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
+		if (p->isOk()) {
+			p->createPanel(parambook);
+			if (defaults != "") p->processPic();
+			if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
+		}
+		else delete p;
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));
