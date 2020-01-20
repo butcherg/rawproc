@@ -440,49 +440,6 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(lfDatabase * lfdatabase, 
 	//ldb = new lfDatabase();
 	ldb = lfdatabase;
 	
-/*
-	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
-	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
-
-#ifdef LF_0395
-	if (lensfundatadir != "") {
-		e = ldb->Load(lensfundatadir.c_str());
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
-		if (e == LF_NO_ERROR) lfok = true;
-	}
-	else {
-		e = ldb->Load();
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
-		if (e == LF_NO_ERROR) lfok = true;
-	}
-		
-#else
-	if (lensfundatadir != "") {
-		if (ldb->LoadDirectory(lensfundatadir.c_str())) {
-			e = LF_NO_ERROR;
-			lfok = true;
-		}
-		else {
-			wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s, trying standard directories..."),wxString(lensfundatadir)));
-			lfok = false;
-		}
-	}
-	if (!lfok) {
-		if (ldb->Load() != LF_NO_ERROR) {
-			wxMessageBox(_("Error: Cannot open lens correction database at any standard directory")) ;
-			lfok = false;
-		}
-		else lfok = true;
-	}
-#endif
-
-	if (!lfok) {
-		ldb->Destroy();
-		return;
-	}
-*/
 
 	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
 	std::map<std::string,std::string> info = idib.getInfo();
@@ -505,21 +462,14 @@ PicProcessorLensCorrection::~PicProcessorLensCorrection()
 	if (ldb) lf_db_destroy (ldb);
 }
 
-bool PicProcessorLensCorrection::isOk()
-{
-	return lfok;
-}
-
 void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
 {
-	if (lfok) {
-		gImage &idib = getPreviousPicProcessor()->getProcessedPic();
-		wxString metadata = wxString::Format(_("Camera: %s\nLens: %s"),metadatacamera, metadatalens);
-		toolpanel = new LensCorrectionPanel(parent, this, c, metadata);
-		parent->ShowNewPage(toolpanel);
-		toolpanel->Refresh();
-		toolpanel->Update();
-	}
+	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
+	wxString metadata = wxString::Format(_("Camera: %s\nLens: %s"),metadatacamera, metadatalens);
+	toolpanel = new LensCorrectionPanel(parent, this, c, metadata);
+	parent->ShowNewPage(toolpanel);
+	toolpanel->Refresh();
+	toolpanel->Update();
 }
 
 void PicProcessorLensCorrection::setAlternates(wxString acam, wxString alens)
