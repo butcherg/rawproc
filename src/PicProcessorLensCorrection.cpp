@@ -22,6 +22,12 @@
 #define LENSCORRECTION_AUTOCROP 6309
 #define LENSCORRECTION_APPLY	6310
 
+//from darktable: src/iop/lens.cc
+#if LF_VERSION == ((0 << 24) | (3 << 16) | (95 << 8) | 0)
+#define LF_0395
+#endif
+
+
 class myListCtrl: public wxListCtrl
 {
 	public:
@@ -534,7 +540,11 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 					false //opts.Inverse
 				);
 
+				#ifdef LF_0395
+				if (ModifyFlags & LF_MODIFY_SCALE) mod->EnableScaling(0.0);
+				#else
 				if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
+				#endif
 
 				unsigned w = dib->getWidth();
 				unsigned h = dib->getHeight();
