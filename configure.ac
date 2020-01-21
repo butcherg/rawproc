@@ -198,9 +198,10 @@ AC_ARG_ENABLE([librtprocess-static],
 )
 if test "$enable_librtprocess_static" == "yes"
 then
-	PKG_CHECK_MODULES([RTPROCESS],[rtprocess_static], [
+	PKG_CHECK_MODULES([RTPROCESS],[rtprocess], [
 		CPPFLAGS="$RTPROCESS_CFLAGS $CPPFLAGS"
-		LIBS="$RTPROCESS_LIBS $LIBS"
+		RTSTATIC="_static"
+		LIBS="$RTPROCESS_LIBS$RTSTATIC $LIBS"
 	],[
 		AC_MSG_ERROR([not found.])
 	])
