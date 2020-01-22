@@ -417,11 +417,7 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(lfDatabase * lfdatabase, 
 	altcamera.clear();
 	altlens.clear();
 	
-	//lfError e;
-
-	//ldb = new lfDatabase();
 	ldb = lfdatabase;
-	
 
 	gImage &idib = getPreviousPicProcessor()->getProcessedPic();
 	std::map<std::string,std::string> info = idib.getInfo();
@@ -441,7 +437,8 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(lfDatabase * lfdatabase, 
 
 PicProcessorLensCorrection::~PicProcessorLensCorrection()
 {
-	if (ldb) lf_db_destroy (ldb);
+	//if (ldb) 
+		delete ldb;
 }
 
 void PicProcessorLensCorrection::createPanel(wxSimplebook* parent)
@@ -667,6 +664,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 						}
 					}
 				}
+				delete mod;
 			}
 			
 			m_display->SetModified(true);
