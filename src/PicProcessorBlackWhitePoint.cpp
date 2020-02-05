@@ -71,8 +71,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			blk = 0.0;
 			wht = 255.0;
 
-			normmin = new myFloatCtrl(this, wxID_ANY, "min", 0.0, 3);
-			normmax = new myFloatCtrl(this, wxID_ANY, "max", 1.0, 3);
+			normmin = new myFloatCtrl(this, wxID_ANY, "min: ", 0.0, 3, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
+			normmax = new myFloatCtrl(this, wxID_ANY, "max: ", 1.0, 3, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 
 			gImage &img = proc->getPreviousPicProcessor()->getProcessedPic();
 			std::map<std::string,float> s = img.StatsMap();

@@ -11,7 +11,7 @@
 #include "gimage/gimage.h"
 
 #ifdef WIN32
-#define TEXTCTRLHEIGHT 20
+#define TEXTCTRLHEIGHT 25
 #define TEXTHEIGHT 15
 #else
 #define TEXTCTRLHEIGHT 30
