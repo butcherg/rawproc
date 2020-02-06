@@ -400,7 +400,7 @@ lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
 	}
 		
 	if (e == LF_NO_ERROR) return lfdb;
-	wxMessageBox(("Error: lens correction database read failed");
+	wxMessageBox(_("Error: lens correction database read failed"));
 	delete lfdb;
 	return NULL;
 }
