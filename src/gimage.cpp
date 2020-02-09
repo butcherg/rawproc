@@ -812,46 +812,78 @@ void gImage::initInterpolation(RESIZE_FILTER interp)
 
 PIXTYPE gImage::getR(float x, float y)
 {
-	unsigned xi = unsigned (x + 0.5);
-	unsigned yi = unsigned (y + 0.5);
-	if (xi >= w || yi >= h)
-		return (PIXTYPE) 0.0;
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		return image[y*w+x].r;
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		return image[y*w+x].r;
+	}
+	else {  //default to nearest neighbor:
+		unsigned xi = unsigned (x + 0.5);
+		unsigned yi = unsigned (y + 0.5);
+		if (xi >= w || yi >= h)
+			return (PIXTYPE) 0.0;
 
-	unsigned pos = yi * w + xi;
-	return image[pos].r;
+		unsigned pos = yi * w + xi;
+		return image[pos].r;
+	}
 }
 
 PIXTYPE gImage::getG(float x, float y)
 {
-	unsigned xi = unsigned (x + 0.5);
-	unsigned yi = unsigned (y + 0.5);
-	if (xi >= w || yi >= h)
-		return (PIXTYPE) 0.0;
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		return image[y*w+x].g;
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		return image[y*w+x].g;
+	}
+	else {  //default to nearest neighbor:
+		unsigned xi = unsigned (x + 0.5);
+		unsigned yi = unsigned (y + 0.5);
+		if (xi >= w || yi >= h)
+			return (PIXTYPE) 0.0;
 
-	unsigned pos = yi * w + xi;
-	return image[pos].g;
+		unsigned pos = yi * w + xi;
+		return image[pos].g;
+	}
 }
 
 PIXTYPE gImage::getB(float x, float y)
 {
-	unsigned xi = unsigned (x + 0.5);
-	unsigned yi = unsigned (y + 0.5);
-	if (xi >= w || yi >= h)
-		return (PIXTYPE) 0.0;
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		return image[y*w+x].b;
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		return image[y*w+x].b;
+	}
+	else {  //default to nearest neighbor:
+		unsigned xi = unsigned (x + 0.5);
+		unsigned yi = unsigned (y + 0.5);
+		if (xi >= w || yi >= h)
+			return (PIXTYPE) 0.0;
 
-	unsigned pos = yi * w + xi;
-	return image[pos].b;
+		unsigned pos = yi * w + xi;
+		return image[pos].b;
+	}
 }
 
 pix gImage::getRGB(float x, float y)
 {
-	unsigned xi = unsigned (x + 0.5);
-	unsigned yi = unsigned (y + 0.5);
-	if (xi >= w || yi >= h)
-		return nullpix;
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		return image[y*w+x];
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		return image[y*w+x];
+	}
+	else {  //default to nearest neighbor:
+		unsigned xi = unsigned (x + 0.5);
+		unsigned yi = unsigned (y + 0.5);
+		if (xi >= w || yi >= h)
+			return nullpix;
 
-	unsigned pos = yi * w + xi;
-	return image[pos];
+		unsigned pos = yi * w + xi;
+		return image[pos];
+	}
 }
 
 
