@@ -816,7 +816,21 @@ PIXTYPE gImage::getR(float x, float y)
 		return image[y*w+x].r;
 	}
 	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		return image[y*w+x].r;
+		unsigned xi = unsigned (x);
+		unsigned yi = unsigned (y);
+		if (xi >= w || yi >= h)
+			return 0;
+
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
+		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
+		return k1 + dy * (k2-k1);
 	}
 	else {  //default to nearest neighbor:
 		unsigned xi = unsigned (x + 0.5);
@@ -835,7 +849,21 @@ PIXTYPE gImage::getG(float x, float y)
 		return image[y*w+x].g;
 	}
 	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		return image[y*w+x].g;
+		unsigned xi = unsigned (x);
+		unsigned yi = unsigned (y);
+		if (xi >= w || yi >= h)
+			return 0;
+
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
+		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
+		return k1 + dy * (k2-k1);
 	}
 	else {  //default to nearest neighbor:
 		unsigned xi = unsigned (x + 0.5);
@@ -854,7 +882,21 @@ PIXTYPE gImage::getB(float x, float y)
 		return image[y*w+x].b;
 	}
 	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		return image[y*w+x].b;
+		unsigned xi = unsigned (x);
+		unsigned yi = unsigned (y);
+		if (xi >= w || yi >= h)
+			return 0;
+
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
+		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
+		return k1 + dy * (k2-k1);
 	}
 	else {  //default to nearest neighbor:
 		unsigned xi = unsigned (x + 0.5);
@@ -873,7 +915,33 @@ pix gImage::getRGB(float x, float y)
 		return image[y*w+x];
 	}
 	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		return image[y*w+x];
+		unsigned xi = unsigned (x);
+		unsigned yi = unsigned (y);
+		if (xi >= w || yi >= h)
+			return nullpix;
+
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		pix out;
+		
+		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
+		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
+		out.r =  k1 + dy * (k2-k1);
+		
+		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
+		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
+		out.g =  k1 + dy * (k2-k1);
+		
+		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
+		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
+		out.b =  k1 + dy * (k2-k1);
+		
+		return out;
 	}
 	else {  //default to nearest neighbor:
 		unsigned xi = unsigned (x + 0.5);
