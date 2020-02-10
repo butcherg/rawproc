@@ -342,6 +342,7 @@ class gImage
 		GIMAGE_ERROR lasterror;
 
 		RESIZE_FILTER lensfun_interp_method;
+		std::vector<float> lanczos_func;
 
 };
 
