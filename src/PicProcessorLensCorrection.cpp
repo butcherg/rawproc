@@ -536,6 +536,14 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				lf_free (lenses);
 			}
 
+			//parm tool.lenscorrection.distortion.interpolation: bilinear|lanczos3, interpolation algorithm to be used for distortion correction.  Default=(blank), nearest neighbor.
+			if (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.distortion.interpolation","") == "lanczos3")
+				dib->initInterpolation(FILTER_LANCZOS3);
+			else if (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.distortion.interpolation","") == "bilinear")
+				dib->initInterpolation(FILTER_BILINEAR);
+			else
+				dib->initInterpolation(FILTER_BOX);  //not recognized, so nearest neighbor is used.
+
 			if (success) {
 #ifdef LF_0395
 				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
