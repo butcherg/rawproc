@@ -228,6 +228,13 @@ class LensCorrectionPanel: public PicProcPanel
 			vig = new wxCheckBox(this, LENSCORRECTION_VIG, _("vignetting"));
 			dist = new wxCheckBox(this, LENSCORRECTION_DIST, _("distortion"));
 			crop = new wxCheckBox(this, LENSCORRECTION_AUTOCROP, _("autocrop"));
+			
+			wxArrayString str;
+			str.Add("nearest");
+			str.Add("bilinear");
+			str.Add("lanczos3");
+			algo = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			algo->SetStringSelection("nearest");
 
 			for (int i=0; i<parms.GetCount(); i++) {
 				wxArrayString nameval = split(parms[i], "=");
@@ -245,6 +252,9 @@ class LensCorrectionPanel: public PicProcPanel
 						if (ops[j] == "dist") dist->SetValue(true);
 						if (ops[j] == "autocrop") crop->SetValue(true);
 					}
+				}
+				if (nameval[0] == "algo") {
+					algo->SetStringSelection(nameval[1]);
 				}
 			}
 
@@ -282,8 +292,10 @@ class LensCorrectionPanel: public PicProcPanel
 			m->AddRowItem(vig, flags);
 			m->NextRow();
 			m->AddRowItem(dist, flags);
-			m->NextRow();
-			m->AddRowItem(crop, flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(crop, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().CenterVertical());
+			m->AddRowItem(algo, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
 			m->NextRow();
@@ -358,6 +370,7 @@ class LensCorrectionPanel: public PicProcPanel
 			if (crop->GetValue()) opAppend("autocrop",ops);
 
 			if (ops != "") paramAppend("ops", ops, cmd);
+			if (dist->GetValue()) paramAppend("algo", algo->GetString(algo->GetSelection()), cmd);
 
 			q->setParams(cmd);
 			q->processPic();
@@ -366,6 +379,7 @@ class LensCorrectionPanel: public PicProcPanel
 
 
 	private:
+		wxChoice *algo;
 		wxCheckBox *ca, *vig, *dist, *crop;
 		wxTextCtrl *cam, *lens;
 		wxCheckBox *enablebox;
@@ -537,15 +551,14 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				lf_free (lenses);
 			}
 
-			//parm tool.lenscorrection.distortion.interpolation: bilinear|lanczos3, interpolation algorithm to be used for distortion correction.  Default=(blank), nearest neighbor.
-			if (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.distortion.interpolation","") == "lanczos3")
-				dib->initInterpolation(FILTER_LANCZOS3);
-			else if (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.distortion.interpolation","") == "bilinear")
-				dib->initInterpolation(FILTER_BILINEAR);
-			else
-				dib->initInterpolation(FILTER_BOX);  //not recognized, so nearest neighbor is used.
 
 			if (success) {
+				if (cp.find("algo") != cp.end()) {
+					if (cp["algo"] == "nearest") dib->initInterpolation(FILTER_BOX);
+					if (cp["algo"] == "bilinear") dib->initInterpolation(FILTER_BILINEAR);
+					if (cp["algo"] == "lanczos3") dib->initInterpolation(FILTER_LANCZOS3);
+				}
+				
 #ifdef LF_0395
 				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
 
