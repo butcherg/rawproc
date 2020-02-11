@@ -212,6 +212,7 @@ class LensCorrectionPanel: public PicProcPanel
 	public:
 		LensCorrectionPanel(wxWindow *parent, PicProcessor *proc, wxString params, wxString metadata): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
