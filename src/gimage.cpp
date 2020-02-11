@@ -804,377 +804,6 @@ std::string gImage::LibraryVersions()
 
 }
 
-//Lensfun support methods
-//Interpolation algorithms adapted from lensfun's lenstool example program
-
-#define LANCZOS_SUPPORT    2
-#define LANCZOS_TABLE_RES  256
-
-void gImage::initInterpolation(RESIZE_FILTER interp)
-{
-	lensfun_interp_method = interp;  //does nothing right now, all hard-coded to nearest-neighbor
-	if (interp == FILTER_LANCZOS3) {
-		lanczos_func.resize(LANCZOS_SUPPORT * LANCZOS_SUPPORT * LANCZOS_TABLE_RES);
-		for (int i = 0; i < LANCZOS_SUPPORT * LANCZOS_SUPPORT * LANCZOS_TABLE_RES; i++)
-		{
-			float d = sqrt (float (i) / LANCZOS_TABLE_RES);
-			if (d == 0.0)
-				lanczos_func [i] = 1.0;
-			else
-				lanczos_func [i] =
-					(LANCZOS_SUPPORT * sin (M_PI * d) *
-					sin ((M_PI / LANCZOS_SUPPORT) * d)) /
-					(M_PI * M_PI * d * d);
-		}
-	}
-	else lanczos_func.empty();
-}	
-
-PIXTYPE gImage::getR(float x, float y)
-{
-	unsigned xi = unsigned (x);
-	unsigned yi = unsigned (y);
-	if (xi >= w || yi >= h)
-			return (PIXTYPE) 0;
-		
-	if (lensfun_interp_method == FILTER_LANCZOS3) {
-		float xs = rint (x) - LANCZOS_SUPPORT;
-		float ys = rint (y) - LANCZOS_SUPPORT;
-		float xe = xs + LANCZOS_SUPPORT * 2;
-		float ye = ys + LANCZOS_SUPPORT * 2;
-
-		float norm = 0.0;
-		float sum = 0.0;
-		long p = (long (ys) * w + long (xs));
-		
-		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
-			for (; ys <= ye; ys += 1.0)
-			{
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].r;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-		else
-		{
-			for (; ys <= ye; ys += 1.0)
-			{
-				if (ys < 0 || ys >= h)
-				{
-					p += w;
-					continue;
-				}
-
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					if (xc < 0 || xc >= w)
-						continue;
-
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].r;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-			if (norm == 0.0)
-				return 0;
-		}
-
-		return (PIXTYPE) (sum / norm);
-		
-	}
-	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		unsigned dx = unsigned (x - trunc (x));
-		unsigned dy = unsigned (y - trunc (y));
-
-		long p0 = yi * w + xi;
-		long p1 = p0 + w;
-		
-		float k1, k2;
-		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
-		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
-		return k1 + dy * (k2-k1);
-	}
-	else {  //default to nearest neighbor:
-		unsigned pos = yi * w + xi;
-		return image[pos].r;
-	}
-}
-
-PIXTYPE gImage::getG(float x, float y)
-{
-	unsigned xi = unsigned (x);
-	unsigned yi = unsigned (y);
-	if (xi >= w || yi >= h)
-			return (PIXTYPE) 0;
-		
-	if (lensfun_interp_method == FILTER_LANCZOS3) {
-		float xs = rint (x) - LANCZOS_SUPPORT;
-		float ys = rint (y) - LANCZOS_SUPPORT;
-		float xe = xs + LANCZOS_SUPPORT * 2;
-		float ye = ys + LANCZOS_SUPPORT * 2;
-
-		float norm = 0.0;
-		float sum = 0.0;
-		long p = (long (ys) * w + long (xs));
-		
-		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
-			for (; ys <= ye; ys += 1.0)
-			{
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].g;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-		else
-		{
-			for (; ys <= ye; ys += 1.0)
-			{
-				if (ys < 0 || ys >= h)
-				{
-					p += w;
-					continue;
-				}
-
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					if (xc < 0 || xc >= w)
-						continue;
-
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].g;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-			if (norm == 0.0)
-				return 0;
-		}
-
-		return (PIXTYPE) (sum / norm);
-	}
-	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		unsigned dx = unsigned (x - trunc (x));
-		unsigned dy = unsigned (y - trunc (y));
-
-		long p0 = yi * w + xi;
-		long p1 = p0 + w;
-		
-		float k1, k2;
-		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
-		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
-		return k1 + dy * (k2-k1);
-	}
-	else {  //default to nearest neighbor:
-		unsigned pos = yi * w + xi;
-		return image[pos].g;
-	}
-}
-
-PIXTYPE gImage::getB(float x, float y)
-{
-	unsigned xi = unsigned (x);
-	unsigned yi = unsigned (y);
-	if (xi >= w || yi >= h)
-			return (PIXTYPE) 0;
-
-	if (lensfun_interp_method == FILTER_LANCZOS3) {
-		float xs = rint (x) - LANCZOS_SUPPORT;
-		float ys = rint (y) - LANCZOS_SUPPORT;
-		float xe = xs + LANCZOS_SUPPORT * 2;
-		float ye = ys + LANCZOS_SUPPORT * 2;
-
-		float norm = 0.0;
-		float sum = 0.0;
-		long p = (long (ys) * w + long (xs));
-		
-		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
-			for (; ys <= ye; ys += 1.0)
-			{
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].b;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-		else
-		{
-			for (; ys <= ye; ys += 1.0)
-			{
-				if (ys < 0 || ys >= h)
-				{
-					p += w;
-					continue;
-				}
-
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					if (xc < 0 || xc >= w)
-						continue;
-
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum += d * image[p].b;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-			if (norm == 0.0)
-				return 0;
-		}
-
-		return (PIXTYPE) (sum / norm);
-	}
-	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		unsigned dx = unsigned (x - trunc (x));
-		unsigned dy = unsigned (y - trunc (y));
-
-		long p0 = yi * w + xi;
-		long p1 = p0 + w;
-		
-		float k1, k2;
-		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
-		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
-		return k1 + dy * (k2-k1);
-	}
-	else {  //default to nearest neighbor:
-		unsigned pos = yi * w + xi;
-		return image[pos].b;
-	}
-}
-
-pix gImage::getRGB(float x, float y)
-{
-	unsigned xi = unsigned (x);
-	unsigned yi = unsigned (y);
-	if (xi >= w || yi >= h)
-			return nullpix;
-
-	if (lensfun_interp_method == FILTER_LANCZOS3) {
-		float xs = rint (x) - LANCZOS_SUPPORT;
-		float ys = rint (y) - LANCZOS_SUPPORT;
-		float xe = xs + LANCZOS_SUPPORT * 2;
-		float ye = ys + LANCZOS_SUPPORT * 2;
-
-		float norm = 0.0;
-		pix sum; sum.r = 0.0; sum.g = 0.0; sum.b = 0.0;
-		long p = (long (ys) * w + long (xs));
-		
-		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
-			for (; ys <= ye; ys += 1.0)
-			{
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum.r += d * image[p].r;
-					sum.g += d * image[p].g;
-					sum.b += d * image[p].b;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-		else
-		{
-			for (; ys <= ye; ys += 1.0)
-			{
-				if (ys < 0 || ys >= h)
-				{
-					p += w;
-					continue;
-				}
-
-				for (float xc = xs; xc <= xe; xc += 1.0, p++)
-				{
-					if (xc < 0 || xc >= w)
-						continue;
-
-					float d = sqr (x - xc) + sqr (y - ys);
-					if (d >= LANCZOS_SUPPORT * LANCZOS_SUPPORT)
-						continue;
-
-					d = lanczos_func [int (d * LANCZOS_TABLE_RES)];
-					norm += d;
-					sum.r += d * image[p].r;
-					sum.g += d * image[p].g;
-					sum.b += d * image[p].b;
-				}
-				p += w - LANCZOS_SUPPORT * 2 - 1;
-			}
-			if (norm == 0.0)
-				return nullpix;
-		}
-
-		pix out;
-		out.r = (sum.r / norm);
-		out.g = (sum.g / norm);
-		out.b = (sum.b / norm);
-		return out;
-
-	}
-	else if (lensfun_interp_method == FILTER_BILINEAR) {
-		unsigned dx = unsigned (x - trunc (x));
-		unsigned dy = unsigned (y - trunc (y));
-
-		long p0 = yi * w + xi;
-		long p1 = p0 + w;
-		
-		float k1, k2;
-		pix out;
-		
-		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
-		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
-		out.r =  k1 + dy * (k2-k1);
-		
-		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
-		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
-		out.g =  k1 + dy * (k2-k1);
-		
-		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
-		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
-		out.b =  k1 + dy * (k2-k1);
-		
-		return out;
-	}
-	else {  //default to nearest neighbor:
-		unsigned pos = yi * w + xi;
-		return image[pos];
-	}
-}
 
 
 
@@ -4633,6 +4262,363 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 
 
 // End of Image Manipulations
+
+
+
+//Lensfun support methods
+//Interpolation algorithms adapted from lensfun's lenstool example program
+
+void gImage::initInterpolation(RESIZE_FILTER interp)
+{
+	lensfun_interp_method = interp;  //does nothing right now, all hard-coded to nearest-neighbor
+}	
+
+PIXTYPE gImage::getR(float x, float y)
+{
+	unsigned xi = unsigned (x);
+	unsigned yi = unsigned (y);
+	if (xi >= w || yi >= h)
+			return (PIXTYPE) 0;
+		
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		float xs = rint (x) - Lanczos3_support;
+		float ys = rint (y) - Lanczos3_support;
+		float xe = xs + Lanczos3_support * 2;
+		float ye = ys + Lanczos3_support * 2;
+
+		float norm = 0.0;
+		float sum = 0.0;
+		long p = (long (ys) * w + long (xs));
+		
+		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
+			for (; ys <= ye; ys += 1.0)
+			{
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].r;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+		else
+		{
+			for (; ys <= ye; ys += 1.0)
+			{
+				if (ys < 0 || ys >= h)
+				{
+					p += w;
+					continue;
+				}
+
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					if (xc < 0 || xc >= w)
+						continue;
+
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].r;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+			if (norm == 0.0)
+				return 0;
+		}
+
+		return (PIXTYPE) (sum / norm);
+		
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
+		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
+		return k1 + dy * (k2-k1);
+	}
+	else {  //default to nearest neighbor:
+		unsigned pos = yi * w + xi;
+		return image[pos].r;
+	}
+}
+
+PIXTYPE gImage::getG(float x, float y)
+{
+	unsigned xi = unsigned (x);
+	unsigned yi = unsigned (y);
+	if (xi >= w || yi >= h)
+			return (PIXTYPE) 0;
+		
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		float xs = rint (x) - Lanczos3_support;
+		float ys = rint (y) - Lanczos3_support;
+		float xe = xs + Lanczos3_support * 2;
+		float ye = ys + Lanczos3_support * 2;
+
+		float norm = 0.0;
+		float sum = 0.0;
+		long p = (long (ys) * w + long (xs));
+		
+		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
+			for (; ys <= ye; ys += 1.0)
+			{
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].g;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+		else
+		{
+			for (; ys <= ye; ys += 1.0)
+			{
+				if (ys < 0 || ys >= h)
+				{
+					p += w;
+					continue;
+				}
+
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					if (xc < 0 || xc >= w)
+						continue;
+
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].g;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+			if (norm == 0.0)
+				return 0;
+		}
+
+		return (PIXTYPE) (sum / norm);
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
+		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
+		return k1 + dy * (k2-k1);
+	}
+	else {  //default to nearest neighbor:
+		unsigned pos = yi * w + xi;
+		return image[pos].g;
+	}
+}
+
+PIXTYPE gImage::getB(float x, float y)
+{
+	unsigned xi = unsigned (x);
+	unsigned yi = unsigned (y);
+	if (xi >= w || yi >= h)
+			return (PIXTYPE) 0;
+
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		float xs = rint (x) - Lanczos3_support;
+		float ys = rint (y) - Lanczos3_support;
+		float xe = xs + Lanczos3_support * 2;
+		float ye = ys + Lanczos3_support * 2;
+
+		float norm = 0.0;
+		float sum = 0.0;
+		long p = (long (ys) * w + long (xs));
+		
+		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
+			for (; ys <= ye; ys += 1.0)
+			{
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].b;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+		else
+		{
+			for (; ys <= ye; ys += 1.0)
+			{
+				if (ys < 0 || ys >= h)
+				{
+					p += w;
+					continue;
+				}
+
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					if (xc < 0 || xc >= w)
+						continue;
+
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum += d * image[p].b;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+			if (norm == 0.0)
+				return 0;
+		}
+
+		return (PIXTYPE) (sum / norm);
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
+		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
+		return k1 + dy * (k2-k1);
+	}
+	else {  //default to nearest neighbor:
+		unsigned pos = yi * w + xi;
+		return image[pos].b;
+	}
+}
+
+pix gImage::getRGB(float x, float y)
+{
+	unsigned xi = unsigned (x);
+	unsigned yi = unsigned (y);
+	if (xi >= w || yi >= h)
+			return nullpix;
+
+	if (lensfun_interp_method == FILTER_LANCZOS3) {
+		float xs = rint (x) - Lanczos3_support;
+		float ys = rint (y) - Lanczos3_support;
+		float xe = xs + Lanczos3_support * 2;
+		float ye = ys + Lanczos3_support * 2;
+
+		float norm = 0.0;
+		pix sum; sum.r = 0.0; sum.g = 0.0; sum.b = 0.0;
+		long p = (long (ys) * w + long (xs));
+		
+		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
+			for (; ys <= ye; ys += 1.0)
+			{
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum.r += d * image[p].r;
+					sum.g += d * image[p].g;
+					sum.b += d * image[p].b;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+		else
+		{
+			for (; ys <= ye; ys += 1.0)
+			{
+				if (ys < 0 || ys >= h)
+				{
+					p += w;
+					continue;
+				}
+
+				for (float xc = xs; xc <= xe; xc += 1.0, p++)
+				{
+					if (xc < 0 || xc >= w)
+						continue;
+
+					float d = sqr (x - xc) + sqr (y - ys);
+					if (d >= Lanczos3_support * Lanczos3_support)
+						continue;
+
+					d = Lanczos3_filter(d);
+					norm += d;
+					sum.r += d * image[p].r;
+					sum.g += d * image[p].g;
+					sum.b += d * image[p].b;
+				}
+				p += w - Lanczos3_support * 2 - 1;
+			}
+			if (norm == 0.0)
+				return nullpix;
+		}
+
+		pix out;
+		out.r = (sum.r / norm);
+		out.g = (sum.g / norm);
+		out.b = (sum.b / norm);
+		return out;
+
+	}
+	else if (lensfun_interp_method == FILTER_BILINEAR) {
+		unsigned dx = unsigned (x - trunc (x));
+		unsigned dy = unsigned (y - trunc (y));
+
+		long p0 = yi * w + xi;
+		long p1 = p0 + w;
+		
+		float k1, k2;
+		pix out;
+		
+		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
+		k1 =  image[p1].r + dx * image[p1+1].r - image[p1].r;
+		out.r =  k1 + dy * (k2-k1);
+		
+		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
+		k1 =  image[p1].g + dx * image[p1+1].g - image[p1].g;
+		out.g =  k1 + dy * (k2-k1);
+		
+		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
+		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
+		out.b =  k1 + dy * (k2-k1);
+		
+		return out;
+	}
+	else {  //default to nearest neighbor:
+		unsigned pos = yi * w + xi;
+		return image[pos];
+	}
+}
+
 
 
 
