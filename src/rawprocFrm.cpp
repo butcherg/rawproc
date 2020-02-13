@@ -886,8 +886,17 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
-		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
-		wxString raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none). <ul><li>Camera-specific default processing can be specified by appending '.Make_Model' to the property name, where make and model identify the camera as these values appear in the raw metadata.  Put an underscore between the make and model, and substitute underscore for any spaces that occur in either value, e.g., Nikon_Z_6.</li><li>If a raw file was originally opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands.</li></ul>"
+		std::string makemodel = std::string("input.raw.default")+"."+underscore(dib->getInfoValue("Make")) + "_" + underscore(dib->getInfoValue("Model"));
+		wxString raw_default, raw_default_source; 
+		if (myConfig::getConfig().exists(makemodel)) {
+			raw_default = wxString(myConfig::getConfig().getValueOrDefault(makemodel, ""));
+			raw_default_source = wxString(makemodel);
+		}
+		else {
+			raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+			raw_default_source = "input.raw.default";
+		}
 
 		//parm app.incrementaldisplay: 0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;
 		bool incdisplay=false;
@@ -897,7 +906,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			int applydefault = wxYES;
 			//parm input.raw.default.prompt: 1|0, enable/disable prompt to apply input.raw.default.  Default=1 
 			if (myConfig::getConfig().getValueOrDefault("input.raw.default.prompt","1") == "1") 
-				applydefault = wxMessageBox(wxString::Format(_("Apply %s to raw file?"),raw_default), "input.raw.default", wxYES_NO, this);
+				applydefault = wxMessageBox(wxString::Format(_("Apply %s to raw file?"),raw_default), raw_default_source, wxYES_NO, this);
 			if (applydefault == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				try {
