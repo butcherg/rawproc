@@ -42,6 +42,7 @@
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
 #include <lensfun/lensfun.h>
+#include "lensfun_dbupdate.h"
 #endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
@@ -2121,17 +2122,39 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 
 	wxString WxWidgetsVersion = wxString::Format("%s %d.%d.%d", wxversion.GetName(), wxversion.GetMajor(), wxversion.GetMinor(), wxversion.GetMicro());
 	wxString libraries = wxString(gImage::LibraryVersions());
+
 #ifdef USE_LENSFUN
 	libraries.Append(wxString::Format("\nLensfun: %d.%d.%d",LF_VERSION_MAJOR,LF_VERSION_MINOR,LF_VERSION_MICRO));
 #endif
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
-#ifdef BUILDDATE
-	wxString builddate = wxString(BUILDDATE);
-	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile, builddate));
-#else
-	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
+
+	wxString description(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
+
+#ifdef USE_LENSFUN
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	wxString lensfundb = "Lensfun Database";
+	
+	if (!myConfig::getConfig().exists("tool.lenscorrection.databasepath")) {
+		lensfundb.Append(": (Relying on system/user paths).");
+	}
+	else {
+		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
+		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+			case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
+		}
+	}
+	description.Append(wxString::Format(_("\n%s"), lensfundb));
 #endif
 
+#ifdef BUILDDATE
+	wxString builddate = wxString(BUILDDATE);
+	description.Append(wxString::Format(_("\n\nBuild Date: %s"), builddate));
+#endif
+
+	info.SetDescription(description);
 	wxAboutBox(info, this);
 
 }

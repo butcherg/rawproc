@@ -164,7 +164,7 @@ if test "$enable_lensfun" == "yes"
 then
 	PKG_CHECK_MODULES([LENSFUN],[lensfun], [
 		CPPFLAGS="$LENSFUN_CFLAGS $CPPFLAGS"
-		LIBS="$LENSFUN_LIBS $LIBS"
+		LIBS="$LENSFUN_LIBS -lcurl -larchive $LIBS"
 	],[
 		AC_MSG_ERROR([not found.])
 	])
