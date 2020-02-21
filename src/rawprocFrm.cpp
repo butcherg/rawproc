@@ -2139,11 +2139,15 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	}
 	else {
 		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
-		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
-			case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
-			case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
-			case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
-			case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
+
+		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
+		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
+			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+				case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
+			}
 		}
 	}
 	description.Append(wxString::Format(_("\n%s"), lensfundb));
