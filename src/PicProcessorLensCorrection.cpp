@@ -392,7 +392,7 @@ lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
 	lfError e = LF_NO_DATABASE;
 	lfDatabase * lfdb = new lfDatabase();
 
-	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.
+	//parm tool.lenscorrection.databasepath: If specified, use this path instead of the standard lensfun directory.  The path specified should be the one that contains the 'version_x' folder that contains the lensfun XML files.
 	std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
 	lensfundatadir.append(string_format("/version_%d", LF_MAX_DATABASE_VERSION));
 
