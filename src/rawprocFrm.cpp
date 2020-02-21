@@ -97,6 +97,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
 	EVT_MENU(ID_MNU_BATCH,rawprocFrm::MnuBatchClick)
+	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
@@ -252,6 +253,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
+#ifdef USE_LENSFUN
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_EDITMnu_Obj, _("Edit"));
 
@@ -624,6 +628,21 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	SetStatusText(filename.GetFullName());
 	myEXIFDialog dlg(this, wxID_ANY, filename.GetFullName(), exif,  wxDefaultPosition, wxSize(500,500));
 	dlg.ShowModal();
+}
+
+void rawprocFrm::MnuData(wxCommandEvent& event)
+{
+#ifdef USE_LENSFUN
+	SetStatusText("Updating lensfun database...");
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	switch (lensfun_dbupdate(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+		case LENSFUN_DBUPDATE_OK:		wxMessageBox("Lens correction database update successful."); break;
+		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_NOVERSION:	wxMessageBox(wxString::Format(_("Error: Lens correction - Version %d database not available from server."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_RETRIEVFAIL:	wxMessageBox(_("Error: Lens correction database retrieve failed.")); break;
+	}
+	SetStatusText("");
+#endif
 }
 
 
