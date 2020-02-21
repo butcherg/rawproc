@@ -293,7 +293,7 @@ static int extract(const char *filename, int flags)
 
 //the dbupdate functions:
 
-lf_db_return lensfun_dbcheck(int version, std::string dbpath)
+lf_db_return lensfun_dbcheck(int version, std::string dbpath, std::string dburl)
 {
 	int result;
 
@@ -303,7 +303,8 @@ lf_db_return lensfun_dbcheck(int version, std::string dbpath)
 	//if a path to the database is specified, cd to it; otherwise, stay at the cwd:
 	if (!dbpath.empty()) result = chdir(dbpath.c_str());
 
-	const std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	if (!dburl.empty()) repositoryurl = dburl;
 
 	//build the dir to store the lensfun database:
 	std::string dbdir = string_format("version_%d",dbversion);	
@@ -339,7 +340,7 @@ lf_db_return lensfun_dbcheck(int version, std::string dbpath)
 	else return LENSFUN_DBUPDATE_NODATABASE;
 }
 
-lf_db_return lensfun_dbupdate(int version, std::string dbpath)
+lf_db_return lensfun_dbupdate(int version, std::string dbpath, std::string dburl)
 {
 	int result;
 
@@ -349,7 +350,8 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath)
 	//if a path to the database is specified, cd to it; otherwise, stay at the cwd:
 	if (!dbpath.empty()) result = chdir(dbpath.c_str());
 
-	const std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	if (!dburl.empty()) repositoryurl = dburl;
 
 	//build the dir to store the lensfun database:
 	std::string dbdir = string_format("version_%d",dbversion);	
@@ -387,11 +389,11 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath)
 	 
 	//build the url and file to retrieve and store the database:
 	std::string dbfile = string_format("%s.tar.bz2",dbdir.c_str());
-	std::string dburl = string_format("%s%s",repositoryurl.c_str(),dbfile.c_str());
+	std::string databbaseurl = string_format("%s%s",repositoryurl.c_str(),dbfile.c_str());
 
 	//get the database file to the current working directory:
-	if (!getAndSaveFile(dburl))
-		//err(string_format("Retrive %s failed.",dburl.c_str()));
+	if (!getAndSaveFile(databbaseurl))
+		//err(string_format("Retrive %s failed.",databbaseurl.c_str()));
 		return LENSFUN_DBUPDATE_RETRIEVFAIL;
 
 	//store the working directory before cd'ing down into version_x/:

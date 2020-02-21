@@ -13,9 +13,9 @@ enum lf_db_return {
 };
 
 //checks available database version, state of installed version:
-lf_db_return lensfun_dbcheck(int version, std::string dbpath=std::string());
+lf_db_return lensfun_dbcheck(int version, std::string dbpath=std::string(), std::string dburl=std::string());
 
 //does the full data base availbility and version checks, retrieves and installs new database:
-lf_db_return lensfun_dbupdate(int version, std::string dbpath=std::string());
+lf_db_return lensfun_dbupdate(int version, std::string dbpath=std::string(), std::string dburl=std::string());
 
 #endif
