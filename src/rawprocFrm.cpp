@@ -42,6 +42,7 @@
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
 #include <lensfun/lensfun.h>
+#include "lensfun_dbupdate.h"
 #endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
@@ -96,6 +97,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
 	EVT_MENU(ID_MNU_BATCH,rawprocFrm::MnuBatchClick)
+	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
@@ -251,6 +253,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
+#ifdef USE_LENSFUN
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_EDITMnu_Obj, _("Edit"));
 
@@ -639,6 +644,21 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	dlg.ShowModal();
 }
 
+void rawprocFrm::MnuData(wxCommandEvent& event)
+{
+#ifdef USE_LENSFUN
+	SetStatusText("Updating lensfun database...");
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	switch (lensfun_dbupdate(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+		case LENSFUN_DBUPDATE_OK:		wxMessageBox("Lens correction database update successful."); break;
+		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_NOVERSION:	wxMessageBox(wxString::Format(_("Error: Lens correction - Version %d database not available from server."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_RETRIEVFAIL:	wxMessageBox(_("Error: Lens correction database retrieve failed.")); break;
+	}
+	SetStatusText("");
+#endif
+}
+
 
 //PicProcessor * rawprocFrm::AddItem(wxString name, wxString command, bool display)
 wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
@@ -650,26 +670,32 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
+	if (name == "saturation") 			p = new PicProcessorSaturation("saturation",command, commandtree, pic);
+	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "cacorrect")		p = new PicProcessorCACorrect("cacorrect",command, commandtree, pic);
 	else if (name == "hlrecover")		p = new PicProcessorHLRecover("hlrecover",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
-	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
-	else if (name == "group")		p = new PicProcessorGroup("group", command, commandtree, pic);
+	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN
-	else if (name == "lenscorrection")	p = new PicProcessorLensCorrection("lenscorrection", command, commandtree, pic);
+	else if (name == "lenscorrection")	{
+		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
+		if (lfdb)
+			p = new PicProcessorLensCorrection(lfdb, "lenscorrection", command, commandtree, pic);
+		else
+			return id;
+	}
 #endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return id;
@@ -894,8 +920,17 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
 		SetStatusText("");
 
-		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."
-		wxString raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none). <ul><li>Camera-specific default processing can be specified by appending '.Make_Model' to the property name, where make and model identify the camera as these values appear in the raw metadata.  Put an underscore between the make and model, and substitute underscore for any spaces that occur in either value, e.g., Nikon_Z_6.</li><li>If a raw file was originally opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands.</li></ul>"
+		std::string makemodel = std::string("input.raw.default")+"."+underscore(dib->getInfoValue("Make")) + "_" + underscore(dib->getInfoValue("Model"));
+		wxString raw_default, raw_default_source; 
+		if (myConfig::getConfig().exists(makemodel)) {
+			raw_default = wxString(myConfig::getConfig().getValueOrDefault(makemodel, ""));
+			raw_default_source = wxString(makemodel);
+		}
+		else {
+			raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+			raw_default_source = "input.raw.default";
+		}
 
 		//parm app.incrementaldisplay: 0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;
 		bool incdisplay=false;
@@ -905,7 +940,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			int applydefault = wxYES;
 			//parm input.raw.default.prompt: 1|0, enable/disable prompt to apply input.raw.default.  Default=1 
 			if (myConfig::getConfig().getValueOrDefault("input.raw.default.prompt","1") == "1") 
-				applydefault = wxMessageBox(wxString::Format(_("Apply %s to raw file?"),raw_default), "input.raw.default", wxYES_NO, this);
+				applydefault = wxMessageBox(wxString::Format(_("Apply %s to raw file?"),raw_default), raw_default_source, wxYES_NO, this);
 			if (applydefault == wxYES) {
 				wxArrayString token = split(raw_default, " ");
 				try {
@@ -1992,23 +2027,17 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	
-	lfError e;
-	struct lfDatabase *ldb = lf_db_new ();
-	if (lf_db_load (ldb) != LF_NO_ERROR) {
-		wxMessageBox(_("Error: Cannot open lens correction database.")) ;
-		if (ldb) lf_db_destroy (ldb);
-		return;
-	}
-	if (ldb) lf_db_destroy (ldb);
-
 	SetStatusText("");
 	try {
-		//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
-		wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
-		PicProcessorLensCorrection *p = new PicProcessorLensCorrection("lenscorrection", defaults, commandtree, pic);
-		p->createPanel(parambook);
-		if (defaults != "") p->processPic();
-		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
+		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
+		if (lfdb) {
+			//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
+			wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
+			PicProcessorLensCorrection *p = new PicProcessorLensCorrection(lfdb, "lenscorrection", defaults, commandtree, pic);
+			p->createPanel(parambook);
+			if (defaults != "") p->processPic();
+			if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1884);
+		}
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));
@@ -2165,17 +2194,43 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 
 	wxString WxWidgetsVersion = wxString::Format("%s %d.%d.%d", wxversion.GetName(), wxversion.GetMajor(), wxversion.GetMinor(), wxversion.GetMicro());
 	wxString libraries = wxString(gImage::LibraryVersions());
+
 #ifdef USE_LENSFUN
 	libraries.Append(wxString::Format("\nLensfun: %d.%d.%d",LF_VERSION_MAJOR,LF_VERSION_MINOR,LF_VERSION_MICRO));
 #endif
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
-#ifdef BUILDDATE
-	wxString builddate = wxString(BUILDDATE);
-	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s\n\nBuild Date: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile, builddate));
-#else
-	info.SetDescription(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
+
+	wxString description(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
+
+#ifdef USE_LENSFUN
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	wxString lensfundb = "Lensfun Database";
+	
+	if (!myConfig::getConfig().exists("tool.lenscorrection.databasepath")) {
+		lensfundb.Append(": (Relying on system/user paths).");
+	}
+	else {
+		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
+
+		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
+		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
+			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+				case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
+				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
+			}
+		}
+	}
+	description.Append(wxString::Format(_("\n%s"), lensfundb));
 #endif
 
+#ifdef BUILDDATE
+	wxString builddate = wxString(BUILDDATE);
+	description.Append(wxString::Format(_("\n\nBuild Date: %s"), builddate));
+#endif
+
+	info.SetDescription(description);
 	wxAboutBox(info, this);
 
 }

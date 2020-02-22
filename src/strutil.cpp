@@ -17,7 +17,9 @@
 
 #ifdef _WIN32
 	#define WINVER 0x0600
-	//#define _WIN32_WINNT 0x0600
+#if __GNUC__ < 6 //mxe.cc (gcc 5.3) doesn't want this...
+	#define _WIN32_WINNT 0x0600
+#endif
 	#include <windows.h>
 	#include <shlobj.h>
 	#include <direct.h>

@@ -81,6 +81,7 @@ wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 	ct->Add(new wxButton(this, DELETEID, "Delete"), 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
 	SetSizerAndFit(sz);
+	fil->SetFocus();
 	Bind(wxEVT_PG_CHANGED,&PropertyDialog::UpdateProperty,this);
 	Bind(wxEVT_TEXT_ENTER, &PropertyDialog::FilterGrid, this);
 	Bind(wxEVT_TEXT, &PropertyDialog::FilterGrid, this, FILTERID);

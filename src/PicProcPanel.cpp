@@ -75,6 +75,7 @@ void PicProcPanel::OnKey(wxKeyEvent& event)
 		{
 		}
 	}
+	event.Skip();
 }
 
 

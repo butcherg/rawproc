@@ -70,8 +70,10 @@ void myToneCurvePane::render(wxDC&  dc)
 	dc.SetLogicalScale(scale, scale);
 	wxPoint *cp = new wxPoint[range];
 	for (unsigned i=0; i<range; i++) cp[i] = wxPoint(i, int((float) range*c[i]));
-	unsigned gridcolor = 192;
-	dc.SetPen(wxPen(wxColour(gridcolor,gridcolor,gridcolor),linewidth,wxPENSTYLE_DOT));
+	unsigned gridcolor = 128;
+	//dc.SetPen(wxPen(wxColour(gridcolor,gridcolor,gridcolor),linewidth,wxPENSTYLE_DOT));
+	dc.SetPen(wxPen(wxColour(gridcolor,gridcolor,gridcolor),linewidth));
+	dc.DrawLine(0,0,range,range);
 	dc.DrawLine(range*0.25,0,range*0.25,range);
 	dc.DrawLine(range*0.5,0,range*0.5,range);
 	dc.DrawLine(range*0.75,0,range*0.75,range);

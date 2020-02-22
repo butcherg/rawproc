@@ -126,6 +126,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_CACORRECT = 1041,
 			ID_MNU_HLRECOVER = 1042,
 			ID_MNU_BATCH = 1043,
+			ID_MNU_DATAUPDATE = 1044,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -193,6 +194,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuHelpClick(wxCommandEvent& event);
 	void MnuProperties(wxCommandEvent& event);
 	void MnuEXIF(wxCommandEvent& event);
+	void MnuData(wxCommandEvent& event);
 	void MnuColorSpace(wxCommandEvent& event);
 	void MnuCACorrect(wxCommandEvent& event);
 	void MnuHLRecover(wxCommandEvent& event);
