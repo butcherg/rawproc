@@ -207,7 +207,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
 		}
 
-		//if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
+		if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
 				
 		unsigned scanlinesize = TIFFScanlineSize(tif);
 		buf = (unsigned char *) _TIFFmalloc(scanlinesize);

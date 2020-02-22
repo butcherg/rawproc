@@ -574,6 +574,20 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		else 
 			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
 	}
+
+	exif.Append("<br>\nExiv2 Extract:<br>\n");
+	Exiv2::ExifData exifData = dib.getExifData();
+	Exiv2::ExifData::const_iterator end = exifData.end();
+	for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
+		const char* tn = i->typeName();
+		if (i->size() < 80)
+			exif.Append(wxString::Format("<b>%s</b> (%d): %s<br>\n",wxString(i->key()),i->count(), wxString(i->toString())));
+		else
+			exif.Append(wxString::Format("<b>%s</b> (%d): %s<br>\n",wxString(i->key()), i->count(), "..."));
+
+	}
+
+
 	char buff[4096];
 
 	exif.Append(wxString::Format("<br><b>Camera EV:</b> %0.2f<br>\n",log2(pow(apt,2)/exp)));
@@ -597,7 +611,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 	exif.Append(dib.Stats(floatstats).c_str());
 	exif.Append("</pre>\n");
 
-	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxSize(400,500));
+	myEXIFDialog dlg(this, wxID_ANY, "Image Information", exif,  wxDefaultPosition, wxSize(500,600));
 	dlg.ShowModal();
 }
 
@@ -1148,7 +1162,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				WxStatusBar1->SetStatusText(wxString::Format(_("Orienting image for output...")));
 				dib->NormalizeRotation();
 			}
-			dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());  //ToDo: move Orientation mgt to exifdata.
+			//dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());  //ToDo: move Orientation mgt to exifdata. Done?
 
 			//configparams will contain any user-specified output parameters, including what metadata tags to include in the file.
 			wxString configparams;
@@ -1789,7 +1803,8 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	//if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getExifData()["Exif.Image.Orientation"].toLong() != 1) {
 		wxMessageBox(_("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}

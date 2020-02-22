@@ -1538,7 +1538,9 @@ void gImage::ApplyVerticalMirror(int threadcount)
 
 void gImage::NormalizeRotation(int threadcount)
 {
+	//ToDo: Need to decide whether to abandon the Libraw/libjpeg/libtiff/libpng Orientation value, go with Exiv2... ??
 	int rotation = atoi(getInfoValue("Orientation").c_str());
+	//int rotation = exifdata["Exif.Image.Orientation"].toLong();
 	if (rotation != 1) {
 		if (rotation == 2) ApplyHorizontalMirror(threadcount);
 		if (rotation == 3) ApplyRotate180(threadcount);
@@ -1548,6 +1550,7 @@ void gImage::NormalizeRotation(int threadcount)
 		if (rotation == 7) {ApplyRotate270(threadcount); ApplyHorizontalMirror(threadcount); }
 		if (rotation == 8) ApplyRotate270(threadcount);
 		setInfo("Orientation","1");
+		exifdata["Exif.Image.Orientation"] = 1;
 	}
 }
 
