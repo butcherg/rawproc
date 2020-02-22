@@ -1197,7 +1197,9 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				WxStatusBar1->SetStatusText(wxString::Format(_("Orienting image for output...")));
 				dib->NormalizeRotation();
 			}
+
 			//dib->getExifData()["Exif.Image.Orientation"] = atoi(dib->getInfoValue("Orientation").c_str());  //ToDo: move Orientation mgt to exifdata. Done?
+
 
 			//configparams will contain any user-specified output parameters, including what metadata tags to include in the file.
 			wxString configparams;

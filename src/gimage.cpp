@@ -917,6 +917,96 @@ Exiv2::XmpData& gImage::getXmpData()
 	return xmpdata;
 }
 
+//Exif/IPTC/XMP getters/setters;
+
+void gImage::setExifData(Exiv2::ExifData exifData)
+{
+	exifdata = exifData;
+}
+
+void gImage::setIptcData(Exiv2::IptcData iptcData)
+{
+	iptcdata = iptcData;
+}
+
+void gImage::setXmpData(Exiv2::XmpData xmpData)
+{
+	xmpdata  = xmpData;
+}
+
+Exiv2::ExifData gImage::getExifData(std::string tags)
+{
+	Exiv2::ExifData e;
+	if (tags == "all")
+		return exifdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::ExifData::iterator j = exifdata.findKey(Exiv2::ExifKey(*i));
+			if (j != exifdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e; //default: 'none'
+}
+
+Exiv2::IptcData gImage::getIptcData(std::string tags)
+{
+	Exiv2::IptcData e;
+	if (tags == "all")
+		return iptcdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::IptcData::iterator j = iptcdata.findKey(Exiv2::IptcKey(*i));
+			if (j != iptcdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e;
+}
+
+Exiv2::XmpData gImage::getXmpData(std::string tags)
+{
+	Exiv2::XmpData e;
+	if (tags == "all")
+		return xmpdata;
+	else if (tags == "none")
+		return e;
+	else if (tags.size() > 0) {
+		std::vector<std::string> t = split(tags,",");
+		for (std::vector<std::string>::iterator i = t.begin(); i != t.end(); ++i) {
+			Exiv2::XmpData::iterator j = xmpdata.findKey(Exiv2::XmpKey(*i));
+			if (j != xmpdata.end()) 
+				e.add(*(j));
+		}
+		return e; 
+	}
+	return e;
+}
+
+//return a reference to the member:
+Exiv2::ExifData& gImage::getExifData()
+{
+	return exifdata;
+}
+
+Exiv2::IptcData& gImage::getIptcData()
+{
+	return iptcdata;
+}
+
+Exiv2::XmpData& gImage::getXmpData()
+{
+	return xmpdata;
+}
+
 void gImage::setProfile(char * prof, unsigned proflength)
 {
 	if (profile) delete [] profile;
