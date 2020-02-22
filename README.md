@@ -43,8 +43,7 @@ point forward.  This approach uses more memory, but at the benefit of less time 
 
 The check box by each manipulation sets the display to that manipulation's result.  So, you can set the display and go to 
 any previous (or subsequent) manipulation and play with it, seeing the result at the checked manipulation.  A kinda goofy
-way to display, but I'm warming to it... :)  Crop is the exception to this behavior; if you want to see the actual cropped
-image, you have to check a subsequent manipulation.
+way to display, but I'm warming to it... :)  
 
 This code is licensed for widespread use under the terms of the GPL.
 
@@ -197,7 +196,7 @@ make img
 # Notes
 
 1. Lens correction using the lensfun library requires particular attention to where the lens correction database is stored.
-Even then, I don't guarantee it'll work correctly at this point.
+As of Version 1.0Dev, I recommend setting the tool.lenscorrection.databasepath to a suitable place and using the Update Data... menu selection to pull the most recent version from the lensfun server.
 
 2. Color management requires the user to specify a profile directory, and in that directory shall go all profiles used, 
 camera, working, and display/output.  rawproc doesn't use the operating system color management facilities.
