@@ -119,6 +119,12 @@ If you're on a Debian/Ubuntu or derivatives, install these packages:
 sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev liblensfun-dev libraw-dev
 </pre>
 
+If you enable lensfun:
+
+<pre>
+sudo apt-get install lensfun-dev libcurl-dev libarchive-dev
+</pre>
+
 If you want to enjoy the fruits of librtprocess, the nascent effort to package the Raw Therapee
 demosaic routines, you'll at present need to compile and install librtprocess from a github clone:
 
