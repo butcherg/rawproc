@@ -190,9 +190,9 @@ std::string getAsString(std::string url)
 
 }
 
-bool getAndSaveFile(std::string url)
+lf_db_return getAndSaveFile(std::string url)
 {
-	bool result = true;
+	lf_db_return result = LENSFUN_DBUPDATE_RETRIEVE_OK;
 	CURL *curl;
 	CURLcode res;
 	std::string dbfile = base_name(url);
@@ -208,14 +208,14 @@ bool getAndSaveFile(std::string url)
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
 			res = curl_easy_perform(curl);
 			if(res != CURLE_OK) {
-				result = false;
+				result = LENSFUN_DBUPDATE_RETRIEVE_RETRIEVEFAILED;
 			}
 			fclose(f);
 		}
-		else result = false;
+		else result = LENSFUN_DBUPDATE_RETRIEVE_FILEOPENFAILED;
 		curl_easy_cleanup(curl);
 	}
-	else result = false;
+	else result = LENSFUN_DBUPDATE_RETRIEVE_INITFAILED;
 
 	curl_global_cleanup();
 	return result;
@@ -392,9 +392,10 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath, std::string dburl
 	std::string databbaseurl = string_format("%s%s",repositoryurl.c_str(),dbfile.c_str());
 
 	//get the database file to the current working directory:
-	if (!getAndSaveFile(databbaseurl))
+	lf_db_return retrieveresult = getAndSaveFile(databbaseurl);
+	if (retrieveresult != LENSFUN_DBUPDATE_RETRIEVE_OK)
 		//err(string_format("Retrive %s failed.",databbaseurl.c_str()));
-		return LENSFUN_DBUPDATE_RETRIEVFAIL;
+		return retrieveresult;
 
 	//store the working directory before cd'ing down into version_x/:
 	std::string prevdir = get_cwd();
