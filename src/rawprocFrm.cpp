@@ -640,7 +640,9 @@ void rawprocFrm::MnuData(wxCommandEvent& event)
 		case LENSFUN_DBUPDATE_OK:		wxMessageBox("Lens correction database update successful."); break;
 		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), LF_MAX_DATABASE_VERSION)); break;
 		case LENSFUN_DBUPDATE_NOVERSION:	wxMessageBox(wxString::Format(_("Error: Lens correction - Version %d database not available from server."), LF_MAX_DATABASE_VERSION)); break;
-		case LENSFUN_DBUPDATE_RETRIEVFAIL:	wxMessageBox(_("Error: Lens correction database retrieve failed.")); break;
+		case LENSFUN_DBUPDATE_RETRIEVE_INITFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (init).")); break;
+		case LENSFUN_DBUPDATE_RETRIEVE_FILEOPENFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (file).")); break;
+		case LENSFUN_DBUPDATE_RETRIEVE_RETRIEVEFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (retrieve).")); break;
 	}
 	SetStatusText("");
 #endif

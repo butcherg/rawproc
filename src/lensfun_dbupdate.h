@@ -9,7 +9,10 @@ enum lf_db_return {
 	LENSFUN_DBUPDATE_NODATABASE,	//no database installed locally at the path
 	LENSFUN_DBUPDATE_OLDVERSION,	//database installed locally at the path is not the latest
 	LENSFUN_DBUPDATE_CURRENTVERSION,//database installed locally at the path is already the latest version
-	LENSFUN_DBUPDATE_RETRIEVFAIL	//database file retrieve from server failed
+	LENSFUN_DBUPDATE_RETRIEVE_OK,	//database file retrieve from server succeeded
+	LENSFUN_DBUPDATE_RETRIEVE_INITFAILED,	//libcurl init
+	LENSFUN_DBUPDATE_RETRIEVE_FILEOPENFAILED,	//local file
+	LENSFUN_DBUPDATE_RETRIEVE_RETRIEVEFAILED	//actual retrieve
 };
 
 //checks available database version, state of installed version:
