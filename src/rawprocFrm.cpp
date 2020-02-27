@@ -630,6 +630,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	dlg.ShowModal();
 }
 
+//ToDo: expand to include camconst.json, elle's profiles?  Maybe even a rawproc.conf...
 void rawprocFrm::MnuData(wxCommandEvent& event)
 {
 #ifdef USE_LENSFUN
