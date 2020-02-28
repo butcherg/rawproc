@@ -196,6 +196,9 @@ class gImage
 		//threadcount=0 uses all available CPUs, n uses precisely n CPUs, and -n uses available-n CPUs
 		//image operations with a std::string params parameter parse a string to apply the operation
 
+		//matrix operations:
+		void ApplyMatrixMultiply(double matrix[3][3], int threadcount);
+
 		//kernel-based algorithms:
 		void ApplyConvolutionKernel(double kernel[3][3], int threadcount=0);
 		void Apply1DConvolutionKernel(std::vector<float> kernel, int threadcount=0);

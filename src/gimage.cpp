@@ -851,6 +851,27 @@ void gImage::setProfilePath(std::string ppath)
 //ease of understanding while maintaining basic image quality
 
 
+//Matrix Operations
+//
+//Matrix operations are prevelant in color management, so I thought I'd 
+//include at least one, a multiplication of the RGB triplets (1x3 matrix)
+//by a 3x3 matrix, widely used to represent color primaries.
+//
+void gImage::ApplyMatrixMultiply(double matrix[3][3], int threadcount)
+{
+	std::vector<pix> src = image;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for(int y = 1; y < h-1; y++) {
+		for(int x = 1; x < w-1; x++) {
+			int pos = x + y*w;
+			float r = image[pos].r; float g = image[pos].g; float b = image[pos].b; 
+			image[pos].r = r*matrix[0][0] + g*matrix[1][0] + b*matrix[2][0];
+			image[pos].g = r*matrix[0][1] + g*matrix[1][1] + b*matrix[2][1];;
+			image[pos].b = r*matrix[0][2] + g*matrix[1][2] + b*matrix[2][2];;
+		}
+	}
+}
 
 
 //Convolution Kernels and Sharpening
