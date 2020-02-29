@@ -867,8 +867,8 @@ void gImage::ApplyMatrixMultiply(double matrix[3][3], int threadcount)
 			int pos = x + y*w;
 			float r = image[pos].r; float g = image[pos].g; float b = image[pos].b; 
 			image[pos].r = r*matrix[0][0] + g*matrix[1][0] + b*matrix[2][0];
-			image[pos].g = r*matrix[0][1] + g*matrix[1][1] + b*matrix[2][1];;
-			image[pos].b = r*matrix[0][2] + g*matrix[1][2] + b*matrix[2][2];;
+			image[pos].g = r*matrix[0][1] + g*matrix[1][1] + b*matrix[2][1];
+			image[pos].b = r*matrix[0][2] + g*matrix[1][2] + b*matrix[2][2];
 		}
 	}
 }
