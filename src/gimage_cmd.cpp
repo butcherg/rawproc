@@ -910,13 +910,21 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 						op = "camera";
 						std::string cameraWB = dib.getInfoValue("Libraw.WhiteBalance");
 						if (cameraWB != "") {
+
+
 							std::vector<std::string> m = split(cameraWB,",");
 							redmult   = atof(m[0].c_str());
 							greenmult = atof(m[1].c_str());
 							bluemult  = atof(m[2].c_str());
 							if (print) printf("whitebalance: %s,%0.2f,%0.2f,%0.2f (%d threads)... ",op.c_str(),redmult,greenmult,bluemult,threadcount); fflush(stdout);
 							_mark();
-							dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+							if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+								if (dib.getInfoValue("Libraw.CFAPattern") != "")
+									dib.ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+							}
+							else {
+								dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+							}
 							if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 							sprintf(cs, "%s:%s ",cmd, op.c_str());
 						}
@@ -1380,6 +1388,45 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			else
 				sprintf(cs, "%s ",cmd);
 			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
+		}
+
+		else if (strcmp(cmd,"matmultiply") == 0) { 
+			char cs[4096];
+			char *c = strtok(NULL, " ");
+			std::vector<std::string> mat = split(std::string(c), ",");
+			if (mat.size() < 9) {
+				if (print) printf("Error: Insufficient number of values in matrix (<9).\n");
+				return std::string();
+			}
+
+			double matrix[3][3];
+
+			for (unsigned r=0; r<3; r++) {
+				for (unsigned c=0; c<3; c++) {
+					unsigned i = c + r*3;
+					float m = atof(mat[i].c_str());
+					if (m > 10.0)
+						matrix[r][c] = m /10000.0;
+					else
+						matrix[r][c] = m;
+				}
+			}
+
+for (unsigned r=0; r<3; r++) {
+	for (unsigned c=0; c<3; c++) {
+		printf("%f ",matrix[r][c]);
+	}
+	printf("\n");
+}
+
+			int threadcount = gImage::ThreadCount();
+
+			if (print) printf("matmultiply: %s (%d threads)... ", c, threadcount); fflush(stdout);
+			_mark();
+			dib.ApplyMatrixMultiply(matrix, threadcount);
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			sprintf(cs, "%s:%s ",cmd,c);
+			commandstring += std::string(cs);
 		}
 /*
 		else if (strcmp(cmd,"save") == 0) {
