@@ -2558,87 +2558,70 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 //165,172,204, the RGB multipliers should be 0.8088,0.8431,1.00
 //
 
+
+std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
+{
+	//ApplyWhiteBalance now handles both cfa and rgb:
+	return ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+}
+
+//works for both cfa and rgb images:
 std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
 {
-	std::vector<double> a;
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned x=0; x<w; x++) {
-		for (unsigned y=0; y<h; y++) {
-			unsigned pos = x + y*w;
-			image[pos].r *= redmult; 
-			image[pos].g *= greenmult; 
-			image[pos].b *= bluemult; 
-		}
-	}
-	a.push_back(redmult);
-	a.push_back(greenmult);
-	a.push_back(bluemult);	
-	return a;
-}
-
-/*
-std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
-{
 	std::vector<double> a = {0.0, 0.0, 0.0};
-	if (imginfo.find("Libraw.CFAPattern") == imginfo.end()) return a;
-	
-	std::vector<unsigned> q = {0, 1, 1, 2};  //default pattern is RGGB, where R=0, G=1, B=2
-	if (imginfo["Libraw.CFAPattern"] == "GRBG") q = {1, 0, 2, 1};
-	if (imginfo["Libraw.CFAPattern"] == "GBRG") q = {1, 2, 0, 1};
-	if (imginfo["Libraw.CFAPattern"] == "BGGR") q = {2, 1, 1, 0};
+	if (imginfo.find("Libraw.Mosaiced") != imginfo.end() && imginfo["Libraw.Mosaiced"] == "1")  
+	{
+		unsigned cfarray[2][2];
+		unsigned xtarray[6][6];
+		int arraydim = 0;
 
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h-1; y+=2) {
-		for (unsigned x=0; x<w-1; x+=2) {
-			unsigned pos[4];
-			pos[0] = x + y*w;  //upper left
-			pos[1] = (x+1) + y*w; //upper right
-			pos[2] = x + (y+1)*w; //lower leftfs
-			pos[3] = (x+1) + (y+1)*w;  //lower right
-			for (unsigned i=0; i<q.size(); i++) {
-				if (q[i] == 0) image[pos[i]].r *= redmult;  //use r, in grayscale, they're all the same...
-				if (q[i] == 1) image[pos[i]].r *= greenmult;  //use r, in grayscale, they're all the same...
-				if (q[i] == 2) image[pos[i]].r *= bluemult;  //use r, in grayscale, they're all the same...
-				image[pos[i]].g = image[pos[i]].b = image[pos[i]].r;
-			}
+		if (cfArray(cfarray)) {
+			arraydim = 2;
+			for (unsigned i=0; i<arraydim; i++)
+				for (unsigned j=0; j<arraydim; j++)
+					xtarray[i][j] = cfarray[i][j];
 		}
-	}
-	
-	a[0] = redmult;
-	a[1] = greenmult;
-	a[2] = bluemult;	
-	return a;
-}
-*/
+		else if (xtranArray(xtarray)) {
+			arraydim = 6; 
+		}
+		else return a;
 
-std::vector<double>  gImage::ApplyCameraWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount)
-{
-	std::vector<double> a = {0.0, 0.0, 0.0};
-	if (imginfo.find("Libraw.CFAArray") == imginfo.end()) return a;
-
-	std::string cfa = imginfo["Libraw.CFAArray"];
-	std::vector<unsigned> q;
-	for (unsigned i = 0; i < cfa.size(); i ++) q.push_back(cfa[i] - '0');
-	
-	unsigned cfadim = 2;
-	if (q.size() == 36) cfadim = 6;
-
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned y=0; y<h-1; y+=2) {
-		for (unsigned x=0; x<w-1; x+=2) {
-			for (unsigned j = 0; j < cfadim; j++) {
-				for (unsigned k = 0; k < cfadim; k++) {
-					unsigned pos = (x + j) + (y + k) * w;
-					if (q[j+k*cfadim] == 0) image[pos].r *= redmult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*cfadim] == 1) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*cfadim] == 2) image[pos].r *= bluemult;  //use r, in grayscale, they're all the same...
-					if (q[j+k*cfadim] == 3) image[pos].r *= greenmult;  //use r, in grayscale, they're all the same...
-					image[pos].g = image[pos].b = image[pos].r;
+		#pragma omp parallel for 
+		for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+			for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+				//unsigned Hpos = (x/2) + (y/2)*(w/2);
+				for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
+					for (unsigned j=0; j<arraydim; j++) {
+						int pos = (x+i) + (y+j) * w;
+						float val;
+						switch (xtarray[i][j]) {
+							case 0: //r
+								image[pos].r *= redmult;
+								break;
+							case 1: //g or g1
+								image[pos].r *= greenmult; 
+								break;
+							case 2:  //b
+								image[pos].r *= bluemult;
+								break;
+							case 3: // g2
+								image[pos].r *= greenmult;
+								break;
+						}
+					}
 				}
 			}
 		}
 	}
-	
+	else { //simple walk of RGB pixels
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned i=0; i<image.size(); i++) {
+			image[i].r *= redmult; 
+			image[i].g *= greenmult; 
+			image[i].b *= bluemult; 
+		}
+	}
+
 	a[0] = redmult;
 	a[1] = greenmult;
 	a[2] = bluemult;
