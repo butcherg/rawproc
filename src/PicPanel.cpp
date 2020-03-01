@@ -171,6 +171,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		//parm display.status: Write display... in status when setting the display image, 0|1.  Default=1
 		if (myConfig::getConfig().getValueOrDefault("display.status","1") == "1")
 			((wxFrame *) GetParent())->SetStatusText("display...");
+		mark();
 
 		display_dib = dib;
 		ch = channel;
@@ -355,6 +356,12 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 		Refresh();
 		((wxFrame *) GetParent())->SetStatusText("");
+
+		wxString d = duration();
+
+		//parm display.render.log: 0|1, turn on/off logging of the duration of the display render operation. Default=0
+		if ((myConfig::getConfig().getValueOrDefault("display.all.log","0") == "1") || 	(myConfig::getConfig().getValueOrDefault("display.render.log","0") == "1"))
+			log(wxString::Format(_("display,time=%s"),d));
 
 
 	}
