@@ -456,8 +456,12 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 						wxMessageBox(_("ColorSpace apply: no input profile in image."));
 						result = false;
 						break;
-					case GIMAGE_APPLYCOLORSPACE_BADINTENT:
-						wxMessageBox(_("ColorSpace apply: input/output profile doesn't support rendering intent."));
+					case GIMAGE_APPLYCOLORSPACE_BADINTENT_INPUT:
+						wxMessageBox(_("ColorSpace apply: input profile doesn't support rendering intent."));
+						result = false;
+						break;
+					case GIMAGE_APPLYCOLORSPACE_BADINTENT_OUTPUT:
+						wxMessageBox(_("ColorSpace apply: output profile doesn't support rendering intent."));
 						result = false;
 						break;
 /*
