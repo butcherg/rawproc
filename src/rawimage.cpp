@@ -959,6 +959,29 @@ char * _loadRAW(const char *filename,
 		*numbits = 16;
 
 		if (p["rawdata"].compare("crop") == 0) {
+/*			//old code (prior to commit 6a3ab0) in case I don't like raw2image...  :D
+			*width = S.width;
+			*height = S.height;
+
+			unsigned short *raw = RawProcessor.imgdata.rawdata.raw_image;
+			//unsigned short *img = new unsigned short[S.width*S.height];
+			img = new char[S.raw_width*S.raw_height*2];
+
+			unsigned short *src = raw;
+			unsigned short *dst = (unsigned short *) img;
+
+			unsigned cnt = 0;
+			for (unsigned row=0; row < S.height; row++) {
+				for (unsigned col=0; col < S.width; col++) {
+					unsigned spos = ((row+S.top_margin)*S.raw_width)+(col+S.left_margin);
+					unsigned dpos = row*S.width+col;
+					dst[dpos] = src[spos];
+					cnt++;
+				}
+			}
+*/
+
+			//new code uses raw2image, because I don't think I can trust S.top_margin and S.left_margin...
 			*width = S.width;
 			*height = S.height;
 			
