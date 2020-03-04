@@ -961,21 +961,15 @@ char * _loadRAW(const char *filename,
 		if (p["rawdata"].compare("crop") == 0) {
 			*width = S.width;
 			*height = S.height;
-
-			unsigned short *raw = RawProcessor.imgdata.rawdata.raw_image;
-			//unsigned short *img = new unsigned short[S.width*S.height];
-			img = new char[S.raw_width*S.raw_height*2];
-
-			unsigned short *src = raw;
+			
+			int result = RawProcessor.raw2image();
+			img = new char[S.width*S.height*2];
 			unsigned short *dst = (unsigned short *) img;
 
-			unsigned cnt = 0;
-			for (unsigned row=0; row < S.height; row++) {
-				for (unsigned col=0; col < S.width; col++) {
-					unsigned spos = ((row+S.top_margin)*S.raw_width)+(col+S.left_margin);
-					unsigned dpos = row*S.width+col;
-					dst[dpos] = src[spos];
-					cnt++;
+			for (unsigned r = 0; r < S.height; r++) { 
+				for (unsigned c = 0; c < S.width; c++) {
+					unsigned pos = r*S.width+c;
+					dst[pos] = RawProcessor.imgdata.image[r*S.width+c][RawProcessor.COLOR(r,c)];
 				}
 			}
 		}
