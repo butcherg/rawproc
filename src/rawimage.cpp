@@ -865,12 +865,30 @@ char * _loadRAW(const char *filename,
 
 
 	//Black level, for subtraction
-	snprintf(buffer, 4096, "%d", C.black);
-	info["Libraw.Black"] = buffer;
+	if (C.black != 0) {
+		snprintf(buffer, 4096, "%d", C.black);
+		info["Libraw.Black"] = buffer;
+	}
 
-	//per-channel black correction:
-	snprintf(buffer, 4096, "%d,%d,%d,%d",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
-	info["Libraw.PerChannelBlack"] = buffer;
+	//per-channel black subtraction:
+	if (C.cblack[0] != 0 | C.cblack[1] != 0 | C.cblack[2] != 0 | C.cblack[3] != 0) {
+		snprintf(buffer, 4096, "%d,%d,%d,%d",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
+		info["Libraw.PerChannelBlack"] = buffer;
+	}
+
+	//color matrix black subtraction
+	if (C.cblack[6] != 0) {
+		unsigned cblackdim_col = C.cblack[4];
+		unsigned cblackdim_row = C.cblack[5];
+		std::string cblackarray;
+		snprintf(buffer, 4096, "%d",C.cblack[6]);
+		cblackarray.append(buffer);
+		for (unsigned i=7; i< 7+cblackdim_col*cblackdim_row-1; i++) {
+			snprintf(buffer, 4096, ",%d",C.cblack[i]);
+			cblackarray.append(buffer);
+		}
+		info["Libraw.CFABlack"] = cblackarray;
+	}
 
 	//Maximum pixel value:
 	snprintf(buffer, 4096, "%d", C.maximum);
