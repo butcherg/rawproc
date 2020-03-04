@@ -2065,12 +2065,11 @@ void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg
 		#pragma omp parallel for 
 		for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 			for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
-				//unsigned Hpos = (x/2) + (y/2)*(w/2);
-				for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
-					for (unsigned j=0; j<arraydim; j++) {
-						int pos = (x+i) + (y+j) * w;
+				for (unsigned r=0; r<arraydim; r++) {
+					for (unsigned c=0; c<arraydim; c++) {
+						int pos = (x+c) + (y+r) * w;
 						float val;
-						switch (xtarray[i][j]) {
+						switch (xtarray[r][c]) {
 							case 0: //r
 								val = image[pos].r - subtractr; 
 								break;
@@ -2589,12 +2588,11 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 		#pragma omp parallel for 
 		for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 			for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
-				//unsigned Hpos = (x/2) + (y/2)*(w/2);
-				for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
-					for (unsigned j=0; j<arraydim; j++) {
-						int pos = (x+i) + (y+j) * w;
+				for (unsigned row=0; row<arraydim; row++) {
+					for (unsigned col=0; col<arraydim; col++) {
+						int pos = (x+col) + (y+row) * w;
 						float val;
-						switch (xtarray[i][j]) {
+						switch (xtarray[row][col]) {
 							case 0: //r
 								image[pos].r *= redmult;
 								break;
@@ -4738,12 +4736,12 @@ std::map<std::string,float> gImage::StatsMap()
 			#pragma omp parallel for 
 			for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 				for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
-					unsigned Hpos = (x/2) + (y/2)*(w/2);
 					float pix[4] = {0.0, 0.0, 0.0, 0.0};
-					for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
-						for (unsigned j=0; j<arraydim; j++) {
-							int pos = (x+i) + (y+j) * w;
-							switch (xtarray[i][j]) {
+					for (unsigned r=0; r<arraydim; r++) {
+						for (unsigned c=0; c<arraydim; c++) {
+							int pos = (x+c) + (y+r) * w;
+							float val;
+							switch (xtarray[r][c]) {		
 								case 0:
 									if (image[pos].r > prmax) prmax = image[pos].r; 
 									if (image[pos].r < prmin) prmin = image[pos].r;
@@ -5066,13 +5064,13 @@ std::vector<histogramdata> gImage::Histogram(unsigned scale, int &zerobucket, in
 			#pragma omp parallel for 
 			for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 				for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
-					unsigned Hpos = (x/2) + (y/2)*(w/2);
+					//unsigned Hpos = (x/2) + (y/2)*(w/2);
 					float pix[4] = {0.0, 0.0, 0.0, 0.0};
-					for (unsigned i=0; i<arraydim; i++) {  //walk the CFA image subset, collect the channel values 
-						for (unsigned j=0; j<arraydim; j++) {
-							int pos = (x+i) + (y+j) * w;
+					for (unsigned row=0; row<arraydim; row++) {
+						for (unsigned col=0; col<arraydim; col++) {
+							int pos = (x+col) + (y+row) * w;
 							unsigned bin = std::min((unsigned) ((image[pos].r-dmin)/inc),scale-1);
-							switch (xtarray[i][j]) {
+							switch (xtarray[row][col]) {
 								case 0:
 									pr[bin]++;
 									break;
