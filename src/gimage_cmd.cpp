@@ -328,7 +328,10 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 					}
 				}
 			}
-
+			
+			unsigned xtarray[6][6];
+			if (dib.xtranArray(xtarray) & demosaic.find("xtran") == std::string::npos) 
+				demosaic = "xtran_fast";
 
 			//char *d = strtok(NULL," ");
 			//if (d) demosaic = d;
