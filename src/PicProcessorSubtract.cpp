@@ -313,15 +313,17 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			result = true;
 		}
 		else if (param == "camera") {
-			m_tree->SetItemText(id, _("subtract:camera"));
-			int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
-			if (subval != 0) {
+			std::map<std::string,std::string> info = dib->getInfo();
+			if (info.find("Libraw.Black") != info.end()) {
+				m_tree->SetItemText(id, _("subtract:camera"));
+				int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
 				subtract = (float) subval / 65536.0;
 				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
 				m_display->SetModified(true);
 				result = true;
 			}
-			else {
+			else if (info.find("Libraw.PerChannelBlack") != info.end()) {
+				m_tree->SetItemText(id, _("subtract:camera(perchannel)"));
 				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
 				std::vector<std::string> s = split(dib->getInfoValue("Libraw.PerChannelBlack"),",");
 				if (s[0] =="0" | s[1] =="0" | s[2] =="0" & s[3] =="0") {
@@ -337,6 +339,19 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 					result = true;
 				}
 				else result = false;
+			}
+			else if (info.find("Libraw.CFABlack") != info.end()) {
+				m_tree->SetItemText(id, _("subtract:camera(cfa)"));
+				float sub[6][6];
+				std::string blackstr = info["Libraw.CFABlack"];
+				std::vector<std::string> blackvec = split(blackstr,",");
+				unsigned blackdim = sqrt(blackvec.size());
+				for (unsigned r=0; r< blackdim; r++)
+					for (unsigned c=0; c< blackdim; c++)
+						sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
+				dib->ApplyCFASubtract(sub, true, threadcount);
+				m_display->SetModified(true);
+				result = true;
 			}
 		}
 		else {
