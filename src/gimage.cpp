@@ -2100,6 +2100,34 @@ void gImage::ApplySubtract(double subtractr, double subtractg1, double subtractg
 	}
 }
 
+//subtract per-channel black values provided for the CFA pattern. Only for raw image arrays.  Thank you, Fuji...
+void gImage::ApplyCFASubtract(float blackarray[6][6], bool clampblack, int threadcount)
+{
+	unsigned cfarray[2][2];
+	unsigned xtarray[6][6];
+	int arraydim = 0;
+
+	if (cfArray(cfarray)) {
+		arraydim = 2;
+	}
+	else if (xtranArray(xtarray)) {
+		arraydim = 6; 
+	}
+	else return;
+
+	#pragma omp parallel for 
+	for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
+		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
+			for (unsigned r=0; r<arraydim; r++) {
+				for (unsigned c=0; c<arraydim; c++) {
+					unsigned pos = (x+c) + (y+r) * w;
+					image[pos].r -= blackarray[r][c];
+				}
+			}
+		}
+	}
+}
+
 //subtract a single value over an entire RGB image
 void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
 {

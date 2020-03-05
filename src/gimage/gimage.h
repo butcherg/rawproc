@@ -209,6 +209,7 @@ class gImage
 
 		//math operations:
 		void ApplySubtract(double subtractr, double subtractg1, double subtractg2, double subtractb, bool clampblack=false, int threadcount=0);
+		void ApplyCFASubtract(float blackarray[6][6], bool clampblack, int threadcount);
 		void ApplySubtract(double subtract, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampblack=false, int threadcount=0);
 		bool ApplySubtract(std::string filename, bool clampblack=false, int threadcount=0);
 		bool ApplySubtract(gImage& subtractimage, bool clampblack=false, int threadcount=0);
