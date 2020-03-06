@@ -314,11 +314,16 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 		}
 		else if (param == "camera") {
 			std::map<std::string,std::string> info = dib->getInfo();
-			if (info.find("Libraw.Black") != info.end()) {
-				m_tree->SetItemText(id, _("subtract:camera"));
-				int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
-				subtract = (float) subval / 65536.0;
-				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+			if (info.find("Libraw.CFABlack") != info.end()) {
+				m_tree->SetItemText(id, _("subtract:camera(cfa)"));
+				float sub[6][6];
+				std::string blackstr = info["Libraw.CFABlack"];
+				std::vector<std::string> blackvec = split(blackstr,",");
+				unsigned blackdim = sqrt(blackvec.size());
+				for (unsigned r=0; r< blackdim; r++)
+					for (unsigned c=0; c< blackdim; c++)
+						sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
+				dib->ApplyCFASubtract(sub, true, threadcount);
 				m_display->SetModified(true);
 				result = true;
 			}
@@ -340,19 +345,15 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 				}
 				else result = false;
 			}
-			else if (info.find("Libraw.CFABlack") != info.end()) {
-				m_tree->SetItemText(id, _("subtract:camera(cfa)"));
-				float sub[6][6];
-				std::string blackstr = info["Libraw.CFABlack"];
-				std::vector<std::string> blackvec = split(blackstr,",");
-				unsigned blackdim = sqrt(blackvec.size());
-				for (unsigned r=0; r< blackdim; r++)
-					for (unsigned c=0; c< blackdim; c++)
-						sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
-				dib->ApplyCFASubtract(sub, true, threadcount);
+			else if (info.find("Libraw.Black") != info.end()) {
+				m_tree->SetItemText(id, _("subtract:camera"));
+				int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
+				subtract = (float) subval / 65536.0;
+				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
 				m_display->SetModified(true);
 				result = true;
 			}
+
 		}
 		else {
 			m_tree->SetItemText(id, _("subtract:file"));
