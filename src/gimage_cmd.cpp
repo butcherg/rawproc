@@ -1151,8 +1151,50 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			if (print) printf("subtract: %f (%d threads)... ",subtract,threadcount); fflush(stdout);
 
 			_mark();
-			if (strcmp(v,"file") == 0)
+			if (strcmp(v,"rgb") == 0) {
+				dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+			}
+			else if (strcmp(v,"red") == 0) {
+				dib.ApplySubtract(subtract, 0.0, 0.0, 0.0, true, threadcount);
+			}
+			else if (strcmp(v,"green") == 0) {
+				dib.ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
+			}
+			else if (strcmp(v,"blue") == 0) {
+				dib.ApplySubtract(0.0, 0.0, subtract, true, threadcount);
+			}
+			else if (strcmp(v,"camera") == 0) {
+				std::map<std::string,std::string> info = dib.getInfo();
+				if (info.find("Libraw.CFABlack") != info.end()) {
+					float sub[6][6];
+					std::string blackstr = info["Libraw.CFABlack"];
+					std::vector<std::string> blackvec = split(blackstr,",");
+					unsigned blackdim = sqrt(blackvec.size());
+					for (unsigned r=0; r< blackdim; r++)
+						for (unsigned c=0; c< blackdim; c++)
+							sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
+					dib.ApplyCFASubtract(sub, true, threadcount);
+				}
+				else if (info.find("Libraw.PerChannelBlack") != info.end()) {
+					float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
+					std::vector<std::string> s = split(info["Libraw.PerChannelBlack"],",");
+					if (s.size() >= 4) {
+						subr = atof(s[0].c_str());
+						subg1 = atof(s[0].c_str());
+						subb = atof(s[0].c_str());
+						subg2 = atof(s[0].c_str());
+						dib.ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
+					}
+				}
+				else if (info.find("Libraw.Black") != info.end()) {
+					int subval = atoi(info["Libraw.Black"].c_str());
+					float subtract = (float) subval / 65536.0;
+					dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+				}
+			}
+			else if (strcmp(v,"file") == 0) {
 				dib.ApplySubtract(std::string(filename), threadcount);  
+			}
 			else
 				dib.ApplySubtract(subtract, CHANNEL_RGB, true, threadcount);  
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
