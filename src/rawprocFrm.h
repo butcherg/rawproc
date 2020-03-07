@@ -210,6 +210,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void OnSize(wxSizeEvent& event);
 	void CharEvent(wxKeyEvent& event);
 	wxString getOpenFilePath();
+	void ClearParamPane();  //a try at avoiding a suspect condition in wxNotebookBase->DeleteAllPages()
 
 	bool isOpen();
 	bool isOpenSource();

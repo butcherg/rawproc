@@ -405,6 +405,11 @@ void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 }
 #endif
 
+void rawprocFrm::ClearParamPane()
+{
+	while (parambook->GetPageCount()) parambook->DeletePage(0);
+}
+
 void rawprocFrm::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
@@ -499,7 +504,8 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
-	parambook->DeleteAllPages();
+	//parambook->DeleteAllPages();
+	ClearParamPane();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
@@ -519,7 +525,8 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
-	parambook->DeleteAllPages();
+	//parambook->DeleteAllPages();
+	ClearParamPane();
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
@@ -869,7 +876,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 
 		pic->BlankPic();
 		histogram->BlankPic();
-		parambook->DeleteAllPages();
+		//parambook->DeleteAllPages();
+		ClearParamPane();
 		
 		mark();
 		if (dib) delete dib;
@@ -1058,7 +1066,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			pic->BlankPic();
 			histogram->BlankPic();
-			parambook->DeleteAllPages();
+			//parambook->DeleteAllPages();
+			ClearParamPane();
 			SetStatusText(wxString::Format(_("Loading file:%s params:%s"),ofilename, oparams));
 
 			mark();
