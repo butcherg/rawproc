@@ -2180,7 +2180,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	else {
 		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
-#ifdef USE_LENSFUNPUDATE
+#ifdef USE_LENSFUNUPDATE
 		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
 		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
 			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
