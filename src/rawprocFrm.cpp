@@ -267,7 +267,9 @@ void rawprocFrm::CreateGUIControls()
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
+#ifdef USE_LIBRTPROCESS
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CACORRECT,	_("CACorrect"), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,	_("Colorspace"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
@@ -276,8 +278,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+#ifdef USE_LIBRTPROCESS
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
-
+#endif
 #ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
 #endif

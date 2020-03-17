@@ -242,7 +242,9 @@ bool PicProcessorCACorrect::processPicture(gImage *processdib)
 
 	if (global_processing_enabled & processingenabled) {
 		mark();
+#ifdef USE_LIBRTPROCESS
 		dib->ApplyCACorrect(autoca, iterations, cared, cablue, avoidcs, threadcount);
+#endif
 		m_display->SetModified(true);
 		wxString d = duration();
 

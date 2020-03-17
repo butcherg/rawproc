@@ -131,9 +131,9 @@ bool PicProcessorHLRecover::processPicture(gImage *processdib)
 
 	if (global_processing_enabled & processingenabled) {
 		mark();
+#ifdef USE_LIBRTPROCESS
 		dib->ApplyHLRecover(threadcount);
-		//if (!dib->ApplyHaldCLUT("/home/glenn/Photography/Hald_CLUT_Identity.png", threadcount)) wxMessageBox("HaldCLUT didn't work, for some reason...");
-
+#endif
 		m_display->SetModified(true);
 		wxString d = duration();
 
