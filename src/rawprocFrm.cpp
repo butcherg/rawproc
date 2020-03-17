@@ -1389,10 +1389,12 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
 {
 	wxTreeItemId parentitem = commandtree->GetItemParent(event.GetItem());
-	std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
-	if (parentitemlabel == "group") {
-		//event.Veto();
-		commandtree->SelectItem(parentitem);
+	if (parentitem.IsOk()) {
+		std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
+		if (parentitemlabel == "group") {
+			//event.Veto();
+			commandtree->SelectItem(parentitem);
+		}
 	}
 	event.Skip();
 }
