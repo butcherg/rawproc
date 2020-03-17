@@ -385,7 +385,8 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
-		//img <li>hlrecover - Use unclipped channels to reconstruct highlights. Use only before demosaic.</li>
+#ifdef USE_LIBRTPROCESS
+		//img <li>cacorrect - Correct chromatic abberation. Use only before demosaic.</li>
 		else if (strcmp(cmd,"cacorrect") == 0) {  
 			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.clcorrect.cores","0").c_str());
 			if (threadcount == 0) 
@@ -418,6 +419,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			sprintf(cs, "%s ",cmd);
 			commandstring += std::string(cs);
 		}
+#endif
 
 		//img <li>addexif:tagname,value - tagname must be valid EXIF tag for it to survive the file save...</li>
 		else if (strcmp(cmd,"addexif") == 0) {  
