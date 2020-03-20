@@ -3,8 +3,8 @@
 
 #include <wx/wx.h>
 
-wxDECLARE_EVENT(myFLOATCTRL_UPDATE, wxCommandEvent);
-wxDECLARE_EVENT(myFLOATCTRL_CHANGE, wxCommandEvent);
+wxDECLARE_EVENT(myFLOATCTRL_UPDATE, wxCommandEvent); //process Enter key
+wxDECLARE_EVENT(myFLOATCTRL_CHANGE, wxCommandEvent); //process thumbwheel change
 
 
 class myFloatCtrl: public wxControl
