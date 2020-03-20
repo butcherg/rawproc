@@ -173,6 +173,29 @@ then
 fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
 
+#lensfun-update:
+AC_ARG_ENABLE([lensfunupdate],
+        AS_HELP_STRING([--enable-lensfunupdate], [enables lensfun update. lensfun must also be enabled.])
+)
+if test "$enable_lensfunupdate" == "yes"
+then
+	PKG_CHECK_MODULES([CURL],[libcurl], [
+		CPPFLAGS="$CURL_CFLAGS $CPPFLAGS"
+		LIBS="$CURL_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
+	PKG_CHECK_MODULES([ARCHIVE],[libarchive], [
+		CPPFLAGS="$ARCHIVE_CFLAGS $CPPFLAGS"
+		LIBS="$ARCHIVE_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
+	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUNUPDATE"
+	
+fi
+AM_CONDITIONAL(LENSFUNUPDATE, test x$enable_lensfunupdate = xyes)
+
 
 #librtprocess:
 

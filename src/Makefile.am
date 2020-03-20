@@ -13,8 +13,13 @@ rawproc_SOURCES =  curve.cpp CurvePane.cpp CameraData.cpp elapsedtime.cpp gimage
 rawproc_SOURCES += CurvePane.h CameraData.h elapsedtime.h gimage_cmd.h jpegexif.h jpegimage.h myConfig.h myDoubleSlider.h myBatchDialog.h myEXIFDialog.h myHistogramDialog.h myHistogramPane.h myPropertyDialog.h myRowSizer.h myRowColumnSizer.h myFloatCtrl.h myIntegerCtrl.h myToneCurvePane.h PicPanel.h PicProcessorCACorrect.h PicProcessorHLRecover.h PicProcessorGroup.h PicProcessorSubtract.h PicProcessorDemosaic.h PicProcessorBlackWhitePoint.h PicProcessorColorSpace.h  PicProcessor.h PicProcessorCrop.h PicProcessorCurve.h PicProcessorDenoise.h PicProcessorExposure.h PicProcessorTone.h PicProcessorGray.h  PicProcessorRedEye.h PicProcessorResize.h PicProcessorRotate.h PicProcessorSaturation.h PicProcessorSharpen.h PicProcessorWhiteBalance.h PicProcPanel.h pngimage.h rawimage.h rawprocApp.h rawprocFrm.h tiffimage.h util.h nikonlensid.h cJSON.h 
 
 if LENSFUN
-rawproc_SOURCES += PicProcessorLensCorrection.cpp PicProcessorLensCorrection.h lensfun_dbupdate.cpp lensfun_dbupdate.h
+rawproc_SOURCES += PicProcessorLensCorrection.cpp PicProcessorLensCorrection.h 
+if LENSFUNUPDATE
+rawproc_SOURCES += lensfun_dbupdate.cpp lensfun_dbupdate.h
 endif
+endif
+
+
 
 rawproc_LDADD = @WX_LIBS@
 

@@ -42,7 +42,9 @@
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
 #include <lensfun/lensfun.h>
+#ifdef USE_LENSFUNUPDATE
 #include "lensfun_dbupdate.h"
+#endif
 #endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
@@ -97,7 +99,6 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_Paste,rawprocFrm::MnuPaste1203Click)
 	EVT_MENU(ID_MNU_SHOWCOMMAND,rawprocFrm::MnuShowCommand1010Click)
 	EVT_MENU(ID_MNU_BATCH,rawprocFrm::MnuBatchClick)
-	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
 	EVT_MENU(ID_MNU_ABOUT,rawprocFrm::MnuAbout1011Click)
 	EVT_MENU(ID_MNU_VIEWHELP,rawprocFrm::MnuHelpClick)
 	EVT_MENU(ID_MNU_PROPERTIES,rawprocFrm::MnuProperties)
@@ -111,6 +112,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
+#ifdef USE_LENSFUNUPDATE
+	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
+#endif
 #endif
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
@@ -253,7 +257,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
-#ifdef USE_LENSFUN
+#ifdef USE_LENSFUNUPDATE
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
@@ -263,7 +267,9 @@ void rawprocFrm::CreateGUIControls()
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
+#ifdef USE_LIBRTPROCESS
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CACORRECT,	_("CACorrect"), _(""), wxITEM_NORMAL);
+#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,	_("Colorspace"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
@@ -272,8 +278,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+#ifdef USE_LIBRTPROCESS
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
-
+#endif
 #ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
 #endif
@@ -640,7 +647,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 //ToDo: expand to include camconst.json, elle's profiles?  Maybe even a rawproc.conf...
 void rawprocFrm::MnuData(wxCommandEvent& event)
 {
-#ifdef USE_LENSFUN
+#ifdef USE_LENSFUNUPDATE
 	SetStatusText("Updating lensfun database...");
 	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
 	switch (lensfun_dbupdate(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
@@ -1382,10 +1389,12 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
 {
 	wxTreeItemId parentitem = commandtree->GetItemParent(event.GetItem());
-	std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
-	if (parentitemlabel == "group") {
-		//event.Veto();
-		commandtree->SelectItem(parentitem);
+	if (parentitem.IsOk()) {
+		std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
+		if (parentitemlabel == "group") {
+			//event.Veto();
+			commandtree->SelectItem(parentitem);
+		}
 	}
 	event.Skip();
 }
@@ -2176,6 +2185,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	else {
 		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
+#ifdef USE_LENSFUNUPDATE
 		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
 		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
 			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
@@ -2185,6 +2195,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
 			}
 		}
+#endif
 	}
 	description.Append(wxString::Format(_("\n%s"), lensfundb));
 #endif
