@@ -1,6 +1,7 @@
 #include "PicProcessor.h"
 #include "PicProcessorSaturation.h"
 #include "PicProcPanel.h"
+#include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
@@ -24,20 +25,18 @@ class SaturationPanel: public PicProcPanel
 			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
 			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
-			saturate = new wxSlider(this, wxID_ANY, initialvalue*10.0, 0, 30, wxPoint(10, 30), wxSize(140, -1));
-			g->Add(saturate, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			val = new wxStaticText(this,wxID_ANY, wxString::Format("%2.2f", initialvalue), wxDefaultPosition, wxSize(30, -1));
-			g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			saturate = new myFloatCtrl(this, wxID_ANY, 1.0, 2, wxDefaultPosition,wxDefaultSize);
+			g->Add(saturate, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip(_("Reset to default"));
-			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			g->Add(btn, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			SetFocus();
 			t.SetOwner(this);
 			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
-			Bind(wxEVT_SCROLL_CHANGED, &SaturationPanel::OnChanged, this);
-			Bind(wxEVT_SCROLL_THUMBTRACK, &SaturationPanel::OnThumbTrack, this);
+			Bind(myFLOATCTRL_CHANGE,&SaturationPanel::OnChanged, this);
+			Bind(myFLOATCTRL_UPDATE,&SaturationPanel::OnEnter, this);
 			Bind(wxEVT_CHECKBOX, &SaturationPanel::onEnable, this, SATURATIONENABLE);
 			Bind(wxEVT_TIMER, &SaturationPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SaturationPanel::OnKey,  this);
@@ -56,20 +55,21 @@ class SaturationPanel: public PicProcPanel
 			}
 		}
 
-		void OnChanged(wxCommandEvent& event)
+		void OnEnter(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
-			t.Start(500,wxTIMER_ONE_SHOT);
+			q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			q->processPic();
+			event.Skip();
 		}
 
-		void OnThumbTrack(wxCommandEvent& event)
+		void OnChanged(wxCommandEvent& event)
 		{
-			val->SetLabel(wxString::Format("%2.2f", saturate->GetValue()/10.0));
+			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%2.2f",saturate->GetValue()/10.0));
+			q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -77,17 +77,15 @@ class SaturationPanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
-			saturate->SetValue(resetval*10.0);
+			saturate->SetFloatValue(resetval);
 			q->setParams(wxString::Format("%2.2f",resetval));
-			val->SetLabel(wxString::Format("%2.2f", resetval));
 			q->processPic();
 			event.Skip();
 		}
 
 
 	private:
-		wxSlider *saturate;
-		wxStaticText *val;
+		myFloatCtrl *saturate;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		wxTimer t;
