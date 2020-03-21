@@ -3477,25 +3477,15 @@ void gImage::ApplySaturate(double saturate, int threadcount)
 	}
 }
 
-//this version constrains its application to a range of color calculated from the pixel values in colorpatch, and to a 
+//this version constrains its application to a range of color bounded by r|g|bmin and r|g|bmax, and to a 
 //segment of the image bounded by top,left,bottom,right
-void gImage::ApplySaturate(double saturate, std::vector<pix> colorpatch, float top, float left, float bottom, float right, int threadcount)
+void gImage::ApplySaturate(double saturate, float rmin, float rmax, float gmin, float gmax, float bmin, float bmax, float top, float left, float bottom, float right, int threadcount)
 {
 	//normalize 0-1 to proportion of w,h:
 	int t = h * top;
 	int l = w * left;
 	int b = h * bottom;
 	int r = w * right;
-
-	float rmin=0.0, rmax=100.0, gmin=0.0, gmax=100.0, bmin=0.0, bmax=100.0;
-	for (unsigned i=0; i<colorpatch.size(); i++) {
-		if (colorpatch[i].r < rmin) rmin = colorpatch[i].r;
-		if (colorpatch[i].r > rmax) rmax = colorpatch[i].r;
-		if (colorpatch[i].g < rmin) gmin = colorpatch[i].g;
-		if (colorpatch[i].g > rmax) gmax = colorpatch[i].g;
-		if (colorpatch[i].b < rmin) bmin = colorpatch[i].b;
-		if (colorpatch[i].b > rmax) bmax = colorpatch[i].b;
-	}
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=l; x<r; x++) {
