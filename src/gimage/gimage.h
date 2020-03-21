@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cfloat>
 #include <lcms2.h>
 #include "curve.h"
 
@@ -221,7 +220,7 @@ class gImage
 
 		//basic color/tone operations:
 		void ApplySaturate(double saturate, int threadcount=0);
-		void ApplySaturate(double saturate, float rmin=0.0, float rmax=FLT_MAX, float gmin=0.0, float gmax=FLT_MAX, float bmin=0.0, float bmax=FLT_MAX, float top=0.0, float left=0.0, float bottom=1.0, float right=1.0, int threadcount=0.0);
+		void ApplySaturate(double saturate, std::vector<pix> colorpatch, float top=0.0, float left=0.0, float bottom=1.0, float right=1.0, int threadcount=0);
 		void ApplyExposureCompensation(double ev, int threadcount=0);
 		float ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
