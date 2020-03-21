@@ -2,6 +2,7 @@
 #include "PicProcessorSaturation.h"
 #include "PicProcPanel.h"
 #include "myFloatCtrl.h"
+#include "myRowSizer.h"
 #include "myConfig.h"
 #include "util.h"
 #include "undo.xpm"
@@ -15,26 +16,32 @@ class SaturationPanel: public PicProcPanel
 		{
 			Freeze();
 			SetSize(parent->GetSize());
-			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
-			wxGridBagSizer *g = new wxGridBagSizer();
 
 			double initialvalue = atof(params.c_str());
 
 			enablebox = new wxCheckBox(this, SATURATIONENABLE, _("saturation:"));
 			enablebox->SetValue(true);
-			g->Add(enablebox, wxGBPosition(0,0), wxGBSpan(1,3), wxALIGN_LEFT | wxALL, 3);
-			g->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(280,2)),  wxGBPosition(1,0), wxGBSpan(1,4), wxALIGN_LEFT | wxBOTTOM | wxEXPAND, 10);
 
 			saturate = new myFloatCtrl(this, wxID_ANY, 1.0, 2, wxDefaultPosition,wxDefaultSize);
-			g->Add(saturate, wxGBPosition(2,0), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip(_("Reset to default"));
-			g->Add(btn, wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			
+			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
+			wxSizerFlags patchflags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT);
+			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
+			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-			SetSizerAndFit(g);
+			m->NextRow();
+			m->AddRowItem(saturate,flags);
+			m->AddRowItem(btn,flags);
+
+			m->End();
+
+			SetSizerAndFit(m);
 			SetFocus();
 			t.SetOwner(this);
-			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
 			Bind(myFLOATCTRL_CHANGE,&SaturationPanel::OnChanged, this);
 			Bind(myFLOATCTRL_UPDATE,&SaturationPanel::OnEnter, this);
 			Bind(wxEVT_CHECKBOX, &SaturationPanel::onEnable, this, SATURATIONENABLE);
