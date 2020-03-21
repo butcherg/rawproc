@@ -220,9 +220,8 @@ class gImage
 
 		//basic color/tone operations:
 		void ApplySaturate(double saturate, int threadcount=0);
-		void ApplySaturate(double saturate, std::vector<pix> colorpatch, float top=0.0, float left=0.0, float bottom=1.0, float right=1.0, int threadcount=0);
 		void ApplyExposureCompensation(double ev, int threadcount=0);
-		float ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount=0);
+		float ApplyExposureCompensation(int x, int y, float radius, float destinationev, int threadcount);
 		void ApplyToneCurve(std::vector<cp> ctpts, int threadcount=0);
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount=0);
@@ -232,7 +231,7 @@ class gImage
 		//image geometry algorithms:
 		void ApplyResize(unsigned width, unsigned height, RESIZE_FILTER filter, int threadcount=0);
 		void ApplyResize(std::string params, int threadcount=0);
-		void ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount=0);
+		void ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount);
 		void ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount=0);
 
 		//rotation algorithms:
