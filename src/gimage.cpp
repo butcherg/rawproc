@@ -3491,20 +3491,20 @@ void gImage::ApplySaturate(double saturate, float rmin, float rmax, float gmin, 
 	for (unsigned x=l; x<r; x++) {
 		for (unsigned y=t; y<b; y++) {
 			unsigned pos = x + y*w;
-			if (image[pos].r > rmin & image[pos].r < rmax & image[pos].g > gmin & image[pos].g < gmax & image[pos].b > bmin & image[pos].b < bmax) { 
-				double R = image[pos].r;
-				double G = image[pos].g;
-				double B = image[pos].b;
+			if (image[pos].r < rmin | image[pos].r > rmax | image[pos].g < gmin | image[pos].g > gmax | image[pos].b < bmin | image[pos].b > bmax) continue; 
+			double R = image[pos].r;
+			double G = image[pos].g;
+			double B = image[pos].b;
 
-				double  P=sqrt(
-				R*R*Pr+
-				G*G*Pg+
-				B*B*Pb ) ;
+			double  P=sqrt(
+			R*R*Pr+
+			G*G*Pg+
+			B*B*Pb ) ;
 
-				image[pos].r=P+(R-P)*saturate;
-				image[pos].g=P+(G-P)*saturate;
-				image[pos].b=P+(B-P)*saturate;
-			}
+			image[pos].r=P+(R-P)*saturate;
+			image[pos].g=P+(G-P)*saturate;
+			image[pos].b=P+(B-P)*saturate;
+
 		}
 	}
 }
