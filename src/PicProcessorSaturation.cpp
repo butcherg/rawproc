@@ -15,6 +15,10 @@ class SaturationPanel: public PicProcPanel
 		{
 			Freeze();
 			SetSize(parent->GetSize());
+
+			rmin=0.0; rmax=FLT_MAX; gmin=0.0; gmax=FLT_MAX; bmin=0.0; bmax=FLT_MAX;
+			ispatch = false;
+
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxGridBagSizer *g = new wxGridBagSizer();
 
@@ -83,9 +87,37 @@ class SaturationPanel: public PicProcPanel
 			event.Skip();
 		}
 
+		void processSA()
+		{
+			if (ispatch) 
+				q->setParams(wxString::Format("%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f",rmin, rmax, gmin, gmax, bmin, bmax, saturate->GetFloatValue()));
+			else
+				q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			q->processPic();
+		}
+
+		void addToPatch(pix p)
+		{
+			ispatch = true;
+			if (p.r < rmin) rmin = p.r;
+			if (p.r > rmax) rmax = p.r;
+			if (p.g < rmin) gmin = p.g;
+			if (p.g > rmax) gmax = p.g;
+			if (p.b < rmin) bmin = p.b;
+			if (p.b > rmax) bmax = p.b;
+		}
+
+		void clearPatch()
+		{
+			rmin=0.0; rmax=FLT_MAX; gmin=0.0; gmax=FLT_MAX; bmin=0.0; bmax=FLT_MAX;
+			ispatch = false;
+		}
+
 
 	private:
 		myFloatCtrl *saturate;
+		float rmin, rmax, gmin, gmax, bmin, bmax;
+		bool ispatch;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		wxTimer t;
@@ -109,7 +141,17 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 bool PicProcessorSaturation::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("saturation..."));
-	double saturation = atof(c.c_str());
+
+	float rmin=0.0, rmax=FLT_MAX, gmin=0.0, gmax=FLT_MAX, bmin=0.0, bmax=FLT_MAX;
+
+	wxArrayString p = split(wxString(c),",");
+	double saturation = atof(p[0].c_str());
+	if (p.size() >= 2) rmin = atof(p[1].c_str());
+	if (p.size() >= 3) rmin = atof(p[2].c_str());
+	if (p.size() >= 4) rmin = atof(p[3].c_str());
+	if (p.size() >= 5) rmin = atof(p[4].c_str());
+	if (p.size() >= 6) rmin = atof(p[5].c_str());
+	if (p.size() >= 7) rmin = atof(p[6].c_str());
 	bool result = true;
 	
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturate.cores","0").c_str());
@@ -123,7 +165,7 @@ bool PicProcessorSaturation::processPicture(gImage *processdib)
 
 	if (processingenabled & saturation != 1.0) {
 		mark();
-		dib->ApplySaturate(saturation, threadcount);
+		dib->ApplySaturate(saturation, rmin, rmax, gmin, gmax, bmin, bmax, 0.0, 0.0, 1.0, 1.0, threadcount);
 		m_display->SetModified(true);
 		wxString d = duration();
 
