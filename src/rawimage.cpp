@@ -871,7 +871,8 @@ char * _loadRAW(const char *filename,
 	}
 
 	//per-channel black subtraction:
-	if (C.cblack[0] != 0 | C.cblack[1] != 0 | C.cblack[2] != 0 | C.cblack[3] != 0) {
+	//if (C.cblack[0] != 0 | C.cblack[1] != 0 | C.cblack[2] != 0 | C.cblack[3] != 0) { //libraw 0.19.5 isn't encoding this correctly...
+	if (C.cblack[0] > 1 | C.cblack[1] > 1 | C.cblack[2] > 1 | C.cblack[3] > 1) {
 		snprintf(buffer, 4096, "%d,%d,%d,%d",C.cblack[0],C.cblack[1],C.cblack[2],C.cblack[3]);
 		info["Libraw.PerChannelBlack"] = buffer;
 	}
