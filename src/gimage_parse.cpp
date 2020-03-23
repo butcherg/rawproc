@@ -1,19 +1,7 @@
 
-//#include <string>
 #include "gimage/strutil.h"
 #include "cJSON.h"
 
-//#include <string.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <unistd.h>
-//#include <dirent.h>
-//#include <math.h> 
-
-//#include "elapsedtime.h"
-//#include "gimage/strutil.h"
-//#include "myConfig.h"
-//#include "CameraData.h"
 
 std::map<std::string,std::string> parse_JSONparams(std::string JSONstring)
 {
@@ -24,6 +12,14 @@ std::map<std::string,std::string> parse_JSONparams(std::string JSONstring)
 		pmap[std::string(iterator->string)] = std::string(iterator->valuestring);
 	}
 	return pmap;
+}
+
+std::string paramprint(std::map<std::string,std::string> params)
+{
+	std::string s;
+	for (std::map<std::string,std::string>::iterator it=params.begin(); it!=params.end(); ++it)
+		s.append(it->first + ": " + it->second);
+	return s;
 }
 
 
@@ -42,12 +38,12 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 	//collect all defaults into pmap:
 
 	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
-		parse_JSONparams(paramstring);
+		pmap = parse_JSONparams(paramstring);
 	}
 
-	//if string has name=val pairs, just parse them into pmap:
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
 	}
 
 	else { //positional
