@@ -1,0 +1,85 @@
+
+//#include <string>
+#include "gimage/strutil.h"
+#include "cJSON.h"
+
+//#include <string.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <unistd.h>
+//#include <dirent.h>
+//#include <math.h> 
+
+//#include "elapsedtime.h"
+//#include "gimage/strutil.h"
+//#include "myConfig.h"
+//#include "CameraData.h"
+
+std::map<std::string,std::string> parse_JSONparams(std::string JSONstring)
+{
+	std::map<std::string,std::string> pmap;
+	cJSON *json = cJSON_Parse(JSONstring.c_str());
+	cJSON *iterator;
+	cJSON_ArrayForEach(iterator, json) {
+		pmap[std::string(iterator->string)] = std::string(iterator->valuestring);
+	}
+	return pmap;
+}
+
+
+//blackwhitepoint
+//:rgb|red|green|blue - do Auto on channel
+//:rgb|red|green|blue,<nbr>[,<nbr>] - specific b/w on channel, if only one number, b=<nbr>, w=255
+//:rgb|red|green|blue,data - b/w on data limits, b=smallest r|g|b, w=largest r|g|b
+//:rgb|red|green|blue,data,minwhite - b/w on data limits w=smallest r|g|b
+//:camera - b/w on camera data limits, b=smallest r|g|b, w=largest r|g|b
+//:<nbr>,[<nbr>] - specific b/w, if only one number, b=<nbr>, w=255
+//:NULL - do Auto on rgb
+
+std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		if (paramstring == std::string()) {  //NULL string, default processing
+			pmap["channel"] = "rgb";
+			pmap["mode"] = "auto";
+		}
+		else if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {    // | p[0] == "min") {   ??
+			pmap["channel"] = p[0];
+			if (p.size() >= 2) {
+				if (p[1] == "data") { //bound on min/max of image data
+					pmap["mode"] == "data";
+					if (p.size() >= 3 && p[2] == "minwhite") pmap["minwhite"] = "true";
+				}
+				else { //specific number(s) on specific channel
+					pmap["black"] = p[1];
+					if (p.size() >= 3) 
+						pmap["white"] = p[2];
+					else
+						pmap["white"] = "255";
+				}
+			}
+			else pmap["mode"] = "auto";
+		}
+		else if (p[0] == "camera") {
+			pmap["channel"] = "rgb";
+			pmap["mode"] = "camera";
+		}
+	}
+	return pmap;
+}
+
+
+
