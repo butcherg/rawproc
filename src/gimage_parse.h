@@ -3,6 +3,8 @@
 
 #include <string>
 
+std::string paramprint(std::map<std::string,std::string> params);
+
 std::map<std::string,std::string> parse_blackwhitepoint(std::string params);
 
 #endif

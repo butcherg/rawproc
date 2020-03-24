@@ -14,12 +14,21 @@ std::map<std::string,std::string> parse_JSONparams(std::string JSONstring)
 	return pmap;
 }
 
-std::string paramprint(std::map<std::string,std::string> params)
+//std::string paramprint(std::map<std::string,std::string> params)
+void paramprint(std::map<std::string,std::string> params)
 {
 	std::string s;
-	for (std::map<std::string,std::string>::iterator it=params.begin(); it!=params.end(); ++it)
-		s.append(it->first + ": " + it->second);
-	return s;
+	printf("params ");
+	printf("%d elements):\n",params.size()); 
+	fflush(stdout);
+	if (params.empty()) return;
+	
+	for (std::map<std::string,std::string>::iterator it=params.begin(); it!=params.end(); ++it) {
+		//s.append(it->first + ": " + it->second) + "\r\n";
+		printf("%s: %s\n",it->first.c_str(), it->second.c_str()); 
+		fflush(stdout);
+	}
+	//return s;
 }
 
 
@@ -48,18 +57,23 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 
 	else { //positional
 		std::vector<std::string> p = split(paramstring, ",");
-		if (paramstring == std::string()) {  //NULL string, default processing
-			pmap["channel"] = "rgb";
-			pmap["mode"] = "auto";
-		}
-		else if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {    // | p[0] == "min") {   ??
+		//if (paramstring == std::string()) {  //NULL string, default processing
+		//	pmap["channel"] = "rgb";
+		//	pmap["mode"] = "auto";
+		//}
+		//else 
+		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {    // | p[0] == "min") {   ??
 			pmap["channel"] = p[0];
 			if (p.size() >= 2) {
 				if (p[1] == "data") { //bound on min/max of image data
 					pmap["mode"] == "data";
 					if (p.size() >= 3 && p[2] == "minwhite") pmap["minwhite"] = "true";
 				}
-				else { //specific number(s) on specific channel
+				else if (p[1] == "auto") {
+					pmap["channel"] = p[0];
+					pmap["mode"] = "auto";
+				}
+				else { 
 					pmap["black"] = p[1];
 					if (p.size() >= 3) 
 						pmap["white"] = p[2];
@@ -73,6 +87,15 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 			pmap["channel"] = "rgb";
 			pmap["mode"] = "camera";
 		}
+		else {
+			pmap["channel"] = "rgb";
+			pmap["mode"] = "auto";
+		}
+	}
+	printf("in parse_blackwhitepoint: %d elements):\n",pmap.size()); 
+	for (std::map<std::string,std::string>::iterator it=pmap.begin(); it!=pmap.end(); ++it) {
+		printf("\t%s: %s\n",it->first.c_str(), it->second.c_str()); 
+		fflush(stdout);
 	}
 	return pmap;
 }

@@ -12,6 +12,7 @@
 #include "gimage/strutil.h"
 #include "myConfig.h"
 #include "CameraData.h"
+#include "gimage_parse.h"
 
 
 std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, bool print)
@@ -429,6 +430,24 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			if (print) printf("addexif: %s=%s ... ",name,value); fflush(stdout);
 
 			dib.setInfo(std::string(name),std::string(value));
+		}
+		
+		else if (strcmp(cmd,"blackwhitepoint-foo") == 0) {   
+		
+			char * pstr = strtok(NULL, " ");
+			std::map<std::string,std::string> parms = parse_blackwhitepoint(std::string(pstr));
+			
+			printf("parmstr: %s\n",pstr); fflush(stdout);
+			paramprint(parms);
+			printf("on to processing...\n"); fflush(stdout);
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+	
+			commandstring += std::string(cmd) + ":" + pstr;
 		}
 
 		//img <li>blackwhitepoint: [auto] | [rgb|red|green|blue,[data[,minwhite]]|[0-127,128-255] | [camera]  Default: auto. <ul><li>If the parameters start with 'auto', a 0-255 black and white point are calculated from the histogram.</li><li>If the parameters start with a channel, they are followed by either a black and white bound specified in the range 0-255, or 'data', which will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', which will instead for white use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li></ul></li>
