@@ -15,14 +15,6 @@
 #include "gimage_parse.h"
 
 
-int getThreadCount(int threadcount) {
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-	return threadcount;
-}
-
 std::string buildcommand(std::string cmd, std::map<std::string,std::string> params)
 {
 	std::string c = cmd;
@@ -470,95 +462,22 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				if (print) printf("blackwhitepoint: %s\n",params["error"].c_str());
 				return std::string();  //ToDo: return an error message...
 			}
-			else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-				if (print) printf("blackwhitepoint: Error - no mode\n");
-				return std::string();
-			}
-			//nominal processing:
-			else {
-				int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str()));
 
-				//tool-specific setup:
-				double blk=0.0, wht=255.0;
-				GIMAGE_CHANNEL channel = CHANNEL_RGB;
-				if (paramexists(params, "channel")) {
-					if (params["channel"] == "rgb")   channel = CHANNEL_RGB;
-					if (params["channel"] == "red")   channel = CHANNEL_RED;
-					if (params["channel"] == "green") channel = CHANNEL_GREEN;
-					if (params["channel"] == "blue")  channel = CHANNEL_BLUE;
-				}
-				else params["channel"] = "rgb";
+			//processing
+			std::map<std::string,std::string> result =  process_blackwhitepoint(dib, params);
 
-				//tool-specific logic:
-				if (params["mode"] == "auto"){
-					double blkthresh = 
-						atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.001").c_str());
-					double whtthresh = 
-						atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.001").c_str());
-					//int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
-					//int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str()); 
-					long whtinitial = 
-						atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+			if (print) printf("blackwhitepoint(%s): %s,%s,%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				params["channel"].c_str(),
+				result["black"].c_str(),
+				result["white"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
 
-					std::vector<double> bwpts = 
-						dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, params["channel"]);	
-					blk = bwpts[0];
-					wht = bwpts[1];
-				}
-				else if (params["mode"] == "values"){
-					blk = atof(params["black"].c_str());
-					wht = atof(params["white"].c_str());
-				}
-				else if (params["mode"] == "data"){
-					std::map<std::string,float> s = dib.StatsMap();
-					if (channel == CHANNEL_RGB) {
-						blk = std::min(std::min(s["rmin"],s["gmin"]),s["bmin"]);
-						wht = std::max(std::max(s["rmax"],s["gmax"]),s["bmax"]);
-						if (paramexists(params, "minwhite")) {
-							if (params["minwhite"] == "true") wht = std::min(std::min(s["rmax"],s["gmax"]),s["bmax"]);
-						}
-					}
-					else if (channel == CHANNEL_RED) {
-						blk = s["rmin"];
-						wht = s["rmax"];
-					}
-					else if (channel == CHANNEL_GREEN) {
-						blk = s["gmin"];
-						wht = s["gmax"];
-					}
-					else if (channel == CHANNEL_BLUE) {
-						blk = s["bmin"];
-						wht = s["bmax"];
-					}
-				}
-				else if (params["mode"] == "norm"){
-					blk = atof(params["black"].c_str());
-					wht = atof(params["white"].c_str());
-				}
-				else if (params["mode"] == "camera"){
-					if (paramexists(dib.getInfo(), "Libraw.Black"))
-						blk = atoi(dib.getInfoValue("Libraw.Black").c_str()) / 65536.0;
-					else 
-						blk = 0.0;   //not raw, do no harm...
-					if (paramexists(dib.getInfo(), "Libraw.Maximum"))
-						wht = atoi(dib.getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
-					else 
-						wht = 255.0; //not raw, do no harm...
-				}
-
-				if (print) printf("blackwhitepoint(%s): %s,%0.2f,%0.2f (%d threads)... ",
-					params["mode"].c_str(),params["channel"].c_str(),blk,wht,threadcount); 
-				fflush(stdout);
-				_mark();
-				if (params["mode"] == "norm")
-					dib.ApplyNormalization(blk, wht, threadcount);
-				else
-					dib.ApplyToneLine(blk, wht, channel, threadcount);
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-	
-				//commandstring += buildcommand(cmd, params);
-				commandstring += std::string(cmd) + ":" + pstr + " ";
-			}
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
 		}
 
 		//img <li>blackwhitepoint: [auto] | [rgb|red|green|blue,[data[,minwhite]]|[0-127,128-255] | [camera]  Default: auto. <ul><li>If the parameters start with 'auto', a 0-255 black and white point are calculated from the histogram.</li><li>If the parameters start with a channel, they are followed by either a black and white bound specified in the range 0-255, or 'data', which will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', which will instead for white use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li></ul></li>
