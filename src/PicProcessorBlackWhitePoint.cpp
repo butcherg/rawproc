@@ -31,8 +31,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			Freeze();
 			int blk=0, wht=255;
-			wxArrayString p = split(params,",");
-
+			
 			//int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str());
 			//int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
 
@@ -88,52 +87,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			minwhite = new wxCheckBox(this, BLACKWHITEMINWHITE, _("min white:"));
 			datvals= new wxStaticText(this, wxID_ANY, wxString::Format(_("black: %f\nwhite: %f"),datblk, datwht));
 			datminwht = new wxStaticText(this, wxID_ANY, wxString::Format("%f",minwht));
-
 			
-			if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
-				chan->SetStringSelection(p[0]);
-				if (p.size() == 1) {
-					bwmode = BLACKWHITESLIDERAUTO;
-					slideb->SetValue(true);
-				}
-				else if (p.size() >= 2 && p[1] == "data") {
-					bwmode = BLACKWHITEDATA;
-					if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
-					datb->SetValue(true);
-				}
-				else if (p.size() >= 3) {
-					bwmode = BLACKWHITESLIDER;
-					slideb->SetValue(true);
-					blk = atoi(p[1].c_str());
-					wht = atoi(p[2].c_str());
-					bwpoint->SetLeftValue(blk);
-					bwpoint->SetRightValue(wht);
-				}
-			}
-			else if (p[0] == "camera") {
-				bwmode = BLACKWHITECAMERA;
-				camb->SetValue(true);
-			}
-			else if (p[0] == "norm") {
-				bwmode = BLACKWHITENORM;
-				normb->SetValue(true);
-				if (p.size() >= 3) {
-					normmin->SetFloatValue(atof(p[1].c_str()));
-					normmax->SetFloatValue(atof(p[2].c_str()));
-				}
-			}
-			else {
-				chan->SetSelection(chan->FindString("rgb"));
-				bwmode = BLACKWHITESLIDER;
-				slideb->SetValue(true);
-				if (p.size() >= 3) {
-					blk = atoi(p[0].c_str());
-					wht = atoi(p[1].c_str());
-					bwpoint->SetLeftValue(blk);
-					bwpoint->SetRightValue(wht);
-				}
-			}
-
+			setControls(params);
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
@@ -200,6 +155,41 @@ class BlackWhitePointPanel: public PicProcPanel
 			Bind(wxEVT_CHAR_HOOK, &BlackWhitePointPanel::OnKey,  this);
 			Thaw();
 		}
+		
+		void setControls(wxString params)
+		{
+			std::map<std::string,std::string> param = parse_blackwhitepoint(params.ToStdString());
+			if (paramexists(param, "channel")) chan->SetStringSelection(wxString(param["channel"]));
+			if (param["mode"] == "auto") {
+				bwmode = BLACKWHITESLIDERAUTO;
+				slideb->SetValue(true);
+			}
+			else if (param["mode"] == "data") {
+				bwmode = BLACKWHITEDATA;
+				datb->SetValue(true);
+				if (param["minwhite"] == "true") minwhite->SetValue(true);
+			}
+			else if (param["mode"] == "camera") {
+				bwmode = BLACKWHITECAMERA;
+				camb->SetValue(true);
+			}
+			else if (param["mode"] == "norm") {
+				bwmode = BLACKWHITENORM;
+				normb->SetValue(true);
+				normmin->SetFloatValue(atof(param["black"].c_str()));
+				normmax->SetFloatValue(atof(param["white"].c_str()));
+			}
+			else if (param["mode"] == "values") {
+				bwmode = BLACKWHITESLIDER;
+				slideb->SetValue(true);
+				bwpoint->SetLeftValue(atof(param["black"].c_str()));
+				bwpoint->SetRightValue(atof(param["white"].c_str()));
+			}
+			else {
+				bwmode = BLACKWHITESLIDER;
+				slideb->SetValue(true);
+			}
+		}
 
 		void handleFocus(wxFocusEvent& event)
 		{
@@ -232,53 +222,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			if (q->pasteParamsFromClipboard()) {
 				double blk=0.0, wht=255.0;
-				wxArrayString p = split(q->getParams(),",");
-
-				if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
-					chan->SetStringSelection(p[0]);
-					if (p.size() == 1) {
-						bwmode = BLACKWHITESLIDERAUTO;
-						slideb->SetValue(true);
-					}
-					else if (p.size() >= 2 && p[1] == "data") {
-						bwmode = BLACKWHITEDATA;
-						if (p.size() >= 3 && p[2] == "minwhite") minwhite->SetValue(true);
-						datb->SetValue(true);
-					}
-					else if (p[0] == "norm") {
-						bwmode = BLACKWHITENORM;
-						normb->SetValue(true);
-						if (p.size() >= 3) {
-							normmin->SetFloatValue(atof(p[1].c_str()));
-							normmax->SetFloatValue(atof(p[2].c_str()));
-						}
-					}
-					else if (p.size() >= 3) {
-						bwmode = BLACKWHITESLIDER;
-						slideb->SetValue(true);
-						blk = atoi(p[1].c_str());
-						wht = atoi(p[2].c_str());
-						bwpoint->SetLeftValue(blk);
-						bwpoint->SetRightValue(wht);
-					}
-				}
-
-				else if (p[0] == "camera") {
-					bwmode = BLACKWHITECAMERA;
-					camb->SetValue(true);
-				}
-				else {
-					chan->SetSelection(chan->FindString("rgb"));
-					bwmode = BLACKWHITESLIDER;
-					slideb->SetValue(true);
-					if (p.size() >= 3) {
-						blk = atoi(p[0].c_str());
-						wht = atoi(p[1].c_str());
-						bwpoint->SetLeftValue(blk);
-						bwpoint->SetRightValue(wht);
-					}
-				}
-
+				setControls(q->getParams());
 				q->processPic();
 				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
