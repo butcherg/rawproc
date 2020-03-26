@@ -13,6 +13,7 @@
 #include "myConfig.h"
 #include "CameraData.h"
 #include "gimage_parse.h"
+#include "gimage_process.h"
 
 
 std::string buildcommand(std::string cmd, std::map<std::string,std::string> params)

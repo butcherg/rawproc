@@ -7,6 +7,7 @@
 #include "myConfig.h"
 #include "myRowSizer.h"
 #include "gimage_parse.h"
+#include "gimage_process.h"
 #include "undo.xpm"
 #include "copy.xpm"
 #include "paste.xpm"
