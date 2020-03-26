@@ -53,6 +53,7 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "lcms2.h"
 #include <omp.h>
 #include <exception>

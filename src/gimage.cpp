@@ -16,6 +16,7 @@
 #include "tiffimage.h"
 #include "pngimage.h"
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "cJSON.h"
 #include <rtprocess/librtprocess.h>
 #include "gimage/half.hpp"

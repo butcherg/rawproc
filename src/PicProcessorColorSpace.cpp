@@ -3,6 +3,7 @@
 #include "myRowSizer.h"
 #include "util.h"
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "myConfig.h"
 #include "myEXIFDialog.h"
 #include "CameraData.h"

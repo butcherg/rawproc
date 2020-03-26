@@ -20,6 +20,7 @@
 #include "util.h"
 #include "gimage/gimage.h"
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "myConfig.h"
 #include "icon.xpm"
 

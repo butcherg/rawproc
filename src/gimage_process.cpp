@@ -112,3 +112,83 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 
 }
 
+std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "Error - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		//tool-specific setup:
+	
+		cmsUInt32Number intent = INTENT_PERCEPTUAL;
+		if (params["rendering_intent"] == "perceptual") intent = INTENT_PERCEPTUAL;
+		if (params["rendering_intent"] == "saturation") intent = INTENT_SATURATION;
+		if (params["rendering_intent"] == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+		if (params["rendering_intent"] == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+
+		bool bpc = false;
+		if (params["bpc"] == "true") bpc = true;
+
+
+		//tool-specific logic:
+		if (params["mode"] == "camera") {
+
+		}
+		else if (params["mode"] == "primaries") {
+			if (params["op"] == "convert") {
+				_mark();
+				if (dib.ApplyColorspace(params["primaries"], intent, bpc, threadcount) != GIMAGE_OK) {
+					result["error"] = "Error - ColorSpace convert failed.";
+				}
+				else params["treelabel"] = "colorspace:primaries,convert";
+					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,convert"),wxString(cp[0])));
+				result["duration"] = std::to_string(_duration());
+			}
+			else if (params["op"] == "assign") {
+				_mark();
+				if (dib.AssignColorspace(params["primaries"]) != GIMAGE_OK) {
+					result["error"] = "Error - ColorSpace assign failed.";
+				}
+				else params["treelabel"] = "colorspace:primaries,assign";
+ 					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,assign"),wxString(cp[0])));
+				result["duration"] = std::to_string(_duration());
+			}
+		}
+		else if (params["mode"] == "built-in") {
+			if (params["op"] == "convert") {
+				_mark();
+				if (dib.ApplyColorspace(params["profilename"], intent, bpc, threadcount) != GIMAGE_OK) {
+					result["error"] = "Error - ColorSpace convert failed.";
+				}
+				else params["treelabel"] = string_format("colorspace:%s,convert",params["profilename"]);
+					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,convert"),wxString(cp[0])));
+				result["duration"] = std::to_string(_duration());
+			}
+			else if (params["op"] == "assign") {
+				_mark();
+				if (dib.AssignColorspace(params["profilename"]) != GIMAGE_OK) {
+					result["error"] = "Error - ColorSpace assign failed.";
+				}
+				else params["treelabel"] = string_format("colorspace:%s,assign",params["profilename"]);
+ 					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,assign"),wxString(cp[0])));
+				result["duration"] = std::to_string(_duration());
+			}
+		}
+		else if (params["mode"] == "file") {
+
+		}
+		else result["error"] = string_format("Error - unrecognized mode: %s",params["mode"]);
+
+
+
+	}
+	return result;
+}
+

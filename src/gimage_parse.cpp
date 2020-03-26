@@ -5,6 +5,8 @@
 #include "elapsedtime.h"
 #include "cJSON.h"
 
+#include <algorithm>
+
 bool paramexists (std::map<std::string,std::string> m, std::string k)
 {
 	return (m.find(k) != m.end());
@@ -108,9 +110,84 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 		}
 		else {
 			pmap["error"] = "Error - unrecognized positional parameter string";
+			return pmap;
 		}
 	}
 	return pmap;
 }
 
+
+
+//colorspace
+//file		:<profile_filename>[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - open profile file and use to assign|convert
+//camera	:camera[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - find camera primaries in dcraw.c|camconst.json|libraw, make a d65 profile and use to assign|convert
+//primaries	:<int>,<int>,<int>,<int>,<int>,<int>,<int>,<int>,<int>[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - use 9 ints to make a d65 profile and use to assign|convert 
+//built-in	:srgb|wide|adobe|prophoto|identity[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]
+
+std::map<std::string,std::string> parse_colorspace(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		unsigned token = 0;
+
+		pmap["bpc"] = "false";
+
+		if (p[0] == "camera") {
+			pmap["mode"] = "camera";
+			token = 1;
+		}
+
+		else if (p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera") {
+			pmap["mode"] = "built-in";
+			pmap["profilename"] = p[0];
+			token = 1;
+		}
+
+		else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
+			pmap["mode"] = "primaries";
+			pmap["primaries"] = 
+				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]);
+			token = 10;
+		}
+		else {  //treat whatever is in p[0] as a file name
+			pmap["mode"] = "file";
+			pmap["filename"] = p[0];
+			token = 1;
+		}
+
+		for (unsigned i=token; i<psize; i++) {  //op, rendering intent, and/or bpc in any order
+			if (p[i] == "convert" | p[i] == "assign") {
+				pmap["op"] = p[i];
+			}
+			else if (p[i] == "absolute_colorimetric" | 
+				 p[i] == "relative_colorimetric" | 
+				 p[i] == "perceptual" | 
+				 p[i] == "saturation") {
+					pmap["rendering_intent"] = p[i];
+			}
+			else if (p[i] == "bpc") {
+				pmap["bpc"] = true;
+			}				
+			else {
+				pmap["error"] = string_format("Error - unrecognized positional parameter: %s",p[1]);
+				return pmap;
+			}
+		}
+
+	}
+	return pmap;
+}
 

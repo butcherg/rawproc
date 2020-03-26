@@ -31,8 +31,8 @@ img_SOURCES = img.cpp curve.cpp CameraData.cpp elapsedtime.cpp gimage.cpp gimage
 
 img_SOURCES += img.h curve.h CameraData.h elapsedtime.h gimage.h gimage_cmd.h gimage_parse.h gimage_process.h jpegexif.h jpegimage.h myConfig.h pngimage.h rawimage.h strutil.h fileutil.h tiffimage.h cJSON.h
 
-exif_SOURCES = exif.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp tiffimage.cpp cJSON.c
+exif_SOURCES = exif.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp fileutil.cpp tiffimage.cpp cJSON.c
 
-exif_SOURCES += exif.h curve.h elapsedtime.h gimage.h jpegexif.h jpegimage.h myConfig.h pngimage.h rawimage.h strutil.h tiffimage.h cJSON.h
+exif_SOURCES += exif.h curve.h elapsedtime.h gimage.h jpegexif.h jpegimage.h myConfig.h pngimage.h rawimage.h strutil.h fileutil.h tiffimage.h cJSON.h
 
 

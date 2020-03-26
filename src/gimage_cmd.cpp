@@ -10,6 +10,7 @@
 
 #include "elapsedtime.h"
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "myConfig.h"
 #include "CameraData.h"
 #include "gimage_parse.h"
