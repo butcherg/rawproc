@@ -152,19 +152,19 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 
 		else if (p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera") {
 			pmap["mode"] = "built-in";
-			pmap["profilename"] = p[0];
+			pmap["icc"] = p[0];
 			token = 1;
 		}
 
 		else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
 			pmap["mode"] = "primaries";
-			pmap["primaries"] = 
+			pmap["icc"] = 
 				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]);
 			token = 10;
 		}
 		else {  //treat whatever is in p[0] as a file name
 			pmap["mode"] = "file";
-			pmap["filename"] = p[0];
+			pmap["icc"] = p[0];
 			token = 1;
 		}
 

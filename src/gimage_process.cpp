@@ -5,6 +5,7 @@
 #include "fileutil.h"
 #include "myConfig.h"
 #include "elapsedtime.h"
+#include "CameraData.h"
 #include "cJSON.h"
 
 int getThreadCount(int threadcount) { 
@@ -127,6 +128,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 		result["threadcount"] = std::to_string(threadcount);
 
 		//tool-specific setup:
+		GIMAGE_ERROR ret;
 
 		std::string profilepath = filepath_normalize(myConfig::getConfig().getValueOrDefault("cms.profilepath",""));
 		
@@ -143,57 +145,88 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 		//tool-specific logic:
 		if (params["mode"] == "camera") {
+			std::string makemodel = dib.getInfoValue("Make");
+			makemodel.append(" ");
+			makemodel.append(dib.getInfoValue("Model"));
 
+			std::string dcrawpath;
+			std::string camconstpath;
+			std::string dcraw_primaries, primary_source;
+
+			if (dcraw_primaries.empty()) { //Look in dcraw.c and camconst.json
+				CameraData c;
+				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
+				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
+				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
+				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
+				params["icc"] = c.getItem(makemodel, "dcraw_matrix");
+				params["source"] = c.getItem(makemodel, "primary_source");
+				//((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
+			}
+			
+			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
+				std::string libraw_primaries = dib.getInfoValue("Libraw.CamXYZ");
+				std::vector<std::string> primaries = split(libraw_primaries, ",");
+				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
+					params["icc"] = string_format("%d,%d,%d,%d,%d,%d,%dfs,%d,%d",
+						int(atof(primaries[0].c_str()) * 10000),
+						int(atof(primaries[1].c_str()) * 10000),
+						int(atof(primaries[2].c_str()) * 10000),
+						int(atof(primaries[3].c_str()) * 10000),
+						int(atof(primaries[4].c_str()) * 10000),
+						int(atof(primaries[5].c_str()) * 10000),
+						int(atof(primaries[6].c_str()) * 10000),
+						int(atof(primaries[7].c_str()) * 10000),
+						int(atof(primaries[8].c_str()) * 10000));
+					params["source"] = "LibRaw";
+				}
+			}
 		}
 		else if (params["mode"] == "primaries") {
-			if (params["op"] == "convert") {
-				_mark();
-				if (dib.ApplyColorspace(params["primaries"], intent, bpc, threadcount) != GIMAGE_OK) {
-					result["error"] = "Error - ColorSpace convert failed.";
-				}
-				else params["treelabel"] = "colorspace:primaries,convert";
-					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,convert"),wxString(cp[0])));
-				result["duration"] = std::to_string(_duration());
-			}
-			else if (params["op"] == "assign") {
-				_mark();
-				if (dib.AssignColorspace(params["primaries"]) != GIMAGE_OK) {
-					result["error"] = "Error - ColorSpace assign failed.";
-				}
-				else params["treelabel"] = "colorspace:primaries,assign";
- 					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,assign"),wxString(cp[0])));
-				result["duration"] = std::to_string(_duration());
-			}
+			params["treelabel"] = "colorspace:primaries";
 		}
 		else if (params["mode"] == "built-in") {
-			if (params["op"] == "convert") {
-				_mark();
-				if (dib.ApplyColorspace(params["profilename"], intent, bpc, threadcount) != GIMAGE_OK) {
-					result["error"] = "Error - ColorSpace convert failed.";
-				}
-				else params["treelabel"] = string_format("colorspace:%s,convert",params["profilename"]);
-				result["duration"] = std::to_string(_duration());
-			}
-			else if (params["op"] == "assign") {
-				_mark();
-				if (dib.AssignColorspace(params["profilename"]) != GIMAGE_OK) {
-					result["error"] = "Error - ColorSpace assign failed.";
-				}
-				else params["treelabel"] = string_format("colorspace:%s,assign",params["profilename"]);
-				result["duration"] = std::to_string(_duration());
-			}
+			params["treelabel"] = "colorspace:" + params["icc"];
 		}
 		else if (params["mode"] == "file") {
-			if (file_exists(profilepath+params["filename"])) {
-
-
+			if (!file_exists(profilepath+params["icc"])) {
+				result["error"] = string_format("Error - file not found: %s",params["icc"]);
+				return result;
 			}
-			else result["error"] = string_format("Error - Profile not found: %s.",params["filename"]);
-
+			params["treelabel"] = "colorspace:file";
 		}
-		else result["error"] = string_format("Error - unrecognized mode: %s",params["mode"]);
+		else {
+			 result["error"] = string_format("Error - unrecognized mode: %s",params["mode"]);
+			 return result;
+		}
 
+		if (params["op"] == "convert") {
+			_mark();
+			if ((ret = dib.ApplyColorspace(params["icc"], intent, bpc, threadcount)) == GIMAGE_OK)
+			result["duration"] = std::to_string(_duration());
+			params["treelabel"] += std::string(",") + std::string("convert");
+		}
+		else if (params["op"] == "assign") {
+			_mark();
+			if ((ret = dib.AssignColorspace(params["icc"])) == GIMAGE_OK) 
+			result["duration"] = std::to_string(_duration());
+			params["treelabel"] += std::string(",") + std::string("assign");
+		}
 
+		switch (ret) {
+			case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
+				result["error"] = "ColorSpace apply: no input profile in image.";
+				break;
+			case GIMAGE_APPLYCOLORSPACE_BADINTENT_INPUT:
+				result["error"] = "ColorSpace apply: input profile doesn't support rendering intent.";
+				break;
+			case GIMAGE_APPLYCOLORSPACE_BADINTENT_OUTPUT:
+				result["error"] = "ColorSpace apply: output profile doesn't support rendering intent.";
+				break;
+			case GIMAGE_APPLYCOLORSPACE_BADTRANSFORM:
+				result["error"] = "ColorSpace apply: colorspace transform creation failed.";
+				break;
+		}
 
 	}
 	return result;
