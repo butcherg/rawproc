@@ -452,7 +452,8 @@ void PicProcessorBlackWhitePoint::reCalc()
 bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("black/white point..."));
-	bool r = true;
+	bool ret = true;
+	std::map<std::string,std::string> result;
 	dib = processdib;
 
 	//if (!global_processing_enabled) r= true;  //ToDo: get rid of global_processing_enabled
@@ -471,20 +472,21 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 	
 	if (params.find("error") != params.end()) {
 		wxMessageBox(params["error"]);
-		r = false; 
+		ret = false; 
 	}
 	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
 		wxMessageBox("Error - no mode");
-		r = false;
+		ret = false;
 	}
 	else { 
-		std::map<std::string,std::string> result = process_blackwhitepoint(*dib, params);
+		result = process_blackwhitepoint(*dib, params);
 		
 		if (result.find("error") != result.end()) {
 			wxMessageBox(params["error"]);
-			r = false;
+			ret = false;
 		}
 		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, result["treelabel"]);
 			m_display->SetModified(true);
 			//parm tool.all.log: Turns on logging for all tools.  Default=0
 			//parm tool.*.log: Turns on logging for the specified tool.  Default=0
@@ -502,7 +504,7 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 
 	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	return r;
+	return ret;
 }
 
 

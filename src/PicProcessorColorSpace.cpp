@@ -7,6 +7,8 @@
 #include "myConfig.h"
 #include "myEXIFDialog.h"
 #include "CameraData.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include <wx/stdpaths.h>
 #include "listview.xpm"
 #include "copy.xpm"
@@ -389,6 +391,54 @@ wxString PicProcessorColorSpace::getOpenFilePath()
 bool PicProcessorColorSpace::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("colorspace..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+	if (!pstr.empty())
+		params = parse_colorspace(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_colorspace(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(params["error"]);
+			ret = false;
+		}
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, result["treelabel"]);
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))
+					log(wxString::Format(_("tool=colorspace,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+
+}
+
+/* old one...
+bool PicProcessorColorSpace::processPicture(gImage *processdib) 
+{
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("colorspace..."));
 	bool result = true;
 	GIMAGE_ERROR ret;
 	
@@ -465,12 +515,12 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 						wxMessageBox(_("ColorSpace apply: output profile doesn't support rendering intent."));
 						result = false;
 						break;
-/*
-					case 3:
-					wxMessageBox(_("ColorSpace apply: output profile doesn't support rendering intent."));
-						result = false;
-						break;
-*/
+
+//					case 3:
+//					wxMessageBox(_("ColorSpace apply: output profile doesn't support rendering intent."));
+//						result = false;
+//						break;
+
 					case GIMAGE_APPLYCOLORSPACE_BADTRANSFORM:
 						wxMessageBox(_("ColorSpace apply: colorspace transform creation failed."));
 						result = false;
@@ -633,5 +683,5 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 	return result;
 }
 
-
+*/
 

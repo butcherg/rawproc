@@ -108,6 +108,8 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 		result["duration"] = std::to_string(_duration());
 		result["black"] = params["black"];
 		result["white"] = params["white"];
+		result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+		if (params["minwhite"] == "true") result["treelabel"] += ",minwhite";
 	}
 
 	return result;
@@ -180,23 +182,24 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 						int(atof(primaries[8].c_str()) * 10000));
 					params["source"] = "LibRaw";
 				}
+				result["treelabel"] = "colorspace:camera";
 			}
 		}
 		else if (params["mode"] == "primaries") {
-			params["treelabel"] = "colorspace:primaries";
+			result["treelabel"] = "colorspace:primaries";
 		}
 		else if (params["mode"] == "built-in") {
-			params["treelabel"] = "colorspace:" + params["icc"];
+			result["treelabel"] = "colorspace:" + params["icc"];
 		}
 		else if (params["mode"] == "file") {
 			if (!file_exists(profilepath+params["icc"])) {
-				result["error"] = string_format("Error - file not found: %s",params["icc"]);
+				result["error"] = string_format("Error - file not found: %s",params["icc"].c_str());
 				return result;
 			}
-			params["treelabel"] = "colorspace:file";
+			result["treelabel"] = "colorspace:file";
 		}
 		else {
-			 result["error"] = string_format("Error - unrecognized mode: %s",params["mode"]);
+			 result["error"] = string_format("Error - unrecognized mode: %s",params["mode"].c_str());
 			 return result;
 		}
 
@@ -204,13 +207,13 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 			_mark();
 			if ((ret = dib.ApplyColorspace(params["icc"], intent, bpc, threadcount)) == GIMAGE_OK)
 			result["duration"] = std::to_string(_duration());
-			params["treelabel"] += std::string(",") + std::string("convert");
+			result["treelabel"] += std::string(",") + std::string("convert");
 		}
 		else if (params["op"] == "assign") {
 			_mark();
 			if ((ret = dib.AssignColorspace(params["icc"])) == GIMAGE_OK) 
 			result["duration"] = std::to_string(_duration());
-			params["treelabel"] += std::string(",") + std::string("assign");
+			result["treelabel"] += std::string(",") + std::string("assign");
 		}
 
 		switch (ret) {
