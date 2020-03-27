@@ -2,6 +2,7 @@
 #include "gimage_process.h"
 #include "gimage_parse.h" //for paramexists()
 #include "gimage/strutil.h"
+#include "fileutil.h"
 #include "myConfig.h"
 #include "elapsedtime.h"
 #include "cJSON.h"
@@ -126,6 +127,9 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 		result["threadcount"] = std::to_string(threadcount);
 
 		//tool-specific setup:
+
+		std::string profilepath = filepath_normalize(myConfig::getConfig().getValueOrDefault("cms.profilepath",""));
+		
 	
 		cmsUInt32Number intent = INTENT_PERCEPTUAL;
 		if (params["rendering_intent"] == "perceptual") intent = INTENT_PERCEPTUAL;
@@ -168,7 +172,6 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 					result["error"] = "Error - ColorSpace convert failed.";
 				}
 				else params["treelabel"] = string_format("colorspace:%s,convert",params["profilename"]);
-					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,convert"),wxString(cp[0])));
 				result["duration"] = std::to_string(_duration());
 			}
 			else if (params["op"] == "assign") {
@@ -177,11 +180,15 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 					result["error"] = "Error - ColorSpace assign failed.";
 				}
 				else params["treelabel"] = string_format("colorspace:%s,assign",params["profilename"]);
- 					//m_tree->SetItemText(id, wxString::Format(_("colorspace:%s,assign"),wxString(cp[0])));
 				result["duration"] = std::to_string(_duration());
 			}
 		}
 		else if (params["mode"] == "file") {
+			if (file_exists(profilepath+params["filename"])) {
+
+
+			}
+			else result["error"] = string_format("Error - Profile not found: %s.",params["filename"]);
 
 		}
 		else result["error"] = string_format("Error - unrecognized mode: %s",params["mode"]);
