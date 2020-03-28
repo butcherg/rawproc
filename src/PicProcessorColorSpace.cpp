@@ -411,11 +411,14 @@ bool PicProcessorColorSpace::processPicture(gImage *processdib)
 		result = process_colorspace(*dib, params);
 		
 		if (result.find("error") != result.end()) {
-			wxMessageBox(params["error"]);
+			wxMessageBox(wxString(result["error"]));
 			ret = false;
 		}
 		else {
-			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, result["treelabel"]);
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			if (params["mode"] == "camera") ((ColorspacePanel *) toolpanel)->setPrimaries(wxString(result["dcraw_primaries"]));
+			//if (paramexists(result,"dcraw_primaries")) ((ColorspacePanel *) toolpanel)->setPrimaries(result["dcraw_primaries"]);
+			if (paramexists(result,"dcraw_source")) ((ColorspacePanel *) toolpanel)->setSource(wxString(result["dcraw_source"]));
 			m_display->SetModified(true);
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.colorspace.log","0") == "1"))

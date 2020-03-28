@@ -131,6 +131,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 		//tool-specific setup:
 		GIMAGE_ERROR ret;
+		std::string icc;
 
 		std::string profilepath = filepath_normalize(myConfig::getConfig().getValueOrDefault("cms.profilepath",""));
 		
@@ -162,15 +163,15 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				params["icc"] = c.getItem(makemodel, "dcraw_matrix");
-				params["source"] = c.getItem(makemodel, "primary_source");
-				//((ColorspacePanel *) toolpanel)->setCamdatStatus(wxString(c.getStatus()));
+				result["dcraw_source"] = c.getItem(makemodel, "primary_source");
+				result["dcraw_primaries"] = result["icc"];
 			}
 			
 			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
 				std::string libraw_primaries = dib.getInfoValue("Libraw.CamXYZ");
 				std::vector<std::string> primaries = split(libraw_primaries, ",");
 				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
-					params["icc"] = string_format("%d,%d,%d,%d,%d,%d,%dfs,%d,%d",
+					params["icc"] = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
 						int(atof(primaries[0].c_str()) * 10000),
 						int(atof(primaries[1].c_str()) * 10000),
 						int(atof(primaries[2].c_str()) * 10000),
@@ -180,21 +181,37 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 						int(atof(primaries[6].c_str()) * 10000),
 						int(atof(primaries[7].c_str()) * 10000),
 						int(atof(primaries[8].c_str()) * 10000));
-					params["source"] = "LibRaw";
+					result["dcraw_source"] = "LibRaw";
+					result["dcraw_primaries"] = params["icc"];
 				}
+				
+			}
+			if (!params["icc"].empty()) {
 				result["treelabel"] = "colorspace:camera";
+				icc = params["icc"];
+			}
+			else {
+				result["error"] = "Error - camera primaries not found.";
+				return result;
 			}
 		}
 		else if (params["mode"] == "primaries") {
 			result["treelabel"] = "colorspace:primaries";
+			icc = params["icc"];
 		}
 		else if (params["mode"] == "built-in") {
 			result["treelabel"] = "colorspace:" + params["icc"];
+			icc = params["icc"];
 		}
 		else if (params["mode"] == "file") {
-			if (!file_exists(profilepath+params["icc"])) {
-				result["error"] = string_format("Error - file not found: %s",params["icc"].c_str());
-				return result;
+			if (params["icc"] != "(none)") {
+				if (!file_exists(profilepath+params["icc"])) {
+					result["error"] = string_format("Error - file not found: %s",params["icc"].c_str());
+					return result;
+				}
+				else {
+					icc = profilepath+params["icc"];
+				}
 			}
 			result["treelabel"] = "colorspace:file";
 		}
@@ -205,13 +222,13 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 		if (params["op"] == "convert") {
 			_mark();
-			if ((ret = dib.ApplyColorspace(params["icc"], intent, bpc, threadcount)) == GIMAGE_OK)
+			if ((ret = dib.ApplyColorspace(icc, intent, bpc, threadcount)) == GIMAGE_OK)
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] += std::string(",") + std::string("convert");
 		}
 		else if (params["op"] == "assign") {
 			_mark();
-			if ((ret = dib.AssignColorspace(params["icc"])) == GIMAGE_OK) 
+			if ((ret = dib.AssignColorspace(icc)) == GIMAGE_OK) 
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] += std::string(",") + std::string("assign");
 		}

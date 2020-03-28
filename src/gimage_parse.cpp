@@ -159,7 +159,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 		else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
 			pmap["mode"] = "primaries";
 			pmap["icc"] = 
-				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]);
+				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[1].c_str(),p[2].c_str(),p[3].c_str(),p[4].c_str(),p[5].c_str(),p[6].c_str(),p[7].c_str(),p[8].c_str(),p[9].c_str());
 			token = 10;
 		}
 		else {  //treat whatever is in p[0] as a file name
@@ -182,7 +182,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 				pmap["bpc"] = true;
 			}				
 			else {
-				pmap["error"] = string_format("Error - unrecognized positional parameter: %s",p[1]);
+				pmap["error"] = string_format("Error - unrecognized positional parameter: %s",p[i].c_str());
 				return pmap;
 			}
 		}

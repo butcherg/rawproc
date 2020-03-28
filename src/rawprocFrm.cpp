@@ -1973,13 +1973,13 @@ void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 
 void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 {
-	wxString cmd = "(none),-,-";
+	wxString cmd = "(none)";
 
 	if (commandtree->IsEmpty()) return;
 
 	if (PicProcessor::getSelectedPicProcessor(commandtree)->getProcessedPic().getProfile() == NULL) {
 		wxMessageBox(_("Note: Image does not have a source profile, only 'assign' is valid"));
-		cmd = "(none),assign,-";
+		cmd = "(none),assign";
 	}
 
 	SetStatusText("");
