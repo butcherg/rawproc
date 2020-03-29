@@ -275,7 +275,7 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 			_mark();
 			dib.ApplyRatioCrop(x, y, w, h, threadcount);
 			result["duration"] = std::to_string(_duration());
-			result["treelabel"] += std::string(",") + std::string("crop");
+			result["treelabel"] = "crop";
 			
 		}
 		

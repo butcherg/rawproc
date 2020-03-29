@@ -241,10 +241,10 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 			return pmap;
 		}
 		pmap["mode"] = "default";
-		pmap["x"] = atof(p[0].c_str());
-		pmap["y"] = atof(p[1].c_str());
-		pmap["w"] = atof(p[2].c_str());
-		pmap["h"] = atof(p[3].c_str());
+		pmap["x"] = p[0];
+		pmap["y"] = p[1];
+		pmap["w"] = p[2];
+		pmap["h"] = p[3];
 		
 	}
 	return pmap;

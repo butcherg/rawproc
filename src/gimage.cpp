@@ -1807,10 +1807,20 @@ void gImage::ImageBounds(unsigned *x1, unsigned *x2, unsigned *y1, unsigned *y2,
 void gImage::ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount)
 {
 	unsigned ux1, uy1, ux2, uy2;
-	if (x1 < 1.0)  ux1 = (unsigned) (x1 * w); else ux1 = (unsigned) x1;
-	if (y1 < 1.0)  uy1 = (unsigned) (y1 * h); else uy1 = (unsigned) y1;
-	if (x2 < 1.0)  ux2 = (unsigned) (x2 * w); else ux2 = (unsigned) x2;
-	if (y2 < 1.0)  uy2 = (unsigned) (y2 * h); else uy2 = (unsigned) y2;
+	
+	if (x2 <= 1.0 & y2 <= 1.0) {
+		ux1 = (unsigned) (x1 * w);
+		uy1 = (unsigned) (y1 * h);
+		ux2 = (unsigned) (x2 * w);
+		uy2 = (unsigned) (y2 * h);
+	}
+	else {
+		ux1 = (unsigned) x1;
+		uy1 = (unsigned) y1;
+		ux2 = (unsigned) x2;
+		uy2 = (unsigned) y2;
+	}
+
 	ApplyCrop(ux1, uy1, ux2, uy2, threadcount);
 }
 

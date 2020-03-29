@@ -3,6 +3,8 @@
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "myRowSizer.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "util.h"
 #include "copy.xpm"
 #include "paste.xpm"
@@ -663,6 +665,55 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 
 bool PicProcessorCrop::processPicture(gImage *processdib) 
 {
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("crop..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_crop(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_crop(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.crop.log","0") == "1"))
+					log(wxString::Format(_("tool=crop,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+
+/*
+bool PicProcessorCrop::processPicture(gImage *processdib) 
+{
 	((wxFrame*) m_display->GetParent())->SetStatusText("crop...");
 	wxArrayString p = split(getParams(),",");
 	float l = atof(p[0]);
@@ -706,6 +757,6 @@ bool PicProcessorCrop::processPicture(gImage *processdib)
 	
 	return result;
 }
-
+*/
 
 
