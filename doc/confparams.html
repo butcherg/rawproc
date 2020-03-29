@@ -1,16 +1,20 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
+<li><b>app.about.lensdatabasecheck</b>:  1|0, if set, the lensfun database version will be checked against the server. Default: 1</li>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
 <li><b>app.dock.width</b>:  Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300</li>
 <li><b>app.floatctrl.backgroundcolor</b>:  Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192</li>
+<li><b>app.histogram.height</b>:  Specifies height of histogram at startup. Change requires restarting rawproc.  Default=150</li>
 <li><b>app.incrementaldisplay</b>:  0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;</li>
 <li><b>app.integerctrl.backgroundcolor</b>:  Specifies the integer control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,192,255</li>
 <li><b>app.parameters.fontcolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify font color to be used in the parameter pane.  Default=0</li>
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
 <li><b>app.parameters.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw lines in the parameter pane. Some tools override this, look for "linecolor" in the Properties filter. Default=0</li>
+<li><b>app.parampane.height</b>:  Specifies height of parameter pane at startup. Change requires restarting rawproc. However, parameter pane will grow vertically if the rawproc application window is resized.  Default=350</li>
 <li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li>
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
+<li><b>app.toolchain.height</b>:  Specifies height of tool chain at startup. Change requires restarting rawproc.  Default=200</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
 <li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1</li>
 <li><a name="batch"><b>batch.imgcommand</b>:  path/executable for the img command line raw processor. Default: img (somewhere in $PATH)</li>
@@ -37,6 +41,8 @@
 <li><b>display.outofbound.white=r,g,b</b>:  RGB color to use for out-of-upper-bound pixels.  Default: 0,255,255 (magenta)</li>
 <li><b>display.outofbound</b>:  Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0</li>
 <li><b>display.panelborder</b>:  Border around the display image.  Default: 5</li>
+<li><b>display.render.log</b>:  0|1, turn on/off logging of the duration of the display render operation. Default=0</li>
+<li><b>display.snapshot</b>:  1|0, enables|disables the 'n' key and snapshooting of the display.  Default: 0</li>
 <li><b>display.status</b>:  Write display... in status when setting the display image, 0|1.  Default=1</li>
 <li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
@@ -62,7 +68,7 @@
 <li><b>input.png.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)</li>
 <li><b>input.raw.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.raw.default.prompt</b>:  1|0, enable/disable prompt to apply input.raw.default.  Default=1 </li>
-<li><b>input.raw.default</b>:  Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none).  Note: If a raw file is opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands."</li>
+<li><b>input.raw.default</b>:  Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none). <ul><li>Camera-specific default processing can be specified by appending '.Make_Model', or just '.Make' to the property name, where make and model identify the camera as these values appear in the raw metadata.  Put an underscore between the make and model, and substitute underscore for any spaces that occur in either value, e.g., Nikon_Z_6.</li><li>If a raw file was originally opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands.</li></ul>"</li>
 <li><b>input.raw.libraw.*</b>:  Instead of, or in addition to input.raw.parameters, you can enter any libraw parameter individually, as in input.raw.libraw.bright=2.0.  Note that if you duplicate a parameter here and in input.raw.parameters, the latter will be what's used in processing.</li>
 <li><b>input.raw.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the raw image reader.  Default=(none)</li>
 <li><b>input.tiff.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
@@ -109,7 +115,7 @@
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
 <li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
 <li><a name="tool.gray"><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
-<li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.  The path specified should be the one that contains the 'version_x' folder that contains the lensfun XML files.</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: none.</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>
@@ -121,6 +127,8 @@
 <li><a name="tool.rotate"><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
 <li><a name="tool.saturate"><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
+<li><a name="tool.tone"><b>tool.tone.curve.arraysize - number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default</b>:  256</li>
+<li><a name="tool.tone"><b>tool.tone.curve.type - horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default</b>:  vertical.</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.A</b>:  Default value for filmic tone operator A coefficient.  Default=6.2</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.B</b>:  Default value for filmic tone operator B coefficient.  Default=0.5</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.C</b>:  Default value for filmic tone operator C coefficient.  Default=1.7</li>
