@@ -29,7 +29,7 @@ void paramprint(std::map<std::string,std::string> params)
 	if (params.empty()) return;
 	
 	for (std::map<std::string,std::string>::iterator it=params.begin(); it!=params.end(); ++it) {
-		printf("%s: %s\n",it->first.c_str(), it->second.c_str()); 
+		printf("\t%s: %s\n",it->first.c_str(), it->second.c_str()); 
 		fflush(stdout);
 	}
 }
@@ -78,12 +78,25 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 					pmap["channel"] = p[0];
 				}
 				else { 
+					if (!isFloat(p[1])) {
+						pmap["error"] = string_format("blackwhitepoint:ParseError - invalid float: %s",p[1].c_str());
+						return pmap;
+					}
 					pmap["mode"] = "values";
 					pmap["black"] = p[1];
-					if (psize >= 3) 
+					if (psize >= 3) {
+						if (!isFloat(p[2])) {
+							pmap["error"] = string_format("blackwhitepoint:ParseError - invalid float: %s",p[2].c_str());
+							return pmap;
+						}
 						pmap["white"] = p[2];
-					else
-						pmap["white"] = "255";
+					}
+					else {
+						if (atof(p[1].c_str()) < 1.0)
+							pmap["white"] = "1.0";
+						else
+							pmap["white"] = "255";
+					}
 				}
 			}
 			else pmap["mode"] = "auto";
@@ -101,15 +114,27 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 				pmap["black"] = p[1];
 				pmap["white"] = p[2];
 			}
+			else {
+				pmap["error"] = "blackwhitepoint:ParseError - norm requires two values.";
+				return pmap;
+			}
 		}
 		else if (psize == 2) {  //just two values
+			if (!isFloat(p[0])) {
+				pmap["error"] = string_format("blackwhitepoint:ParseError - invalid float: %s",p[0].c_str());
+				return pmap;
+			}
+			if (!isFloat(p[1])) {
+				pmap["error"] = string_format("blackwhitepoint:ParseError - invalid float: %s",p[1].c_str());
+				return pmap;
+			}
 			pmap["mode"] = "values";
 			pmap["channel"] = "rgb";
 			pmap["black"] = p[0];
 			pmap["white"] = p[1];
 		}
 		else {
-			pmap["error"] = "Error - unrecognized positional parameter string";
+			pmap["error"] = string_format("blackwhitepoint:ParseError - unrecognized positional parameter string: %s",p[0].c_str());
 			return pmap;
 		}
 	}
@@ -150,7 +175,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 			token = 1;
 		}
 
-		else if (p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera" | p[0] == "camera") {
+		else if (p[0] == "srgb" | p[0] == "wide" | p[0] == "adobe" | p[0] == "prophoto" | p[0] == "identity") {
 			pmap["mode"] = "built-in";
 			pmap["icc"] = p[0];
 			token = 1;
@@ -182,11 +207,45 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 				pmap["bpc"] = true;
 			}				
 			else {
-				pmap["error"] = string_format("Error - unrecognized positional parameter: %s",p[i].c_str());
+				pmap["error"] = string_format("colorspace:ParseError - unrecognized positional parameter: %s",p[i].c_str());
 				return pmap;
 			}
 		}
 
+	}
+	return pmap;
+}
+
+//crop
+//:<x>,<y>,<w>,<h> - extract subimage at x,y,w,h bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
+std::map<std::string,std::string> parse_crop(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize < 4) {
+			pmap["error"] = string_format("Error - not enough crop parameters.");
+			return pmap;
+		}
+		pmap["mode"] = "default";
+		pmap["x"] = atof(p[0].c_str());
+		pmap["y"] = atof(p[1].c_str());
+		pmap["w"] = atof(p[2].c_str());
+		pmap["h"] = atof(p[3].c_str());
+		
 	}
 	return pmap;
 }

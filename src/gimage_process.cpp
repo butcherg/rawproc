@@ -24,7 +24,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "Error - no mode";
+		result["error"] = "blackwhitepoint:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
@@ -122,7 +122,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "Error - no mode";
+		result["error"] = "colorspace:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
@@ -191,7 +191,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				icc = params["icc"];
 			}
 			else {
-				result["error"] = "Error - camera primaries not found.";
+				result["error"] = "colorspace:ProcessError - camera primaries not found.";
 				return result;
 			}
 		}
@@ -206,7 +206,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 		else if (params["mode"] == "file") {
 			if (params["icc"] != "(none)") {
 				if (!file_exists(profilepath+params["icc"])) {
-					result["error"] = string_format("Error - file not found: %s",params["icc"].c_str());
+					result["error"] = string_format("colorspace:ProcessError - file not found: %s",params["icc"].c_str());
 					return result;
 				}
 				else {
@@ -216,39 +216,71 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 			result["treelabel"] = "colorspace:file";
 		}
 		else {
-			 result["error"] = string_format("Error - unrecognized mode: %s",params["mode"].c_str());
+			 result["error"] = string_format("colorspace:ProcessError - unrecognized mode: %s",params["mode"].c_str());
 			 return result;
 		}
 
+		_mark();
 		if (params["op"] == "convert") {
-			_mark();
-			if ((ret = dib.ApplyColorspace(icc, intent, bpc, threadcount)) == GIMAGE_OK)
-			result["duration"] = std::to_string(_duration());
-			result["treelabel"] += std::string(",") + std::string("convert");
+			ret = dib.ApplyColorspace(icc, intent, bpc, threadcount);
 		}
 		else if (params["op"] == "assign") {
-			_mark();
-			if ((ret = dib.AssignColorspace(icc)) == GIMAGE_OK) 
-			result["duration"] = std::to_string(_duration());
-			result["treelabel"] += std::string(",") + std::string("assign");
+			ret = dib.AssignColorspace(icc);
 		}
 
 		switch (ret) {
+			case GIMAGE_OK:
+				result["duration"] = std::to_string(_duration());
+				result["treelabel"] += std::string(",") + params["op"];
+				break;
 			case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
-				result["error"] = "ColorSpace apply: no input profile in image.";
+				result["error"] = "colorspace:ProcessError - no input profile in image.";
 				break;
 			case GIMAGE_APPLYCOLORSPACE_BADINTENT_INPUT:
-				result["error"] = "ColorSpace apply: input profile doesn't support rendering intent.";
+				result["error"] = "colorspace:ProcessError - input profile doesn't support rendering intent.";
 				break;
 			case GIMAGE_APPLYCOLORSPACE_BADINTENT_OUTPUT:
-				result["error"] = "ColorSpace apply: output profile doesn't support rendering intent.";
+				result["error"] = "colorspace:ProcessError - output profile doesn't support rendering intent.";
 				break;
 			case GIMAGE_APPLYCOLORSPACE_BADTRANSFORM:
-				result["error"] = "ColorSpace apply: colorspace transform creation failed.";
+				result["error"] = "colorspace:ProcessError - colorspace transform creation failed.";
 				break;
 		}
 
 	}
 	return result;
 }
+
+std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "Error - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		//tool-specific setup:
+		float x = atof(params["x"].c_str());
+		float y = atof(params["y"].c_str());
+		float w = atof(params["w"].c_str());
+		float h = atof(params["h"].c_str());
+		
+		//tool-specific logic:
+		if (params["mode"] == "default") {
+			_mark();
+			dib.ApplyRatioCrop(x, y, w, h, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] += std::string(",") + std::string("crop");
+			
+		}
+		
+	}
+	return result;
+}
+
 

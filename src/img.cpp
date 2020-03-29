@@ -582,14 +582,12 @@ for (int f=0; f<files.size(); f++)
 		}
 		else {
 			std::string cmdstr = do_cmd(dib, commands[i], files[f].variant);
-			if (cmdstr != std::string()) {
-				commandstring += cmdstr;
-			}
-			else {
-				printf("Error: unrecognized command.\n"); 
-				fflush(stdout);
+			fflush(stdout);
+			if (cmdstr.find("Error")  != std::string::npos) {
+				printf("%s\n",cmdstr.c_str());
 				exit(1);
 			}
+			else commandstring += cmdstr;
 		}
 	}
 

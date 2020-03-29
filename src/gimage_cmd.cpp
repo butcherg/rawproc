@@ -40,8 +40,77 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		strncpy(c, commandstr.c_str(), 255);
 		char* cmd = strtok(c,":");
 		
+		if (strcmp(cmd,"blackwhitepoint") == 0) {   
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_blackwhitepoint(std::string(pstr));
+			else
+				params = parse_blackwhitepoint("rgb,auto");
+			
+			//error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];    //ToDo: return an error message...
+			}
+
+			//processing
+			std::map<std::string,std::string> result =  process_blackwhitepoint(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf("blackwhitepoint:%s,%s,%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				params["black"].c_str(),
+				params["white"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
+		}
+		
 		//img <li>colorspace:profilefile[,convert|assign][,renderingintent][,bpc]</li>
-		if (strcmp(cmd,"colorspace") == 0) { 
+		if (strcmp(cmd,"colorspace") == 0) {   
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_colorspace(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+
+			//processing
+			std::map<std::string,std::string> result =  process_colorspace(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf("colorspace:%s,%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				params["op"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
+		}
+
+/*
+		//img <li>colorspace:profilefile[,convert|assign][,renderingintent][,bpc]</li>
+		else if (strcmp(cmd,"colorspace") == 0) { 
 			char *profstr = strtok(NULL, ",");
 			char *opstr = strtok(NULL, ",");
 			char *istr = strtok(NULL, ",");
@@ -173,6 +242,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
 			commandstring += std::string(cs);
 		}
+*/
 
 		//img <li>tone:operator,[param...]</li>
 		else if (strcmp(cmd,"tone") == 0) {
@@ -450,156 +520,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			dib.setInfo(std::string(name),std::string(value));
 		}
 		
-		else if (strcmp(cmd,"blackwhitepoint") == 0) {   
-			//parsing:
-			std::map<std::string,std::string> params;
-			char * pstr = strtok(NULL, " ");
-			if (pstr)
-				params = parse_blackwhitepoint(std::string(pstr));
-			else
-				params = parse_blackwhitepoint("rgb,auto");
-			
-			//error-catching:
-			if (params.find("error") != params.end()) {
-				if (print) printf("blackwhitepoint: %s\n",params["error"].c_str());
-				return std::string();  //ToDo: return an error message...
-			}
-
-			//processing
-			std::map<std::string,std::string> result =  process_blackwhitepoint(dib, params);
-
-			if (print) printf("blackwhitepoint(%s): %s,%s,%s (%s threads, %ssec)\n",
-				params["mode"].c_str(),
-				params["channel"].c_str(),
-				result["black"].c_str(),
-				result["white"].c_str(),
-				result["threadcount"].c_str(),
-				result["duration"].c_str()
-			); 
-			fflush(stdout);
-
-			//commandstring += buildcommand(cmd, params);
-			commandstring += std::string(cmd) + ":" + pstr + " ";
-		}
-
-		//img <li>blackwhitepoint: [auto] | [rgb|red|green|blue,[data[,minwhite]]|[0-127,128-255] | [camera]  Default: auto. <ul><li>If the parameters start with 'auto', a 0-255 black and white point are calculated from the histogram.</li><li>If the parameters start with a channel, they are followed by either a black and white bound specified in the range 0-255, or 'data', which will use the mins and maxes for the specified channel, or total rgb.  'minwhite' can follow 'data', which will instead for white use the minimum of the channel maxiumums, useful for highlight clipping of saturated values.</li></ul></li>
-		else if (strcmp(cmd,"blackwhitepoint-old") == 0) {   
-			char *c, *b, *w, *m;
-			GIMAGE_CHANNEL channel = CHANNEL_RGB;
-			std::string chan;
-			double blk=0.0, wht=255.0;
-			double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.001").c_str());
-			double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.001").c_str());
-			int blklimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blacklimit","128").c_str());
-			int whtlimit = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitelimit","128").c_str()); 
-			long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 		
-			long hmax = 0;
-			int maxpos;
-			c = strtok(NULL,", ");
-			if (c) { //first token is a channel, or min 
-				chan = std::string(c);
-				if (chan == "rgb" | chan == "red" |chan == "green" | chan == "blue" | chan == "min") {
-					b = strtok(NULL,", ");
-					if (b == NULL && chan == "rgb") { //blackwhitepoint:rgb, do auto on all three channels
-						std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan);	
-						blk = bwpts[0];
-						wht = bwpts[1];
-						commandstring += std::string(cmd) + ":rgb ";
-					}
-					else {
-						w = strtok(NULL,", ");
-						if (std::string(b) == "data") {
-							std::map<std::string,float> s = dib.StatsMap();
-							if (chan == "rgb") {
-								blk = std::min(std::min(s["rmin"],s["gmin"]),s["bmin"]);
-								wht = std::max(std::max(s["rmax"],s["gmax"]),s["bmax"]);
-								//m = strtok(NULL,", ");
-								if (w) {
-									if (std::string(w) == "minwhite") {
-										wht = std::min(std::min(s["rmax"],s["gmax"]),s["bmax"]);
-										commandstring += std::string(cmd) + ":rgb,data,minwhite ";
-									}
-									else commandstring += std::string(cmd) + ":rgb,data ";
-								}
-								else commandstring += std::string(cmd) + ":rgb,data ";
-							}
-							else if (chan == "red") {
-								blk = s["rmin"];
-								wht = s["rmax"];
-								commandstring += std::string(cmd) + ":red,data ";
-							}
-							else if (chan == "green") {
-								blk = s["gmin"];
-								wht = s["gmax"];
-								commandstring += std::string(cmd) + ":green,data ";
-							}
-							else if (chan == "blue") {
-								blk = s["bmin"];
-								wht = s["bmax"];
-								commandstring += std::string(cmd) + ":blue,data ";
-							}
-						}
-						else {
-							wht = 255; blk = 0;
-							if (!b) { //no black/white, compute using channel:
-								std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan);	
-								blk = bwpts[0];
-								wht = bwpts[1];
-							}
-							else {
-								blk = atof(b);
-								wht = atof(w);
-							}
-							char cs[256];
-							sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
-							commandstring += std::string(cs);
-						}
-					}
-				}
-				else if (chan == "camera") {
-					int librawblk = atoi(dib.getInfoValue("Libraw.Black").c_str());
-					blk = librawblk / 65536.0; 
-					int librawwht = atoi(dib.getInfoValue("Libraw.Maximum").c_str());
-					wht = librawwht / 65536.0; 
-					commandstring += std::string(cmd) + ":camera ";
-				}
-				else { //no channel, just black and white:
-					b = c;
-					w = strtok(NULL,", ");
-					if (w) wht = atof(w);
-					if (b) blk = atof(b);
-					char cs[256];
-					sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
-					commandstring += std::string(cs);
-				}
-			}
-			else { //no tokens, do auto rgb:
-				chan = "rgb";
-				std::vector<double> bwpts = dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial);
-				blk = bwpts[0];
-				wht = bwpts[1];
-			}
-			
-			if (chan == "rgb")   channel = CHANNEL_RGB;
-			if (chan == "red")   channel = CHANNEL_RED;
-			if (chan == "green") channel = CHANNEL_GREEN;
-			if (chan == "blue")  channel = CHANNEL_BLUE;
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("blackwhitepoint: %s,%0.2f,%0.2f (%d threads)... ",chan.c_str(),blk,wht,threadcount); fflush(stdout);
-
-			_mark();
-			dib.ApplyToneLine(blk, wht, channel, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			//char cs[256];
-			//sprintf(cs, "%s:%s,%0.0f,%0.0f ",cmd, chan.c_str(), blk, wht);
-			//commandstring += std::string(cs);
-		}
 
 		//img <li>contrast:[-100 - 100] default: 0 (no-contrast)</li>
 		else if (strcmp(cmd,"contrast") == 0) {  
