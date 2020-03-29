@@ -170,6 +170,7 @@ sudo make install
 If you're building from source in either Linux or MSYS2, you'll also need to build and manually install your configuration and help files.  In the build directory:
 
 <pre>
+make docpages
 make doc
 make conf
 sudo cp src/rawprocdoc.zip /usr/local/bin/.
