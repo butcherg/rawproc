@@ -74,7 +74,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			//commandstring += buildcommand(cmd, params);
 			commandstring += std::string(cmd) + ":" + pstr + " ";
 		}
-		
+
 		//img <li>colorspace:profilefile[,convert|assign][,renderingintent][,bpc]</li>
 		if (strcmp(cmd,"colorspace") == 0) {   
 			//parsing:
@@ -108,141 +108,43 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cmd) + ":" + pstr + " ";
 		}
 
-/*
-		//img <li>colorspace:profilefile[,convert|assign][,renderingintent][,bpc]</li>
-		else if (strcmp(cmd,"colorspace") == 0) { 
-			char *profstr = strtok(NULL, ",");
-			char *opstr = strtok(NULL, ",");
-			char *istr = strtok(NULL, ",");
-			char *bpstr = strtok(NULL, " ");
+		//img <li>crop:x,y,w,y  no defaults</li>
+		if (strcmp(cmd,"crop") == 0) {   
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_crop(std::string(pstr));
 			
-			std::string profile;
-			std::string profilepath =  gImage::getProfilePath(); //myConfig::getConfig().getValueOrDefault("cms.profilepath","").c_str();
-
-			if (profstr == NULL) {
-				if (print) printf("colorspace: no profile.\n");
-				return std::string();
-			}
-			else profile = std::string(profstr);
-			
-			std::string operation = "convert";
-			if (opstr) operation = std::string(opstr);
-			
-			cmsUInt32Number intent = INTENT_RELATIVE_COLORIMETRIC;
-			if (istr) {
-				std::string intentstr = std::string(istr);
-				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
-				if (intentstr == "saturation") intent = INTENT_SATURATION;
-				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
-				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
-			}
-			
-			bool bp = false;
-			std::string bpcomp;
-			if (bpstr != NULL) bpcomp = std::string(bpstr);
-			if (bpcomp == "bpc") bp = true;
-			
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-			char cs[256];
-
-			if (profile == "camera") {
-				std::string dcrawfile = "";
-				if (myConfig::getConfig().exists("tool.colorspace.dcrawpath")) {
-					dcrawfile = myConfig::getConfig().getValue("tool.colorspace.dcrawpath");
-					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
-				}
-
-				if (dcrawfile == "") {
-					dcrawfile = getExeDir("dcraw.c");
-					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
-				}
-
-				if (dcrawfile == "") {
-					dcrawfile = getAppConfigDir("dcraw.c");
-					if (access(dcrawfile.c_str(), 0 ) != 0) dcrawfile == "";
-				}
-
-				if (dcrawfile == "") {
-					if (print) printf("Error: dcraw.c not found in either the tool.colorspace.dcrawpath, the executable's directory, or the app config directory.\n");
-					return std::string();
-				}
-
-				std::string makemodel;
-				if (dib.getInfoValue("Make") != "" & dib.getInfoValue("Model") != "") {
-					makemodel = dib.getInfoValue("Make");
-					makemodel.append(" ");
-					makemodel.append(dib.getInfoValue("Model"));
-				}
-				else {
-					if (print) printf("Error: camera make and/or model not found.\n");
-					return std::string();
-				}
-
-				std::string dcrawpath;
-				std::string camconstpath;
-				std::string cam;
-
-				CameraData c;
-				dcrawpath = c.findFile("dcraw.c","tool.colorspace.dcrawpath");
-				camconstpath = c.findFile("camconst.json","tool.colorspace.camconstpath");
-				if (file_exists(dcrawpath)) c.parseDcraw(dcrawpath);
-				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
-				cam = c.getItem(makemodel, "dcraw_matrix");
-
-				if (cam.empty()) { //if not found in dcraw.c or camconst.json, look in the LibRaw metadata:
-					std::string libraw_primaries = dib.getInfoValue("Libraw.CamXYZ");
-					std::vector<std::string> primaries = split(libraw_primaries, ",");
-					if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
-						cam = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
-							int(atof(primaries[0].c_str()) * 10000),
-							int(atof(primaries[1].c_str()) * 10000),
-							int(atof(primaries[2].c_str()) * 10000),
-							int(atof(primaries[3].c_str()) * 10000),
-							int(atof(primaries[4].c_str()) * 10000),
-							int(atof(primaries[5].c_str()) * 10000),
-							int(atof(primaries[6].c_str()) * 10000),
-							int(atof(primaries[7].c_str()) * 10000),
-							int(atof(primaries[8].c_str()) * 10000));
-					}
-				}
-
-				if (!cam.empty()) {
-					if (print) printf("colorspace: %s, %s (%s) (%d threads)... ",profile.c_str(),opstr,makemodel.c_str(),threadcount); fflush(stdout);
-					_mark();
-					if (operation == "convert") {
-						if (dib.ApplyColorspace(cam, intent, bp, threadcount) != GIMAGE_OK) if (print) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
-					}
-					else if (operation == "assign") {
-						if (dib.AssignColorspace(cam)!= GIMAGE_OK) if (print) printf("Error: %s\n", dib.getLastErrorMessage().c_str());
-					} 
-					else if (print) printf("Error: unrecognized operator %s ", operation.c_str());
-					sprintf(cs, "%s:%s,%s ",cmd,profile.c_str(),opstr);
-				}
-			}
-			else {
-				if (print) printf("colorspace: %s, %s, %s, %s (%d threads)... ",profile.c_str(),opstr,istr,bpstr,threadcount); fflush(stdout);
-				_mark();
-				if (operation == "convert") {
-					if (dib.ApplyColorspace(profilepath+profile, intent, bp, threadcount) != GIMAGE_OK) if (print) printf("Error: %s (%s)\n", dib.getLastErrorMessage().c_str(), profilepath.append(profile).c_str());
-					sprintf(cs, "%s:%s,%s,%s,%s ",cmd,profile.c_str(),opstr,istr,bpstr);
-				}
-				else if (operation == "assign") {
-					dib.AssignColorspace(profilepath+profile);
-					sprintf(cs, "%s:%s,%s ",cmd,profile.c_str(),opstr);
-				}
-				else if (print) printf("Error: unrecognized operator -%s- ", operation.c_str());
-
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
 			}
 
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			commandstring += std::string(cs);
+			//processing
+			std::map<std::string,std::string> result =  process_crop(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf("crop:%s,%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				params["op"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
 		}
-*/
+
+
+
+
+//old ops: ********************************************************************
 
 		//img <li>tone:operator,[param...]</li>
 		else if (strcmp(cmd,"tone") == 0) {
@@ -720,33 +622,6 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			}
 		}
 
-		//img <li>crop:x,y,w,y  no defaults</li>
-		else if (strcmp(cmd,"crop") == 0) {  //#crop:x,y,w,h      
-			unsigned x=0, y=0, width=0, height=0;
-			char *xstr = strtok(NULL,", ");
-			char *ystr = strtok(NULL,", ");
-			char *wstr = strtok(NULL,", ");
-			char *hstr = strtok(NULL," ");
-			if (xstr) x = atoi(xstr);
-			if (ystr) y = atoi(ystr);
-			if (wstr) width = atoi(wstr);
-			if (hstr) height = atoi(hstr);
-			width += x;
-			height += y;
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("crop: %d,%d %dx%d (%d threads)... ",x,y,width,height,threadcount); fflush(stdout);
-
-			_mark();
-			dib.ApplyCrop(x,y,width,height,threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%d,%d,%d,%d ",cmd, x, y, width, height);
-			commandstring += std::string(cs);
-		}
 
 		//img <li>saturation:[0 - 5.0] default=1.0, no change</li>
 		else if (strcmp(cmd,"saturation") == 0) {  

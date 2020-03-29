@@ -261,7 +261,7 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 	}
 	//nominal processing:
 	else {
-		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.colorspace.cores","0").c_str()));
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 		
 		//tool-specific setup:
