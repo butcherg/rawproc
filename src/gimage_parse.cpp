@@ -217,7 +217,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 }
 
 //crop
-//:<x>,<y>,<w>,<h> - extract subimage at x,y,w,h bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
+//default	:<x>,<y>,<w>,<h> - extract subimage at x,y,w,h bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
 std::map<std::string,std::string> parse_crop(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -245,6 +245,67 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 		pmap["y"] = p[1];
 		pmap["w"] = p[2];
 		pmap["h"] = p[3];
+		
+	}
+	return pmap;
+}
+
+//curve
+//:rgb|red|green|blue,<x1>,<y1>,...,<xn>,<yn> - apply curve to the designated channel defined by the x,y coordinates, 0-255
+
+std::map<std::string,std::string> parse_curve(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {  
+			pmap["channel"] =  p[0];
+			pmap["mode"] = "default";
+			if (isFloat(p[1])) 
+				pmap["curvecoords"] = p[1];
+			else {
+				pmap["error"] = string_format("Error - not a float: %s.",p[1].c_str());
+				return pmap;
+			}
+			for (unsigned i=2; i<psize; i++) {
+				if (isFloat(p[i])) {
+					pmap["curvecoords"] += std::string(",") + p[i];
+				}
+				else {
+					pmap["error"] = string_format("Error - not a float: %s.",p[i].c_str());
+					return pmap;
+				}
+			}
+		}
+		else if (isFloat(p[0])) {
+			pmap["channel"] =  "rgb";
+			pmap["mode"] = "default";
+			for (unsigned i=0; i<psize; i++) {
+				if (isFloat(p[i])) {
+					pmap["curvecoords"] += std::string(",") + p[i];
+				}
+				else {
+					pmap["error"] = string_format("Error - not a float: %s.",p[i].c_str());
+					return pmap;
+				}
+			}
+		}
+		else {
+			
+		}
 		
 	}
 	return pmap;

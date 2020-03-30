@@ -2,6 +2,7 @@
 #include "gimage_process.h"
 #include "gimage_parse.h" //for paramexists()
 #include "gimage/strutil.h"
+#include "gimage/curve.h"
 #include "fileutil.h"
 #include "myConfig.h"
 #include "elapsedtime.h"
@@ -283,4 +284,42 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 	return result;
 }
 
+std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
 
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "Error - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		GIMAGE_CHANNEL channel = CHANNEL_RGB;
+		if (paramexists(params, "channel")) {
+			if (params["channel"] == "rgb")   channel = CHANNEL_RGB;
+			if (params["channel"] == "red")   channel = CHANNEL_RED;
+			if (params["channel"] == "green") channel = CHANNEL_GREEN;
+			if (params["channel"] == "blue")  channel = CHANNEL_BLUE;
+		}
+		else params["channel"] = "rgb";
+		
+		Curve crv;
+		std::vector<std::string> cpts = split(params["curvecoords"], ",");
+		for (unsigned i=0; i<cpts.size()-1; i+=2) {
+			crv.insertpoint(atof(cpts[i].c_str()), atof(cpts[i+1].c_str()));
+		}
+		std::vector<cp> ctrlpts = crv.getControlPoints();
+		
+		if (params["mode"] == "default") {
+			_mark();
+			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "crop";
+		}
+		
+	}
+	return result;
+}

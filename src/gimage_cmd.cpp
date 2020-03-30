@@ -129,7 +129,39 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				return result["error"];  
 			}
 
-			if (print) printf("crop:%s,%s (%s threads, %ssec)\n",
+			if (print) printf("crop:%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
+		}
+		
+		//img <li>curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb</li>
+		else if (strcmp(cmd,"curve") == 0) {
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_curve(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+
+			//processing
+			std::map<std::string,std::string> result =  process_curve(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf("curve:%s,%s (%s threads, %ssec)\n",
 				params["mode"].c_str(),
 				params["op"].c_str(),
 				result["threadcount"].c_str(),
@@ -139,9 +171,48 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 			//commandstring += buildcommand(cmd, params);
 			commandstring += std::string(cmd) + ":" + pstr + " ";
+			
 		}
 
 
+/*
+		//img <li>curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb</li>
+		else if (strcmp(cmd,"curve") == 0) {
+			Curve crv;
+			int ctstart;
+			GIMAGE_CHANNEL channel;
+			std::vector<cp> ctrlpts;
+			char *p = strtok(NULL," ");
+			std::vector<std::string> cpts = split(std::string(p), ",");
+			ctstart = 1;
+			if      (cpts[0] == "rgb") 	channel = CHANNEL_RGB;
+			else if (cpts[0] == "red")	channel = CHANNEL_RED;
+			else if (cpts[0] == "green")	channel = CHANNEL_GREEN;
+			else if (cpts[0] == "blue")	channel = CHANNEL_BLUE;
+			else {
+				channel = CHANNEL_RGB;
+				ctstart = 0;
+			}
+			for (int i=ctstart; i<cpts.size()-1; i+=2) {
+				crv.insertpoint(atof(cpts[i].c_str()), atof(cpts[i+1].c_str()));
+			}
+			ctrlpts = crv.getControlPoints();
+			
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("curve: %s (%d threads)... ",p,threadcount); fflush(stdout);
+			_mark();
+			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			char cs[256];
+			sprintf(cs, "%s:%s ",cmd, p);
+			commandstring += std::string(cs);
+			
+		}
+*/
 
 
 //old ops: ********************************************************************
@@ -888,42 +959,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
-		//img <li>curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb</li>
-		else if (strcmp(cmd,"curve") == 0) {
-			Curve crv;
-			int ctstart;
-			GIMAGE_CHANNEL channel;
-			std::vector<cp> ctrlpts;
-			char *p = strtok(NULL," ");
-			std::vector<std::string> cpts = split(std::string(p), ",");
-			ctstart = 1;
-			if      (cpts[0] == "rgb") 	channel = CHANNEL_RGB;
-			else if (cpts[0] == "red")	channel = CHANNEL_RED;
-			else if (cpts[0] == "green")	channel = CHANNEL_GREEN;
-			else if (cpts[0] == "blue")	channel = CHANNEL_BLUE;
-			else {
-				channel = CHANNEL_RGB;
-				ctstart = 0;
-			}
-			for (int i=ctstart; i<cpts.size()-1; i+=2) {
-				crv.insertpoint(atof(cpts[i].c_str()), atof(cpts[i+1].c_str()));
-			}
-			ctrlpts = crv.getControlPoints();
-			
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("curve: %s (%d threads)... ",p,threadcount); fflush(stdout);
-			_mark();
-			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%s ",cmd, p);
-			commandstring += std::string(cs);
-			
-		}
+
 		
 		//img <li>exposure:ev default: 1.0</li>
 		else if (strcmp(cmd,"exposure") == 0) {
