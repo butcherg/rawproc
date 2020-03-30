@@ -3,6 +3,7 @@
 #include "util.h"
 #include <vector>
 #include <cmath>
+#include "gimage/gimage.h"
 #include "PicProcessor.h"
 #include "myConfig.h"
 #include <wx/clipbrd.h>
@@ -222,14 +223,23 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			wxFileName profilepath;
 			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 		
-			//parm display.cms.displayprofile: Filename of display profile.  Default: none.
+			//parm display.cms.displayprofile: Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.
 			//template display.cms.displayprofile=iccfile
-			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""))); 
+			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""));
+			profilepath.SetFullName(iccfile); 
+
+			//parm display.cms.displaygamma: Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2
+			float displaygamma = atof(myConfig::getConfig().getValueOrDefault("display.cms.displaygamma","2.2").c_str());
 	
-			if (profilepath.FileExists()) 
-				displayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
-			else 
-				displayProfile = NULL;
+			if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity") {
+					displayProfile = gImage::makeLCMSProfile(iccfile.ToStdString(), displaygamma);
+			}
+			else {
+				if (profilepath.FileExists()) 
+					displayProfile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				else 
+					displayProfile = NULL;
+			}
 		
 			if (dib->getProfile() != NULL & dib->getProfileLength() > 0) 
 				hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
