@@ -174,45 +174,42 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			
 		}
 
+		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd][,p1[,p2..]][,cacorrect][,hlrecovery] default: ahd<br>Alternatively, name=val pairs: algorithm=half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd,cacorrect,hlrecovery,passes=#,iterations=#,dcb_enhance,usecielab,initgain</li>
+		else if (strcmp(cmd,"demosaic") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_demosaic(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
 
-/*
-		//img <li>curve:[rgb,|red,|green,|blue,]x1,y1,x2,y2,...xn,yn  Default channel: rgb</li>
-		else if (strcmp(cmd,"curve") == 0) {
-			Curve crv;
-			int ctstart;
-			GIMAGE_CHANNEL channel;
-			std::vector<cp> ctrlpts;
-			char *p = strtok(NULL," ");
-			std::vector<std::string> cpts = split(std::string(p), ",");
-			ctstart = 1;
-			if      (cpts[0] == "rgb") 	channel = CHANNEL_RGB;
-			else if (cpts[0] == "red")	channel = CHANNEL_RED;
-			else if (cpts[0] == "green")	channel = CHANNEL_GREEN;
-			else if (cpts[0] == "blue")	channel = CHANNEL_BLUE;
-			else {
-				channel = CHANNEL_RGB;
-				ctstart = 0;
-			}
-			for (int i=ctstart; i<cpts.size()-1; i+=2) {
-				crv.insertpoint(atof(cpts[i].c_str()), atof(cpts[i+1].c_str()));
-			}
-			ctrlpts = crv.getControlPoints();
+			//processing
+			std::map<std::string,std::string> result =  process_demosaic(dib, params);
 			
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("curve: %s (%d threads)... ",p,threadcount); fflush(stdout);
-			_mark();
-			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%s ",cmd, p);
-			commandstring += std::string(cs);
-			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			dib.setInfo("Libraw.Mosaiced","0");
+
+			if (print) printf("demosaic:%s,%s (%s threads, %ssec)\n",
+				params["mode"].c_str(),
+				params["op"].c_str(),
+				result["threadcount"].c_str(),
+				result["duration"].c_str()
+			); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			commandstring += std::string(cmd) + ":" + pstr + " ";
+
 		}
-*/
+
 
 
 //old ops: ********************************************************************
@@ -329,123 +326,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			commandstring += std::string(cs);
 		}
 
-		//img <li>demosaic:[half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd][,p1[,p2..]][,cacorrect][,hlrecovery] default: ahd<br>Alternatively, name=val pairs: algorithm=half|half_resize|color|vng|amaze|dcb|rcd|igv|lmmse|ahd,cacorrect,hlrecovery,passes=#,iterations=#,dcb_enhance,usecielab,initgain</li>
-		else if (strcmp(cmd,"demosaic") == 0) {  
-			std::string demosaic = myConfig::getConfig().getValueOrDefault("tool.demosaic.default","ahd").c_str();
-			LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
-			int passes = 1;
-			int iterations = 1;
-			bool dcb_enhance = false;
-			bool usecielab = false;
-			float initgain = 1.0;
-			int border = 0;
 
-			bool nameval = false;
-			
-			std::string pstr = std::string(strtok(NULL, " "));
-			if (pstr.find("=") != std::string::npos) {  //name=val pairs
-				nameval = true;
-				std::map<std::string, std::string> params =  parseparams(pstr);
-				if (params.find("algorithm") != params.end()) demosaic = params["algorithm"];
-				if (params.find("passes") != params.end()) passes = atoi(params["passes"].c_str());
-				if (params.find("iterations") != params.end()) iterations = atoi(params["iterations"].c_str());
-				if (params.find("dcb_enhance") != params.end()) 
-					if (params["dcb_enhance"] == "1")
-						dcb_enhance = true;
-				if (params.find("usecielab") != params.end()) 
-					if (params["usecielab"] == "1")
-						usecielab = true;
-				if (params.find("initgain") != params.end()) initgain = atof(params["initgain"].c_str());
-
-				if (params.find("cacorrect") != params.end()) 
-					if (params["cacorrect"] == "1") 
-						prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_CACORRECT);
-				if (params.find("hlrecovery") != params.end()) 
-					if (params["hlrecovery"] == "1") 
-						prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_HLRECOVERY);
-			}
-			else {  //positional
-				std::vector<std::string> params = split(pstr,",");
-				demosaic = params[0]; //first param must be algorithm
-				while (params.back() == "cacorrect" | params.back() == "hlrecovery") { //cacorrect and/or hlrecovery can be tacked onto the end...
-					if (params.back() == "cacorrect") prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_CACORRECT);
-					if (params.back() == "hlrecovery") prepost = LIBRTPROCESS_PREPOST(prepost | LIBRTPROCESS_HLRECOVERY);
-					params.pop_back();
-				}
-				if (params.size() >= 2) { //what remains are parameters specific to an algorithm
-					if (demosaic == "dcb") {
-						if (params.size() >= 2) iterations = atoi(params[1].c_str());
-						if (params.size() >= 3 && params[2] == "dcb_enhance") dcb_enhance = true;
-					}
-					if (demosaic == "amaze") {
-						if (params.size() >= 2) initgain = atoi(params[1].c_str());
-						if (params.size() >= 3) border = atoi(params[2].c_str());
-					}
-					if (demosaic == "lmmse") {
-						if (params.size() >= 2) iterations = atoi(params[1].c_str());
-					}
-					if (demosaic == "xtran_markesteijn") {
-						if (params.size() >= 2) passes = atoi(params[1].c_str());
-						if (params.size() >= 3 && params[2] == "usecielab") usecielab = true;
-					}
-				}
-			}
-			
-			unsigned xtarray[6][6];
-			if (dib.xtranArray(xtarray) & demosaic.find("xtran") == std::string::npos) 
-				demosaic = "xtran_fast";
-
-			//char *d = strtok(NULL," ");
-			//if (d) demosaic = d;
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("demosaic: %s (%d threads)... ",demosaic.c_str(),threadcount); fflush(stdout);
-
-			_mark();
-			if (demosaic == "color")
-				dib.ApplyMosaicColor(threadcount);
-			else if (demosaic == "half")
-				dib.ApplyDemosaicHalf(false, threadcount);
-			else if (demosaic == "half_resize")
-				dib.ApplyDemosaicHalf(true, threadcount);
-#ifdef USE_LIBRTPROCESS
-			else if (demosaic == "vng")
-				dib.ApplyDemosaicVNG(prepost, threadcount);
-			else if (demosaic == "amaze")
-				dib.ApplyDemosaicAMAZE(prepost, initgain, 0, 1.0, 1.0, threadcount);
-			else if (demosaic == "dcb")
-				dib.ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
-			else if (demosaic == "rcd")
-				dib.ApplyDemosaicRCD(prepost, threadcount);
-			else if (demosaic == "igv")
-				dib.ApplyDemosaicIGV(prepost, threadcount);
-			else if (demosaic == "lmmse")
-				dib.ApplyDemosaicLMMSE(prepost, iterations, threadcount);
-			else if (demosaic == "ahd")
-				dib.ApplyDemosaicAHD(prepost, threadcount);
-			else if (demosaic == "xtran_fast") 
-				dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
-			else if (demosaic == "xtran_markesteijn") 
-				dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, usecielab, threadcount);
-#endif
-			else {
-				if (print) printf("Error: unrecognized algorithm");
-				return std::string();
-			}
-			dib.setInfo("Libraw.Mosaiced","0");
-			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
-				if (print) printf("normalizing rotation... "); fflush(stdout);
-				dib.NormalizeRotation(threadcount);
-			}
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%s ",cmd, demosaic.c_str());
-			commandstring += std::string(cs);
-		}
 
 #ifdef USE_LIBRTPROCESS
 		//img <li>cacorrect - Correct chromatic abberation. Use only before demosaic.</li>

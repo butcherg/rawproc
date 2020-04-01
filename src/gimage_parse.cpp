@@ -318,7 +318,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 //:amaze[,<initgain>][,<border>] - demosaic the image with the supplied parameters
 //:lmmse[,<iterations] - demosaic the image with the supplied parameters
 //:xtran_markesteijn[,<passes>][,usecielab] - demosaic the image with the supplied parameters
-
+//:proof - xtran_fast or half, depending on image type (xtran|bayer)
 std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -356,11 +356,10 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 			else
 				pmap["iterations"] = "1";
 			if (psize >= 3) {
-				if (p[2] == "dcb_enhance") 
+				if (p[2] == "dcb_enhance" | p[2] == "1") 
 					pmap["dcb_enhance"] = "true";
 				else {
-					pmap["error"] = string_format("demosaic:ParseError - parameter should be 'dcb_enhance', not %s.",p[2].c_str());
-					return pmap;
+					pmap["dcb_enhance"] = "false";
 				}
 			}
 		}

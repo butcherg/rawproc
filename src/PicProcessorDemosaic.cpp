@@ -5,6 +5,8 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "copy.xpm"
 #include "paste.xpm"
 
@@ -416,116 +418,48 @@ ImageType PicProcessorDemosaic::getImageType()
 bool PicProcessorDemosaic::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("demosaic..."));
-	bool result = false;
+	bool ret = true;
+	std::map<std::string,std::string> result;
 
-	LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
 
-	wxArrayString p = split(c,",");
-
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+	if (!pstr.empty())
+		params = parse_demosaic(std::string(pstr));
 	
-
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	if (processingenabled) {
-		mark();
-		if (p[0] == "color") {
-			result = dib->ApplyMosaicColor(threadcount);
-			m_display->SetModified(true);
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_demosaic(*dib, params);
+		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
 		}
-		else if (p[0] == "half") {
-			result = dib->ApplyDemosaicHalf(false, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "half_resize") {
-			result = dib->ApplyDemosaicHalf(true, threadcount);
-			m_display->SetModified(true);
-		}
-#ifdef USE_LIBRTPROCESS
-		else if (p[0] == "vng") {
-			result = dib->ApplyDemosaicVNG(prepost, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "rcd") {
-			result = dib->ApplyDemosaicRCD(prepost, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "dcb") {
-			int iterations = 1;
-			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
-			bool dcb_enhance = false;
-			if (p.GetCount() >= 3) if (p[2] == "1") dcb_enhance = true;
-			result = dib->ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "amaze") {
-			double initGain = 1.0;
-			int border = 0;
-			float inputScale = 1.0;
-			float outputScale = 1.0;
-			result = dib->ApplyDemosaicAMAZE(prepost, initGain, border, inputScale, outputScale, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "igv") {
-			result = dib->ApplyDemosaicIGV(prepost, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "ahd") {
-			result = dib->ApplyDemosaicAHD(prepost, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "lmmse") { 
-			int iterations = 1;
-			if (p.GetCount() >= 2) iterations = atoi(p[1].c_str());
-			result = dib->ApplyDemosaicLMMSE(prepost, iterations, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "xtran_fast") {
-			result = dib->ApplyDemosaicXTRANSFAST(prepost, threadcount);
-			m_display->SetModified(true);
-		}
-		else if (p[0] == "xtran_markesteijn") { 
-			int passes = 1;
-			if (p.GetCount() >= 2) passes = atoi(p[1].c_str());
-			bool useCieLab = false;
-			if (p.GetCount() >= 3) if (p[2] == "1") useCieLab = true;
-			result = dib->ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
-			m_display->SetModified(true);
-		}
-#endif
 		else {
-			wxMessageBox(wxString::Format(_("Unknown demosaic algorithm: %s"),p[0].c_str()));
-			result = false;
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
+					log(wxString::Format(_("tool=crop,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
 		}
-
-		if (result) {
-			wxString d = duration();
-			m_tree->SetItemText(id, wxString::Format("demosaic:%s",p[0].c_str()));
-			dib->setInfo("Libraw.Mosaiced", "0");
-
-			//parm tool.demosaic.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=0
-			if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","0") == "1") {
-				((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
-				dib->NormalizeRotation(threadcount);
-			}
-
-			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
-				log(wxString::Format(_("tool=demosaic,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
-
-			dirty = false;
-
-		}
-		else wxMessageBox(wxString::Format(_("Demosaic algorithm %s didn't work on this image."),p[0].c_str()));
 	}
 
+	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
+	return ret;
 }
 
 

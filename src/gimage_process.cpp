@@ -339,8 +339,18 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 	}
 	//nominal processing:
 	else {
-		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.demosaic.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
+
+		unsigned xtarray[6][6];
+		if (params["mode"] == "proof") {
+			if (dib.xtranArray(xtarray))
+				params["mode"] = "xtran_fast";
+			else
+				params["mode"] = "half";
+		}
+
+		result["treelabel"] = string_format("demosaic:%s",params["mode"].c_str());
 
 		if (params["mode"] == "color") {
 			ret = dib.ApplyMosaicColor(threadcount);
@@ -402,7 +412,6 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			result["error"] = "demosaic:ProcessError - Demosaic failed, wrong image type (bayer vs xtran).";
 			return result;
 		}
-		result["treelabel"] = string_format("demosaic:%s",params["mode"]);
 
 	}
 	return result;
