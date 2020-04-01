@@ -341,7 +341,7 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 #ifdef USE_LIBRTPROCESS
 			p[0] == "vng" |p[0] == "rcd" |p[0] == "igv" |p[0] == "ahd" |p[0] == "xtran_fast" |p[0] == "dcb" |p[0] == "amaze" |p[0] == "lmmse" |p[0] == "xtran_markesteijn" |
 #endif
-			p[0] == "color") {
+			p[0] == "proof" | p[0] == "color") {
 				pmap["mode"] = p[0];
 		}
 		else {

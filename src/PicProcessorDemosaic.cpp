@@ -448,7 +448,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
 					log(wxString::Format(_("tool=crop,%s,imagesize=%dx%d,threads=%s,time=%s"),
-						params["mode"].c_str(),
+						result["mode"].c_str(), //using result instead of params, gimage_process may have changed params (proof = half|xtran_fast)
 						dib->getWidth(), 
 						dib->getHeight(),
 						result["threadcount"].c_str(),

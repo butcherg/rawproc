@@ -350,29 +350,39 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 				params["mode"] = "half";
 		}
 
-		result["treelabel"] = string_format("demosaic:%s",params["mode"].c_str());
-
 		if (params["mode"] == "color") {
+			_mark();
 			ret = dib.ApplyMosaicColor(threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "half") {
+			_mark();
 			ret = dib.ApplyDemosaicHalf(false, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "half_resize") {
+			_mark();
 			ret = dib.ApplyDemosaicHalf(true, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 #ifdef USE_LIBRTPROCESS
 		else if (params["mode"] == "vng") {
+			_mark();
 			ret = dib.ApplyDemosaicVNG(prepost, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "rcd") {
+			_mark();
 			ret = dib.ApplyDemosaicRCD(prepost, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "dcb") {
 			int iterations = atoi(params["iterations"].c_str());
 			bool dcb_enhance = false;
 			if (paramexists(params,"dcb_enhance") && params["dcb_enhance"] == "true") dcb_enhance = true;
+			_mark();
 			ret = dib.ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "amaze") {
 			double initGain = 1.0;
@@ -381,26 +391,38 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			if (paramexists(params,"border")) initGain = atoi(params["border"].c_str());
 			float inputScale = 1.0;
 			float outputScale = 1.0;
+			_mark();
 			ret = dib.ApplyDemosaicAMAZE(prepost, initGain, border, inputScale, outputScale, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "igv") {
+			_mark();
 			ret = dib.ApplyDemosaicIGV(prepost, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "ahd") {
+			_mark();
 			ret = dib.ApplyDemosaicAHD(prepost, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "lmmse") { 
 			int iterations = atoi(params["iterations"].c_str());
+			_mark();
 			ret = dib.ApplyDemosaicLMMSE(prepost, iterations, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "xtran_fast") {
+			_mark();
 			ret = dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 		else if (params["mode"] == "xtran_markesteijn") { 
 			int passes = atoi(params["passes"].c_str());
 			bool useCieLab = false;
 			if (paramexists(params,"usecielab") && params["usecielab"] == "true") useCieLab = true;
+			_mark();
 			ret = dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
+			result["duration"] = std::to_string(_duration());
 		}
 #endif
 		else {
@@ -412,6 +434,9 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			result["error"] = "demosaic:ProcessError - Demosaic failed, wrong image type (bayer vs xtran).";
 			return result;
 		}
+		
+		result["treelabel"] = string_format("demosaic:%s",params["mode"].c_str());
+		result["mode"] = params["mode"];
 
 	}
 	return result;

@@ -198,7 +198,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			dib.setInfo("Libraw.Mosaiced","0");
 
 			if (print) printf("demosaic:%s,%s (%s threads, %ssec)\n",
-				params["mode"].c_str(),
+				result["mode"].c_str(), //using result instead of params, gimage_process may have changed params (proof = half|xtran_fast)
 				params["op"].c_str(),
 				result["threadcount"].c_str(),
 				result["duration"].c_str()
