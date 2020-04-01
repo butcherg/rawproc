@@ -258,7 +258,7 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "Error - no mode";
+		result["error"] = "crop:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
@@ -290,7 +290,7 @@ std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::strin
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "Error - no mode";
+		result["error"] = "curve:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
@@ -323,3 +323,89 @@ std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::strin
 	}
 	return result;
 }
+
+std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	bool ret = false;
+
+#ifdef USE_LIBRTPROCESS
+	LIBRTPROCESS_PREPOST prepost = LIBRTPROCESS_DEMOSAIC;  //from back when I thought pre- and post-demosaic should also be in the respective demosaic chains...
+#endif
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "demosaic:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		if (params["mode"] == "color") {
+			ret = dib.ApplyMosaicColor(threadcount);
+		}
+		else if (params["mode"] == "half") {
+			ret = dib.ApplyDemosaicHalf(false, threadcount);
+		}
+		else if (params["mode"] == "half_resize") {
+			ret = dib.ApplyDemosaicHalf(true, threadcount);
+		}
+#ifdef USE_LIBRTPROCESS
+		else if (params["mode"] == "vng") {
+			ret = dib.ApplyDemosaicVNG(prepost, threadcount);
+		}
+		else if (params["mode"] == "rcd") {
+			ret = dib.ApplyDemosaicRCD(prepost, threadcount);
+		}
+		else if (params["mode"] == "dcb") {
+			int iterations = atoi(params["iterations"].c_str());
+			bool dcb_enhance = false;
+			if (paramexists(params,"dcb_enhance") && params["dcb_enhance"] == "true") dcb_enhance = true;
+			ret = dib.ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
+		}
+		else if (params["mode"] == "amaze") {
+			double initGain = 1.0;
+			if (paramexists(params,"initgain")) initGain = atof(params["initgain"].c_str());
+			int border = 0;
+			if (paramexists(params,"border")) initGain = atoi(params["border"].c_str());
+			float inputScale = 1.0;
+			float outputScale = 1.0;
+			ret = dib.ApplyDemosaicAMAZE(prepost, initGain, border, inputScale, outputScale, threadcount);
+		}
+		else if (params["mode"] == "igv") {
+			ret = dib.ApplyDemosaicIGV(prepost, threadcount);
+		}
+		else if (params["mode"] == "ahd") {
+			ret = dib.ApplyDemosaicAHD(prepost, threadcount);
+		}
+		else if (params["mode"] == "lmmse") { 
+			int iterations = atoi(params["iterations"].c_str());
+			ret = dib.ApplyDemosaicLMMSE(prepost, iterations, threadcount);
+		}
+		else if (params["mode"] == "xtran_fast") {
+			ret = dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
+		}
+		else if (params["mode"] == "xtran_markesteijn") { 
+			int passes = atoi(params["passes"].c_str());
+			bool useCieLab = false;
+			if (paramexists(params,"usecielab") && params["usecielab"] == "true") useCieLab = true;
+			ret = dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
+		}
+#endif
+		else {
+			result["error"] = string_format("demosaic:ProcessError - Unrecognized demosaic option: %s.",params["mode"].c_str());
+			return result;
+		}
+
+		if (ret == false) {
+			result["error"] = "demosaic:ProcessError - Demosaic failed, wrong image type (bayer vs xtran).";
+			return result;
+		}
+		result["treelabel"] = string_format("demosaic:%s",params["mode"]);
+
+	}
+	return result;
+}
+
+

@@ -237,7 +237,7 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 		int psize = p.size();
 		
 		if (psize < 4) {
-			pmap["error"] = string_format("Error - not enough crop parameters.");
+			pmap["error"] = string_format("crop:ParseError - not enough crop parameters.");
 			return pmap;
 		}
 		pmap["mode"] = "default";
@@ -251,8 +251,7 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 }
 
 //curve
-//:rgb|red|green|blue,<x1>,<y1>,...,<xn>,<yn> - apply curve to the designated channel defined by the x,y coordinates, 0-255
-
+//default	:rgb|red|green|blue,<x1>,<y1>,...,<xn>,<yn> - apply curve to the designated channel defined by the x,y coordinates, 0-255
 std::map<std::string,std::string> parse_curve(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -277,7 +276,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 			if (isFloat(p[1])) 
 				pmap["curvecoords"] = p[1];
 			else {
-				pmap["error"] = string_format("Error - not a float: %s.",p[1].c_str());
+				pmap["error"] = string_format("curve:ParseError - not a float: %s.",p[1].c_str());
 				return pmap;
 			}
 			for (unsigned i=2; i<psize; i++) {
@@ -285,7 +284,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 					pmap["curvecoords"] += std::string(",") + p[i];
 				}
 				else {
-					pmap["error"] = string_format("Error - not a float: %s.",p[i].c_str());
+					pmap["error"] = string_format("curve:ParseError - not a float: %s.",p[i].c_str());
 					return pmap;
 				}
 			}
@@ -298,7 +297,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 					pmap["curvecoords"] += std::string(",") + p[i];
 				}
 				else {
-					pmap["error"] = string_format("Error - not a float: %s.",p[i].c_str());
+					pmap["error"] = string_format("curve:ParseError - not a float: %s.",p[i].c_str());
 					return pmap;
 				}
 			}
@@ -310,4 +309,88 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 	}
 	return pmap;
 }
+
+
+//demosaic (each algo is a mode...)
+//:color - color the unmosaiced image with the pattern colors
+//:half|half_resize|vng|rcd|igv|ahd|xtran_fast - demosaic the image
+//:dcb[,<iterations>][,dcb_enhance] - demosaic the image with the supplied parameters
+//:amaze[,<initgain>][,<border>] - demosaic the image with the supplied parameters
+//:lmmse[,<iterations] - demosaic the image with the supplied parameters
+//:xtran_markesteijn[,<passes>][,usecielab] - demosaic the image with the supplied parameters
+
+std::map<std::string,std::string> parse_demosaic(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (p[0] == "half" |p[0] == "half_resize" |
+#ifdef USE_LIBRTPROCESS
+			p[0] == "vng" |p[0] == "rcd" |p[0] == "igv" |p[0] == "ahd" |p[0] == "xtran_fast" |p[0] == "dcb" |p[0] == "amaze" |p[0] == "lmmse" |p[0] == "xtran_markesteijn" |
+#endif
+			p[0] == "color") {
+				pmap["mode"] = p[0];
+		}
+		else {
+			pmap["error"] = string_format("demosaic:ParseError - Unrecognized demosaic option: %s.",p[0].c_str());
+			return pmap;
+		}
+
+#ifdef USE_LIBRTPROCESS
+		if (pmap["mode"] == "dcb") {
+			if (psize >= 2) 
+				pmap["iterations"] = p[1];
+			else
+				pmap["iterations"] = "1";
+			if (psize >= 3) {
+				if (p[2] == "dcb_enhance") 
+					pmap["dcb_enhance"] = "true";
+				else {
+					pmap["error"] = string_format("demosaic:ParseError - parameter should be 'dcb_enhance', not %s.",p[2].c_str());
+					return pmap;
+				}
+			}
+		}
+		if (pmap["mode"] == "amaze") {
+			if (psize >= 2) pmap["initgain"] = p[1];
+			if (psize >= 3) pmap["border"] = p[2]; 
+		}
+		if (pmap["mode"] == "lmmse") {
+			if (psize >= 2) 
+				pmap["iterations"] = p[1];
+			else
+				pmap["iterations"] = "1";
+		}
+		if (pmap["mode"] == "xtran_markesteijn") {
+			if (psize >= 2) 
+				pmap["passes"] = p[1];
+			else
+				pmap["passes"] = "1";
+			if (psize >= 3) {
+				if (p[2] == "usecielab") 
+					pmap["usecielab"] = "true";
+				else {
+					pmap["error"] = string_format("demosaic:ParseError - parameter should be 'usecielab', not %s.",p[2].c_str());
+					return pmap;
+				}
+			}
+		}
+#endif
+	}
+	return pmap;
+}
+
 
