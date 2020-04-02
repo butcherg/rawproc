@@ -392,4 +392,45 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 	return pmap;
 }
 
+//denoise (each algo is a mode...)
+//:nlmeans[,<sigma>][,<local>][,<patch>] - apply nlmeans denoise
+//:wavelet[,<threshold>] - apply wavelet denoise
+std::map<std::string,std::string> parse_denoise(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
 
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (pmap["mode"] == "nlmeans") {
+			pmap["sigma"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0");
+			pmap["local"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.local","3");
+			pmap["patch"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1");
+			if (psize >= 2) pmap["sigma"] = p[1];
+			if (psize >= 3) pmap["local"] = p[2]; 
+			if (psize >= 4) pmap["patch"] = p[3]; 
+		}
+		else if (pmap["mode"] == "wavelet") {
+			pmap["threshold"] = myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0");
+			if (psize >= 2) pmap["threshold"] = p[1];
+		}
+		else {
+			pmap["error"] = string_format("demosaic:ParseError - Unrecognized demosaic option: %s.",p[0].c_str());
+			return pmap;
+		}
+		
+		
+	}
+	return pmap;
+}

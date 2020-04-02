@@ -442,4 +442,43 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 	return result;
 }
 
+std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "nlmeans") {
+			_mark();
+			int sigma = atoi(params["sigma"].c_str());
+			int local = atoi(params["local"].c_str());
+			int patch = atoi(params["patch"].c_str());
+			dib.ApplyNLMeans(sigma,local, patch, threadcount);
+			result["duration"] = std::to_string(_duration());
+		}
+		else if (params["mode"] == "wavelet") {
+			float threshold = atoi(params["threshold"].c_str());
+			_mark();
+			dib.ApplyWaveletDenoise(threshold, threadcount);
+			result["duration"] = std::to_string(_duration());
+		}
+		else {
+			result["error"] = string_format("denoise:ProcessError - Unrecognized denoise option: %s.",params["mode"].c_str());
+			return result;
+		}
+		
+		result["treelabel"] = string_format("denoise:%s",params["mode"].c_str());
+		
+		
+	}
+	return result;
+}
+
 
