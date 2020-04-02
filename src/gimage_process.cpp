@@ -107,8 +107,8 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 		else
 			dib.ApplyToneLine(blk, wht, channel, threadcount);
 		result["duration"] = std::to_string(_duration());
-		result["black"] = params["black"];
-		result["white"] = params["white"];
+		result["black"] = tostr(blk);
+		result["white"] = tostr(wht);
 		result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
 		if (params["minwhite"] == "true") result["treelabel"] += ",minwhite";
 	}

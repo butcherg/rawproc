@@ -101,6 +101,11 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 			}
 			else pmap["mode"] = "auto";
 		}
+		else if (p[0] == "data") {
+			pmap["mode"] = "data";
+			pmap["channel"] = "rgb";
+			if (psize >= 2 && p[1] == "minwhite") pmap["minwhite"] = "true";
+		}
 		else if (p[0] == "camera") {
 			pmap["mode"] = "camera";
 			pmap["channel"] = "rgb";

@@ -64,8 +64,8 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 			if (print) printf("blackwhitepoint:%s,%s,%s (%s threads, %ssec)\n",
 				params["mode"].c_str(),
-				params["black"].c_str(),
-				params["white"].c_str(),
+				result["black"].c_str(),
+				result["white"].c_str(),
 				result["threadcount"].c_str(),
 				result["duration"].c_str()
 			); 
@@ -197,9 +197,8 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 			dib.setInfo("Libraw.Mosaiced","0");
 
-			if (print) printf("demosaic:%s,%s (%s threads, %ssec)\n",
+			if (print) printf("demosaic:%s (%s threads, %ssec)\n",
 				result["mode"].c_str(), //using result instead of params, gimage_process may have changed params (proof = half|xtran_fast)
-				params["op"].c_str(),
 				result["threadcount"].c_str(),
 				result["duration"].c_str()
 			); 
