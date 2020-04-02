@@ -165,7 +165,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				if (file_exists(camconstpath)) c.parseCamconst(camconstpath);
 				params["icc"] = c.getItem(makemodel, "dcraw_matrix");
 				result["dcraw_source"] = c.getItem(makemodel, "primary_source");
-				result["dcraw_primaries"] = result["icc"];
+				result["dcraw_primaries"] = params["icc"];
 			}
 			
 			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
