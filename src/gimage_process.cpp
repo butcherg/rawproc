@@ -497,4 +497,45 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 	return result;
 }
 
+std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "patch") {
+			int x = atoi(params["x"].c_str());
+			int y = atoi(params["y"].c_str());
+			float radius = atof(params["radius"].c_str());
+			float ev0 = atof(params["ev0"].c_str());
+			_mark();
+			float stops = dib.ApplyExposureCompensation(x, y, radius, ev0, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["stops"] = tostr(stops);
+			result["commandstring"] = string_format("exposure:patch,%d,%d,%f,%f",x,y,radius,ev0);
+			result["treelabel"] = "exposure:patch";
+		}
+		else if (params["mode"] == "ev") {
+			float ev = atof(params["ev0"].c_str());
+			_mark();
+			dib.ApplyExposureCompensation(ev, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("exposure:%f",ev);
+			result["treelabel"] = "exposure:ev";
+		}
+		else {
+			result["error"] = string_format("exposure:ProcessError - Unrecognized exposure option: %s.",params["mode"].c_str());
+			return result;
+		}
+	}
+	return result;
+}
+
 

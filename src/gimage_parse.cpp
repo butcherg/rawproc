@@ -442,3 +442,57 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 	}
 	return pmap;
 }
+
+//exposure
+//:<ev> - apply the ev to the image (img and rawproc)
+//:patch,x,y,r,ev0
+std::map<std::string,std::string> parse_exposure(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (p[0] == "patch") {
+			if (psize < 5) {
+				pmap["error"] = "exposure:ParseError - patch mode needs x, y, radius and ev0.";
+				return pmap;
+			}
+			pmap["mode"] = "patch";
+			pmap["x"] = p[1];
+			pmap["y"] = p[2]; 
+			pmap["radius"] = p[3]; 
+			pmap["ev0"] = p[4]; 
+		}
+		else {
+			if (psize >= 2) {
+				if (isFloat(p[1])) {
+					pmap["ev"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("exposure:ParseError - Not numeric: %s.",p[1].c_str());
+					return pmap;
+				}
+			}
+			else {
+				pmap["ev"] = "0.0";
+			}
+			pmap["mode"] = "ev";
+		}
+
+	}
+	return pmap;
+}
+
+
