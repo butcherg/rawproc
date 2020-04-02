@@ -6,6 +6,8 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/strutil.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "copy.xpm"
 #include "paste.xpm"
 #include "undo.xpm"
@@ -220,7 +222,8 @@ class ExposurePanel: public PicProcPanel
 					break;
 				case EXPOSURETARGETEV:
 					if (patx > 0 & paty > 0) { 
-						q->setParams(wxString::Format("patch=%d,%d;radius=%0.1f;ev0=%0.2f",patx,paty, radius->GetFloatValue(), ev0->GetFloatValue()));
+						//q->setParams(wxString::Format("patch=%d,%d;radius=%0.1f;ev0=%0.2f",patx,paty, radius->GetFloatValue(), ev0->GetFloatValue()));
+						q->setParams(wxString::Format("patch,%d,%d,%0.1f,%0.2f",patx,paty, radius->GetFloatValue(), ev0->GetFloatValue()));
 						q->processPic();
 					}
 					break;
@@ -307,6 +310,56 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 
 bool PicProcessorExposure::processPicture(gImage *processdib) 
 {
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("exposure..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_exposure(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_exposure(*dib, params);
+		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			((ExposurePanel *) toolpanel)->setStops(atof(result["stops"].c_str()));
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.exposure.log","0") == "1"))
+					log(wxString::Format(_("tool=exposure,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+
+/*
+bool PicProcessorExposure::processPicture(gImage *processdib) 
+{
 	double ev;
 	int x=0, y=0;
 	float radius=0.0;
@@ -390,6 +443,6 @@ bool PicProcessorExposure::processPicture(gImage *processdib)
 	
 	return result;
 }
-
+*/
 
 
