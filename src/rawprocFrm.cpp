@@ -1923,8 +1923,10 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 		algorithm =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.algorithm","wavelet"));
 		
 		if (algorithm == "nlmeans") {
-			//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0
-			sigma =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
+			//parm tool.denoise.initialvalue: The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=tool.denoise.sigma (initialvalue is deprecated)
+			//parm tool.denoise.sigma: The initial sigma value used to calculate the denoised pixel.  Default=1
+			sigma =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue",
+				myConfig::getConfig().getValueOrDefault("tool.denoise.sigma","0")));
 			//parm tool.denoise.local: Defines the initial (and reset button) size of the neigbor pixel array.  Default=3
 			local =  wxString(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3"));
 			//parm tool.denoise.patch: Defines the initial (and reset button) size of the patch pixel array.  Default=1

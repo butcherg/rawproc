@@ -415,7 +415,8 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 
 		if ( p[0] == "nlmeans") {
 			pmap["mode"] = p[0];
-			pmap["sigma"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0");
+			pmap["sigma"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue",
+				myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
 			pmap["local"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.local","3");
 			pmap["patch"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1");
 			if (psize >= 2) pmap["sigma"] = p[1];

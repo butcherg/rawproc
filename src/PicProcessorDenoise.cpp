@@ -37,7 +37,8 @@ class DenoisePanel: public PicProcPanel
 		{
 			Freeze();
 			algorithm = DENOISENLMEANS;
-			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","1").c_str());
+			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue",
+				myConfig::getConfig().getValueOrDefault("tool.denoise.sigma","0")).c_str());
 			int localval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
 			int patchval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
 			float thresholdval = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0").c_str());
@@ -53,7 +54,7 @@ class DenoisePanel: public PicProcPanel
 			nl = new wxRadioButton(this, DENOISENLMEANS, _("NLMeans:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			nl->SetValue(true);
 
-			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 1, 100, wxPoint(10, 30), wxSize(110, -1));
+			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(110, -1));
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",sigmaval), wxDefaultPosition, wxSize(25, -1));
 			btn = new wxBitmapButton(this, SIGMARESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
