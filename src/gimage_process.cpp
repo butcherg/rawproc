@@ -317,7 +317,7 @@ std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::strin
 			_mark();
 			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
 			result["duration"] = std::to_string(_duration());
-			result["treelabel"] = "crop";
+			result["treelabel"] = string_format("%s:%s",params["mode"].c_str(),params["channel"].c_str());
 		}
 		
 	}
@@ -354,27 +354,32 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			_mark();
 			ret = dib.ApplyMosaicColor(threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "half") {
 			_mark();
 			ret = dib.ApplyDemosaicHalf(false, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "half_resize") {
 			_mark();
 			ret = dib.ApplyDemosaicHalf(true, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 #ifdef USE_LIBRTPROCESS
 		else if (params["mode"] == "vng") {
 			_mark();
 			ret = dib.ApplyDemosaicVNG(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "rcd") {
 			_mark();
 			ret = dib.ApplyDemosaicRCD(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "dcb") {
 			int iterations = atoi(params["iterations"].c_str());
@@ -383,6 +388,8 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			_mark();
 			ret = dib.ApplyDemosaicDCB(prepost, iterations, dcb_enhance, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s,%d",params["mode"].c_str(),iterations);
+			if (dcb_enhance) result["commandstring"] += ",dcb_enhance";
 		}
 		else if (params["mode"] == "amaze") {
 			double initGain = 1.0;
@@ -394,27 +401,32 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			_mark();
 			ret = dib.ApplyDemosaicAMAZE(prepost, initGain, border, inputScale, outputScale, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s,%f,%d",params["mode"].c_str(),initGain,border);
 		}
 		else if (params["mode"] == "igv") {
 			_mark();
 			ret = dib.ApplyDemosaicIGV(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "ahd") {
 			_mark();
 			ret = dib.ApplyDemosaicAHD(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
-		else if (params["mode"] == "lmmse") { 
+		else if (params["mode"] == "lmmse") {
 			int iterations = atoi(params["iterations"].c_str());
 			_mark();
 			ret = dib.ApplyDemosaicLMMSE(prepost, iterations, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s,%d",params["mode"].c_str(),iterations);
 		}
 		else if (params["mode"] == "xtran_fast") {
 			_mark();
 			ret = dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "xtran_markesteijn") { 
 			int passes = atoi(params["passes"].c_str());
@@ -423,6 +435,8 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			_mark();
 			ret = dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("demosaic:%s,%f",params["mode"].c_str(),passes);
+			if (useCieLab) result["commandstring"] += ",usecielab";
 		}
 #endif
 		else {
@@ -462,12 +476,14 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 			int patch = atoi(params["patch"].c_str());
 			dib.ApplyNLMeans(sigma,local, patch, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("denoise:nlmeans,%d,%d,%d",sigma,local,patch);
 		}
 		else if (params["mode"] == "wavelet") {
 			float threshold = atoi(params["threshold"].c_str());
 			_mark();
 			dib.ApplyWaveletDenoise(threshold, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("denoise:wavelet,%f",threshold);
 		}
 		else {
 			result["error"] = string_format("denoise:ProcessError - Unrecognized denoise option: %s.",params["mode"].c_str());

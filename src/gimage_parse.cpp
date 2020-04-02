@@ -413,7 +413,8 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 
-		if (pmap["mode"] == "nlmeans") {
+		if ( p[0] == "nlmeans") {
+			pmap["mode"] = p[0];
 			pmap["sigma"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0");
 			pmap["local"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.local","3");
 			pmap["patch"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1");
@@ -421,12 +422,13 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 			if (psize >= 3) pmap["local"] = p[2]; 
 			if (psize >= 4) pmap["patch"] = p[3]; 
 		}
-		else if (pmap["mode"] == "wavelet") {
+		else if (p[0] == "wavelet") {
+			pmap["mode"] = p[0];
 			pmap["threshold"] = myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0");
 			if (psize >= 2) pmap["threshold"] = p[1];
 		}
 		else {
-			pmap["error"] = string_format("demosaic:ParseError - Unrecognized demosaic option: %s.",p[0].c_str());
+			pmap["error"] = string_format("demosaic:ParseError - Unrecognized denoise option: %s.",p[0].c_str());
 			return pmap;
 		}
 		

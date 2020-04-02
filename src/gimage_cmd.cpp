@@ -206,10 +206,48 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			fflush(stdout);
 
 			//commandstring += buildcommand(cmd, params);
-			commandstring += std::string(cmd) + ":" + pstr + " ";
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";
 
 		}
 
+		//img <li>denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3</li>
+		else if (strcmp(cmd,"denoise") == 0) {  
+			
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_denoise(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("denoise:%s... ",params["mode"].c_str()); 
+			fflush(stdout);
+
+			//processing
+			std::map<std::string,std::string> result =  process_denoise(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";
+		
+		}
 
 
 //old ops: ********************************************************************
@@ -595,57 +633,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			sprintf(cs, "%s:%0.1f ",cmd, saturation);
 			commandstring += std::string(cs);
 		}
-
-		//img <li>denoise:[0 - 100.0],[1-10],[1-10], default=0.0,1,3</li>
-		else if (strcmp(cmd,"denoise") == 0) {  
-			double sigma= atof(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
-			int local = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
-			int patch = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
-			float threshold = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.001").c_str());
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-			char *d = strtok(NULL,", ");
-			if (strcmp(d, "nlmeans") == 0) {
-				char *s = strtok(NULL,", ");
-				char *l = strtok(NULL,", ");
-				char *p = strtok(NULL," ");
-				if (s) sigma = atof(s);
-				if (l) local = atoi(l);
-				if (p) patch = atoi(p);
-				if (print) printf("denoise: nlmieans, %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
-				_mark();
-				dib.ApplyNLMeans(sigma, local, patch, threadcount);  
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:nlmeans,%0.1f,%d,%d ",cmd, sigma, local, patch);
-				commandstring += std::string(cs);
-			}
-			else if (strcmp(d, "wavelet") == 0) {
-				char *t = strtok(NULL,", ");
-				if (t) threshold = atof(t);
-				if (print) printf("denoise: wavelet, %0.2f (%d threads)... ",threshold,threadcount); fflush(stdout);
-				dib.ApplyWaveletDenoise(threshold, threadcount);
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:wavelet,%0.1f ",cmd, threshold);
-				commandstring += std::string(cs);
-			}
-			else { //default is nlmeans, with only sigma specified
-				sigma = atof(d);
-				if (print) printf("denoise: nlmieans, %0.2f (%d threads)... ",sigma,threadcount); fflush(stdout);
-				_mark();
-				dib.ApplyNLMeans(sigma, local, patch, threadcount);  
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:nlmeans,%0.1f,%d,%d ",cmd, sigma, local, patch);
-				commandstring += std::string(cs);
-			}
-		}
+		
 
 		//img <li>tint:[r,g,b] default: 0,0,0 (doesn't have a corresponding tool in rawproc)</li>
 		else if (strcmp(cmd,"tint") == 0) {  

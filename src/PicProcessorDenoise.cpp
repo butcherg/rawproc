@@ -4,6 +4,8 @@
 #include "myRowSizer.h"
 #include "myFloatCtrl.h"
 #include "myConfig.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "undo.xpm"
 #include "copy.xpm"
 #include "paste.xpm"
@@ -35,7 +37,7 @@ class DenoisePanel: public PicProcPanel
 		{
 			Freeze();
 			algorithm = DENOISENLMEANS;
-			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0").c_str());
+			int sigmaval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","1").c_str());
 			int localval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
 			int patchval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
 			float thresholdval = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0").c_str());
@@ -51,7 +53,7 @@ class DenoisePanel: public PicProcPanel
 			nl = new wxRadioButton(this, DENOISENLMEANS, _("NLMeans:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			nl->SetValue(true);
 
-			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 0, 100, wxPoint(10, 30), wxSize(110, -1));
+			sigma = new wxSlider(this, SIGMASLIDER, sigmaval, 1, 100, wxPoint(10, 30), wxSize(110, -1));
 			val = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",sigmaval), wxDefaultPosition, wxSize(25, -1));
 			btn = new wxBitmapButton(this, SIGMARESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn->SetToolTip("Reset to default");
@@ -340,6 +342,54 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 bool PicProcessorDenoise::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_denoise(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_denoise(*dib, params);
+		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.denoise.log","0") == "1"))
+					log(wxString::Format(_("tool=denoise,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+/*
+bool PicProcessorDenoise::processPicture(gImage *processdib) 
+{
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise..."));
 
 	int algorithm = DENOISENLMEANS;
 	double sigma = 0.0;
@@ -410,5 +460,6 @@ bool PicProcessorDenoise::processPicture(gImage *processdib)
 	return result;
 }
 
+*/
 
 
