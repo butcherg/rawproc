@@ -248,6 +248,63 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
+		//img <li>exposure:ev default: 1.0</li>
+		else if (strcmp(cmd,"exposure") == 0) {
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_exposure(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("exposure:%s... ",params["mode"].c_str()); 
+			fflush(stdout);
+
+			//processing
+			std::map<std::string,std::string> result =  process_exposure(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";
+		}
+
+/*
+		//img <li>exposure:ev default: 1.0</li>
+		else if (strcmp(cmd,"exposure") == 0) {
+			double ev = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
+			char *s = strtok(NULL," ");
+			if (s) ev = atof(s);
+
+			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
+			if (threadcount == 0) 
+				threadcount = gImage::ThreadCount();
+			else if (threadcount < 0) 
+				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+			if (print) printf("exposure: %0.2f (%d threads)... ",ev,threadcount); fflush(stdout);
+
+			_mark();
+			dib.ApplyExposureCompensation(ev, threadcount);  //local and patch hard-coded, for now...
+			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
+			char cs[256];
+			sprintf(cs, "%s:%0.1f ",cmd, ev);
+			commandstring += std::string(cs);
+		}
+*/
+
 
 //old ops: ********************************************************************
 
@@ -825,29 +882,6 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			}
 			else if (print) printf("redeye: bad x coord\n");
 		
-		}
-
-
-		
-		//img <li>exposure:ev default: 1.0</li>
-		else if (strcmp(cmd,"exposure") == 0) {
-			double ev = atof(myConfig::getConfig().getValueOrDefault("tool.exposure.initialvalue","0.0").c_str());
-			char *s = strtok(NULL," ");
-			if (s) ev = atof(s);
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.exposure.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("exposure: %0.2f (%d threads)... ",ev,threadcount); fflush(stdout);
-
-			_mark();
-			dib.ApplyExposureCompensation(ev, threadcount);  //local and patch hard-coded, for now...
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.1f ",cmd, ev);
-			commandstring += std::string(cs);
 		}
 		
 		//img <li>normalize:newmin,newmax default: 0.0,1.0</li>

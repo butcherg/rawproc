@@ -476,17 +476,12 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 			pmap["ev0"] = p[4]; 
 		}
 		else {
-			if (psize >= 2) {
-				if (isFloat(p[1])) {
-					pmap["ev"] = p[1];
-				}
-				else {
-					pmap["error"] = string_format("exposure:ParseError - Not numeric: %s.",p[1].c_str());
-					return pmap;
-				}
+			if (isFloat(p[0])) {
+				pmap["ev"] = p[0];
 			}
 			else {
-				pmap["ev"] = "0.0";
+				pmap["error"] = string_format("exposure:ParseError - Not numeric: %s.",p[0].c_str());
+				return pmap;
 			}
 			pmap["mode"] = "ev";
 		}

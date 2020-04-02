@@ -523,10 +523,11 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 			result["treelabel"] = "exposure:patch";
 		}
 		else if (params["mode"] == "ev") {
-			float ev = atof(params["ev0"].c_str());
+			float ev = atof(params["ev"].c_str());
 			_mark();
 			dib.ApplyExposureCompensation(ev, threadcount);
 			result["duration"] = std::to_string(_duration());
+			result["stops"] = tostr(ev);
 			result["commandstring"] = string_format("exposure:%f",ev);
 			result["treelabel"] = "exposure:ev";
 		}
