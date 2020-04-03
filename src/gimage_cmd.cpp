@@ -289,6 +289,8 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			char * pstr = strtok(NULL, " ");
 			if (pstr)
 				params = parse_gray(std::string(pstr));
+			else
+				params = parse_gray(std::string());
 			
 			//parse error-catching:
 			if (params.find("error") != params.end()) {

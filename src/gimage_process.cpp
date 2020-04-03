@@ -435,7 +435,7 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			_mark();
 			ret = dib.ApplyDemosaicXTRANSMARKESTEIJN(prepost, passes, useCieLab, threadcount);
 			result["duration"] = std::to_string(_duration());
-			result["commandstring"] = string_format("demosaic:%s,%f",params["mode"].c_str(),passes);
+			result["commandstring"] = string_format("demosaic:%s,%d",params["mode"].c_str(),passes);
 			if (useCieLab) result["commandstring"] += ",usecielab";
 		}
 #endif
@@ -519,7 +519,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 			float stops = dib.ApplyExposureCompensation(x, y, radius, ev0, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["stops"] = tostr(stops);
-			result["commandstring"] = string_format("exposure:patch,%d,%d,%f,%f",x,y,radius,ev0);
+			result["commandstring"] = string_format("exposure:patch,%d,%d,%0.1f,%0.2f",x,y,radius,ev0);
 			result["treelabel"] = "exposure:patch";
 		}
 		else if (params["mode"] == "ev") {
@@ -528,7 +528,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 			dib.ApplyExposureCompensation(ev, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["stops"] = tostr(ev);
-			result["commandstring"] = string_format("exposure:%f",ev);
+			result["commandstring"] = string_format("exposure:%0.2f",ev);
 			result["treelabel"] = "exposure:ev";
 		}
 		else {
@@ -542,7 +542,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
-	paramprint(params);
+
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
 		result["error"] = "curve:ProcessError - no mode";
@@ -559,7 +559,7 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 		_mark();
 		dib.ApplyGray(red,green,blue, threadcount);
 		result["duration"] = std::to_string(_duration());
-		result["commandstring"] = string_format("gray:%f,%f,%f",red,green,blue);
+		result["commandstring"] = string_format("gray:%0.2f,%0.2f,%0.2f",red,green,blue);
 		result["treelabel"] = "gray";
 	}
 	return result;
