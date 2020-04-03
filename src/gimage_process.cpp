@@ -539,4 +539,30 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 	return result;
 }
 
+std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		double red   = atof(params["red"].c_str());
+		double green = atof(params["green"].c_str());
+		double blue  = atof(params["blue"].c_str());
+		
+		_mark();
+		dib.ApplyGray(red,green,blue, threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("gray:%f,%f,%f",red,green,blue);
+		result["treelabel"] = "gray";
+	}
+	return result;
+}
+
 

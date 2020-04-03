@@ -357,7 +357,6 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 		}
 		else if (param == "file") {
 			m_tree->SetItemText(id, _("subtract:file"));
-printf("subtract file: %s\n",p[1].c_str()); fflush(stdout);
 			if (wxFileName::FileExists(wxString(p[1]))) {
 				if (dib->ApplySubtract(p[1].c_str(), true, threadcount)) {
 					m_display->SetModified(true);

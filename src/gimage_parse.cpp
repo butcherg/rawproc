@@ -490,4 +490,46 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 	return pmap;
 }
 
+//gray
+//:<float>,<float>,<float> - grayscale the image using the specified RGB multipliers
+//:NULL - grayscale the image using the default multipliers
+std::map<std::string,std::string> parse_gray(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		std::string mult;
+		
+		if (psize == 3) {
+			if (isFloat(p[0])) pmap["red"]   = p[0]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[0].c_str()); }
+			if (isFloat(p[1])) pmap["green"] = p[1]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[1].c_str()); }
+			if (isFloat(p[2])) pmap["blue"]  = p[2]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[2].c_str()); }
+		}
+		else {
+			mult = myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21");
+			if (isFloat(mult)) pmap["red"]   = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.r: %s.",mult.c_str()); }
+			mult = myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72");
+			if (isFloat(mult)) pmap["green"] = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.g: %s.",mult.c_str()); }
+			mult = myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07");
+			if (isFloat(mult)) pmap["blue"]  = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.b: %s.",mult.c_str()); }
+		}
+			
+		pmap["mode"] = "gray";
+		
+	}
+	return pmap;
+}
 
