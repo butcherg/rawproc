@@ -514,17 +514,17 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 		std::string mult;
 		
 		if (psize == 3) {
-			if (isFloat(p[0])) pmap["red"]   = p[0]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[0].c_str()); }
-			if (isFloat(p[1])) pmap["green"] = p[1]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[1].c_str()); }
-			if (isFloat(p[2])) pmap["blue"]  = p[2]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[2].c_str()); }
+			if (isFloat(p[0])) pmap["red"]   = p[0]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[0].c_str()); return pmap; }
+			if (isFloat(p[1])) pmap["green"] = p[1]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[1].c_str()); return pmap; }
+			if (isFloat(p[2])) pmap["blue"]  = p[2]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[2].c_str()); return pmap; }
 		}
 		else {
 			mult = myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21");
-			if (isFloat(mult)) pmap["red"]   = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.r: %s.",mult.c_str()); }
+			if (isFloat(mult)) pmap["red"]   = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.r: %s.",mult.c_str()); return pmap; }
 			mult = myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72");
-			if (isFloat(mult)) pmap["green"] = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.g: %s.",mult.c_str()); }
+			if (isFloat(mult)) pmap["green"] = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.g: %s.",mult.c_str()); return pmap; }
 			mult = myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07");
-			if (isFloat(mult)) pmap["blue"]  = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.b: %s.",mult.c_str()); }
+			if (isFloat(mult)) pmap["blue"]  = mult; else { pmap["error"] = string_format("Error - invalid float from tool.gray.b: %s.",mult.c_str()); return pmap; }
 		}
 			
 		pmap["mode"] = "gray";

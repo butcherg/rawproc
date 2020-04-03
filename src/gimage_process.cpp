@@ -542,7 +542,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
-
+	paramprint(params);
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
 		result["error"] = "curve:ProcessError - no mode";
