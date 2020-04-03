@@ -355,20 +355,21 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 			}
 
 		}
-		else {
+		else if (param == "file") {
 			m_tree->SetItemText(id, _("subtract:file"));
-			if (wxFileName::FileExists(wxString(param))) {
-				if (dib->ApplySubtract(param.c_str(), true, threadcount)) {
+printf("subtract file: %s\n",p[1].c_str()); fflush(stdout);
+			if (wxFileName::FileExists(wxString(p[1]))) {
+				if (dib->ApplySubtract(p[1].c_str(), true, threadcount)) {
 					m_display->SetModified(true);
 					result = true;
 				}
 				else {
-					wxMessageBox(_("dark image subtraction not successful."));
+					wxMessageBox(_("subtract image subtraction not successful."));
 					result = false;
 				}
 			}
 			else {
-				wxMessageBox(_("dark image file not found."));
+				wxMessageBox(wxString::Format(_("subtract image file %s not found."),p[1].c_str()));
 				result = false;
 			}
 		}
