@@ -560,7 +560,7 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 		dib.ApplyGray(red,green,blue, threadcount);
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("gray:%0.2f,%0.2f,%0.2f",red,green,blue);
-		result["treelabel"] = "gray";
+		//result["treelabel"] = "gray";
 	}
 	return result;
 }

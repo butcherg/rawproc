@@ -4,6 +4,8 @@
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "myRowSizer.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "undo.xpm"
 #include "copy.xpm"
 #include "paste.xpm"
@@ -238,37 +240,49 @@ void PicProcessorGray::createPanel(wxSimplebook* parent)
 bool PicProcessorGray::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("gray..."));
-	wxArrayString cp = split(getParams(),",");
-	double r = atof(cp[0]);
-	double g = atof(cp[1]);
-	double b = atof(cp[2]);
-	bool result = true;
+	bool ret = true;
+	std::map<std::string,std::string> result;
 
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.gray.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
 
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	if (processingenabled) {
-		mark();
-		dib->ApplyGray(r, g, b, threadcount);
-		m_display->SetModified(true);
-		wxString d = duration();
-
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))
-			log(wxString::Format(_("tool=gray,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
+	if (!pstr.empty())
+		params = parse_gray(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_gray(*dib, params);
+		//if (paramexists(result,"treelabel")) 
+		//	m_tree->SetItemText(id, wxString(result["treelabel"]));
+		//else
+			m_tree->SetItemText(id, "gray");
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.gray.log","0") == "1"))
+					log(wxString::Format(_("tool=gray,imagesize=%dx%d,threads=%s,time=%s"),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
 	}
 
-	dirty = false;
-
+	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
+	return ret;
 }
-
-
 
