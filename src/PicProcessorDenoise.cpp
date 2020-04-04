@@ -342,6 +342,8 @@ void PicProcessorDenoise::createPanel(wxSimplebook* parent)
 
 bool PicProcessorDenoise::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("denoise..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;

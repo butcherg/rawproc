@@ -451,6 +451,8 @@ void PicProcessorBlackWhitePoint::reCalc()
 
 bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("black/white point..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;

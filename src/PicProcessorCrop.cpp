@@ -665,6 +665,8 @@ void PicProcessorCrop::createPanel(wxSimplebook* parent)
 
 bool PicProcessorCrop::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("crop..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;

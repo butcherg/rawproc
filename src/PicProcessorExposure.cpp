@@ -310,6 +310,8 @@ void PicProcessorExposure::createPanel(wxSimplebook* parent)
 
 bool PicProcessorExposure::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("exposure..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;

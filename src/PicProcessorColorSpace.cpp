@@ -390,6 +390,8 @@ wxString PicProcessorColorSpace::getOpenFilePath()
 
 bool PicProcessorColorSpace::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("colorspace..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;

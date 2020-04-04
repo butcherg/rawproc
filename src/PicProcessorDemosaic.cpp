@@ -417,6 +417,8 @@ ImageType PicProcessorDemosaic::getImageType()
 
 bool PicProcessorDemosaic::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("demosaic..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;
