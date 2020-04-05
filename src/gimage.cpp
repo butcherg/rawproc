@@ -60,7 +60,7 @@ using namespace half_float::literal;
 
 inline unsigned sqr(const unsigned x) { return x*x; }
 
-lfDatabase *gImage::ldb;
+lfDatabase *gImage::ldb = NULL;
 
 const char * gImageVersion()
 {
@@ -4706,7 +4706,7 @@ GIMAGE_ERROR gImage::loadLensDatabase(std::string lensfundatadir)
 
 void gImage::destroyLensDatabase()
 {
-	
+	if (ldb != NULL) ldb->~lfDatabase();
 }
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops)
