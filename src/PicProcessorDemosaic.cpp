@@ -208,7 +208,6 @@ colorb->Enable(true);
 			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
-			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &DemosaicPanel::algorithmChanged, this);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnCopy, this, DEMOSAICCOPY);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnPaste, this, DEMOSAICPASTE);
@@ -418,7 +417,7 @@ ImageType PicProcessorDemosaic::getImageType()
 bool PicProcessorDemosaic::processPicture(gImage *processdib) 
 {
 	if (!processingenabled) return true;
-	
+
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("demosaic..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;
