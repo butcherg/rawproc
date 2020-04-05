@@ -60,6 +60,8 @@ using namespace half_float::literal;
 
 inline unsigned sqr(const unsigned x) { return x*x; }
 
+lfDatabase *gImage::ldb;
+
 const char * gImageVersion()
 {
 	#ifdef VERSION
@@ -4659,6 +4661,57 @@ pix gImage::getRGB(float x, float y)
 		unsigned pos = yi * w + xi;
 		return image[pos];
 	}
+}
+
+
+//Lens database and correction methods
+//Wraps Lensfun classes in order to manage database 
+
+GIMAGE_ERROR gImage::loadLensDatabase(std::string lensfundatadir)
+{
+	bool lfok = false;
+	lfError e = LF_NO_ERROR;
+	GIMAGE_ERROR g = GIMAGE_OK;
+	ldb = new lfDatabase();
+
+	
+	lensfundatadir.append(string_format("/version_%d", LF_MAX_DATABASE_VERSION));
+
+
+	if (lensfundatadir != "") {
+#ifdef LF_0395
+		e = ldb->Load(lensfundatadir.c_str());
+		if (e == LF_NO_DATABASE) g = GIMAGE_LF_NO_DATABASE; //wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT;  //wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
+#else
+		if (ldb->LoadDirectory(lensfundatadir.c_str())) 
+			e = LF_NO_ERROR;
+		else 
+			e = LF_NO_DATABASE;
+			//wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+#endif
+	}
+	else {
+		e = ldb->Load();
+		if (e == LF_NO_DATABASE) g =  GIMAGE_LF_NO_DATABASE; // wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
+		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT; //wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
+	}
+		
+	if (e != LF_NO_ERROR) {
+		delete ldb;
+		ldb = NULL;
+	}
+	return g;
+}
+
+void gImage::destroyLensDatabase()
+{
+	
+}
+
+GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops)
+{
+	return GIMAGE_OK;
 }
 
 

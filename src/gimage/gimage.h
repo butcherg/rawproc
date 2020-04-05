@@ -6,6 +6,7 @@
 #include <map>
 #include <lcms2.h>
 #include "curve.h"
+#include <lensfun/lensfun.h>
 
 #if defined PIXhalf
 #include "gimage/half.hpp"
@@ -90,7 +91,10 @@ enum GIMAGE_ERROR {
 	GIMAGE_APPLYCOLORSPACE_BADINTENT_OUTPUT,
 	GIMAGE_APPLYCOLORSPACE_BADTRANSFORM,
 	
-	GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM
+	GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM,
+	
+	GIMAGE_LF_NO_DATABASE,
+	GIMAGE_LF_WRONG_FORMAT
 };
 
 enum LIBRTPROCESS_PREPOST { 
@@ -183,6 +187,11 @@ class gImage
 		PIXTYPE getG(float x, float y);
 		PIXTYPE getB(float x, float y);
 		pix getRGB(float x, float y);
+		
+		//Lensfun database and correction methods
+		static GIMAGE_ERROR loadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
+		static void destroyLensDatabase();
+		GIMAGE_ERROR ApplyLensCorrection(std::string modops);
 
 		//Static methods
 		static std::string getRGBCharacteristics();
@@ -347,6 +356,8 @@ class gImage
 		GIMAGE_ERROR lasterror;
 
 		RESIZE_FILTER lensfun_interp_method;
+		
+		static lfDatabase *ldb;
 
 };
 
