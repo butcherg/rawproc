@@ -4704,6 +4704,11 @@ GIMAGE_ERROR gImage::loadLensDatabase(std::string lensfundatadir)
 	return g;
 }
 
+lfDatabase * gImage::getLensDatabase()
+{
+	return ldb;
+}
+
 void gImage::destroyLensDatabase()
 {
 	if (ldb != NULL) ldb->~lfDatabase();

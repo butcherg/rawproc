@@ -192,6 +192,7 @@ class gImage
 		
 		//Lensfun database and correction methods
 		static GIMAGE_ERROR loadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
+		static lfDatabase * getLensDatabase();
 		static void destroyLensDatabase();
 		GIMAGE_ERROR ApplyLensCorrection(std::string modops, int threadcount=0);
 
