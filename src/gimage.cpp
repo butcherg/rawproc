@@ -4709,8 +4709,172 @@ void gImage::destroyLensDatabase()
 	if (ldb != NULL) ldb->~lfDatabase();
 }
 
-GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops)
+GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount)
 {
+	int ModifyFlags = 0;
+	
+	std::map<std::string, std::string> cp = parseparams(modops);
+	
+	//get camera instance:
+	const lfCamera *cam = NULL;
+	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, imginfo["Model"].c_str());
+	if (cameras) {
+		cam = cameras[0];
+	}
+	else {
+		lf_free (cameras);
+		return GIMAGE_LF_CAMERA_NOT_FOUND;
+	}
+	lf_free (cameras);
+
+	//get lens instance:
+	const lfLens *lens = NULL;
+	const lfLens **lenses = NULL;
+	lenses = ldb->FindLenses (cam, NULL, imginfo["Lens"].c_str());
+	if (lenses) {
+		lens = lenses [0];
+	}
+	else {
+		lf_free (lenses);
+		return GIMAGE_LF_LENS_NOT_FOUND;
+	}
+	lf_free (lenses);
+	
+	if (cp.find("ops") != cp.end()) {
+		std::vector<std::string> ops = split(cp["ops"], ",");
+		for (unsigned i=0; i<ops.size(); i++) {
+			if (ops[i] == "ca")   ModifyFlags |= LF_MODIFY_TCA;
+			if (ops[i] == "vig")  ModifyFlags |= LF_MODIFY_VIGNETTING;
+			if (ops[i] == "dist") ModifyFlags |= LF_MODIFY_DISTORTION;
+			if (ops[i] == "autocrop") ModifyFlags |= LF_MODIFY_SCALE;
+		}
+	}
+
+	if (cp.find("algo") != cp.end()) {
+		if (cp["algo"] == "nearest")  initInterpolation(FILTER_BOX);
+		if (cp["algo"] == "bilinear") initInterpolation(FILTER_BILINEAR);
+		if (cp["algo"] == "lanczofss3") initInterpolation(FILTER_LANCZOS3);
+	}
+				
+#ifdef LF_0395
+	lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
+
+	// Enable desired modifications
+	int modflags = 0;
+
+	if (ModifyFlags & LF_MODIFY_TCA)
+		modflags |= mod->EnableTCACorrection(lens, atof(info["FocalLength"].c_str()));
+	if (ModifyFlags & LF_MODIFY_VIGNETTING)
+		modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
+	if (ModifyFlags & LF_MODIFY_DISTORTION)
+		modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
+	if (ModifyFlags & LF_MODIFY_GEOMETRY)
+		modflags |= mod->EnableProjectionTransform(lens, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
+	if (ModifyFlags & LF_MODIFY_SCALE)
+		modflags |= mod->EnableScaling(1.0);
+
+#else
+	lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, w, h);
+	int modflags = mod->Initialize (
+		lens, 
+		LF_PF_F32, 
+		atof(imginfo["FocalLength"].c_str()), 
+		atof(imginfo["FNumber"].c_str()),
+		1.0f, //opts.Distance
+		1.0f, //opts.Scale, 
+		LF_RECTILINEAR, //opts.TargetGeom,
+		ModifyFlags, 
+		false //opts.Inverse
+	);
+
+	if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
+#endif
+
+	//unsigned w = dib->getWidth();
+	//unsigned h = dib->getHeight();
+
+	if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#1
+		pix * newimg = getImageDataRaw();
+		bool ok = true;
+
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y = 0; y < h; y++) {
+			unsigned p = y*w;
+			ok = mod->ApplyColorModification (&newimg[p], 0.0, y, w, 1, LF_CR_3 (RED, GREEN, BLUE), w);
+		}
+	}
+
+	if ((ModifyFlags & LF_MODIFY_DISTORTION) & (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
+		gImage olddib(*this);
+		pix * newimg = getImageDataRaw();
+		bool ok = true;
+		int lwidth = w * 2 * 3;
+			
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned y = 0; y < h; y++) {
+			float pos[lwidth];
+			ok = mod->ApplySubpixelGeometryDistortion (0.0, y, w, 1, pos);
+			if (ok) {
+				unsigned s=0;
+				for (unsigned x = 0; x < w; x++) {
+					unsigned p = x + y*w;
+					newimg[p].r = olddib.getR (pos [s], pos [s+1]);
+					newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
+					newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
+					s += 2 * 3;
+				}
+			}
+		}
+	
+	}
+
+	else {  //#2, or #3
+	
+		if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
+			gImage olddib(*this);
+			pix * newimg = getImageDataRaw();
+			bool ok = true;
+			int lwidth = w * 2;
+				
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned y = 0; y < h; y++) {
+				float pos[lwidth];
+				ok = mod->ApplyGeometryDistortion (0.0, y, w, 1, pos);
+				if (ok) {
+					unsigned s=0;
+					for (unsigned x = 0; x < w; x++) {
+						unsigned p = x + y*w;
+						newimg[p] = olddib.getRGB (pos [s], pos [s+1]);
+						s += 2;
+					}
+				}
+			}
+		}
+	
+		if (ModifyFlags & LF_MODIFY_TCA) {  //#3
+			gImage olddib(*this);
+			pix * newimg = getImageDataRaw();
+			bool ok = true;
+			int lwidth = w * 2 * 3;
+		
+			#pragma omp parallel for num_threads(threadcount)
+			for (unsigned y = 0; y < h; y++) {
+				float pos[lwidth];
+				ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
+				if (ok) {
+					unsigned s=0;
+					for (unsigned x = 0; x < w; x++) {
+						unsigned p = x + y*w;
+						newimg[p].r = olddib.getR (pos [s], pos [s+1]);
+						newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
+						newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
+						s += 2 * 3;
+					}
+				}
+			}
+		}
+	}
+	delete mod;
 	return GIMAGE_OK;
 }
 

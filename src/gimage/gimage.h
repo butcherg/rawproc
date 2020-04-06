@@ -94,7 +94,9 @@ enum GIMAGE_ERROR {
 	GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM,
 	
 	GIMAGE_LF_NO_DATABASE,
-	GIMAGE_LF_WRONG_FORMAT
+	GIMAGE_LF_WRONG_FORMAT,
+	GIMAGE_LF_CAMERA_NOT_FOUND,
+	GIMAGE_LF_LENS_NOT_FOUND
 };
 
 enum LIBRTPROCESS_PREPOST { 
@@ -191,7 +193,7 @@ class gImage
 		//Lensfun database and correction methods
 		static GIMAGE_ERROR loadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
 		static void destroyLensDatabase();
-		GIMAGE_ERROR ApplyLensCorrection(std::string modops);
+		GIMAGE_ERROR ApplyLensCorrection(std::string modops, int threadcount=0);
 
 		//Static methods
 		static std::string getRGBCharacteristics();
