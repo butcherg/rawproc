@@ -164,6 +164,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			if (param["mode"] == "auto") {
 				bwmode = BLACKWHITESLIDERAUTO;
 				slideb->SetValue(true);
+				recalc->SetValue(true);
 			}
 			else if (param["mode"] == "data") {
 				bwmode = BLACKWHITEDATA;
@@ -183,6 +184,7 @@ class BlackWhitePointPanel: public PicProcPanel
 			else if (param["mode"] == "values") {
 				bwmode = BLACKWHITESLIDER;
 				slideb->SetValue(true);
+				recalc->SetValue(false);
 				bwpoint->SetLeftValue(atof(param["black"].c_str()));
 				bwpoint->SetRightValue(atof(param["white"].c_str()));
 			}
@@ -245,7 +247,7 @@ class BlackWhitePointPanel: public PicProcPanel
 		{
 			switch (bwmode) {
 				case BLACKWHITESLIDERAUTO:
-					q->setParams("rgb");
+					q->setParams(wxString::Format("%s,auto", chan->GetString(chan->GetSelection())));
 					q->processPic();
 					break;
 				case BLACKWHITESLIDER:
@@ -277,9 +279,13 @@ class BlackWhitePointPanel: public PicProcPanel
 			Refresh();
 		}
 
+		//slider change:
 		void OnChanged(wxCommandEvent& event)
 		{
-			if (bwmode == BLACKWHITESLIDERAUTO) bwmode == BLACKWHITESLIDER;
+			if (bwmode == BLACKWHITESLIDERAUTO) {
+				recalc->SetValue(false);
+				bwmode = BLACKWHITESLIDER;
+			}
 			if (bwmode == BLACKWHITESLIDER) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -290,6 +296,8 @@ class BlackWhitePointPanel: public PicProcPanel
 		
 		void OnCheckBox(wxCommandEvent& event)
 		{
+			if (recalc->GetValue())
+				bwmode = BLACKWHITESLIDERAUTO;
 			((PicProcessorBlackWhitePoint *) q)->setReCalc(recalc->GetValue());
 			processBW();
 			event.Skip();
@@ -301,15 +309,19 @@ class BlackWhitePointPanel: public PicProcPanel
 			event.Skip();
 		}
 
-		void updateSliders()
+		void updateSliders(int blk, int wht)
 		{
-			wxArrayString p = split(q->getParams(),",");
-			bwpoint->SetLeftValue(atoi(p[1].c_str()));
-			bwpoint->SetRightValue(atoi(p[2].c_str()));
+			if (bwmode == BLACKWHITESLIDERAUTO) {
+				bwpoint->SetLeftValue(blk);
+				bwpoint->SetRightValue(wht);
+			}
+			Refresh();
 		}
 		
 		void channelChanged(wxCommandEvent& event)
 		{
+			processBW();
+/*
 			gImage &img = q->getPreviousPicProcessor()->getProcessedPic();
 			std::map<std::string,float> s;
 			double datblk, datwht, minwht;
@@ -352,13 +364,21 @@ class BlackWhitePointPanel: public PicProcPanel
 					processBW();
 					break;
 			}
+*/
 		}
 
+		//one-time recalk
 		void OnButton(wxCommandEvent& event)
 		{
-			((PicProcessorBlackWhitePoint *) q)->reCalc();
-			updateSliders();
-			processBW();
+			double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
+			double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
+			long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+
+			std::vector<double> bwpts = q->getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, chan->GetString(chan->GetSelection()).ToStdString());
+
+			updateSliders((int) bwpts[0], (int) bwpts[1]);
+			Refresh();
+			if (bwmode == BLACKWHITESLIDER) processBW();
 			event.Skip();
 		}
 
@@ -432,21 +452,21 @@ void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
 
 void PicProcessorBlackWhitePoint::setReCalc(bool r)
 {
-	recalc = r;
-	if (recalc) reCalc();
+	//recalc = r;
+	//if (recalc) reCalc();
 }
 
 void PicProcessorBlackWhitePoint::reCalc()
 {
-	double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
-	double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
-	long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
+	//double blkthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.blackthreshold","0.05").c_str());
+	//double whtthresh = atof(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whitethreshold","0.05").c_str());
+	//long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 
-	wxArrayString p = split(getParams(),",");
-	std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
-	double blk = bwpts[0];
-	double wht = bwpts[1];
-	setParams(wxString::Format("%s,%d,%d",p[0],(unsigned) blk, (unsigned) wht));
+	//wxArrayString p = split(getParams(),",");
+	//std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
+	//double blk = bwpts[0];
+	//double wht = bwpts[1];
+	//setParams(wxString::Format("%s,%d,%d",p[0],(unsigned) blk, (unsigned) wht));
 }
 
 bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib) 
@@ -460,10 +480,10 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 
 	//if (!global_processing_enabled) r= true;  //ToDo: get rid of global_processing_enabled
 
-	if (recalc) {
-		reCalc();
-		((BlackWhitePointPanel *) toolpanel)->updateSliders();
-	}
+	//if (recalc) {
+	//	reCalc();
+	//	((BlackWhitePointPanel *) toolpanel)->updateSliders();
+	//}
 
 	std::map<std::string,std::string> params;
 	std::string pstr = getParams().ToStdString();
@@ -490,6 +510,8 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		else {
 			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, result["treelabel"]);
 			m_display->SetModified(true);
+//printf("blk: %s   wht: %s\n", result["black"].c_str(), result["white"].c_str()); fflush(stdout);
+			((BlackWhitePointPanel *) toolpanel)->updateSliders(atoi(result["black"].c_str()), atoi(result["white"].c_str()));
 			//parm tool.all.log: Turns on logging for all tools.  Default=0
 			//parm tool.*.log: Turns on logging for the specified tool.  Default=0
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 

@@ -62,7 +62,7 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 
-		if (paramstring == std::string()) {  //NULL string, default processing
+		if (paramstring == std::string() | paramstring == "auto") {  //NULL string, default processing
 			pmap["channel"] = "rgb";
 			pmap["mode"] = "auto";
 		}

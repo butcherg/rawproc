@@ -42,7 +42,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 			if (params["channel"] == "green") channel = CHANNEL_GREEN;
 			if (params["channel"] == "blue")  channel = CHANNEL_BLUE;
 		}
-		else params["channel"] = "rgb";
+		else channel = CHANNEL_RGB;
 
 		//tool-specific logic:
 		if (params["mode"] == "auto"){
@@ -59,36 +59,42 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 				dib.CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, params["channel"]);	
 			blk = bwpts[0];
 			wht = bwpts[1];
+			result["treelabel"] = string_format("blackwhitepoint:%s,%s",params["channel"].c_str(),params["mode"].c_str());
 		}
 		else if (params["mode"] == "values"){
 			blk = atof(params["black"].c_str());
 			wht = atof(params["white"].c_str());
+			//result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+			//result["treelabel"] = "blackwhitepoint";
+			result["treelabel"] = string_format("blackwhitepoint:%s,%s",params["channel"].c_str(),params["mode"].c_str());
 		}
 		else if (params["mode"] == "data"){
 			std::map<std::string,float> s = dib.StatsMap();
-			if (channel == CHANNEL_RGB) {
+			//if (channel == CHANNEL_RGB) {
 				blk = std::min(std::min(s["rmin"],s["gmin"]),s["bmin"]);
 				wht = std::max(std::max(s["rmax"],s["gmax"]),s["bmax"]);
 				if (paramexists(params, "minwhite")) {
 					if (params["minwhite"] == "true") wht = std::min(std::min(s["rmax"],s["gmax"]),s["bmax"]);
 				}
-			}
-			else if (channel == CHANNEL_RED) {
-				blk = s["rmin"];
-				wht = s["rmax"];
-			}
-			else if (channel == CHANNEL_GREEN) {
-				blk = s["gmin"];
-				wht = s["gmax"];
-			}
-			else if (channel == CHANNEL_BLUE) {
-				blk = s["bmin"];
-				wht = s["bmax"];
-			}
+			//}
+			//else if (channel == CHANNEL_RED) {
+			//	blk = s["rmin"];
+			//	wht = s["rmax"];
+			//}
+			//else if (channel == CHANNEL_GREEN) {
+			//	blk = s["gmin"];
+			//	wht = s["gmax"];
+			//}
+			//else if (channel == CHANNEL_BLUE) {
+			//	blk = s["bmin"];
+			//	wht = s["bmax"];
+			//}
+			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "norm"){
 			blk = atof(params["black"].c_str());
 			wht = atof(params["white"].c_str());
+			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
 		}
 		else if (params["mode"] == "camera"){
 			if (paramexists(dib.getInfo(), "Libraw.Black"))
@@ -99,6 +105,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 				wht = atoi(dib.getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
 			else 
 				wht = 255.0; //not raw, do no harm...
+			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
 		}
 
 		_mark();
@@ -109,8 +116,8 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 		result["duration"] = std::to_string(_duration());
 		result["black"] = tostr(blk);
 		result["white"] = tostr(wht);
-		result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
-		if (params["minwhite"] == "true") result["treelabel"] += ",minwhite";
+		//result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+		//if (params["minwhite"] == "true") result["treelabel"] += ",minwhite";
 	}
 
 	return result;
