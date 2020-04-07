@@ -311,60 +311,14 @@ class BlackWhitePointPanel: public PicProcPanel
 
 		void updateSliders(int blk, int wht)
 		{
-			if (bwmode == BLACKWHITESLIDERAUTO) {
-				bwpoint->SetLeftValue(blk);
-				bwpoint->SetRightValue(wht);
-			}
+			bwpoint->SetLeftValue(blk);
+			bwpoint->SetRightValue(wht);
 			Refresh();
 		}
 		
 		void channelChanged(wxCommandEvent& event)
 		{
 			processBW();
-/*
-			gImage &img = q->getPreviousPicProcessor()->getProcessedPic();
-			std::map<std::string,float> s;
-			double datblk, datwht, minwht;
-			wxString chanstr = chan->GetString(chan->GetSelection());
-			switch (bwmode) {
-				case BLACKWHITESLIDERAUTO:
-					q->setParams(wxString::Format("%s,%d,%d",chan->GetString(chan->GetSelection()),0,255));
-					((PicProcessorBlackWhitePoint *) q)->setChannel(chan->GetString(chan->GetSelection()));
-					((PicProcessorBlackWhitePoint *) q)->reCalc();
-					updateSliders();
-					processBW();
-					break;
-				case BLACKWHITEDATA:
-					s = img.StatsMap();
-					if (chanstr =="rgb" | chanstr == "tone") {
-						datblk = fmin(fmin(s["rmin"],s["gmin"]),s["bmin"]);
-						datwht = fmax(fmax(s["rmax"],s["gmax"]),s["bmax"]);
-						minwht = fmin(fmin(s["rmax"],s["gmax"]),s["bmax"]);
-					}
-					else if (chanstr =="red") {
-						datblk = s["rmin"];
-						datwht = s["rmax"];
-						minwht = s["rmax"];
-					}
-					else if (chanstr =="green") {
-						datblk = s["gmin"];
-						datwht = s["gmax"];
-						minwht = s["gmax"];
-					}
-					else if (chanstr =="blue") {
-						datblk = s["bmin"];
-						datwht = s["bmax"];
-						minwht = s["bmax"];
-					}
-					updateVals(datblk, datwht, minwht);
-					if (minwhite->GetValue())
-						q->setParams(wxString::Format("%s,data,minwhite",chan->GetString(chan->GetSelection())));
-					else
-						q->setParams(wxString::Format("%s,data",chan->GetString(chan->GetSelection())));
-					processBW();
-					break;
-			}
-*/
 		}
 
 		//one-time recalk
