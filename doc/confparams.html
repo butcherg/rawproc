@@ -24,7 +24,8 @@
 <li><a name="batch"><b>batch.toolchain</b>:  The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
-<li><b>display.cms.displayprofile</b>:  Filename of display profile.  Default: none.</li>
+<li><b>display.cms.displaygamma</b>:  Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2</li>
+<li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
 <li><b>display.cms.softproof.profile</b>:  Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.</li>
@@ -104,11 +105,11 @@
 <li><a name="tool.curve"><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
 <li><a name="tool.curve"><b>tool.curve.rateadapt.threshold</b>:  Specify threshold to turn on rate adaptation, in seconds. Default=0.01</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.</li>
-<li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  If you're going to use demosaic in the tool chain, you actually need to set input.orient=0 an leave this setting at its default, so the normalization is deferred until after demosaic.  Demosaic requires the image to be in its original orientation to preserve the specified Bayer pattern.  Default=0</li>
 <li><a name="tool.denoise"><b>tool.denoise.algorithm</b>:  nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet</li>
-<li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=0</li>
+<li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=tool.denoise.sigma (initialvalue is deprecated)</li>
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
 <li><a name="tool.denoise"><b>tool.denoise.patch</b>:  Defines the initial (and reset button) size of the patch pixel array.  Default=1</li>
+<li><a name="tool.denoise"><b>tool.denoise.sigma</b>:  The initial sigma value used to calculate the denoised pixel.  Default=1</li>
 <li><a name="tool.denoise"><b>tool.denoise.threshold</b>:  Defines the initial value of the threshold for wavelet denoise.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.initialvalue</b>:  The initial (and reset button) value of the exposure tool, 0.0=no change.  Default=0.0</li>
 <li><a name="tool.exposure"><b>tool.exposure.patchradius</b>:  (float), radius of patch.  Default=1.5</li>
