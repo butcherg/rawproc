@@ -287,7 +287,6 @@ void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 {
 	if (m_tree->GetSelection() == GetId()) {
 		if (event.ShiftDown()) {
-
 			coord c = m_display->GetImgCoords();
 			points.push_back(c);
 		}
@@ -301,13 +300,15 @@ void PicProcessorRedEye::OnLeftDown(wxMouseEvent& event)
 			}
 			points = n;
 		}
-		dcList.clear();
-		c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
-		for (unsigned i=0; i<points.size(); i++) {
-			dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
-			c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
+		if (event.ShiftDown() | event.ControlDown()) {
+			dcList.clear();
+			c = wxString::Format("%2.2f,%d,%d,%2.2f;",threshold,radius,desat,desatpct);
+			for (unsigned i=0; i<points.size(); i++) {
+				dcList.Append(wxString::Format("cross,%d,%d;",points[i].x, points[i].y));
+				c.Append(wxString::Format("%d,%d;",points[i].x, points[i].y));
+			}
+			processPic();
 		}
-		processPic();
 	}	
 
 	event.Skip();
