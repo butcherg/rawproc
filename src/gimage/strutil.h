@@ -6,6 +6,8 @@
 #include <map>
 
 bool isFloat(std::string str);
+bool isUnsignedInt(std::string str);
+bool isInt(std::string str);
 
 std::string tostr(double t);
 std::string tostr(unsigned short t);

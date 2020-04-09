@@ -46,6 +46,18 @@ bool isFloat(std::string str)
 	return std::regex_match (str,e);
 }
 
+bool isUnsignedInt(std::string str)
+{
+	std::regex e ("^\d+$");
+	return std::regex_match (str,e);
+}
+
+bool isInt(std::string str)
+{
+	std::regex e ("^[-+]?[1-9]\d*\.?[0]*$");
+	return std::regex_match (str,e);
+}
+
 
 std::string tostr(double t)
 { 
