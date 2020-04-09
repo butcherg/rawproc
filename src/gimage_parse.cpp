@@ -556,3 +556,81 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+	}
+	return pmap;
+}
+
+
+//redeye
+//:<xint1>,<yint1>[,<xint2>,<yint2>...],<tint>,<lint> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y)
+std::map<std::string,std::string> parse_redeye(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize < 4) {
+			pmap["error"] = "Error - not enough parameters."; 
+			return pmap;
+		}
+		
+		std::string coords;
+		if (isUnsignedInt(p[0])) coords = p[0];
+		for (unsigned i = 1; i<psize-3; i++) {
+			if (isUnsignedInt(p[i])) {
+				coords.append(","+p[i]); 
+			}
+			else {
+				pmap["error"] = string_format("Error - pixel coordinate is not an unsigned integer: %s.",p[i].c_str()); 
+				return pmap;
+			}
+		}
+		if (isFloat(p[psize - 2])) {
+			pmap["threshold"] = p[psize-2];
+		}
+		else {
+			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[psize-2].c_str()); 
+			return pmap;
+		}
+		if (isUnsignedInt(p[psize - 1])) {
+			pmap["limit"] = p[psize-1];
+		}
+		else {
+			pmap["error"] = string_format("Error - limit is not an unsigned iteger: %s.",p[psize-1].c_str()); 
+			return pmap;
+		}
+	}
+	return pmap;
+}
+
+

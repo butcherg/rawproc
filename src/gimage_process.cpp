@@ -572,4 +572,59 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 	return result;
 }
 
+std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
 
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+	}
+	return result;
+}
+
+std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		std::vector<coord> points;
+		std::vector<std::string> p = split(params["coords"], ",");
+		for (unsigned i=0; i<p.size()-1; i++) {
+			points.push_back({atoi(p[i].c_str()),atoi(p[i+1].c_str())});
+		}
+		double threshold = atof(params["threshold"].c_str());
+		unsigned limit = atoi(params["limit"].c_str());
+		bool desat = false;
+		double desatpct=1.0;
+		if (params["desat"] == "true") {
+			desat = true;
+			desatpct = atof(params["desatpct"].c_str());
+		}
+				
+		_mark();
+		dib.ApplyRedeye(points, threshold, limit, desat, desatpct, threadcount);
+		result["duration"] = std::to_string(_duration());
+		if (desat)
+			result["commandstring"] = string_format("redeye:%s,%0.2f,%d,true,%0.f",params["coords"],threshold,limit,desatpct);
+		else
+			result["commandstring"] = string_format("redeye:%s,%0.2f,%d,false,%0.f",params["coords"],threshold,limit,desatpct);
+		result["treelabel"] = "redeye";
+		
+	}
+	return result;
+}
