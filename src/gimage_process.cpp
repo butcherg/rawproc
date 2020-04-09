@@ -486,7 +486,7 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 			result["commandstring"] = string_format("denoise:nlmeans,%d,%d,%d",sigma,local,patch);
 		}
 		else if (params["mode"] == "wavelet") {
-			float threshold = atoi(params["threshold"].c_str());
+			float threshold = atof(params["threshold"].c_str());
 			_mark();
 			if (threshold != 0.0) dib.ApplyWaveletDenoise(threshold, threadcount);
 			result["duration"] = std::to_string(_duration());
