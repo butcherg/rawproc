@@ -242,6 +242,7 @@ void PicProcessorRedEye::setDesat(bool d)
 }
 
 
+//ToDo: convert to gimage_parse/gimage_process...
 bool PicProcessorRedEye::processPicture(gImage *processdib) 
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("redeye..."));
