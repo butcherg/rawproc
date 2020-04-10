@@ -519,7 +519,7 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 				pmap["red"]   = mult; 
 			}
 			else { 
-				pmap["error"] = string_format("Error - invalid float from tool.gray.r: %s.",mult.c_str()); 
+				pmap["error"] = string_format("gray:ParseError - invalid float from tool.gray.r: %s.",mult.c_str()); 
 				return pmap; 
 			}
 			mult = myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72");
@@ -527,7 +527,7 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 				pmap["green"] = mult; 
 			}
 			else { 
-				pmap["error"] = string_format("Error - invalid float from tool.gray.g: %s.",mult.c_str()); 
+				pmap["error"] = string_format("gray:ParseError - invalid float from tool.gray.g: %s.",mult.c_str()); 
 				return pmap; 
 			}
 			mult = myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07");
@@ -535,17 +535,17 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 				pmap["blue"]  = mult; 
 			}
 			else { 
-				pmap["error"] = string_format("Error - invalid float from tool.gray.b: %s.",mult.c_str()); 
+				pmap["error"] = string_format("gray:ParseError - invalid float from tool.gray.b: %s.",mult.c_str()); 
 				return pmap; 
 			}
 		}
 		else if (psize == 3) {
-			if (isFloat(p[0])) pmap["red"]   = p[0]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[0].c_str()); return pmap; }
-			if (isFloat(p[1])) pmap["green"] = p[1]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[1].c_str()); return pmap; }
-			if (isFloat(p[2])) pmap["blue"]  = p[2]; else { pmap["error"] = string_format("Error - invalid float: %s.",p[2].c_str()); return pmap; }
+			if (isFloat(p[0])) pmap["red"]   = p[0]; else { pmap["error"] = string_format("gray:ParseError - invalid float: %s.",p[0].c_str()); return pmap; }
+			if (isFloat(p[1])) pmap["green"] = p[1]; else { pmap["error"] = string_format("gray:ParseError - invalid float: %s.",p[1].c_str()); return pmap; }
+			if (isFloat(p[2])) pmap["blue"]  = p[2]; else { pmap["error"] = string_format("gray:ParseError - invalid float: %s.",p[2].c_str()); return pmap; }
 		}
 		else {
-			pmap["error"] = string_format("Error -invalid parameters: %s.",paramstring.c_str()); 
+			pmap["error"] = string_format("gray:ParseError -invalid parameters: %s.",paramstring.c_str()); 
 			return pmap;
 		}
 
@@ -605,7 +605,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 
 		//parse parameters, 4 of 'em:
 		if (psize < 4) {
-			pmap["error"] = "Error - not enough parameters."; 
+			pmap["error"] = "redeye:ParseError - not enough parameters."; 
 			return pmap;
 		}
 
@@ -613,7 +613,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 			pmap["threshold"] = p[0];
 		}
 		else {
-			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[0].c_str()); 
+			pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[0].c_str()); 
 			return pmap;
 		}
 
@@ -621,7 +621,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 			pmap["limit"] = p[1];
 		}
 		else {
-			pmap["error"] = string_format("Error - limit is not an unsigned integer: %s.",p[1].c_str()); 
+			pmap["error"] = string_format("redeye:ParseError - limit is not an unsigned integer: %s.",p[1].c_str()); 
 			return pmap;
 		}
 
@@ -632,7 +632,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 			pmap["desat"] = "false";
 		}
 		else {
-			pmap["error"] = string_format("Error - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
+			pmap["error"] = string_format("redeye:ParseError - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
 			return pmap;
 		}
 
@@ -640,7 +640,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 			pmap["desatpct"] = p[3];
 		}
 		else {
-			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[3].c_str()); 
+			pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[3].c_str()); 
 			return pmap;
 		}
 
@@ -662,7 +662,10 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 }
 
 //resize
-//:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3] - resize the image to the specified width and height, using the specified interpolation algorithm.  If only one number is provided, use it for the largest dimension and compute the other to preserve the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  Can't specify an algorithm if only one number is provided.
+//:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3] 
+//	- resize the image to the specified width and height, using the specified interpolation algorithm.  
+//	If only one number is provided, use it for the largest dimension and compute the other to preserve 
+//	the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
 std::map<std::string,std::string> parse_resize(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -678,7 +681,40 @@ std::map<std::string,std::string> parse_resize(std::string paramstring)
 	}
 
 	else { //positional
-
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (isUnsignedInt(p[0])) {
+			pmap["width"] = p[0];
+		}
+		else {
+			pmap["error"] = string_format("resize:ParseError - first parameter is not an unsigned integer: %s.",p[0].c_str()); 
+			return pmap;
+		}
+		
+		if (psize < 2) {
+			pmap["mode"] = "largestside";
+			return pmap;
+		}
+		else if (isUnsignedInt(p[1])) {
+			pmap["height"] = p[1];
+			pmap["mode"] = "asspecified";
+		}
+		else if (p[1] == "box" | p[1] == "bilinear" | p[1] == "bspline" | p[1] == "bicubic" | p[1] == "catmullrom" | p[1] == "lanczos3") {
+			pmap["algorithm"] = p[1];
+		}
+		else {
+			pmap["error"] = string_format("resize:ParseError - Unrecognized parameter: %s.",p[1].c_str()); 
+			return pmap;
+		}
+		
+		if (psize >= 3 && (p[2] == "box" | p[2] == "bilinear" | p[2] == "bspline" | p[2] == "bicubic" | p[2] == "catmullrom" | p[2] == "lanczos3")) {
+			pmap["algorithm"] = p[1];
+		}
+		else {
+			pmap["error"] = string_format("resize:ParseError - Unrecognized algorithm: %s.",p[2].c_str()); 
+			return pmap;
+		}
 
 	}
 	return pmap;

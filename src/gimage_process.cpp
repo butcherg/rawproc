@@ -628,6 +628,53 @@ std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::stri
 
 std::map<std::string,std::string> process_resize(gImage &dib, std::map<std::string,std::string> params)
 {
+	std::map<std::string,std::string> result;
 
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		int w=0, h=0, dw=dib.getWidth(), dh=dib.getHeight();
+		if (params["mode"] == "asspecified") {
+			w = atoi(params["width"].c_str());
+			h = atoi(params["height"].c_str());
+		}
+		else if (params["mode"] == "largestside") {
+			if (dh > dw) {
+				h = atoi(params["width"].c_str());
+			}
+			else {
+				w = atoi(params["width"].c_str());
+			}
+		}
+		else {
+			result["error"] = string_format("resize:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
+			return result;
+		}
+
+		if (h ==  0) h = dh * ((float)w/(float)dw);
+		if (w == 0)  w = dw * ((float)h/(float)dh); 
+		
+		RESIZE_FILTER filter = FILTER_CATMULLROM;  //must be same as default if tool.resize.algorithm is not specified
+		if (params["algorithm"] == "box") filter = FILTER_BOX;
+		if (params["algorithm"] == "bilinear") filter = FILTER_BILINEAR;
+		if (params["algorithm"] == "bspline") filter = FILTER_BSPLINE;
+		if (params["algorithm"] == "bicubic") filter = FILTER_BICUBIC;
+		if (params["algorithm"] == "catmullrom") filter = FILTER_CATMULLROM;
+		if (params["algorithm"] == "lanczos3") filter = FILTER_LANCZOS3;
+		
+		_mark();
+		dib.ApplyResize(w,h, filter, threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("resize:%s",params["paramstring"].c_str());
+		result["treelabel"] = "resize";
+		
+	}
+	return result;
 }
 

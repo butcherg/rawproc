@@ -352,6 +352,41 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 				commandstring += std::string(cmd) + ":" + pstr + " ";		
 		
 		}
+		
+		else if (strcmp(cmd,"resize") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_resize(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("resize... "); 
+			fflush(stdout);
+
+			//processing
+			std::map<std::string,std::string> result =  process_resize(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";		
+		
+		}
+
 
 
 //old ops: ********************************************************************
@@ -580,68 +615,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		}
 
 
-		//img <li>resize:w[,h] If either w or h is 0, resize preserves aspect of that dimension.  If only one number is present, the image is resized to that number along the longest dimension, preserving aspect.</li>
-		else if (strcmp(cmd,"resize") == 0) {  
-			unsigned w, h;  //don't read defaults from properties
-			std::string algo = myConfig::getConfig().getValueOrDefault("tool.resize.algorithm","catmullrom");
-			char *wstr = strtok(NULL,", ");
-			char *hstr = strtok(NULL,", ");
-			char *astr = strtok(NULL," ");
-			if (wstr == NULL) {
-				if (print) printf("Error: resize needs at least one parameter.\n");
-				return std::string();
-			}
-			else {
-				if (wstr) w = atoi(wstr);
-				if (hstr) h = atoi(hstr);
-				if (astr) algo = std::string(astr);
-				unsigned dw = dib.getWidth();
-				unsigned dh = dib.getHeight();
 
-				//if only one number is provided, put it in the largest dimension, set the other to 0
-				if (hstr == NULL) {
-					if (dh > dw) {
-						h = w;
-						w = 0;
-					}
-					else {
-						h =0;
-					}
-				}
-
-				if (h ==  0) h = dh * ((float)w/(float)dw);
-				if (w == 0)  w = dw * ((float)h/(float)dh); 
-
-				RESIZE_FILTER filter = FILTER_CATMULLROM;  //must be same as default if tool.resize.algorithm is not specified
-				if (algo == "box") filter = FILTER_BOX;
-				if (algo == "bilinear") filter = FILTER_BILINEAR;
-				if (algo == "bspline") filter = FILTER_BSPLINE;
-				if (algo == "bicubic") filter = FILTER_BICUBIC;
-				if (algo == "catmullrom") filter = FILTER_CATMULLROM;
-				if (algo == "lanczos3") filter = FILTER_LANCZOS3;
-
-				int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.resize.cores","0").c_str());
-				if (threadcount == 0) 
-					threadcount = gImage::ThreadCount();
-				else if (threadcount < 0) 
-					threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-				if (print) printf("resize: %dx%d,%s (%d threads)... ",w,h,algo.c_str(), threadcount); fflush(stdout);
-
-				_mark();
-				dib.ApplyResize(w,h, filter, threadcount);
-				if (print) printf("done (%fsec).\n", _duration()); fflush(stdout);
-				char cs[256];
-				if (wstr)
-					if (hstr)
-						if (astr)
-							sprintf(cs, "%s:%s,%s,%s ",cmd, wstr, hstr, astr);
-						else
-							sprintf(cs, "%s:%s,%s ",cmd, wstr, hstr);
-					else
-						sprintf(cs, "%s:%s ",cmd, wstr);
-				commandstring += std::string(cs);
-			}
-		}
 
 		//img <li>rotate:[-45.0 - 45.0] default: 0 (no-rotate)</li>
 		else if (strcmp(cmd,"rotate") == 0) {  

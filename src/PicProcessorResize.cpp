@@ -4,6 +4,8 @@
 #include "myConfig.h"
 #include "myFloatCtrl.h"
 #include "myIntegerCtrl.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "util.h"
 
 #include <wx/spinctrl.h>
@@ -178,6 +180,56 @@ void PicProcessorResize::createPanel(wxSimplebook* parent)
 
 bool PicProcessorResize::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("resize..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_resize(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_resize(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
+					log(wxString::Format(_("tool=resize,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+/*
+bool PicProcessorResize::processPicture(gImage *processdib) 
+{
 	wxString algo;
 	bool blur = false;
 	float sigma = 1.0;
@@ -240,6 +292,8 @@ bool PicProcessorResize::processPicture(gImage *processdib)
 	
 	return result;
 }
+*/
+
 
 
 
