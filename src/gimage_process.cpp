@@ -625,3 +625,9 @@ std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::stri
 	}
 	return result;
 }
+
+std::map<std::string,std::string> process_resize(gImage &dib, std::map<std::string,std::string> params)
+{
+
+}
+

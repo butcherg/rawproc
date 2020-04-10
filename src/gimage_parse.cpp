@@ -661,4 +661,28 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 	return pmap;
 }
 
+//resize
+//:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3] - resize the image to the specified width and height, using the specified interpolation algorithm.  If only one number is provided, use it for the largest dimension and compute the other to preserve the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  Can't specify an algorithm if only one number is provided.
+std::map<std::string,std::string> parse_resize(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+
+
+	}
+	return pmap;
+}
+
+
 
