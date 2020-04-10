@@ -48,13 +48,13 @@ bool isFloat(std::string str)
 
 bool isUnsignedInt(std::string str)
 {
-	std::regex e ("^\d+$");
+	std::regex e ("^[0-9]+$");
 	return std::regex_match (str,e);
 }
 
 bool isInt(std::string str)
 {
-	std::regex e ("^[-+]?[1-9]\d*\.?[0]*$");
+	std::regex e ("^[-+]?[0-9]+$");
 	return std::regex_match (str,e);
 }
 
