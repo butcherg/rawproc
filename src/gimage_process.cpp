@@ -693,11 +693,15 @@ std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::stri
 
 		float angle = atof(params["angle"].c_str());;
 
-		bool autocrop = false;
+		bool autocrop = false, hmirror = false, vmirror = false;
 		if (params.find("autocrop") != params.end()) autocrop = true;
+		if (params.find("hmirror") != params.end()) hmirror = true;
+		if (params.find("vmirror") != params.end()) vmirror = true;
 
 		_mark();
-		if ((int) angle == 270) dib.ApplyRotate270(threadcount);
+		if (hmirror) dib.ApplyHorizontalMirror(threadcount);
+		else if (vmirror) dib.ApplyVerticalMirror(threadcount);
+		else if ((int) angle == 270) dib.ApplyRotate270(threadcount);
 		else if ((int) angle == 180) dib.ApplyRotate180(threadcount);
 		else if ((int) angle == 90) dib.ApplyRotate90(threadcount);
 		else dib.ApplyRotate(angle, autocrop, threadcount);

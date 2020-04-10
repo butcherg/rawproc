@@ -2,6 +2,8 @@
 #include "PicProcessorRotate.h"
 #include "PicProcPanel.h"
 #include "myConfig.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "util.h"
 #include "undo.xpm"
 #include "run.xpm"
@@ -493,6 +495,55 @@ void PicProcessorRotate::createPanel(wxSimplebook* parent)
 
 bool PicProcessorRotate::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("rotate..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_rotate(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_rotate(*dib, params);
+		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
+					log(wxString::Format(_("tool=rotate,imagesize=%dx%d,threads=%s,time=%s"),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+/*
+bool PicProcessorRotate::processPicture(gImage *processdib) 
+{
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("rotate..."));
 	bool autocrop = false;
 	
@@ -532,6 +583,6 @@ bool PicProcessorRotate::processPicture(gImage *processdib)
 	
 	return result;
 }
-
+*/
 
 

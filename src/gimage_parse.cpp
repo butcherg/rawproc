@@ -741,6 +741,12 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 		if (isFloat(p[0])) {
 			pmap["angle"] = p[0];
 		}
+		else if (p[0] == "hmirror") {
+			pmap["hmirror"] == "true";
+		}
+		else if (p[0] == "vmirror") {
+			pmap["vmirror"] == "true";
+		}
 		else {
 			pmap["error"] = string_format("rotate:ParseError - Not a float: %s.",p[0].c_str()); 
 			return pmap;
