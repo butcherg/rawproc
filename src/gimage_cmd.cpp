@@ -319,34 +319,39 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
-/*
-		//img <li>gray:[r,g,b] default: 0.21,0.72,0.07</li> 
-		else if (strcmp(cmd,"gray") == 0) {  
-			double red   = atof(myConfig::getConfig().getValueOrDefault("tool.gray.r","0.21").c_str()); 
-			double green = atof(myConfig::getConfig().getValueOrDefault("tool.gray.g","0.72").c_str()); 
-			double blue  = atof(myConfig::getConfig().getValueOrDefault("tool.gray.b","0.07").c_str());
-			char *r = strtok(NULL,", ");
-			char *g = strtok(NULL,", ");
-			char *b = strtok(NULL," ");
-			if (r) red = atof(r);
-			if (g) green = atof(g);
-			if (b) blue = atof(b);
+		else if (strcmp(cmd,"redeye") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_redeye(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("redeye... "); 
+			fflush(stdout);
 
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.gray.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("gray: %0.2f,%0.2f,%0.2f (%d threads)... ",red,green,blue,threadcount); fflush(stdout);
+			//processing
+			std::map<std::string,std::string> result =  process_redeye(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
 
-			_mark();
-			dib.ApplyGray(red,green,blue, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.1f,%0.1f,%0.1f ",cmd, red, green, blue);
-			commandstring += std::string(cs);
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";		
+		
 		}
-*/
 
 
 //old ops: ********************************************************************
@@ -870,37 +875,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 
 
-		else if (strcmp(cmd,"redeye") == 0) {  //not documented, for testing only
-			int limit = atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.radius","50").c_str()); 
-			double threshold = atof(myConfig::getConfig().getValueOrDefault("tool.redeye.threshold","1.5").c_str());
-			char *sx = strtok(NULL,", ");
-			char *sy = strtok(NULL,", ");
-			char *st = strtok(NULL,", ");
-			char *sl = strtok(NULL,", ");
-			if (sx) {
-				int x = atoi(sx);
-				if (sy) {
-					if (st) threshold = atof(st);
-					if (sl) limit = atoi(sl);
-					int y = atoi(sy);
-					std::vector<coord> pts;
-					struct coord pt; pt.x = x; pt.y = y;
-					pts.push_back(pt);
-					int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.redeye.cores","0").c_str());
-					if (threadcount == 0) 
-						threadcount = gImage::ThreadCount();
-					else if (threadcount < 0) 
-						threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-					if (print) printf("redeye (%d threads)... ", threadcount); fflush(stdout);
-					_mark();
-					dib.ApplyRedeye(pts, threshold, limit, false, 1.0,  threadcount);
-					if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				}
-				else if (print) printf("redeye: bad y coord\n");
-			}
-			else if (print) printf("redeye: bad x coord\n");
-		
-		}
+
 		
 		//img <li>normalize:newmin,newmax default: 0.0,1.0</li>
 		else if (strcmp(cmd,"normalize") == 0) {

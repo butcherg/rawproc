@@ -581,6 +581,7 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 
 //redeye
 //:<xint1>,<yint1>[,<xint2>,<yint2>...],<tint>,<lint> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y)
+//src/img /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg redeye:1.50,30,0,1.00;3014,1076;3349,1048; foo.jpg
 std::map<std::string,std::string> parse_redeye(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -596,39 +597,66 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 	}
 
 	else { //positional
-		std::vector<std::string> p = split(paramstring, ",");
+		std::vector<std::string> s = split(paramstring, ";");
+		int ssize = s.size();
+
+		std::vector<std::string> p = split (s[0], ",");
 		int psize = p.size();
-		
+
+		//parse parameters, 4 of 'em:
 		if (psize < 4) {
 			pmap["error"] = "Error - not enough parameters."; 
 			return pmap;
 		}
-		
+
+		if (isFloat(p[0])) {
+			pmap["threshold"] = p[0];
+		}
+		else {
+			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[0].c_str()); 
+			return pmap;
+		}
+
+		if (isUnsignedInt(p[1])) {
+			pmap["limit"] = p[1];
+		}
+		else {
+			pmap["error"] = string_format("Error - limit is not an unsigned integer: %s.",p[1].c_str()); 
+			return pmap;
+		}
+
+		if (p[2] == "1" | p[2] == "desat") {
+			pmap["desat"] = "true";
+		}
+		else if (p[2] == "0") {
+			pmap["desat"] = "false";
+		}
+		else {
+			pmap["error"] = string_format("Error - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
+			return pmap;
+		}
+
+		if (isFloat(p[3])) {
+			pmap["desatpct"] = p[3];
+		}
+		else {
+			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[3].c_str()); 
+			return pmap;
+		}
+
+		//parse x,y coordinates
 		std::string coords;
-		if (isUnsignedInt(p[0])) coords = p[0];
-		for (unsigned i = 1; i<psize-3; i++) {
-			if (isUnsignedInt(p[i])) {
-				coords.append(","+p[i]); 
-			}
-			else {
-				pmap["error"] = string_format("Error - pixel coordinate is not an unsigned integer: %s.",p[i].c_str()); 
-				return pmap;
-			}
+		for (unsigned i=1; i < s.size(); i++) {
+			std::vector<std::string> c = split(s[i], ",");
+			if (i == s.size() - 1)
+				coords.append(c[0]+","+c[1]);
+			else
+				coords.append(c[0]+","+c[1]+",");
 		}
-		if (isFloat(p[psize - 2])) {
-			pmap["threshold"] = p[psize-2];
-		}
-		else {
-			pmap["error"] = string_format("Error - threshold is not a float: %s.",p[psize-2].c_str()); 
-			return pmap;
-		}
-		if (isUnsignedInt(p[psize - 1])) {
-			pmap["limit"] = p[psize-1];
-		}
-		else {
-			pmap["error"] = string_format("Error - limit is not an unsigned iteger: %s.",p[psize-1].c_str()); 
-			return pmap;
-		}
+		pmap["mode"] = "default";
+		pmap["coords"] = coords;
+		pmap["paramstring"] = paramstring;
+
 	}
 	return pmap;
 }

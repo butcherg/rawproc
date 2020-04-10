@@ -610,7 +610,7 @@ std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::stri
 		double threshold = atof(params["threshold"].c_str());
 		unsigned limit = atoi(params["limit"].c_str());
 		bool desat = false;
-		double desatpct=1.0;
+		double desatpct=0.0;
 		if (params["desat"] == "true") {
 			desat = true;
 			desatpct = atof(params["desatpct"].c_str());
@@ -619,10 +619,7 @@ std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::stri
 		_mark();
 		dib.ApplyRedeye(points, threshold, limit, desat, desatpct, threadcount);
 		result["duration"] = std::to_string(_duration());
-		if (desat)
-			result["commandstring"] = string_format("redeye:%s,%0.2f,%d,true,%0.f",params["coords"],threshold,limit,desatpct);
-		else
-			result["commandstring"] = string_format("redeye:%s,%0.2f,%d,false,%0.f",params["coords"],threshold,limit,desatpct);
+		result["commandstring"] = string_format("redeye:%s",params["paramstring"].c_str());
 		result["treelabel"] = "redeye";
 		
 	}
