@@ -581,7 +581,9 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 
 //redeye
 //:<xint1>,<yint1>[,<xint2>,<yint2>...],<tint>,<lint> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y)
-//src/img /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg redeye:1.50,30,0,1.00;3014,1076;3349,1048; foo.jpg
+//also, coord pairs can be ";" separated...
+//src/img -f /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg "redeye:1.50,30,0,1.00;3014,1076;3349,1048;" foo.jpg
+//src/img -f /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg redeye:1.50,30,0,1.00,3014,1076,3349,1048 foo.jpg
 std::map<std::string,std::string> parse_redeye(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -597,64 +599,127 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 	}
 
 	else { //positional
-		std::vector<std::string> s = split(paramstring, ";");
-		int ssize = s.size();
 
-		std::vector<std::string> p = split (s[0], ",");
-		int psize = p.size();
 
 		//parse parameters, 4 of 'em:
-		if (psize < 4) {
-			pmap["error"] = "redeye:ParseError - not enough parameters."; 
-			return pmap;
-		}
 
-		if (isFloat(p[0])) {
-			pmap["threshold"] = p[0];
-		}
-		else {
-			pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[0].c_str()); 
-			return pmap;
-		}
 
-		if (isUnsignedInt(p[1])) {
-			pmap["limit"] = p[1];
-		}
-		else {
-			pmap["error"] = string_format("redeye:ParseError - limit is not an unsigned integer: %s.",p[1].c_str()); 
-			return pmap;
-		}
+		if (paramstring.find(";") == std::string::npos) { //all parameters and coordinates separated by ","
+			std::vector<std::string> p = split (paramstring, ",");
+			int psize = p.size();
 
-		if (p[2] == "1" | p[2] == "desat") {
-			pmap["desat"] = "true";
-		}
-		else if (p[2] == "0") {
-			pmap["desat"] = "false";
-		}
-		else {
-			pmap["error"] = string_format("redeye:ParseError - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
-			return pmap;
-		}
+			if (psize < 4) {
+				pmap["error"] = "redeye:ParseError - not enough parameters."; 
+				return pmap;
+			}
 
-		if (isFloat(p[3])) {
-			pmap["desatpct"] = p[3];
-		}
-		else {
-			pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[3].c_str()); 
-			return pmap;
-		}
+			if (isFloat(p[0])) {
+				pmap["threshold"] = p[0];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[0].c_str()); 
+				return pmap;
+			}
 
-		//parse x,y coordinates
-		std::string coords;
-		for (unsigned i=1; i < s.size(); i++) {
-			std::vector<std::string> c = split(s[i], ",");
-			if (i == s.size() - 1)
-				coords.append(c[0]+","+c[1]);
-			else
-				coords.append(c[0]+","+c[1]+",");
+			if (isUnsignedInt(p[1])) {
+				pmap["limit"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - limit is not an unsigned integer: %s.",p[1].c_str()); 
+				return pmap;
+			}
+
+			if (p[2] == "1" | p[2] == "desat") {
+				pmap["desat"] = "true";
+			}
+			else if (p[2] == "0") {
+				pmap["desat"] = "false";
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
+				return pmap;
+			}
+
+			if (isFloat(p[3])) {
+				pmap["desatpct"] = p[3];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[3].c_str()); 
+				return pmap;
+			}
+
+			if (((psize - 4) % 2) != 0) { //remaining number of parameters is not even
+				pmap["error"] = "redeye:ParseError - number of coord parameters is not even."; 
+				return pmap;
+			} 
+
+			if (isUnsignedInt(p[4])) pmap["coords"] = p[4];
+			for (unsigned i=4; i < psize; i++) {
+				if (isUnsignedInt(p[i])) pmap["coords"].append(","+p[i]);
+			}
+		}
+		else { // semicolon-delimited params and coordinates
+
+			std::vector<std::string> s = split(paramstring, ";");
+			int ssize = s.size();
+
+			std::vector<std::string> p = split (s[0], ",");
+			int psize = p.size();
+
+			if (psize < 4) {
+				pmap["error"] = "redeye:ParseError - not enough parameters."; 
+				return pmap;
+			}
+
+			if (isFloat(p[0])) {
+				pmap["threshold"] = p[0];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[0].c_str()); 
+				return pmap;
+			}
+
+			if (isUnsignedInt(p[1])) {
+				pmap["limit"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - limit is not an unsigned integer: %s.",p[1].c_str()); 
+				return pmap;
+			}
+
+			if (p[2] == "1" | p[2] == "desat") {
+				pmap["desat"] = "true";
+			}
+			else if (p[2] == "0") {
+				pmap["desat"] = "false";
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - should be \"desat\" or \"1|0\", instead of %s.",p[2].c_str()); 
+				return pmap;
+			}
+
+			if (isFloat(p[3])) {
+				pmap["desatpct"] = p[3];
+			}
+			else {
+				pmap["error"] = string_format("redeye:ParseError - threshold is not a float: %s.",p[3].c_str()); 
+				return pmap;
+			}
+
+			//parse x,y coordinates
+			for (unsigned i=1; i < s.size(); i++) {
+				std::vector<std::string> c = split(s[i], ",");
+				if (c.size() != 2) {
+					pmap["error"] = string_format("redeye:ParseError - not a coordinate pair: %s.",s[i].c_str()); 
+					return pmap;
+				}
+				if (i == s.size() - 1)
+					pmap["coords"].append(c[0]+","+c[1]);
+				else
+					pmap["coords"].append(c[0]+","+c[1]+",");
+			}
 		}
 		pmap["mode"] = "default";
-		pmap["coords"] = coords;
 		pmap["paramstring"] = paramstring;
 
 	}
