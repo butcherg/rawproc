@@ -678,3 +678,36 @@ std::map<std::string,std::string> process_resize(gImage &dib, std::map<std::stri
 	return result;
 }
 
+std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		float angle = atof(params["angle"].c_str());;
+
+		bool autocrop = false;
+		if (params.find("autocrop") != params.end()) autocrop = true;
+
+		_mark();
+		if ((int) angle == 270) dib.ApplyRotate270(threadcount);
+		else if ((int) angle == 180) dib.ApplyRotate180(threadcount);
+		else if ((int) angle == 90) dib.ApplyRotate90(threadcount);
+		else dib.ApplyRotate(angle, autocrop, threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("rotate:%s",params["paramstring"].c_str());
+		result["treelabel"] = "rotate";
+	}
+	return result;
+}
+
+
+
+

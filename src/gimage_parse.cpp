@@ -720,5 +720,41 @@ std::map<std::string,std::string> parse_resize(std::string paramstring)
 	return pmap;
 }
 
+std::map<std::string,std::string> parse_rotate(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (isFloat(p[0])) {
+			pmap["angle"] = p[0];
+		}
+		else {
+			pmap["error"] = string_format("rotate:ParseError - Not a float: %s.",p[0].c_str()); 
+			return pmap;
+		}
+
+		if (psize >= 2) {
+			if (p[1] == "autocrop") {
+				pmap["autocrop"] == "true";
+			}
+		}
+		pmap["mode"] = "default";
+	}
+	return pmap;
+}
+
 
 
