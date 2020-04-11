@@ -227,72 +227,7 @@ bool PicProcessorResize::processPicture(gImage *processdib)
 	return ret;
 }
 
-/*
-bool PicProcessorResize::processPicture(gImage *processdib) 
-{
-	wxString algo;
-	bool blur = false;
-	float sigma = 1.0;
-	unsigned kernelsize = 3;
-	((wxFrame*) m_display->GetParent())->SetStatusText(_("resize..."));
-	wxArrayString cp = split(getParams(),",");
-	int width =  atoi(cp[0]);
-	int height =  atoi(cp[1]);
-	if (cp.size() >2) algo  = cp[2];
-	if (cp.size() >=6) {
-		if (cp[3] == "blur") {
-			blur = true;
-			sigma = atof(cp[4]);
-			kernelsize = atoi(cp[5]);
-		}
-	}
 
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	bool result = true;
-	unsigned dw = dib->getWidth();
-	unsigned dh = dib->getHeight();
-	if (height ==  0) height = dh * ((float)width/(float)dw);
-	if (width == 0)  width = dw * ((float)height/(float)dh); 
-	RESIZE_FILTER filter = FILTER_LANCZOS3;
-	if (algo == "box") filter = FILTER_BOX;
-	if (algo == "bilinear") filter = FILTER_BILINEAR;
-	if (algo == "bspline") filter = FILTER_BSPLINE;
-	if (algo == "bicubic") filter = FILTER_BICUBIC;
-	if (algo == "catmullrom") filter = FILTER_CATMULLROM;
-	if (algo == "lanczos3") filter = FILTER_LANCZOS3;
-
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.resize.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-	if (processingenabled) {
-		mark();
-#ifdef PREBLUR
-		if (blur) {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("resize, with pre-blur..."));
-			dib->ApplyGaussianBlur(sigma, kernelsize, threadcount);
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("resize..."));
-		}
-#endif
-		dib->ApplyResize(width, height, filter, threadcount);
-		m_display->SetModified(true);
-		wxString d = duration();
-
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.resize.log","0") == "1"))
-			log(wxString::Format(_("tool=resize,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
-	}
-
-	dirty = false;
-
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
-}
-*/
 
 
 
