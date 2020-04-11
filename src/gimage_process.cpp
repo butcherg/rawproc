@@ -731,7 +731,7 @@ std::map<std::string,std::string> process_saturation(gImage &dib, std::map<std::
 		dib.ApplySaturate(saturation, threadcount);
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
-		result["treelabel"] = "rotate";
+		result["treelabel"] = "saturation";
 	}
 	return result;
 }
