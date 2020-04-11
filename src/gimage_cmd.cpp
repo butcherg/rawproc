@@ -421,6 +421,39 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
+		else if (strcmp(cmd,"saturation") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_saturation(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("saturation... "); 
+			fflush(stdout);
+
+			//processing
+			std::map<std::string,std::string> result =  process_saturation(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";		
+		
+		}
 
 
 
@@ -703,28 +736,6 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 			}
 		}
 
-
-		//img <li>saturation:[0 - 5.0] default=1.0, no change</li>
-		else if (strcmp(cmd,"saturation") == 0) {  
-			double saturation= atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
-			char *s = strtok(NULL," ");
-			if (s) saturation = atof(s);
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("saturate: %0.2f (%d threads)... ",saturation,threadcount); fflush(stdout);
-
-			_mark();
-			dib.ApplySaturate(saturation, threadcount);
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-			char cs[256];
-			sprintf(cs, "%s:%0.1f ",cmd, saturation);
-			commandstring += std::string(cs);
-		}
-		
 
 		//img <li>tint:[r,g,b] default: 0,0,0 (doesn't have a corresponding tool in rawproc)</li>
 		else if (strcmp(cmd,"tint") == 0) {  

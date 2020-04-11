@@ -4,6 +4,8 @@
 #include "myFloatCtrl.h"
 #include "myRowSizer.h"
 #include "myConfig.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "util.h"
 #include "undo.xpm"
 
@@ -115,6 +117,56 @@ void PicProcessorSaturation::createPanel(wxSimplebook* parent)
 
 bool PicProcessorSaturation::processPicture(gImage *processdib) 
 {
+	if (!processingenabled) return true;
+	
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("saturation..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
+
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_saturation(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_saturation(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.saturation.log","0") == "1"))
+					log(wxString::Format(_("tool=saturation,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
+		}
+	}
+
+	dirty=false;
+	((wxFrame*) m_display->GetParent())->SetStatusText("");
+	return ret;
+}
+
+/*
+bool PicProcessorSaturation::processPicture(gImage *processdib) 
+{
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("saturation..."));
 	double saturation = atof(c.c_str());
 	bool result = true;
@@ -145,6 +197,6 @@ bool PicProcessorSaturation::processPicture(gImage *processdib)
 	
 	return result;
 }
-
+*/
 
 
