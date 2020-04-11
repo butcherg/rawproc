@@ -712,6 +712,27 @@ std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::stri
 	return result;
 }
 
+std::map<std::string,std::string> process_saturation(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
 
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "saturation:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
 
+		float saturation = atof(params["saturation"].c_str());;
+
+		_mark();
+		dib.ApplySaturate(saturation, threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
+		result["treelabel"] = "rotate";
+	}
+	return result;
+}
 
