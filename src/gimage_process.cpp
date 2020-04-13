@@ -8,6 +8,7 @@
 #include "elapsedtime.h"
 #include "CameraData.h"
 #include "cJSON.h"
+#include <math.h> 
 
 int getThreadCount(int threadcount) { 
 	if (threadcount == 0) 
@@ -742,11 +743,11 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "saturation:ProcessError - no mode";
+		result["error"] = "sharpen:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
-		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str()));
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 		
 		result["duration"] = "0";
@@ -756,6 +757,7 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 				_mark();
 				dib.ApplySharpen(strength, threadcount);
 				result["duration"] = std::to_string(_duration());
+				result["treelabel"] = "sharpen:convolution";
 			}
 		}
 		else if (params["mode"] == "usm") {
@@ -769,14 +771,97 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 				mask.ApplySubtract(blur,threadcount);
 				dib.ApplyAdd(mask,threadcount);
 				result["duration"] = std::to_string(_duration());
+				result["treelabel"] = "sharpen:usm";
 			}
 		}
 		else {
 			result["error"] = string_format("sharpen:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
 		}
-		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
-		result["treelabel"] = "saturation";
+		result["commandstring"] = string_format("sharpen:%s",params["paramstring"].c_str());
 	}
 	return result;
 }
+
+std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "subtract:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		if (params["mode"] == "value") {
+			float subtract = atof(params["value"].c_str());
+			_mark();
+			if (params["channel"] == "rgb") {
+				dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+			}
+			else if (params["channel"] == "red") {
+				dib.ApplySubtract(subtract, 0.0, 0.0, 0.0, true, threadcount);
+			}
+			else if (params["channel"] == "green") {
+				dib.ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
+			}
+			else if (params["channel"] == "blue") {
+				dib.ApplySubtract(0.0, 0.0, subtract, true, threadcount);
+			}
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = string_format("subtract:%s,value",params["channel"].c_str());
+		}
+		else if (params["mode"] == "camera") {
+			std::map<std::string,std::string> info = dib.getInfo();
+			if (info.find("Libraw.CFABlack") != info.end()) {
+				float sub[6][6];
+				std::string blackstr = info["Libraw.CFABlack"];
+				std::vector<std::string> blackvec = split(blackstr,",");
+				unsigned blackdim = sqrt(blackvec.size());
+				for (unsigned r=0; r< blackdim; r++)
+					for (unsigned c=0; c< blackdim; c++)
+						sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
+				dib.ApplyCFASubtract(sub, true, threadcount);
+				result["duration"] = std::to_string(_duration());
+				result["treelabel"] = "subtract:camera(cfa)";
+			}
+			else if (info.find("Libraw.PerChannelBlack") != info.end()) {
+				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
+				std::vector<std::string> s = split(info["Libraw.PerChannelBlack"],",");
+				if (s.size() >= 4) {
+					subr  = atof(s[0].c_str());
+					subg1 = atof(s[1].c_str());
+					subb  = atof(s[2].c_str());
+					subg2 = atof(s[3].c_str());
+					dib.ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
+					result["duration"] = std::to_string(_duration());
+				
+				}
+				result["treelabel"] = "subtract:camera(chan)";
+			}
+			else if (info.find("Libraw.Black") != info.end()) {
+				int subval = atoi(info["Libraw.Black"].c_str());
+				float subtract = (float) subval / 65536.0;
+				dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
+				result["duration"] = std::to_string(_duration());
+				result["treelabel"] = "subtract:camera";
+			}
+		}
+		else if (params["mode"] == "file") {
+			if (!file_exists(params["filename"])) {
+				result["error"] = string_format("subtract:ProcessError - file %s doesn't exist.",params["filename"].c_str());
+			}
+			_mark();
+			dib.ApplySubtract(params["filename"], threadcount);  
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "subtract:file";
+		}
+
+
+	}
+	return result;
+}
+
 
