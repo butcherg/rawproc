@@ -164,39 +164,6 @@ bool PicProcessorSaturation::processPicture(gImage *processdib)
 	return ret;
 }
 
-/*
-bool PicProcessorSaturation::processPicture(gImage *processdib) 
-{
-	((wxFrame*) m_display->GetParent())->SetStatusText(_("saturation..."));
-	double saturation = atof(c.c_str());
-	bool result = true;
-	
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.saturate.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
 
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	if (processingenabled & saturation != 1.0) {
-		mark();
-		dib->ApplySaturate(saturation, threadcount);
-		m_display->SetModified(true);
-		wxString d = duration();
-
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.saturate.log","0") == "1"))
-			log(wxString::Format(_("tool=saturate,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
-
-	}
-	
-	dirty = false;
-
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
-}
-*/
 
 
