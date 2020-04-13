@@ -749,22 +749,27 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 		
+		result["duration"] = "0";
 		if (params["mode"] == "convolution") {
 			float strength = atof(params["strength"].c_str());
-			_mark();
-			dib.ApplySharpen(strength, threadcount);
-			result["duration"] = std::to_string(_duration());
+			if (strength != 0.0) {
+				_mark();
+				dib.ApplySharpen(strength, threadcount);
+				result["duration"] = std::to_string(_duration());
+			}
 		}
 		else if (params["mode"] == "usm") {
 			float sigma = atof(params["sigma"].c_str());
 			float radius = atof(params["radius"].c_str());
-			_mark();
-			gImage blur = gImage(dib);
-			blur.ApplyGaussianBlur(sigma, (int) (radius*2.0), threadcount);
-			gImage mask = gImage(dib);
-			mask.ApplySubtract(blur,threadcount);
-			dib.ApplyAdd(mask,threadcount);
-			result["duration"] = std::to_string(_duration());
+			if (sigma != 0.0) {
+				_mark();
+				gImage blur = gImage(dib);
+				blur.ApplyGaussianBlur(sigma, (int) (radius*2.0), threadcount);
+				gImage mask = gImage(dib);
+				mask.ApplySubtract(blur,threadcount);
+				dib.ApplyAdd(mask,threadcount);
+				result["duration"] = std::to_string(_duration());
+			}
 		}
 		else {
 			result["error"] = string_format("sharpen:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());

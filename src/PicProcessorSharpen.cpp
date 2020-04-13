@@ -4,6 +4,8 @@
 #include "myConfig.h"
 #include "myRowSizer.h"
 #include "myFloatCtrl.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "undo.xpm"
 #include "util.h"
 
@@ -237,86 +239,51 @@ void PicProcessorSharpen::createPanel(wxSimplebook* parent)
 
 bool PicProcessorSharpen::processPicture(gImage *processdib) 
 {
-	double kernel[3][3] =
-	{
-		0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0
-	};
+	if (!processingenabled) return true;
+	
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("sharpen..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
 
-	double strength = 0.0, sigma = 0.0, radius=1.5;
-	bool result = true;
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
 
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
-
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-	((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("sharpen...")));
-
-	wxArrayString p = split(wxString(c),",");
-	wxString tool = "convolution";
-	wxString d;
-
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	if (global_processing_enabled & processingenabled) {
-		if (p[0] == "usm") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("sharpen:usm...")));
-			m_tree->SetItemText(id, _("sharpen:usm"));
-			tool = "usm";
-			if (p.GetCount() >=2) sigma = atof(p[1].c_str());
-			if (p.GetCount() >=3) radius = atof(p[2].c_str());
-			if (sigma > 0.0) {
-				mark();
-				gImage blur = gImage(*dib);
-				blur.ApplyGaussianBlur(sigma, (int) (radius*2.0));
-				gImage mask = gImage(*dib);
-				mask.ApplySubtract(blur);
-				dib->ApplyAdd(mask);
-				m_display->SetModified(true);
-				d = duration();
-			}
+	if (!pstr.empty())
+		params = parse_sharpen(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_sharpen(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
 		}
 		else {
-			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("sharpen:convolution...")));
-			m_tree->SetItemText(id, _("sharpen:convolution"));
-			if (p.GetCount() >=2 && p[0] == "convolution") 
-				strength = atof(p[1].c_str())+1.0;
-			else
-				strength = atof(c.c_str())+1.0;	
-			if (strength > 0.0) {
-				double x = -((strength-1)/4.0);
-				kernel[0][1] = x;
-				kernel[1][0] = x;
-				kernel[1][2] = x;
-				kernel[2][1] = x;
-				kernel[1][1] = strength;
-				((SharpenPanel *) toolpanel)->setKernel(kernel);
-				mark();
-				dib->ApplyConvolutionKernel(kernel, threadcount);
-				m_display->SetModified(true);
-				d = duration();
-			}
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			m_display->SetModified(true);
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
+					log(wxString::Format(_("tool=saturation,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
 		}
-
-		if (!d.IsEmpty()) {
-			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
-				log(wxString::Format(_("tool=sharpen(%s),imagesize=%dx%d,threads=%d,time=%s"),tool,dib->getWidth(), dib->getHeight(),threadcount,d));
-		}
-
 	}
 
-	dirty = false;
-	
+	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-
-	return result;
+	return ret;
 }
-
-
 
 
