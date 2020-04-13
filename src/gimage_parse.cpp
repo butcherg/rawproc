@@ -864,4 +864,87 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 	return pmap;
 }
 
+//sharpen
+//:usm[,<sfloat>][,<rfloat>] - apply usm sharpen with the specified sigma and radius
+//:convolution[,<afloat>] - apply convolution sharpen with the specified amount
+//:<afloat> - apply convolution sharpening with the specified amount
+std::map<std::string,std::string> parse_sharpen(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize < 1) {
+			pmap["error"] = "sharpen:ParseError - Need some parameters"; 
+			return pmap;
+		}
+		if (isFloat(p[0])) {
+			pmap["mode"] = "convolution";
+			pmap["strength"] = p[0];
+		}
+		else if (p[0] == "convolution") {
+			pmap["mode"] = "convolution";
+			if (psize >= 2) {
+				if (isFloat(p[1])) {
+					pmap["strength"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("sharpen:ParseError - Convolution strength is not a float: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+			else {
+				pmap["error"] = "sharpen:ParseError - Convolution needs a float strength"; 
+				return pmap;
+			}
+			
+		}
+		else if (p[0] == "usm") {
+			pmap["mode"] = "usm";
+			if (psize >= 2) {
+				if (isFloat(p[1])) {
+					pmap["sigma"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("sharpen:ParseError - USM sigma is not a float: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+			else {
+				pmap["error"] = "sharpen:ParseError - USM needs a float sigma"; 
+				return pmap;
+			}
+			if (psize >= 3) {
+				if (isFloat(p[2])) {
+					pmap["radius"] = p[2];
+				}
+				else {
+					pmap["error"] = string_format("sharpen:ParseError - USM radius is not a float: %s", p[2].c_str()); 
+					return pmap;
+				}
+			}
+			else {
+				pmap["error"] = "sharpen:ParseError - USM needs a float radius"; 
+				return pmap;
+			}
+		}
+		else {
+			pmap["error"] = string_format("sharpen:ParseError - Unrecognized parameter: %s",p[0].c_str()); 
+			return pmap;
+		}
+	}
+	return pmap;
+}
 

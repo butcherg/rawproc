@@ -736,5 +736,42 @@ std::map<std::string,std::string> process_saturation(gImage &dib, std::map<std::
 	return result;
 }
 
+std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
 
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "saturation:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.saturation.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "convolution") {
+			float strength = atof(params["strength"].c_str());
+			_mark();
+			dib.ApplySharpen(strength, threadcount);
+			result["duration"] = std::to_string(_duration());
+		}
+		else if (params["mode"] == "usm") {
+			float sigma = atof(params["sigma"].c_str());
+			float radius = atof(params["radius"].c_str());
+			_mark();
+			gImage blur = gImage(dib);
+			blur.ApplyGaussianBlur(sigma, (int) (radius*2.0), threadcount);
+			gImage mask = gImage(dib);
+			mask.ApplySubtract(blur,threadcount);
+			dib.ApplyAdd(mask,threadcount);
+			result["duration"] = std::to_string(_duration());
+		}
+		else {
+			result["error"] = string_format("sharpen:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
+		}
+		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
+		result["treelabel"] = "saturation";
+	}
+	return result;
+}
 

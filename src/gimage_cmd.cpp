@@ -455,6 +455,40 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
+		else if (strcmp(cmd,"sharpen") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_sharpen(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("sharpen... "); 
+			fflush(stdout);
+
+			//processing
+			std::map<std::string,std::string> result =  process_sharpen(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
+			}
+
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
+
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
+			else
+				commandstring += std::string(cmd) + ":" + pstr + " ";		
+		
+		}
+
 
 
 //old ops: ********************************************************************
@@ -683,58 +717,6 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		}
 
 
-		//img <li>sharpen:[0 - 10, default: 0 (no-sharpen)</li>
-		else if (strcmp(cmd,"sharpen") == 0) {  
-			double sharp  = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.initialvalue","0").c_str());
-			double sigma  = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.sigma","0").c_str());
-			double radius = atof(myConfig::getConfig().getValueOrDefault("tool.sharpen.radius","1.5").c_str());
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.sharpen.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			
-			char *d = strtok(NULL,", ");
-			if (strcmp(d, "usm") == 0) {
-				char *s = strtok(NULL,", ");
-				char *r = strtok(NULL," ");
-				if (s) sigma = atof(s);
-				if (r) radius = atof(r);
-				if (print) printf("sharp: usm,%0.2f,%0.2f (%d threads)... ",sigma,radius, threadcount); fflush(stdout);
-				_mark();
-				gImage blur = gImage(dib);
-				blur.ApplyGaussianBlur(sigma, (int) (radius*2.0));
-				gImage mask = gImage(dib);
-				mask.ApplySubtract(blur);
-				dib.ApplyAdd(mask);
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:usm%0.2f,%0.2f ",cmd, sigma,radius);
-				commandstring += std::string(cs);
-			}
-			else if (strcmp(d, "convolution") == 0) {
-				char *s = strtok(NULL," ");
-				if (s) sharp = atof(s);
-				if (print) printf("sharp: convolution,%0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
-				_mark();
-				dib.ApplySharpen(sharp, threadcount);
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:convolution,%0.2f ",cmd, sharp);
-				commandstring += std::string(cs);
-			}
-			else { //default convolution, only strength
-				sharp = atof(d);
-				if (print) printf("sharp: %0.2f (%d threads)... ",sharp, threadcount); fflush(stdout);
-				_mark();
-				dib.ApplySharpen(sharp, threadcount);
-				if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-				char cs[256];
-				sprintf(cs, "%s:%0.2f ",cmd, sharp);
-				commandstring += std::string(cs);
-			}
-		}
 
 
 		//img <li>tint:[r,g,b] default: 0,0,0 (doesn't have a corresponding tool in rawproc)</li>
