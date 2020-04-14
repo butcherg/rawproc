@@ -1015,42 +1015,30 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		else {
 			SetStatusText(wxString::Format(_("Source script found, loading source file %s..."),ofilename) );
 
-			if (!wxFileName::FileExists(ofilename)) {  //source file not found in same directory as destination file
-				//parm input.opensource.subdirectory: Enable search of specific directory for source file.  
-				wxString subdir = wxString(myConfig::getConfig().getValueOrDefault("input.opensource.subdirectory",""));
-				if (subdir != "") {
-					wxFileName findfilesubdir(ofilename);
-					if (findfilesubdir.Normalize()) {
-						findfilesubdir.AppendDir(subdir);  //see if source file is in the parent directory
-						if (findfilesubdir.Exists()) {
-							//SetStatusText(wxString::Format(_("Loading source file %s from %s directory..."),ofilename,subdir) );
-							ofilename = findfilesubdir.GetFullPath();
-						}
-					}
-					else {
-						//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0 
-						if (myConfig::getConfig().getValueOrDefault("input.opensource.parentdirectory","0") == "1") {
-							wxFileName findfileparentdir(ofilename);
-							if (findfileparentdir.Normalize()) {
-								findfileparentdir.RemoveLastDir();  //see if source file is in the parent directory
-								if (findfileparentdir.Exists()) {
-									//SetStatusText(wxString::Format(_("Loading source file %s from parent directory..."),ofilename) );
-									ofilename = findfileparentdir.GetFullPath();
-								}
-								else {
-									wxMessageBox(wxString::Format(_("Error: Source file %s not found in source, parent or sub directory"), ofilename));
-									SetStatusText("");
-									return;
-								}
-							}
+			if (!wxFileName::FileExists(ofilename)) {
+				std::string dirlist;
+				//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0
+				if (myConfig::getConfig().getValueOrDefault("input.opensource.parentdirectory","0") == "1") dirlist.append("..");
+				//parm input.opensource.subdirectory: Comma-separated list of subdirectories to search for source file. Default: (empty) 
+				if (myConfig::getConfig().exists("input.opensource.subdirectory")) dirlist.append("," + myConfig::getConfig().getValueOrDefault("input.opensource.subdirectory",""));
+				std::vector<std::string> dirs = split(dirlist,",");
+				bool sourcedirfound = false;
+				for (std::vector<std::string>::iterator it =  dirs.begin(); it != dirs.end(); ++it) {
+					wxFileName findfiledir(ofilename);
+					if (findfiledir.Normalize()) {
+						findfiledir.AppendDir(wxString(*it));  //see if source file is in the parent directory
+						if (findfiledir.Exists()) {
+							ofilename = findfiledir.GetFullPath();
+							sourcedirfound = true;
+							break;
 						}
 					}
 				}
-//				else {
-//					wxMessageBox(wxString::Format(_("Error: Source file %s not found"), ofilename));
-//					SetStatusText("");
-//					return;
-//				}
+				if (!sourcedirfound) {
+					wxMessageBox(wxString::Format(_("Error: Source file %s not found in source, parent or sub directory"), ofilename));
+					SetStatusText("");
+					return;
+				}
 			}
 
 			GIMAGE_FILETYPE fif;
