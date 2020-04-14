@@ -1009,3 +1009,182 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 }
 
 
+//tone
+//:gamma[,<gfloat>]
+//:reinhard,channel|luminance[,norm]
+//:log2
+//:loggamma
+//:filmic[,<Afloat>,<Bfloat>,<Cfloat>,<Dfloat>][,<pfloat>][,norm]
+std::map<std::string,std::string> parse_tone(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (psize < 1) {
+			 p.push_back("filmic");  //ToDo: use tool.tone.defaultmode instead...
+		}
+
+		if (p[0] == "gamma") {
+			if (psize >=2) {
+				if (isFloat(p[0])) {
+					pmap["mode"] = "gamma";
+					pmap["cmdlabel"] = "tone:gamma";
+					pmap["value"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("tone:ParseError - Not a float: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+			else {
+				pmap["error"] = "tone:ParseError - gamma needs a float power"; 
+				return pmap;
+			}
+		}
+		else if (p[0] == "reinhard") {
+			pmap["mode"] = "reinhard";
+			pmap["cmdlabel"] = "tone:reinhard";
+			pmap["reinhardmode"] = "channel";  //ToDo: use value from tool.tone.reinard.mode instead...
+			if (psize >=2) {
+				if (p[1] == "luminance") {
+					pmap["reinhardmode"] = "luminance";
+				}
+				else if (p[1] == "norm") {
+					pmap["norm"] = "true";
+				}
+				else if (p[1] != "channel") {
+					pmap["error"] = string_format("tone:ParseError - Unknown token: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+		}
+		else if (p[0] == "log2") {
+			pmap["mode"] = "log2";
+			pmap["cmdlabel"] = "tone:log2";
+		}
+		else if (p[0] == "loggamma") {
+			pmap["mode"] = "loggamma";
+			pmap["cmdlabel"] = "tone:loggamma";
+		}
+		else if (p[0] == "filmic") {
+			pmap["mode"] = "filmic";
+			pmap["cmdlabel"] = "tone:filmic";
+			pmap["power"] = "1.0";
+			pmap["A"] = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2");
+			pmap["B"] = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5");
+			pmap["C"] = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7");
+			pmap["D"] = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.6");
+			pmap["power"] = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0");
+			pmap["norm"] = (myConfig::getConfig().getValueOrDefault("tool.tone.filmic.norm","0") == "1") ? "true" : "false";
+			if (psize >= 5) {
+				if (isFloat(p[1])) {
+					pmap["A"] = p[1]; 
+				}
+				else {
+					pmap["error"] = string_format("tone:ParseError - Expected float A, instead got: %s", p[1].c_str()); 
+					return pmap;
+				}
+				if (isFloat(p[2])) {
+					pmap["B"] = p[2];
+				} 
+				else {
+					pmap["error"] = string_format("tone:ParseError - Expected float B, instead got: %s", p[2].c_str()); 
+					return pmap;
+				}
+				if (isFloat(p[3])) {
+					pmap["C"] = p[3]; 
+				} 
+				else {
+					pmap["error"] = string_format("tone:ParseError - Expected float C, instead got: %s", p[3].c_str()); 
+					return pmap;
+				}
+				if (isFloat(p[4])) {
+					pmap["D"] = p[4];
+				} 
+				else {
+					pmap["error"] = string_format("tone:ParseError - Expected float D, instead got: %s", p[4].c_str()); 
+					return pmap;
+				}
+			}
+			if (psize >= 6) {
+				if (isFloat(p[5])) {
+					pmap["power"] = p[5];
+				}
+				else if (p[5] == "norm") {
+					pmap["norm"] = "true";
+				}
+				else {
+					pmap["error"] = string_format("tone:ParseError - Unrecognized token: %s", p[5].c_str()); 
+					return pmap;
+				}
+			}
+			if (psize >= 7) {
+				if (isFloat(p[5])) {
+					pmap["power"] = p[5];
+				}
+				else {
+					pmap["error"] = string_format("tone:ParseError - Expected float power, instead got: %s", p[1].c_str()); 
+					return pmap;
+				}
+				if (p[6] == "norm") {
+					pmap["norm"] = "true";
+				}
+				else {
+					pmap["error"] = string_format("tone:ParseError - Unrecognized token: %s", p[6].c_str()); 
+					return pmap;
+				}
+			}
+		}
+		else {
+			pmap["error"] = string_format("tone:ParseError - Unrecognized mode: %s", p[0].c_str()); 
+			return pmap;
+		}
+
+
+	}
+	return pmap;
+}
+
+
+//whitebalance
+//:camera - apply white balance from the camera metadata multipliers, "as-shot"
+//:auto - apply auto (gray world) white balance
+//:patch,<xint>,<yint>,<rfloat> - apply white balance calculated from the patch at x,y of radius r
+//:<rfloat>,<gfloat>,<bfloat> - apply white balance with the specified RGB multipliers
+std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+
+	}
+	return pmap;
+}
+
+

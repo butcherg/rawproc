@@ -523,163 +523,42 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		
 		}
 
-/*
-		//img <li>subtract:val|camera|file,filename  val=a float value, "camera" retrieves the camera </li>
-		else if (strcmp(cmd,"subtract") == 0) {
-			double subtract;
-			char cs[1024];
-			char filename[256];
-			char *v = strtok(NULL,", ");
-			char *f = strtok(NULL," ");
+		else if (strcmp(cmd,"tone") == 0) {  
+			//parsing:
+			std::map<std::string,std::string> params;
+			char * pstr = strtok(NULL, " ");
+			if (pstr)
+				params = parse_tone(std::string(pstr));
+			
+			//parse error-catching:
+			if (params.find("error") != params.end()) {
+				return params["error"];  
+			}
+			
+			if (print) printf("%s... ",params["cmdlabel"].c_str()); 
+			fflush(stdout);
 
-			if (strcmp(v,"camera") == 0) {
-				subtract = atof(dib.getInfoValue("Libraw.Black").c_str()) / 65536.0;
-				sprintf(cs, "%s:camera ",cmd);
-			}
-			else if (strcmp(v,"file") == 0) {
-				strcpy(filename, f);
-				sprintf(cs, "%s:file,%s ",cmd, filename);
-			}
-			else {
-				subtract = atof(v);
-				sprintf(cs, "%s:%0.1f ",cmd, subtract);
+			//processing
+			std::map<std::string,std::string> result =  process_tone(dib, params);
+			
+			//process error catching:
+			if (result.find("error") != result.end()) {
+				return result["error"];  
 			}
 
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("subtract: %f (%d threads)... ",subtract,threadcount); fflush(stdout);
+			if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			fflush(stdout);
 
-			_mark();
-			if (strcmp(v,"rgb") == 0) {
-				dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
-			}
-			else if (strcmp(v,"red") == 0) {
-				dib.ApplySubtract(subtract, 0.0, 0.0, 0.0, true, threadcount);
-			}
-			else if (strcmp(v,"green") == 0) {
-				dib.ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
-			}
-			else if (strcmp(v,"blue") == 0) {
-				dib.ApplySubtract(0.0, 0.0, subtract, true, threadcount);
-			}
-			else if (strcmp(v,"camera") == 0) {
-				std::map<std::string,std::string> info = dib.getInfo();
-				if (info.find("Libraw.CFABlack") != info.end()) {
-					float sub[6][6];
-					std::string blackstr = info["Libraw.CFABlack"];
-					std::vector<std::string> blackvec = split(blackstr,",");
-					unsigned blackdim = sqrt(blackvec.size());
-					for (unsigned r=0; r< blackdim; r++)
-						for (unsigned c=0; c< blackdim; c++)
-							sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
-					dib.ApplyCFASubtract(sub, true, threadcount);
-				}
-				else if (info.find("Libraw.PerChannelBlack") != info.end()) {
-					float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
-					std::vector<std::string> s = split(info["Libraw.PerChannelBlack"],",");
-					if (s.size() >= 4) {
-						subr = atof(s[0].c_str());
-						subg1 = atof(s[0].c_str());
-						subb = atof(s[0].c_str());
-						subg2 = atof(s[0].c_str());
-						dib.ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
-					}
-				}
-				else if (info.find("Libraw.Black") != info.end()) {
-					int subval = atoi(info["Libraw.Black"].c_str());
-					float subtract = (float) subval / 65536.0;
-					dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
-				}
-			}
-			else if (strcmp(v,"file") == 0) {
-				dib.ApplySubtract(std::string(filename), threadcount);  
-			}
+			//commandstring += buildcommand(cmd, params);
+			if (paramexists(result, "commandstring"))
+				commandstring += result["commandstring"] + " ";
 			else
-				dib.ApplySubtract(subtract, CHANNEL_RGB, true, threadcount);  
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-
-
-			commandstring += std::string(cs);
+				commandstring += std::string(cmd) + ":" + pstr + " ";		
+		
 		}
-*/
 
 
 //old ops: ********************************************************************
-
-		//img <li>tone:operator,[param...]</li>
-		else if (strcmp(cmd,"tone") == 0) {
-			//tone:filmic,6.20,0.50,1.70,0.06,1.00,norm 
-			char cs[4096];
-			cs[0] = '\0';
-			char *c = strtok(NULL, " ");
-			std::vector<std::string> p = split(std::string(c), ",");
-
-			int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tone.cores","0").c_str());
-			if (threadcount == 0) 
-				threadcount = gImage::ThreadCount();
-			else if (threadcount < 0) 
-				threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-			if (print) printf("tone: %s (%d threads)... ",p[0].c_str(),threadcount); fflush(stdout);
-
-			_mark();
-			if (p[0] == "gamma") {
-				double gamma = 1.0;
-				if (p.size() >= 2) gamma = atof(p[1].c_str());
-				dib.ApplyToneMapGamma(gamma, threadcount);
-				sprintf(cs, "tone:gamma,%0.2f ",gamma);
-			}
-			else if (p[0] == "reinhard") {
-				bool channel = true;
-				std::string cmdstr = "reinhard";
-				if (p.size() >= 2) {
-					cmdstr.append(":"+p[1]);
-					if (p[1] == "luminance") channel = false;
-				}
-				bool norm = false;
-				if (p.size() >= 3) {
-					cmdstr.append(","+p[2]);
-					if (p[2] == "norm") norm = true;
-				}
-				cmdstr.append(" ");
-				dib.ApplyToneMapReinhard(channel, norm, threadcount);
-				strncpy(cs,cmdstr.c_str(),4096);
-			}
-			else if (p[0] == "log2") {
-				dib.ApplyToneMapLog2(threadcount);
-				sprintf(cs, "tone:log2 ");
-			}
-			else if (p[0] == "loggamma") {
-				dib.ApplyToneMapLogGamma(threadcount);
-				sprintf(cs, "tone:loggamma ");
-			}
-			else if (p[0] == "filmic") {
-				double filmicA = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.A","6.2").c_str());
-				double filmicB = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.B","0.5").c_str());
-				double filmicC = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.C","1.7").c_str());
-				double filmicD = atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str());
-				double power =   atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str());;
-				bool norm = myConfig::getConfig().getValueOrDefault("tool.tone.filmic.norm","1") == "1" ? true : false;
-				if (p.size() >= 2) filmicA = atof(p[1].c_str());
-				if (p.size() >= 3) filmicB = atof(p[2].c_str());
-				if (p.size() >= 4) filmicC = atof(p[3].c_str());
-				if (p.size() >= 5) filmicD = atof(p[4].c_str());
-				if (p.size() >= 6) power = atof(p[5].c_str());
-				if (p.size() >= 7 && p[6] == "norm") norm = true;
-				dib.ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, power, norm, threadcount);
-				if (norm)
-					sprintf(cs, "tone:filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,norm ",filmicA,filmicB,filmicC,filmicD,power);
-				else
-					sprintf(cs, "tone:filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f ",filmicA,filmicB,filmicC,filmicD,power);
-			}
-			if (print) printf("done (%fsec).\n",_duration()); fflush(stdout);
-
-			//char cs[256];
-			//sprintf(cs, "tone:%s ",c);
-			commandstring += std::string(cs);
-		}
 		
 		//img <li>group:command;command;...</li>
 		else if (strcmp(cmd,"group") == 0) {

@@ -864,4 +864,83 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 	return result;
 }
 
+std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "subtract:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		if (params["mode"] == "gamma") {
+			float gamma = atof(params["value"].c_str());
+			_mark();
+			dib.ApplyToneMapGamma(gamma, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "tone:gamma";
+		}
+		else if (params["mode"] == "reinhard") {
+			bool channel = true;
+			if (params["reinhardmode"] == "luminance") channel = false;
+			bool norm = false;
+			if (params["norm"] == "true") norm = true;
+			_mark();
+			dib.ApplyToneMapReinhard(channel, norm, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "tone:reinhard";
+		}
+		else if (params["mode"] == "log2") {
+			_mark();
+			dib.ApplyToneMapLog2(threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "tone:log2";
+		}
+		else if (params["mode"] == "loggamma") {
+			_mark();
+			dib.ApplyToneMapLogGamma(threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "tone:loggamma";
+		}
+		else if (params["mode"] == "filmic") {
+			float A = atof(params["A"].c_str());
+			float B = atof(params["B"].c_str());
+			float C = atof(params["C"].c_str());
+			float D = atof(params["D"].c_str());
+			float power = atof(params["power"].c_str());
+			bool norm = (params["norm"] == "true") ? true : false;
+			_mark();
+			dib.ApplyToneMapFilmic(A, B, C, D, power, norm, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "tone:filmic";
+		}
+
+	}
+ 	return result;
+}
+
+std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "subtract:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+
+
+	}
+ 	return result;
+}
+
+
 
