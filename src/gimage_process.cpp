@@ -929,14 +929,61 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "subtract:ProcessError - no mode";
+		result["error"] = "whitebalance:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 
-
+		if (params["mode"] == "camera") {
+			std::string cameraWB = dib.getInfoValue("Libraw.WhiteBalance");
+			if (cameraWB != "") {
+				std::vector<std::string> m = split(cameraWB,",");
+				float redmult   = atof(m[0].c_str());
+				float greenmult = atof(m[1].c_str());
+				float bluemult  = atof(m[2].c_str());
+				_mark();
+				if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+					if (dib.getInfoValue("Libraw.CFAPattern") != "")
+						dib.ApplyCameraWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				}
+				else {
+					dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+				}
+				result["duration"] = std::to_string(_duration());
+				result["treelabel"] = "whitebalance:camera";
+			}
+			else {
+				result["error"] = "whitebalance:ProcessError - no camera multipliers found";
+				return result;
+			}
+			
+		}
+		else if (params["mode"] == "auto") {
+			_mark();
+			dib.ApplyWhiteBalance(threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "whitebalance:auto";
+		}
+		else if (params["mode"] == "patch") {
+			unsigned patchx = atoi(params["patchx"].c_str());
+			unsigned patchy = atoi(params["patchy"].c_str());
+			float patchrad = atof(params["patchradius"].c_str());
+			_mark();
+			dib.ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "whitebalance:patch";
+		}
+		else if (params["mode"] == "multipliers") {
+			float redmult = atof(params["redmultiplier"].c_str());
+			float greenmult = atof(params["greenmultiplier"].c_str());
+			float bluemult = atof(params["bluemultiplier"].c_str());
+			_mark();
+			dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "whitebalance:multipliers";
+		}
 
 	}
  	return result;

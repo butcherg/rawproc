@@ -142,6 +142,7 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 			pmap["error"] = string_format("blackwhitepoint:ParseError - unrecognized positional parameter string: %s",p[0].c_str());
 			return pmap;
 		}
+		pmap["cmdlabel"] = string_format("blackwhitepoint:%s",pmap["mode"].c_str());
 	}
 	return pmap;
 }
@@ -216,6 +217,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 				return pmap;
 			}
 		}
+		pmap["cmdlabel"] = string_format("colorspace:%s,%s",pmap["mode"].c_str(),pmap["op"].c_str());
 
 	}
 	return pmap;
@@ -246,6 +248,7 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 			return pmap;
 		}
 		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "crop";
 		pmap["x"] = p[0];
 		pmap["y"] = p[1];
 		pmap["w"] = p[2];
@@ -277,7 +280,6 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 		
 		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {  
 			pmap["channel"] =  p[0];
-			pmap["mode"] = "default";
 			if (isFloat(p[1])) 
 				pmap["curvecoords"] = p[1];
 			else {
@@ -296,7 +298,6 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 		}
 		else if (isFloat(p[0])) {
 			pmap["channel"] =  "rgb";
-			pmap["mode"] = "default";
 			for (unsigned i=0; i<psize; i++) {
 				if (isFloat(p[i])) {
 					pmap["curvecoords"] += std::string(",") + p[i];
@@ -308,9 +309,11 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 			}
 		}
 		else {
-			
+			pmap["error"] = string_format("curve:ParseError - Unrecognized token: %s.",p[0].c_str());
+			return pmap;
 		}
-		
+		pmap["mode"] = "default";
+		pmap["cmdlabel"] = string_format("curve:%s",pmap["channel"]);
 	}
 	return pmap;
 }
@@ -348,6 +351,8 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 #endif
 			p[0] == "proof" | p[0] == "color") {
 				pmap["mode"] = p[0];
+				pmap["cmdlabel"] = string_format("demosaic:%s",p[0].c_str());
+				
 		}
 		else {
 			pmap["error"] = string_format("demosaic:ParseError - Unrecognized demosaic option: %s.",p[0].c_str());
@@ -420,6 +425,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 
 		if ( p[0] == "nlmeans") {
 			pmap["mode"] = p[0];
+			pmap["cmdlabel"] = "denoise:nlmeans";
 			pmap["sigma"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue",
 				myConfig::getConfig().getValueOrDefault("tool.denoise.initialvalue","0"));
 			pmap["local"]	  = myConfig::getConfig().getValueOrDefault("tool.denoise.local","3");
@@ -430,6 +436,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 		}
 		else if (p[0] == "wavelet") {
 			pmap["mode"] = p[0];
+			pmap["cmdlabel"] = "denoise:wavelet";
 			pmap["threshold"] = myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0");
 			if (psize >= 2) pmap["threshold"] = p[1];
 		}
@@ -470,6 +477,7 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 				return pmap;
 			}
 			pmap["mode"] = "patch";
+			pmap["cmdlabel"] = "exposure:patch";
 			pmap["x"] = p[1];
 			pmap["y"] = p[2]; 
 			pmap["radius"] = p[3]; 
@@ -484,6 +492,7 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 				return pmap;
 			}
 			pmap["mode"] = "ev";
+			pmap["cmdlabel"] = "exposure:ev";
 		}
 
 	}
@@ -549,8 +558,8 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 			return pmap;
 		}
 
-			
 		pmap["mode"] = "gray";
+		pmap["cmdlabel"] = "gray";
 		
 	}
 	return pmap;
@@ -720,6 +729,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 			}
 		}
 		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "redeye";
 		pmap["paramstring"] = paramstring;
 
 	}
@@ -759,11 +769,13 @@ std::map<std::string,std::string> parse_resize(std::string paramstring)
 		
 		if (psize < 2) {
 			pmap["mode"] = "largestside";
+			pmap["cmdlabel"] = "resize";
 			return pmap;
 		}
 		else if (isUnsignedInt(p[1])) {
 			pmap["height"] = p[1];
 			pmap["mode"] = "asspecified";
+			pmap["cmdlabel"] = "resize";
 		}
 		else if (p[1] == "box" | p[1] == "bilinear" | p[1] == "bspline" | p[1] == "bicubic" | p[1] == "catmullrom" | p[1] == "lanczos3") {
 			pmap["algorithm"] = p[1];
@@ -823,6 +835,7 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 			}
 		}
 		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "rotate";
 	}
 	return pmap;
 }
@@ -860,6 +873,7 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 			return pmap;
 		}
 		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "saturation";
 	}
 	return pmap;
 }
@@ -892,10 +906,12 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 		}
 		if (isFloat(p[0])) {
 			pmap["mode"] = "convolution";
+			pmap["cmdlabel"] = "sharpen:convolution";
 			pmap["strength"] = p[0];
 		}
 		else if (p[0] == "convolution") {
 			pmap["mode"] = "convolution";
+			pmap["cmdlabel"] = "sharpen:convolution";
 			if (psize >= 2) {
 				if (isFloat(p[1])) {
 					pmap["strength"] = p[1];
@@ -913,6 +929,7 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 		}
 		else if (p[0] == "usm") {
 			pmap["mode"] = "usm";
+			pmap["cmdlabel"] = "sharpen:usm";
 			if (psize >= 2) {
 				if (isFloat(p[1])) {
 					pmap["sigma"] = p[1];
@@ -977,6 +994,7 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 
 		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {
 			pmap["mode"] = "value";
+			pmap["cmdlabel"] = string_format("subtract:%s,value",p[0].c_str());
 			pmap["channel"] = p[0];
 			if (psize >= 2) {
 				if (isFloat(p[1])) {
@@ -994,13 +1012,17 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 		}
 		else if (isFloat(p[0])) {
 			pmap["mode"] = "value";
+			pmap["cmdlabel"] = "subtract:rgb,value";
 			pmap["value"] = p[0];
+			pmap["channel"] = "rgb";
 		}
 		else if (p[0] == "camera") {
 			pmap["mode"] = "camera";
+			pmap["cmdlabel"] = "subtract:camera";
 		}
 		else { //filename?
 			pmap["mode"] = "file";
+			pmap["cmdlabel"] = "subtract:file";
 			pmap["filename"] = p[0];
 		}
 
@@ -1182,6 +1204,85 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 
+		if (isFloat(p[0])) {
+			pmap["mode"] = "multipliers";
+			pmap["cmdlabel"] = "whitebalance:multipliers";
+			if (psize < 3) {
+				pmap["error"] = "whitebalance:ParseError - Insufficient number of multipliers"; 
+				return pmap;
+			}
+			
+			if (isFloat(p[0])) {
+				pmap["redmultiplier"] = p[0];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Red multiplier expected to be float: %s", p[0].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[1])) {
+				pmap["greenmultiplier"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Green multiplier expected to be float: %s", p[1].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[2])) {
+				pmap["bluemultiplier"] = p[2];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Blue multiplier expected to be float: %s", p[2].c_str()); 
+				return pmap;
+			}
+		}
+		else if (p[0] == "camera") {
+			pmap["mode"] = "camera";
+			pmap["cmdlabel"] = "whitebalance:camera";
+
+		}
+		else if (p[0] == "auto") {
+			pmap["mode"] = "log2";
+			pmap["cmdlabel"] = "whitebalance:auto";
+			
+		}
+		else if (p[0] == "patch") {
+			pmap["mode"] = "log2";
+			pmap["cmdlabel"] = "whitebalance:patch";
+			if (psize < 4) {
+				pmap["error"] = "whitebalance:ParseError - Insufficient number of patch parameters"; 
+				return pmap;
+			}
+			if (isUnsignedInt(p[1])) {
+				pmap["patchx"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Patch x expected to be unsigned integer: %s", p[1].c_str()); 
+				return pmap;
+			}
+			if (isUnsignedInt(p[2])) {
+				pmap["patchy"] = p[2];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Patch y expected to be unsigned integer: %s", p[2].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[3])) {
+				pmap["patchradius"] = p[3];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Patch radius expected to be float: %s", p[3].c_str()); 
+				return pmap;
+			}
+			
+			
+			
+			pmap["patchy"] = p[2];
+			pmap["patchradius"] = p[3];
+			
+		}
+		else {
+			pmap["error"] = string_format("whitebalance:ParseError - Unrecognized token: %s", p[0].c_str()); 
+			return pmap;
+		}
 
 	}
 	return pmap;

@@ -35,6 +35,91 @@ std::string buildcommand(std::string cmd, std::map<std::string,std::string> para
 
 std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, bool print)
 {
+//printf("do_cmd: enter, command=-%s-...\n",commandstr.c_str()); fflush(stdout);
+	std::string commandstring = std::string();
+	char c[256];
+	strncpy(c, commandstr.c_str(), 255);
+	char* cmd = strtok(c,":");
+	std::string command;
+	if (cmd) command = cmd;
+	
+	std::map<std::string,std::string> result;
+
+	//parsing:
+	std::map<std::string,std::string> params;
+	char * pstr = strtok(NULL, " ");
+	if (pstr) {
+		if (command == "blackwhitepoint") params = parse_blackwhitepoint(std::string(pstr));
+		else if (command == "colorspace") params = parse_colorspace(std::string(pstr));
+		else if (command == "curve") params = parse_curve(std::string(pstr));
+		else if (command == "demosaic") params = parse_demosaic(std::string(pstr));
+		else if (command == "denoise") params = parse_denoise(std::string(pstr));
+		else if (command == "exposure") params = parse_exposure(std::string(pstr));
+		else if (command == "gray") params = parse_gray(std::string(pstr));
+		else if (command == "lenscorrection") params = parse_lenscorrection(std::string(pstr));
+		else if (command == "redeye") params = parse_redeye(std::string(pstr));
+		else if (command == "resize") params = parse_resize(std::string(pstr));
+		else if (command == "rotate") params = parse_rotate(std::string(pstr));
+		else if (command == "saturation") params = parse_saturation(std::string(pstr));
+		else if (command == "sharpen") params = parse_sharpen(std::string(pstr));
+		else if (command == "subtract") params = parse_subtract(std::string(pstr));
+		else if (command == "tone") params = parse_tone(std::string(pstr));
+		else if (command == "whitebalance") params = parse_whitebalance(std::string(pstr));
+		else return string_format("Error - Unrecognized command: %s",command.c_str());
+	}
+	else {
+		printf("no command...\n"); fflush(stdout);
+		return "";
+	}
+			
+	//parse error-catching:
+	if (params.find("error") != params.end()) {
+//printf("do_cmd: exit - parse error...\n"); fflush(stdout);
+		return params["error"];  
+	}
+			
+	if (print) printf("%s... ",params["cmdlabel"].c_str()); 
+	fflush(stdout);
+
+	//processing
+	if (command == "blackwhitepoint") result =  process_blackwhitepoint(dib, params);
+	else if (command == "colorspace") result =  process_colorspace(dib, params);
+	else if (command == "curve") result =  process_curve(dib, params);
+	else if (command == "demosaic") result =  process_demosaic(dib, params);
+	else if (command == "denoise") result =  process_denoise(dib, params);
+	else if (command == "exposure") result =  process_exposure(dib, params);
+	else if (command == "gray") result =  process_gray(dib, params);
+	else if (command == "lenscorrection") result =  process_lenscorrection(dib, params);
+	else if (command == "redeye") result =  process_redeye(dib, params);
+	else if (command == "resize") result =  process_resize(dib, params);
+	else if (command == "rotate") result =  process_rotate(dib, params);
+	else if (command == "saturation") result =  process_saturation(dib, params);
+	else if (command == "sharpen") result =  process_sharpen(dib, params);
+	else if (command == "subtract") result =  process_subtract(dib, params);
+	else if (command == "tone") result =  process_tone(dib, params);
+	else if (command == "whitebalance") result =  process_whitebalance(dib, params);
+	
+			
+	//process error catching:
+	if (result.find("error") != result.end()) {
+//printf("do_cmd: exit - process error...\n"); fflush(stdout);
+		return result["error"];  
+	}
+
+	if (print) printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+	fflush(stdout);
+
+	//commandstring += buildcommand(cmd, params);
+	if (paramexists(result, "commandstring"))
+		commandstring += result["commandstring"] + " ";
+	else
+		commandstring += std::string(cmd) + ":" + pstr + " ";		
+//printf("do_cmd: exit nominal...\n"); fflush(stdout);
+	return commandstring;
+}
+
+std::string do_cmd_old(gImage &dib, std::string commandstr, std::string outfile, bool print)
+{
 		std::string commandstring = std::string();
 		char c[256];
 		strncpy(c, commandstr.c_str(), 255);
