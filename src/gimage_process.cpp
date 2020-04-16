@@ -1,6 +1,7 @@
 
 #include "gimage_process.h"
-#include "gimage_parse.h" //for paramexists()
+#include "gimage_parse.h"
+#include "gimage_cmd.h"
 #include "gimage/strutil.h"
 #include "gimage/curve.h"
 #include "fileutil.h"
@@ -988,6 +989,26 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 	}
  	return result;
 }
+
+std::map<std::string,std::string> process_group(gImage &dib, std::map<std::string,std::string> params, bool print)
+{
+	std::map<std::string,std::string> result;
+	
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "whitebalance:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		if (print) printf("\n"); fflush(stdout);
+		std::vector<std::string> cmdlist = split(std::string(params["cmdstring"]), ";");
+		for (int i=0; i<cmdlist.size(); i++) {
+			if (print) printf("\t"); fflush(stdout);
+			do_cmd(dib, cmdlist[i], std::string(), true);
+		}
+	}
+	return result;
+}
+
 
 
 

@@ -2845,6 +2845,7 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 			halfimage[Hpos].b = pix[2];
 		}
 	}
+	imginfo["Libraw.Mosaiced"] = "0";
 
 	image = halfimage;
 	w /=2;
@@ -2888,7 +2889,7 @@ bool gImage::ApplyMosaicColor(int threadcount)
 			}
 		}
 	}
-
+	imginfo["Libraw.Mosaiced"] = "0";
 
 	c = 3;
 	return true;
@@ -2951,6 +2952,7 @@ bool gImage::ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	free( red );
 	free (rawdata[0]);
 	free( rawdata );
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -2999,6 +3001,7 @@ bool gImage::ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3041,6 +3044,7 @@ bool gImage::ApplyDemosaicDCB(LIBRTPROCESS_PREPOST prepost, int iterations, bool
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3091,6 +3095,7 @@ bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, i
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3133,6 +3138,7 @@ bool gImage::ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3226,6 +3232,7 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3269,6 +3276,7 @@ bool gImage::ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost, int iterations, in
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3306,6 +3314,7 @@ bool gImage::ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost, int threadcou
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
@@ -3346,6 +3355,7 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 	RT_free(green);
 	RT_free(red);
 	RT_free(rawdata);
+	imginfo["Libraw.Mosaiced"] = "0";
 	return true;
 }
 
