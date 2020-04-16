@@ -256,9 +256,9 @@ class BlackWhitePointPanel: public PicProcPanel
 					break;
 				case BLACKWHITEDATA:
 					if (minwhite->GetValue())
-						q->setParams(wxString::Format("%s,data,minwhite",  chan->GetString(chan->GetSelection())));
+						q->setParams("data,minwhite");
 					else
-						q->setParams(wxString::Format("%s,data",  chan->GetString(chan->GetSelection())));
+						q->setParams("data");
 					q->processPic();
 					break;
 				case BLACKWHITECAMERA:
