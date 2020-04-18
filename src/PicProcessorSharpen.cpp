@@ -20,6 +20,7 @@ class SharpenPanel: public PicProcPanel
 	public:
 		SharpenPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			printf("SharpPanel: %s\n",params.c_str());  fflush(stdout);
 			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
@@ -69,6 +70,7 @@ class SharpenPanel: public PicProcPanel
 				else {
 					convb->SetValue(true);
 					sharpmode = SHARPENCONV;
+					if (p.GetCount() >= 1) sharpval->SetFloatValue(atof(p[0].c_str()));
 				}
 			}
 			
@@ -203,11 +205,25 @@ class SharpenPanel: public PicProcPanel
 			processSH();
 		}
 		
-		void setKernel(double k[3][3])
+		void setKernel(double strength)
 		{
+			double k[3][3] =
+			{
+				0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0
+			};
+			double x = -((strength)/4.0);
+			k[0][1] = x;
+			k[1][0] = x;
+			k[1][2] = x;
+			k[2][1] = x;
+			k[1][1] = strength+1.0;
+			
 			for (int r=0; r<3; r++)
 				for (int c=0; c<3; c++)
 					kernel[r][c]->SetLabel(wxString::Format("%0.2f",k[r][c]+0.0));
+			Refresh();
 		}
 
 
@@ -268,6 +284,8 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 		}
 		else {
 			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+			if (params["mode"] == "convolution") 
+				((SharpenPanel *) toolpanel)->setKernel(atof(params["strength"].c_str()));
 			m_display->SetModified(true);
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
