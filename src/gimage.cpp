@@ -2859,30 +2859,43 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 bool gImage::ApplyMosaicColor(int threadcount)
 {
 	unsigned cfarray[2][2];
-	if (!cfArray(cfarray)) return false;
-	int arraydim = 2;
+	unsigned xtarray[6][6];
+	int arraydim = 0;
+
+	if (cfArray(cfarray)) {
+		arraydim = 2;
+		for (unsigned i=0; i<arraydim; i++)
+			for (unsigned j=0; j<arraydim; j++)
+				xtarray[i][j] = cfarray[i][j];
+	}
+	else if (xtranArray(xtarray)) {
+		arraydim = 6; 
+	}
+	else return false;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h-(arraydim-1); y+=arraydim) {
 		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
-			unsigned Hpos = (x/2) + (y/2)*(w/2);
-			float pix[4] = {0.0, 0.0, 0.0, 0.0};
-			for (unsigned i=0; i<arraydim; i++) {
-				for (unsigned j=0; j<arraydim; j++) {
-					int pos = (x+i) + (y+j) * w;
-					switch (cfarray[i][j]) {
-						case 0:  //red
+			for (unsigned row=0; row<arraydim; row++) {
+				for (unsigned col=0; col<arraydim; col++) {
+					int pos = (x+col) + (y+row) * w;
+					float val;
+					switch (xtarray[row][col]) {
+						case 0: //r
 							image[pos].g = 0.0;
 							image[pos].b = 0.0;
 							break;
-						case 1:  //green
-						case 3:
+						case 1: //g or g1
 							image[pos].r = 0.0;
 							image[pos].b = 0.0;
 							break;
-						case 2:  //blue
+						case 2:  //b
 							image[pos].r = 0.0;
 							image[pos].g = 0.0;
+							break;
+						case 3: // g2
+							image[pos].r = 0.0;
+							image[pos].b = 0.0;
 							break;
 					}
 				}
@@ -2890,10 +2903,10 @@ bool gImage::ApplyMosaicColor(int threadcount)
 		}
 	}
 	imginfo["Libraw.Mosaiced"] = "0";
-
 	c = 3;
 	return true;
 }
+
 
 #ifdef USE_LIBRTPROCESS
 
