@@ -9,7 +9,8 @@
 
 #define GROUPENABLE 8200
 #define GROUPFILESELECT 8201
-#define GROUPUPDATE 8202
+#define GROUPFILESAVE 8202
+#define GROUPUPDATE 8203
 
 class GroupPanel: public PicProcPanel
 {
@@ -36,17 +37,20 @@ class GroupPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
-
-			m->AddRowItem(new wxButton(this, GROUPFILESELECT, _("Select File")), flags);
-			m->AddRowItem(new wxButton(this, GROUPUPDATE, _("Update Group")), flags);
+			m->AddRowItem(new wxButton(this, GROUPFILESELECT, _("Select File...")), flags);
+			m->AddRowItem(new wxButton(this, GROUPFILESAVE, _("Save File...")), flags);
 			m->NextRow();
 			m->AddRowItem(edit, flags);
+			
+			m->NextRow();
+			m->AddRowItem(new wxButton(this, GROUPUPDATE, _("Update Group")), flags);
 			m->End();
 
 			SetSizerAndFit(m);
 
 			Bind(wxEVT_CHECKBOX, &GroupPanel::onEnable, this, GROUPENABLE);
 			Bind(wxEVT_BUTTON, &GroupPanel::selectFile, this, GROUPFILESELECT);
+			Bind(wxEVT_BUTTON, &GroupPanel::saveFile, this, GROUPFILESAVE);
 			Bind(wxEVT_BUTTON, &GroupPanel::updateGroup, this, GROUPUPDATE);
 			Bind(wxEVT_CHAR_HOOK, &GroupPanel::OnKey,  this);
 			Thaw();
@@ -77,6 +81,27 @@ class GroupPanel: public PicProcPanel
 		{
 			commandstring.Replace(";","\n");
 			edit->SetValue(commandstring);
+		}
+		
+		void saveFile(wxCommandEvent& event)
+		{
+			wxString commandstring;
+			wxFileName toollistpath;
+			toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
+
+			wxString fname = wxFileSelector(_("Save Tool List..."), toollistpath.GetPath());
+			if (fname == "") return;
+			wxFileName filepath(fname);
+			
+			wxFile f;
+			if (!f.Open(filepath.GetFullPath(), wxFile::write)) {
+				wxMessageBox(wxString::Format("Tool file %s save failed.",filepath.GetFullName()));
+			}
+			else {
+				f.Write(edit->GetValue());
+				f.Close();
+				wxMessageBox(wxString::Format("Tool file %s saved.",filepath.GetFullName()));
+			}
 		}
 
 		void selectFile(wxCommandEvent& event)
