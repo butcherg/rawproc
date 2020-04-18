@@ -121,16 +121,8 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	return commandstring;
 }
 
-std::string do_cmd_old(gImage &dib, std::string commandstr, std::string outfile, bool print)
-{
-		std::string commandstring = std::string();
-		char c[256];
-		strncpy(c, commandstr.c_str(), 255);
-		char* cmd = strtok(c,":");
-		
 
-
-
+/*
 //old ops: ********************************************************************
 		
 		//img <li>group:command;command;...</li>
@@ -301,7 +293,7 @@ std::string do_cmd_old(gImage &dib, std::string commandstr, std::string outfile,
 			commandstring += std::string(cs);
 		}
 
-/*
+
 		else if (strcmp(cmd,"blur") == 0) {  
 			double kernel1[5][5] = 
 			{
@@ -341,7 +333,7 @@ std::string do_cmd_old(gImage &dib, std::string commandstr, std::string outfile,
 				sprintf(cs, "%s ",cmd);
 			//commandstring += std::string(cs);  //uncomment when rawproc supports blur
 		}
-*/
+
 		else if (strcmp(cmd,"blur") == 0) { 
 			unsigned kernelsize = 3; 
 			double sigma = 1.0;
@@ -406,7 +398,7 @@ for (unsigned r=0; r<3; r++) {
 			sprintf(cs, "%s:%s ",cmd,c);
 			commandstring += std::string(cs);
 		}
-/*
+
 		else if (strcmp(cmd,"save") == 0) {
 			char *of = strtok(NULL, ", ");
 			char *params = strtok(NULL, ", ");
@@ -427,8 +419,3 @@ for (unsigned r=0; r<3; r++) {
 		}
 */
 		
-		return commandstring;
-		//else printf("Unrecognized command: %s.  Continuing...\n",cmd); fflush(stdout);
-
-}
-
