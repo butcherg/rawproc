@@ -20,7 +20,6 @@ class SharpenPanel: public PicProcPanel
 	public:
 		SharpenPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
-			printf("SharpPanel: %s\n",params.c_str());  fflush(stdout);
 			Freeze();
 			SetSize(parent->GetSize());
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
