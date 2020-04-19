@@ -191,10 +191,12 @@ class gImage
 		pix getRGB(float x, float y);
 		
 		//Lensfun database and correction methods
-		static GIMAGE_ERROR loadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
-		static lfDatabase * getLensDatabase();
-		static void destroyLensDatabase();
-		GIMAGE_ERROR ApplyLensCorrection(std::string modops, int threadcount=0);
+		static GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
+		static lfDatabase * lensfunGetLensDatabase();
+		static void lensfunDestroyLensDatabase();
+		static GIMAGE_ERROR lensfunFindCameraLens(std::string camera, std::string lens);
+		GIMAGE_ERROR ApplyLensCorrection(std::string modops, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
+		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
 
 		//Static methods
 		static std::string getRGBCharacteristics();

@@ -4690,7 +4690,7 @@ pix gImage::getRGB(float x, float y)
 //Lens database and correction methods
 //Wraps Lensfun classes in order to manage database 
 
-GIMAGE_ERROR gImage::loadLensDatabase(std::string lensfundatadir)
+GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir)
 {
 	bool lfok = false;
 	lfError e = LF_NO_ERROR;
@@ -4727,17 +4727,41 @@ GIMAGE_ERROR gImage::loadLensDatabase(std::string lensfundatadir)
 	return g;
 }
 
-lfDatabase * gImage::getLensDatabase()
+lfDatabase * gImage::lensfunGetLensDatabase()
 {
 	return ldb;
 }
 
-void gImage::destroyLensDatabase()
+void gImage::lensfunDestroyLensDatabase()
 {
 	if (ldb != NULL) ldb->~lfDatabase();
 }
 
-GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount)
+
+GIMAGE_ERROR gImage::lensfunFindCameraLens(std::string camera, std::string lens)
+{
+	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
+	//get camera instance:
+	const lfCamera *cam = NULL;
+	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camera.c_str());
+	if (cameras == NULL) {
+		lf_free (cameras);
+		return GIMAGE_LF_CAMERA_NOT_FOUND;
+	}
+	lf_free (cameras);
+
+	//get lens instance:
+	const lfLens **lenses = NULL;
+	lenses = ldb->FindLenses (cam, NULL, lens.c_str());
+	if (lenses == NULL) {
+		lf_free (lenses);
+		return GIMAGE_LF_LENS_NOT_FOUND;
+	}
+	lf_free (lenses);
+	return GIMAGE_OK;
+}
+
+GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount, std::string camera, std::string lens)
 {
 	int ModifyFlags = 0;
 	
@@ -4756,11 +4780,11 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount)
 	lf_free (cameras);
 
 	//get lens instance:
-	const lfLens *lens = NULL;
+	const lfLens *lns = NULL;
 	const lfLens **lenses = NULL;
 	lenses = ldb->FindLenses (cam, NULL, imginfo["Lens"].c_str());
 	if (lenses) {
-		lens = lenses [0];
+		lns = lenses [0];
 	}
 	else {
 		lf_free (lenses);
@@ -4791,20 +4815,20 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount)
 	int modflags = 0;
 
 	if (ModifyFlags & LF_MODIFY_TCA)
-		modflags |= mod->EnableTCACorrection(lens, atof(info["FocalLength"].c_str()));
+		modflags |= mod->EnableTCACorrection(lns, atof(info["FocalLength"].c_str()));
 	if (ModifyFlags & LF_MODIFY_VIGNETTING)
-		modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
+		modflags |= mod->EnableVignettingCorrection(lns, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
 	if (ModifyFlags & LF_MODIFY_DISTORTION)
-		modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
+		modflags |= mod->EnableDistortionCorrection(lns, atof(info["FocalLength"].c_str()));
 	if (ModifyFlags & LF_MODIFY_GEOMETRY)
-		modflags |= mod->EnableProjectionTransform(lens, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
+		modflags |= mod->EnableProjectionTransform(lns, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
 	if (ModifyFlags & LF_MODIFY_SCALE)
 		modflags |= mod->EnableScaling(1.0);
 
 #else
-	lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, w, h);
+	lfModifier *mod = lfModifier::Create (lns, lns->CropFactor, w, h);
 	int modflags = mod->Initialize (
-		lens, 
+		lns, 
 		LF_PF_F32, 
 		atof(imginfo["FocalLength"].c_str()), 
 		atof(imginfo["FNumber"].c_str()),
