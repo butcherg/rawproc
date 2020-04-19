@@ -464,8 +464,8 @@ bool PicProcessorBlackWhitePoint::processPicture(gImage *processdib)
 		else {
 			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, result["treelabel"]);
 			m_display->SetModified(true);
-//printf("blk: %s   wht: %s\n", result["black"].c_str(), result["white"].c_str()); fflush(stdout);
-			((BlackWhitePointPanel *) toolpanel)->updateSliders(atoi(result["black"].c_str()), atoi(result["white"].c_str()));
+			if (params["mode"] == "values")
+				((BlackWhitePointPanel *) toolpanel)->updateSliders(atoi(result["black"].c_str()), atoi(result["white"].c_str()));
 			//parm tool.all.log: Turns on logging for all tools.  Default=0
 			//parm tool.*.log: Turns on logging for the specified tool.  Default=0
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
