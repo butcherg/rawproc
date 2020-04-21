@@ -458,6 +458,9 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			return result;
 		}
 		
+		//parm tool.demosaic.orient: 0|1 - Normalizes the image orientation after demosaic so the EXIF:Orientation tag can be 1.  Only performs the operation if the EXIF::Orientation tag isn't already 1.  Default: 1
+		if (myConfig::getConfig().getValueOrDefault("tool.demosaic.orient","1") == "1") dib.NormalizeRotation();
+		
 		result["treelabel"] = string_format("demosaic:%s",params["mode"].c_str());
 		result["mode"] = params["mode"];
 
