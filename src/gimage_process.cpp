@@ -580,12 +580,65 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "curve:ProcessError - no mode";
+		result["error"] = "lenscorrrection:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
-		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
+		
+		lfDatabase *ldb;
+		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",std::string());
+		GIMAGE_ERROR res =  dib.lensfunLoadLensDatabase(lensfundatadir, &ldb);
+		if (ldb == NULL) {
+			result["error"] = "lenscorrection:ProcessError - Database initialize failed";
+			return result;
+		}
+		if (res ==  GIMAGE_LF_NO_DATABASE) {
+			result["error"] = string_format("lenscorrection:ProcessError - Database not found: %s", lensfundatadir.c_str());
+			return result;
+		}
+		else if (res ==  GIMAGE_LF_WRONG_FORMAT) {
+			result["error"] = "lenscorrection:ProcessError - Database is wrong format";
+			return result;
+		}
+		
+		int modops = 0;
+		std::vector<std::string> ops = split(params["ops"], ",");
+		for (std::vector<std::string>::iterator it = ops.begin() ; it != ops.end(); ++it) {
+				if (*it == "ca") modops |= LF_MODIFY_TCA;
+				if (*it == "vig") modops |= LF_MODIFY_VIGNETTING;
+				if (*it == "dist") modops |= LF_MODIFY_DISTORTION;
+				if (*it == "autocrop") modops |= LF_MODIFY_SCALE;
+		}
+		
+		RESIZE_FILTER algo = FILTER_BOX;
+		if (params["algo"] == "nearest") algo = FILTER_BOX;
+		else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
+		else if (params["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
+		
+		std::string camera = dib.getInfoValue("Model");;
+		if (paramexists(params, "camera")) camera = params["camera"];
+		std::string lens = dib.getInfoValue("Lens");
+		if (paramexists(params, "lens")) camera = params["lens"];
+
+		_mark();
+		res =  dib.ApplyLensCorrection(ldb, modops, algo, threadcount, camera, lens);
+		if (res ==  GIMAGE_LF_NO_DATABASE) {
+			result["error"] = "lenscorrection:ProcessError - No database instance";
+			return result;
+		}
+		else if (res ==  GIMAGE_LF_CAMERA_NOT_FOUND) {
+			result["error"] = string_format("lenscorrection:ProcessError - Camera not found: %s", camera.c_str());
+			return result;
+		}
+		else if (res ==  GIMAGE_LF_LENS_NOT_FOUND) {
+			result["error"] = string_format("lenscorrection:ProcessError - Lens not found: %s", lens.c_str());
+			return result;
+		}
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
+		result["treelabel"] = "lenscorrection";
 		
 	}
 	return result;

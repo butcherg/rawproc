@@ -69,7 +69,6 @@ enum GIMAGE_FILETYPE {
 };
 
 enum RESIZE_FILTER {
-	FILTER_NEAREST_NEIGHBOR,
 	FILTER_BOX,
 	FILTER_BILINEAR,
 	FILTER_BSPLINE,
@@ -297,7 +296,7 @@ class gImage
 		
 		//Lensfun database and correction methods. 
 		//From the lensfun library, gImage users need to know the lfDatabase class and the LF_MODIFY_XXXX flagus
-		GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase * ldb);
+		GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase **ldb);
 		GIMAGE_ERROR lensfunFindCameraLens(lfDatabase * ldb, std::string camera, std::string lens);
 		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]

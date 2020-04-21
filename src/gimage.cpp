@@ -4336,13 +4336,13 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 //only accepts FILTER_BILINEAR and FILTER_LANCZOS3
 bool gImage::initInterpolation(RESIZE_FILTER interp)
 {
-	if (interp == FILTER_NEAREST_NEIGHBOR | interp == FILTER_BILINEAR | interp == FILTER_LANCZOS3) {
+	if (interp == FILTER_BOX | interp == FILTER_BILINEAR | interp == FILTER_LANCZOS3) {
 		lensfun_interp_method = interp;  
 		return true;
 	}
 	else {
 		//this should have been set in the constructor, but this logic protects that omission:
-		lensfun_interp_method = FILTER_NEAREST_NEIGHBOR;
+		lensfun_interp_method = FILTER_BOX;
 		return false;
 	}
 }	
@@ -4697,39 +4697,41 @@ pix gImage::getRGB(float x, float y)
 //Lens database and correction methods
 //Wraps Lensfun classes in order to manage database 
 
-GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase * ldb)
+GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase **ldb)
 {
 	bool lfok = false;
 	lfError e = LF_NO_ERROR;
 	GIMAGE_ERROR g = GIMAGE_OK;
-	ldb = new lfDatabase();
+	*ldb = new lfDatabase();
 
-	
 	lensfundatadir.append(string_format("/version_%d", LF_MAX_DATABASE_VERSION));
 
-
-	if (lensfundatadir != "") {
+	if (!lensfundatadir.empty()) {
 #ifdef LF_0395
-		e = ldb->Load(lensfundatadir.c_str());
+		e = (*ldb)->Load(lensfundatadir.c_str());
 		if (e == LF_NO_DATABASE) g = GIMAGE_LF_NO_DATABASE; 
 		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT;  
 #else
-		if (ldb->LoadDirectory(lensfundatadir.c_str())) 
+		if ((*ldb)->LoadDirectory(lensfundatadir.c_str())) {
 			e = LF_NO_ERROR;
-		else 
+			g = GIMAGE_OK;
+		}
+		else {
+			g =  GIMAGE_LF_NO_DATABASE; 
 			e = LF_NO_DATABASE;
+		}
 			
 #endif
 	}
 	else {
-		e = ldb->Load();
+		e = (*ldb)->Load();
 		if (e == LF_NO_DATABASE) g =  GIMAGE_LF_NO_DATABASE; 
 		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT; 
 	}
 		
 	if (e != LF_NO_ERROR) {
-		delete ldb;
-		ldb = NULL;
+		delete *ldb;
+		*ldb = NULL;
 	}
 	return g;
 }
@@ -4763,7 +4765,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FI
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
 	
 	int ModifyFlags = modops;
-	
+	initInterpolation(algo);
 	
 	//get camera instance:
 	const lfCamera *cam = NULL;

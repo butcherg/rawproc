@@ -565,6 +565,8 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+//lenscorrection (rawproc)
+//:ops=<op1>...[;algo=nearest|bilinear|lanczos3 - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -579,11 +581,15 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 		pmap = parseparams(paramstring);  //from gimage/strutil.h
 	}
 
+/* no positional parameters for lenscorrection, use name=val instead...
 	else { //positional
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
 	}
+*/
+	pmap["mode"] = "default";
+	pmap["cmdlabel"] = "lenscorrection";
 	return pmap;
 }
 
