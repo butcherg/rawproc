@@ -60,8 +60,6 @@ using namespace half_float::literal;
 
 inline unsigned sqr(const unsigned x) { return x*x; }
 
-lfDatabase *gImage::ldb = NULL;
-
 const char * gImageVersion()
 {
 	#ifdef VERSION
@@ -4335,9 +4333,18 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 //Lensfun support methods
 //Interpolation algorithms adapted from lensfun's lenstool example program
 
-void gImage::initInterpolation(RESIZE_FILTER interp)
+//only accepts FILTER_BILINEAR and FILTER_LANCZOS3
+bool gImage::initInterpolation(RESIZE_FILTER interp)
 {
-	lensfun_interp_method = interp;  //does nothing right now, all hard-coded to nearest-neighbor
+	if (interp == FILTER_NEAREST_NEIGHBOR | interp == FILTER_BILINEAR | interp == FILTER_LANCZOS3) {
+		lensfun_interp_method = interp;  
+		return true;
+	}
+	else {
+		//this should have been set in the constructor, but this logic protects that omission:
+		lensfun_interp_method = FILTER_NEAREST_NEIGHBOR;
+		return false;
+	}
 }	
 
 PIXTYPE gImage::getR(float x, float y)
@@ -4690,7 +4697,7 @@ pix gImage::getRGB(float x, float y)
 //Lens database and correction methods
 //Wraps Lensfun classes in order to manage database 
 
-GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir)
+GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase * ldb)
 {
 	bool lfok = false;
 	lfError e = LF_NO_ERROR;
@@ -4704,20 +4711,20 @@ GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir)
 	if (lensfundatadir != "") {
 #ifdef LF_0395
 		e = ldb->Load(lensfundatadir.c_str());
-		if (e == LF_NO_DATABASE) g = GIMAGE_LF_NO_DATABASE; //wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
-		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT;  //wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
+		if (e == LF_NO_DATABASE) g = GIMAGE_LF_NO_DATABASE; 
+		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT;  
 #else
 		if (ldb->LoadDirectory(lensfundatadir.c_str())) 
 			e = LF_NO_ERROR;
 		else 
 			e = LF_NO_DATABASE;
-			//wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+			
 #endif
 	}
 	else {
 		e = ldb->Load();
-		if (e == LF_NO_DATABASE) g =  GIMAGE_LF_NO_DATABASE; // wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
-		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT; //wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
+		if (e == LF_NO_DATABASE) g =  GIMAGE_LF_NO_DATABASE; 
+		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT; 
 	}
 		
 	if (e != LF_NO_ERROR) {
@@ -4727,18 +4734,8 @@ GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir)
 	return g;
 }
 
-lfDatabase * gImage::lensfunGetLensDatabase()
-{
-	return ldb;
-}
 
-void gImage::lensfunDestroyLensDatabase()
-{
-	if (ldb != NULL) ldb->~lfDatabase();
-}
-
-
-GIMAGE_ERROR gImage::lensfunFindCameraLens(std::string camera, std::string lens)
+GIMAGE_ERROR gImage::lensfunFindCameraLens(lfDatabase * ldb, std::string camera, std::string lens)
 {
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
 	//get camera instance:
@@ -4761,11 +4758,12 @@ GIMAGE_ERROR gImage::lensfunFindCameraLens(std::string camera, std::string lens)
 	return GIMAGE_OK;
 }
 
-GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount, std::string camera, std::string lens)
+GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
-	int ModifyFlags = 0;
+	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
 	
-	std::map<std::string, std::string> cp = parseparams(modops);
+	int ModifyFlags = modops;
+	
 	
 	//get camera instance:
 	const lfCamera *cam = NULL;
@@ -4792,21 +4790,6 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(std::string modops, int threadcount, st
 	}
 	lf_free (lenses);
 	
-	if (cp.find("ops") != cp.end()) {
-		std::vector<std::string> ops = split(cp["ops"], ",");
-		for (unsigned i=0; i<ops.size(); i++) {
-			if (ops[i] == "ca")   ModifyFlags |= LF_MODIFY_TCA;
-			if (ops[i] == "vig")  ModifyFlags |= LF_MODIFY_VIGNETTING;
-			if (ops[i] == "dist") ModifyFlags |= LF_MODIFY_DISTORTION;
-			if (ops[i] == "autocrop") ModifyFlags |= LF_MODIFY_SCALE;
-		}
-	}
-
-	if (cp.find("algo") != cp.end()) {
-		if (cp["algo"] == "nearest")  initInterpolation(FILTER_BOX);
-		if (cp["algo"] == "bilinear") initInterpolation(FILTER_BILINEAR);
-		if (cp["algo"] == "lanczofss3") initInterpolation(FILTER_LANCZOS3);
-	}
 				
 #ifdef LF_0395
 	lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);

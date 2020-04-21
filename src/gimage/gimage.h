@@ -69,6 +69,7 @@ enum GIMAGE_FILETYPE {
 };
 
 enum RESIZE_FILTER {
+	FILTER_NEAREST_NEIGHBOR,
 	FILTER_BOX,
 	FILTER_BILINEAR,
 	FILTER_BSPLINE,
@@ -182,22 +183,6 @@ class gImage
 		//std::map<GIMAGE_CHANNEL,std::vector<unsigned> > Histogram(unsigned channels, unsigned scale);
 		std::vector<long> Histogram(unsigned channel, unsigned &hmax);
 
-		
-		//Lensfun support methods
-		void initInterpolation(RESIZE_FILTER method);  //only accepts FILTER_BILINEAR and FILTER_LANCZOS3
-		PIXTYPE getR(float x, float y);
-		PIXTYPE getG(float x, float y);
-		PIXTYPE getB(float x, float y);
-		pix getRGB(float x, float y);
-		
-		//Lensfun database and correction methods
-		static GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir=std::string()); //needs to be called prior to calling ApplyLensCorrection()
-		static lfDatabase * lensfunGetLensDatabase();
-		static void lensfunDestroyLensDatabase();
-		static GIMAGE_ERROR lensfunFindCameraLens(std::string camera, std::string lens);
-		GIMAGE_ERROR ApplyLensCorrection(std::string modops, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
-		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
-
 		//Static methods
 		static std::string getRGBCharacteristics();
 		static std::map<std::string,std::string> getInfo(const char * filename);
@@ -299,8 +284,23 @@ class gImage
 		void ApplyTint(double red,double green,double blue, int threadcount=0);
 		void ApplyGray(double redpct, double greenpct, double bluepct, int threadcount=0);
 
+		//colorspace operators:
 		GIMAGE_ERROR ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp=false, int threadcount=0);
 		GIMAGE_ERROR AssignColorspace(std::string iccfile);
+		
+		//Lensfun support methods
+		bool initInterpolation(RESIZE_FILTER method);  //only accepts FILTER_BILINEAR and FILTER_LANCZOS3
+		PIXTYPE getR(float x, float y);
+		PIXTYPE getG(float x, float y);
+		PIXTYPE getB(float x, float y);
+		pix getRGB(float x, float y);
+		
+		//Lensfun database and correction methods. 
+		//From the lensfun library, gImage users need to know the lfDatabase class and the LF_MODIFY_XXXX flagus
+		GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase * ldb);
+		GIMAGE_ERROR lensfunFindCameraLens(lfDatabase * ldb, std::string camera, std::string lens);
+		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
+		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
 		
 
 		//Image loaders.  Return a new gImage
@@ -361,8 +361,7 @@ class gImage
 		GIMAGE_ERROR lasterror;
 
 		RESIZE_FILTER lensfun_interp_method;
-		
-		static lfDatabase *ldb;
+
 
 };
 
