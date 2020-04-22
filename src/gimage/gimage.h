@@ -64,6 +64,7 @@ enum GIMAGE_FILETYPE {
 	FILETYPE_JPEG,
 	FILETYPE_TIFF,
 	FILETYPE_PNG,
+	FILETYPE_DATA,
 	FILETYPE_UNKNOWN,
 	FILETYPE_BAD_FILENAME
 };
@@ -320,7 +321,8 @@ class gImage
 		GIMAGE_ERROR saveJPEG(const char * filename, BPP bits, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		GIMAGE_ERROR saveTIFF(const char * filename, BPP bits, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
 		GIMAGE_ERROR savePNG(const char * filename, BPP bits, std::string params="", cmsHPROFILE profile=NULL, cmsUInt32Number intent=INTENT_PERCEPTUAL);
-
+		GIMAGE_ERROR saveData(const char * filename, BPP bits, std::string params);
+		
 		//ICC (LittleCMS) profiles.
 		static cmsHPROFILE myCmsOpenProfileFromFile(const std::string filename);
 		static cmsHPROFILE makeLCMSProfile(const std::string json);

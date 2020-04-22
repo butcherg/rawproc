@@ -772,6 +772,9 @@ GIMAGE_FILETYPE gImage::getFileNameType(const char * filename)
 	if (ext.compare("tif") == 0 | ext.compare("tiff") == 0) return FILETYPE_TIFF;
 	if ((ext.compare("jpg") == 0) | (ext.compare("JPG") == 0)) return FILETYPE_JPEG;
 	if ((ext.compare("png") == 0) | (ext.compare("PNG") == 0)) return FILETYPE_PNG;
+	if ((ext.compare("dat") == 0) | (ext.compare("DAT") == 0)) return FILETYPE_DATA;
+	if ((ext.compare("csv") == 0) | (ext.compare("CSV") == 0)) return FILETYPE_DATA;
+	if ((ext.compare("txt") == 0) | (ext.compare("txt") == 0)) return FILETYPE_DATA;
 	return FILETYPE_UNKNOWN;
 }
 
@@ -5760,6 +5763,9 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 		else
 			return savePNG(filename, bitfmt, params);
 	}
+	if (ftype == FILETYPE_DATA) {
+		return saveData(filename, bitfmt, params);
+	}
 	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
 	return lasterror;
 }
@@ -5792,6 +5798,28 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 }
 
 
+GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
+{
+	FILE *f = fopen(filename, "w");
+	if (f) {
+		fprintf(f,"width: %d   height: %d\n",w,h);
+		for(unsigned y = 0; y < h; y++) {
+			bool first = true;
+			for(unsigned x = 0; x < w; x++) {
+					unsigned pos = x + y*w;
+					if (first) 
+						fprintf(f,"%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
+					else
+						fprintf(f,",%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
+					first = false;
+			}
+			fprintf(f,"\n");
+		}
+		fclose(f);
+		return GIMAGE_OK;
+	}
+	else return GIMAGE_UNSUPPORTED_FILEFORMAT;
+}
 
 GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
