@@ -391,10 +391,13 @@ void PicPanel::setStatusBar()
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh) {
 		struct pix p = display_dib->getPixel(imagex, imagey);
-		wxString stext = wxString::Format("xy:%d,%d rgb:%f,%f,%f",imagex, imagey, p.r, p.g, p.b);
+		//parm display.statusbar.luminance: redmult,greenmult,bluemult - Multipliers used to calculate pixel luminance. Default:0.21,0.72,0.07
+		wxArrayString lumstr = split(wxString(myConfig::getConfig().getValueOrDefault("display.statusbar.luminance","0.21,0.72,0.07")), ",");
+		float lum = p.r * atof(lumstr[0].ToStdString().c_str()) + p.g * atof(lumstr[1].ToStdString().c_str()) + p.b * atof(lumstr[2].ToStdString().c_str());
+		wxString stext = wxString::Format("xy:%d,%d rgb:%f,%f,%f lum:%f",imagex, imagey, p.r, p.g, p.b, lum);
 		if (pixelbox) {
 			struct pix sp = display_dib->getPixel(selectedx, selectedy);
-			stext.Append(wxString::Format("   selected: xy%d,%d rgb:%f,%f,%f",selectedx, selectedy, sp.r, sp.g, sp.b));
+			stext.Append(wxString::Format("   selected: xy%d,%d rgb:%f,%f,%f, ",selectedx, selectedy, sp.r, sp.g, sp.b));
 		}
 		((wxFrame *) GetParent())->SetStatusText(stext);
 		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
