@@ -5800,20 +5800,67 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
+	std::map<std::string,std::string> p = parseparams(params);
+	std::string channel = "split";
+	if (p.find("channel") != p.end()) channel = p["channel"];
 	FILE *f = fopen(filename, "w");
 	if (f) {
 		fprintf(f,"width: %d   height: %d\n",w,h);
-		for(unsigned y = 0; y < h; y++) {
-			bool first = true;
-			for(unsigned x = 0; x < w; x++) {
-					unsigned pos = x + y*w;
-					if (first) 
-						fprintf(f,"%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
-					else
-						fprintf(f,",%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
-					first = false;
+		if (channel == "rgb") {
+			fprintf(f,"\nrgb:\n");
+			for(unsigned y = 0; y < h; y++) {
+				bool first = true;
+				for(unsigned x = 0; x < w; x++) {
+						unsigned pos = x + y*w;
+						if (first) 
+							fprintf(f,"%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
+						else
+							fprintf(f,",%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
+						first = false;
+				}
+				fprintf(f,"\n");
 			}
-			fprintf(f,"\n");
+		}
+		else if (channel == "split") {
+			fprintf(f,"\nred:\n");
+			for(unsigned y = 0; y < h; y++) {
+				bool first = true;
+				for(unsigned x = 0; x < w; x++) {
+						unsigned pos = x + y*w;
+						if (first) 
+							fprintf(f,"%f",image[pos].r);
+						else
+							fprintf(f,",%f",image[pos].r);
+						first = false;
+				}
+				fprintf(f,"\n");
+			}
+			fprintf(f,"\ngreen:\n");
+			for(unsigned y = 0; y < h; y++) {
+				bool first = true;
+				for(unsigned x = 0; x < w; x++) {
+						unsigned pos = x + y*w;
+						if (first) 
+							fprintf(f,"%f",image[pos].g);
+						else
+							fprintf(f,",%f",image[pos].g);
+						first = false;
+				}
+				fprintf(f,"\n");
+			}
+			fprintf(f,"\nblue:\n");
+			for(unsigned y = 0; y < h; y++) {
+				bool first = true;
+				for(unsigned x = 0; x < w; x++) {
+						unsigned pos = x + y*w;
+						if (first) 
+							fprintf(f,"%f",image[pos].b);
+						else
+							fprintf(f,",%f",image[pos].b);
+						first = false;
+				}
+				fprintf(f,"\n");
+			}
 		}
 		fclose(f);
 		return GIMAGE_OK;
