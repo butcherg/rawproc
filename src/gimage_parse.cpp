@@ -224,7 +224,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 }
 
 //crop
-//default	:<x>,<y>,<w>,<h> - extract subimage at x,y,w,h bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
+//default	:<x1>,<y1>,<x2>,<y2> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
 std::map<std::string,std::string> parse_crop(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
