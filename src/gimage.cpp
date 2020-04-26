@@ -5802,18 +5802,26 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 {
 	std::map<std::string,std::string> p = parseparams(params);
 	std::string channel = "split";
+	//$ <li><b>channel</b>=rgb|split: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. </li>
 	if (p.find("channel") != p.end()) channel = p["channel"];
+	bool invert = true;
+	//$ <li><b>invertrows</b>=0|1: Applies to data save.  If 1, rows are printed right-to-left. Default=0</li>
+	if (p.find("invertrows") != p.end() & p["invertrows"] == "1") invert = true;
+
 	FILE *f = fopen(filename, "w");
 	if (f) {
-		fprintf(f,"width: %d   height: %d\n",w,h);
+		fprintf(f, "width: %d   height: %d\n",w,h);
+		fprintf(f, "%s", imginfo["ImageDescription"].c_str());
 		if (channel == "rgb") {
 			fprintf(f,"\nrgb:\n");
+			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos = x + y*w;
+						unsigned pos;
+						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
 						if (first) 
-							fprintf(f,"%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
+							fprintf(f,"%d,%f,%f,%f",y,image[pos].r, image[pos].g, image[pos].b);
 						else
 							fprintf(f,",%f,%f,%f",image[pos].r, image[pos].g, image[pos].b);
 						first = false;
@@ -5823,12 +5831,14 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 		}
 		else if (channel == "split") {
 			fprintf(f,"\nred:\n");
+			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos = x + y*w;
+						unsigned pos;
+						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
 						if (first) 
-							fprintf(f,"%f",image[pos].r);
+							fprintf(f,"%d,%f",y,image[pos].r);
 						else
 							fprintf(f,",%f",image[pos].r);
 						first = false;
@@ -5836,12 +5846,14 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 				fprintf(f,"\n");
 			}
 			fprintf(f,"\ngreen:\n");
+			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos = x + y*w;
+						unsigned pos;
+						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
 						if (first) 
-							fprintf(f,"%f",image[pos].g);
+							fprintf(f,"%d,%f",y,image[pos].g);
 						else
 							fprintf(f,",%f",image[pos].g);
 						first = false;
@@ -5849,12 +5861,14 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 				fprintf(f,"\n");
 			}
 			fprintf(f,"\nblue:\n");
+			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos = x + y*w;
+						unsigned pos;
+						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
 						if (first) 
-							fprintf(f,"%f",image[pos].b);
+							fprintf(f,"%d,%f",y,image[pos].b);
 						else
 							fprintf(f,",%f",image[pos].b);
 						first = false;
