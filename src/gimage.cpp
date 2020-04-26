@@ -5801,15 +5801,81 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);
-	std::string channel = "split";  //ToDo: make sure params is passed from rawproc...
+	std::string channel = "rgb";  
 	//$ <li><b>channel</b>=rgb|split: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. </li>
 	if (p.find("channel") != p.end()) channel = p["channel"];
+	
+	bool channelaverage = true; //ToDo: should be =false, make sure params is passed from rawproc...
+	//$ <li><b>channelaverage</b>=1|0: Applies to data save.  If '1', each column is averaged, channel-by-channel.  Default: 0</li>
+	if (p.find("channelaverage") != p.end()) if (p["channelaverage"] == "1") channelaverage = true;
 
 	FILE *f = fopen(filename, "w");
 	if (f) {
 		fprintf(f, "width: %d\nheight: %d\n",w,h);
 		fprintf(f, "%s\n", imginfo["ImageDescription"].c_str());
-		if (channel == "rgb") {
+		if (channelaverage) {
+			fprintf(f,",");
+			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); 
+			float rmax = 0.0, gmax = 0.0, bmax = 0.0;
+			int rmaxcol = 0, gmaxcol = 0, bmaxcol = 0;
+			fprintf(f,"\nred,");
+			bool first = true; 
+			for(unsigned x = 0; x < w; x++) {
+				float rsum = 0.0;
+				for(unsigned y = 0; y < h; y++) {
+						unsigned pos = x + y*w;
+						rsum += image[pos].r;
+				}
+				rsum /= h;
+				if (rsum > rmax) {
+					rmax = rsum;
+					rmaxcol = x;
+				}
+				if (first) fprintf(f,"%f",rsum); else fprintf(f,",%f",rsum);
+				first = false;
+			}
+			fprintf(f,"\n");
+
+			fprintf(f,"green,");
+			first = true; 
+			for(unsigned x = 0; x < w; x++) {
+				float gsum = 0.0;
+				for(unsigned y = 0; y < h; y++) {
+						unsigned pos = x + y*w;
+						gsum += image[pos].g;
+				}
+				gsum /= h;
+				if (gsum > gmax) {
+					gmax = gsum;
+					gmaxcol = x;
+				}
+				if (first) fprintf(f,"%f",gsum); else fprintf(f,",%f",gsum);
+				first = false;
+			}
+			fprintf(f,"\n");
+			
+			fprintf(f,"blue,");
+			first = true; 
+			for(unsigned x = 0; x < w; x++) {
+				float bsum = 0.0;
+				for(unsigned y = 0; y < h; y++) {
+						unsigned pos = x + y*w;
+						bsum += image[pos].b;
+				}
+				bsum /= h;
+				if (bsum > bmax) {
+					bmax = bsum;
+					bmaxcol = x;
+				}
+				if (first) fprintf(f,"%f",bsum); else fprintf(f,",%f",bsum);
+				first = false;
+			}
+			fprintf(f,"\n\n");
+			fprintf(f,"rmax: %f rmaxcolumn: %d\n",rmax, rmaxcol);
+			fprintf(f,"gmax: %f gmaxcolumn: %d\n",gmax, gmaxcol);
+			fprintf(f,"bmax: %f bmaxcolumn: %d\n",bmax, bmaxcol);
+		}
+		else if (channel == "rgb") {
 			fprintf(f,"\nrgb:\n");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
