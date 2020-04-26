@@ -18,6 +18,8 @@
 #define ROTATE90	7504
 #define ROTATE180	7505
 #define ROTATE270	7506
+#define ROTATEHFLIP	7507
+#define ROTATEVFLIP	7508
 
 class rotateSlider: public wxControl
 {
@@ -267,6 +269,10 @@ class RotatePanel: public PicProcPanel
 			b->Add(r180 , 0, wxALIGN_LEFT | wxALL, 1);
 			r270 = new wxRadioButton(this, ROTATE270, _("Rotate 270"));
 			b->Add(r270 , 0, wxALIGN_LEFT | wxALL, 1);
+			rH = new wxRadioButton(this, ROTATEHFLIP, _("Flip Horizontal"));
+			b->Add(rH , 0, wxALIGN_LEFT | wxALL, 1);
+			rV = new wxRadioButton(this, ROTATEVFLIP, _("Flip Vertical"));
+			b->Add(rV , 0, wxALIGN_LEFT | wxALL, 1);
 			
 			r45 = new wxRadioButton(this, ROTATE45, _("Rotate < 45:"));
 			b->Add(r45 , 0, wxALIGN_LEFT | wxALL, 1);
@@ -406,6 +412,8 @@ class RotatePanel: public PicProcPanel
 				if (r90->GetValue())  {q->setParams(wxString::Format("%2.1f",90.0));  rotation = 90.0;}
 				if (r180->GetValue()) {q->setParams(wxString::Format("%2.1f",180.0)); rotation = 180.0;}
 				if (r270->GetValue()) {q->setParams(wxString::Format("%2.1f",270.0)); rotation = 270.0;}
+				if (rH->GetValue()) {q->setParams("hmirror");}
+				if (rV->GetValue()) {q->setParams("vmirror");}
 			}
 			preview->Rotate(rotation);
 			Refresh();
@@ -471,7 +479,7 @@ class RotatePanel: public PicProcPanel
 		
 	private:
 		wxCheckBox *autocrop, *enablebox;
-		wxRadioButton *r45, *r90, *r180, *r270;
+		wxRadioButton *r45, *r90, *r180, *r270, *rH, *rV;
 		rotateSlider *rotate;
 		wxTimer t;
 		RotatePreview *preview;

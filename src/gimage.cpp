@@ -5801,25 +5801,21 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);
-	std::string channel = "split";
+	std::string channel = "split";  //ToDo: make sure params is passed from rawproc...
 	//$ <li><b>channel</b>=rgb|split: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. </li>
 	if (p.find("channel") != p.end()) channel = p["channel"];
-	bool invert = true;
-	//$ <li><b>invertrows</b>=0|1: Applies to data save.  If 1, rows are printed right-to-left. Default=0</li>
-	if (p.find("invertrows") != p.end() & p["invertrows"] == "1") invert = true;
 
 	FILE *f = fopen(filename, "w");
 	if (f) {
-		fprintf(f, "width: %d   height: %d\n",w,h);
-		fprintf(f, "%s", imginfo["ImageDescription"].c_str());
+		fprintf(f, "width: %d\nheight: %d\n",w,h);
+		fprintf(f, "%s\n", imginfo["ImageDescription"].c_str());
 		if (channel == "rgb") {
 			fprintf(f,"\nrgb:\n");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos;
-						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
+						unsigned pos = x + y*w;
 						if (first) 
 							fprintf(f,"%d,%f,%f,%f",y,image[pos].r, image[pos].g, image[pos].b);
 						else
@@ -5835,8 +5831,7 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos;
-						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
+						unsigned pos = x + y*w;
 						if (first) 
 							fprintf(f,"%d,%f",y,image[pos].r);
 						else
@@ -5850,8 +5845,7 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos;
-						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
+						unsigned pos = x + y*w;
 						if (first) 
 							fprintf(f,"%d,%f",y,image[pos].g);
 						else
@@ -5865,8 +5859,7 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
 				for(unsigned x = 0; x < w; x++) {
-						unsigned pos;
-						if (invert) pos = (w-x) + (y*w); else pos = x + y*w;
+						unsigned pos = x + y*w;
 						if (first) 
 							fprintf(f,"%d,%f",y,image[pos].b);
 						else
