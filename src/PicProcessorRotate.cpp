@@ -240,6 +240,7 @@ class RotatePanel: public PicProcPanel
 	public:
 		RotatePanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			bool acrop = false;
 			SetDoubleBuffered(true);
 			thumb = false;
@@ -250,6 +251,7 @@ class RotatePanel: public PicProcPanel
 			wxImage i = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 			
 			wxArrayString tok = split(params, ",");
+			std::string initialvaluestr = std::string(tok[0].ToStdString());
 			double initialvalue = atof(tok[0].c_str());
 			if (tok.GetCount() > 1)
 				if (tok[1] == "autocrop")
@@ -304,7 +306,9 @@ class RotatePanel: public PicProcPanel
 			b->Add(preview , 1, wxEXPAND | wxALIGN_CENTER_VERTICAL |wxALIGN_CENTER_HORIZONTAL | wxALL, 1);  // wxSHAPED |
 
 			preview->setAutocrop(autocrop->GetValue());
-			if ((int) initialvalue == 90) r90->SetValue(true);
+			if (initialvaluestr == "hmirror") rH->SetValue(true);
+			else if (initialvaluestr == "vmirror") rV->SetValue(true);
+			else if ((int) initialvalue == 90) r90->SetValue(true);
 			else if ((int) initialvalue == 180) r180->SetValue(true);
 			else if ((int) initialvalue == 270) r270->SetValue(true);
 			else r45->SetValue(true);
@@ -384,13 +388,13 @@ class RotatePanel: public PicProcPanel
 		{
 			double rotation;
 			if (r45->GetValue()) {
-				///rotate->Enable(true);
-				///autocrop->Enable(true);
-				///preview->Enable(true);
+				rotate->Enable(true);
+				//autocrop->Enable(true);
+				//preview->Enable(true);
 				
-				rotate->Show(true);
-				autocrop->Show(true);
-				preview->Show(true);
+				//rotate->Show(true);
+				//autocrop->Show(true);
+				//preview->Show(true);
 				
 				preview->setAutocrop(autocrop->GetValue());
 				rotation = rotate->GetValue()/10.0;
@@ -400,13 +404,13 @@ class RotatePanel: public PicProcPanel
 					q->setParams(wxString::Format("%2.1f",rotation));
 			}
 			else {
-				//rotate->Enable(false);
+				rotate->Enable(false);
 				//autocrop->Enable(false);
 				//preview->Enable(false);
 				
-				rotate->Show(false);
-				autocrop->Show(false);
-				preview->Show(false);
+				//rotate->Show(false);
+				//autocrop->Show(false);
+				//preview->Show(false);
 				
 				preview->setAutocrop(false);
 				if (r90->GetValue())  {q->setParams(wxString::Format("%2.1f",90.0));  rotation = 90.0;}
@@ -549,48 +553,5 @@ bool PicProcessorRotate::processPicture(gImage *processdib)
 	return ret;
 }
 
-/*
-bool PicProcessorRotate::processPicture(gImage *processdib) 
-{
-	((wxFrame*) m_display->GetParent())->SetStatusText(_("rotate..."));
-	bool autocrop = false;
-	
-	wxArrayString t = split(c, ",");
-	
-	double angle = atof(t[0].c_str());
-	if (t.GetCount() > 1)
-		if (t[1] == "autocrop")
-			autocrop = true;
-	bool result = true;
-
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.rotate.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	if (processingenabled & angle != 0.0) {
-		mark();
-		if ((int) angle == 270) dib->ApplyRotate270(threadcount);
-		else if ((int) angle == 180) dib->ApplyRotate180(threadcount);
-		else if ((int) angle == 90) dib->ApplyRotate90(threadcount);
-		else dib->ApplyRotate(angle, autocrop, threadcount);
-		m_display->SetModified(true);
-		wxString d = duration();
-
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.rotate.log","0") == "1"))
-			log(wxString::Format(_("tool=rotate,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
-	}
-
-	dirty = false;
-		
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
-}
-*/
 
 

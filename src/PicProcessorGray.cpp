@@ -25,6 +25,7 @@ class GrayPanel: public PicProcPanel
 	public:
 		GrayPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
+			Freeze();
 			SetSize(parent->GetSize());
 			
 			wxArrayString p = split(params,",");
