@@ -1312,19 +1312,19 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		myConfig::getConfig().enableTempConfig(true);
 		wxString token = toolfile.GetFirstLine();
 		while (!toolfile.Eof())  {
-			wxArrayString cmd = split(token, ":");	
-			if (cmd.GetCount() > 0) {
+			std::vector<std::string> cmd = bifurcate(token.ToStdString(), ':');
+			if (cmd.size() > 0) {
 				wxString params;
-				if (cmd.GetCount() >=2) params = cmd[1];
+				if (cmd.size() >=2) params = wxString(cmd[1]);
 				if (cmd[0] == "set") {
 					wxArrayString prop = split(params,"=");
 					if (prop.GetCount() >=2) myConfig::getConfig().setValue(std::string(prop[0].c_str()),std::string(prop[1].c_str()));
 				}
-				else if (AddItem(cmd[0], params, incdisplay).IsOk()) {
+				else if (AddItem(wxString(cmd[0]), params, incdisplay).IsOk()) {
 					wxSafeYield(this);
 				}
 				else {
-					wxMessageBox(wxString::Format(_("Unknown command: %s.  Aborting tool list insertion."),cmd[0]));
+					wxMessageBox(wxString::Format(_("Unknown command: %s.  Aborting tool list insertion."),wxString(cmd[0])));
 					myConfig::getConfig().enableTempConfig(false);
 					toolfile.Close();
 					return;
