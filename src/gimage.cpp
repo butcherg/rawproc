@@ -5801,19 +5801,15 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);
-	std::string channel = "rgb";  
-	//$ <li><b>channel</b>=rgb|split: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. </li>
-	if (p.find("channel") != p.end()) channel = p["channel"];
-	
-	bool channelaverage = true; //ToDo: should be =false, make sure params is passed from rawproc...
-	//$ <li><b>channelaverage</b>=1|0: Applies to data save.  If '1', each column is averaged, channel-by-channel.  Default: 0</li>
-	if (p.find("channelaverage") != p.end()) if (p["channelaverage"] == "1") channelaverage = true;
+	std::string outputmode = "rgb";  
+	//$ <li><b>outputmode</b>=rgb|split|channelaverage: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. If 'channelaverage', each column is averaged, channel-by-channel. Default: 'rgb'</li>
+	if (p.find("outputmode") != p.end()) outputmode = p["outputmode"];
 
 	FILE *f = fopen(filename, "w");
 	if (f) {
 		fprintf(f, "width: %d\nheight: %d\n",w,h);
 		fprintf(f, "%s\n", imginfo["ImageDescription"].c_str());
-		if (channelaverage) {
+		if (outputmode == "channelaverage") {
 			fprintf(f,",");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); 
 			float rmax = 0.0, gmax = 0.0, bmax = 0.0;
@@ -5875,7 +5871,7 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 			fprintf(f,"gmax: %f gmaxcolumn: %d\n",gmax, gmaxcol);
 			fprintf(f,"bmax: %f bmaxcolumn: %d\n",bmax, bmaxcol);
 		}
-		else if (channel == "rgb") {
+		else if (outputmode == "rgb") {
 			fprintf(f,"\nrgb:\n");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
@@ -5891,7 +5887,7 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 				fprintf(f,"\n");
 			}
 		}
-		else if (channel == "split") {
+		else if (outputmode == "split") {
 			fprintf(f,"\nred:\n");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {

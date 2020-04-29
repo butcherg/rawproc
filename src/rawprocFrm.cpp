@@ -1144,7 +1144,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 
 	if (!sourcefilename.IsOk()) 
-		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png"),wxFD_SAVE);  // 
+		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png |Data files (*.csv)|*.csv"),wxFD_SAVE);  // 
 	else
 		fname = wxFileSelector(_("Save image..."),sourcefilename.GetPath(),sourcefilename.GetName(),sourcefilename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png"),wxFD_SAVE);  // 
 
@@ -1202,6 +1202,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
 				thumbdir = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.directory",thumbdir.ToStdString());
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
+			}
+			if (filetype == FILETYPE_DATA) {
+				//parm output.data.parameters: name=value list of parameters, separated by semicolons, to pass to the data writer.   Applicable parameters: <ul><li>outputmode=rgb|split|channelsummary: Specifies the output format. Default: rgb</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.data.parameters","");
 			}
 
 			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
