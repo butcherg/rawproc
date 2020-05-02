@@ -480,13 +480,15 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 	else {
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
+		float nlmeansthreshold = -1.0;
 		
 		if (params["mode"] == "nlmeans") {
 			_mark();
 			int sigma = atoi(params["sigma"].c_str());
 			int local = atoi(params["local"].c_str());
 			int patch = atoi(params["patch"].c_str());
-			if (sigma != 0) dib.ApplyNLMeans(sigma,local, patch, threadcount);
+			if (paramexists(params, "nlmeansthreshold")) nlmeansthreshold =  atof(params["nlmeansthreshold"].c_str());
+			if (sigma != 0) dib.ApplyNLMeans(sigma,local, patch, nlmeansthreshold, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("denoise:nlmeans,%d,%d,%d",sigma,local,patch);
 		}

@@ -3632,7 +3632,7 @@ void gImage::ApplyGray(double redpct, double greenpct, double bluepct, int threa
 //GMIC script by David Tschumperlé in his blog at http://gmic.eu
 //
 
-void gImage::ApplyNLMeans(double sigma, int local, int patch, int threadcount)
+void gImage::ApplyNLMeans(double sigma, int local, int patch, float threshold, int threadcount)
 {
 	std::vector<pix> *s = new std::vector<pix>(image);
 	std::vector<pix> &src = *s;
@@ -3657,6 +3657,8 @@ void gImage::ApplyNLMeans(double sigma, int local, int patch, int threadcount)
 		if (py<yplb) py = yplb;
 		if (py>ypub) py = ypub;
 		for(unsigned x = local; x < iw-local; x++) {
+			unsigned pos = x + y*w;
+			if ((threshold != -1.0) && (src[pos].r + src[pos].g + src[pos].b)/3.0 > threshold) continue;
 			unsigned px = x;
 			if (px<xplb) px = xplb;
 			if (px>xpub) px = xpub;

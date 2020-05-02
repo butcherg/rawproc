@@ -276,8 +276,8 @@ class gImage
 		void ApplyNormalization(float newmin, float newmax, int threadcount=0);
 
 		//blur/noise algorithms:
-		void ApplyNLMeans(double sigma, int local, int patch, int threadcount=0);
-		void ApplyWaveletDenoise(double strength, int threadcount);
+		void ApplyNLMeans(double sigma, int local, int patch, float threshold=-1.0, int threadcount=0); //-1 bypasses threshold, 0.0 and up bypasses any pixel >= threshold
+		void ApplyWaveletDenoise(double strength, int threadcount=0);
 
 		//specialty algorithms:
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);

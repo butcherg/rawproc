@@ -403,7 +403,7 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 }
 
 //denoise (each algo is a mode...)
-//:nlmeans[,<sigma>][,<local>][,<patch>] - apply nlmeans denoise
+//:nlmeans[,<sigma>][,<local>][,<patch>][,<threshold>] - apply nlmeans denoise
 //:wavelet[,<threshold>] - apply wavelet denoise
 std::map<std::string,std::string> parse_denoise(std::string paramstring)
 {
@@ -433,6 +433,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 			if (psize >= 2) pmap["sigma"] = p[1];
 			if (psize >= 3) pmap["local"] = p[2]; 
 			if (psize >= 4) pmap["patch"] = p[3]; 
+			if (psize >= 5) pmap["nlmeansthreshold"] = p[4]; 
 		}
 		else if (p[0] == "wavelet") {
 			pmap["mode"] = p[0];

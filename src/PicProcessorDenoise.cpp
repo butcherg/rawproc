@@ -25,10 +25,12 @@
 #define PATCHSLIDER 6007
 
 #define WAVELETTHRESHOLD 6008
+#define NLMEANSTHRESHOLD 6009
+#define NLMEANSTHRESHOLDENABLE 6010
 
-#define SIGMARESET 6010
-#define LOCALRESET 6011
-#define PATCHRESET 6012
+#define SIGMARESET 6011
+#define LOCALRESET 6012
+#define PATCHRESET 6013
 
 class DenoisePanel: public PicProcPanel
 {
@@ -42,6 +44,7 @@ class DenoisePanel: public PicProcPanel
 			int localval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.local","3").c_str());
 			int patchval = atoi(myConfig::getConfig().getValueOrDefault("tool.denoise.patch","1").c_str());
 			float thresholdval = atof(myConfig::getConfig().getValueOrDefault("tool.denoise.threshold","0.0").c_str());
+			float nlmeansthresholdval = 1.0;
 			
 			wxSize spinsize(80, TEXTCTRLHEIGHT);
 			SetSize(parent->GetSize());
@@ -68,6 +71,10 @@ class DenoisePanel: public PicProcPanel
 			val2 = new wxStaticText(this,wxID_ANY, wxString::Format("%3d",patchval), wxDefaultPosition, wxSize(25, -1));
 			btn2 = new wxBitmapButton(this, PATCHRESET, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			btn2->SetToolTip("Reset to default");
+			
+			thresholdenable = new wxCheckBox(this, NLMEANSTHRESHOLDENABLE, _("threshold:"));
+			thresholdenable->SetValue(false);
+			nlmeansthreshold = new myFloatCtrl(this, NLMEANSTHRESHOLD, "", nlmeansthresholdval, 4, wxDefaultPosition, spinsize);
 			
 
 			wl = new wxRadioButton(this, DENOISEWAVELET, _("Wavelet:"));
@@ -108,6 +115,10 @@ class DenoisePanel: public PicProcPanel
 			m->AddRowItem(patch, flags);
 			m->AddRowItem(val2, flags);
 			m->AddRowItem(btn2, flags);
+			
+			m->NextRow();
+			m->AddRowItem(thresholdenable, flags);
+			m->AddRowItem(nlmeansthreshold, flags);
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -123,16 +134,24 @@ class DenoisePanel: public PicProcPanel
 			
 			bool nlb, wlb;
 			wxArrayString cp = split(params,",");
-			if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
-				sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
-				local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
-				patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
+			if (cp[0] == "nlmeans") {
+				if (cp.GetCount() >= 4)  {
+					sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+					local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+					patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
+				}
+				if (cp.GetCount() >= 5) {
+					thresholdenable->SetValue(true);
+					nlmeansthreshold->SetFloatValue(atof(cp[4].c_str()));
+				}
 				nlb=true; wlb=false;
 				algorithm = DENOISENLMEANS;
 				nl->SetValue(true);
 			}
-			if (cp.GetCount() == 2 && cp[0] == "wavelet") {
-				thresh->SetFloatValue(atof(cp[1]));
+			if (cp[0] == "wavelet") {
+				if (cp.GetCount() == 2) {
+					thresh->SetFloatValue(atof(cp[1]));
+				}
 				nlb=false; wlb=true;
 				algorithm = DENOISEWAVELET;
 				wl->SetValue(true);
@@ -272,7 +291,10 @@ class DenoisePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (algorithm == DENOISENLMEANS)
-				q->setParams(wxString::Format("nlmeans,%d,%d,%d",sigma->GetValue(),local->GetValue(),patch->GetValue()));
+				if (thresholdenable->GetValue())
+					q->setParams(wxString::Format("nlmeans,%d,%d,%d,%f",sigma->GetValue(),local->GetValue(),patch->GetValue(),nlmeansthreshold->GetFloatValue()));
+				else
+					q->setParams(wxString::Format("nlmeans,%d,%d,%d",sigma->GetValue(),local->GetValue(),patch->GetValue()));
 			if (algorithm == DENOISEWAVELET) 
 				q->setParams(wxString::Format("wavelet,%f",thresh->GetFloatValue()));
 			q->processPic();
@@ -318,10 +340,10 @@ class DenoisePanel: public PicProcPanel
 		int algorithm;
 		wxRadioButton *nl, *wl;
 		wxSlider *sigma, *local, *patch;
-		myFloatCtrl *thresh;
+		myFloatCtrl *thresh, *nlmeansthreshold;
 		wxStaticText *val, *val1, *val2;
 		wxBitmapButton *btn, *btn1, *btn2;
-		wxCheckBox *enablebox;
+		wxCheckBox *enablebox, *thresholdenable;
 		wxTimer t;
 
 };
