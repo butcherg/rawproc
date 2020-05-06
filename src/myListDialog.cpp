@@ -2,6 +2,8 @@
 //#include "myConfig.h"
 #include "util.h"
 
+#define MYLISTDIALOGRESET 4000
+
 
 myListDialog::myListDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxArrayString items, const wxPoint &pos, const wxSize &size):
 	wxDialog(parent, id, title, pos, size)
@@ -14,9 +16,10 @@ myListDialog::myListDialog(wxWindow *parent, wxWindowID id, const wxString &titl
 			
 	ct->Add(new wxButton(this, wxID_OK, _("Ok")), 0, wxALL, 10);
 	ct->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 10);
-	ct->Add(new wxStaticText(this, wxID_ANY, _("Filter: ")), 0, wxALL, 10);
+	ct->Add(new wxStaticText(this, wxID_ANY, _("Filter: ")), 0, wxTOP|wxBOTTOM|wxLEFT, 10);
 	fil = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
-	ct->Add(fil, 0, wxALL, 10);
+	ct->Add(fil, 0, wxTOP|wxBOTTOM, 10);
+	ct->Add(new wxButton(this, MYLISTDIALOGRESET, _("X"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxTOP|wxBOTTOM|wxRIGHT, 10);
 	count = new wxStaticText(this, wxID_ANY, wxString::Format(_("%d items"),list->GetItemCount()));
 	ct->Add(count, 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
@@ -25,7 +28,9 @@ myListDialog::myListDialog(wxWindow *parent, wxWindowID id, const wxString &titl
 			
 	Bind(wxEVT_TEXT_ENTER, &myListDialog::filterGrid, this);
 	Bind(wxEVT_TEXT, &myListDialog::filterGrid, this);
-	Bind(wxEVT_BUTTON, &myListDialog::endDialog, this);
+	Bind(wxEVT_BUTTON, &myListDialog::resetDialog, this, MYLISTDIALOGRESET);
+	//Bind(wxEVT_BUTTON, &myListDialog::endDialog, this, wxID_OK);
+	//Bind(wxEVT_BUTTON, &myListDialog::endDialog, this, wxID_CANCEL);
 	list->Bind(wxEVT_LEFT_DCLICK, &myListDialog::doubleClicked, this);
 		
 }
@@ -42,6 +47,13 @@ void myListDialog::doubleClicked(wxMouseEvent& event)
 {
 	EndModal(wxID_OK);
 	event.Skip();
+}
+
+void myListDialog::resetDialog(wxCommandEvent& event)
+{
+	fil->SetValue("");
+	list->setFilter("");
+	fil->SetFocus();
 }
 		
 void myListDialog::filterGrid(wxCommandEvent& event)

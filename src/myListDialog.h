@@ -9,6 +9,7 @@ class myListDialog: public wxDialog
 	public:
 		myListDialog(wxWindow *parent, wxWindowID id, const wxString &title, wxArrayString items, const wxPoint &pos, const wxSize &size);
 		void endDialog(wxCommandEvent& event);
+		void resetDialog(wxCommandEvent& event);
 		void doubleClicked(wxMouseEvent& event);
 		void filterGrid(wxCommandEvent& event);
 		wxString getSelection();
