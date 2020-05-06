@@ -1,5 +1,6 @@
 #include "PicProcessorLensCorrection.h"
 #include "PicProcPanel.h"
+#include "myListCtrl.h"
 #include "myRowSizer.h"
 #include "util.h"
 #include "gimage/strutil.h"
@@ -29,7 +30,7 @@
 #define LF_0395
 #endif
 
-
+/*
 class myListCtrl: public wxListCtrl
 {
 	public:
@@ -117,6 +118,7 @@ class myListCtrl: public wxListCtrl
 		wxArrayString itemlist;
 		wxString filter, selected, name;
 };
+*/
  
 
 class myLensDialog: public wxDialog
