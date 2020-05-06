@@ -45,8 +45,8 @@ void myListCtrl::setFilter(wxString f)
 	InsertColumn(0, col0);
 			
 	for (int i=0; i<itemlist.GetCount(); i++) {
-		//if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) {
-		if (itemlist[i].Find(filter) != wxNOT_FOUND) {
+		if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) {
+		//if (itemlist[i].Find(filter) != wxNOT_FOUND) {
 			//wxListItem item;
 			//item.SetId(j);
 			//item.SetText( itemlist[i] );
