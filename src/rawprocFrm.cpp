@@ -52,6 +52,7 @@
 #include "myEXIFDialog.h"
 #include "myConfig.h"
 #include "myListDialog.h"
+#include "myDataDialog.h"
 #include "util.h"
 #include "gimage/strutil.h"
 #include "fileutil.h"
@@ -656,7 +657,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 		dlg.ShowModal();
 	}
 	else if (exifformat == "text") {
-		myListDialog dlg(this, wxID_ANY, filename.GetFullName(), output,  wxDefaultPosition, wxSize(500,500));
+		myDataDialog dlg(this, wxID_ANY, filename.GetFullName(), output,  wxDefaultPosition, wxSize(500,500));
 		dlg.ShowModal();
 	}
 	else wxMessageBox(wxString::Format("Invalid exif.format value: %s",exifformat));
