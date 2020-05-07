@@ -51,6 +51,7 @@
 #include "myBatchDialog.h"
 #include "myEXIFDialog.h"
 #include "myConfig.h"
+#include "myListDialog.h"
 #include "util.h"
 #include "gimage/strutil.h"
 #include "fileutil.h"
@@ -624,14 +625,22 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 void rawprocFrm::EXIFDialog(wxFileName filename)
 {
 	if (!filename.FileExists()) return;
+	//parm exif.format: text|html - If 'html', exif is displayed with HTML formatting.  If 'text', exif is presented in a filterable list box.  Default=html
+	std::string exifformat = myConfig::getConfig().getValueOrDefault("exif.format","html");
 	//parm exif.command: Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.
 	wxString exifcommand = wxString(myConfig::getConfig().getValueOrDefault("exif.command",""));
 	if (exifcommand == "") {
 		wxMessageBox("No exiftool path defined in exif.command");
 		return;
 	}
-	//parm exif.parameters: exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.
-	wxString exifparameters = wxString(myConfig::getConfig().getValueOrDefault("exif.parameters","-g -h"));
+	//parm exif.parameters: exiftool parameters used to format the exiftool output.  If the parameter doesn't exist, parameters suitable for the exif.format value will be used.
+	wxString exifparameters;
+	if (myConfig::getConfig().exists("exif.parameters"))
+		exifparameters = wxString(myConfig::getConfig().getValueOrDefault("exif.parameters",""));
+	else if (exifformat == "text")
+		exifparameters = "-G -S";
+	else if (exifformat == "html")
+		exifparameters = "-g -h";
 
 	wxString command = wxString::Format("%s %s \"%s\"",exifcommand, exifparameters, filename.GetFullPath());
 	wxArrayString output;
@@ -641,8 +650,16 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 	wxString exif;
 	for (int i=0; i<output.GetCount(); i++) exif.Append(output[i]);
 	SetStatusText(filename.GetFullName());
-	myEXIFDialog dlg(this, wxID_ANY, filename.GetFullName(), exif,  wxDefaultPosition, wxSize(500,500));
-	dlg.ShowModal();
+	
+	if (exifformat == "html") {
+		myEXIFDialog dlg(this, wxID_ANY, filename.GetFullName(), exif,  wxDefaultPosition, wxSize(500,500));
+		dlg.ShowModal();
+	}
+	else if (exifformat == "text") {
+		myListDialog dlg(this, wxID_ANY, filename.GetFullName(), output,  wxDefaultPosition, wxSize(500,500));
+		dlg.ShowModal();
+	}
+	else wxMessageBox(wxString::Format("Invalid exif.format value: %s",exifformat));
 }
 
 //ToDo: expand to include camconst.json, elle's profiles?  Maybe even a rawproc.conf...
