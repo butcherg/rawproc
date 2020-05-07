@@ -45,13 +45,8 @@ void myListCtrl::setFilter(wxString f)
 	InsertColumn(0, col0);
 			
 	for (int i=0; i<itemlist.GetCount(); i++) {
-		if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) {
-		//if (itemlist[i].Find(filter) != wxNOT_FOUND) {
-			//wxListItem item;
-			//item.SetId(j);
-			//item.SetText( itemlist[i] );
-			//InsertItem( item );
-			//j++;
+		if (itemlist[i].Lower().Find(filter.Lower()) != wxNOT_FOUND) { //case insensitive
+		//if (itemlist[i].Find(filter) != wxNOT_FOUND) { //case sensitive
 			filteredlist.Add(itemlist[i]);
 		}
 	}
@@ -64,8 +59,7 @@ void myListCtrl::setFilter(wxString f)
 	Refresh();
 }
 		
-
-		//Captures the entry selected, at selection:
+//Captures the entry selected, at selection:
 void myListCtrl::Selected(wxListEvent& event)
 {
 	selected = event.GetText();
