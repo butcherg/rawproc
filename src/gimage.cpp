@@ -5873,8 +5873,55 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 			fprintf(f,"gmax: %f gmaxcolumn: %d\n",gmax, gmaxcol);
 			fprintf(f,"bmax: %f bmaxcolumn: %d\n",bmax, bmaxcol);
 		}
+		else if (outputmode == "channelaveragecolumns") {
+			float sum = 0.0;
+			float rmax = 0.0, gmax = 0.0, bmax = 0.0;
+			int rmaxcol = 0, gmaxcol = 0, bmaxcol = 0;
+			fprintf(f,"\n,red,green,blue\n");
+			for(unsigned x = 0; x < w; x++) {
+				fprintf(f,"%d,",x);
+				for(unsigned y = 0; y < h; y++) {
+					unsigned pos = x + y*w;
+					sum += image[pos].r;
+				}
+				sum /= h;
+				if (sum > rmax) {
+					rmax = sum;
+					rmaxcol = x;
+				}
+				fprintf(f,"%f,",sum);
+				sum = 0.0;
+				for(unsigned y = 0; y < h; y++) {
+					unsigned pos = x + y*w;
+					sum += image[pos].g;
+				}
+				sum /= h;
+				if (sum > gmax) {
+					gmax = sum;
+					gmaxcol = x;
+				}
+				fprintf(f,"%f,",sum);
+				sum = 0.0;
+				for(unsigned y = 0; y < h; y++) {
+					unsigned pos = x + y*w;
+					sum += image[pos].b;
+				}
+				sum /= h;
+				if (sum > bmax) {
+					bmax = sum;
+					bmaxcol = x;
+				}
+				fprintf(f,"%f",sum);
+				sum = 0.0;
+				fprintf(f,"\n");
+			}
+			fprintf(f,"\n\n");
+			fprintf(f,",,,,,rmax: %f rmaxcolumn: %d\n",rmax, rmaxcol);
+			fprintf(f,",,,,,gmax: %f gmaxcolumn: %d\n",gmax, gmaxcol);
+			fprintf(f,",,,,,bmax: %f bmaxcolumn: %d\n",bmax, bmaxcol);
+		}
 		else if (outputmode == "rgb") {
-			fprintf(f,"\nrgb:\n");
+			// fprintf(f,"\nrgb:\n");
 			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); fprintf(f,"\n");
 			for(unsigned y = 0; y < h; y++) {
 				bool first = true;
