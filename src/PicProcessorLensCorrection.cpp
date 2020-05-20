@@ -61,6 +61,19 @@ class LensCorrectionPanel: public PicProcPanel
 			str.Add("lanczos3");
 			algo = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 			algo->SetStringSelection("nearest");
+			
+			str.Empty();
+			str.Add("reticlinear");
+			str.Add("fisheye");
+			str.Add("panoramic");
+			str.Add("equirectangular");
+			str.Add("orthographic");
+			str.Add("stereographic");
+			str.Add("equisolid");
+			str.Add("thoby");
+			geom = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			geom->SetStringSelection("reticlinear");
+			
 
 			for (int i=0; i<parms.GetCount(); i++) {
 				wxArrayString nameval = split(parms[i], "=");
@@ -82,6 +95,9 @@ class LensCorrectionPanel: public PicProcPanel
 				if (nameval[0] == "algo") {
 					algo->SetStringSelection(nameval[1]);
 				}
+				if (nameval[0] == "geometry") {
+					geom->SetStringSelection(nameval[1]);
+				}
 			}
 
 			wxString altcam = cam->GetValue();
@@ -94,8 +110,9 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			//m->NextRow();
+			//m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,-1, metadata, wxDefaultPosition, wxSize(260,50)), flags);
 			m->NextRow();
@@ -110,18 +127,28 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
-			m->NextRow();
-			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
-			m->NextRow();
+			//m->NextRow();
+			//m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			
+			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(ca, flags);
 			m->NextRow();
 			m->AddRowItem(vig, flags);
 			m->NextRow();
 			m->AddRowItem(dist, flags);
+			m->NextRow();
+			m->AddRowItem(crop, flags);
+			
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
+			
 			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(crop, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 			m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().CenterVertical());
 			m->AddRowItem(algo, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
+			m->AddRowItem(new wxStaticText(this,-1, "geometry:"), wxSizerFlags(0).Right().CenterVertical());
+			m->AddRowItem(geom, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
+			
+			
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
 			m->NextRow();
@@ -215,6 +242,9 @@ class LensCorrectionPanel: public PicProcPanel
 
 			if (ops != "") paramAppend("ops", ops, cmd);
 			if (dist->GetValue()) paramAppend("algo", algo->GetString(algo->GetSelection()), cmd);
+			
+			wxString geometry = geom->GetString(geom->GetSelection()); 
+			if (geometry != "reticlinear") paramAppend("geometry", geometry, cmd);
 
 			q->setParams(cmd);
 			q->processPic();
@@ -223,7 +253,7 @@ class LensCorrectionPanel: public PicProcPanel
 
 
 	private:
-		wxChoice *algo;
+		wxChoice *algo, *geom;
 		wxCheckBox *ca, *vig, *dist, *crop;
 		wxTextCtrl *cam, *lens;
 		wxCheckBox *enablebox;

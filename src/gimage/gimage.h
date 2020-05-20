@@ -78,6 +78,17 @@ enum RESIZE_FILTER {
 	FILTER_LANCZOS3
 };
 
+enum LENS_GEOMETRY {
+	GEOMETRY_RETICLINEAR,
+	GEOMETRY_FISHEYE,
+	GEOMETRY_PANORAMIC,
+	GEOMETRY_EQUIRECTANGULAR,
+	GEOMETRY_ORTHOGRAPHIC,
+	GEOMETRY_STEREOGRAPHIC,
+	GEOMETRY_EQUISOLID,
+	GEOMETRY_THOBY
+};
+
 
 enum GIMAGE_ERROR {
 	GIMAGE_OK,
@@ -299,7 +310,7 @@ class gImage
 		//From the lensfun library, gImage users need to know the lfDatabase class and the LF_MODIFY_XXXX flagus
 		GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase **ldb);
 		GIMAGE_ERROR lensfunFindCameraLens(lfDatabase * ldb, std::string camera, std::string lens);
-		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
+		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
 		
 

@@ -187,11 +187,12 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 			token = 1;
 		}
 
-		else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
+		//else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
+		else if (isInt(p[0])) {
 			pmap["mode"] = "primaries";
 			pmap["icc"] = 
-				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[1].c_str(),p[2].c_str(),p[3].c_str(),p[4].c_str(),p[5].c_str(),p[6].c_str(),p[7].c_str(),p[8].c_str(),p[9].c_str());
-			token = 10;
+				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[0].c_str(),p[1].c_str(),p[2].c_str(),p[3].c_str(),p[4].c_str(),p[5].c_str(),p[6].c_str(),p[7].c_str(),p[8].c_str());
+			token = 9;
 		}
 		else {  //treat whatever is in p[0] as a file name
 			pmap["mode"] = "file";
@@ -567,7 +568,7 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 }
 
 //lenscorrection (rawproc)
-//:ops=<op1>...[;algo=nearest|bilinear|lanczos3 - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
+//:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;

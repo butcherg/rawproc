@@ -617,6 +617,24 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 				if (*it == "autocrop") modops |= LF_MODIFY_SCALE;
 		}
 		
+		modops |= LF_MODIFY_GEOMETRY;
+		
+		LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR;
+		if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
+		else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
+		else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
+		else if (params["geometry"] == "equirectangular") geometry = GEOMETRY_EQUIRECTANGULAR;
+		else if (params["geometry"] == "orthographic") geometry = GEOMETRY_ORTHOGRAPHIC;
+		else if (params["geometry"] == "stereographic") geometry = GEOMETRY_STEREOGRAPHIC;
+		else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
+		else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
+		else {
+			result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"]);
+			return result;
+		}
+		
+		//reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby
+		
 		RESIZE_FILTER algo = FILTER_BOX;
 		if (params["algo"] == "nearest") algo = FILTER_BOX;
 		else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
@@ -628,7 +646,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		if (paramexists(params, "lens")) camera = params["lens"];
 
 		_mark();
-		res =  dib.ApplyLensCorrection(ldb, modops, algo, threadcount, camera, lens);
+		res =  dib.ApplyLensCorrection(ldb, modops, geometry, algo, threadcount, camera, lens);
 		if (res ==  GIMAGE_LF_NO_DATABASE) {
 			result["error"] = "lenscorrection:ProcessError - No database instance";
 			return result;

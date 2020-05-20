@@ -4765,12 +4765,22 @@ GIMAGE_ERROR gImage::lensfunFindCameraLens(lfDatabase * ldb, std::string camera,
 	return GIMAGE_OK;
 }
 
-GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
+GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
 	
 	int ModifyFlags = modops;
 	initInterpolation(algo);
+	
+	lfLensType targeom = LF_RECTILINEAR;
+	if (geometry == GEOMETRY_RETICLINEAR) targeom = LF_RECTILINEAR;
+	else if (geometry == GEOMETRY_FISHEYE) targeom = LF_FISHEYE;
+	else if (geometry == GEOMETRY_PANORAMIC) targeom = LF_PANORAMIC;
+	else if (geometry == GEOMETRY_EQUIRECTANGULAR) targeom = LF_EQUIRECTANGULAR ;
+	else if (geometry == GEOMETRY_ORTHOGRAPHIC) targeom = LF_FISHEYE_ORTHOGRAPHIC ;
+	else if (geometry == GEOMETRY_STEREOGRAPHIC) targeom = LF_FISHEYE_STEREOGRAPHIC ;
+	else if (geometry == GEOMETRY_EQUISOLID) targeom = LF_FISHEYE_EQUISOLID ;
+	else if (geometry == GEOMETRY_THOBY) targeom = LF_FISHEYE_THOBY ;
 	
 	//get camera instance:
 	const lfCamera *cam = NULL;
@@ -4811,9 +4821,10 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FI
 	if (ModifyFlags & LF_MODIFY_DISTORTION)
 		modflags |= mod->EnableDistortionCorrection(lns, atof(info["FocalLength"].c_str()));
 	if (ModifyFlags & LF_MODIFY_GEOMETRY)
-		modflags |= mod->EnableProjectionTransform(lns, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
+		modflags |= mod->EnableProjectionTransform(lns, atof(info["FocalLength"].c_str()), targeom);
 	if (ModifyFlags & LF_MODIFY_SCALE)
 		modflags |= mod->EnableScaling(1.0);
+	
 
 #else
 	lfModifier *mod = lfModifier::Create (lns, lns->CropFactor, w, h);
@@ -4822,15 +4833,16 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, RESIZE_FI
 		LF_PF_F32, 
 		atof(imginfo["FocalLength"].c_str()), 
 		atof(imginfo["FNumber"].c_str()),
-		1.0f, //opts.Distance
+		1000.0f, //opts.Distance
 		1.0f, //opts.Scale, 
-		LF_RECTILINEAR, //opts.TargetGeom,
+		targeom, //opts.TargetGeom,
 		ModifyFlags, 
 		false //opts.Inverse
 	);
 
 	if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
 #endif
+
 
 	//unsigned w = dib->getWidth();
 	//unsigned h = dib->getHeight();
