@@ -258,6 +258,7 @@ class gImage
 		std::vector<double> ApplyPatchWhiteBalance(float patchx, float patchy, double patchradius, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult, int threadcount=0);
 		std::vector<double> ApplyWhiteBalance(int threadcount=0);
+		std::vector<double> ApplyWhiteBalance(double redmult, double greenmult, double bluemult,  float bluethreshold, int threadcount=0);
 
 		//demosaic algorithms:
 		bool ApplyDemosaicHalf(bool resize=false, int threadcount=0);

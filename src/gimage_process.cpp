@@ -1061,7 +1061,16 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "whitebalance:multipliers";
 		}
-
+		else if (params["mode"] == "bluethreshold") {
+			float redmult = atof(params["redmultiplier"].c_str());
+			float greenmult = atof(params["greenmultiplier"].c_str());
+			float bluemult = atof(params["bluemultiplier"].c_str());
+			float bluethresh = atof(params["bluethreshold"].c_str());
+			_mark();
+			dib.ApplyWhiteBalance(redmult, greenmult, bluemult, bluethresh, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "whitebalance:bluethreshold";
+		}
 	}
  	return result;
 }

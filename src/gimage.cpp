@@ -2724,6 +2724,29 @@ std::vector<double> gImage::ApplyWhiteBalance(int threadcount)
 	return a;
 }
 
+// applies WB to any pixel where it's blue value is greater than lum, (r+b+g)/3, by the specified threshold.  For images shot in tungsten light 
+// where there are windows looking out on daylight...  
+std::vector<double> gImage::ApplyWhiteBalance(double redmult, double greenmult, double bluemult,  float bluethreshold, int threadcount)
+{
+	std::vector<double> a = {0.0, 0.0, 0.0};
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i<image.size(); i++) {
+		double lum = (image[i].r + image[i].g + image[i].b) / 3.0;
+		if (image[i].b / lum > bluethreshold) {
+			image[i].r *= redmult; 
+			image[i].g *= greenmult; 
+			image[i].b *= bluemult; 
+		}
+	}
+
+	a[0] = redmult;
+	a[1] = greenmult;
+	a[2] = bluemult;
+
+	return a;
+}
+
+
 bool f(double d)
 {
 	return true;

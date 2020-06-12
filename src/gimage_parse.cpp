@@ -1280,12 +1280,40 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 				pmap["error"] = string_format("whitebalance:ParseError - Patch radius expected to be float: %s", p[3].c_str()); 
 				return pmap;
 			}
-			
-			
-			
+
 			pmap["patchy"] = p[2];
 			pmap["patchradius"] = p[3];
 			
+		}
+		else if (p[0] == "bluethreshold") {
+			if (isFloat(p[0])) {
+				pmap["redmultiplier"] = p[0];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Red multiplier expected to be float: %s", p[0].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[1])) {
+				pmap["greenmultiplier"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Green multiplier expected to be float: %s", p[1].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[2])) {
+				pmap["bluemultiplier"] = p[2];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Blue multiplier expected to be float: %s", p[2].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[3])) {
+				pmap["bluethreshold"] = p[3];
+			}
+			else {
+				pmap["error"] = string_format("whitebalance:ParseError - Blue threshold expected to be float: %s", p[2].c_str()); 
+				return pmap;
+			}
 		}
 		else {
 			pmap["error"] = string_format("whitebalance:ParseError - Unrecognized token: %s", p[0].c_str()); 
