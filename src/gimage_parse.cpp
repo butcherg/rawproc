@@ -1248,12 +1248,12 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 
 		}
 		else if (p[0] == "auto") {
-			pmap["mode"] = "log2";
+			pmap["mode"] = "auto";
 			pmap["cmdlabel"] = "whitebalance:auto";
 			
 		}
 		else if (p[0] == "patch") {
-			pmap["mode"] = "log2";
+			pmap["mode"] = "patch";
 			pmap["cmdlabel"] = "whitebalance:patch";
 			if (psize < 4) {
 				pmap["error"] = "whitebalance:ParseError - Insufficient number of patch parameters"; 
@@ -1286,29 +1286,30 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 			
 		}
 		else if (p[0] == "bluethreshold") {
-			if (isFloat(p[0])) {
-				pmap["redmultiplier"] = p[0];
+			pmap["mode"] = "bluethreshold";
+			if (isFloat(p[1])) {
+				pmap["redmultiplier"] = p[1];
 			}
 			else {
 				pmap["error"] = string_format("whitebalance:ParseError - Red multiplier expected to be float: %s", p[0].c_str()); 
 				return pmap;
 			}
-			if (isFloat(p[1])) {
-				pmap["greenmultiplier"] = p[1];
+			if (isFloat(p[2])) {
+				pmap["greenmultiplier"] = p[2];
 			}
 			else {
 				pmap["error"] = string_format("whitebalance:ParseError - Green multiplier expected to be float: %s", p[1].c_str()); 
 				return pmap;
 			}
-			if (isFloat(p[2])) {
-				pmap["bluemultiplier"] = p[2];
+			if (isFloat(p[3])) {
+				pmap["bluemultiplier"] = p[3];
 			}
 			else {
 				pmap["error"] = string_format("whitebalance:ParseError - Blue multiplier expected to be float: %s", p[2].c_str()); 
 				return pmap;
 			}
-			if (isFloat(p[3])) {
-				pmap["bluethreshold"] = p[3];
+			if (isFloat(p[4])) {
+				pmap["bluethreshold"] = p[4];
 			}
 			else {
 				pmap["error"] = string_format("whitebalance:ParseError - Blue threshold expected to be float: %s", p[2].c_str()); 
