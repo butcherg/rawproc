@@ -20,6 +20,7 @@
 #define WBPATCH 6403
 #define WBCAMERA 6404
 #define WBORIGINAL 6405
+#define WBBLUETHRESHOLD 6406
 
 #define WBRED 6406
 #define WBGREEN 6407
@@ -57,6 +58,8 @@ class WhiteBalancePanel: public PicProcPanel
 			rmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			gmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			bmult = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
+			bluethres = new wxCheckBox(this, WBBLUETHRESHOLD, _("blue threshold:"));
+			bthresh = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
 			btn = new wxBitmapButton(this, WBRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 			btn->SetToolTip(_("Reset multipliers to original values"));
 
@@ -101,6 +104,11 @@ class WhiteBalancePanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("blue mult:"), wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
 			m->AddRowItem(bmult, flags);
 			m->AddRowItem(btn, flags);
+			
+			m->NextRow();
+			//m->AddRowItem(new wxStaticText(this,wxID_ANY, _("blue threshold:"), wxDefaultPosition, wxSize(80,TEXTHEIGHT)), flags);
+			m->AddRowItem(bluethres, flags);
+			m->AddRowItem(bthresh, flags);
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -169,6 +177,17 @@ class WhiteBalancePanel: public PicProcPanel
 				pb->Enable(true);
 				pb->SetValue(true);
 			}
+			else if (p[0] == "bluethreshold") {
+				orgr = atof(p[1]);
+				orgg = atof(p[2]);
+				orgb = atof(p[3]);
+				origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
+				setMultipliers(orgr, orgg, orgb);
+				bthresh->SetFloatValue(atof(p[4]));
+				ob->Enable(true);
+				ob->SetValue(true);
+				bluethres->SetValue(true);
+			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
 				orgr = atof(p[0]);
 				orgg = atof(p[1]);
@@ -191,6 +210,7 @@ class WhiteBalancePanel: public PicProcPanel
 			Bind(myFLOATCTRL_CHANGE,&WhiteBalancePanel::onWheel, this);
 			Bind(myFLOATCTRL_UPDATE,&WhiteBalancePanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::OnEnable, this, WBENABLE);
+			Bind(wxEVT_CHECKBOX, &WhiteBalancePanel::paramChanged, this, WBBLUETHRESHOLD);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnReset, this, WBRESET);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnCopy, this, WBCOPY);
 			Bind(wxEVT_BUTTON, &WhiteBalancePanel::OnPaste, this, WBPASTE);
@@ -249,6 +269,14 @@ class WhiteBalancePanel: public PicProcPanel
 					pb->Enable(true);
 					pb->SetValue(true);
 				}
+				else if (p[0] == "bluethreshold") {
+					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[1]), atof(p[2]), atof(p[3])));
+					setMultipliers(atof(p[1]), atof(p[2]), atof(p[3]));
+					bthresh->SetFloatValue(atof(p[4]));
+					ob->Enable(true);
+					ob->SetValue(true);
+					bluethres->SetValue(true);
+				}
 				else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
 					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[0]), atof(p[1]), atof(p[2])));
 					setMultipliers(atof(p[0]), atof(p[1]), atof(p[2]));
@@ -295,9 +323,11 @@ class WhiteBalancePanel: public PicProcPanel
 					q->setParams(wxString::Format("patch,%d,%d,%0.1f",patx, paty, patrad));
 					break;
 				case WBORIGINAL:
-					q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
+					if (bluethres->GetValue())
+						q->setParams(wxString::Format("bluethreshold,%0.3f,%0.3f,%0.3f,%0.3f",orgr, orgg, orgb,bthresh->GetFloatValue()));
+					else
+						q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
 					break;
-
 			}
 			q->processPic();
 			Refresh();
@@ -333,7 +363,10 @@ class WhiteBalancePanel: public PicProcPanel
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
+			if (bluethres->GetValue())
+				q->setParams(wxString::Format("bluethreshold,%0.3f,%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue(), bthresh->GetFloatValue()));
+			else
+				q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			q->processPic();
 			Refresh();
 		}
@@ -344,7 +377,10 @@ class WhiteBalancePanel: public PicProcPanel
 			ab->SetValue(false);
 			pb->SetValue(false);
 			cb->SetValue(false);
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
+			if (bluethres->GetValue())
+				q->setParams(wxString::Format("bluethreshold,%0.3f,%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue(), bthresh->GetFloatValue()));
+			else
+				q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",rmult->GetFloatValue(), gmult->GetFloatValue(), bmult->GetFloatValue()));
 			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -362,8 +398,9 @@ class WhiteBalancePanel: public PicProcPanel
 	private:
 		wxStaticText *origwb, *autowb, *patch, *camera;
 		wxRadioButton *ob, *ab, *pb, *cb;
-		wxCheckBox *enablebox;
+		wxCheckBox *enablebox, *bluethres;
 		myFloatCtrl *rmult, *gmult ,*bmult;
+		myFloatCtrl *bthresh;
 		wxBitmapButton *btn;
 		wxTimer t;
 		unsigned patx, paty;
@@ -422,7 +459,8 @@ enum optypes {
 	automatic,
 	camera,
 	imgpatch,
-	multipliers
+	multipliers,
+	bluethreshold
 };
 
 std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
@@ -441,6 +479,7 @@ std::vector<double> PicProcessorWhiteBalance::getCameraMultipliers()
 bool PicProcessorWhiteBalance::processPicture(gImage *processdib) 
 {
 	double redmult=1.0, greenmult=1.0, bluemult=1.0;
+	float bthreshold = 1.0;
 	std::vector<double> wbmults;
 	float patchx, patchy; double patchrad;
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("white balance..."));
@@ -471,6 +510,13 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 				bluemult = 1.0;
 				optype = multipliers;
 			}
+		}
+		else if (p[0] == "bluethreshold") {
+			redmult = atof(p[1]);
+			greenmult = atof(p[2]);
+			bluemult = atof(p[3]);
+			bthreshold = atof(p[4]);
+			optype = bluethreshold;
 		}
 		else if (p[0].Find(".") != wxNOT_FOUND) {  //float multipliers
 			redmult = atof(p[0]);
@@ -538,6 +584,11 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 				m_display->SetModified(true);
 				m_tree->SetItemText(id, wxString::Format(_("whitebalance:multipliers")));
 			} 
+			else if (optype == bluethreshold) {
+				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, bthreshold, threadcount);
+				m_display->SetModified(true);
+				m_tree->SetItemText(id, wxString::Format(_("whitebalance:bluethreshold")));
+			}
 			else if (optype == camera) {
 				wbmults = dib->ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 				m_display->SetModified(true);
