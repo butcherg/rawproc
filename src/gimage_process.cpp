@@ -960,6 +960,7 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			dib.ApplyToneMapGamma(gamma, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "tone:gamma";
+			result["commandstring"] = string_format("tone:gamma,%s",params["value"].c_str());
 		}
 		else if (params["mode"] == "reinhard") {
 			bool channel = true;
@@ -970,18 +971,22 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			dib.ApplyToneMapReinhard(channel, norm, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "tone:reinhard";
+			result["commandstring"] = string_format("tone:reinhard,%s",params["reinhardmode"].c_str());
+			if (norm) result["commandstring"] += ",norm";
 		}
 		else if (params["mode"] == "log2") {
 			_mark();
 			dib.ApplyToneMapLog2(threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "tone:log2";
+			result["commandstring"] = "tone:log2";
 		}
 		else if (params["mode"] == "loggamma") {
 			_mark();
 			dib.ApplyToneMapLogGamma(threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "tone:loggamma";
+			result["commandstring"] = "tone:loggamma";
 		}
 		else if (params["mode"] == "filmic") {
 			float A = atof(params["A"].c_str());
@@ -994,6 +999,8 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			dib.ApplyToneMapFilmic(A, B, C, D, power, norm, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "tone:filmic";
+			result["commandstring"] = string_format("tone:filmic,%s,%s,%s,%s,%s",params["A"].c_str(),params["B"].c_str(),params["C"].c_str(),params["D"].c_str(),params["power"].c_str());
+			if (norm) result["commandstring"] += ",norm";
 		}
 
 	}
