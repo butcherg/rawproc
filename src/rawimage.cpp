@@ -710,10 +710,16 @@ char * _loadRAW(const char *filename,
 	if (p.find("no_interpolation") != p.end()) 
 		RawProcessor.imgdata.params.no_interpolation = atoi(p["no_interpolation"].c_str());
 
-	//raw <li><b>whitebalance</b>=none|auto|camera|n,n,n,n - whitebalance overrides all other dcraw/libraw white balance parameters, provides a more intuitive way to specify white balance.  Default=none (no value also equals 'none').</li>
-	RawProcessor.imgdata.params.no_auto_scale=1;  //turn it all off
+	//raw <li><b>whitebalance</b>=none|auto|camera|n,n,n,n - whitebalance overrides all other dcraw/libraw white balance parameters, provides a more intuitive way to specify white balance.  Default=camera (no value also equals 'camera').</li>
+	//RawProcessor.imgdata.params.no_auto_scale=1;  //turn it all off
+
+	//default to camera if whitebalance is not specified:
+	RawProcessor.imgdata.params.no_auto_scale=0;
+	RawProcessor.imgdata.params.use_camera_wb = 1;
+	RawProcessor.imgdata.params.use_auto_wb = 0;
+
 	if (p.find("whitebalance") != p.end()) {
-		if (p["whitebalance"] == "none" | p["whitebalance"].empty()) {
+		if (p["whitebalance"] == "none") {
 			RawProcessor.imgdata.params.no_auto_scale=1;
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
@@ -727,7 +733,7 @@ char * _loadRAW(const char *filename,
 			RawProcessor.imgdata.params.use_camera_wb = 0;
 			RawProcessor.imgdata.params.use_auto_wb = 1;
 		}
-		else if (p["whitebalance"] == "camera" ) {
+		else if (p["whitebalance"] == "camera" | p["whitebalance"].empty()) {  //default if property exists but is empty
 			RawProcessor.imgdata.params.no_auto_scale=0;
 			RawProcessor.imgdata.params.use_camera_wb = 1;
 			RawProcessor.imgdata.params.use_auto_wb = 0;
