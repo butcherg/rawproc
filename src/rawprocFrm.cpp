@@ -917,10 +917,24 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 		
 		pic->SetModified(false);
 		
-		//parm input.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0
-		if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
-			WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
-			dib->NormalizeRotation();
+		//parm input.[jpeg|tiff|png].orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Can be set for jpeg, tiff, or png images only; raw images have to wait until after demosaic to preserve the CFA orientation (see tool.demosaic.orient).  Default=0
+		if (fif == FILETYPE_JPEG) {
+			if (myConfig::getConfig().getValueOrDefault("input.jpeg.orient","0") == "1") {
+				WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing jpeg image orientation...")));
+				dib->NormalizeRotation();
+			}
+		}
+		else if (fif == FILETYPE_TIFF) {
+			if (myConfig::getConfig().getValueOrDefault("input.tiff.orient","0") == "1") {
+				WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing tiff image orientation...")));
+				dib->NormalizeRotation();
+			}
+		}
+		else if (fif == FILETYPE_PNG) {
+			if (myConfig::getConfig().getValueOrDefault("input.png.orient","0") == "1") {
+				WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing png image orientation...")));
+				dib->NormalizeRotation();
+			}
 		}
 		
 		//wxString flagstring(params.c_str());
@@ -1095,9 +1109,23 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 			pic->SetModified(false);
 			
-			if (myConfig::getConfig().getValueOrDefault("input.orient","0") == "1") {
-				WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing image orientation...")));
-				dib->NormalizeRotation();
+			if (fif == FILETYPE_JPEG) {
+				if (myConfig::getConfig().getValueOrDefault("input.jpeg.orient","0") == "1") {
+					WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing jpeg image orientation...")));
+					dib->NormalizeRotation();
+				}
+			}
+			else if (fif == FILETYPE_TIFF) {
+				if (myConfig::getConfig().getValueOrDefault("input.tiff.orient","0") == "1") {
+					WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing tiff image orientation...")));
+					dib->NormalizeRotation();
+				}
+			}
+			else if (fif == FILETYPE_PNG) {
+				if (myConfig::getConfig().getValueOrDefault("input.png.orient","0") == "1") {
+					WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing png image orientation...")));
+					dib->NormalizeRotation();
+				}
 			}
 			
 			filename.Assign(ofilename);
