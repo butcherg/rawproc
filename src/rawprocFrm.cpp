@@ -1609,14 +1609,6 @@ void rawprocFrm::Mnureopen1033Click(wxCommandEvent& event)
 			}
 			else if (result == wxNO) {
 				OpenFile(filename.GetFullPath());
-				wxArrayString token = split(cmdstring, " ");
-				for (int i=2; i<token.GetCount(); i++) {
-					wxArrayString cmd = split(token[i], ":");					
-					if (AddItem(cmd[0], cmd[1]).IsOk()) 
-						wxSafeYield(this);
-					else
-						wxMessageBox(wxString::Format(_("Unknown command: %s"),cmd[0]));
-				}
 			}
 		}
 		else {
