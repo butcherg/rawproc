@@ -5847,12 +5847,12 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 		fprintf(f, "width: %d\nheight: %d\n",w,h);
 		fprintf(f, "%s\n", imginfo["ImageDescription"].c_str());
 		if (outputmode == "channelaverage") {
-			fprintf(f,",");
-			for(unsigned x = 0; x < w; x++) fprintf(f,"%d,",x); 
+			fprintf(f,"x");
+			for(unsigned x = 0; x < w; x++) fprintf(f,",%d",x); 
 			float rmax = 0.0, gmax = 0.0, bmax = 0.0;
 			int rmaxcol = 0, gmaxcol = 0, bmaxcol = 0;
-			fprintf(f,"\nred,");
-			bool first = true; 
+			fprintf(f,"\nred");
+			//bool first = true; 
 			for(unsigned x = 0; x < w; x++) {
 				float rsum = 0.0;
 				for(unsigned y = 0; y < h; y++) {
@@ -5864,13 +5864,14 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 					rmax = rsum;
 					rmaxcol = x;
 				}
-				if (first) fprintf(f,"%f",rsum); else fprintf(f,",%f",rsum);
-				first = false;
+				//if (first) fprintf(f,"%f",rsum); else 
+				fprintf(f,",%f",rsum);
+				//first = false;
 			}
 			fprintf(f,"\n");
 
-			fprintf(f,"green,");
-			first = true; 
+			fprintf(f,"green");
+			//first = true; 
 			for(unsigned x = 0; x < w; x++) {
 				float gsum = 0.0;
 				for(unsigned y = 0; y < h; y++) {
@@ -5882,13 +5883,14 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 					gmax = gsum;
 					gmaxcol = x;
 				}
-				if (first) fprintf(f,"%f",gsum); else fprintf(f,",%f",gsum);
-				first = false;
+				//if (first) fprintf(f,"%f",gsum); else 
+				fprintf(f,",%f",gsum);
+				//first = false;
 			}
 			fprintf(f,"\n");
 			
-			fprintf(f,"blue,");
-			first = true; 
+			fprintf(f,"blue");
+			//first = true; 
 			for(unsigned x = 0; x < w; x++) {
 				float bsum = 0.0;
 				for(unsigned y = 0; y < h; y++) {
@@ -5900,8 +5902,9 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 					bmax = bsum;
 					bmaxcol = x;
 				}
-				if (first) fprintf(f,"%f",bsum); else fprintf(f,",%f",bsum);
-				first = false;
+				//if (first) fprintf(f,"%f",bsum); else 
+				fprintf(f,",%f",bsum);
+				//first = false;
 			}
 			fprintf(f,"\n\n");
 			fprintf(f,"rmax: %f rmaxcolumn: %d\n",rmax, rmaxcol);
