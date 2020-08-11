@@ -435,11 +435,30 @@ char * gImage::getTransformedImageData(BPP bits, cmsHTRANSFORM transform)
 			imagedata = (char *) malloc(w*h*c);
 			//outformat = TYPE_RGB_8;
 			cpix * imgdata = (cpix *) imagedata;
+/*
+			#pragma omp parallel
+			{
+				int threadnum = omp_get_thread_num();
+				int numthreads =  omp_get_num_threads();
+
+				int div = h / numthreads;
+				int mod = h % numthreads;
+				int pos = (div * threadnum) * w;
+				if (threadnum+1 == numthreads) div += mod;
+				//printf("thread:%d  pos:%d  div:%d    w: %d h:%d c:%d\n", threadnum, pos, div, w, h, c);  fflush(stdout);
+				
+				cmsDoTransformLineStride(transform, &img[pos], &imgdata[pos], w, div, w*sizeof(PIXTYPE)*c, w*c, 0, 0 );
+
+			}
+*/
+			
+
 			#pragma omp parallel for
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = y*w;
 				cmsDoTransform(transform, &img[pos], &imgdata[pos], w);
 			}
+
 		}
 		else if (bits == BPP_FP | bits == BPP_UFP) {
 			//imagedata = new char[w*h*c*sizeof(float)];
