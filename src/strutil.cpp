@@ -40,6 +40,13 @@ std::string to_utf8(std::wstring wstr)
 	return converter.to_bytes(wstr);
 }
 
+std::string toUpperCase(std::string str)
+{
+	for (std::string::iterator p = str.begin(); p != str.end(); ++p)
+		*p = toupper(*p);
+	return str;
+}
+
 bool isFloat(std::string str)
 {
 	std::regex e ("^[-+]?[0-9]*.?[0-9]+([eE][-+]?[0-9]+)?$");

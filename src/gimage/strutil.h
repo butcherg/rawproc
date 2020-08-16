@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+std::string toUpperCase(std::string str);
+
 bool isFloat(std::string str);
 bool isUnsignedInt(std::string str);
 bool isInt(std::string str);
