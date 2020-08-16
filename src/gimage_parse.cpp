@@ -443,7 +443,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 			if (psize >= 2) pmap["threshold"] = p[1];
 		}
 		else {
-			pmap["error"] = string_format("demosaic:ParseError - Unrecognized denoise option: %s.",p[0].c_str());
+			pmap["error"] = string_format("denoise:ParseError - Unrecognized denoise option: %s.",p[0].c_str());
 			return pmap;
 		}
 		
