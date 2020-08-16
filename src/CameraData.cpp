@@ -119,6 +119,9 @@ std::string CameraData::getItem(std::string makemodel, std::string itemname)
 	if (camdat.find(makemodel) != camdat.end())
 		if (camdat[makemodel].find(itemname) != camdat[makemodel].end())
 			return camdat[makemodel][itemname];
+	if (camdat.find(toUpperCase(makemodel)) != camdat.end())
+		if (camdat[makemodel].find(itemname) != camdat[makemodel].end())
+			return camdat[makemodel][itemname];
 	return std::string();
 }
 
