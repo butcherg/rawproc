@@ -1877,13 +1877,15 @@ void gImage::ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int t
 	h=dh;
 }
 
+//This is a special version of crop designed to extract a spectrum for camera profile processing.
 std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, int threadcount)
 {
-	unsigned bgX = 0, bgY = 0;
+	float greenthreshold = 0.6;
+	unsigned bgX = 0, bgY = 0, gtop=0, gbottom = 0;
+	unsigned top, left, bottom, right;
 	float bg = 0.0;
 	
 	//find the brightest green:
-	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
@@ -1894,17 +1896,31 @@ std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, int threadcount)
 			}
 		}
 	}
+	
+	//determine the band top and bottom by walking the brightest green column:
+	{
+		unsigned x = bgX;
+		bool inband = false;
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			if (image[pos].g > greenthreshold & !inband) {gtop = y; inband = true;}
+			else if (image[pos].g < greenthreshold &  inband) {gbottom = y; break;}
+		}
+	}
+	
+	//compute the band (crop) extents extents from the center of the detected band:
+	unsigned bandcenter = gtop + (gbottom - gtop)/2;
+	top = bandcenter - band/2;
+	left = 0;
+	bottom = bandcenter + band/2;
+	right = w;
+
+	//printf("\nApplySpectralCrop: gtop:%d gbottom:%d bandcenter:%d band:%d\n", gtop, gbottom, bandcenter, band); fflush(stdout);	
 	//printf("ApplySpectralCrop: max green:%f  x:%d,y:%d  w:%d,h:%d\n",bg, bgX, bgY, w, h); fflush(stdout);
 	
-	unsigned pos = bgX + (bgY-band) * w;
-	if (image[pos].g > bg * 0.9) {  //look to see if the pixel at the upper bound is within the spectrum bound
-		ApplyCrop(0,bgY-band,w,bgY);
-		return std::vector<unsigned> {0,bgY-band,w,bgY};
-	}
-	else {
-		ApplyCrop(0,bgY,w,bgY+band);
-		return std::vector<unsigned> {0,bgY,w,bgY+band};
-	}
+	ApplyCrop(left, top, right, bottom);
+	return std::vector<unsigned> {left, top, right, bottom};
+	
 }
 
 
