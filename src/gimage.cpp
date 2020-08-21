@@ -1880,7 +1880,7 @@ void gImage::ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int t
 //This is a special version of crop designed to extract a spectrum for camera profile processing.
 std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, int threadcount)
 {
-	float greenthreshold = 0.6;
+	float greenthreshold = 0.8;
 	unsigned bgX = 0, bgY = 0, gtop=0, gbottom = 0;
 	unsigned top, left, bottom, right;
 	float bg = 0.0;
@@ -1889,7 +1889,7 @@ std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, int threadcount)
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-			if (image[pos].g > bg) {
+		if (image[pos].g > bg & image[pos].r < 0.5 & image[pos].b < 0.5) {
 				bg = image[pos].g;
 				bgX = x;
 				bgY = y;
