@@ -7,6 +7,7 @@
 std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string,std::string> params);
+std::map<std::string,std::string> process_cropspectrum(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::string,std::string> params);

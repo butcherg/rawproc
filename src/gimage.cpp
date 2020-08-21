@@ -1877,6 +1877,36 @@ void gImage::ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int t
 	h=dh;
 }
 
+std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, int threadcount)
+{
+	unsigned bgX = 0, bgY = 0;
+	float bg = 0.0;
+	
+	//find the brightest green:
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned x=0; x<w; x++) {
+		for (unsigned y=0; y<h; y++) {
+			unsigned pos = x + y*w;
+			if (image[pos].g > bg) {
+				bg = image[pos].g;
+				bgX = x;
+				bgY = y;
+			}
+		}
+	}
+	//printf("ApplySpectralCrop: max green:%f  x:%d,y:%d  w:%d,h:%d\n",bg, bgX, bgY, w, h); fflush(stdout);
+	
+	unsigned pos = bgX + (bgY-band) * w;
+	if (image[pos].g > bg * 0.9) {  //look to see if the pixel at the upper bound is within the spectrum bound
+		ApplyCrop(0,bgY-band,w,bgY);
+		return std::vector<unsigned> {0,bgY-band,w,bgY};
+	}
+	else {
+		ApplyCrop(0,bgY,w,bgY+band);
+		return std::vector<unsigned> {0,bgY,w,bgY+band};
+	}
+}
+
 
 
 //Curve

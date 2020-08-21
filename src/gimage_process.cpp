@@ -293,6 +293,36 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 	return result;
 }
 
+std::map<std::string,std::string> process_cropspectrum(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "crop:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		unsigned bound = atoi(params["bound"].c_str());
+		
+		//tool-specific logic:
+		if (params["mode"] == "default") {
+			_mark();
+			std::vector<unsigned> cc = dib.ApplySpectralCrop(bound, threadcount);
+			result["cropcoords"] = string_format("%d,%d,%d,%d",cc[0], cc[1], cc[2], cc[3]); 
+			result["commandstring"] = "crop:"+result["cropcoords"];
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "cropspectrum";
+			
+		}
+		
+	}
+	return result;
+}
+
 std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
@@ -766,7 +796,7 @@ std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::stri
 	}
 	//nominal processing:
 	else {
-		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.rotate.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 
 		float angle = atof(params["angle"].c_str());;

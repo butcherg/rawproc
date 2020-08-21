@@ -259,6 +259,31 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 	return pmap;
 }
 
+std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		pmap["bound"] = p[0];
+		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "cropspectrum";
+	}
+	return pmap;
+}
+
 //curve
 //default	:rgb|red|green|blue,<x1>,<y1>,...,<xn>,<yn> - apply curve to the designated channel defined by the x,y coordinates, 0-255
 std::map<std::string,std::string> parse_curve(std::string paramstring)

@@ -51,6 +51,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		if (command == "blackwhitepoint") params = parse_blackwhitepoint(std::string(pstr));
 		else if (command == "colorspace") params = parse_colorspace(std::string(pstr));
 		else if (command == "crop") params = parse_crop(std::string(pstr));
+		else if (command == "cropspectrum") params = parse_cropspectrum(std::string(pstr));
 		else if (command == "curve") params = parse_curve(std::string(pstr));
 		else if (command == "demosaic") params = parse_demosaic(std::string(pstr));
 		else if (command == "denoise") params = parse_denoise(std::string(pstr));
@@ -76,6 +77,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		printf("no command...\n"); fflush(stdout);
 		return "";
 	}
+	params["paramstring"] = std::string(pstr);
 			
 	//parse error-catching:
 	if (params.find("error") != params.end()) {
@@ -89,6 +91,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	if (command == "blackwhitepoint") result =  process_blackwhitepoint(dib, params);
 	else if (command == "colorspace") result =  process_colorspace(dib, params);
 	else if (command == "crop") result =  process_crop(dib, params);
+	else if (command == "cropspectrum") result =  process_cropspectrum(dib, params);
 	else if (command == "curve") result =  process_curve(dib, params);
 	else if (command == "demosaic") result =  process_demosaic(dib, params);
 	else if (command == "denoise") result =  process_denoise(dib, params);
