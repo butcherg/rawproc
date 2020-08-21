@@ -277,7 +277,21 @@ std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		pmap["bound"] = p[0];
+		if (psize >= 1) {
+			pmap["bound"] = p[0];
+		}
+		else {
+			pmap["error"] = string_format("cropspectrum:ParseError - not enough parameters.");
+			return pmap;
+		}
+			
+		if (psize >= 2) {
+			pmap["threshold"] = p[1];
+		}
+		else {
+			pmap["error"] = string_format("cropspectrum:ParseError - not enough parameters.");
+			return pmap;
+		}
 		pmap["mode"] = "default";
 		pmap["cmdlabel"] = "cropspectrum";
 	}

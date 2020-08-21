@@ -243,7 +243,7 @@ class gImage
 		void ApplyResize(std::string params, int threadcount=0);
 		void ApplyRatioCrop(float x1, float y1, float x2, float y2, int threadcount);
 		void ApplyCrop(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int threadcount=0);
-		std::vector<unsigned> ApplySpectralCrop(unsigned band=50, int threadcount= 0); //specifically used to pull spectra for SSF construction
+		std::vector<unsigned> ApplySpectralCrop(unsigned band, float greenthreshold, int threadcount= 0); //specifically used to pull spectra for SSF construction
 
 		//rotation algorithms:
 		void ApplyRotate(double angle, bool crop, int threadcount=0);

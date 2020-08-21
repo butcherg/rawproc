@@ -307,11 +307,12 @@ std::map<std::string,std::string> process_cropspectrum(gImage &dib, std::map<std
 		result["threadcount"] = std::to_string(threadcount);
 		
 		unsigned bound = atoi(params["bound"].c_str());
+		float threshold = atof(params["threshold"].c_str());
 		
 		//tool-specific logic:
 		if (params["mode"] == "default") {
 			_mark();
-			std::vector<unsigned> cc = dib.ApplySpectralCrop(bound, threadcount);
+			std::vector<unsigned> cc = dib.ApplySpectralCrop(bound, threshold, threadcount);
 			result["cropcoords"] = string_format("%d,%d,%d,%d",cc[0], cc[1], cc[2], cc[3]); 
 			result["commandstring"] = "crop:"+result["cropcoords"];
 			result["duration"] = std::to_string(_duration());
