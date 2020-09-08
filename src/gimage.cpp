@@ -1888,7 +1888,7 @@ std::vector<unsigned> gImage::ApplySpectralCrop(unsigned band, float greenthresh
 	for (unsigned x=0; x<w; x++) {
 		for (unsigned y=0; y<h; y++) {
 			unsigned pos = x + y*w;
-		if (image[pos].g > bg & image[pos].r < 0.5 & image[pos].b < 0.5) {
+			if (image[pos].g > bg & image[pos].r < 0.5 & image[pos].b < 0.5) {
 				bg = image[pos].g;
 				bgX = x;
 				bgY = y;
