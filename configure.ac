@@ -199,7 +199,6 @@ AM_CONDITIONAL(LENSFUNUPDATE, test x$enable_lensfunupdate = xyes)
 
 #librtprocess:
 
-#dynamic library linking:
 AC_ARG_ENABLE([librtprocess],
         AS_HELP_STRING([--enable-librtprocess], [enables librtprocess, which contains additional demosaic algorithms.])
 )
@@ -214,24 +213,6 @@ then
 	CXXFLAGS="$CXXFLAGS -DUSE_LIBRTPROCESS"	
 fi
 AM_CONDITIONAL(LIBRTPROCESS, test x$enable_librtprocess = xyes)
-
-#static library linking:
-AC_ARG_ENABLE([librtprocess-static],
-        AS_HELP_STRING([--enable-librtprocess-static], [enables librtprocess, which contains additional demosaic algorithms.])
-)
-if test "$enable_librtprocess_static" == "yes"
-then
-	PKG_CHECK_MODULES([RTPROCESS],[rtprocess], [
-		CPPFLAGS="$RTPROCESS_CFLAGS $CPPFLAGS"
-		RTSTATIC="_static"
-		LIBS="$RTPROCESS_LIBS$RTSTATIC $LIBS"
-	],[
-		AC_MSG_ERROR([not found.])
-	])
-	CXXFLAGS="$CXXFLAGS -DUSE_LIBRTPROCESS"	
-fi
-AM_CONDITIONAL(LIBRTPROCESS, test x$enable_librtprocess_static = xyes)
-
 
 #old LibRaw dcraw params, pre 0.18.7:
 AC_ARG_ENABLE([old-libraw],
