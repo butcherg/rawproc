@@ -1358,6 +1358,10 @@ void rawprocFrm::MnuToolList(wxCommandEvent& event)
 		myConfig::getConfig().enableTempConfig(true);
 		wxString token = toolfile.GetFirstLine();
 		while (!toolfile.Eof())  {
+			if (token == "") {
+				token = toolfile.GetNextLine();
+				continue;
+			}
 			std::vector<std::string> cmd = bifurcate(token.ToStdString(), ':');
 			if (cmd.size() > 0) {
 				wxString params;
