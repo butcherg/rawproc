@@ -76,7 +76,7 @@ class WhiteBalancePanel: public PicProcPanel
 			cb->Enable(false);
 
 			//Operator parameters:
-			origwb = new wxStaticText(this, wxID_ANY, "(none)");
+			origwb = new wxStaticText(this, wxID_ANY, "");
 			autowb = new wxStaticText(this, wxID_ANY, "");
 			patch = new wxStaticText(this, wxID_ANY, "(none)");
 			camera = new wxStaticText(this, wxID_ANY, "(none)");
