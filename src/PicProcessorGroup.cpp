@@ -240,7 +240,10 @@ bool PicProcessorGroup::processPicture(gImage *processdib)
 		mark();
 		for (int i=0; i<p.size(); i++) {
 			((wxFrame*) m_display->GetParent())->SetStatusText(wxString::Format(_("group command: %s"),p[i]));
-			do_cmd(*dib, p[i].ToStdString(), "", false);
+			std::string result = do_cmd(*dib, p[i].ToStdString(), "", false);
+			if (result.find("Error")  != std::string::npos) {
+				wxMessageBox(wxString(result));
+			}
 		}
 		m_display->SetModified(true);
 		wxString d = duration();
