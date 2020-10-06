@@ -606,6 +606,7 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+#ifdef USE_LENSFUN
 //lenscorrection (rawproc)
 //:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
@@ -633,7 +634,7 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 	pmap["cmdlabel"] = "lenscorrection";
 	return pmap;
 }
-
+#endif
 
 //redeye
 //:<xint1>,<yint1>[,<xint2>,<yint2>...],<tint>,<lint> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y)

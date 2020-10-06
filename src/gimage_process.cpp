@@ -610,6 +610,7 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 	return result;
 }
 
+#ifdef USE_LENSFUN
 std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
@@ -697,6 +698,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 	}
 	return result;
 }
+#endif
 
 std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::string,std::string> params)
 {

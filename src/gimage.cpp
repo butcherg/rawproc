@@ -4789,6 +4789,8 @@ pix gImage::getRGB(float x, float y)
 }
 
 
+#ifdef USE_LENSFUN
+
 //Lens database and correction methods
 //Wraps Lensfun classes in order to manage database 
 
@@ -5021,7 +5023,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	delete mod;
 	return GIMAGE_OK;
 }
-
+#endif //USE_LENSFUN
 
 
 
