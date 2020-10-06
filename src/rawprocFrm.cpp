@@ -57,6 +57,9 @@
 #include "gimage/strutil.h"
 #include "fileutil.h"
 #include "lcms2.h"
+#ifdef USE_LCMS_FASTFLOAT
+#include "lcms2_fast_float.h"
+#endif
 #include <omp.h>
 #include <exception>
 
@@ -179,6 +182,12 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 {
 	d = NULL;
 	img = NULL;
+
+#ifdef USE_LCMS_FASTFLOAT	
+	if (cmsPlugin(cmsFastFloatExtensions()) == 0)
+		printf("LittleCMS fast_float plugin load failed.\n");
+#endif
+	
 	wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 	if (startpath != "") 
 		if (wxFileName::DirExists(startpath))
