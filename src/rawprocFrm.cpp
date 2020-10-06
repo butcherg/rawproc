@@ -184,7 +184,8 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	img = NULL;
 
 #ifdef USE_LCMS_FASTFLOAT	
-	cmsPlugin(cmsFastFloatExtensions());
+	if (cmsPlugin(cmsFastFloatExtensions()) == 0)
+		printf("LittleCMS fast_float plugin load failed.\n");
 #endif
 	
 	wxString startpath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
