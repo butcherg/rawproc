@@ -22,6 +22,10 @@
 #include "gimage/half.hpp"
 //#include <rtprocess/jaggedarray.h>  //maybe, later....
 
+#if LF_VERSION == ((0 << 24) | (3 << 16) | (95 << 8) | 0)
+#define LF_0395
+#endif
+
 #define PI            3.14159265358979323846
 #ifndef M_PI
 #define M_PI PI
@@ -4895,19 +4899,19 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	
 				
 #ifdef LF_0395
-	lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
+	lfModifier *mod = new lfModifier (lns, atof(imginfo["FocalLength"].c_str()), cam->CropFactor, getWidth(), getHeight(), LF_PF_F32, false);
 
 	// Enable desired modifications
 	int modflags = 0;
 
 	if (ModifyFlags & LF_MODIFY_TCA)
-		modflags |= mod->EnableTCACorrection(lns, atof(info["FocalLength"].c_str()));
+		modflags |= mod->EnableTCACorrection();
 	if (ModifyFlags & LF_MODIFY_VIGNETTING)
-		modflags |= mod->EnableVignettingCorrection(lns, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
+		modflags |= mod->EnableVignettingCorrection(atof(imginfo["FNumber"].c_str()), 1000.0f);
 	if (ModifyFlags & LF_MODIFY_DISTORTION)
-		modflags |= mod->EnableDistortionCorrection(lns, atof(info["FocalLength"].c_str()));
+		modflags |= mod->EnableDistortionCorrection();
 	if (ModifyFlags & LF_MODIFY_GEOMETRY)
-		modflags |= mod->EnableProjectionTransform(lns, atof(info["FocalLength"].c_str()), targeom);
+		modflags |= mod->EnableProjectionTransform(targeom);
 	if (ModifyFlags & LF_MODIFY_SCALE)
 		modflags |= mod->EnableScaling(1.0);
 	

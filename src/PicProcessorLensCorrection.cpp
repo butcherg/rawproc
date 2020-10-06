@@ -435,6 +435,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				}
 				
 #ifdef LF_0395
+/*"old" 0.3.95:
 				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
 
 				// Enable desired modifications
@@ -448,6 +449,23 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 					modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
 				if (ModifyFlags & LF_MODIFY_GEOMETRY)
 					modflags |= mod->EnableProjectionTransform(lens, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
+				if (ModifyFlags & LF_MODIFY_SCALE)
+					modflags |= mod->EnableScaling(1.0);
+*/
+//"new" 0.3.95, master:
+				lfModifier *mod = new lfModifier (lens, atof(info["FocalLength"].c_str()), cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
+
+				// Enable desired modifications
+				int modflags = 0;
+
+				if (ModifyFlags & LF_MODIFY_TCA)
+					modflags |= mod->EnableTCACorrection();
+				if (ModifyFlags & LF_MODIFY_VIGNETTING)
+					modflags |= mod->EnableVignettingCorrection(atof(info["FNumber"].c_str()), 1000.0f);
+				if (ModifyFlags & LF_MODIFY_DISTORTION)
+					modflags |= mod->EnableDistortionCorrection();
+				if (ModifyFlags & LF_MODIFY_GEOMETRY)
+					modflags |= mod->EnableProjectionTransform(LF_RECTILINEAR);
 				if (ModifyFlags & LF_MODIFY_SCALE)
 					modflags |= mod->EnableScaling(1.0);
 
