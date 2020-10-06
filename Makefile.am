@@ -21,6 +21,8 @@ docpages:
 .PHONY: conf
 conf:
 	$(srcdir)/conffile.pl $(srcdir)/src > src/rawproc.conf
+	wget -P src https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/camconst.json 
+	wget -P src https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
 
 .PHONY: zip
 zip:
