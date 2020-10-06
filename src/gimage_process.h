@@ -13,7 +13,9 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string,std::string> params);
+#ifdef USE_LENSFUN
 std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<std::string,std::string> params);
+#endif
 std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_resize(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::string,std::string> params);

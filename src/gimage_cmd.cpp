@@ -57,7 +57,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		else if (command == "denoise") params = parse_denoise(std::string(pstr));
 		else if (command == "exposure") params = parse_exposure(std::string(pstr));
 		else if (command == "gray") params = parse_gray(std::string(pstr));
+#ifdef USE_LENSFUN
 		else if (command == "lenscorrection") params = parse_lenscorrection(std::string(pstr));
+#endif
 		else if (command == "redeye") params = parse_redeye(std::string(pstr));
 		else if (command == "resize") params = parse_resize(std::string(pstr));
 		else if (command == "rotate") params = parse_rotate(std::string(pstr));
@@ -97,7 +99,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "denoise") result =  process_denoise(dib, params);
 	else if (command == "exposure") result =  process_exposure(dib, params);
 	else if (command == "gray") result =  process_gray(dib, params);
+#ifdef USE_LENSFUN
 	else if (command == "lenscorrection") result =  process_lenscorrection(dib, params);
+#endif
 	else if (command == "redeye") result =  process_redeye(dib, params);
 	else if (command == "resize") result =  process_resize(dib, params);
 	else if (command == "rotate") result =  process_rotate(dib, params);
