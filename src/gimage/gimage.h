@@ -342,6 +342,7 @@ class gImage
 		
 		//ICC (LittleCMS) profiles.
 		static cmsHPROFILE myCmsOpenProfileFromFile(const std::string filename);
+		static cmsHPROFILE makeLCMSStoredProfile(const std::string profilename);
 		static cmsHPROFILE makeLCMSProfile(const std::string json);
 		static cmsHPROFILE makeLCMSProfile(const std::string name, float gamma);
 		static cmsHPROFILE makeLCMSCamConstProfile(std::string camconstfile, std::string camera);

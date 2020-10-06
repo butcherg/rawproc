@@ -21,6 +21,7 @@
 #include <rtprocess/librtprocess.h>
 #include "gimage/half.hpp"
 //#include <rtprocess/jaggedarray.h>  //maybe, later....
+#include "icc_profiles.h"
 
 #if LF_VERSION == ((0 << 24) | (3 << 16) | (95 << 8) | 0)
 #define LF_0395
@@ -6416,6 +6417,16 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 	return profile;
 }
 
+//make a profile with a named stored profile:
+cmsHPROFILE gImage::makeLCMSStoredProfile(const std::string profilename)
+{
+	cmsHPROFILE gImgProf;
+	if (profilename == "srgb_g10")
+		gImgProf = cmsOpenProfileFromMem(srgb_icc, srgb_icc_len);
+	else
+		gImgProf = NULL;
+	return gImgProf;
+}
 
 //make a profile for a dcamprof json string:
 cmsHPROFILE gImage::makeLCMSProfile(const std::string json)
