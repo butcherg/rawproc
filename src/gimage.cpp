@@ -4367,6 +4367,8 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
 	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
 		hImgProf = makeLCMSProfile(iccfile, 1.0);
+	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22")
+		hImgProf = makeLCMSStoredProfile(iccfile);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	
@@ -4405,6 +4407,8 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
 	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
 		hImgProf = makeLCMSProfile(iccfile, 1.0);
+	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22")
+		hImgProf = makeLCMSStoredProfile(iccfile);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
 	if (hImgProf) {
