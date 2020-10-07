@@ -181,7 +181,19 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 			token = 1;
 		}
 
-		else if (p[0] == "srgb" | p[0] == "wide" | p[0] == "adobe" | p[0] == "prophoto" | p[0] == "identity") {
+		else if (p[0] == "srgb" | 
+				p[0] == "wide" | 
+				p[0] == "adobe" | 
+				p[0] == "prophoto" | 
+				p[0] == "identity" |
+				p[0] == "aces2065-1-v4-g10" |
+				p[0] == "adobergb-v4-g10" |
+				p[0] == "bt709-v4-g10" |
+				p[0] == "prophoto-v4-g10" |
+				p[0] == "rec2020-v4-g10" |
+				p[0] == "srgb-v4-g10" |
+				p[0] == "srgb-v2-g22") 
+				{
 			pmap["mode"] = "built-in";
 			pmap["icc"] = p[0];
 			token = 1;
