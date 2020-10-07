@@ -4367,7 +4367,7 @@ GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
 	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
 		hImgProf = makeLCMSProfile(iccfile, 1.0);
-	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22")
+	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22" | iccfile == "srgb-output")
 		hImgProf = makeLCMSStoredProfile(iccfile);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
@@ -4407,7 +4407,7 @@ GIMAGE_ERROR gImage::AssignColorspace(std::string iccfile)
 		hImgProf = makeLCMSAdobeCoeffProfile(iccfile);
 	else if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
 		hImgProf = makeLCMSProfile(iccfile, 1.0);
-	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22")
+	else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22" | iccfile == "srgb-output")
 		hImgProf = makeLCMSStoredProfile(iccfile);
 	else
 		hImgProf = myCmsOpenProfileFromFile(iccfile);
@@ -6266,6 +6266,7 @@ const cmsCIExyY cmsCIEXYZ2cmsCIExyY(cmsCIEXYZ in)
 //use in place of cmsOpenProfileFromFile() to include .json files:
 cmsHPROFILE gImage::myCmsOpenProfileFromFile(const std::string filename)
 {
+printf("gImage::myCmsOpenProfileFromFile...\n");
 	if (!file_exists(filename)) return NULL;
 
 	size_t pos = filename.find_last_of(".");
@@ -6424,24 +6425,24 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 //make a profile with a named stored profile:
 cmsHPROFILE gImage::makeLCMSStoredProfile(const std::string profilename)
 {
-	cmsHPROFILE gImgProf;
-	if (profilename == "srgb_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(srgb_v4_g10_icc, srgb_v4_g10_icc_len);
-	else if (profilename == "srgb_v2_g10")
-		gImgProf = cmsOpenProfileFromMem(srgb_v2_g22_icc, srgb_v2_g22_icc_len);
-	else if (profilename == "rec2020_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(rec2020_v4_g10_icc, rec2020_v4_g10_icc_len);
-	else if (profilename == "prophoto_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(prophoto_v4_g10_icc, prophoto_v4_g10_icc_len);
-	else if (profilename == "bt709_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(bt709_v4_g10_icc, bt709_v4_g10_icc_len);
-	else if (profilename == "adobergb_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(adobergb_v4_g10_icc, adobergb_v4_g10_icc_len);
-	else if (profilename == "aces2065_1_v4_g10")
-		gImgProf = cmsOpenProfileFromMem(aces2065_1_v4_g10_icc, aces2065_1_v4_g10_icc_len);
-	else gImgProf = NULL;
+	cmsHPROFILE sImgProf;
+	if (profilename == "srgb-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(srgb_v4_g10_icc, srgb_v4_g10_icc_len);
+	else if (profilename == "srgb-v2-g22" | profilename == "srgb-output")
+		sImgProf = cmsOpenProfileFromMem(srgb_v2_g22_icc, srgb_v2_g22_icc_len);
+	else if (profilename == "rec2020-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(rec2020_v4_g10_icc, rec2020_v4_g10_icc_len);
+	else if (profilename == "prophoto-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(prophoto_v4_g10_icc, prophoto_v4_g10_icc_len);
+	else if (profilename == "bt709-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(bt709_v4_g10_icc, bt709_v4_g10_icc_len);
+	else if (profilename == "adobergb-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(adobergb_v4_g10_icc, adobergb_v4_g10_icc_len);
+	else if (profilename == "aces2065-1-v4-g10")
+		sImgProf = cmsOpenProfileFromMem(aces2065_1_v4_g10_icc, aces2065_1_v4_g10_icc_len);
+	else sImgProf = NULL;
 	
-	return gImgProf;
+	return sImgProf;
 }
 
 //make a profile for a dcamprof json string:

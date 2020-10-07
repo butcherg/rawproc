@@ -192,7 +192,8 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 				p[0] == "prophoto-v4-g10" |
 				p[0] == "rec2020-v4-g10" |
 				p[0] == "srgb-v4-g10" |
-				p[0] == "srgb-v2-g22") 
+				p[0] == "srgb-v2-g22" |
+				p[0] == "srgb-output") 
 				{
 			pmap["mode"] = "built-in";
 			pmap["icc"] = p[0];
