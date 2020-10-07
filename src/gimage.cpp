@@ -6421,10 +6421,22 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 cmsHPROFILE gImage::makeLCMSStoredProfile(const std::string profilename)
 {
 	cmsHPROFILE gImgProf;
-	if (profilename == "srgb_g10")
-		gImgProf = cmsOpenProfileFromMem(srgb_icc, srgb_icc_len);
-	else
-		gImgProf = NULL;
+	if (profilename == "srgb_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(srgb_v4_g10_icc, srgb_v4_g10_icc_len);
+	else if (profilename == "srgb_v2_g10")
+		gImgProf = cmsOpenProfileFromMem(srgb_v2_g22_icc, srgb_v2_g22_icc_len);
+	else if (profilename == "rec2020_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(rec2020_v4_g10_icc, rec2020_v4_g10_icc_len);
+	else if (profilename == "prophoto_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(prophoto_v4_g10_icc, prophoto_v4_g10_icc_len);
+	else if (profilename == "bt709_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(bt709_v4_g10_icc, bt709_v4_g10_icc_len);
+	else if (profilename == "adobergb_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(adobergb_v4_g10_icc, adobergb_v4_g10_icc_len);
+	else if (profilename == "aces2065_1_v4_g10")
+		gImgProf = cmsOpenProfileFromMem(aces2065_1_v4_g10_icc, aces2065_1_v4_g10_icc_len);
+	else gImgProf = NULL;
+	
 	return gImgProf;
 }
 
