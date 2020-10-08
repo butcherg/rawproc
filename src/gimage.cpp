@@ -6266,7 +6266,6 @@ const cmsCIExyY cmsCIEXYZ2cmsCIExyY(cmsCIEXYZ in)
 //use in place of cmsOpenProfileFromFile() to include .json files:
 cmsHPROFILE gImage::myCmsOpenProfileFromFile(const std::string filename)
 {
-printf("gImage::myCmsOpenProfileFromFile...\n");
 	if (!file_exists(filename)) return NULL;
 
 	size_t pos = filename.find_last_of(".");
