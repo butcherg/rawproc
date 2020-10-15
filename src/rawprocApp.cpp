@@ -46,45 +46,11 @@ bool rawprocFrmApp::OnInit()
 	wxCmdLineParser cmdline(cmdLineDesc, wxGetApp().argc, wxGetApp().argv);
 	if (cmdline.Parse() == -1) exit(0);
 
-	wxString configfile, configfilepath;
-	wxString conf_exe = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath()+wxFileName::GetPathSeparator()+"rawproc.conf";
-	wxString conf_cwd = wxString(getCwdConfigFilePath().c_str());
-
-#ifdef WIN32
-	wxString conf_configd = wxStandardPaths::Get().GetUserConfigDir()+psep+"rawproc"+psep+"rawproc.conf";
-#else
-	wxString conf_configd = wxStandardPaths::Get().GetUserConfigDir()+psep+".rawproc"+psep+"rawproc.conf";
-#endif
-
-	//config file search order: 
-	//	1) path specified in the -c parameter; 
-	//	2) current working directory (conf_cwd); 
-	//	3) executable directory (conf_exe); 
-	//	4) OS-defined user data directory (conf_configd) 
-	if (cmdline.Found("c", &configfile)) {
-		if (wxFileName::FileExists(configfile)) {
-			wxFileName cfile(configfile);
-			cfile.Normalize();
-			//frame->SetConfigFile(cfile.GetFullPath());
-			configfilepath = cfile.GetFullPath();
-			myConfig::loadConfig(std::string(cfile.GetFullPath().c_str()));
-		}
-	}
-	else if (wxFileName::FileExists(conf_exe)) {
-		//frame->SetConfigFile(conf_exe);
-		configfilepath = conf_exe;
-		myConfig::loadConfig(std::string(conf_exe.c_str()));
-	}
-	else if (wxFileName::FileExists(conf_cwd)) {
-		//frame->SetConfigFile(conf_cwd);
-		configfilepath = conf_cwd;
-		myConfig::loadConfig(std::string(conf_cwd.c_str()));
-	}
-	else if (wxFileName::FileExists(conf_configd)) {
-		//frame->SetConfigFile(conf_configd);
-		configfilepath = conf_configd;
-		myConfig::loadConfig(std::string(conf_configd.c_str()));
-	}
+	wxString configfile;
+	std::string configfilepath;
+	cmdline.Found("c", &configfile);
+	configfilepath = wxString(getRawprocConfPath(std::string(configfile.c_str())));
+	if (configfilepath != "(none)") myConfig::loadConfig(configfilepath);
 	
 	rawprocFrm* frame = new rawprocFrm(NULL);
 	frame->SetIcon(icon_xpm);
@@ -93,7 +59,7 @@ bool rawprocFrmApp::OnInit()
 	frame->SetConfigFile(configfilepath);
 
 	//propvar EXEDIR: Use to substitute the path to the running executable in path properties
-	myConfig::getConfig().setVariable("EXEDIR", std::string(wxFileName(conf_exe).GetPath().c_str()));
+	myConfig::getConfig().setVariable("EXEDIR", getExeDir());
 	
 	wxFileName profpath;
 	profpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));

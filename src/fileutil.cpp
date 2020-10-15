@@ -136,4 +136,26 @@ bool file_exists(const std::string& filename)
   return (stat (filename.c_str(), &buffer) == 0); 
 }
 
+std::string getRawprocConfPath(std::string conf_cmdline)
+{
+	//config file search order: 
+	//	1) path specified in conf_cmdline, usually from a command line parameter; 
+	//	2) current working directory (conf_cwd); 
+	//	3) executable directory (conf_exe); 
+	//	4) OS-defined user data directory (conf_configd) 
+	
+	std::string conf_cwd = getCwdConfigFilePath();
+	std::string conf_exe = getExeDir("rawproc.conf");
+	std::string conf_configd = getAppConfigFilePath();
+	
+	if (access( conf_cmdline.c_str(), 0 ) == 0) 
+		return conf_cmdline;
+	else if (access( conf_cwd.c_str(), 0 ) == 0) 
+		return conf_cwd;
+	else if (access( conf_exe.c_str(), 0 ) == 0) 
+		return conf_exe;
+	else if (access( conf_configd.c_str(), 0 ) == 0) 
+		return conf_configd;
+	else return "(none)";
+}
 

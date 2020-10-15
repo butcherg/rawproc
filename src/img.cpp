@@ -335,26 +335,11 @@ int main (int argc, char **argv)
 	int c;
 	int flags;
 	//gImage dib;
-
-	std::string conf_cwd = getCwdConfigFilePath();
-	std::string conf_configd = getAppConfigFilePath();
-
+	
 	if (!noconf) {
-		if (conffile != "") {
-			if (access(conffile.c_str(), 0 ) == 0) {
-				myConfig::loadConfig(conffile);
-				printf("configuration file: %s\n", conffile.c_str());
-			}
-			else printf("configuration file %s not found.\n", conffile.c_str());
-		}
-		else if (access( conf_cwd.c_str(), 0 ) == 0) {
-			myConfig::loadConfig(conf_cwd);
-			printf("configuration file: %s\n", conf_cwd.c_str());
-		}
-		else if (access( conf_configd.c_str(), 0 ) == 0) {
-			myConfig::loadConfig(conf_configd);
-			printf("configuration file: %s\n", conf_configd.c_str());
-		}
+		std::string configfile = getRawprocConfPath(conffile);
+		if (configfile != "(none)") myConfig::loadConfig(configfile);
+		printf("configuration file: %s\n", configfile.c_str());
 	}
 
 	gImage::setProfilePath(filepath_normalize(myConfig::getConfig().getValueOrDefault("cms.profilepath",getCwd())));

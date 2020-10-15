@@ -20,5 +20,7 @@ std::string getCwd();
 std::string getAppConfigDir(std::string filename="");
 std::string getExeDir(std::string filename="");
 
+std::string getRawprocConfPath(std::string conf_cmdline);
+
 
 #endif
