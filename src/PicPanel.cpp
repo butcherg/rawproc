@@ -232,7 +232,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			float displaygamma = atof(myConfig::getConfig().getValueOrDefault("display.cms.displaygamma","2.2").c_str());
 	
 			if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity") {
-					displayProfile = gImage::makeLCMSProfile(iccfile.ToStdString(), displaygamma);
+				displayProfile = gImage::makeLCMSProfile(iccfile.ToStdString(), displaygamma);
+			}
+			else if (iccfile == "srgb-output") {
+				displayProfile = gImage::makeLCMSStoredProfile(iccfile.ToStdString());
 			}
 			else {
 				if (profilepath.FileExists()) 
