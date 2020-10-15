@@ -18,7 +18,9 @@
 #include "gimage/strutil.h"
 #include "fileutil.h"
 #include "cJSON.h"
+#ifdef USE_LIBRTPROCESS
 #include <rtprocess/librtprocess.h>
+#endif
 #include "gimage/half.hpp"
 //#include <rtprocess/jaggedarray.h>  //maybe, later....
 #include "icc_profiles.h"
