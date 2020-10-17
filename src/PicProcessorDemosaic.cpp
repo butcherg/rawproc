@@ -387,7 +387,12 @@ colorb->Enable(true);
 PicProcessorDemosaic::PicProcessorDemosaic(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	if (getImageType() == IMAGETYPE_XTRANS & c.find("xtran") == std::string::npos) 
-		c = "xtran_fast";	
+		c = "xtran_fast";
+	if (c.find("proof") != std::string::npos)
+		if (getImageType() == IMAGETYPE_XTRANS)
+			c = "xtran_fast";
+		else
+			c = "half";
 }
 
 void PicProcessorDemosaic::createPanel(wxSimplebook* parent)
