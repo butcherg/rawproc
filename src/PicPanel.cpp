@@ -340,7 +340,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		if (dispTransform) 
 			img = gImage2wxImage(*dib, dispTransform, localoob);
 		else 
-			img = img = gImage2wxImage(*dib, localoob);
+			img = gImage2wxImage(*dib, localoob);
 		
 		
 		if (image) image->~wxBitmap();
