@@ -47,6 +47,7 @@ wxBitmap HistogramFromData(int width, int height);
 wxImage gImage2wxImage(gImage &dib);
 wxImage gImage2wxImage(gImage &dib, int oob);
 wxImage gImage2wxImage(gImage &dib, cmsHTRANSFORM transform, int oob);
+wxImage gImageFloat2wxImage(gImage &dib, cmsHPROFILE outProfile, cmsHPROFILE softprofile=NULL, int oob=0, cmsUInt32Number dwflags=0);
 
 wxColour wxString2wxColour(wxString s);
 

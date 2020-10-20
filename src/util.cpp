@@ -392,6 +392,73 @@ wxImage gImage2wxImage(gImage &dib, cmsHTRANSFORM transform, int oob)
 	}
 
 	return image;
+
+}
+
+wxImage gImageFloat2wxImage(gImage &dib, cmsHPROFILE outProfile, cmsHPROFILE softprofile, int oob, cmsUInt32Number dwflags)
+{
+	pix * img = (pix *) dib.getImageDataForDisplay(true, outProfile, softprofile, INTENT_RELATIVE_COLORIMETRIC);
+	
+	unsigned h = dib.getHeight();
+	unsigned w =  dib.getWidth();
+	unsigned size = w*h;
+	float upper = 0.25;
+
+	wxImage image(w, h);
+	dpix * dst = (dpix *) image.GetData();
+
+	if (oob == 1) { //average
+		#pragma omp parallel for
+		for (unsigned i = 0; i<size; i++) {
+			double g = (img[i].r + img[i].g + img[i].b) / 3.0;
+			if (g > upper) {
+				dst[i].r = 255;
+				dst[i].g = 0;
+				dst[i].b = 255;
+			}
+			else if (g < 0.0) {
+				dst[i].r = 0;
+				dst[i].g = 255;
+				dst[i].b = 255;
+			}
+			else {
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+			}
+		}
+	}
+	else if (oob == 2) { ///at least one channel
+		#pragma omp parallel for
+		for (unsigned i = 0; i<size; i++) {
+			if (img[i].r > upper | img[i].g > upper | img[i].b > upper) {
+				dst[i].r = 255;
+				dst[i].g = 0;
+				dst[i].b = 255;
+			}
+			else if (img[i].r < 0.0 | img[i].g < 0.0 | img[i].b < 0.0) {
+				dst[i].r = 0;
+				dst[i].g = 255;
+				dst[i].b = 255;
+			}
+			else {
+				dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+				dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+				dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+			}
+		}
+	}
+	else {
+		#pragma omp parallel for
+		for (unsigned i = 0; i<size; i++) {
+			dst[i].r = (unsigned char) lrint(fmin(fmax(img[i].r*255.0,0.0),255.0)); 
+			dst[i].g = (unsigned char) lrint(fmin(fmax(img[i].g*255.0,0.0),255.0));
+			dst[i].b = (unsigned char) lrint(fmin(fmax(img[i].b*255.0,0.0),255.0)); 
+		}
+	}
+	
+	delete [] img;
+	return image;
 }
 
 
@@ -455,6 +522,7 @@ wxImage gImage2wxImage(gImage &dib, int oob)
 	}
 
 	return image;
+	
 }
 
 wxImage gImage2wxImage(gImage &dib)  //original routine, hope to not use anymore...

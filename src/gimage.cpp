@@ -535,7 +535,118 @@ float * gImage::getImageDataFloat(bool unbounded, cmsHPROFILE profile, cmsUInt32
 	return (float *) imagedata;
 }
 
+float * gImage::getImageDataForDisplay(bool unbounded, cmsHPROFILE displayprofile, cmsHPROFILE softprofile, cmsUInt32Number intent, cmsUInt32Number dwflags)
+{
+	cmsHPROFILE hImgProfile;
+	//cmsUInt32Number format;
+	cmsUInt32Number informat;
+	cmsHTRANSFORM hTransform;
+	//float * imagedata;
+	unsigned imagesize = w*h;
+	fpix * imagedata = new fpix[imagesize];
+	pix * img = image.data();
 
+	if (unbounded)
+		#pragma omp parallel for
+		for (unsigned i=0; i<imagesize; i++) {
+			imagedata[i].r = (PIXTYPE) img[i].r;
+			imagedata[i].g = (PIXTYPE) img[i].g;
+			imagedata[i].b = (PIXTYPE) img[i].b;
+		}
+	else
+		#pragma omp parallel for
+		for (unsigned i=0; i<imagesize; i++) {
+			#if defined PIXHALF
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0_h),1.0_h); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0_h),1.0_h); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0_h),1.0_h); 
+			#elif defined PIXFLOAT
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0f),1.0f); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0f),1.0f); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0f),1.0f); 
+			#else
+			imagedata[i].r = (PIXTYPE) fmin(fmax(img[i].r,0.0),1.0); 
+			imagedata[i].g = (PIXTYPE) fmin(fmax(img[i].g,0.0),1.0); 
+			imagedata[i].b = (PIXTYPE) fmin(fmax(img[i].b,0.0),1.0); 
+			#endif
+		}
+
+	if (displayprofile) {
+		if (sizeof(PIXTYPE) == 2) informat = TYPE_RGB_HALF_FLT; 
+		if (sizeof(PIXTYPE) == 4) informat = TYPE_RGB_FLT;
+		if (sizeof(PIXTYPE) == 8) informat = TYPE_RGB_DBL;
+		hImgProfile = cmsOpenProfileFromMem(getProfile(), getProfileLength());
+		if (hImgProfile != NULL) {
+			if (displayprofile != NULL) {
+				if (softprofile != NULL) {
+					hTransform = cmsCreateProofingTransform(
+						hImgProfile, informat,
+						displayprofile, TYPE_RGB_FLT,
+						softprofile,
+						intent,
+						intent,
+						dwflags
+					);
+				}
+				else {
+					hTransform = cmsCreateTransform(
+						hImgProfile, informat, 
+						displayprofile, TYPE_RGB_FLT, 
+						intent, 
+						dwflags
+					);
+				}
+				
+				if (hTransform == NULL) {
+					lasterror = GIMAGE_APPLYCOLORSPACE_BADTRANSFORM;
+				}
+				else {
+
+ //takes advantage of floating point speedups in LCMS 2.11 (with fast_float plugin)
+					#pragma omp parallel
+					{
+						int threadnum = omp_get_thread_num();
+						int numthreads =  omp_get_num_threads();
+
+						int div = h / numthreads;  //line count for this thread
+						int mod = h % numthreads;  //remainder of lines for last thread
+						int pos = (div * threadnum) * w; //starting position in the image buffers
+						if (threadnum+1 == numthreads) div += mod; //line count modification for the last thread
+				
+						cmsDoTransformLineStride(
+							hTransform, 
+							&imagedata[pos], 	//input buffer
+							&imagedata[pos], 	//output buffer
+							w, 					//pixels per line
+							div, 				//line count
+							w*sizeof(float)*c, 	//bytes per line in
+							w*sizeof(float)*c,  //bytes per line out
+							0, 					//bytes per plane in, planar formats only
+							0 );				//bytes per plane out, planar formats only
+					}
+
+
+/*	// old and less slow		
+					#pragma omp parallel for
+					for (unsigned y=0; y<h; y++) {
+						unsigned pos = y*w;
+						cmsDoTransform(hTransform, &imagedata[pos], &imagedata[pos], w);
+					}
+*/
+
+
+/* //old and slow...
+					cmsDoTransform(hTransform, imagedata, imagedata, imagesize);
+*/
+					cmsCloseProfile(hImgProfile);
+				}
+				
+			}
+		}
+	}
+	lasterror = GIMAGE_OK;
+	return (float *) imagedata;
+}
 
 //Converts the data to the specified BPP integer format, then performs the profile transform:
 char * gImage::getImageData(BPP bits, cmsHPROFILE profile, cmsUInt32Number intent)
