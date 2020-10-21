@@ -178,6 +178,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		ch = channel;
 		wxImage img;
 		float sspeed, aperture, iso;
+		cmsUInt32Number dwflags = 0;
 		
 		int localoob = oob;
 		//parm display.outofbound: Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0
@@ -252,7 +253,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				hImgProfile = cmsOpenProfileFromMem(dib->getProfile(), dib->getProfileLength());
 		
 			if (hImgProfile) {
-				cmsUInt32Number dwflags = 0;
+				
 			
 				//parm display.cms.renderingintent: Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual
 				wxString intentstr = wxString(myConfig::getConfig().getValueOrDefault("display.cms.renderingintent","perceptual"));
@@ -291,26 +292,44 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 						if (displayProfile) {
 							if (hSoftProofProfile) {
 								img = gImageFloat2wxImage(*dib, displayProfile, hSoftProofProfile, localoob, dwflags);
-								if (dib->getLastError() != GIMAGE_OK) 
+								if (dib->getLastError() != GIMAGE_OK) {
 									resultstr.Append(":xform_error");
-								else
+									img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+								}
+								else {
 									resultstr.Append(":softproof");
+								}
 							}
-							else resultstr.Append(":soft_error");
+							else {
+								resultstr.Append(":soft_error");
+								img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+							}
 						}
-						else resultstr.Append(":disp_error");
+						else {
+							resultstr.Append(":disp_error");
+							img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+						}
 					}
-					else  resultstr.Append(":file_error");
+					else  {
+						resultstr.Append(":file_error");
+						img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+					}
 				}
 				else {
 					if (displayProfile) {
 						img = gImageFloat2wxImage(*dib, displayProfile, NULL, localoob, 0);
-						if (dib->getLastError() != GIMAGE_OK) 
+						if (dib->getLastError() != GIMAGE_OK) {
 							resultstr.Append(":xform_error");
-						else
+							img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+						}
+						else {
 							resultstr.Append(":display");
+						}
 					}
-					else resultstr.Append(":disp_error");
+					else {
+						resultstr.Append(":disp_error");
+						img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+					}
 				}
 				
 				displayTransform = cmsCreateTransform(  //for crop and rotate tools...
@@ -323,7 +342,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 
 		}
 		else { // no display CMS, just display the "raw" image:
-			img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, 0);
+			img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
 			((wxFrame *) GetParent())->SetStatusText("",STATUS_CMS);
 		}
 
