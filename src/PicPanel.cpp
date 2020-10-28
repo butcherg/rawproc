@@ -337,6 +337,10 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 							displayProfile, TYPE_RGB_8,
 							intent, dwflags);
 			}
+			else {
+				resultstr.Append(":prof_error");
+				img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
+			}
 
 			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),STATUS_CMS);
 
