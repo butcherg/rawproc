@@ -126,6 +126,14 @@ PKG_CHECK_MODULES([LCMS2],[lcms2], [
 	AC_MSG_ERROR([not found.])
 ])
 
+AC_ARG_WITH([lcms2-fastfloat],
+	AS_HELP_STRING([--with-lcms2-fastfloat], [use LittleCMS fast_float plugin])
+)
+if test "$with_lcms2_fastfloat" != ""
+then
+	CXXFLAGS="$CXXFLAGS -DUSE_LCMS_FASTFLOAT"
+fi
+
 
 #libraw-dcraw:
 AC_ARG_ENABLE([dcraw],
