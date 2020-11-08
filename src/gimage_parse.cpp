@@ -620,8 +620,8 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 }
 
 #ifdef USE_LENSFUN
-//lenscorrection (rawproc)
-//:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
+//laundrylist - lenscorrection:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby)
+//nameval - lenscorrection:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -636,13 +636,34 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 		pmap = parseparams(paramstring);  //from gimage/strutil.h
 	}
 
-/* no positional parameters for lenscorrection, use name=val instead...
+	// no positional parameters for lenscorrection, use "laundry list" ...
 	else { //positional
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
+		for (unsigned i=0; i<psize; i++) { //ca,vig,dist,autocrop
+			if (p[i] == "ca") pmap["ops"] += "ca,";
+			if (p[i] == "vig") pmap["ops"] += "vig,";
+			if (p[i] == "dist") pmap["ops"] += "dist,";
+			
+			if (p[i] == "nearest") pmap["algo"] = "nearest,";
+			if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
+			if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
+			
+			if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear,";
+			if (p[i] == "fisheye") pmap["geometry"] = "fisheye,";
+			if (p[i] == "panoramic") pmap["geometry"] = "panoramic,";
+			if (p[i] == "equirectangular") pmap["geometry"] = "equirectangular,";
+			if (p[i] == "orthographic") pmap["geometry"] = "orthographic,";
+			if (p[i] == "stereographic") pmap["geometry"] = "stereographic,";
+			if (p[i] == "equisolid") pmap["geometry"] = "equisolid,";
+			if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+		}
+		size_t opssize = pmap["ops"].size();
+		if (opssize > 0) pmap["ops"].erase(opssize-1);  //get rid of the last comma
+ 		
 	}
-*/
+
 	pmap["mode"] = "default";
 	pmap["cmdlabel"] = "lenscorrection";
 	return pmap;
