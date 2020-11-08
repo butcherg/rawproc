@@ -651,20 +651,21 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		
 		modops |= LF_MODIFY_GEOMETRY;
 		
-		LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR;
-		if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
-		else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
-		else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
-		else if (params["geometry"] == "equirectangular") geometry = GEOMETRY_EQUIRECTANGULAR;
-		else if (params["geometry"] == "orthographic") geometry = GEOMETRY_ORTHOGRAPHIC;
-		else if (params["geometry"] == "stereographic") geometry = GEOMETRY_STEREOGRAPHIC;
-		else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
-		else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
-		else {
-			result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"]);
-			return result;
+		LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR; //default
+		if (paramexists(params, "geometry")) {
+			if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
+			else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
+			else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
+			else if (params["geometry"] == "equirectangular") geometry = GEOMETRY_EQUIRECTANGULAR;
+			else if (params["geometry"] == "orthographic") geometry = GEOMETRY_ORTHOGRAPHIC;
+			else if (params["geometry"] == "stereographic") geometry = GEOMETRY_STEREOGRAPHIC;
+			else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
+			else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
+			else {
+				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"]);
+				return result;
+			}
 		}
-		
 		//reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby
 		
 		RESIZE_FILTER algo = FILTER_BOX;
