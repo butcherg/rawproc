@@ -24,6 +24,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 	std::map<std::string,std::string> result;
 	char buffer[4096];
 	double blk=0.0, wht=255.0;
+	std::string imgmsg;
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
@@ -62,6 +63,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 			blk = bwpts[0];
 			wht = bwpts[1];
 			result["treelabel"] = string_format("blackwhitepoint:%s,%s",params["channel"].c_str(),params["mode"].c_str());
+			imgmsg = string_format("%s,%s,%f,%f",params["channel"].c_str(),params["mode"].c_str(),blk,wht);
 		}
 		else if (params["mode"] == "values"){
 			blk = atof(params["black"].c_str());
@@ -69,6 +71,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 			//result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
 			//result["treelabel"] = "blackwhitepoint";
 			result["treelabel"] = string_format("blackwhitepoint:%s,%s",params["channel"].c_str(),params["mode"].c_str());
+			imgmsg = string_format("%s,%s,%f,%f",params["channel"].c_str(),params["mode"].c_str(),blk,wht);
 		}
 		else if (params["mode"] == "data"){
 			std::map<std::string,float> s = dib.StatsMap();
@@ -92,11 +95,14 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 			//	wht = s["bmax"];
 			//}
 			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+			imgmsg = string_format("%s,%s,%f,%f",params["channel"].c_str(),params["mode"].c_str(),blk,wht);
 		}
 		else if (params["mode"] == "norm"){
 			blk = atof(params["black"].c_str());
 			wht = atof(params["white"].c_str());
 			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+			//imgmsg = string_format("%s,%s,%f,%f",params["channel"].c_str(),params["mode"].c_str(),blk,wht);
+			imgmsg = "normalize";
 		}
 		else if (params["mode"] == "camera"){
 			if (paramexists(dib.getInfo(), "Libraw.Black"))
@@ -108,6 +114,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 			else 
 				wht = 255.0; //not raw, do no harm...
 			result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
+			imgmsg = string_format("%s,%s,%f,%f",params["channel"].c_str(),params["mode"].c_str(),blk,wht);
 		}
 
 		_mark();
@@ -118,8 +125,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 		result["duration"] = std::to_string(_duration());
 		result["black"] = tostr(blk);
 		result["white"] = tostr(wht);
-		//result["treelabel"] = string_format("blackwhitepoint:%s",params["mode"].c_str());
-		//if (params["minwhite"] == "true") result["treelabel"] += ",minwhite";
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 	}
 
 	return result;
@@ -200,6 +206,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 			if (!params["icc"].empty()) {
 				result["treelabel"] = "colorspace:camera";
 				icc = params["icc"];
+				imgmsg = string_format("camera,%s",result["dcraw_primaries"].c_str());
 			}
 			else {
 				result["error"] = "colorspace:ProcessError - camera primaries not found.";
@@ -209,10 +216,11 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 		else if (params["mode"] == "primaries") {
 			result["treelabel"] = "colorspace:primaries";
 			icc = params["icc"];
+			imgmsg = string_format("primaries,%s",icc.c_str());
 		}
 		else if (params["mode"] == "built-in") {
 			result["treelabel"] = "colorspace:" + params["icc"];
-			icc = params["icc"];
+			icc = imgmsg = params["icc"];
 		}
 		else if (params["mode"] == "file") {
 			if (params["icc"] != "(none)") {
@@ -225,6 +233,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				}
 			}
 			result["treelabel"] = "colorspace:file";
+			imgmsg = string_format("file,%s",params["icc"].c_str());
 		}
 		else {
 			 result["error"] = string_format("colorspace:ProcessError - unrecognized mode: %s",params["mode"].c_str());
@@ -233,17 +242,20 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 		_mark();
 		if (params["op"] == "convert") {
+			imgmsg += ",convert";
 			ret = dib.ApplyColorspace(icc, intent, bpc, threadcount);
+			result["imgmsg"] = string_format("%s (%d threads, %ssec)\n", imgmsg.c_str(), threadcount, result["duration"].c_str());
 		}
 		else if (params["op"] == "assign") {
+			imgmsg += ",assign";
 			ret = dib.AssignColorspace(icc);
+			result["imgmsg"] = string_format("%s (0 threads, 0sec)", imgmsg.c_str());
 		}
 
 		switch (ret) {
 			case GIMAGE_OK:
 				result["duration"] = std::to_string(_duration());
 				result["treelabel"] += std::string(",") + params["op"];
-				//result["imgmsg"] = string_format("%s (%d threads, %ssec)\n", x, y, w, h, threadcount, result["duration"].c_str());
 				break;
 			case GIMAGE_APPLYCOLORSPACE_BADPROFILE:
 				result["error"] = "colorspace:ProcessError - no input profile in image.";
@@ -288,7 +300,7 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 			dib.ApplyRatioCrop(x, y, w, h, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "crop";
-			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)\n", x, y, w, h, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)", x, y, w, h, threadcount, result["duration"].c_str());
 		}
 		
 	}
@@ -319,7 +331,7 @@ std::map<std::string,std::string> process_cropspectrum(gImage &dib, std::map<std
 			result["commandstring"] = "crop:"+result["cropcoords"];
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "cropspectrum";
-			result["imgmsg"] = string_format("%d,%f (%d threads, %ssec)\n", bound, threshold, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("%d,%f (%d threads, %ssec)", bound, threshold, threadcount, result["duration"].c_str());
 		}
 		
 	}
@@ -360,7 +372,7 @@ std::map<std::string,std::string> process_curve(gImage &dib, std::map<std::strin
 			dib.ApplyToneCurve(ctrlpts, channel, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = string_format("%s:%s",params["mode"].c_str(),params["channel"].c_str());
-			result["imgmsg"] = string_format("%s (%d threads, %ssec)\n", params["channel"].c_str(), threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("%s (%d threads, %ssec)", params["channel"].c_str(), threadcount, result["duration"].c_str());
 		}
 		
 	}
@@ -497,7 +509,7 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 		
 		result["treelabel"] = string_format("demosaic:%s",params["mode"].c_str());
 		result["mode"] = params["mode"];
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n", params["mode"].c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)", params["mode"].c_str(), threadcount, result["duration"].c_str());
 
 	}
 	return result;
@@ -526,7 +538,7 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 			if (sigma != 0) dib.ApplyNLMeans(sigma,local, patch, nlmeansthreshold, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("denoise:nlmeans,%d,%d,%d",sigma,local,patch);
-			result["imgmsg"] = string_format("%d,%d,%d (%d threads, %ssec)\n", sigma,local,patch, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("nlmeans,%d,%d,%d (%d threads, %ssec)", sigma,local,patch, threadcount, result["duration"].c_str());
 		}
 		else if (params["mode"] == "wavelet") {
 			float threshold = atof(params["threshold"].c_str());
@@ -534,7 +546,7 @@ std::map<std::string,std::string> process_denoise(gImage &dib, std::map<std::str
 			if (threshold != 0.0) dib.ApplyWaveletDenoise(threshold, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("denoise:wavelet,%f",threshold);
-			result["imgmsg"] = string_format("%0.1f (%d threads, %ssec)\n", threshold, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("wavelet,%0.3f (%d threads, %ssec)", threshold, threadcount, result["duration"].c_str());
 		}
 		else {
 			result["error"] = string_format("denoise:ProcessError - Unrecognized denoise option: %s.",params["mode"].c_str());
@@ -572,7 +584,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 			result["stops"] = tostr(stops);
 			result["commandstring"] = string_format("exposure:patch,%d,%d,%0.1f,%0.2f",x,y,radius,ev0);
 			result["treelabel"] = "exposure:patch";
-			result["imgmsg"] = string_format("%0.1f (%d threads, %ssec)\n", stops, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("patch,%0.1f (%d threads, %ssec)", stops, threadcount, result["duration"].c_str());
 		}
 		else if (params["mode"] == "ev") {
 			float ev = atof(params["ev"].c_str());
@@ -582,7 +594,7 @@ std::map<std::string,std::string> process_exposure(gImage &dib, std::map<std::st
 			result["stops"] = tostr(ev);
 			result["commandstring"] = string_format("exposure:%0.2f",ev);
 			result["treelabel"] = "exposure:ev";
-			result["imgmsg"] = string_format("%0.1f (%d threads, %ssec)\n", ev, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("ev,%0.1f (%d threads, %ssec)", ev, threadcount, result["duration"].c_str());
 		}
 		else {
 			result["error"] = string_format("exposure:ProcessError - Unrecognized exposure option: %s.",params["mode"].c_str());
@@ -614,7 +626,7 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("gray:%0.2f,%0.2f,%0.2f",red,green,blue);
 		//result["treelabel"] = "gray";
-		result["imgmsg"] = string_format("%f,%f,%f (%d threads, %ssec)\n",red, green, blue, threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f (%d threads, %ssec)",red, green, blue, threadcount, result["duration"].c_str());
 	}
 	return result;
 }
@@ -623,6 +635,7 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
+	std::string imgmsg;
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
@@ -650,6 +663,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		}
 		
 		int modops = 0;
+		imgmsg = params["ops"];
 		std::vector<std::string> ops = split(params["ops"], ",");
 		for (std::vector<std::string>::iterator it = ops.begin() ; it != ops.end(); ++it) {
 				if (*it == "ca") modops |= LF_MODIFY_TCA;
@@ -662,6 +676,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		
 		LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR; //default
 		if (paramexists(params, "geometry")) {
+			imgmsg.append(string_format(",%s",params["geometry"].c_str()));
 			if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
 			else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
 			else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
@@ -671,16 +686,24 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 			else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
 			else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
 			else {
-				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"]);
+				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"].c_str());
 				return result;
 			}
 		}
-		//reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby
+		else imgmsg.append(",reticlinear");
 		
 		RESIZE_FILTER algo = FILTER_BOX;
-		if (params["algo"] == "nearest") algo = FILTER_BOX;
-		else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
-		else if (params["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
+		if (paramexists(params, "algo")) {
+			imgmsg.append(string_format(",%s",params["algo"].c_str()));
+			if (params["algo"] == "nearest") algo = FILTER_BOX;
+			else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
+			else if (params["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
+			else {
+				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized algorithm: %s",params["algo"].c_str());
+				return result;
+			}
+		}
+		else imgmsg.append(",nearest");
 		
 		std::string camera = dib.getInfoValue("Model");;
 		if (paramexists(params, "camera")) camera = params["camera"];
@@ -704,7 +727,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
 		result["treelabel"] = "lenscorrection";
-		result["imgmsg"] = string_format("lens:%s (%d threads, %ssec)\n",camera.c_str(), lens.c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
 		
 	}
 	return result;
@@ -743,7 +766,7 @@ std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::stri
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("redeye:%s",params["paramstring"].c_str());
 		result["treelabel"] = "redeye";
-		result["imgmsg"] = string_format("points:%d (%d threads, %ssec)\n",points.size(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%d (%d threads, %ssec)",points.size(), threadcount, result["duration"].c_str());
 
 		
 	}
@@ -797,7 +820,7 @@ std::map<std::string,std::string> process_resize(gImage &dib, std::map<std::stri
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("resize:%s",params["paramstring"].c_str());
 		result["treelabel"] = "resize";
-		result["imgmsg"] = string_format("width:%d height:%d (%d threads, %ssec)\n",w, h, threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%d,%d (%d threads, %ssec)",w, h, threadcount, result["duration"].c_str());
 		
 	}
 	return result;
@@ -832,13 +855,15 @@ std::map<std::string,std::string> process_rotate(gImage &dib, std::map<std::stri
 		else if ((int) angle == 180) dib.ApplyRotate180(threadcount);
 		else if ((int) angle == 90) dib.ApplyRotate90(threadcount);
 		else dib.ApplyRotate(angle, autocrop, threadcount);
+		
 		if (hmirror) imgmsg = "horizontal mirror";
 		else if (vmirror) imgmsg = "vertical mirror";
 		else imgmsg = tostr(angle);
+		
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("rotate:%s",params["paramstring"].c_str());
 		result["treelabel"] = "rotate";
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n",imgmsg.c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 	}
 	return result;
 }
@@ -863,7 +888,7 @@ std::map<std::string,std::string> process_saturation(gImage &dib, std::map<std::
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
 		result["treelabel"] = "saturation";
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n",params["saturation"].c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",params["saturation"].c_str(), threadcount, result["duration"].c_str());
 	}
 	return result;
 }
@@ -885,7 +910,7 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 		
 		result["duration"] = "0";
 		if (params["mode"] == "convolution") {
-			imgmsg = string_format("convolution strength:%s", params["strength"].c_str());
+			imgmsg = string_format("convolution,%s", params["strength"].c_str());
 			float strength = atof(params["strength"].c_str());
 			if (strength != 0.0) {
 				_mark();
@@ -895,7 +920,7 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 			}
 		}
 		else if (params["mode"] == "usm") {
-			imgmsg = string_format("usm sigma:%s radius:%s", params["sigma"].c_str(), params["radius"].c_str());
+			imgmsg = string_format("usm,%s,%s", params["sigma"].c_str(), params["radius"].c_str());
 			float sigma = atof(params["sigma"].c_str());
 			float radius = atof(params["radius"].c_str());
 			if (sigma != 0.0) {
@@ -913,7 +938,7 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 			result["error"] = string_format("sharpen:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
 		}
 		result["commandstring"] = string_format("sharpen:%s",params["paramstring"].c_str());
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n",imgmsg.c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 	}
 	return result;
 }
@@ -921,6 +946,7 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
+	std::string imgmsg;
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
@@ -931,8 +957,6 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 		
-		std::string imgmsg;
-
 		if (params["mode"] == "value") {
 			float subtract = atof(params["value"].c_str());
 			_mark();
@@ -950,7 +974,7 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 			}
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = string_format("subtract:%s,value",params["channel"].c_str());
-			result["imgmsg"] = string_format("%s:%f (%d threads, %ssec)\n",params["channel"], subtract, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("%s:%f (%d threads, %ssec)",params["channel"], subtract, threadcount, result["duration"].c_str());
 
 		}
 		else if (params["mode"] == "camera") {
@@ -966,7 +990,7 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 				dib.ApplyCFASubtract(sub, true, threadcount);
 				result["duration"] = std::to_string(_duration());
 				result["treelabel"] = "subtract:camera(cfa)";
-				result["imgmsg"] = string_format("camera(cfa) (%d threads, %ssec)\n", threadcount, result["duration"].c_str());
+				result["imgmsg"] = string_format("camera(cfa),%s (%d threads, %ssec)",blackstr.c_str(), threadcount, result["duration"].c_str());
 			}
 			else if (info.find("Libraw.PerChannelBlack") != info.end()) {
 				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
@@ -978,9 +1002,9 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 					subg2 = atof(s[3].c_str());
 					dib.ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
 					result["duration"] = std::to_string(_duration());
-					result["imgmsg"] = string_format("camera(perchannel) (%d threads, %ssec)\n", threadcount, result["duration"].c_str());
 				}
 				result["treelabel"] = "subtract:camera(chan)";
+				result["imgmsg"] = string_format("camera(perchannel),%s (%d threads, %ssec)",info["Libraw.PerChannelBlack"].c_str(), threadcount, result["duration"].c_str());
 			}
 			else if (info.find("Libraw.Black") != info.end()) {
 				int subval = atoi(info["Libraw.Black"].c_str());
@@ -988,9 +1012,11 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 				dib.ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
 				result["duration"] = std::to_string(_duration());
 				result["treelabel"] = "subtract:camera";
-				result["imgmsg"] = string_format("camera(value) (%d threads, %ssec)\n", threadcount, result["duration"].c_str());
+				result["imgmsg"] = string_format("camera(value),%f (%d threads, %ssec)", subtract, threadcount, result["duration"].c_str());
 
 			}
+			else
+				result["imgmsg"] = string_format("camera(no value found) (0 threads, 0sec)");
 		}
 		else if (params["mode"] == "file") {
 			if (!file_exists(params["filename"])) {
@@ -1000,7 +1026,7 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 			dib.ApplySubtract(params["filename"], threadcount);  
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "subtract:file";
-			result["imgmsg"] = string_format("camera(file) %s (%d threads, %ssec)\n",params["filename"].c_str(), threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("file,%s (%d threads, %ssec)",params["filename"].c_str(), threadcount, result["duration"].c_str());
 		}
 
 	}
@@ -1074,7 +1100,7 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			if (norm) result["commandstring"] += ",norm";
 			imgmsg = string_format("filmic,%s,%s,%s,%s,%s",params["A"].c_str(),params["B"].c_str(),params["C"].c_str(),params["D"].c_str(),params["power"].c_str());
 		}
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n",imgmsg.c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 
 	}
  	return result;
@@ -1124,7 +1150,7 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 			std::vector<double> wbmult = dib.ApplyWhiteBalance(threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "whitebalance:auto";
-			imgmsg = string_format("auto,%f,%f,%f",wbmult[0], wbmult[1], wbmult[2]);
+			imgmsg = string_format("auto,%0.4f,%0.4f,%0.4f",wbmult[0], wbmult[1], wbmult[2]);
 		}
 		else if (params["mode"] == "patch") {
 			unsigned patchx = atoi(params["patchx"].c_str());
@@ -1134,7 +1160,7 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 			std::vector<double> wbmult = dib.ApplyWhiteBalance((unsigned) patchx, (unsigned) patchy, patchrad, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "whitebalance:patch";
-			imgmsg = string_format("patch,%f,%f,%f",wbmult[0], wbmult[1], wbmult[2]);
+			imgmsg = string_format("patch,%0.4f,%0.4f,%0.4f",wbmult[0], wbmult[1], wbmult[2]);
 		}
 		else if (params["mode"] == "multipliers") {
 			float redmult = atof(params["redmultiplier"].c_str());
@@ -1144,7 +1170,7 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 			std::vector<double> wbmult = dib.ApplyWhiteBalance(redmult, greenmult, bluemult, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "whitebalance:multipliers";
-			imgmsg = string_format("multipliers,%f,%f,%f",wbmult[0], wbmult[1], wbmult[2]);
+			imgmsg = string_format("multipliers,%0.4f,%0.4f,%0.4f",wbmult[0], wbmult[1], wbmult[2]);
 		}
 		else if (params["mode"] == "bluethreshold") {
 			float redmult = atof(params["redmultiplier"].c_str());
@@ -1155,9 +1181,9 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 			std::vector<double> wbmult = dib.ApplyWhiteBalance(redmult, greenmult, bluemult, bluethresh, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "whitebalance:bluethreshold";
-			imgmsg = string_format("multipliers w/bluethreshold,%f,%f,%f",wbmult[0], wbmult[1], wbmult[2]);
+			imgmsg = string_format("multipliers w/bluethreshold,%0.4f,%0.4f,%0.4f",wbmult[0], wbmult[1], wbmult[2]);
 		}
-		result["imgmsg"] = string_format("%s (%d threads, %ssec)\n",imgmsg.c_str(), threadcount, result["duration"].c_str());
+		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 	}
  	return result;
 }

@@ -36,57 +36,53 @@ std::string buildcommand(std::string cmd, std::map<std::string,std::string> para
 std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, bool print)
 {
 	std::string commandstring = std::string();
-	char c[256];
-	strncpy(c, commandstr.c_str(), 255);
-	char* cmd = strtok(c,":");
-	std::string command;
-	if (cmd) command = cmd;
+	
+	std::vector<std::string> cs = split(commandstr,":");
+	std::string command = cs[0];
+	std::string parms;
+	if (cs.size() >= 2) parms = cs[1]; 
 	
 	std::map<std::string,std::string> result;
 
 	//parsing:
 	std::map<std::string,std::string> params;
-	char * pstr = strtok(NULL, " ");
-	if (pstr) {
-		if (command == "blackwhitepoint") params = parse_blackwhitepoint(std::string(pstr));
-		else if (command == "colorspace") params = parse_colorspace(std::string(pstr));
-		else if (command == "crop") params = parse_crop(std::string(pstr));
-		else if (command == "cropspectrum") params = parse_cropspectrum(std::string(pstr));
-		else if (command == "curve") params = parse_curve(std::string(pstr));
-		else if (command == "demosaic") params = parse_demosaic(std::string(pstr));
-		else if (command == "denoise") params = parse_denoise(std::string(pstr));
-		else if (command == "exposure") params = parse_exposure(std::string(pstr));
-		else if (command == "gray") params = parse_gray(std::string(pstr));
+
+	if (command == "blackwhitepoint") params = parse_blackwhitepoint(parms);
+	else if (command == "colorspace") params = parse_colorspace(parms);
+	else if (command == "crop") params = parse_crop(parms);
+	else if (command == "cropspectrum") params = parse_cropspectrum(parms);
+	else if (command == "curve") params = parse_curve(parms);
+	else if (command == "demosaic") params = parse_demosaic(parms);
+	else if (command == "denoise") params = parse_denoise(parms);
+	else if (command == "exposure") params = parse_exposure(parms);
+	else if (command == "gray") params = parse_gray(parms);
 #ifdef USE_LENSFUN
-		else if (command == "lenscorrection") params = parse_lenscorrection(std::string(pstr));
+	else if (command == "lenscorrection") params = parse_lenscorrection(parms);
 #endif
-		else if (command == "redeye") params = parse_redeye(std::string(pstr));
-		else if (command == "resize") params = parse_resize(std::string(pstr));
-		else if (command == "rotate") params = parse_rotate(std::string(pstr));
-		else if (command == "saturation") params = parse_saturation(std::string(pstr));
-		else if (command == "sharpen") params = parse_sharpen(std::string(pstr));
-		else if (command == "subtract") params = parse_subtract(std::string(pstr));
-		else if (command == "tone") params = parse_tone(std::string(pstr));
-		else if (command == "whitebalance") params = parse_whitebalance(std::string(pstr));
-		else if (command == "group"){ 
-			params["cmdlabel"] = "group"; 
-			params["mode"] = "default";
-			params["cmdstring"] = std::string(pstr);
-		}
-		else return string_format("Error - Unrecognized command: %s",command.c_str());
+	else if (command == "redeye") params = parse_redeye(parms);
+	else if (command == "resize") params = parse_resize(parms);
+	else if (command == "rotate") params = parse_rotate(parms);
+	else if (command == "saturation") params = parse_saturation(parms);
+	else if (command == "sharpen") params = parse_sharpen(parms);
+	else if (command == "subtract") params = parse_subtract(parms);
+	else if (command == "tone") params = parse_tone(parms);
+	else if (command == "whitebalance") params = parse_whitebalance(parms);
+	else if (command == "group"){ 
+		params["cmdlabel"] = "group"; 
+		params["mode"] = "default";
+		params["cmdstring"] = parms;
 	}
-	else {
-		printf("no command...\n"); fflush(stdout);
-		return "";
-	}
-	params["paramstring"] = std::string(pstr);
+	else return string_format("Error - Unrecognized command: %s",command.c_str());
+	
+	params["paramstring"] = parms; 
 			
 	//parse error-catching:
 	if (params.find("error") != params.end()) {
 		return params["error"];  
 	}
 			
-	if (print) printf("%s... ",params["cmdlabel"].c_str()); 
+	//if (print) printf("-%s-... ",params["cmdlabel"].c_str()); 
+	if (print) printf("%s: ",command.c_str()); 
 	fflush(stdout);
 
 	//processing
@@ -120,14 +116,14 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 
 	if (print & command != "group") 
 		//printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
-		printf("%s",result["imgmsg"].c_str());
+		printf("%s\n",result["imgmsg"].c_str());
 	fflush(stdout);
 
 	//commandstring += buildcommand(cmd, params);
 	if (paramexists(result, "commandstring"))
 		commandstring += result["commandstring"] + " ";
 	else
-		commandstring += std::string(cmd) + ":" + pstr + " ";		
+		commandstring += command + ":" + parms + " ";		
 
 	return commandstring;
 }

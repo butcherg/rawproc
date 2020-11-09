@@ -643,21 +643,26 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 		
 		for (unsigned i=0; i<psize; i++) { //ca,vig,dist,autocrop
 			if (p[i] == "ca") pmap["ops"] += "ca,";
-			if (p[i] == "vig") pmap["ops"] += "vig,";
-			if (p[i] == "dist") pmap["ops"] += "dist,";
+			else if (p[i] == "vig") pmap["ops"] += "vig,";
+			else if (p[i] == "dist") pmap["ops"] += "dist,";
+			else if (p[i] == "autocrop") pmap["ops"] += "autocrop,";
 			
-			if (p[i] == "nearest") pmap["algo"] = "nearest,";
-			if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
-			if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
+			else if (p[i] == "nearest") pmap["algo"] = "nearest,";
+			else if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
+			else if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
 			
-			if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear,";
-			if (p[i] == "fisheye") pmap["geometry"] = "fisheye,";
-			if (p[i] == "panoramic") pmap["geometry"] = "panoramic,";
-			if (p[i] == "equirectangular") pmap["geometry"] = "equirectangular,";
-			if (p[i] == "orthographic") pmap["geometry"] = "orthographic,";
-			if (p[i] == "stereographic") pmap["geometry"] = "stereographic,";
-			if (p[i] == "equisolid") pmap["geometry"] = "equisolid,";
-			if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+			else if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear";
+			else if (p[i] == "fisheye") pmap["geometry"] = "fisheye";
+			else if (p[i] == "panoramic") pmap["geometry"] = "panoramic,";
+			else if (p[i] == "equirectangular") pmap["geometry"] = "equirectangula";
+			else if (p[i] == "orthographic") pmap["geometry"] = "orthographic";
+			else if (p[i] == "stereographic") pmap["geometry"] = "stereographic";
+			else if (p[i] == "equisolid") pmap["geometry"] = "equisolid";
+			else if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+			else {
+				pmap["error"] = string_format("lenscorrection:ParseError - unrecognized parameter: %s",p[i].c_str()); 
+				return pmap;
+			}
 		}
 		size_t opssize = pmap["ops"].size();
 		if (opssize > 0) pmap["ops"].erase(opssize-1);  //get rid of the last comma
