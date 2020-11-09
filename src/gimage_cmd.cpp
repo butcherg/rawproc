@@ -118,7 +118,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		return result["error"];  
 	}
 
-	if (print & command != "group") printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+	if (print & command != "group") 
+		//printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+		printf("%s",result["imgmsg"].c_str());
 	fflush(stdout);
 
 	//commandstring += buildcommand(cmd, params);
