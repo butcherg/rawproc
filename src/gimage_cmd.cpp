@@ -37,7 +37,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 {
 	std::string commandstring = std::string();
 	
-	std::vector<std::string> cs = split(commandstr,":");
+	std::vector<std::string> cs = bifurcate(commandstr,':');
 	std::string command = cs[0];
 	std::string parms;
 	if (cs.size() >= 2) parms = cs[1]; 
