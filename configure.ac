@@ -56,13 +56,13 @@ then
 	case "$host_alias" in
 		x86_64-w64-mingw32* )
 			INNO_SUFFIX="w64"
-			INNO_PF="{pf64}"
+			INNO_PF="{commonpf64}"
 			INNO_ARCHITECURESALLOWED="ArchitecturesAllowed=x64"
 			INNO_ARCHITECTURESINSTALLEDIN64BITMODE="ArchitecturesInstallIn64BitMode=x64"
 		;;
 		i686-w64-mingw32* )
 			INNO_SUFFIX="w32"
-			INNO_PF="{pf32}"
+			INNO_PF="{commonpf32}"
 			INNO_ARCHITECURES="ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64"
 		;;
 	esac

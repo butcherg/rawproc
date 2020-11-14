@@ -2,7 +2,7 @@
 
 FILENAME=$1
 SCRIPTNAME=$2
-INNO_BIN="Inno Setup 5/ISCC.exe"
+INNO_BIN="Inno Setup 6/ISCC.exe"
 
 # Check if variable is set
 [ -z "$SCRIPTNAME" ] && { echo "Usage: $0 <SCRIPT_NAME>"; echo; exit 1; }
@@ -26,7 +26,7 @@ INNO_PATH="${PROGFILES_PATH%?}/${INNO_BIN}"
 SCRIPTNAME=$(winepath -w "$SCRIPTNAME" 2> /dev/null)
 
 # Check if Inno Setup is installed into wine
-[ ! -f "$INNO_PATH" ] && { echo "Install Inno Setup 5 Quickstart before running this script."; echo; exit 1; }
+[ ! -f "$INNO_PATH" ] && { echo "Install Inno Setup 6 Quickstart before running this script."; echo; exit 1; }
 
 # Compile!
 #wine "$INNO_PATH" /F"$FILENAME" "$SCRIPTNAME"
