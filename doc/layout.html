@@ -13,31 +13,35 @@
 	100%/fit-to-display by double-clicking the image.  The min/max zoom is presently 10%/500%.<br><br>
 	Display pane keyboard commands:
 	<ul>
-		<li>o: Toggle out-of-bound tone flagging, off|average|at-least-one-channel.  Must be enabled with display.outofbound=1.</li>
-		<li>s: Toggle soft-proof.  A proofing profile needs to be specified in display.cms.softproof.profile.</li>
-		<li>t: Toggle thumbnail visibility.</li>
-		<li>ctrl-c: Copy the float RGB values of the pixel under the mouse pointer to the clipboard.</li>
-		<li>shift-mousewheel: Increase the zoom increment to 10%.</li>
-		<li>ctrl-mousewheel: Increase the zoom increment to 100%.</li>
+		<li>-: zoom out</li>
+		<li>+: zoom in</li>
+		<li>Ctrl-c: Copy RGB values at the mouse x,y</li>
+		<li>e: Exposure box toggle</li>
+		<li>f,F: Fit image to window</li>
+		<li>h: Toggle display thumbnail at the upper-left corner</li>
+		<li>n: Take a snapshot of the display window.  This can be done repeatedly.</li>
+		<li>o: Out-of-bound toggle.  Rotates between off|RGB average|at least one channel</li>
+		<li>s: Softproof toggle</li>
+		<li>t,T: Tooltip toggle</li>
+		<li>left-arrow: Pan left, Shift = x10, Ctrl = x100</li>
+		<li>right-arrow: Pan right, Shift = x10, Ctrl = x100</li>
+		<li>down-arrow: Pan down, Shift = x10, Ctrl = x100</li>
+		<li>up-arrow: Pan up, Shift = x10, Ctrl = x100</li>
 	</ul><br><br>
-	As of version 0.9, the input.cms property is removed.  Instead, display.cms enables/disables transform of the 
+	For color management, display.cms enables/disables transform of the 
 	image from the checked tool to the display profile before rendering in the display pane.  The internal working
 	image has to have an attached profile, and an appropriate profile has to be entered in display.cms.displayprofile.
-	This change is in response to the realization that there is no global "color management" mode in rawproc; it all
-	depends of the "chain of custody" maintained by having the associated profile as metadata to the image that is
-	encoded to its constraints.  In rawproc, that is maintained through use of the associated input.*.profile parameters
-	that assign a profile to an image when the file is opened, and the application of the colorspace tool as the tool
-	chain is built by the user.
 	</li><br>
 
-	<li><b>Commands:</b> The top-left-hand window, contains the list of tools applied to the image.  You
-	can select a tool to mess with by left-clicking it.  Right-clicking a tool 
-	brings up a pop-up menu from which you can either display EXIF and image data or delete the
-	tool. The checkbox beside each tool is to
+	<li><b>Commands:</b> The top-left-hand window, contains the list of tools applied to the image.  This list of tools 
+	is usually referred to as the "toolchain".  You can select a tool to mess with by left-clicking it.  Right-clicking 
+	a tool 	brings up a pop-up menu from which you can display EXIF and image data, delete the
+	tool, or if the tool is a group, break the group in to the toolchain or extract the last tool in the group and make it
+	a tool in the toolchain. The checkbox beside each tool is to
 	select that tool result for display; this can be done separate from selecting the tool to
 	mess with its parameters.  This is extremely useful to compare the results of different tools,
 	as the display is switched from image to image without having to reprocess, at the expense of
-	memory.  It works well for 16MP images, but I'm not sure how it'll scale to larger ones.<br><br>
+	memory<br><br>
 	Command pane keyboard commands:
 	<ul>
 		<li>ctrl-c: Copies the selected comand and its parameters to the clipboard.</li>
@@ -46,7 +50,8 @@
 	</ul>
 	</li><br>
 	
-	<li><b>Histogram:</b> Standard RGB histogram.  It can be zoomed in with the mouse thumbwheel, and panned
+	<li><b>Histogram:</b> Standard RGB histogram of the image produced by the tool selected for display.  
+	It can be zoomed in with the mouse thumbwheel, and panned
 	by dragging with the mouse. Double-clicking the histogram restores the original scale and origin. 
 	The default scale is 256 bins; this can be changed with the 
 	histogram.scale parameter in the Properties list, for instance, to set 65536 for sixteen-bit 
@@ -54,11 +59,14 @@
 	if you change the histogram tool scaling, the curve tool will still work internally at 0.0-255.0.<br><br>
 	Histogram pane keyboard commands:
 	<ul>
-		<li>l: Pan the histogram left.</li>
-		<li>r: Pan the histogram right.</li>
-		<li>t: Restores the histogram scale and origin.</li>
-		<li>spacebar: Toggles the channel display order.</li>
-		<li>ctrl-c: Copies the histogram data as 256 buckets to the clipboard, in the form "red:0val,1val,2val...\ngreen:...\nblue:..."</li>
+		<li>space: Toggle channel order in display</li>
+		<li>Ctrl-c: Copy 256-bucket histogram to the clipboard</li>
+		<li>d: Toggle bounded/unbounded histogram, display bounds/data bounds</li>
+		<li>e: Toggle EV stop lines</li>
+		<li>l Toggle labels</li>
+		<li>t: Toggle tooltip display</li>
+		<li>right-arrow: Pan right, Shift = x10, Ctrl = x100</li>
+		<li>left-arrow: Pan left, Shift = x10, Ctrl = x100</li>
 	</ul>
 	</li><br>
 

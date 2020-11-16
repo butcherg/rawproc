@@ -103,7 +103,10 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 
 	//parm app.tooltip: 0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
-		SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		//SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		
+		SetToolTip("-: zoom out\n+: zoom in\nCtrl-c: Copy RGB values at the mouse x,y\ne: Exposure box toggle\nf,F: Fit image to window\nh: Toggle display thumbnail at the upper-left corner\nn: Take a snapshot of the display window.  This can be done repeatedly.\no: Out-of-bound toggle.  Rotates between off|RGB average|at least one channel\ns: Softproof toggle\nt,T: Tooltip toggle\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\nright-arrow: Pan right, Shift = x10, Ctrl = x100\ndown-arrow: Pan down, Shift = x10, Ctrl = x100\nup-arrow: Pan up, Shift = x10, Ctrl = x100\n");
+
 
 
 	Bind(wxEVT_SIZE, &PicPanel::OnSize, this);
@@ -140,7 +143,8 @@ void PicPanel::OnSize(wxSizeEvent& event)
 bool PicPanel::ToggleToolTip()
 {
 	if (GetToolTipText() == "") {
-		SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		//SetToolTip("PicPanel Keyboard Commands:\n   h: thumbnail toggle\n   o: out-of-bound toggle, off/average/at-least-one-channel\n   s: softproof toggle\n   t: tooltip toggle\n   ctrl-c: copy RGB at the cursor x,y");
+		SetToolTip("-: zoom out\n+: zoom in\nCtrl-c: Copy RGB values at the mouse x,y\ne: Exposure box toggle\nf,F: Fit image to window\nh: Toggle display thumbnail at the upper-left corner\nn: Take a snapshot of the display window.  This can be done repeatedly.\no: Out-of-bound toggle.  Rotates between off|RGB average|at least one channel\ns: Softproof toggle\nt,T: Tooltip toggle\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\nright-arrow: Pan right, Shift = x10, Ctrl = x100\ndown-arrow: Pan down, Shift = x10, Ctrl = x100\nup-arrow: Pan up, Shift = x10, Ctrl = x100\n");
 		return true;
 	}
 	else {
@@ -1082,7 +1086,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 		if ( uc >= 32 )
 		{
 			switch (uc) {
-
+				//key -: zoom out
 				case 45: //- zoom out
 					fit=false;
 					GetSize(&mx,&my);
@@ -1118,6 +1122,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key +: zoom in
 				case 61: //+ zoom in
 					fit=false;
 
@@ -1154,7 +1159,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					Refresh();
 					break;
 
-
+				//key Ctrl-c: Copy RGB values at the mouse x,y
 				case 67: //c - with Ctrl-, copy RGB at the x,y
 					if (event.ControlDown()) 
 						if (display_dib)
@@ -1166,6 +1171,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 							}
 					break;
 
+				//key e: Exposure box toggle
 				case 69: //e exposure box toggle
 					if (!exposurestring.IsEmpty()) {
 						if (exposurebox) {
@@ -1178,6 +1184,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					}
 					break;
 
+				//key f,F: Fit image to window
 				case 102: //f
 				case 70:  //F - fit image to window
 					SetScaleToWidth();
@@ -1186,6 +1193,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key h: Toggle display thumbnail at the upper-left corner
 				case 72:  //h - toggle display thumbnail 
 					if (thumbvisible)
 						thumbvisible = false;
@@ -1194,11 +1202,13 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key n: Take a snapshot of the display window.  This can be done repeatedly.
 				case 78: //n snapshot
 					snapshot = true;
 					Refresh();
 					break;
 
+				//key o: Out-of-bound toggle.  Rotates between off|RGB average|at least one channel
 				case 79: //o oob toggle
 					if (myConfig::getConfig().getValueOrDefault("display.outofbound","0") == "1") {
 						oob++;
@@ -1228,6 +1238,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					setStatusBar();
 					break;
 
+				//key s: Softproof toggle
 				case 83: //s softproof toggle
 					if (softproof) {
 						softproof = false;
@@ -1240,6 +1251,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					RefreshPic();
 					break;
 
+				//key t,T: Tooltip toggle
 				case 116: //t
 				case 84: //T - toggle tooltip
 						if (ToggleToolTip())
@@ -1265,6 +1277,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 		// It's a special key, > WXK_START, deal with all the known ones:
 		switch ( event.GetKeyCode() )
 		{
+			//key left-arrow: Pan left, Shift = x10, Ctrl = x100
 			case WXK_LEFT:
 				fit=false;
 
@@ -1281,6 +1294,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				Refresh();
 				break;
 
+			//key right-arrow: Pan right, Shift = x10, Ctrl = x100
 			case WXK_RIGHT:
 				fit=false;
 
@@ -1297,6 +1311,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				Refresh();
 				break;
 
+			//key down-arrow: Pan down, Shift = x10, Ctrl = x100
 			case WXK_DOWN:
 				fit=false;
 
@@ -1313,6 +1328,7 @@ void PicPanel::OnKey(wxKeyEvent& event)
 				Refresh();
 				break;
 
+			//key up-arrow: Pan up, Shift = x10, Ctrl = x100
 			case WXK_UP:
 				fit=false;
 

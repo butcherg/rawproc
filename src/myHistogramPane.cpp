@@ -36,7 +36,10 @@ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 	inwindow = false;
 
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
-		SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		//SetToolTip("Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   l: label visibility   r: reset scale\n   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		
+		SetToolTip("space: Toggle channel order in display\nCtrl-c: Copy 256-bucket histogram to the clipboard\nd: Toggle bounded/unbounded histogram, display bounds/data bounds\ne: Toggle EV stop lines\nl Toggle labels\nt: Toggle tooltip display\nright-arrow: Pan right, Shift = x10, Ctrl = x100\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\n");
+
 
 	Bind(wxEVT_MOTION, &myHistogramPane::mouseMoved, this);
 	Bind(wxEVT_LEFT_DOWN, &myHistogramPane::mouseDown, this);
@@ -70,7 +73,9 @@ void myHistogramPane::OnSize(wxSizeEvent& event)
 bool myHistogramPane::ToggleToolTip()
 {
 	if (GetToolTipText() == "") {
-		SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		//SetToolTip("Histogram Keyboard Commands:\n   d: histogram display/data\n   e: EV markers\n   f: cursor data/bin\n   l: label visibility   t: toggle tooltip\n   <sp>: channel on-top\n   ctrl-c: copy 256-bin histogram to clipboard\n   left-right arrows: pan histogram");
+		
+		SetToolTip("space: Toggle channel order in display\nCtrl-c: Copy 256-bucket histogram to the clipboard\nd: Toggle bounded/unbounded histogram, display bounds/data bounds\ne: Toggle EV stop lines\nl Toggle labels\nt: Toggle tooltip display\nright-arrow: Pan right, Shift = x10, Ctrl = x100\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\n");		
 		return true;
 	}
 	else {
@@ -398,6 +403,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 		if ( uc >= 32 )
 		{
 			switch (uc) {
+				//key space: Toggle channel order in display
 				case WXK_SPACE : // - order of channels
 					if (ord == 1) ord = 2;
 					else if(ord == 2) ord = 3;
@@ -405,6 +411,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key Ctrl-c: Copy 256-bucket histogram to the clipboard
 				case 67: // c - with Ctrl, copy 256-scale histogram to clipboard
 					if (!event.ControlDown()) break;
 
@@ -428,6 +435,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					((wxFrame *) GetParent())->SetStatusText("histogram data copied to clipboard");
 					break;
 
+				//key d: Toggle bounded/unbounded histogram, display bounds/data bounds
 				case 68: //d - bounded/unbounded histogram
 					if (Unbounded)
 						Unbounded = false;
@@ -437,6 +445,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key e: Toggle EV stop lines
 				case 69: //e - toggle EV stop lines
 					if (EVaxis)
 						EVaxis = false;
@@ -445,7 +454,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					Refresh();
 					break;
 
-
+				//key l Toggle labels
 				case 76: // l - toggle labels
 					if (TextVisible)
 						TextVisible = false;
@@ -454,6 +463,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 					Refresh();
 					break;
 
+				//key t: Toggle tooltip display
 				case 84: //t - toggle tooltip
 						if (ToggleToolTip())
 							((wxFrame *) GetParent())->SetStatusText("Histogram tooltip display: on");
@@ -483,6 +493,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 		// It's a special key, > WXK_START, deal with all the known ones:
 		switch ( event.GetKeyCode() )
 		{
+			//key right-arrow: Pan right, Shift = x10, Ctrl = x100
 			case WXK_RIGHT: //-> - pan right
 				if (event.ShiftDown()) xorigin -= 10;
 				else if (event.ControlDown()) xorigin -= 100;
@@ -490,6 +501,7 @@ void myHistogramPane::keyPressed(wxKeyEvent& event)
 				Refresh();
 				break;
 
+			//key left-arrow: Pan left, Shift = x10, Ctrl = x100
 			case WXK_LEFT: // <- - pan left
 				if (event.ShiftDown()) xorigin += 10;
 				else if (event.ControlDown()) xorigin += 100;
