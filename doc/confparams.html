@@ -24,30 +24,45 @@
 <li><a name="batch"><b>batch.toolchain</b>:  The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
+<li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
+<li><b>display.cms.displaygamma</b>:  Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2</li>
 <li><b>display.cms.displaygamma</b>:  Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2</li>
 <li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.</li>
+<li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.</li>
+<li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
+<li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
+<li><b>display.cms.softproof.profile</b>:  Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.</li>
 <li><b>display.cms.softproof.profile</b>:  Sets the ICC profile to be used for softproofing.  Default="", which disables soft proofing.</li>
 <li><b>display.cms.softproof.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
+<li><b>display.cms.softproof.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
+<li><b>display.cms</b>:  Enable color tranform of the display image, 0|1.  Default=1</li>
 <li><b>display.cms</b>:  Enable color tranform of the display image, 0|1.  Default=1</li>
 <li><b>display.exposuredata.backgroundcolor</b>:  Sets background color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=192 (light gray)</li>
 <li><b>display.exposuredata.outlinecolor</b>:  Sets border color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)</li>
 <li><b>display.exposuredata.outlinecolor</b>:  Sets text color of the exposure box.  Specify an integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray).  Default=0 (black)</li>
 <li><b>display.exposuredata</b>:  0|1, enable/disable exposurebox display at startup.  Exposurebox display can still be toggled on/off with the 'e' key. Default=1</li>
 <li><b>display.info.evlv</b>:  Add either/both EV (Exposure Value, Wikipedia definition) or LV (Light Value, exiftool definition) to the information string. "EV" and/or "LV" need to be in the property value, you can separate them with blanks, a comma, or just run them together.  Default: blank. </li>
+<li><b>display.info.evlv</b>:  Add either/both EV (Exposure Value, Wikipedia definition) or LV (Light Value, exiftool definition) to the information string. "EV" and/or "LV" need to be in the property value, you can separate them with blanks, a comma, or just run them together.  Default: blank. </li>
 <li><b>display.maxscale</b>:  Smallest panel image size.  Default=5.0, or 500%</li>
 <li><b>display.minscale</b>:  Smallest panel image size.  Default=0.1, or 10%</li>
 <li><b>display.outofbound.black=r,g,b</b>:  RGB color to use for out-of-lower-bound pixels.  Default: 255,0,255 (cyan)</li>
 <li><b>display.outofbound.white=r,g,b</b>:  RGB color to use for out-of-upper-bound pixels.  Default: 0,255,255 (magenta)</li>
 <li><b>display.outofbound</b>:  Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0</li>
+<li><b>display.outofbound</b>:  Enable/disable out-of-bound pixel marking, 0|1.  In display pane 'o' toggles between no oob, average of channels, and at least one channel.  Default=0</li>
 <li><b>display.panelborder</b>:  Border around the display image.  Default: 5</li>
+<li><b>display.render.log</b>:  0|1, turn on/off logging of the duration of the display render operation. Default=0</li>
 <li><b>display.render.log</b>:  0|1, turn on/off logging of the duration of the display render operation. Default=0</li>
 <li><b>display.snapshot</b>:  1|0, enables|disables the 'n' key and snapshooting of the display.  Default: 0</li>
 <li><b>display.status</b>:  Write display... in status when setting the display image, 0|1.  Default=1</li>
+<li><b>display.status</b>:  Write display... in status when setting the display image, 0|1.  Default=1</li>
+<li><b>display.statusbar.luminance</b>:  redmult,greenmult,bluemult - Multipliers used to calculate pixel luminance. Default:0.21,0.72,0.07</li>
+<li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>display.thumbsize</b>:  The largest dimension of the thumbnail. Default=150</li>
 <li><b>exif.command</b>:  Full path/filename to the Phil Harvey exiftool.exe program.  Default=(none), won't work without a valid program.</li>
-<li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  Default=-g -h, produces an HTML table, grouped by type.</li>
+<li><b>exif.format</b>:  text|html - If 'html', exif is displayed with HTML formatting.  If 'text', exif is presented in a filterable list box.  Default=html</li>
+<li><b>exif.parameters</b>:  exiftool parameters used to format the exiftool output.  If the parameter doesn't exist, parameters suitable for the exif.format value will be used.</li>
 <li><b>histogram.clipbins</b>:  number of buckets to eliminate on both ends of the histogram in calculating the max height.  Default=0</li>
 <li><b>histogram.cursor.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw the histogram cursor. Some tools override this, look for "linecolor" in the Properties filter. Default=app.parameters.linecolor</li>
 <li><b>histogram.depiction</b>:  lines|bars. Default=bars</li>
@@ -56,15 +71,17 @@
 <li><b>histogram.ev.range</b>:  +/- range to plot EV.  Default: 3.0 (-/+ 3 stops)</li>
 <li><b>histogram.ev.zero</b>:  Tone in the 0.0-1.0 scale to plot as EV0.  Default: 0.18</li>
 <li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
+<li><b>histogram.scale</b>:  The number of buckets to display in the histogram. Default=256</li>
+<li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>histogram.singlechannel</b>:  0|1, turns on/off the display of single-channel histogram plot for per-channel curves</li>
 <li><b>imageinfo.floatstats</b>:  Show image statistic as floats corresponding to the internal image, or integers corresponding to the unsigned 16-bit integer of raw formats.  Default=1</li>
 <li><b>imageinfo.libraw</b>:  Include/exclude Libraw-inserted parameters in EXIF.  Default=0 (exclude)</li>
+<li><b>input.[jpeg|tiff|png].orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Can be set for jpeg, tiff, or png images only; raw images have to wait until after demosaic to preserve the CFA orientation (see tool.demosaic.orient).  Default=0</li>
 <li><b>input.jpeg.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li>
 <li><b>input.log</b>:  log the file input operation.  Default=0</li>
 <li><b>input.opensource.parentdirectory</b>:  Enable search of parent directory for source file.  Default=0</li>
 <li><b>input.opensource.subdirectory</b>:  Comma-separated list of subdirectories to search for source file. Default: (empty) </li>
-<li><b>input.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Default=0</li>
 <li><b>input.png.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.png.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)</li>
 <li><b>input.raw.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
@@ -77,6 +94,7 @@
 <li><b>menu.showcommand.type</b>:  Specify dialog box type in which to show the cumulative command, text|html. Dialog type 'html' can be copied to the clipboard.  Default=text</li>
 <li><b>output.*.thumbnails.directory</b>:  *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.</li>
 <li><b>output.*.thumbnails.parameters</b>:  *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.</li>
+<li><b>output.data.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the data writer.   Applicable parameters: <ul><li>outputmode=rgb|split|channelsummary: Specifies the output format. Default: rgb</li></ul></li>
 <li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1</li>
 <li><b>output.jpeg.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li>
 <li><b>output.jpeg.cms.renderingintent</b>:  Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
@@ -105,6 +123,7 @@
 <li><a name="tool.curve"><b>tool.curve.landingradius</b>:  radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5</li>
 <li><a name="tool.curve"><b>tool.curve.rateadapt.threshold</b>:  Specify threshold to turn on rate adaptation, in seconds. Default=0.01</li>
 <li><a name="tool.demosaic"><b>tool.demosaic.default</b>:  Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.</li>
+<li><a name="tool.demosaic"><b>tool.demosaic.orient</b>:  0|1 - Normalizes the image orientation after demosaic so the EXIF:Orientation tag can be 1.  Only performs the operation if the EXIF::Orientation tag isn't already 1.  Default: 1</li>
 <li><a name="tool.denoise"><b>tool.denoise.algorithm</b>:  nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet</li>
 <li><a name="tool.denoise"><b>tool.denoise.initialvalue</b>:  The initial (and reset button) sigma value used to calculate the denoised pixel.  Default=tool.denoise.sigma (initialvalue is deprecated)</li>
 <li><a name="tool.denoise"><b>tool.denoise.local</b>:  Defines the initial (and reset button) size of the neigbor pixel array.  Default=3</li>
@@ -147,4 +166,4 @@
 <p>For the output.*.parameters properties, the following are available.  Specify them
 as name=value pairs, separated by semicolons.</p>
 <ul>
-<li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li><br><li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br><li><b>excludeicc</b>: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li><br><li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li></ul></body></html>
+<li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li><li><b>outputmode</b>=rgb|split|channelaverage: Applies to data save.  If 'rgb', data is printed RGBRGBRGB...  If 'split', each channel is printed separately, in sequence. If 'channelaverage', each column is averaged, channel-by-channel. Default: 'rgb'</li><li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=75 </li><br><li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br><li><b>excludeicc</b>: Applies to JPEG and PNG output, if present, output image doesn't include icc profile</li><br><li><b>dcrawparams</b>: command line parameters for dcraw-based (--enable-dcraw) raw file input.  Spaces need to be specified by underscores, e.g., -o_3_-g_1_1_-W</li></ul></body></html>
