@@ -3036,10 +3036,10 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 		for (unsigned x=0; x<w-(arraydim-1); x+=arraydim) {
 			unsigned Hpos = (x/2) + (y/2)*(w/2);
 			float pix[4] = {0.0, 0.0, 0.0, 0.0};
-			for (unsigned i=0; i<arraydim; i++) {  //walk the 2x2 image subset, collect the channel values 
-				for (unsigned j=0; j<arraydim; j++) {
-					int pos = (x+i) + (y+j) * w;
-					pix[cfarray[i][j]] += image[pos].r;
+			for (unsigned r=0; r<arraydim; r++) {  //walk the 2x2 image subset, collect the channel values 
+				for (unsigned c=0; c<arraydim; c++) {
+					int pos = (x+c) + (y+r) * w;
+					pix[ cfarray[r][c] ] += image[pos].r;
 				}
 			}
 			pix[1] = (pix[1] + pix[3]) / 2.0; //make a single green of G1 and G2
