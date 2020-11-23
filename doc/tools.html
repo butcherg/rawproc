@@ -3,6 +3,39 @@
 
 <h2 id="ImageManipulations">Image Tools</h2>
 
+<p>Tools are added to the toolchain when selected from the Add... menu.  The tool is added after
+the selected tool in the chain.</p>
+
+<p>At any point in the toolchain, the image is one of two states: 1) mosaic, or 2) RGB.  Some tools
+can work both states, other tools will only work one or the other.  The following list enumerates the 
+valid states for each tool:</p>
+
+<table border="1">
+<tr><td><b>Tool</td><td><b>mosaic</b></td><td><b>RGB</b></td></tr>
+<tr><td>blackwhitepoint</td><td align="center">x</td><td align="center">x</td></tr>
+<tr><td>cacorrect</td><td align="center">x</td><td></td></tr>
+<tr><td>colorspace</td><td align="center">assign only</td><td>x</td></tr>
+<tr><td>crop</td><td></td><td align="center">x</td></tr>
+<tr><td>curve</td><td align="center">x</td><td align="center">x</td></tr>
+<tr><td>demosaic</td><td align="center">x</td><td></td></tr>
+<tr><td>denoise</td><td></td><td align="center">x</td></tr>
+<tr><td>exposure</td><td align="center">x</td><td align="center">x</td></tr>
+<tr><td>gray</td><td></td><td align="center">x</td></tr>
+<tr><td>hlrecover</td><td></td><td align="center">x</td></tr>
+<tr><td>lenscorrection</td><td></td><td align="center">x</td></tr>
+<tr><td>redeye</td><td></td><td align="center">x</td></tr>
+<tr><td>resize</td><td></td><td align="center">x</td></tr>
+<tr><td>rotate</td><td></td><td align="center">x</td></tr>
+<tr><td>saturation</td><td></td><td align="center">x</td></tr>
+<tr><td>sharpen</td><td></td><td align="center">x</td></tr>
+<tr><td>subtract</td><td align="center">x</td><td align="center">x</td></tr>
+<tr><td>tone</td><td align="center">x</td><td align="center">x</td></tr>
+<tr><td>whitebalance</td><td align="center">x</td><td align="center">x</td></tr>
+</table>
+
+<p>Raw images start as mosaic, and are converted to RGB with the demosaic tool.  JPEG, TIFF, and PNG images
+start as RGB.</p>
+
 <p>At the top of each tool pane, at the left is a checkbox that enables/disables the tool; use this to 
 toggle on/off the tool's effect without having to delete and re-insert it.  Also in this area, selected
 tools have copy and paste buttons, so a tool's command and parameters can be copied and pasted into

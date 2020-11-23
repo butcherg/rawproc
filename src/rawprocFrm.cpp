@@ -1740,10 +1740,11 @@ void rawprocFrm::MnuTone(wxCommandEvent& event)
 void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	//if (imginfo["Libraw.Mosaiced"] == "0") {
-	//	wxMessageBox(_("Error: CACorrect can only be applied to raw data, before demosaic."));
-	//	return;
-	//}
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "0") {
+		wxMessageBox(_("Error: CACorrect can only be applied to mosaic data, before demosaic."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		PicProcessorCACorrect *p = new PicProcessorCACorrect("cacorrect","auto,1", commandtree, pic);
@@ -1760,10 +1761,11 @@ void rawprocFrm::MnuCACorrect(wxCommandEvent& event)
 void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	//if (imginfo["Libraw.Mosaiced"] == "0") {
-	//	wxMessageBox(_("Error: HLRecover can only be applied to RGB data, after demosaic."));
-	//	return;
-	//}
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: HLRecover can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		PicProcessorHLRecover *p = new PicProcessorHLRecover("hlrecover","", commandtree, pic);
@@ -1782,6 +1784,11 @@ void rawprocFrm::MnuHLRecover(wxCommandEvent& event)
 void rawprocFrm::MnusaturateClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Saturation can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.saturate.initialvalue: The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0
@@ -1833,6 +1840,11 @@ void rawprocFrm::Mnucurve1010Click(wxCommandEvent& event)
 void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Gray can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.gray.r: The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21
@@ -1856,7 +1868,11 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Crop can only be applied to RGB data."));
+		return;
+	}
+	if (dib.getInfoValue("Orientation") != "1") {
 		wxMessageBox(_("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
@@ -1876,8 +1892,12 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox(_("Resize tool isn't designed to work work if the image orientation isn't normalized (prior to demosaic?).  Put it in the tool chain after Orientation=1"));
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Resize can only be applied to RGB data."));
+		return;
+	}
+	if (dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox(_("Resize tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
@@ -1920,6 +1940,11 @@ void rawprocFrm::MnuBlackWhitePointClick(wxCommandEvent& event)
 void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Sharpen can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.sharpen.initialvalue: The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0
@@ -1938,8 +1963,12 @@ void rawprocFrm::MnuRotateClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Libraw.Mosaiced") == "1" && dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox(_("Rotate tool isn't designed to work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Rotate can only be applied to RGB data."));
+		return;
+	}
+	if (dib.getInfoValue("Orientation") != "1") {
+		wxMessageBox(_("Rotate tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
@@ -1960,6 +1989,11 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 {
 	wxString algorithm, sigma, local, patch, threshold, cmd;
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Denoise can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.denoise.algorithm: nlmeans|wavelet. The default algorithm to use when adding a denoise tool.  Default=wavelet
@@ -1994,6 +2028,11 @@ void rawprocFrm::MnuDenoiseClick(wxCommandEvent& event)
 void rawprocFrm::MnuRedEyeClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Redeye can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.redeye.threshold: The initial (and reset button) red intensity threshold.  Default=1.5
@@ -2045,7 +2084,11 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Lens correction can only be applied to RGB data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
@@ -2067,6 +2110,11 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "0") {
+		wxMessageBox(_("Error: Demosaix can only be applied to mosaic data."));
+		return;
+	}
 	SetStatusText("");
 	try {
 		//parm tool.demosaic.default: Demosaic algorithm default.  Default=ahd, if librtprocess is present, else Default=half.
