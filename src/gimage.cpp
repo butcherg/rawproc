@@ -3718,6 +3718,51 @@ void gImage::ApplySaturate(double saturate, int threadcount)
 	}
 }
 
+void gImage::ApplySaturate(double saturate, GIMAGE_CHANNEL channel, float threshold, int threadcount)
+{
+	if (channel == CHANNEL_RGB) {  //threshold is ignored in the RGB case
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				double R = image[pos].r;
+				double G = image[pos].g;
+				double B = image[pos].b;
+
+				double  P=sqrt(
+				R*R*Pr+
+				G*G*Pg+
+				B*B*Pb ) ;
+
+				image[pos].r=P+(R-P)*saturate;
+				image[pos].g=P+(G-P)*saturate;
+				image[pos].b=P+(B-P)*saturate;
+
+			}
+		}
+	}
+	else {
+		#pragma omp parallel for num_threads(threadcount)
+		for (unsigned x=0; x<w; x++) {
+			for (unsigned y=0; y<h; y++) {
+				unsigned pos = x + y*w;
+				double R = image[pos].r;
+				double G = image[pos].g;
+				double B = image[pos].b;
+
+				double  P=sqrt(
+				R*R*Pr+
+				G*G*Pg+
+				B*B*Pb ) ;
+
+				if (channel == CHANNEL_RED   & image[pos].r > threshold) image[pos].r=P+(R-P)*saturate;
+				if (channel == CHANNEL_GREEN & image[pos].g > threshold) image[pos].g=P+(G-P)*saturate;
+				if (channel == CHANNEL_BLUE  & image[pos].b > threshold) image[pos].b=P+(B-P)*saturate;
+			}
+		}
+	}
+}
+
 
 //Exposure Compensation
 //
