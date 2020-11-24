@@ -882,9 +882,21 @@ std::map<std::string,std::string> process_saturation(gImage &dib, std::map<std::
 		result["threadcount"] = std::to_string(threadcount);
 
 		float saturation = atof(params["saturation"].c_str());
+		GIMAGE_CHANNEL channel = CHANNEL_RGB;
+		if (paramexists(params, "channel")) {
+			if (params["channel"] == "rgb")   channel = CHANNEL_RGB;
+			if (params["channel"] == "red")   channel = CHANNEL_RED;
+			if (params["channel"] == "green") channel = CHANNEL_GREEN;
+			if (params["channel"] == "blue")  channel = CHANNEL_BLUE;
+		}
+		else channel = CHANNEL_RGB;
+		float threshold = 0.0;
+		if (paramexists(params, "threshold")) threshold = atof(params["threshold"].c_str());
+		
 
 		_mark();
-		dib.ApplySaturate(saturation, threadcount);
+		//dib.ApplySaturate(saturation, threadcount);
+		dib.ApplySaturate(saturation, channel, threshold, threadcount);
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("saturation:%s",params["paramstring"].c_str());
 		result["treelabel"] = "saturation";

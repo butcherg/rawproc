@@ -18,8 +18,17 @@ class SaturationPanel: public PicProcPanel
 		{
 			Freeze();
 			SetSize(parent->GetSize());
+			
+			std::map<std::string,std::string> parm = parse_saturation(params.ToStdString());
+			
+			wxArrayString str;
+			str.Add("rgb");
+			str.Add("red");
+			str.Add("green");
+			str.Add("blue");
+			chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 
-			double initialvalue = atof(params.c_str());
+			//double initialvalue = atof(params.c_str());
 
 			enablebox = new wxCheckBox(this, SATURATIONENABLE, _("saturation:"));
 			enablebox->SetValue(true);
@@ -30,8 +39,10 @@ class SaturationPanel: public PicProcPanel
 			
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxSizerFlags patchflags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT);
+			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(chan, wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -40,6 +51,9 @@ class SaturationPanel: public PicProcPanel
 			m->AddRowItem(btn,flags);
 
 			m->End();
+			
+			chan->SetStringSelection(wxString(parm["channel"]));
+			saturate->SetFloatValue(atof(parm["saturation"].c_str()));
 
 			SetSizerAndFit(m);
 			SetFocus();
@@ -66,7 +80,8 @@ class SaturationPanel: public PicProcPanel
 
 		void OnEnter(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			//q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->processPic();
 			event.Skip();
 		}
@@ -78,7 +93,8 @@ class SaturationPanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			//q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->processPic();
 			event.Skip();
 		}
@@ -94,6 +110,7 @@ class SaturationPanel: public PicProcPanel
 
 
 	private:
+		wxChoice *chan;
 		myFloatCtrl *saturate;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;

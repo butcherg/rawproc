@@ -928,7 +928,7 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 }
 
 //saturation
-//:<sfloat> - apply HSL saturation to the image in the amount specified. 
+//:[rgb|red|green|blue],<sfloat>[,<tfloat>] - apply HSL saturation to the image in the amount specified. If channel is specified, restrict application to it; if threshold is specified (not used for rgb), restrict application to only values above it. 
 std::map<std::string,std::string> parse_saturation(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -951,14 +951,37 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 			pmap["error"] = "saturation:ParseError - Need a value"; 
 			return pmap;
 		}
-
-		if (isFloat(p[0])) {
+		
+		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") { 
+			pmap["channel"] = p[0];
+			if (psize >= 2) {
+				if (isFloat(p[1])) {
+					pmap["saturation"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("saturation:ParseError - Not a float value: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+			if (psize >= 3) {
+				if (isFloat(p[2])) {
+					pmap["threshold"] = p[2];
+				}
+			}
+			else {
+				pmap["threshold"] = "0.0";
+			}
+		}
+		else if (isFloat(p[0])) {
+			pmap["channel"] = "rgb";
 			pmap["saturation"] = p[0];
+			pmap["threshold"] = "0.0";
 		}
 		else {
-			pmap["error"] = string_format("saturation:ParseError - Not a float value: %s",p[0].c_str()); 
+			pmap["error"] = string_format("saturation:ParseError - Not a channel or float value: %s",p[0].c_str()); 
 			return pmap;
 		}
+		
 		pmap["mode"] = "default";
 		pmap["cmdlabel"] = "saturation";
 	}
