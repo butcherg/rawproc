@@ -61,6 +61,8 @@ class SaturationPanel: public PicProcPanel
 			Bind(myFLOATCTRL_CHANGE,&SaturationPanel::OnChanged, this);
 			Bind(myFLOATCTRL_UPDATE,&SaturationPanel::OnEnter, this);
 			Bind(wxEVT_CHECKBOX, &SaturationPanel::onEnable, this, SATURATIONENABLE);
+			Bind(wxEVT_BUTTON, &SaturationPanel::OnButton, this);
+			Bind(wxEVT_CHOICE, &SaturationPanel::channelChanged, this);
 			Bind(wxEVT_TIMER, &SaturationPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SaturationPanel::OnKey,  this);
 			Thaw();
@@ -80,7 +82,13 @@ class SaturationPanel: public PicProcPanel
 
 		void OnEnter(wxCommandEvent& event)
 		{
-			//q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
+			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
+			q->processPic();
+			event.Skip();
+		}
+		
+		void channelChanged(wxCommandEvent& event)
+		{
 			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->processPic();
 			event.Skip();
@@ -93,7 +101,6 @@ class SaturationPanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			//q->setParams(wxString::Format("%2.2f",saturate->GetFloatValue()));
 			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->processPic();
 			event.Skip();
@@ -103,7 +110,7 @@ class SaturationPanel: public PicProcPanel
 		{
 			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.saturate.initialvalue","1.0").c_str());
 			saturate->SetFloatValue(resetval);
-			q->setParams(wxString::Format("%2.2f",resetval));
+			q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->processPic();
 			event.Skip();
 		}
