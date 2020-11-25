@@ -5183,7 +5183,12 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 			}
 		}
 	}
+#ifdef LF_0395
 	delete mod;
+#else
+	mod->Destroy();
+#endif
+
 	return GIMAGE_OK;
 }
 #endif //USE_LENSFUN

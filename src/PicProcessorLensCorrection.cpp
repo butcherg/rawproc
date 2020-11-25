@@ -574,7 +574,11 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 						}
 					}
 				}
+#ifdef LF_0395
 				delete mod;
+#else
+				mod->Destroy();
+#endif
 			}
 			
 			m_display->SetModified(true);
