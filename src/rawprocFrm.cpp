@@ -1872,10 +1872,6 @@ void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 		wxMessageBox(_("Error: Crop can only be applied to RGB data."));
 		return;
 	}
-	if (dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox(_("Crop tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
-		return;
-	}
 	SetStatusText("");
 	try {
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
@@ -1894,10 +1890,6 @@ void rawprocFrm::MnuResizeClick(wxCommandEvent& event)
 	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
 	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
 		wxMessageBox(_("Error: Resize can only be applied to RGB data."));
-		return;
-	}
-	if (dib.getInfoValue("Orientation") != "1") {
-		wxMessageBox(_("Resize tool isn't designed to work work if the image orientation isn't normalized prior to demosaic.  Put it in the tool chain after Orientation=1"));
 		return;
 	}
 	SetStatusText("");
