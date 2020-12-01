@@ -18,6 +18,7 @@
 #include <wx/aboutdlg.h> 
 #include <wx/stdpaths.h>
 #include <wx/statline.h>
+#include <wx/display.h>
 
 
 #include "PicProcessorSaturation.h"
@@ -83,6 +84,7 @@
 ////Event Table Start
 BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_SIZE(rawprocFrm::OnSize)
+	EVT_MOVE(rawprocFrm::OnMove)
 	EVT_CLOSE(rawprocFrm::OnClose)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
 	EVT_MENU(ID_MNU_REOPEN, rawprocFrm::Mnureopen1033Click)
@@ -203,6 +205,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	opensource = false;
 	open=false;
 	displayitem.Unset();
+	display_number = wxDisplay::GetFromWindow(this);
 
 	wxImageList *states;
         wxIcon icons[2];
@@ -433,6 +436,17 @@ void rawprocFrm::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
 	Refresh();
+}
+
+void rawprocFrm::OnMove(wxMoveEvent& event)
+{
+	int new_display_number = wxDisplay::GetFromWindow(this);
+	if (display_number != new_display_number) {
+		//printf("display changed: %d to %d\n",display_number, new_display_number); fflush(stdout);
+		display_number = new_display_number;
+		pic->RefreshPic();
+	}
+	event.Skip();
 }
 
 bool rawprocFrm::isOpenSource()

@@ -30,7 +30,6 @@ public:
 		event.Skip();
 	}
 
-
 	void OnPaint(wxPaintEvent & event)
 	{
 		wxPaintDC dc(this);
@@ -234,17 +233,23 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			//template display.cms.displayprofile=iccfile
 			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""));
 			profilepath.SetFullName(iccfile); 
+			wxString displaystr = "-";
 			
+			int name;
 			//parm display.cms.displayprofile.<number>: Filename of the display profile for the enumerated display.
 			std::map<std::string, std::string> p = myConfig::getConfig().getSubset("display.cms.displayprofile.");
-			int disp = wxDisplay::GetFromWindow(this);
+			int disp = wxDisplay::GetFromWindow(GetParent());
 			for (std::map<std::string, std::string>::iterator it=p.begin(); it!=p.end(); ++it) {
-				int name = atoi(it->first.c_str());
+				name = atoi(it->first.c_str());
 				std::string val =  it->second.c_str();
-				if (name == disp) profilepath.SetFullName(wxString(val)); 
+				if (name == disp) { 
+					profilepath.SetFullName(wxString(val)); 
+					displaystr = it->first.c_str();
+					break;
+				}
 			}
 			
-			printf("display profile: %s\n",profilepath.GetFullName().ToStdString().c_str()); fflush(stdout);
+			//printf("display profile: %s (%d)\n",profilepath.GetFullName().ToStdString().c_str(),disp); fflush(stdout);
 
 			//parm display.cms.displaygamma: Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2
 			float displaygamma = atof(myConfig::getConfig().getValueOrDefault("display.cms.displaygamma","2.2").c_str());
@@ -355,7 +360,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 				img = gImageFloat2wxImage(*dib, NULL, NULL, localoob, dwflags);
 			}
 
-			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s",resultstr),STATUS_CMS);
+			((wxFrame *) GetParent())->SetStatusText(wxString::Format("CMS%s (%s)",resultstr,displaystr),STATUS_CMS);
 
 		}
 		else { // no display CMS, just display the "raw" image:

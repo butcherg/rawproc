@@ -208,6 +208,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void SetStartPath(wxString path);
 	void SetBackground();
 	void OnSize(wxSizeEvent& event);
+	void OnMove(wxMoveEvent& event);
 	void CharEvent(wxKeyEvent& event);
 	wxString getOpenFilePath();
 	void ClearParamPane();  //a try at avoiding a suspect condition in wxNotebookBase->DeleteAllPages()
@@ -234,6 +235,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 		wxTreeCtrl *commandtree;
 		PicPanel *pic;
 		wxPanel *preview;
+		int display_number;
 		wxSimplebook* parambook;
 		myHistogramPane *histogram;
 		PropertyDialog *propdiag;
