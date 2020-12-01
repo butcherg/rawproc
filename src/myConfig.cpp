@@ -158,6 +158,32 @@ std::string myConfig::getValueOrDefault(std::string section, std::string name, s
 	}
 }
 
+std::map<std::string, std::string> myConfig::getSubset(std::string spec)
+{
+	std::map<std::string, std::string> s;
+	std::map<std::string, std::string> c = myConfig::getConfig().getDefault();
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		std::string name = it->first.c_str();
+		std::string val =  it->second.c_str();
+		if (name.find(spec) != std::string::npos)
+			s[name] = val;	
+	}
+	return s;
+}
+
+std::map<std::string, std::string> myConfig::getSubset(std::string section, std::string spec)
+{
+	std::map<std::string, std::string> s;
+	std::map<std::string, std::string> c = myConfig::getConfig().getSection(section);
+	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
+		std::string name = it->first.c_str();
+		std::string val =  it->second.c_str();
+		if (name.find(spec) != std::string::npos)
+			s[name] = val;	
+	}
+	return s;
+}
+
 void myConfig::deleteValue(std::string section, std::string name)
 {
 	if (exists(section,name))

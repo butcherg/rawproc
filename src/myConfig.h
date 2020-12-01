@@ -22,6 +22,8 @@ public:
 	std::string getValue(std::string section, std::string name);
 	std::string getValueOrDefault(std::string name, std::string defaultval);
 	std::string getValueOrDefault(std::string section, std::string name, std::string defaultval);
+	std::map<std::string, std::string> getSubset(std::string spec);
+	std::map<std::string, std::string> getSubset(std::string section, std::string spec);
 	void setValue(std::string section, std::string name, std::string value);
 	void setValue(std::string name, std::string value);
 	void deleteValue(std::string section, std::string name);
