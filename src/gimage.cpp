@@ -2171,13 +2171,19 @@ void gImage::ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int t
 void gImage::ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount)
 {
 	if (low < 0.0) low = 0.0;
-	if (high <= 1.0) {
-		low *= 256.0;
-		high *= 256.0;
+	
+	if (high >= 1.0) {
+		low /= 256.0;
+		high /= 256.0;
 	}
 
-	double slope = 255.0 / (high-low);
-	low = low / 255.0;
+	double slope;
+	double dif = high-low;
+
+	if (dif != 0.0)
+		slope = 1.0 / (high-low);
+	else
+		slope = 1.0;
 
 	if (channel == CHANNEL_RGB) {
 		#pragma omp parallel for num_threads(threadcount)
