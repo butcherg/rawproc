@@ -165,8 +165,10 @@ std::map<std::string, std::string> myConfig::getSubset(std::string spec)
 	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
 		std::string name = it->first.c_str();
 		std::string val =  it->second.c_str();
-		if (name.find(spec) != std::string::npos)
-			s[name] = val;	
+		if (name.find(spec) != std::string::npos) {
+			name.erase(name.find(spec), spec.size());
+			s[name] = val;
+		}
 	}
 	return s;
 }
@@ -178,8 +180,10 @@ std::map<std::string, std::string> myConfig::getSubset(std::string section, std:
 	for (std::map<std::string, std::string>::iterator it=c.begin(); it!=c.end(); ++it) {
 		std::string name = it->first.c_str();
 		std::string val =  it->second.c_str();
-		if (name.find(spec) != std::string::npos)
-			s[name] = val;	
+		if (name.find(spec) != std::string::npos) {
+			name.erase(name.find(spec), spec.size());
+			s[name] = val;
+		}
 	}
 	return s;
 }
