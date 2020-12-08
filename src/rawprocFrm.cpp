@@ -184,6 +184,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 {
 	d = NULL;
 	img = NULL;
+	pic = NULL;
 
 #ifdef USE_LCMS_FASTFLOAT	
 	if (cmsPlugin(cmsFastFloatExtensions()) == 0)
@@ -444,7 +445,7 @@ void rawprocFrm::OnMove(wxMoveEvent& event)
 	if (display_number != new_display_number) {
 		//printf("display changed: %d to %d\n",display_number, new_display_number); fflush(stdout);
 		display_number = new_display_number;
-		pic->RefreshPic();
+		if (pic) pic->RefreshPic();
 	}
 	event.Skip();
 }
