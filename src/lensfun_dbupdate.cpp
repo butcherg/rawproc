@@ -30,6 +30,10 @@
 #define mkdir(A, B) mkdir(A)
 #endif
 
+#define LENSFUN_SOURCEFORGE_URL "http://lensfun.sourceforge.net/db/"
+#define LENSFUN_BRONGER_URL     "https://wilson.bronger.org/lensfun-db/"
+
+std::string repository_url = LENSFUN_SOURCEFORGE_URL;
 
 //utility routines:
 
@@ -303,7 +307,7 @@ lf_db_return lensfun_dbcheck(int version, std::string dbpath, std::string dburl)
 	//if a path to the database is specified, cd to it; otherwise, stay at the cwd:
 	if (!dbpath.empty()) result = chdir(dbpath.c_str());
 
-	std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	std::string repositoryurl = repository_url;
 	if (!dburl.empty()) repositoryurl = dburl;
 
 	//build the dir to store the lensfun database:
@@ -350,7 +354,7 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath, std::string dburl
 	//if a path to the database is specified, cd to it; otherwise, stay at the cwd:
 	if (!dbpath.empty()) result = chdir(dbpath.c_str());
 
-	std::string repositoryurl = "http://lensfun.sourceforge.net/db/";
+	std::string repositoryurl = repository_url;
 	if (!dburl.empty()) repositoryurl = dburl;
 
 	//build the dir to store the lensfun database:
