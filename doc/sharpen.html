@@ -1,10 +1,17 @@
 <html><title>Sharpen</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
 
 <h3 id="Sharpen">Sharpen</h3>
-<p>Sharpens the image edges.  This tool is really a digital unsharp mask, which actually increases the contrast 
-of the edges, more appropriately known as acutance.  The algorithm used is a simple 3x3 convolution kernel, 
+<p>Sharpens the image edges. Two algorithms are supplied:</p>
+
+<ul>
+
+<li><b>usm:</b> Sharpens with the application of a blurred copy of the image, similar to the old film 
+technique.  Sigma controls the blur extent, radius controls the radius of the blur.
+</li>
+
+<li><b>convolution:</b>  Sharpens with the application of a simple 3x3 convolution kernel, 
 adjustable in strength from 1 to 10 in 0.1 increments.  The 0 value is no-sharpen.</p>
-<p align=center><img src=sharpen.png></p>
+
 <p>The kernel used to apply the sharpening is displayed.  Of note:
 <ul>
 	<li>The algorithm that performs the convolution takes the pixels in the 3x3 area surrounding the pixel to be
@@ -13,9 +20,9 @@ adjustable in strength from 1 to 10 in 0.1 increments.  The 0 value is no-sharpe
 	<li>The matrix that produces no-change, or the 'identity matrix', has 1.0 as its center value and 0.0 for the
 	surrounding values.</li>
 </ul>	
-<p>I've found the most effective use of this tool is to sharpen reduced-sized images to restore the 
-acutance lost in pixel interpolation; before version 1.0 I've been using 1 for this purpose, but now
-I'm going to use the 0.1 increments to see if there's value in lower strengths.</p>
+</ul>
+
+<p align=center><img src=sharpen.png></p>
 
 <p><b>Properties:</b> See tool.sharpen.* in <a href=confparams.html#tool.sharpen>Configuration Properties</a></p>
 
