@@ -71,8 +71,9 @@ class LensCorrectionPanel: public PicProcPanel
 			str.Add("stereographic");
 			str.Add("equisolid");
 			str.Add("thoby");
-			geom = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
-			geom->SetStringSelection("reticlinear");
+			//disable - fully implement geometry (see further comment-outs, below)
+			//geom = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			//geom->SetStringSelection("reticlinear");
 			
 
 			for (int i=0; i<parms.GetCount(); i++) {
@@ -95,9 +96,9 @@ class LensCorrectionPanel: public PicProcPanel
 				if (nameval[0] == "algo") {
 					algo->SetStringSelection(nameval[1]);
 				}
-				if (nameval[0] == "geometry") {
-					geom->SetStringSelection(nameval[1]);
-				}
+				//if (nameval[0] == "geometry") {
+				//	geom->SetStringSelection(nameval[1]);
+				//}
 			}
 
 			wxString altcam = cam->GetValue();
@@ -145,8 +146,8 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().CenterVertical());
 			m->AddRowItem(algo, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
-			m->AddRowItem(new wxStaticText(this,-1, "geometry:"), wxSizerFlags(0).Right().CenterVertical());
-			m->AddRowItem(geom, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
+			//m->AddRowItem(new wxStaticText(this,-1, "geometry:"), wxSizerFlags(0).Right().CenterVertical());
+			//m->AddRowItem(geom, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
 			
 			
 			m->NextRow();
@@ -243,8 +244,8 @@ class LensCorrectionPanel: public PicProcPanel
 			if (ops != "") paramAppend("ops", ops, cmd);
 			if (dist->GetValue()) paramAppend("algo", algo->GetString(algo->GetSelection()), cmd);
 			
-			wxString geometry = geom->GetString(geom->GetSelection()); 
-			if (geometry != "reticlinear") paramAppend("geometry", geometry, cmd);
+			//wxString geometry = geom->GetString(geom->GetSelection()); 
+			//if (geometry != "reticlinear") paramAppend("geometry", geometry, cmd);
 
 			q->setParams(cmd);
 			q->processPic();
