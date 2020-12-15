@@ -5084,7 +5084,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	if (ModifyFlags & LF_MODIFY_GEOMETRY)
 		modflags |= mod->EnableProjectionTransform(targeom);
 	if (ModifyFlags & LF_MODIFY_SCALE)
-		modflags |= mod->EnableScaling(1.0);
+		modflags |= mod->EnableScaling(mod->GetAutoScale(false));
 	
 
 #else

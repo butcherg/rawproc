@@ -467,7 +467,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				if (ModifyFlags & LF_MODIFY_GEOMETRY)
 					modflags |= mod->EnableProjectionTransform(LF_RECTILINEAR);
 				if (ModifyFlags & LF_MODIFY_SCALE)
-					modflags |= mod->EnableScaling(1.0);
+					modflags |= mod->EnableScaling(mod->GetAutoScale(false));
 
 #else
 				lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
