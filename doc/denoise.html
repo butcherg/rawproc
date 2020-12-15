@@ -14,6 +14,9 @@ sigma=10 is a good starting point for a small image.</p>
 <p>The local and patch sliders change the so-called radii of the chunks of the image used to compute the denoised
 pixel.  If you want to change them, refer to David's blog for definitions.  Changing these sliders will not update the 
 image, only the sigma slider will do that.</p>
+<p>If enabled with the checkbox, threshold specifies a luminance value that is used to limit application of nlmeans to
+pixels with luminance less than the threshold.  NLMeans is computationally intensive, so this can cut the time required to 
+apply, as well as to keep the loss of definition out of the higher-luminance regions.</p>
 </li>
 
 <li><b>Wavelet:</b> Uses the wavelet denoise algorithm cobbled snarfed from David Coffin's dcraw.c.  
