@@ -996,7 +996,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			raw_default_source = wxString(make);
 		}
 		else {
-			raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default",""));
+			raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default","colorspace:camera,assign subtract:camera whitebalance:camera demosaic:ahd blackwhitepoint:rgb,data"));
 			raw_default_source = "input.raw.default";
 		}
 
