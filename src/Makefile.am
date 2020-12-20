@@ -21,7 +21,9 @@ rawproc_SOURCES += lensfun_dbupdate.cpp lensfun_dbupdate.h
 endif
 endif
 
-
+if WIN32
+rawproc_SOURCES += rawprocRes.rc
+endif
 
 rawproc_LDADD = @WX_LIBS@
 
@@ -37,4 +39,8 @@ exif_SOURCES = exif.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegim
 
 exif_SOURCES += elapsedtime.h jpegexif.h jpegimage.h myConfig.h pngimage.h rawimage.h fileutil.h tiffimage.h cJSON.h
 
+.rc.o: 
+	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) $(WX_RESCOMP) $< -o $@
 
+ 
+ 

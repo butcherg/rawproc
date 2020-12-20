@@ -67,6 +67,7 @@ then
 		;;
 	esac
 fi
+AM_CONDITIONAL(WIN32, test x$mingw_cv_win32_host = xyes)
 
 
 # Checks for libraries.
