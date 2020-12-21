@@ -164,6 +164,8 @@ class TonePanel: public PicProcPanel
 			SetSizerAndFit(m);
 			SetFocus();
 			t.SetOwner(this);
+			
+			processTone(tonemode);
 
 			Bind(wxEVT_TIMER, &TonePanel::OnTimer, this);
 			Bind(wxEVT_BUTTON, &TonePanel::OnCopy, this, TONECOPY);
