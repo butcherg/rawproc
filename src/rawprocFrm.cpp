@@ -483,9 +483,9 @@ void rawprocFrm::SetBackground()
 	}
 	dr = pr; dg = pg; db = pb;
 	
-	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)
+	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(0,0,0)
 	if (myConfig::getConfig().exists("app.picpanel.backgroundcolor")) {
-		wxString pbk = wxString(myConfig::getConfig().getValueOrDefault("app.picpanel.backgroundcolor","119,119,119"));
+		wxString pbk = wxString(myConfig::getConfig().getValueOrDefault("app.picpanel.backgroundcolor","0,0,0"));
 		if (pbk == "") pbk = "119,119,119";
 		wxArrayString picbkgnd = split(pbk,",");
 		pr = atoi(picbkgnd[0].c_str());
