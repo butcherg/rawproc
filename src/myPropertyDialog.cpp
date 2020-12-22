@@ -10,6 +10,7 @@
 #define ADDID 3101
 #define DELETEID 3102
 #define HIDEID 3103
+#define RESETFILTERID 3104
 
 class AddDialog: public wxDialog
 {
@@ -77,6 +78,7 @@ wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 	ct->Add(new wxStaticText(this, wxID_ANY, "Filter: "), 0, wxALL, 10);
 	fil = new wxTextCtrl(this, FILTERID, "", wxDefaultPosition, wxSize(100,25),wxTE_PROCESS_ENTER);
 	ct->Add(fil, 0, wxALL, 10);
+	ct->Add(new wxButton(this, RESETFILTERID, "X", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxTOP|wxBOTTOM|wxRIGHT, 10);
 	ct->Add(new wxButton(this, ADDID, "Add"), 0, wxALL, 10);
 	ct->Add(new wxButton(this, DELETEID, "Delete"), 0, wxALL, 10);
 	sz->Add(ct, 0, wxALL, 10);
@@ -88,6 +90,7 @@ wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 	Bind(wxEVT_BUTTON, &PropertyDialog::AddProp, this, ADDID);
 	Bind(wxEVT_BUTTON, &PropertyDialog::DelProp, this, DELETEID);
 	Bind(wxEVT_BUTTON, &PropertyDialog::HideDialog, this, HIDEID);
+	Bind(wxEVT_BUTTON, &PropertyDialog::resetFilter, this, RESETFILTERID);
 }
 
 void PropertyDialog::LoadConfig()
@@ -146,6 +149,21 @@ void PropertyDialog::UpdateProperty(wxPropertyGridEvent& event)
 	//Note: rawprocFrm::UpdateConfig() is changing the .conf file, so don't remove event.Skip()
 	Refresh();
 	event.Skip();
+}
+
+void PropertyDialog::resetFilter(wxCommandEvent& event)
+{
+	fil->SetValue("");
+	int i;
+	wxPropertyGridIterator it;
+	for ( it = pg->GetIterator();
+		!it.AtEnd();
+		it++ )
+	{
+    		wxPGProperty* p = *it;
+		p->Hide(false);
+	}
+	fil->SetFocus();
 }
 
 void PropertyDialog::FilterGrid(wxCommandEvent& event)
