@@ -2299,7 +2299,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
 			}
 		}
-		else lensfundb.Append(" - Not Enabled.");
+		else lensfundb.Append(_(" - Not Enabled."));
 #endif
 	}
 	description.Append(wxString::Format(_("\n%s"), lensfundb));

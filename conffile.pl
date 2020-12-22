@@ -20,8 +20,8 @@ foreach $file (@files) {
 			else {
 				$value = "";
 			} 
-			next if $name = "make"; 
-			next if $name = "makemodel";
+			next if $name eq "make"; 
+			next if $name eq "makemodel";
 			$properties{$name} = $value;
 		}
 	}
