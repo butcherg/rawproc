@@ -7,20 +7,20 @@
 <p>Prior to first use, there are a few configuration properties that deserve some attention:</p>
 <ul>
 	<li><b>app.start.path</b>: This is the directory rawproc will go to for opening files from the menu.  
-	If you don't set this, it'll start at the directory from which rawproc was run.</li>
+	If you don't set this, it'll start at the directory from which rawproc was run.</li><br>
 
 	<li><b>app.toollist.path</b>: The directory containing toollist files, used by both group and toollist.
-	Make a directory somewhere in your home/user space... </li>
+	Make a directory somewhere in your home/user space... </li><br>
 	
 	<li><b>cms.profilepath</b>: The directory where all the ICC profiles you'd use for cameras, working spaces,
 	and displays are to be accessed.  Make a directory somewhere in your home/user space.  I populated
 	mine with Elle Stone's excellent collection of well-behaved ICC profiles, found at 
-	<a href=https://github.com/ellelstone/elles_icc_profiles>https://github.com/ellelstone/elles_icc_profiles</a></li>
+	https://github.com/ellelstone/elles_icc_profiles</li><br>
 	
 	<li><b>display.cms.displayprofile</b>: Set this to the filename of your calibrated display profile located in
 	the cms.profilepath directory.  If you don't have one, set it to srgb-output, and rawproc will 
 	use its internal gamma 2.2 sRGB profile.  If you have mulitiple displays, you can set the profiles for
-	each by using separate display.cms.displayprofile.N tags, where N=display number.</li>
+	each by using separate display.cms.displayprofile.N tags, where N=display number.</li><br>
 	
 	<li><b>input.raw.default</b>: Set this to the default toochain you want to use to develop raws.  I use
 	
@@ -29,10 +29,10 @@
 	</pre>
 	<br>
 	
-	to give me a linear RGB as the starting point for discretionary editing.</li>
+	to give me a linear RGB as the starting point for discretionary editing.</li><br>
 	
 	<li><b>input.raw.libraw.rawdata</b>: Set this to crop, to open raw files without any processing except to 
-	crop the unexposed borders.</li>
+	crop the unexposed borders.</li><br>
 	
 	<li><b>output.jpeg.cms.profile</b>: If you've downloaded Elle Stone's profiles and put them in the 
 	cms.profilepath directory, set this to sRGB-elle-V2-g22.icc. If you don't have those profiles, or a
