@@ -254,11 +254,11 @@ class TonePanel: public PicProcPanel
 
 		void OnCurveCopy(wxCommandEvent& event)
 		{
-			//parm tool.tone.curve.arraysize - number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256
+			//parm tool.tone.curve.arraysize: number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256
 			unsigned arraysize = atoi(myConfig::getConfig().getValueOrDefault("tool.tone.curve.arraysize","256").c_str());
 
 			wxString cdatstr;
-			//parm tool.tone.curve.type - horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.
+			//parm tool.tone.curve.type: horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.
 			std::string datatype = myConfig::getConfig().getValueOrDefault("tool.tone.curve.type","vertical");
 			if (datatype == "horizontal") {
 				std::vector<float> cdat =  makeXArray(arraysize);
