@@ -468,8 +468,8 @@ void rawprocFrm::SetBackground()
 	int pr, pg, pb;
 	int dr, dg, db;
 	wxString f;
-	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)
-	wxString bk = wxString(myConfig::getConfig().getValueOrDefault("app.backgroundcolor","119,119,119"));
+	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(0,0,0)
+	wxString bk = wxString(myConfig::getConfig().getValueOrDefault("app.backgroundcolor","0,0,0"));
 	if (bk == "") bk = "119,119,119";
 	wxArrayString bkgnd = split(bk,",");
 	pr = atoi(bkgnd[0].c_str());
