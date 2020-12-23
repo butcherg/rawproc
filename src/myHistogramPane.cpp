@@ -235,7 +235,7 @@ void myHistogramPane::render(wxDC&  dc)
 	bool bars = true;
 	//parm histogram.depiction: lines|bars. Default=bars
 	//template histogram.depiction=bars|lines
-	if (myConfig::getConfig().getValueOrDefault("histogram.depiction","bars") == "lines") bars = false;
+	if (myConfig::getConfig().getValueOrDefault("histogram.depiction","lines") == "lines") bars = false;
 	
 	unsigned order = ord;
 	for (unsigned i=0; i<3; i++) {
