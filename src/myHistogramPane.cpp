@@ -190,7 +190,7 @@ void myHistogramPane::render(wxDC&  dc)
 	if (blankpic) return;
 
 	//set up colors:
-	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","10").c_str());
+	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","9").c_str());
 	dc.SetTextForeground(wxString2wxColour(wxString(myConfig::getConfig().getValueOrDefault("app.parameters.fontcolor","0"))));
 	wxFont font(wxFontInfo(fontsize).Family(wxFONTFAMILY_SWISS));
 	dc.SetFont(font);

@@ -338,7 +338,7 @@ void rawprocFrm::CreateGUIControls()
 	////GUI Items Creation End
 
 	int fr=0, fg=0, fb=0;
-	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","10").c_str());
+	int fontsize = atoi(myConfig::getConfig().getValueOrDefault("app.parameters.fontsize","9").c_str());
 	wxString fc = wxString(myConfig::getConfig().getValueOrDefault("app.parameters.fontcolor","0"));
 	if (fc == "") fc = "0";
 	wxArrayString fntc = split(fc,",");
