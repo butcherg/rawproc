@@ -31,6 +31,9 @@ foreach $name (sort keys %properties) {
 	print "$name=$properties{$name}\n";
 }
 
+#12-22-2020: crop is the new default per the delivered rawproc.conf, new for rawproc 1.0:
+print "input.raw.libraw.rawdata=crop\n";
+
 print "\n\n[Templates]\n";
 
 foreach $file (@files) {

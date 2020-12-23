@@ -229,9 +229,9 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			wxFileName profilepath;
 			profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 		
-			//parm display.cms.displayprofile: Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.
+			//parm display.cms.displayprofile: Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: srgb-output, for the event there is no calibrated display profile.
 			//template display.cms.displayprofile=iccfile
-			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""));
+			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","srgb-output"));
 			profilepath.SetFullName(iccfile); 
 			wxString displaystr = "-";
 			
@@ -468,7 +468,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 		
 			//parm display.cms.displayprofile: Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.
 			//template display.cms.displayprofile=iccfile
-			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile",""));
+			wxString iccfile = wxString(myConfig::getConfig().getValueOrDefault("display.cms.displayprofile","srgb-output"));
 			profilepath.SetFullName(iccfile); 
 
 			//parm display.cms.displaygamma: Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2
