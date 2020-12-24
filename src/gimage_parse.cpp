@@ -88,7 +88,20 @@ std::map<std::string,std::string> parse_add(std::string paramstring)
 		else if (p[0] == "file") {
 			pmap["mode"] = "file";
 			pmap["cmdlabel"] = "add:file";
-			pmap["filename"] = p[1];
+			if (psize >= 2) {
+				pmap["filename"] = p[1];
+			}
+			else {
+					pmap["error"] = string_format("add:ParseError - no file name."); 
+					return pmap;
+			}
+			if (psize >= 3) {
+				pmap["position"] = p[2];
+			}
+			else {
+					pmap["error"] = string_format("add:ParseError - no position."); 
+					return pmap;
+			}
 		}
 		else { //filename?
 			pmap["mode"] = "file";

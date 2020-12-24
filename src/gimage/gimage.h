@@ -62,6 +62,13 @@ enum GIMAGE_CHANNEL {
 	CHANNEL_TONE
 };
 
+enum GIMAGE_PLACE {
+	TOP_LEFT,
+	TOP_RIGHT,
+	BOTTOM_LEFT,
+	BOTTOM_RIGHT
+};
+
 enum GIMAGE_FILETYPE {
 	FILETYPE_RAW,
 	FILETYPE_JPEG,
@@ -229,11 +236,11 @@ class gImage
 		void ApplySubtract(double subtractr, double subtractg1, double subtractg2, double subtractb, bool clampblack=false, int threadcount=0);
 		void ApplyCFASubtract(float blackarray[6][6], bool clampblack, int threadcount);
 		void ApplySubtract(double subtract, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampblack=false, int threadcount=0);
-		bool ApplySubtract(std::string filename, bool clampblack=false, int threadcount=0);
+		bool ApplySubtract(std::string filename, bool clampblack=false, GIMAGE_PLACE place=TOP_LEFT, int threadcount=0);
 		bool ApplySubtract(gImage& subtractimage, bool clampblack=false, int threadcount=0);
-		void ApplyAdd(double add, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampblack=true, int threadcount=0);
-		bool ApplyAdd(std::string filename, bool clampblack=true, int threadcount=0);
-		bool ApplyAdd(gImage& addimage, bool clampblack=true, int threadcount=0);
+		void ApplyAdd(double add, GIMAGE_CHANNEL channel=CHANNEL_RGB, bool clampwhite=false, int threadcount=0);
+		bool ApplyAdd(std::string filename, bool clampwhite=false, GIMAGE_PLACE place=TOP_LEFT, int threadcount=0);
+		bool ApplyAdd(gImage& addimage, bool clampwhite=false, int threadcount=0);
 
 
 		//basic color/tone operations:

@@ -738,7 +738,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
-	else if (name == "add")		p = new PicProcessorSubtract("add", command, commandtree, pic);
+	else if (name == "add")				p = new PicProcessorAdd("add", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN

@@ -57,8 +57,13 @@ std::map<std::string,std::string> process_add(gImage &dib, std::map<std::string,
 			if (!file_exists(params["filename"])) {
 				result["error"] = string_format("add:ProcessError - file %s doesn't exist.",params["filename"].c_str());
 			}
+			GIMAGE_PLACE place;
+			if (params["position"] == "topleft") place = TOP_LEFT;
+			else if (params["position"] == "topright") place = TOP_RIGHT;
+			else if (params["position"] == "bottomleft") place = BOTTOM_LEFT;
+			else if (params["position"] == "bottomright") place = BOTTOM_RIGHT;
 			_mark();
-			dib.ApplyAdd(params["filename"], threadcount);  
+			dib.ApplyAdd(params["filename"], false, place, threadcount);  
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "add:file";
 			result["imgmsg"] = string_format("file,%s (%d threads, %ssec)",params["filename"].c_str(), threadcount, result["duration"].c_str());

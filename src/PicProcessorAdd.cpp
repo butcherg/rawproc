@@ -12,7 +12,6 @@
 #define ADDENABLE 8500
 #define ADDVAL 8501
 #define ADDFILE 8502
-//#define ADDCAMERA 8503
 
 class AddPanel: public PicProcPanel
 {
@@ -37,12 +36,18 @@ class AddPanel: public PicProcPanel
 
 			addb = new wxRadioButton(this, ADDVAL, _("value:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP); 
 			fileb = new wxRadioButton(this, ADDFILE, _("file:"));
-			//camb = new wxRadioButton(this, SUBTRACTCAMERA, _("camera:"));
 			addb->SetValue(true);
 
 			add = new myFloatCtrl(this, wxID_ANY, 0.0, 2);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
-			//cam = new wxStaticText(this, wxID_ANY, "--");
+			
+			wxArrayString positions;
+			positions.Add(_("topleft"));
+			positions.Add(_("topright"));
+			positions.Add(_("bottomleft"));
+			positions.Add(_("bottomright"));
+			
+			pos = new wxRadioBox(this, wxID_ANY, _("Position"), wxDefaultPosition, wxDefaultSize,  positions, 1, wxRA_SPECIFY_COLS);
 
 			std::vector<std::string> p = split(params.ToStdString(),",");
 			std::string param = p[0];
@@ -58,17 +63,20 @@ class AddPanel: public PicProcPanel
 				if (p.size() >= 2) 
 					if (isFloat(p[1])) add->SetFloatValue(atof(p[1].c_str()));
 			}
-			//else if (param == "camera") {
-			//	addmode = SUBTRACTCAMERA;
-			//	camb->SetValue(true);
-			//	chan->Enable(false);
-			//}
-			else {
+			else if (param == "file") {
 				addmode = ADDFILE;
 				fileb->SetValue(true);
-				darkfile->SetValue(wxString(param));
+				darkfile->SetValue(p[1]);
 				chan->Enable(false);
+				if (p.size() >= 3) {
+					pos->SetSelection(pos->FindString(wxString(p[2])));
+				}
 			}
+			
+
+			
+			
+	
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
@@ -92,7 +100,10 @@ class AddPanel: public PicProcPanel
 			m->AddRowItem(new wxButton(this, wxID_ANY, _("Select")), flags);
 
 			m->NextRow(wxSizerFlags().Expand());
+			m->NextRow();
+			m->AddRowItem(pos, flags);
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
 
 			//m->NextRow();
 			//m->AddRowItem(camb, flags.CenterVertical());
@@ -113,6 +124,7 @@ class AddPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &AddPanel::selectDarkFile, this);
 			Bind(wxEVT_CHAR_HOOK, &AddPanel::OnKey,  this);
 			Bind(wxEVT_CHOICE, &AddPanel::onChoice,  this);
+			Bind(wxEVT_RADIOBOX,&AddPanel::paramUpdated, this);	
 			Thaw();
 		}
 
@@ -133,21 +145,6 @@ class AddPanel: public PicProcPanel
 			processSUB();
 		}
 
-/*
-		void setCameraVal(float val)
-		{
-			camval = val;
-			cam->SetLabel(wxString::Format("%f",val));
-			Refresh();
-		}
-
-		void setCameraVal(wxString str)
-		{
-			cam->SetLabel(str);
-			Refresh();
-		}
-*/
-
 		void selectDarkFile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
@@ -165,7 +162,7 @@ class AddPanel: public PicProcPanel
 					q->processPic();
 					break;
 				case ADDFILE:
-					q->setParams(wxString::Format("file,%s",darkfile->GetValue()));
+					q->setParams(wxString::Format("file,%s,%s",darkfile->GetValue(),pos->GetString(pos->GetSelection())));
 					q->processPic();
 					break;
 			}
@@ -197,7 +194,7 @@ class AddPanel: public PicProcPanel
 
 		void paramUpdated(wxCommandEvent& event)
 		{
-			if (addmode == ADDVAL) processSUB();
+			processSUB();
 		}
 		
 		void OnTimer(wxTimerEvent& event)
@@ -209,6 +206,8 @@ class AddPanel: public PicProcPanel
 		wxChoice *chan;
 		wxCheckBox *enablebox;
 		wxRadioButton *addb, *fileb; //, *camb;
+		//wxRadioButton *tl, *tr, *bl, *br;
+		wxRadioBox *pos;
 		wxTextCtrl *darkfile;
 		myFloatCtrl *add;
 		//wxStaticText *cam;

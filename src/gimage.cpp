@@ -2374,7 +2374,7 @@ void gImage::ApplySubtract(double subtract, GIMAGE_CHANNEL channel, bool clampbl
 }
 
 //this version subtracts a RGB dark frame image, loaded from a rawproc/valid file, from the RGB array of the gImage instance:
-bool gImage::ApplySubtract(std::string filename, bool clampblack, int threadcount)
+bool gImage::ApplySubtract(std::string filename, bool clampblack, GIMAGE_PLACE place, int threadcount)
 {
 	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
 	if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
@@ -2418,7 +2418,7 @@ bool gImage::ApplySubtract(gImage& subtractimage, bool clampblack, int threadcou
 
 //equivalents of ApplySubtract, for addition...
 
-void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int threadcount)
+void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampwhite, int threadcount)
 {
 	//if (add == 0.0) return;  //why bother... 12/2019: bother if clampblack...
 	if (channel == CHANNEL_RGB) {
@@ -2426,9 +2426,9 @@ void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int t
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
-				image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
-				image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+				image[pos].r += add; if (clampwhite & image[pos].r > 1.0) image[pos].r = 1.0;
+				image[pos].g += add; if (clampwhite & image[pos].g > 1.0) image[pos].g = 1.0;
+				image[pos].b += add; if (clampwhite & image[pos].b > 1.0) image[pos].b = 1.0;
 			}
 		}
 	}
@@ -2437,7 +2437,7 @@ void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int t
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r += add; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
+				image[pos].r += add; if (clampwhite & image[pos].r > 1.0) image[pos].r = 1.0;
 			}
 		}
 	}
@@ -2446,7 +2446,7 @@ void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int t
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].g += add; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
+				image[pos].g += add; if (clampwhite & image[pos].g > 0.0) image[pos].g = 1.0;
 			}
 		}
 	}
@@ -2455,27 +2455,40 @@ void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int t
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].b += add; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+				image[pos].b += add; if (clampwhite & image[pos].b > 1.0) image[pos].b = 1.0;
 			}
 		}
 	}
 }
 
 //will add a smaller image file, but no larger than equal in both width and height:
-bool gImage::ApplyAdd(std::string filename, bool clampblack, int threadcount)
+bool gImage::ApplyAdd(std::string filename, bool clampwhite, GIMAGE_PLACE place, int threadcount)
 {
 	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
 	unsigned dw = darkfile.getWidth(); unsigned dh = darkfile.getHeight();
 	if (dw == 0 & dh == 0) return false; //file not found
+	
 	if (dw <= w & dh <= h) { 
+		unsigned ow=0, oh=0;
+		if (place == BOTTOM_LEFT) {
+			oh = h - dh;
+		}
+		else if (place == TOP_RIGHT) {
+			ow = w - dw;
+		}
+		else if (place == BOTTOM_RIGHT) {
+			ow = w - dw;
+			oh = h - dh;
+		}
 		std::vector<pix> &dark = darkfile.getImageData();
 		#pragma omp parallel for num_threads(threadcount)
 		for (unsigned x=0; x<dw; x++) {
 			for (unsigned y=0; y<dh; y++) {
-				unsigned pos = x + y*dw;
-				image[pos].r += dark[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
-				image[pos].g += dark[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
-				image[pos].b += dark[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+				unsigned pos = (ow+x) + (oh+y)*w;
+				unsigned dpos = x + y*dw;
+				image[pos].r += dark[dpos].r; if (clampwhite & image[pos].r > 1.0) image[pos].r = 1.0;
+				image[pos].g += dark[dpos].g; if (clampwhite & image[pos].g > 1.0) image[pos].g = 1.0;
+				image[pos].b += dark[dpos].b; if (clampwhite & image[pos].b > 1.0) image[pos].b = 1.0;
 			}
 		}
 		return true;
@@ -2485,7 +2498,7 @@ bool gImage::ApplyAdd(std::string filename, bool clampblack, int threadcount)
 	}
 }
 
-bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
+bool gImage::ApplyAdd(gImage& addimage, bool clampwhite, int threadcount)
 {
 	if (addimage.getWidth() == w & addimage.getHeight() == h) { 
 		std::vector<pix> &add = addimage.getImageData();
@@ -2493,9 +2506,9 @@ bool gImage::ApplyAdd(gImage& addimage, bool clampblack, int threadcount)
 		for (unsigned x=0; x<w; x++) {
 			for (unsigned y=0; y<h; y++) {
 				unsigned pos = x + y*w;
-				image[pos].r += add[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
-				image[pos].g += add[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
-				image[pos].b += add[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;
+				image[pos].r += add[pos].r; if (clampwhite & image[pos].r > 1.0) image[pos].r = 1.0;
+				image[pos].g += add[pos].g; if (clampwhite & image[pos].g > 1.0) image[pos].g = 1.0;
+				image[pos].b += add[pos].b; if (clampwhite & image[pos].b > 1.0) image[pos].b = 1.0;
 			}
 		}
 		return true;
