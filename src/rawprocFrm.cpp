@@ -39,6 +39,7 @@
 #include "PicProcessorGroup.h"
 #include "PicProcessorCACorrect.h"
 #include "PicProcessorHLRecover.h"
+#include "PicProcessorAdd.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -118,6 +119,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_GROUP, rawprocFrm::MnuGroup)
 	EVT_MENU(ID_MNU_CACORRECT, rawprocFrm::MnuCACorrect)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
+	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #ifdef USE_LENSFUNUPDATE
@@ -283,6 +285,7 @@ void rawprocFrm::CreateGUIControls()
 	
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ADDITION,	_("Add"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
 #ifdef USE_LIBRTPROCESS
 	//disable - figure out cacorrect
@@ -735,6 +738,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
 	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "add")		p = new PicProcessorSubtract("add", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN
@@ -2155,6 +2159,21 @@ void rawprocFrm::MnuWhiteBalance(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding white balance tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuAdd(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorAdd *p = new PicProcessorAdd("add", "rgb,0.0", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding add tool failed: %s"),e.what()));
 	}
 }
 

@@ -19,6 +19,56 @@ int getThreadCount(int threadcount) {
 	return threadcount;
 }
 
+std::map<std::string,std::string> process_add(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "add:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.add.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "value") {
+			float add = atof(params["value"].c_str());
+			_mark();
+			if (params["channel"] == "rgb") {
+				dib.ApplyAdd(add, CHANNEL_RGB, true, threadcount);
+			}
+			else if (params["channel"] == "red") {
+				dib.ApplyAdd(add, CHANNEL_RED, true, threadcount);
+			}
+			else if (params["channel"] == "green") {
+				dib.ApplyAdd(add, CHANNEL_GREEN, true, threadcount);
+			}
+			else if (params["channel"] == "blue") {
+				dib.ApplyAdd(add, CHANNEL_BLUE, true, threadcount);
+			}
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = string_format("add:%s,value",params["channel"].c_str());
+			result["imgmsg"] = string_format("%s:%f (%d threads, %ssec)",params["channel"], add, threadcount, result["duration"].c_str());
+
+		}
+		else if (params["mode"] == "file") {
+			if (!file_exists(params["filename"])) {
+				result["error"] = string_format("add:ProcessError - file %s doesn't exist.",params["filename"].c_str());
+			}
+			_mark();
+			dib.ApplyAdd(params["filename"], threadcount);  
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "add:file";
+			result["imgmsg"] = string_format("file,%s (%d threads, %ssec)",params["filename"].c_str(), threadcount, result["duration"].c_str());
+		}
+
+	}
+	return result;
+}
+
+
 std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;

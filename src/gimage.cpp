@@ -2461,15 +2461,18 @@ void gImage::ApplyAdd(double add, GIMAGE_CHANNEL channel, bool clampblack, int t
 	}
 }
 
+//will add a smaller image file, but no larger than equal in both width and height:
 bool gImage::ApplyAdd(std::string filename, bool clampblack, int threadcount)
 {
 	gImage darkfile = gImage::loadImageFile(filename.c_str(), "");
-	if (darkfile.getWidth() == w & darkfile.getHeight() == h) { 
+	unsigned dw = darkfile.getWidth(); unsigned dh = darkfile.getHeight();
+	if (dw == 0 & dh == 0) return false; //file not found
+	if (dw <= w & dh <= h) { 
 		std::vector<pix> &dark = darkfile.getImageData();
 		#pragma omp parallel for num_threads(threadcount)
-		for (unsigned x=0; x<w; x++) {
-			for (unsigned y=0; y<h; y++) {
-				unsigned pos = x + y*w;
+		for (unsigned x=0; x<dw; x++) {
+			for (unsigned y=0; y<dh; y++) {
+				unsigned pos = x + y*dw;
 				image[pos].r += dark[pos].r; if (clampblack & image[pos].r < 0.0) image[pos].r = 0.0;
 				image[pos].g += dark[pos].g; if (clampblack & image[pos].g < 0.0) image[pos].g = 0.0;
 				image[pos].b += dark[pos].b; if (clampblack & image[pos].b < 0.0) image[pos].b = 0.0;

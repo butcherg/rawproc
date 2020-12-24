@@ -35,6 +35,71 @@ void paramprint(std::map<std::string,std::string> params)
 }
 
 
+//add
+//:file,<filename> - adds the specified image file to the image, pixel-for-pixel
+//:<sfloat> - add the specified value to the image
+std::map<std::string,std::string> parse_add(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+
+		if (psize < 1) {
+			pmap["error"] = "add:ParseError - Need some parameters"; 
+			return pmap;
+		}
+
+		if (p[0] == "rgb" | p[0] == "red" | p[0] == "green" | p[0] == "blue") {
+			pmap["mode"] = "value";
+			pmap["cmdlabel"] = string_format("add:%s,value",p[0].c_str());
+			pmap["channel"] = p[0];
+			if (psize >= 2) {
+				if (isFloat(p[1])) {
+					pmap["value"] = p[1];
+				}
+				else {
+					pmap["error"] = string_format("add:ParseError - Not a float: %s", p[1].c_str()); 
+					return pmap;
+				}
+			}
+			else {
+				pmap["error"] = "add:ParseError - Needs a float value"; 
+				return pmap;
+			}
+		}
+		else if (isFloat(p[0])) {
+			pmap["mode"] = "value";
+			pmap["cmdlabel"] = "add:rgb,value";
+			pmap["value"] = p[0];
+			pmap["channel"] = "rgb";
+		}
+		else if (p[0] == "file") {
+			pmap["mode"] = "file";
+			pmap["cmdlabel"] = "add:file";
+			pmap["filename"] = p[1];
+		}
+		else { //filename?
+			pmap["mode"] = "file";
+			pmap["cmdlabel"] = "add:file";
+			pmap["filename"] = p[0];
+		}
+
+	}
+	return pmap;
+}
+
 //blackwhitepoint
 //auto:		rgb|red|green|blue - do auto on channel
 //values:	rgb|red|green|blue,<nbr>[,<nbr>] - specific b/w on channel, if only one number, b=<nbr>, w=255
@@ -1129,6 +1194,11 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 		else if (p[0] == "camera") {
 			pmap["mode"] = "camera";
 			pmap["cmdlabel"] = "subtract:camera";
+		}
+		else if (p[0] == "file") {
+			pmap["mode"] = "file";
+			pmap["cmdlabel"] = "subtract:file";
+			pmap["filename"] = p[1];
 		}
 		else { //filename?
 			pmap["mode"] = "file";

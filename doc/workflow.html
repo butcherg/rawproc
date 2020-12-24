@@ -34,6 +34,12 @@
 	<li><b>input.raw.libraw.rawdata</b>: Set this to crop, to open raw files without any processing except to 
 	crop the unexposed borders.</li><br>
 	
+	<li><b>tool.lenscorrection.databasepath</b>: Set this to the directory in which you want the lensfun database
+	to reside.  lensfun will by default try to find the standard data directory for the host operating system,
+	but that location is not discoverable by rawproc.  Setting this property will let you tell rawproc where 
+	you want it, and let rawproc then be able to update it with the menu selection Edit -> Data update...
+	A good directory to use is where rawproc.conf resides.</li><br>
+	
 	<li><b>output.jpeg.cms.profile</b>: If you've downloaded Elle Stone's profiles and put them in the 
 	cms.profilepath directory, set this to sRGB-elle-V2-g22.icc. If you don't have those profiles, or a
 	directory in cms.profilepath, set it to srgb-output.</li>
