@@ -102,7 +102,7 @@ filename, or overwrite the original img-produced JPEG</li>
 </li><br>
 <li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.</li>
 </li><br>
-<li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.
+<li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.  Used to extract data from images of spectra.
 </li><br>
 <li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lty1&gt;,...,&lt;xn&gt;,&ly;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
 </li><br>
@@ -119,26 +119,68 @@ filename, or overwrite the original img-produced JPEG</li>
 </li><br>
 <li><b>denoise</b>
 <ul>
-<li><b>:nlmeans[,<sigma>][,<local>][,<patch>][,<threshold>]</b> - apply nlmeans denoise.</li>
-<li><b>:wavelet[,<threshold>]</b> - apply wavelet denoise.</li>
+<li><b>:nlmeans[,&lt;sigma&gt;][,&lt;local&gt;][,&ltpatch&gt;][,&lt;threshold&gt;]</b> - apply nlmeans denoise.</li>
+<li><b>:wavelet[,&lt;threshold&gt;]</b> - apply wavelet denoise.</li>
 </ul>
 </li><br>
 <li><b>exposure</b>
 <ul>
-<li><b>:<ev></b> - apply the ev to the image.</li>
+<li><b>:&lt;ev&gt;</b> - apply the ev to the image.</li>
 <li><b>:patch,x,y,r,ev0</b> - Compute what it would take to make the value at the patch coorinates the value of ev0, then apply that EV to the entire image.</li>
-</ul>
-</li><br>
-<li><b>add</b>
-<ul>
-<li><b>:&lt;float&gt;</b> - Adds a float value to each image channel value.</li>
-<li><b>:&lt;filename&gt;</b> - Adds a file containing a RGB image of the same dimensions.</li>
 </ul>
 </li><br>
 <li><b>gray</b>
 <ul>
-<li><b>:<float>,<float>,<float></b> - grayscale the image using the specified RGB multipliers.</li>
+<li><b>:&lt;redfloat&gt;,&lt;greenfloat&gt;,&lt;bluefloat&gt;</b> - grayscale the image using the specified RGB multipliers.</li>
 <li><b>:NULL</b> - grayscale the image using the default multipliers.</li>
+</ul>
+</li><br>
+<li><b>lenscorrection</b> Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
+<ul>
+<li><b>:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby) </b> - positional format.</li>
+<li><b>:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby </b> - param=value format.</li>
+</ul>
+</li><br>
+<li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
+</li><br>
+<li><b>resize</b>:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
+resize the image to the specified width and height, using the specified interpolation algorithm.  
+If only one number is provided, use it for the largest dimension and compute the other to preserve 
+the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
+</li><br>
+<li><b>rotate:&lt;rfloat&gt; |hmirror|vmirror</b> - rotate the image.  rrotate can be -45.0-+45.0, 90, 180, or 270.
+</li><br>
+<li><b>saturation:[rgb|red|green|blue],&lt;saturationfloat&gt;[,&lt;thresholdfloat&gt; ]</b> - apply HSL saturation to the image in the amount specified. If channel is specified, restrict application to it; if threshold is specified (not used for rgb), restrict application to only values above it. 
+</li><br>
+<li><b>sharpen</b>
+<ul>
+<li><b>:usm[,&lt;sfloat&gt;][,&lt;rfloat&gt;]</b> - apply usm sharpen with the specified sigma and radius.</li>
+<li><b>:convolution[,&lt;afloat&gt;]</b> - apply convolution sharpen with the specified amount.</li>
+<li><b>:&lt;afloat&gt;</b> - apply convolution sharpening with the specified amount.</li>
+</ul>
+</li><br>
+<li><b>subtract</b>
+<ul>
+<li><b>:&lt;float&gt;</b> - Subtracts a float value to each image channel value.</li>
+<li><b>:&lt;filename&gt;</b> - Subtracts a file containing a RGB image of the same dimensions.</li>
+<li><b>:camera</b> - subtract the metadata-extracted black value, global (img and rawproc), perchannel (rawproc), or cfa (rawproc).</li>
+</ul>
+</li><br>
+<li><b>tone</b> - applies a non-linear tone curve to the image.  One of:
+<ul>
+<li><b>:gamma[,&lt;gfloat&gt;]</b></li>
+<li><b>:reinhard,channel|luminance[,norm]</b></li>
+<li><b>:log2</b></li>
+<li><b>:loggamma</b></li>
+<li><b>:filmic[,&lt;Afloat&gt;,&lt;Bfloat&gt;,&lt;Cfloat&gt;,&lt;Dfloat&gt;][,&lt;pfloat&gt;][,norm]</b></li>
+</ul>
+</li><br>
+<li><b>whitebalance</b>
+<ul>
+<li><b>:camera</b> - apply white balance from the camera metadata multipliers, "as-shot."
+<li><b>:auto</b> - apply auto (gray world) white balance.
+<li><b>:patch,&lt;xint&gt;,&lt;yint&gt;,&lt;rfloat&gt;</b> - apply white balance calculated from the patch at x,y of radius r.
+<li><b>:&lt;rfloat&gt;,&lt;gfloat&gt;,&lt;bfloat&gt;</b> - apply white balance with the specified RGB multipliers.
 </ul>
 </li><br>
 </ul></body></html>

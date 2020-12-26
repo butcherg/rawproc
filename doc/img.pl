@@ -84,12 +84,8 @@ my @conflines;
 my $file = $ARGV[0];
 my @lines = `grep \"//img\" $file`;
 foreach $line (@lines) {
-	#chomp $line;
 	$line =~ s/\r//;
-#	$line =~ s/</&lt;/g;
-#	$line =~ s/>/&gt;/g;
 	$line =~ s/^\/\/img //;
-#	push @conflines, $line;
 	print $line;
 }
 

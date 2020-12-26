@@ -358,7 +358,7 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 	return pmap;
 }
 
-//img <li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.
+//img <li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.  Used to extract data from images of spectra.
 //img </li><br>
 std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 {
@@ -550,8 +550,8 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 
 //img <li><b>denoise</b>
 //img <ul>
-//img <li><b>:nlmeans[,<sigma>][,<local>][,<patch>][,<threshold>]</b> - apply nlmeans denoise.</li>
-//img <li><b>:wavelet[,<threshold>]</b> - apply wavelet denoise.</li>
+//img <li><b>:nlmeans[,&lt;sigma&gt;][,&lt;local&gt;][,&ltpatch&gt;][,&lt;threshold&gt;]</b> - apply nlmeans denoise.</li>
+//img <li><b>:wavelet[,&lt;threshold&gt;]</b> - apply wavelet denoise.</li>
 //img </ul>
 //img </li><br>
 
@@ -608,7 +608,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 
 //img <li><b>exposure</b>
 //img <ul>
-//img <li><b>:<ev></b> - apply the ev to the image.</li>
+//img <li><b>:&lt;ev&gt;</b> - apply the ev to the image.</li>
 //img <li><b>:patch,x,y,r,ev0</b> - Compute what it would take to make the value at the patch coorinates the value of ev0, then apply that EV to the entire image.</li>
 //img </ul>
 //img </li><br>
@@ -658,28 +658,12 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 	return pmap;
 }
 
-
-//img <li><b>add</b>
-//img <ul>
-//img <li><b>:&lt;float&gt;</b> - Adds a float value to each image channel value.</li>
-//img <li><b>:&lt;filename&gt;</b> - Adds a file containing a RGB image of the same dimensions.</li>
-//img </ul>
-//img </li><br>
-
-
 //img <li><b>gray</b>
 //img <ul>
-//img <li><b>:<float>,<float>,<float></b> - grayscale the image using the specified RGB multipliers.</li>
+//img <li><b>:&lt;redfloat&gt;,&lt;greenfloat&gt;,&lt;bluefloat&gt;</b> - grayscale the image using the specified RGB multipliers.</li>
 //img <li><b>:NULL</b> - grayscale the image using the default multipliers.</li>
 //img </ul>
 //img </li><br>
-
-
-
-
-//gray
-//:<float>,<float>,<float> - grayscale the image using the specified RGB multipliers
-//:NULL - grayscale the image using the default multipliers
 std::map<std::string,std::string> parse_gray(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -743,9 +727,15 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+//img <li><b>lenscorrection</b> Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
+//img <ul>
+//img <li><b>:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby) </b> - positional format.</li>
+//img <li><b>:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby </b> - param=value format.</li>
+//img </ul>
+//img </li><br>
 #ifdef USE_LENSFUN
 //laundrylist - lenscorrection:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby)
-//nameval - lenscorrection:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
+//nameval - lenscorrection:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - 
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -799,11 +789,8 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 }
 #endif
 
-//redeye
-//:<xint1>,<yint1>[,<xint2>,<yint2>...],<tint>,<lint> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y)
-//also, coord pairs can be ";" separated...
-//src/img -f /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg "redeye:1.50,30,0,1.00;3014,1076;3349,1048;" foo.jpg
-//src/img -f /home/glenn/SDCard/Pictures/DSG_6304-redeyetest.jpg redeye:1.50,30,0,1.00,3014,1076,3349,1048 foo.jpg
+//img <li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
+//img </li><br>
 std::map<std::string,std::string> parse_redeye(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -947,11 +934,11 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 	return pmap;
 }
 
-//resize
-//:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3] 
-//	- resize the image to the specified width and height, using the specified interpolation algorithm.  
-//	If only one number is provided, use it for the largest dimension and compute the other to preserve 
-//	the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
+//img <li><b>resize</b>:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
+//img resize the image to the specified width and height, using the specified interpolation algorithm.  
+//img If only one number is provided, use it for the largest dimension and compute the other to preserve 
+//img the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
+//img </li><br>
 std::map<std::string,std::string> parse_resize(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1008,6 +995,8 @@ std::map<std::string,std::string> parse_resize(std::string paramstring)
 	return pmap;
 }
 
+//img <li><b>rotate:&lt;rfloat&gt; |hmirror|vmirror</b> - rotate the image.  rrotate can be -45.0-+45.0, 90, 180, or 270.
+//img </li><br>
 std::map<std::string,std::string> parse_rotate(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1051,8 +1040,8 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 	return pmap;
 }
 
-//saturation
-//:[rgb|red|green|blue],<sfloat>[,<tfloat>] - apply HSL saturation to the image in the amount specified. If channel is specified, restrict application to it; if threshold is specified (not used for rgb), restrict application to only values above it. 
+//img <li><b>saturation:[rgb|red|green|blue],&lt;saturationfloat&gt;[,&lt;thresholdfloat&gt; ]</b> - apply HSL saturation to the image in the amount specified. If channel is specified, restrict application to it; if threshold is specified (not used for rgb), restrict application to only values above it. 
+//img </li><br>
 std::map<std::string,std::string> parse_saturation(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1112,10 +1101,13 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 	return pmap;
 }
 
-//sharpen
-//:usm[,<sfloat>][,<rfloat>] - apply usm sharpen with the specified sigma and radius
-//:convolution[,<afloat>] - apply convolution sharpen with the specified amount
-//:<afloat> - apply convolution sharpening with the specified amount
+//img <li><b>sharpen</b>
+//img <ul>
+//img <li><b>:usm[,&lt;sfloat&gt;][,&lt;rfloat&gt;]</b> - apply usm sharpen with the specified sigma and radius.</li>
+//img <li><b>:convolution[,&lt;afloat&gt;]</b> - apply convolution sharpen with the specified amount.</li>
+//img <li><b>:&lt;afloat&gt;</b> - apply convolution sharpening with the specified amount.</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1199,10 +1191,13 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 	return pmap;
 }
 
-//subtract
-//:camera - subtract the metadata-extracted black value, global (img and rawproc), perchannel (rawproc), or cfa (rawproc)
-//:file,<filename> - subtracts the specified image file from the image, pixel-for-pixel
-//:<sfloat> - subtract the specified value from the image
+//img <li><b>subtract</b>
+//img <ul>
+//img <li><b>:&lt;float&gt;</b> - Subtracts a float value to each image channel value.</li>
+//img <li><b>:&lt;filename&gt;</b> - Subtracts a file containing a RGB image of the same dimensions.</li>
+//img <li><b>:camera</b> - subtract the metadata-extracted black value, global (img and rawproc), perchannel (rawproc), or cfa (rawproc).</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_subtract(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1269,13 +1264,15 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 	return pmap;
 }
 
-
-//tone
-//:gamma[,<gfloat>]
-//:reinhard,channel|luminance[,norm]
-//:log2
-//:loggamma
-//:filmic[,<Afloat>,<Bfloat>,<Cfloat>,<Dfloat>][,<pfloat>][,norm]
+//img <li><b>tone</b> - applies a non-linear tone curve to the image.  One of:
+//img <ul>
+//img <li><b>:gamma[,&lt;gfloat&gt;]</b></li>
+//img <li><b>:reinhard,channel|luminance[,norm]</b></li>
+//img <li><b>:log2</b></li>
+//img <li><b>:loggamma</b></li>
+//img <li><b>:filmic[,&lt;Afloat&gt;,&lt;Bfloat&gt;,&lt;Cfloat&gt;,&lt;Dfloat&gt;][,&lt;pfloat&gt;][,norm]</b></li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_tone(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -1419,12 +1416,14 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 	return pmap;
 }
 
-
-//whitebalance
-//:camera - apply white balance from the camera metadata multipliers, "as-shot"
-//:auto - apply auto (gray world) white balance
-//:patch,<xint>,<yint>,<rfloat> - apply white balance calculated from the patch at x,y of radius r
-//:<rfloat>,<gfloat>,<bfloat> - apply white balance with the specified RGB multipliers
+//img <li><b>whitebalance</b>
+//img <ul>
+//img <li><b>:camera</b> - apply white balance from the camera metadata multipliers, "as-shot."
+//img <li><b>:auto</b> - apply auto (gray world) white balance.
+//img <li><b>:patch,&lt;xint&gt;,&lt;yint&gt;,&lt;rfloat&gt;</b> - apply white balance calculated from the patch at x,y of radius r.
+//img <li><b>:&lt;rfloat&gt;,&lt;gfloat&gt;,&lt;bfloat&gt;</b> - apply white balance with the specified RGB multipliers.
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
