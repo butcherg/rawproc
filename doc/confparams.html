@@ -1,6 +1,6 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.about.lensdatabasecheck</b>:  1|0, if set, the lensfun database version will be checked against the server. Default: 1</li>
-<li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(119,119,119)</li>
+<li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(0,0,0)</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
 <li><b>app.dock.width</b>:  Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300</li>
 <li><b>app.floatctrl.backgroundcolor</b>:  Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192</li>
@@ -11,7 +11,7 @@
 <li><b>app.parameters.fontsize</b>:  Integer font size for paramter pane dialogs.  Default=10</li>
 <li><b>app.parameters.linecolor</b>:  integer RGB triplet or single of 0-255 (e.g., 128,128,128 or just 128 for gray) to specify default  color to be used to draw lines in the parameter pane. Some tools override this, look for "linecolor" in the Properties filter. Default=0</li>
 <li><b>app.parampane.height</b>:  Specifies height of parameter pane at startup. Change requires restarting rawproc. However, parameter pane will grow vertically if the rawproc application window is resized.  Default=350</li>
-<li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(119,119,119)</li>
+<li><b>app.picpanel.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(0,0,0)</li>
 <li><b>app.start.logmessage</b>:  Message to print in the log when rawproc starts. </li>
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toolchain.height</b>:  Specifies height of tool chain at startup. Change requires restarting rawproc.  Default=200</li>
@@ -29,7 +29,7 @@
 <li><b>display.cms.displaygamma</b>:  Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2</li>
 <li><b>display.cms.displayprofile.<number></b>:  Filename of the display profile for the enumerated display.</li>
 <li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.</li>
-<li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: none.</li>
+<li><b>display.cms.displayprofile</b>:  Filename of display profile. One of the srgb|wide|adobe|prophoto built-ins can be used in a pinch.   Default: srgb-output, for the event there is no calibrated display profile.</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.renderingintent</b>:  Specify the rendering intent for the display transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=perceptual</li>
 <li><b>display.cms.softproof.gamutcheck</b>:  Perform softproofing color transform with gamut check, marking out-of-gamut colors.  Default=0  </li>
@@ -148,8 +148,8 @@
 <li><a name="tool.rotate"><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
 <li><a name="tool.saturate"><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
-<li><a name="tool.tone"><b>tool.tone.curve.arraysize - number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default</b>:  256</li>
-<li><a name="tool.tone"><b>tool.tone.curve.type - horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default</b>:  vertical.</li>
+<li><a name="tool.tone"><b>tool.tone.curve.arraysize</b>:  number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256</li>
+<li><a name="tool.tone"><b>tool.tone.curve.type</b>:  horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.A</b>:  Default value for filmic tone operator A coefficient.  Default=6.2</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.B</b>:  Default value for filmic tone operator B coefficient.  Default=0.5</li>
 <li><a name="tool.tone"><b>tool.tone.filmic.C</b>:  Default value for filmic tone operator C coefficient.  Default=1.7</li>

@@ -1,0 +1,30 @@
+<html><title>Add</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css">
+<body>
+
+
+<h3 id="Add">Add</h3>
+<p>Purpose: Adds a value from each channel of each pixel of the image.  Two modes:
+
+<ul>
+
+<li><b>value:</b> Adds the value from every channel value of every pixel in the image.  
+Remember, the internal working image is floating point, 0.0 - 1.0, so meaningful subtractions
+are with numbers in that range.  But, you can do what you want...  :D Actually, I don't know 
+what practical use this mode might be...
+</li>
+
+<li><b>file:</b> Opens the selected image file, and adds every corresponding channel value of
+every pixel of it from the working image.  Unlike subtract, add will allow a smaller image, 
+oriented to one of the four corners: topleft, topright, bottomleft, bottomright.  This mode 
+is useful for adding watermarks to images, where the image to be added is a black-background, 
+white-text image formatted to display nicely in one of the corners.
+</li>
+
+</ul>
+
+<p align=center><img src=add.png></p>
+
+<p><b>Properties:</b> See tool.add.* in <a href=confparams.html#tool.add>Configuration Properties</a></p>
+
+
+</body></html>

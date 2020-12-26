@@ -43,6 +43,11 @@
 			<param name="Name" value="Image Tools">
 			<param name="Local" value="tools.html">
 			</OBJECT>
+			
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Add">
+			<param name="Local" value="add.html">
+			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Black/White Point">

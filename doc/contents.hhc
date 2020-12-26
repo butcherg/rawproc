@@ -58,11 +58,17 @@
 			</OBJECT>
 
 		<UL>
+		
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Add">
+				<param name="Local" value="add.html">
+				</OBJECT>
+
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Black/White Point">
 				<param name="Local" value="blackwhitepoint.html">
 				</OBJECT>
-				
+
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Colorspace">
 				<param name="Local" value="colorspace.html">
