@@ -39,7 +39,7 @@ class AddPanel: public PicProcPanel
 			addb->SetValue(true);
 
 			add = new myFloatCtrl(this, wxID_ANY, 0.0, 2);
-			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
+			addfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
 			
 			wxArrayString positions;
 			positions.Add(_("topleft"));
@@ -66,7 +66,7 @@ class AddPanel: public PicProcPanel
 			else if (param == "file") {
 				addmode = ADDFILE;
 				fileb->SetValue(true);
-				darkfile->SetValue(p[1]);
+				addfile->SetValue(p[1]);
 				chan->Enable(false);
 				if (p.size() >= 3) {
 					pos->SetSelection(pos->FindString(wxString(p[2])));
@@ -96,7 +96,7 @@ class AddPanel: public PicProcPanel
 			m->AddRowItem(fileb, flags);
 
 			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(darkfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
+			m->AddRowItem(addfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
 			m->AddRowItem(new wxButton(this, wxID_ANY, _("Select")), flags);
 
 			m->NextRow(wxSizerFlags().Expand());
@@ -121,7 +121,7 @@ class AddPanel: public PicProcPanel
 			Bind(myFLOATCTRL_UPDATE, &AddPanel::paramUpdated, this);
 			Bind(wxEVT_CHECKBOX, &AddPanel::onEnable, this, ADDENABLE);
 			Bind(wxEVT_RADIOBUTTON, &AddPanel::OnRadioButton, this);
-			Bind(wxEVT_BUTTON, &AddPanel::selectDarkFile, this);
+			Bind(wxEVT_BUTTON, &AddPanel::selectaddfile, this);
 			Bind(wxEVT_CHAR_HOOK, &AddPanel::OnKey,  this);
 			Bind(wxEVT_CHOICE, &AddPanel::onChoice,  this);
 			Bind(wxEVT_RADIOBOX,&AddPanel::paramUpdated, this);	
@@ -145,11 +145,11 @@ class AddPanel: public PicProcPanel
 			processSUB();
 		}
 
-		void selectDarkFile(wxCommandEvent& event)
+		void selectaddfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			fname.Assign(wxFileSelector(_("Select dark file")));
-			darkfile->SetValue(fname.GetFullName());
+			fname.Assign(wxFileSelector(_("Select add file")));
+			addfile->SetValue(fname.GetFullName());
 			if (addmode == ADDFILE) processSUB();
 		}
 
@@ -162,7 +162,7 @@ class AddPanel: public PicProcPanel
 					q->processPic();
 					break;
 				case ADDFILE:
-					q->setParams(wxString::Format("file,%s,%s",darkfile->GetValue(),pos->GetString(pos->GetSelection())));
+					q->setParams(wxString::Format("file,%s,%s",addfile->GetValue(),pos->GetString(pos->GetSelection())));
 					q->processPic();
 					break;
 			}
@@ -208,7 +208,7 @@ class AddPanel: public PicProcPanel
 		wxRadioButton *addb, *fileb; //, *camb;
 		//wxRadioButton *tl, *tr, *bl, *br;
 		wxRadioBox *pos;
-		wxTextCtrl *darkfile;
+		wxTextCtrl *addfile;
 		myFloatCtrl *add;
 		//wxStaticText *cam;
 		wxTimer t;
