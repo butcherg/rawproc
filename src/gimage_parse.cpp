@@ -34,10 +34,12 @@ void paramprint(std::map<std::string,std::string> params)
 	}
 }
 
-
-//add
-//:file,<filename> - adds the specified image file to the image, pixel-for-pixel
-//:<sfloat> - add the specified value to the image
+//img <li><b>add</b>
+//img <ul>
+//img <li><b>:&lt;float&gt;</b> - Adds a float value to each image channel value.</li>
+//img <li><b>:&lt;filename&gt;</b> - Adds a file containing a RGB image of the same dimensions.</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_add(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -113,15 +115,16 @@ std::map<std::string,std::string> parse_add(std::string paramstring)
 	return pmap;
 }
 
-//blackwhitepoint
-//auto:		rgb|red|green|blue - do auto on channel
-//values:	rgb|red|green|blue,<nbr>[,<nbr>] - specific b/w on channel, if only one number, b=<nbr>, w=255
-//data:		rgb|red|green|blue,data - b/w on data limits, b=smallest r|g|b, w=largest r|g|b
-//data:		rgb|red|green|blue,data,minwhite - b/w on data limits w=smallest r|g|b
-//camera:	camera - b/w on rgb using camera exif limits
-//values:	<nbr>,[<nbr>] - specific b/w on rgb, if only one number, b=<nbr>, w=255
-//auto:		NULL - do auto on rgb
-
+//img <li><b>blackwhitepoint</b>
+//img <ul>
+//img <li><b>NULL</b> - do auto on rgb.</li>
+//img <li><b>:rgb|red|green|blue</b> - do auto on channel.</li>
+//img <li><b>:&lt;nbr&gt;,[&lt;nbr&gt;]</b> - specific b/w on rgb, if only one number, b=<nbr>, w=255.</li>
+//img <li><b>:rgb|red|green|blue,&lt;nbr&gt;[,&lt;nbr&gt;]</b> - specific b/w on channel, if only one number, b=<nbr>, w=255.</li>
+//img <li><b>:rgb|red|green|blue,data[,minwhite]</b> - b/w on data limits, b=smallest r|g|b, w=largest r|g|b. If 'minwhite' is specified, use the smallest r|g|b for w.</li>
+//img <li><b>:camera</b> - b/w on rgb using camera exif limits.</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -227,12 +230,16 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 
 
 
-//colorspace
-//file		:<profile_filename>[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - open profile file and use to assign|convert
-//camera	:camera[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - find camera primaries in dcraw.c|camconst.json|libraw, make a d65 profile and use to assign|convert
-//primaries	:<int>,<int>,<int>,<int>,<int>,<int>,<int>,<int>,<int>[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc] - use 9 ints to make a d65 profile and use to assign|convert 
-//built-in	:srgb|wide|adobe|prophoto|identity[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]
+//img <li><b>colorspace</b>
+//img <ul>
+//img <li><b>:&lt;profile_filename&gt;[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]</b> - open profile file and use to assign|convert.</li>
+//img <li><b>:camera[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]</b> - find camera primaries in dcraw.c|camconst.json|libraw, make a d65 profile and use to assign|convert.</li>
+//img <li><b>:&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;,&lt;int&gt;[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]</b> - use 9 ints to make a d65 profile and use to assign|convert.</li>
+//img <li><b>:srgb|wide|adobe|prophoto|identity[,assign|convert][,absolute_colorimetric|relative_colorimetric|perceptual|saturation][,bpc]</b> - use one of the built-in primary sets to make a d65 profile and use to assign|convert.</li>
+//img <li><b>:aces2065-1-v4-g10|adobergb-v4-g10| bt709-v4-g10|prophoto-v4-g10|rec2020-v4-g10|srgb-v4-g10|srgb-v2-g22| srgb-output[,assign|convert]</b> - use one of the built-in ICC profiles to assign|convert.</li>
 
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -315,8 +322,9 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 	return pmap;
 }
 
-//crop
-//default	:<x1>,<y1>,<x2>,<y2> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h
+
+//img <li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.</li>
+//img </li><br>
 std::map<std::string,std::string> parse_crop(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -350,6 +358,8 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 	return pmap;
 }
 
+//img <li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.
+//img </li><br>
 std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -389,8 +399,9 @@ std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 	return pmap;
 }
 
-//curve
-//default	:rgb|red|green|blue,<x1>,<y1>,...,<xn>,<yn> - apply curve to the designated channel defined by the x,y coordinates, 0-255
+
+//img <li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lty1&gt;,...,&lt;xn&gt;,&ly;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
+//img </li><br>
 std::map<std::string,std::string> parse_curve(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -450,14 +461,17 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 }
 
 
-//demosaic (each algo is a mode...)
-//:color - color the unmosaiced image with the pattern colors
-//:half|half_resize|vng|rcd|igv|ahd|xtran_fast - demosaic the image
-//:dcb[,<iterations>][,dcb_enhance] - demosaic the image with the supplied parameters
-//:amaze[,<initgain>][,<border>] - demosaic the image with the supplied parameters
-//:lmmse[,<iterations] - demosaic the image with the supplied parameters
-//:xtran_markesteijn[,<passes>][,usecielab] - demosaic the image with the supplied parameters
-//:proof - xtran_fast or half, depending on image type (xtran|bayer)
+//img <li><b>demosaic</b>
+//img <ul>
+//img <li><b>:color</b> - color the unmosaiced Bayer image with the pattern colors.  A teaching tool; not for further processing.
+//img <li><b>:half|half_resize|vng|rcd|igv|ahd|xtran_fast</b> - demosaic the Bayer image.
+//img <li><b>:dcb[,&lt;iterations&gt;][,dcb_enhance]</b> - demosaic the Bayer image with the supplied parameters.
+//img <li><b>:amaze[,&lt;initgain&gt;][,&lt;border&gt;]</b> - demosaic the Bayer image with the supplied parameters.
+//img <li><b>:lmmse[,&lt;iterations]</b> - demosaic the Bayer image with the supplied parameters.
+//img <li><b>:xtran_markesteijn[,&lt;passes&gt;][,usecielab]</b> - demosaic the XTrans image with the supplied parameters.
+//img <li><b>:proof</b> - xtran_fast or half, depending on image type (XTrans|bayer).
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -533,6 +547,14 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 	return pmap;
 }
 
+
+//img <li><b>denoise</b>
+//img <ul>
+//img <li><b>:nlmeans[,<sigma>][,<local>][,<patch>][,<threshold>]</b> - apply nlmeans denoise.</li>
+//img <li><b>:wavelet[,<threshold>]</b> - apply wavelet denoise.</li>
+//img </ul>
+//img </li><br>
+
 //denoise (each algo is a mode...)
 //:nlmeans[,<sigma>][,<local>][,<patch>][,<threshold>] - apply nlmeans denoise
 //:wavelet[,<threshold>] - apply wavelet denoise
@@ -582,9 +604,14 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 	return pmap;
 }
 
-//exposure
-//:<ev> - apply the ev to the image (img and rawproc)
-//:patch,x,y,r,ev0
+
+
+//img <li><b>exposure</b>
+//img <ul>
+//img <li><b>:<ev></b> - apply the ev to the image.</li>
+//img <li><b>:patch,x,y,r,ev0</b> - Compute what it would take to make the value at the patch coorinates the value of ev0, then apply that EV to the entire image.</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_exposure(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -630,6 +657,25 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 	}
 	return pmap;
 }
+
+
+//img <li><b>add</b>
+//img <ul>
+//img <li><b>:&lt;float&gt;</b> - Adds a float value to each image channel value.</li>
+//img <li><b>:&lt;filename&gt;</b> - Adds a file containing a RGB image of the same dimensions.</li>
+//img </ul>
+//img </li><br>
+
+
+//img <li><b>gray</b>
+//img <ul>
+//img <li><b>:<float>,<float>,<float></b> - grayscale the image using the specified RGB multipliers.</li>
+//img <li><b>:NULL</b> - grayscale the image using the default multipliers.</li>
+//img </ul>
+//img </li><br>
+
+
+
 
 //gray
 //:<float>,<float>,<float> - grayscale the image using the specified RGB multipliers

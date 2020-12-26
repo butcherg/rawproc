@@ -84,13 +84,17 @@ my @conflines;
 my $file = $ARGV[0];
 my @lines = `grep \"//img\" $file`;
 foreach $line (@lines) {
-	chomp $line;
+	#chomp $line;
 	$line =~ s/\r//;
-	$line =~ s/^\s+\/\/img //;
-	push @conflines, $line;
+#	$line =~ s/</&lt;/g;
+#	$line =~ s/>/&gt;/g;
+	$line =~ s/^\/\/img //;
+#	push @conflines, $line;
+	print $line;
 }
 
-@conf = sort @conflines;
-print @conf;
+#@conf = sort @conflines;
+#print @conf;
+
 
 print "</ul></body></html>\n";
