@@ -208,6 +208,7 @@ colorb->Enable(true);
 			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
+			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &DemosaicPanel::algorithmChanged, this);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnCopy, this, DEMOSAICCOPY);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnPaste, this, DEMOSAICPASTE);
@@ -355,9 +356,9 @@ colorb->Enable(true);
 					break;
 				case DEMOSAICXTRANMARKESTEIJN:
 					if (xtran_markesteijn_cielab->GetValue())
-						q->setParams(wxString::Format("xtran_markesteijn,%d,1",xtran_markesteijn_passes->GetIntegerValue()));
+						q->setParams(wxString::Format("xtran_markesteijn,%d,usecielab",xtran_markesteijn_passes->GetIntegerValue()));
 					else
-						q->setParams(wxString::Format("xtran_markesteijn,%d,0",xtran_markesteijn_passes->GetIntegerValue()));
+						q->setParams(wxString::Format("xtran_markesteijn,%d",xtran_markesteijn_passes->GetIntegerValue()));
 					break;
 				case DEMOSAICXTRANFAST:
 					q->setParams("xtran_fast");
