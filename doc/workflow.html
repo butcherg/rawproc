@@ -148,7 +148,8 @@ probably find a clean way to do it, but not for 0.9.</p>
 
 <h4>Color Management</h4>
 
-<p>rawproc ascribes to the concepts describe in this article I wrote: https://discuss.pixls.us/t/article-color-management-in-raw-processing/11521. To fully enable managing color, the rawproc internal image class, gImage, has a member called 'profile', which
+<p>rawproc ascribes to the concepts describe in this article I wrote: https://discuss.pixls.us/t/article-color-management-in-raw-processing/11521. 
+To fully enable managing color, the rawproc internal image class, gImage, has a member called 'profile', which
 is a chunk of memory where an ICC color profile resides, managed with the gImage::ApplyColorspace() and gImage::AssignColorspace()
 methods.  In rawproc, if an opened image file contains an ICC profile, that profile is inserted into 'profile', else 'profile'
 is set to NULL.  In order to do subsequent color management with an opened image, 'profile' cannot be NULL.</p>
@@ -169,9 +170,9 @@ contains a color profile, one can change it right after opening by adding a colo
 the desired profile specified as a file.</p>
 
 <p>For most raw files, color profile information pertaining to the raw data is not contained in the metadata, go figure.  
-Accordingly, rawprof give one the opportunity to assign one in two ways: 1) lookup of camera-specific color primaries from 
+Accordingly, rawprof gives one the opportunity to assign one in two ways: 1) lookup of camera-specific color primaries from 
 dcraw and/or RawTherapee, or 2) specification of a .json or .icc file containing the camera-specific color information.  The 
-colorspace tool implements both ways; in my raw processing group, colorspace:camera,assign is my first tool; this looks up 
+colorspace tool implements both ways; in my raw default toolchain, colorspace:camera,assign is my first tool; this looks up 
 the color information in the dcraw.c/camconst.json files, builds a D65 ICC profile from it, and stores it in the internal images's 
 profile.  One can instead specify an ICC camera profile.  Adobe DCPs are not supported in version 0.9.  If one is still using
 the pre-0.9 dcraw processing, a camera profile can be specified in the input.raw.libraw.cameraprofile property.</p>
@@ -186,7 +187,8 @@ input.*.cms.profile and output.*.cms.profile all still work as before.</p>
 
 <p>For raw files with a camera profile, after demosaicing the image it is advisable to convert it to a working profile 
 before doing any subsequent manipulation.  This is done by adding a colorspace tool that converts the internal image to a 
-profile specified as a file.  Elle Stone's profile collection has a bunch of quite useful working profiles; note that her 
+profile specified as a file. Add this tool to the toolchain after the demosaic tool, as colorspace converting will only work
+with RGB images.  Elle Stone's profile collection has a bunch of quite useful working profiles; note that her 
 naming was done to avoid copyright conflicts, and so popular profiles are there but named according to their seminal 
 sources. I use Rec2020-elle-V4-g10.icc.</p>
 
