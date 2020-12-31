@@ -14,7 +14,7 @@
 			command line program that comes with rawproc.  The img command to produce the proof looks something 
 			like this:
 <pre>
-img "*.NEF:rawdata=crop" group:colorspace:camera,assign;subtract:camera;whitebalance:camera;demosaic:half group:blackwhitepoint:rgb;resize:800;sharpen:1 "../*.jpg"
+img "*.NEF:rawdata=crop" group:colorspace:camera,assign;subtract:camera;whitebalance:camera;demosaic:proof group:blackwhitepoint:rgb;resize:800;sharpen:1 "../*.jpg"
 </pre>
 			<li>Review the proofs; if any need correcting, or if I see an alternate rendition, I File->Open->Source 
 			the JPEG in rawproc; it finds the NEF, opens it, and re-applies the processing from the JPEG to
@@ -52,10 +52,11 @@ img "*.NEF:rawdata=crop" group:colorspace:camera,assign;subtract:camera;whitebal
 				multipliers specified in the metadata.  rawproc knows the difference between a bayer
 				mosaic and a RGB image, and the correct pattern is applied to do the multiplication.</li>
 
-				<li>demosaic:half: This tool applies the so-called 'half' demosaic algorithm to the image.
+				<li>demosaic:proof: This tool applies either the xtrans_fast or the so-called 'half' 
+				demosaic algorithm to the image, depending on the camera model.
 				This does not produce the best quality mosaic, but it's darned fast and thus well-suited 
-				to proof work.  The resulting image is half the size of the original, so it is a step 
-				in the eventual direction to resize to 800x600.</li>
+				to proof work. In the caser of 'half', the resulting image is half the size of the original, 
+				so it is a step in the eventual direction to resize to 800x600.</li>
 
 				</ul>
 				</li>
