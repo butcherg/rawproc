@@ -57,7 +57,7 @@ class DemosaicPanel: public PicProcPanel
 			colorb->SetToolTip(_("Doesn't do demosaic, colors the image according to the bayer array"));
 
 #ifdef USE_LIBRTPROCESS
-			//ahdb, amazeb, dcbb, igvb, lmmseb, rcdb, vngb, xtran_markesteijnb, xtran_fastb
+			//ahdb, amazeb, dcbb, igvb, lmmseb, rcdb, vngb, xtrans_markesteijnb, xtrans_fastb
 			ahdb = new wxRadioButton(this, DEMOSAICAHD, "ahd");
 			ahdb->SetToolTip(_("dcraw standard, good all-round performance. Fast enough."));
 			amazeb = new wxRadioButton(this, DEMOSAICAMAZE, "amaze");
@@ -75,12 +75,12 @@ class DemosaicPanel: public PicProcPanel
 			rcdb->SetToolTip(_("Good for low ISO images, nature images. Faster than amaze."));
 			vngb = new wxRadioButton(this, DEMOSAICVNG, "vng");
 			vngb->SetToolTip(_("Slow, good for medium ISO images."));
-			xtran_markesteijnb = new wxRadioButton(this, DEMOSAICXTRANMARKESTEIJN, "xtran_markesteijn:");
-				xtran_markesteijn_passes = new myIntegerCtrl(this, wxID_ANY, "passes:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
-				xtran_markesteijn_cielab = new wxCheckBox(this, wxID_ANY, "cielab:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-			xtran_markesteijnb->SetToolTip("");
-			xtran_fastb = new wxRadioButton(this, DEMOSAICXTRANFAST, "xtran_fast");
-			xtran_fastb->SetToolTip("");
+			xtrans_markesteijnb = new wxRadioButton(this, DEMOSAICXTRANMARKESTEIJN, "xtrans_markesteijn:");
+				xtrans_markesteijn_passes = new myIntegerCtrl(this, wxID_ANY, "passes:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
+				xtrans_markesteijn_cielab = new wxCheckBox(this, wxID_ANY, "cielab:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+			xtrans_markesteijnb->SetToolTip("");
+			xtrans_fastb = new wxRadioButton(this, DEMOSAICXTRANFAST, "xtrans_fast");
+			xtrans_fastb->SetToolTip("");
 #endif
 
 			ImageType imgtype = ((PicProcessorDemosaic *)q)->getImageType();
@@ -96,13 +96,13 @@ class DemosaicPanel: public PicProcPanel
 			lmmseb->Enable(false);
 			rcdb->Enable(false);
 			vngb->Enable(false);
-			xtran_markesteijnb->Enable(false);
-			xtran_fastb->Enable(false);
+			xtrans_markesteijnb->Enable(false);
+			xtrans_fastb->Enable(false);
 			dcb_enhance->Enable(false);
 			dcb_iterations->Enable(false);
 			lmmse_iterations->Enable(false);
-			xtran_markesteijn_passes->Enable(false);
-			xtran_markesteijn_cielab->Enable(false);
+			xtrans_markesteijn_passes->Enable(false);
+			xtrans_markesteijn_cielab->Enable(false);
 #endif
 
 			switch (imgtype) {
@@ -126,10 +126,10 @@ class DemosaicPanel: public PicProcPanel
 #ifdef USE_LIBRTPROCESS
 				case IMAGETYPE_XTRANS:
 colorb->Enable(true);
-					xtran_markesteijnb->Enable(true);
-					xtran_fastb->Enable(true);
-					xtran_markesteijn_passes->Enable(true);
-					xtran_markesteijn_cielab->Enable(true);
+					xtrans_markesteijnb->Enable(true);
+					xtrans_fastb->Enable(true);
+					xtrans_markesteijn_passes->Enable(true);
+					xtrans_markesteijn_cielab->Enable(true);
 					break;
 #endif
 			}
@@ -147,8 +147,8 @@ colorb->Enable(true);
 				else if (p[0] == "lmmse") 		{ lmmseb->SetValue(true); 		selected_algorithm = DEMOSAICLMMSE; }
 				else if (p[0] == "rcd") 		{ rcdb->SetValue(true); 		selected_algorithm = DEMOSAICRCD; }
 				else if (p[0] == "vng") 		{ vngb->SetValue(true); 		selected_algorithm = DEMOSAICVNG; }
-				else if (p[0] == "xtran_markesteijn") 	{ xtran_markesteijnb->SetValue(true); 	selected_algorithm = DEMOSAICXTRANMARKESTEIJN; }
-				else if (p[0] == "xtran_fast") 		{ xtran_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
+				else if (p[0] == "xtrans_markesteijn") 	{ xtrans_markesteijnb->SetValue(true); 	selected_algorithm = DEMOSAICXTRANMARKESTEIJN; }
+				else if (p[0] == "xtrans_fast") 		{ xtrans_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
 #endif
 				else {
 					wxMessageBox(wxString::Format(_("%s is not a valid demosaic algorithm.  Setting to default."),p[0].mb_str()));
@@ -189,13 +189,13 @@ colorb->Enable(true);
 				m->NextRow();
 			m->AddRowItem(rcdb, flags); m->NextRow();
 			m->AddRowItem(vngb, flags); m->NextRow();
-			m->AddRowItem(xtran_markesteijnb, flags);
+			m->AddRowItem(xtrans_markesteijnb, flags);
 				m->NextRow();
 				m->AddRowItem(new wxStaticText(this, wxID_ANY, " ", wxDefaultPosition, wxSize(30,-1)), flags);
-				m->AddRowItem(xtran_markesteijn_passes, flags);
-				m->AddRowItem(xtran_markesteijn_cielab, flags);
+				m->AddRowItem(xtrans_markesteijn_passes, flags);
+				m->AddRowItem(xtrans_markesteijn_cielab, flags);
 				m->NextRow();
-			m->AddRowItem(xtran_fastb, flags); m->NextRow();
+			m->AddRowItem(xtrans_fastb, flags); m->NextRow();
 #endif
 
 			m->End();
@@ -270,17 +270,17 @@ colorb->Enable(true);
 										}
 					else if (p[0] == "rcd") 		{ rcdb->SetValue(true); 		selected_algorithm = DEMOSAICRCD; }
 					else if (p[0] == "vng") 		{ vngb->SetValue(true); 		selected_algorithm = DEMOSAICVNG; }
-					else if (p[0] == "xtran_markesteijn") 	{ 
-											xtran_markesteijnb->SetValue(true);
+					else if (p[0] == "xtrans_markesteijn") 	{ 
+											xtrans_markesteijnb->SetValue(true);
 										 	selected_algorithm = DEMOSAICXTRANMARKESTEIJN; 
-											xtran_markesteijn_passes->SetIntegerValue(1);
-											if (p.GetCount() >= 2) xtran_markesteijn_passes->SetIntegerValue(atoi(p[1].c_str()));
-											xtran_markesteijn_cielab->SetValue(false);
+											xtrans_markesteijn_passes->SetIntegerValue(1);
+											if (p.GetCount() >= 2) xtrans_markesteijn_passes->SetIntegerValue(atoi(p[1].c_str()));
+											xtrans_markesteijn_cielab->SetValue(false);
 											if (p.GetCount() >= 3)
 												if (p[2] == "1") 
-													xtran_markesteijn_cielab->SetValue(true);
+													xtrans_markesteijn_cielab->SetValue(true);
 										}
-					else if (p[0] == "xtran_fast") 		{ xtran_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
+					else if (p[0] == "xtrans_fast") 		{ xtrans_fastb->SetValue(true); 		selected_algorithm = DEMOSAICXTRANFAST; }
 #endif
 					else wxMessageBox(wxString::Format(_("%s is not a valid demosaic algorithm."),p[0].mb_str()));
 
@@ -355,13 +355,13 @@ colorb->Enable(true);
 					q->setParams("vng");
 					break;
 				case DEMOSAICXTRANMARKESTEIJN:
-					if (xtran_markesteijn_cielab->GetValue())
-						q->setParams(wxString::Format("xtran_markesteijn,%d,usecielab",xtran_markesteijn_passes->GetIntegerValue()));
+					if (xtrans_markesteijn_cielab->GetValue())
+						q->setParams(wxString::Format("xtrans_markesteijn,%d,usecielab",xtrans_markesteijn_passes->GetIntegerValue()));
 					else
-						q->setParams(wxString::Format("xtran_markesteijn,%d",xtran_markesteijn_passes->GetIntegerValue()));
+						q->setParams(wxString::Format("xtrans_markesteijn,%d",xtrans_markesteijn_passes->GetIntegerValue()));
 					break;
 				case DEMOSAICXTRANFAST:
-					q->setParams("xtran_fast");
+					q->setParams("xtrans_fast");
 					break;
 #endif
 			}
@@ -378,9 +378,9 @@ colorb->Enable(true);
 		wxTimer t;
 
 #ifdef USE_LIBRTPROCESS
-		wxRadioButton *ahdb, *amazeb, *dcbb, *igvb, *lmmseb, *rcdb, *vngb, *xtran_markesteijnb, *xtran_fastb;
-		myIntegerCtrl *dcb_iterations, *lmmse_iterations, *xtran_markesteijn_passes;
-		wxCheckBox *dcb_enhance, *xtran_markesteijn_cielab;
+		wxRadioButton *ahdb, *amazeb, *dcbb, *igvb, *lmmseb, *rcdb, *vngb, *xtrans_markesteijnb, *xtrans_fastb;
+		myIntegerCtrl *dcb_iterations, *lmmse_iterations, *xtrans_markesteijn_passes;
+		wxCheckBox *dcb_enhance, *xtrans_markesteijn_cielab;
 #endif
 
 };
@@ -388,10 +388,10 @@ colorb->Enable(true);
 PicProcessorDemosaic::PicProcessorDemosaic(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command, tree, display) 
 {
 	if (getImageType() == IMAGETYPE_XTRANS & c.find("xtran") == std::string::npos) 
-		c = "xtran_fast";
+		c = "xtrans_fast";
 	if (c.find("proof") != std::string::npos)
 		if (getImageType() == IMAGETYPE_XTRANS)
-			c = "xtran_fast";
+			c = "xtrans_fast";
 		else
 			c = "half";
 }
@@ -455,7 +455,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.demosaic.log","0") == "1"))
 					log(wxString::Format(_("tool=demosaic,%s,imagesize=%dx%d,threads=%s,time=%s"),
-						result["mode"].c_str(), //using result instead of params, gimage_process may have changed params (proof = half|xtran_fast)
+						result["mode"].c_str(), //using result instead of params, gimage_process may have changed params (proof = half|xtrans_fast)
 						dib->getWidth(), 
 						dib->getHeight(),
 						result["threadcount"].c_str(),

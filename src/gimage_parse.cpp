@@ -464,12 +464,12 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 //img <li><b>demosaic</b>
 //img <ul>
 //img <li><b>:color</b> - color the unmosaiced Bayer image with the pattern colors.  A teaching tool; not for further processing.
-//img <li><b>:half|half_resize|vng|rcd|igv|ahd|xtran_fast</b> - demosaic the Bayer image.
+//img <li><b>:half|half_resize|vng|rcd|igv|ahd|xtrans_fast</b> - demosaic the Bayer image.
 //img <li><b>:dcb[,&lt;iterations&gt;][,dcb_enhance]</b> - demosaic the Bayer image with the supplied parameters.
 //img <li><b>:amaze[,&lt;initgain&gt;][,&lt;border&gt;]</b> - demosaic the Bayer image with the supplied parameters.
 //img <li><b>:lmmse[,&lt;iterations]</b> - demosaic the Bayer image with the supplied parameters.
-//img <li><b>:xtran_markesteijn[,&lt;passes&gt;][,usecielab]</b> - demosaic the XTrans image with the supplied parameters.
-//img <li><b>:proof</b> - xtran_fast or half, depending on image type (XTrans|bayer).
+//img <li><b>:xtrans_markesteijn[,&lt;passes&gt;][,usecielab]</b> - demosaic the XTrans image with the supplied parameters.
+//img <li><b>:proof</b> - xtrans_fast or half, depending on image type (XTrans|bayer).
 //img </ul>
 //img </li><br>
 std::map<std::string,std::string> parse_demosaic(std::string paramstring)
@@ -492,7 +492,7 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 
 		if (p[0] == "half" |p[0] == "half_resize" |
 #ifdef USE_LIBRTPROCESS
-			p[0] == "vng" |p[0] == "rcd" |p[0] == "igv" |p[0] == "ahd" |p[0] == "xtran_fast" |p[0] == "dcb" |p[0] == "amaze" |p[0] == "lmmse" |p[0] == "xtran_markesteijn" |
+			p[0] == "vng" |p[0] == "rcd" |p[0] == "igv" |p[0] == "ahd" |p[0] == "xtrans_fast" |p[0] == "dcb" |p[0] == "amaze" |p[0] == "lmmse" |p[0] == "xtrans_markesteijn" |
 #endif
 			p[0] == "proof" | p[0] == "color") {
 				pmap["mode"] = p[0];
@@ -528,7 +528,7 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 			else
 				pmap["iterations"] = "1";
 		}
-		if (pmap["mode"] == "xtran_markesteijn") {
+		if (pmap["mode"] == "xtrans_markesteijn") {
 			if (psize >= 2) 
 				pmap["passes"] = p[1];
 			else
