@@ -333,7 +333,7 @@ void rawprocFrm::CreateGUIControls()
 	WxStatusBar1->SetFieldsCount (4, widths);
 
 	SetStatusBar(WxStatusBar1);
-	SetTitle(_("rawproc"));
+	SetTitle(wxString::Format("%s #s",_("rawproc"),VERSION));
 	SetIcon(wxNullIcon);
 	SetSize(0,0,1200,820);
 	Center();
@@ -985,7 +985,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			SetStatusText("scale: fit",STATUS_SCALE);
 		}
 		CommandTreeSetDisplay(picdata->GetId(), 790);
-		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
+		SetTitle(wxString::Format("%s #s: %s",_("rawproc"),VERSION,filename.GetFullName()));
 		SetStatusText("");
 
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none). <ul><li>Camera-specific default processing can be specified by appending '.Make_Model', or just '.Make' to the property name, where make and model identify the camera as these values appear in the raw metadata.  Put an underscore between the make and model, and substitute underscore for any spaces that occur in either value, e.g., Nikon_Z_6.</li><li>If a raw file was originally opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands.</li></ul>"
@@ -1182,7 +1182,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
 			picdata->createPanel(parambook);
 			if (incdisplay) CommandTreeSetDisplay(picdata->GetId(),933);
-			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			SetTitle(wxString::Format("%s #s: %s (%s)",_("rawproc"), VERSION, filename.GetFullName(), sourcefilename.GetFullName().c_str()));
 
 			for (int i=2; i<token.GetCount(); i++) {
 				std::vector<std::string> cmd = bifurcate(token[i].ToStdString(),':');
