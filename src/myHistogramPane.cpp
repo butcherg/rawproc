@@ -35,7 +35,7 @@ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 	pressedDown = false;
 	inwindow = false;
 
-	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
+	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "0")
 		SetToolTip("space: Toggle channel order in display\nCtrl-c: Copy 256-bucket histogram to the clipboard\nd: Toggle bounded/unbounded histogram, display bounds/data bounds\ne: Toggle EV stop lines\nl Toggle labels\nt: Toggle tooltip display\nright-arrow: Pan right, Shift = x10, Ctrl = x100\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\n");
 
 
