@@ -240,7 +240,20 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	propdiag = nullptr;
 
-	
+	//parm app.window.lastremembered: Modified when rawproc is exited to record the last window state.  Either a [width]x[height] or 'maximized'.  If param.window.rememberlast is 1, rawproc will update this parameter when it is exited.
+	std::string lastremembered = myConfig::getConfig().getValueOrDefault("app.window.lastremembered","");
+	if (lastremembered != std::string()) {
+		if (lastremembered == "maximized") Maximize();
+		else if (lastremembered.find('x') != std::string::npos) {
+			std::vector<std::string> dim = bifurcate(lastremembered,'x');
+			if (dim.size() >=2 && (isInt(dim[0]) & isInt(dim[1]))) {
+				unsigned w = atoi(dim[0].c_str());
+				unsigned h = atoi(dim[1].c_str());
+				SetSize(w,h);
+				Refresh();
+			}
+		}
+	}
 }
 
 void rawprocFrm::CreateGUIControls()
@@ -537,10 +550,28 @@ void rawprocFrm::SetStartPath(wxString path)
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
-{
+{	
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
+			
+	//parm app.window.rememberlast: If 1, rawproc will remember the dimensions or maximized window state at exit and restore that when it's re-run. Default: 1
+	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
+		printf("remembering last...\n");
+		if (IsMaximized()) {
+			printf("setting lastremembered = maximized...\n");
+			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
+		}
+		else {
+			printf("setting lastremembered = size...\n");
+			int w, h;
+			GetSize(&w,&h);
+			std::string dim = string_format("%dx%d", w, h);
+			myConfig::getConfig().setValue("app.window.lastremembered",dim);
+		}
+		myConfig::getConfig().flush();
+	}
+			
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
@@ -562,6 +593,23 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
+			
+	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
+		printf("remembering last...\n");
+		if (IsMaximized()) {
+			printf("setting lastremembered = maximized...\n");
+			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
+		}
+		else {
+			printf("setting lastremembered = size...\n");
+			int w, h;
+			GetSize(&w,&h);
+			std::string dim = string_format("%dx%d", w, h);
+			myConfig::getConfig().setValue("app.window.lastremembered",dim);
+		}
+		myConfig::getConfig().flush();
+	}
+			
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
