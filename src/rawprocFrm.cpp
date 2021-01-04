@@ -2386,6 +2386,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 {
 	help.Display("Introduction");
+	help.Display("rawproc Image Processor");
 }
 
 #define ID_EXIF			2001
