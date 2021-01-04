@@ -702,7 +702,9 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		result["threadcount"] = std::to_string(threadcount);
 		
 		lfDatabase *ldb;
-		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",std::string());
+		
+		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
+
 		GIMAGE_ERROR res =  dib.lensfunLoadLensDatabase(lensfundatadir, &ldb);
 		if (ldb == NULL) {
 			result["error"] = "lenscorrection:ProcessError - Database initialize failed";

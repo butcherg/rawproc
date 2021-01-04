@@ -557,13 +557,10 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 			
 	//parm app.window.rememberlast: If 1, rawproc will remember the dimensions or maximized window state at exit and restore that when it's re-run. Default: 1
 	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
-		printf("remembering last...\n");
 		if (IsMaximized()) {
-			printf("setting lastremembered = maximized...\n");
 			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
 		}
 		else {
-			printf("setting lastremembered = size...\n");
 			int w, h;
 			GetSize(&w,&h);
 			std::string dim = string_format("%dx%d", w, h);
@@ -595,13 +592,10 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 			return;
 			
 	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
-		printf("remembering last...\n");
 		if (IsMaximized()) {
-			printf("setting lastremembered = maximized...\n");
 			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
 		}
 		else {
-			printf("setting lastremembered = size...\n");
 			int w, h;
 			GetSize(&w,&h);
 			std::string dim = string_format("%dx%d", w, h);
@@ -746,15 +740,19 @@ void rawprocFrm::MnuData(wxCommandEvent& event)
 {
 #ifdef USE_LENSFUNUPDATE
 	SetStatusText("Updating lensfun database...");
-	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	std::string lensfundbpath;
+	
+	lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
+	
 	switch (lensfun_dbupdate(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
 		case LENSFUN_DBUPDATE_OK:		wxMessageBox("Lens correction database update successful."); break;
-		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), 	LF_MAX_DATABASE_VERSION)); break;
 		case LENSFUN_DBUPDATE_NOVERSION:	wxMessageBox(wxString::Format(_("Error: Lens correction - Version %d database not available from server."), LF_MAX_DATABASE_VERSION)); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_INITFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (init).")); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_FILEOPENFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (file).")); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_RETRIEVEFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (retrieve).")); break;
 	}
+		
 	SetStatusText("");
 #endif
 }
@@ -2348,28 +2346,21 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString description(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 
 #ifdef USE_LENSFUN
-	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
 	wxString lensfundb = "Lensfun Database";
-	
-	if (!myConfig::getConfig().exists("tool.lenscorrection.databasepath")) {
-		lensfundb.Append(": (Relying on system/user paths).");
-	}
-	else {
-		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
+	lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
 #ifdef USE_LENSFUNUPDATE
-		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
-		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
-			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
-				case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
-			}
+	//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
+	if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
+		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+			case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
 		}
-		else lensfundb.Append(_(" - Not Enabled."));
-#endif
 	}
+#endif
 	description.Append(wxString::Format(_("\n%s"), lensfundb));
 #endif
 
