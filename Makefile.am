@@ -20,9 +20,15 @@ docpages:
 
 .PHONY: conf
 conf:
+	rm -f src/rawproc.conf src/dcraw.c src/camconst.json
 	$(srcdir)/conffile.pl $(srcdir)/src > src/rawproc.conf
 	wget -P src https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/camconst.json 
 	wget -P src https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
+	wget -P src http://lensfun.sourceforge.net/db/@LENSFUN_DATABASE_VERSION@.tar.bz2
+	mkdir -p src/@LENSFUN_DATABASE_VERSION@
+	tar -xjvf src/@LENSFUN_DATABASE_VERSION@.tar.bz2 -C src/@LENSFUN_DATABASE_VERSION@
+	echo "0" > src/@LENSFUN_DATABASE_VERSION@/timestamp.txt
+	
 
 .PHONY: zip
 zip:
