@@ -40,5 +40,5 @@ wininstaller:
 
 .PHONY: appimage
 appimage:
-	$(srcdir)/make-appimage.pl $(VERSION) src/rawproc src/rawprocdoc.zip src/img src/exif src/wxcmd $(srcdir)/src/icon.xpm $(srcdir)/rawproc.appdata.xml src/dcraw.c src/camconst.json
+	$(srcdir)/make-appimage.pl $(VERSION) BIN:src/rawproc BIN:src/rawprocdoc.zip BIN:src/img BIN:src/exif BIN:src/wxcmd "BIN:$(srcdir)/src/icon.xpm" "BIN:$(srcdir)/rawproc.appdata.xml" DATA:src/dcraw.c DATA:src/camconst.json DATA:src/rawproc.conf DATA:src/@LENSFUN_DATABASE_VERSION@
 
