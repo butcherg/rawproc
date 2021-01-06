@@ -16,12 +16,15 @@ use File::Copy "cp";
 
 $arch = "x86_64";
 $version = shift @ARGV;
-$program = $ARGV[0];
+my ($dest,$pat) = split ":", $ARGV[0];
+$program = $pat;
 
 #get application name, from $program:
 ($volume,$directory,$file) = File::Spec->splitpath($program);
 
 $rootdir = "$file-$arch.AppDir";
+
+printf "$file...\n";
 
 #make directory structure:
 mkdir $rootdir;
@@ -30,21 +33,45 @@ mkdir "$rootdir/usr/bin";
 mkdir "$rootdir/usr/lib";
 mkdir "$rootdir/usr/share";
 mkdir "$rootdir/usr/share/metainfo";
+mkdir "$rootdir/usr/share/$file";
 
 
-#copy each arg to bin:
+#copy each arg prepended with BIN: to bin:
+printf "BIN:\n";
 foreach $arg (@ARGV) {
-	($vol,$dir,$fil) = File::Spec->splitpath($arg);
-	if (-d $arg) {
+	my ($dest,$pat) = split ":", $arg;
+	next if ($dest ne "BIN");
+	printf "\t$pat\n";
+	my ($vol,$dir,$fil) = File::Spec->splitpath($pat);
+	if (-d $pat) {
 		mkdir "$rootdir/usr/bin/$fil";
-		for my $file (glob "$arg/*") {
-			cp $file, "$rootdir/usr/bin/$fil/";
+		for my $dirfile (glob "$pat/*") {
+			cp $dirfile, "$rootdir/usr/bin/$fil/";
 		}
 	}
 	else {
-		cp  $arg, "$rootdir/usr/bin/";
+		cp  $pat, "$rootdir/usr/bin/";
 	}
 }
+
+#copy each arg prepended with DATA: to share/$program/:
+printf "DATA:\n";
+foreach $arg (@ARGV) {
+	my ($dest,$pat) = split ":", $arg;
+	next if ($dest ne "DATA");
+	printf "\t$pat\n";
+	my ($vol,$dir,$fil) = File::Spec->splitpath($pat);
+	if (-d $pat) {
+		mkdir "$rootdir/usr/share/$file/$fil";
+		for my $dirfile (glob "$pat/*") {
+			cp $dirfile, "$rootdir/usr/share/$file/$fil/";
+		}
+	}
+	else {
+		cp  $pat, "$rootdir/usr/share/$file/";
+	}
+}
+
 
 #set executable permissions for each application in $rootdir/usr/bin/
 foreach $fname (<$rootdir/usr/bin/*>) {
@@ -84,15 +111,15 @@ print "\n";
 
 foreach $line (@lines) {
 	@items = split /\s/, $line;
-	
-	if (exists $exclude{$items[1]}) {
-		print "Excluded: $items[1]\n";
-	}
-	else {
+#Disable exclude list logic, for now...	
+#	if (exists $exclude{$items[1]}) {
+#		print "Excluded: $items[1]\n";
+#	}
+#	else {
 		if ($items[3] ne "") {
 			cp $items[3], "$rootdir/usr/lib/";
 		}
-	} 
+#	} 
 }
 
 $APPRUN = <<'END_APPRUN';
@@ -107,6 +134,16 @@ export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${H
 #export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
 #EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
 #exec "${EXEC}" "$@"
+
+if [ ! -d "${HOME}/.rawproc" ]
+then
+	if zenity --question --title="rawproc Configuration/Data Files" --text="HOME/.rawproc doesn't exist.  Shall I create and populate it?" --no-wrap 
+    	then
+    		cp -r ${HERE}/usr/share/rawproc ~/.rawproc
+        	zenity --info --title="Success" --text="HOME/.rawproc populated." --no-wrap
+	fi
+fi
+
 if [ ! -z $APPIMAGE ] ; then
 	BINARY_NAME=$(basename "$ARGV0")
 	if [ -e "$HERE/usr/bin/$BINARY_NAME" ] ; then
@@ -138,6 +175,7 @@ open OUTFILE, ">$file-$arch.AppDir/$file.desktop";
 print OUTFILE $DESKTOP;
 close OUTFILE;
 
+#hack move files from bin to their appropriate places, replace with META: and ICON: later...
 cp "$file-$arch.AppDir/usr/bin/icon.xpm", "$file-$arch.AppDir/.";
 cp "$file-$arch.AppDir/usr/bin/rawproc.appdata.xml", "$file-$arch.AppDir/usr/share/metainfo/.";
 

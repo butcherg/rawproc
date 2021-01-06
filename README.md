@@ -1,5 +1,5 @@
 # rawproc
-Raw camera and general image processor, my way...
+Raw processor and general image processor.
 
 I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but one day I'll make it tablet-
 friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does 

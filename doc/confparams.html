@@ -16,7 +16,9 @@
 <li><b>app.start.path</b>:  Specify the directory at which to start opening files.  Default="", rawproc uses the OS Pictures directory for the current user.</li>
 <li><b>app.toolchain.height</b>:  Specifies height of tool chain at startup. Change requires restarting rawproc.  Default=200</li>
 <li><b>app.toollistpath</b>:  Directory path where tool list files can be found.  Default: (none, implies current working directory)</li>
-<li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=1</li>
+<li><b>app.tooltip</b>:  0|1, enable/disable tooltip display at startup. Tooltip display can still be toggled on/off with the 't' key.  Default=0</li>
+<li><b>app.window.lastremembered</b>:  Modified when rawproc is exited to record the last window state.  Either a [width]x[height] or 'maximized'.  If param.window.rememberlast is 1, rawproc will update this parameter when it is exited.</li>
+<li><b>app.window.rememberlast</b>:  If 1, rawproc will remember the dimensions or maximized window state at exit and restore that when it's re-run. Default: 1</li>
 <li><a name="batch"><b>batch.imgcommand</b>:  path/executable for the img command line raw processor. Default: img (somewhere in $PATH)</li>
 <li><a name="batch"><b>batch.inputspec</b>:  Path/file specification for input.  Append input processing with a ':', e.g., *.NEF:rawdata=crop.  Default: None, you need to specify your own.</li>
 <li><a name="batch"><b>batch.outputspec</b>:  Path/file specification for output.  Append output processing with a ':', e.g., *.jpg:quality=75.  Default: None, you need to specify your own.</li>
@@ -99,7 +101,7 @@
 <li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1</li>
 <li><b>output.jpeg.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li>
 <li><b>output.jpeg.cms.renderingintent</b>:  Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
-<li><b>output.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul></li>
+<li><b>output.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul> Default:quality=95.</li>
 <li><b>output.orient</b>:  Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0</li>
 <li><b>output.png.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li>
 <li><b>output.png.cms.renderingintent</b>:  Specify the rendering intent for the PNG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
@@ -136,7 +138,7 @@
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
 <li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
 <li><a name="tool.gray"><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
-<li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path instead of the standard lensfun directory.  The path specified should be the one that contains the 'version_x' folder that contains the lensfun XML files.</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path to update and retrive for use the lensfun database.  The path specified should be the one that contains the 'version_x' folder that contains the lensfun XML files.  If none is specified, the same directory as the configuration file location is used. (rawproc does not allow lensfun to use the system data directories.)</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: none.</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([rawproc], [1.1dev], [glenn.butcher@gmail.com])
+AC_INIT([rawproc], [1.0.1], [glenn.butcher@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 #AC_CONFIG_HEADERS([config.h])
@@ -178,6 +178,9 @@ then
 		AC_MSG_ERROR([not found.])
 	])
 	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN"
+	if test "${LENSFUN_DATABASE_VERSION+set}" != set; then
+		LENSFUN_DATABASE_VERSION="version_1"
+	fi
 	
 fi
 AM_CONDITIONAL(LENSFUN, test x$enable_lensfun = xyes)
@@ -267,6 +270,7 @@ AC_SUBST(INNO_ARCHITECURESALLOWED)
 AC_SUBST(INNO_ARCHITECTURESINSTALLEDIN64BITMODE)
 AC_SUBST(INNO_PF)
 AC_SUBST(INNO_SUFFIX)
+AC_SUBST(LENSFUN_DATABASE_VERSION)
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 if test "$mingw_cv_win32_host" == "yes"

@@ -240,7 +240,20 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 
 	propdiag = nullptr;
 
-	
+	//parm app.window.lastremembered: Modified when rawproc is exited to record the last window state.  Either a [width]x[height] or 'maximized'.  If param.window.rememberlast is 1, rawproc will update this parameter when it is exited.
+	std::string lastremembered = myConfig::getConfig().getValueOrDefault("app.window.lastremembered","");
+	if (lastremembered != std::string()) {
+		if (lastremembered == "maximized") Maximize();
+		else if (lastremembered.find('x') != std::string::npos) {
+			std::vector<std::string> dim = bifurcate(lastremembered,'x');
+			if (dim.size() >=2 && (isInt(dim[0]) & isInt(dim[1]))) {
+				unsigned w = atoi(dim[0].c_str());
+				unsigned h = atoi(dim[1].c_str());
+				SetSize(w,h);
+				Refresh();
+			}
+		}
+	}
 }
 
 void rawprocFrm::CreateGUIControls()
@@ -333,7 +346,7 @@ void rawprocFrm::CreateGUIControls()
 	WxStatusBar1->SetFieldsCount (4, widths);
 
 	SetStatusBar(WxStatusBar1);
-	SetTitle(_("rawproc"));
+	SetTitle(wxString::Format("%s %s",_("rawproc"),VERSION));
 	SetIcon(wxNullIcon);
 	SetSize(0,0,1200,820);
 	Center();
@@ -537,10 +550,25 @@ void rawprocFrm::SetStartPath(wxString path)
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
-{
+{	
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
+			
+	//parm app.window.rememberlast: If 1, rawproc will remember the dimensions or maximized window state at exit and restore that when it's re-run. Default: 1
+	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
+		if (IsMaximized()) {
+			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
+		}
+		else {
+			int w, h;
+			GetSize(&w,&h);
+			std::string dim = string_format("%dx%d", w, h);
+			myConfig::getConfig().setValue("app.window.lastremembered",dim);
+		}
+		myConfig::getConfig().flush();
+	}
+			
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
@@ -562,6 +590,20 @@ void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
+			
+	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
+		if (IsMaximized()) {
+			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
+		}
+		else {
+			int w, h;
+			GetSize(&w,&h);
+			std::string dim = string_format("%dx%d", w, h);
+			myConfig::getConfig().setValue("app.window.lastremembered",dim);
+		}
+		myConfig::getConfig().flush();
+	}
+			
 	commandtree->DeleteAllItems();
 	pic->BlankPic();
 	histogram->BlankPic();
@@ -698,15 +740,19 @@ void rawprocFrm::MnuData(wxCommandEvent& event)
 {
 #ifdef USE_LENSFUNUPDATE
 	SetStatusText("Updating lensfun database...");
-	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	std::string lensfundbpath;
+	
+	lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
+	
 	switch (lensfun_dbupdate(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
 		case LENSFUN_DBUPDATE_OK:		wxMessageBox("Lens correction database update successful."); break;
-		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), LF_MAX_DATABASE_VERSION)); break;
+		case LENSFUN_DBUPDATE_CURRENTVERSION:	wxMessageBox(wxString::Format(_("Lens correction: Version %d database is current."), 	LF_MAX_DATABASE_VERSION)); break;
 		case LENSFUN_DBUPDATE_NOVERSION:	wxMessageBox(wxString::Format(_("Error: Lens correction - Version %d database not available from server."), LF_MAX_DATABASE_VERSION)); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_INITFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (init).")); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_FILEOPENFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (file).")); break;
 		case LENSFUN_DBUPDATE_RETRIEVE_RETRIEVEFAILED: wxMessageBox(_("Error: Lens correction database retrieve failed (retrieve).")); break;
 	}
+		
 	SetStatusText("");
 #endif
 }
@@ -985,7 +1031,7 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			SetStatusText("scale: fit",STATUS_SCALE);
 		}
 		CommandTreeSetDisplay(picdata->GetId(), 790);
-		SetTitle(wxString::Format("rawproc: %s",filename.GetFullName()));
+		SetTitle(wxString::Format("%s %s: %s",_("rawproc"),VERSION,filename.GetFullName()));
 		SetStatusText("");
 
 		//parm input.raw.default: Space-separated list of rawproc tools to apply to a raw image after it is input. If this parameter has an entry, application of the tools is prompted yes/no.  Default=(none). <ul><li>Camera-specific default processing can be specified by appending '.Make_Model', or just '.Make' to the property name, where make and model identify the camera as these values appear in the raw metadata.  Put an underscore between the make and model, and substitute underscore for any spaces that occur in either value, e.g., Nikon_Z_6.</li><li>If a raw file was originally opened with this parameter, if it is re-opened, you'll be prompted to apply the input.raw.default.commands, then prompted to re-apply the processing chain.  In this case, say 'no' to the first one, and 'yes' to the second, otherwise you'll duplicate the input.raw.default commands.</li></ul>"
@@ -1182,7 +1228,7 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			PicProcessor *picdata = new PicProcessor(filename.GetFullName(), oparams, commandtree, pic, dib);
 			picdata->createPanel(parambook);
 			if (incdisplay) CommandTreeSetDisplay(picdata->GetId(),933);
-			SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+			SetTitle(wxString::Format("%s %s: %s (%s)",_("rawproc"), VERSION, filename.GetFullName(), sourcefilename.GetFullName()));
 
 			for (int i=2; i<token.GetCount(); i++) {
 				std::vector<std::string> cmd = bifurcate(token[i].ToStdString(),':');
@@ -1219,6 +1265,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 	wxFileName profilepath;
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+	std::string iccfile;
 
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png |Data files (*.csv)|*.csv"),wxFD_SAVE);  // 
@@ -1261,8 +1308,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			//parm output.*.thumbnails.parameters: *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.
 			wxString thumbparams = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.parameters","");
 			if (filetype == FILETYPE_JPEG) {
-				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul>
-				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","");
+				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul> Default:quality=95.
+				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","quality=95");
 				thumbdir = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.directory",thumbdir.ToStdString());
 				thumbparams = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.parameters",thumbparams.ToStdString());
 			}
@@ -1294,8 +1341,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
 					//template output.jpeg.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
-
+					iccfile = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","");
+					
 					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.jpeg.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","relative_colorimetric"));
@@ -1304,7 +1351,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
 					//template output.tiff.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","")));
+					iccfile = myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","");
+					
 					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.tiff.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","relative_colorimetric"));
@@ -1312,7 +1360,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				else if (filetype == FILETYPE_PNG) {
 					//parm output.png.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
 					//template output.png.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.profile","")));
+					iccfile = myConfig::getConfig().getValueOrDefault("output.png.cms.profile","");
+					
 					//parm output.png.cms.renderingintent: Specify the rendering intent for the PNG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.png.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","relative_colorimetric"));
@@ -1323,7 +1372,18 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
 				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
-				profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				//profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				
+				if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
+					profile = gImage::makeLCMSProfile(iccfile, 1.0);
+				else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22" | iccfile == "srgb-output")
+					profile = gImage::makeLCMSStoredProfile(iccfile);
+				else {
+					profilepath.SetFullName(wxString(iccfile));
+					profile = gImage::myCmsOpenProfileFromFile(profilepath.GetFullPath().ToStdString());
+				}
+				
+				
 				if (dib->getProfile()) {
 					if (profile) {
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
@@ -1366,6 +1426,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
 				sourcefilename.Assign(fname);
 				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+				SetTitle(wxString::Format("%s %s: %s (%s)",_("rawproc"), VERSION, filename.GetFullName(), sourcefilename.GetFullName()));
 			}
 			
 		WxStatusBar1->SetStatusText("");
@@ -2299,28 +2360,21 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString description(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 
 #ifdef USE_LENSFUN
-	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath","");
+	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
 	wxString lensfundb = "Lensfun Database";
-	
-	if (!myConfig::getConfig().exists("tool.lenscorrection.databasepath")) {
-		lensfundb.Append(": (Relying on system/user paths).");
-	}
-	else {
-		lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
+	lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
 #ifdef USE_LENSFUNUPDATE
-		//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
-		if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
-			switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
-				case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
-				case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
-			}
+	//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
+	if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
+		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
+			case LENSFUN_DBUPDATE_NOVERSION:	lensfundb.Append(wxString::Format(_("- version %d not available from server."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_NODATABASE:	lensfundb.Append(wxString::Format(_("- no Version %d database at this path."),LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_OLDVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Not current."), LF_MAX_DATABASE_VERSION)); break;
+			case LENSFUN_DBUPDATE_CURRENTVERSION:	lensfundb.Append(wxString::Format(_("- Version %d, Current."), LF_MAX_DATABASE_VERSION)); break;
 		}
-		else lensfundb.Append(_(" - Not Enabled."));
-#endif
 	}
+#endif
 	description.Append(wxString::Format(_("\n%s"), lensfundb));
 #endif
 
@@ -2337,6 +2391,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 void rawprocFrm::MnuHelpClick(wxCommandEvent& event)
 {
 	help.Display("Introduction");
+	help.Display("rawproc Image Processor");
 }
 
 #define ID_EXIF			2001

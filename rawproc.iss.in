@@ -41,20 +41,23 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: modifypath; Description: Add application directory to your environmental path to run img; Flags: unchecked
+Name: modifypath; Description: Add application directory to your environmental path to run img and wxcmd; Flags: unchecked
 
 [Dirs]
 Name: "{userappdata}\rawproc"
 
 
 [Files]
-Source: "src\rawproc.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: "src\img.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: "src\wxcmd.exe"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
-Source: "src\rawprocdoc.zip"; DestDir: "@INNO_PF@\rawproc"; Flags: ignoreversion
+Source: "src\rawproc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "src\img.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "src\wxcmd.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "src\rawprocdoc.zip"; DestDir: "{app}"; Flags: ignoreversion
+
 Source: "src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
-Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
-Source: "src\camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite
+Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
+Source: "src\camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
+Source: "src\@LENSFUN_DATABASE_VERSION@\*"; DestDir: "{userappdata}\rawproc\@LENSFUN_DATABASE_VERSION@"; Flags: ignoreversion 
+
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -282,14 +285,6 @@ begin
 			end;
 		end;
 	end;
-  if CurUninstallStep = usPostUninstall then
-  begin
-    if MsgBox('Do you want to delete rawproc.conf?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
-    //this is the msg that will display after uninstall,change is as you prefer 
-    begin
-        DelTree(ExpandConstant('{app}\DataBase'), True, True, True);
-    end;
-  end;
 end;
 
 function NeedRestart(): Boolean;

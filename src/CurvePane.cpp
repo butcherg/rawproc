@@ -61,7 +61,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	selectedCP.y = -1.0;
 	//c.clampto(0.0,255.0);
 
-	if (myConfig::getConfig().getValueOrDefault("app.tooltip","1") == "1")
+	if (myConfig::getConfig().getValueOrDefault("app.tooltip","0") == "1")
 		SetToolTip("Curve Keyboard Commands:\n   t: toggle tooltip\n   del/backspace: delete selected control point\n   ctrl-c: copy curve y data to clipboard");
 
 

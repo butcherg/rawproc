@@ -12,7 +12,7 @@ foreach $file (@files) {
 			$string =~ s/myConfig::getConfig\(\).getValueOrDefault\(//;
 			$string =~ s/\)//;
 			$string =~ s/,/=/;
-			my ($name, $value) = split "=", $string;
+			my ($name, $value) = split "=", $string, 2;
 			$name   =~ s/"//g;
 			if (index($value,"\"") != -1) {
 				$value =~ s/"//g;

@@ -455,7 +455,7 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 		unsigned xtarray[6][6];
 		if (params["mode"] == "proof") {
 			if (dib.xtranArray(xtarray))
-				params["mode"] = "xtran_fast";
+				params["mode"] = "xtrans_fast";
 			else
 				params["mode"] = "half";
 		}
@@ -532,13 +532,13 @@ std::map<std::string,std::string> process_demosaic(gImage &dib, std::map<std::st
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("demosaic:%s,%d",params["mode"].c_str(),iterations);
 		}
-		else if (params["mode"] == "xtran_fast") {
+		else if (params["mode"] == "xtrans_fast") {
 			_mark();
 			ret = dib.ApplyDemosaicXTRANSFAST(prepost, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("demosaic:%s",params["mode"].c_str());
 		}
-		else if (params["mode"] == "xtran_markesteijn") { 
+		else if (params["mode"] == "xtrans_markesteijn") { 
 			int passes = atoi(params["passes"].c_str());
 			bool useCieLab = false;
 			if (paramexists(params,"usecielab") && params["usecielab"] == "true") useCieLab = true;
@@ -702,7 +702,9 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		result["threadcount"] = std::to_string(threadcount);
 		
 		lfDatabase *ldb;
-		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",std::string());
+		
+		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
+
 		GIMAGE_ERROR res =  dib.lensfunLoadLensDatabase(lensfundatadir, &ldb);
 		if (ldb == NULL) {
 			result["error"] = "lenscorrection:ProcessError - Database initialize failed";

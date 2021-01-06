@@ -71,11 +71,11 @@ wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE) // | wxR
 	}
 	else {
 		//parm batch.inputspec: Path/file specification for input.  Append input processing with a ':', e.g., *.NEF:rawdata=crop.  Default: None, you need to specify your own.
-		ispec = wxString(myConfig::getConfig().getValueOrDefault("batch.inputspec",""));
+		ispec = wxString(myConfig::getConfig().getValueOrDefault("batch.inputspec","*.NEF:rawdata=crop"));
 		//parm batch.outputspec: Path/file specification for output.  Append output processing with a ':', e.g., *.jpg:quality=75.  Default: None, you need to specify your own.
-		ospec = wxString(myConfig::getConfig().getValueOrDefault("batch.outputspec",""));
+		ospec = wxString(myConfig::getConfig().getValueOrDefault("batch.outputspec","../*.jpg"));
 		//parm batch.toolchain: The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.
-		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain",""));
+		tchain = wxString(myConfig::getConfig().getValueOrDefault("batch.toolchain","colorspace:camera,assign subtract:camera whitebalance:camera demosaic:proof blackwhitepoint:rgb,data tone:filmic resize:800 sharpen:0.5"));
 		tchainsource = "(Source: batch.toolchain property)";
 	}
 
