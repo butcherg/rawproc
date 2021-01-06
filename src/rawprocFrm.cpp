@@ -1265,6 +1265,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 
 	wxFileName profilepath;
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+	std::string iccfile;
 
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png |Data files (*.csv)|*.csv"),wxFD_SAVE);  // 
@@ -1340,8 +1341,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (filetype == FILETYPE_JPEG) {
 					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
 					//template output.jpeg.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","")));
-
+					iccfile = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","");
+					
 					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.jpeg.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","relative_colorimetric"));
@@ -1350,7 +1351,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				else if (filetype == FILETYPE_TIFF) {
 					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
 					//template output.tiff.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","")));
+					iccfile = myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","");
+					
 					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.tiff.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","relative_colorimetric"));
@@ -1358,7 +1360,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				else if (filetype == FILETYPE_PNG) {
 					//parm output.png.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
 					//template output.png.cms.profile=iccfile
-					profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.profile","")));
+					iccfile = myConfig::getConfig().getValueOrDefault("output.png.cms.profile","");
+					
 					//parm output.png.cms.renderingintent: Specify the rendering intent for the PNG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
 					//template output.png.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
 					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","relative_colorimetric"));
@@ -1369,7 +1372,18 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
 				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
 
-				profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				//profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				
+				if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
+					profile = gImage::makeLCMSProfile(iccfile, 1.0);
+				else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22" | iccfile == "srgb-output")
+					profile = gImage::makeLCMSStoredProfile(iccfile);
+				else {
+					profilepath.SetFullName(wxString(iccfile));
+					profile = gImage::myCmsOpenProfileFromFile(profilepath.GetFullPath().ToStdString());
+				}
+				
+				
 				if (dib->getProfile()) {
 					if (profile) {
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
