@@ -137,10 +137,12 @@ export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${H
 
 if [ ! -d "${HOME}/.rawproc" ]
 then
-	if zenity --question --title="rawproc Configuration/Data Files" --text="HOME/.rawproc doesn't exist.  Shall I create and populate it?" --no-wrap 
-    	then
-    		cp -r ${HERE}/usr/share/rawproc ~/.rawproc
-        	zenity --info --title="Success" --text="HOME/.rawproc populated." --no-wrap
+	echo -n "HOME/.rawproc doesn't exist.  Shall I create and populate it (y/n)?"
+	read answer
+	if [ "$answer" != "${answer#[Yy]}" ]
+	then
+		cp -r ${HERE}/usr/share/rawproc ~/.rawproc
+		echo "HOME/.rawproc populated."
 	fi
 fi
 
