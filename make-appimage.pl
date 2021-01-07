@@ -91,7 +91,8 @@ foreach $fname (<$rootdir/usr/bin/*>) {
 #local excludes, if needed:
 #$exclude{'libharfbuzz.so.0'} = "foo";
 
-$result = `wget https://raw.githubusercontent.com/AppImage/AppImages/master/excludelist`;
+#$result = `wget https://raw.githubusercontent.com/AppImage/AppImages/master/excludelist`;
+$result = `wget https://raw.githubusercontent.com/AppImage/pkg2appimage/master/excludelist`;
 
 open INFILE, "excludelist";
 while ($line = <INFILE>) {
@@ -111,15 +112,14 @@ print "\n";
 
 foreach $line (@lines) {
 	@items = split /\s/, $line;
-#Disable exclude list logic, for now...	
-#	if (exists $exclude{$items[1]}) {
-#		print "Excluded: $items[1]\n";
-#	}
-#	else {
+	if (exists $exclude{$items[1]}) {
+		print "Excluded: $items[1]\n";
+	}
+	else {
 		if ($items[3] ne "") {
 			cp $items[3], "$rootdir/usr/lib/";
 		}
-#	} 
+	} 
 }
 
 $APPRUN = <<'END_APPRUN';
@@ -137,12 +137,12 @@ export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${H
 
 if [ ! -d "${HOME}/.rawproc" ]
 then
-	echo -n "HOME/.rawproc doesn't exist.  Shall I create and populate it (y/n)?"
+	echo -n "${HOME}/.rawproc doesn't exist.  Shall I create and populate it (y/n)?"
 	read answer
 	if [ "$answer" != "${answer#[Yy]}" ]
 	then
-		cp -r ${HERE}/usr/share/rawproc ~/.rawproc
-		echo "HOME/.rawproc populated."
+		cp -r ${HERE}/usr/share/rawproc ${HOME}/.rawproc
+		echo "${HOME}/.rawproc populated."
 	fi
 fi
 
