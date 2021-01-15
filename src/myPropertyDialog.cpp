@@ -118,6 +118,9 @@ void PropertyDialog::LoadConfig()
 				pg->SetPropertyAttribute(prop,"InitialPath",iccdirectory );
 				pg->SetPropertyAttribute(prop,"ShowFullPath",0);
 			}
+			else if (tplate.find("longstring") != std::string::npos) {
+				wxPGProperty* prop = pg->Append(new wxLongStringProperty(name, wxPG_LABEL, value));
+			}
 		}
 		else
 
