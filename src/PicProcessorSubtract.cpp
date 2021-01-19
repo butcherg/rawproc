@@ -42,7 +42,7 @@ class SubtractPanel: public PicProcPanel
 
 			subtract = new myFloatCtrl(this, wxID_ANY, 0.0, 2);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
-			cam = new wxStaticText(this, wxID_ANY, "--");
+			cam = new wxStaticText(this, wxID_ANY, "--", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE);
 
 			std::vector<std::string> p = split(params.ToStdString(),",");
 			std::string param = p[0];
@@ -233,6 +233,45 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 	toolpanel = new SubtractPanel(parent, this, c);
 	parent->ShowNewPage(toolpanel);
 	gImage dib = getPreviousPicProcessor()->getProcessedPic();
+	std::map<std::string, std::string> info = dib.getInfo();
+	
+	if (info.find("Libraw.CFABlack") != info.end()) {
+		std::string is = info["Libraw.CFABlack"];
+		std::vector<std::string> s = split(is,",");
+		std::string fs;
+		for (unsigned i = 0; i<s.size(); i++) {
+			if (i==0) {
+				fs.append( tostr(atof(s[i].c_str())/65536.0) );
+			}
+			else {
+				fs.append(",");
+				fs.append( tostr(atof(s[i].c_str())/65536.0) );
+			}
+		}
+		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%s\n(%s)", wxString(is), wxString(fs)));
+	}
+	else if (info.find("Libraw.PerChannelBlack") != info.end()) {
+		std::string is = info["Libraw.PerChannelBlack"];
+		std::vector<std::string> s = split(is,",");
+		std::string fs;
+		for (unsigned i = 0; i<s.size(); i++) {
+			if (i==0) {
+				fs.append( tostr(atof(s[i].c_str())/65536.0) );
+			}
+			else {
+				fs.append(",");
+				fs.append( tostr(atof(s[i].c_str())/65536.0) );
+			}
+		}
+		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%s\n(%s)", wxString(is), wxString(fs)));
+	}
+	else if (info.find("Libraw.Black") != info.end()) {
+		int subtract = atoi(info["Libraw.Black"].c_str());
+		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%f (%d)", (float) subtract / 65536.0, subtract));
+	}
+	
+	
+/*
 	int subtract = atoi(dib.getInfoValue("Libraw.Black").c_str());
 	if (subtract != 0) {
 		((SubtractPanel *) toolpanel)->setCameraVal(wxString::Format("%f (%d)", (float) subtract / 65536.0, subtract));
@@ -253,7 +292,7 @@ void PicProcessorSubtract::createPanel(wxSimplebook* parent)
 			}
 		}
 	}
-	toolpanel->Refresh();
+*/
 	toolpanel->Update();
 }
 
@@ -305,142 +344,6 @@ bool PicProcessorSubtract::processPicture(gImage *processdib)
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
 	return ret;
 }
-
-
-/*
-bool PicProcessorSubtract::processPicture(gImage *processdib) 
-{
-	double subtract;
-	wxFileName fname;
-	//gImage darkfile;
-
-	((wxFrame*) m_display->GetParent())->SetStatusText(_("subtract..."));
-
-	bool result = false;
-
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-	
-	if (processingenabled) {
-		
-		mark();
-		std::vector<std::string> p = split(c.ToStdString(),",");
-		std::string param = p[0];
-	
-		if (param == "rgb") {
-			m_tree->SetItemText(id, _("subtract:rgb,val"));
-			setChannel(wxString(param));
-			if (p.size() >=2) subtract = atof(p[1].c_str());
-			dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
-		}
-		else if (param == "red") {
-			m_tree->SetItemText(id, _("subtract:red,val"));
-			setChannel(wxString(param));
-			if (p.size() >=2) subtract = atof(p[1].c_str());
-			dib->ApplySubtract(subtract, 0.0, 0.0, 0.0, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
-		}
-		else if (param == "green") {
-			m_tree->SetItemText(id, _("subtract:green,val"));
-			setChannel(wxString(param));
-			if (p.size() >=2) subtract = atof(p[1].c_str());
-			dib->ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
-		}
-		else if (param == "blue") {
-			m_tree->SetItemText(id, _("subtract:blue,val"));
-			setChannel(wxString(param));
-			if (p.size() >=2) subtract = atof(p[1].c_str());
-			dib->ApplySubtract(0.0, 0.0, 0.0, subtract, true, threadcount);
-			m_display->SetModified(true);
-			result = true;
-		}
-		else if (param == "camera") {
-			std::map<std::string,std::string> info = dib->getInfo();
-			if (info.find("Libraw.CFABlack") != info.end()) {
-				m_tree->SetItemText(id, _("subtract:camera(cfa)"));
-				float sub[6][6];
-				std::string blackstr = info["Libraw.CFABlack"];
-				std::vector<std::string> blackvec = split(blackstr,",");
-				unsigned blackdim = sqrt(blackvec.size());
-				for (unsigned r=0; r< blackdim; r++)
-					for (unsigned c=0; c< blackdim; c++)
-						sub[r][c] = atof(blackvec[c + r*blackdim].c_str()) / 65536.0;
-				dib->ApplyCFASubtract(sub, true, threadcount);
-				m_display->SetModified(true);
-				result = true;
-			}
-			else if (info.find("Libraw.PerChannelBlack") != info.end()) {
-				m_tree->SetItemText(id, _("subtract:camera(perchannel)"));
-				float subr=0.0, subg1=0.0, subg2=0.0, subb=0.0;
-				std::vector<std::string> s = split(dib->getInfoValue("Libraw.PerChannelBlack"),",");
-				if (s[0] =="0" | s[1] =="0" | s[2] =="0" & s[3] =="0") {
-					result = false;
-				}
-				else if (s.size() >= 4) {
-					subr = atof(s[0].c_str());
-					subg1 = atof(s[0].c_str());
-					subb = atof(s[0].c_str());
-					subg2 = atof(s[0].c_str());
-					dib->ApplySubtract(subr, subg1, subg2, subb, true, threadcount);
-					m_display->SetModified(true);
-					result = true;
-				}
-				else result = false;
-			}
-			else if (info.find("Libraw.Black") != info.end()) {
-				m_tree->SetItemText(id, _("subtract:camera"));
-				int subval = atoi(dib->getInfoValue("Libraw.Black").c_str());
-				subtract = (float) subval / 65536.0;
-				dib->ApplySubtract(subtract, subtract, subtract, subtract, true, threadcount);
-				m_display->SetModified(true);
-				result = true;
-			}
-
-		}
-		else if (param == "file") {
-			m_tree->SetItemText(id, _("subtract:file"));
-			if (wxFileName::FileExists(wxString(p[1]))) {
-				if (dib->ApplySubtract(p[1].c_str(), true, threadcount)) {
-					m_display->SetModified(true);
-					result = true;
-				}
-				else {
-					wxMessageBox(_("subtract image subtraction not successful."));
-					result = false;
-				}
-			}
-			else {
-				wxMessageBox(wxString::Format(_("subtract image file %s not found."),p[1].c_str()));
-				result = false;
-			}
-		}
-		wxString d = duration();
-
-		if (result) 
-			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.subtract.log","0") == "1"))
-				log(wxString::Format(_("tool=subtract,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
-
-	}
-
-	dirty = false;
-
-	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
-}
-
-*/
 
 
 

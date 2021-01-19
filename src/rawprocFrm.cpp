@@ -1797,6 +1797,8 @@ void rawprocFrm::UpdateConfig(wxPropertyGridEvent& event)
 		pic->RefreshPic();
 	if (propname.Find("histogram") != wxNOT_FOUND)
 		pic->RefreshPic();
+	if (propname.Find("app.start.path") != wxNOT_FOUND)
+		openfilepath = wxString(myConfig::getConfig().getValueOrDefault("app.start.path",""));
 
 	//not ready for prime time
 	//if (propname.Find("backgroundcolor") != wxNOT_FOUND) SetBackground();
