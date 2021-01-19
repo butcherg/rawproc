@@ -93,6 +93,7 @@ wxDialog(parent, id, title, pos, size, wxCAPTION|wxRESIZE_BORDER)
 	Bind(wxEVT_BUTTON, &PropertyDialog::resetFilter, this, RESETFILTERID);
 }
 
+
 void PropertyDialog::LoadConfig()
 {
 	std::map<std::string, std::string> props = myConfig::getConfig().getDefault();
@@ -104,8 +105,17 @@ void PropertyDialog::LoadConfig()
 		wxString name = it->first.c_str();
 		wxString value = it->second.c_str();
 
-		if (config.exists("Templates", it->first.c_str())) {
-			std::string tplate = config.getValue("Templates", it->first);
+		//find the applicable template, if it exists:
+		//if (config.exists("Templates", it->first.c_str())) {
+		std::string tplate = config.match_name("Templates", it->first.c_str());
+		
+		
+		//bool wild = false;
+		//if (it->first.find("*") != std::string::npos) wild = true;
+		//if (wild) printf("wild: %s\n",it->first.c_str()); fflush(stdout);
+		
+		if (tplate != std::string()) {
+			//std::string tplate = config.getValue("Templates", it->first);
 			if (tplate.find_first_of("|") != std::string::npos) {
 				wxArrayString choices = split(wxString(tplate.c_str()), "|");
 				wxPGChoices ch(choices);
@@ -122,9 +132,8 @@ void PropertyDialog::LoadConfig()
 				wxPGProperty* prop = pg->Append(new wxLongStringProperty(name, wxPG_LABEL, value));
 			}
 		}
-		else
-
-			pg->Append(new wxStringProperty(name, name, value));
+		//if no template:
+		else pg->Append(new wxStringProperty(name, name, value));
 	}
 	
 	pg->Sort();

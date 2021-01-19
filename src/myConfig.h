@@ -16,6 +16,7 @@ public:
 	static myConfig & getConfig();
 
 	bool flush();
+	std::string match_name(std::string section, std::string name);
 	bool exists(std::string name);
 	bool exists(std::string section, std::string name);
 	std::string getValue(std::string name);
