@@ -237,6 +237,7 @@ void PicPanel::SetPic(gImage * dib, GIMAGE_CHANNEL channel)
 			
 			int name;
 			//parm display.cms.displayprofile.<number>: Filename of the display profile for the enumerated display.
+			//template display.cms.displayprofile.*=iccfile
 			std::map<std::string, std::string> p = myConfig::getConfig().getSubset("display.cms.displayprofile.");
 			int disp = wxDisplay::GetFromWindow(GetParent());
 			for (std::map<std::string, std::string>::iterator it=p.begin(); it!=p.end(); ++it) {

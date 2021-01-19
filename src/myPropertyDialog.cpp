@@ -106,13 +106,7 @@ void PropertyDialog::LoadConfig()
 		wxString value = it->second.c_str();
 
 		//find the applicable template, if it exists:
-		//if (config.exists("Templates", it->first.c_str())) {
 		std::string tplate = config.match_name("Templates", it->first.c_str());
-		
-		
-		//bool wild = false;
-		//if (it->first.find("*") != std::string::npos) wild = true;
-		//if (wild) printf("wild: %s\n",it->first.c_str()); fflush(stdout);
 		
 		if (tplate != std::string()) {
 			//std::string tplate = config.getValue("Templates", it->first);

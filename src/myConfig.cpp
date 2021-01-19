@@ -247,27 +247,20 @@ bool myConfig::exists(std::string section, std::string name)
 	return false;
 }
 
-//wildcard match:
+//wildcard match, property names must be of the form 'part1.part2.part3...' :
 std::string myConfig::match_name(std::string section, std::string name)
-{
-	if (exists(section,name)) {
-		std::vector<std::string> match = split(name, ".");
-		std::map<std::string, std::string> temps = getSection(section);
-		for (std::map<std::string, std::string>::iterator it=temps.begin(); it!=temps.end(); ++it) {
-			
-			bool wild = false;
-			if (it->first.find("*") != std::string::npos) wild = true;
-			if (wild) printf("%s\n",it->first.c_str()); fflush(stdout);
-			
-			std::vector<std::string> prop = split(it->first, ".");
-			bool found = true;
-			for (unsigned i = 0; i< prop.size() -1; i++) {
-				if (wild) printf("%s : %s\n",prop[i].c_str(), match[i].c_str()); fflush(stdout);
-				if (prop[i] == "*") continue;
-				if (match[i] != prop[i]) {found = false; break; }
-			}
-			if (found) return it->second;
+{	
+	std::vector<std::string> match = split(name, ".");
+	std::map<std::string, std::string> temps = getSection(section);
+	for (std::map<std::string, std::string>::iterator it=temps.begin(); it!=temps.end(); ++it) {
+		std::vector<std::string> prop = split(it->first, ".");
+		if (prop.size() != match.size()) continue;
+		bool found = true;
+		for (unsigned i = 0; i< prop.size(); i++) {
+			if (prop[i] == "*") continue;
+			if (match[i] != prop[i]) {found = false; break; }
 		}
+		if (found) return it->second;
 	}
 	return std::string();
 }
