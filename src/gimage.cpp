@@ -5064,7 +5064,11 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 	lns = lenses [0];
 	
 	float crop = cam->CropFactor;
+#ifdef LF_0395
 	int mods =  lns->AvailableModifications(crop);
+#else
+	int mods =  LF_MODIFY_TCA | LF_MODIFY_VIGNETTING | LF_MODIFY_DISTORTION | LF_MODIFY_GEOMETRY | LF_MODIFY_SCALE;
+#endif
 	lf_free (cameras);
 	lf_free (lenses);
 	return mods;

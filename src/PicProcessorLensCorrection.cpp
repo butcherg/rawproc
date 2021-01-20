@@ -158,6 +158,9 @@ class LensCorrectionPanel: public PicProcPanel
 
 			SetSizerAndFit(m);
 			SetFocus();
+			
+			setModifications();
+			
 			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
@@ -217,6 +220,8 @@ class LensCorrectionPanel: public PicProcPanel
 				}
 			}
 			((PicProcessorLensCorrection *) q)->setAlternates(cam->GetValue(), lens->GetValue());
+			setModifications();
+			
 		}
 
 		
@@ -225,12 +230,22 @@ class LensCorrectionPanel: public PicProcPanel
 			wxString altcam = cam->GetValue();
 			wxString altlens = lens->GetValue();
 			((PicProcessorLensCorrection *) q)->setAlternates(altcam, altlens);
+			setModifications();
+		}
+		
+		void setAlternates()
+		{
+			wxString altcam = cam->GetValue();
+			wxString altlens = lens->GetValue();
 		}
 		
 		void setModifications()
 		{
-			wxString altcam = cam->GetValue();
-			wxString altlens = lens->GetValue();
+			int mods = ((PicProcessorLensCorrection *) q)->getModifications();
+			if (mods & LF_MODIFY_TCA) ca->Enable(true); else ca->Enable(false);
+			if (mods & LF_MODIFY_VIGNETTING) vig->Enable(true); else vig->Enable(false);
+			if (mods & LF_MODIFY_DISTORTION) dist->Enable(true); else dist->Enable(false);
+			//if (mods & LF_MODIFY_SCALE) crop->Enable(true); else crop->Enable(false);
 		}
 
 		void paramChanged(wxCommandEvent& event)
@@ -359,8 +374,8 @@ int PicProcessorLensCorrection::getModifications()
 	if (ldb == NULL) return 0;
 	wxString camera = metadatacamera;
 	wxString lens = metadatalens;
-	if (camera == "(none)") camera = altcamera;
-	if (lens == "(none)") lens = altlens;
+	if (altcamera != "") camera = altcamera;
+	if (altlens != "") lens = altlens;
 	if (camera == "") return 0;
 	if (lens == "") return 0;
 	
