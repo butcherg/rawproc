@@ -226,6 +226,12 @@ class LensCorrectionPanel: public PicProcPanel
 			wxString altlens = lens->GetValue();
 			((PicProcessorLensCorrection *) q)->setAlternates(altcam, altlens);
 		}
+		
+		void setModifications()
+		{
+			wxString altcam = cam->GetValue();
+			wxString altlens = lens->GetValue();
+		}
 
 		void paramChanged(wxCommandEvent& event)
 		{
@@ -346,6 +352,20 @@ void PicProcessorLensCorrection::setAlternates(wxString acam, wxString alens)
 lfDatabase * PicProcessorLensCorrection::getLensDatabase()
 {
 	return ldb;
+}
+
+int PicProcessorLensCorrection::getModifications()
+{
+	if (ldb == NULL) return 0;
+	wxString camera = metadatacamera;
+	wxString lens = metadatalens;
+	if (camera == "(none)") camera = altcamera;
+	if (lens == "(none)") lens = altlens;
+	if (camera == "") return 0;
+	if (lens == "") return 0;
+	
+	return dib->lensfunAvailableModifications(ldb, camera.ToStdString(), lens.ToStdString()); 
+	
 }
 
 bool PicProcessorLensCorrection::processPicture(gImage *processdib) 

@@ -5042,6 +5042,34 @@ GIMAGE_ERROR gImage::lensfunFindCameraLens(lfDatabase * ldb, std::string camera,
 	return GIMAGE_OK;
 }
 
+int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, std::string lens)
+{
+	//get camera instance:
+	const lfCamera *cam = NULL;
+	const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camera.c_str());
+	if (cameras == NULL) {
+		lf_free (cameras);
+		return 0;
+	}
+	cam = cameras[0];
+
+	//get lens instance:
+	const lfLens *lns = NULL;
+	const lfLens **lenses = NULL;
+	lenses = ldb->FindLenses (cam, NULL, lens.c_str());
+	if (lenses == NULL) {
+		lf_free (lenses);
+		return 0;
+	}
+	lns = lenses [0];
+	
+	float crop = cam->CropFactor;
+	int mods =  lns->AvailableModifications(crop);
+	lf_free (cameras);
+	lf_free (lenses);
+	return mods;
+}
+
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;

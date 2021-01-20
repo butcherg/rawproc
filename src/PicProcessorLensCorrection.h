@@ -15,6 +15,7 @@ class PicProcessorLensCorrection: public PicProcessor
 		void createPanel(wxSimplebook* parent);
 		void setAlternates(wxString acam, wxString alens);
 		lfDatabase * getLensDatabase();
+		int getModifications();
 		bool processPicture(gImage *processdib);
 		
 		static lfDatabase * findLensfunDatabase(); //call this to get the database for the constructor
