@@ -3652,13 +3652,13 @@ bool gImage::ApplyHLRecover(int threadcount)
 		for (unsigned y=0; y<h; y++) {
 			for (unsigned x=0; x<w; x++) {
 				unsigned pos = x + y*w;
-				red[y][x]   = image[pos].r;
-				green[y][x] = image[pos].g;
-				blue[y][x]  = image[pos].b;
-
-				if (ra < image[pos].r) ra = image[pos].r;
-				if (ga < image[pos].g) ga = image[pos].g;
-				if (ba < image[pos].b) ba = image[pos].b;
+				red[y][x]   = image[pos].r * 65535.f;  //hlrecover requires scaling the data to RT range, 0.0-65535.0...
+				green[y][x] = image[pos].g * 65535.f;
+				blue[y][x]  = image[pos].b * 65535.f;
+				
+				if (ra < red[y][x])   ra = red[y][x];
+				if (ga < green[y][x]) ga = green[y][x];
+				if (ba < blue[y][x])  ba = blue[y][x];
 			}
 		}
 
@@ -3673,12 +3673,12 @@ bool gImage::ApplyHLRecover(int threadcount)
 	float clmax[3]; // = {1.0, 1.0, 1.0}; // in case I want to hard-code them for testing...
 	std::vector<std::string> camwb = split(getInfoValue("Libraw.WhiteBalance"), ",");
 	//float clippoint = atof(getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
-	float clippoint = 1.0;
+	float clippoint = 65535.0;
 	clmax[0] = clippoint * atof(camwb[0].c_str());
 	clmax[1] = clippoint * atof(camwb[1].c_str());
 	clmax[2] = clippoint * atof(camwb[2].c_str());
 
-	printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
+	//printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 
 	HLRecovery_inpaint(w,h, red, green, blue, chmax, clmax, f);
 
@@ -3686,9 +3686,9 @@ bool gImage::ApplyHLRecover(int threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
-			image[pos].r = red[y][x];
-			image[pos].g = green[y][x];
-			image[pos].b = blue[y][x];
+			image[pos].r = red[y][x] / 65535.f;
+			image[pos].g = green[y][x] / 65535.f;
+			image[pos].b = blue[y][x] / 65535.f;
 		}
 	}
 

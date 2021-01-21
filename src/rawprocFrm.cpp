@@ -314,7 +314,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
 #ifdef USE_LIBRTPROCESS
 	//disable - figure out hlrecover
-	//ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
 #endif
 #ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
