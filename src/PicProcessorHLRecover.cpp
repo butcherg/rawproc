@@ -31,14 +31,14 @@ class HLRecoverPanel: public PicProcPanel
 			//g->Add(sharp , wxGBPosition(2,1), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 			//val = new wxStaticText(this,wxID_ANY, params, wxDefaultPosition, wxSize(30, -1));
 			//g->Add(val , wxGBPosition(2,2), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
-			btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			//btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
 			//btn->SetToolTip("Reset to default");
-			g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
+			//g->Add(btn, wxGBPosition(2,3), wxDefaultSpan, wxALIGN_LEFT | wxALL, 3);
 
 			SetSizerAndFit(g);
 			SetFocus();
 			//t.SetOwner(this);
-			Bind(wxEVT_BUTTON, &HLRecoverPanel::OnButton, this);
+			//Bind(wxEVT_BUTTON, &HLRecoverPanel::OnButton, this);
 			//Bind(wxEVT_SCROLL_CHANGED, &HLRecoverPanel::OnChanged, this);
 			//Bind(wxEVT_SCROLL_THUMBTRACK, &HLRecoverPanel::OnThumbTrack, this);
 			Bind(wxEVT_CHECKBOX, &HLRecoverPanel::onEnable, this, HLRECOVERENABLE);
@@ -91,7 +91,7 @@ class HLRecoverPanel: public PicProcPanel
 	private:
 		//wxSlider *sharp;
 		//wxStaticText *val;
-		wxBitmapButton *btn;
+		//wxBitmapButton *btn;
 		wxCheckBox *enablebox;
 		//wxTimer t;
 		bool low;
