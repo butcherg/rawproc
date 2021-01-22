@@ -727,6 +727,31 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+std::map<std::string,std::string> parse_hlrecover(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		pmap["mode"] = "hlrecover";
+		pmap["cmdlabel"] = "hlrecover";
+		
+	}
+	return pmap;
+}
+
 //img <li><b>lenscorrection</b> Apply the specified lens corrections (ca,vig,dist,autocrop) using the lensfun data for that lens. algo applies to dist and ca
 //img <ul>
 //img <li><b>:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby) </b> - positional format.</li>

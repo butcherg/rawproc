@@ -686,6 +686,29 @@ std::map<std::string,std::string> process_gray(gImage &dib, std::map<std::string
 	return result;
 }
 
+std::map<std::string,std::string> process_hlrecover(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "curve:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.crop.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		_mark();
+		dib.ApplyHLRecover(threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("hlrecover");
+		result["treelabel"] = "hlrecover";
+		result["imgmsg"] = string_format("(%d threads, %ssec)", threadcount, result["duration"].c_str());
+	}
+	return result;
+}
+
 #ifdef USE_LENSFUN
 std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<std::string,std::string> params)
 {

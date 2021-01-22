@@ -57,6 +57,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "denoise") params = parse_denoise(parms);
 	else if (command == "exposure") params = parse_exposure(parms);
 	else if (command == "gray") params = parse_gray(parms);
+	else if (command == "hlrecover") params = parse_hlrecover(parms);
 #ifdef USE_LENSFUN
 	else if (command == "lenscorrection") params = parse_lenscorrection(parms);
 #endif
@@ -97,6 +98,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "denoise") result =  process_denoise(dib, params);
 	else if (command == "exposure") result =  process_exposure(dib, params);
 	else if (command == "gray") result =  process_gray(dib, params);
+	else if (command == "hlrecover") result =  process_hlrecover(dib, params);
 #ifdef USE_LENSFUN
 	else if (command == "lenscorrection") result =  process_lenscorrection(dib, params);
 #endif
