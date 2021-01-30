@@ -296,23 +296,23 @@ lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
 	if (lensfundatadir != "") {
 #ifdef LF_0395
 		e = lfdb->Load(lensfundatadir.c_str());
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect"),wxString(lensfundatadir)));
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s."),wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect."),wxString(lensfundatadir)));
 #else
 		if (lfdb->LoadDirectory(lensfundatadir.c_str())) 
 			e = LF_NO_ERROR;
 		else 
-			wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s"),wxString(lensfundatadir)));
+			wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s."),wxString(lensfundatadir)));
 #endif
 	}
 	else {
 		e = lfdb->Load();
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location")));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect")));
+		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at a system location.")));
+		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database (system location) format is incorrect.")));
 	}
 		
 	if (e == LF_NO_ERROR) return lfdb;
-	wxMessageBox(_("Error: lens correction database read failed"));
+	wxMessageBox(_("Error: lens correction database read failed."));
 	delete lfdb;
 	return NULL;
 }
@@ -441,7 +441,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 				success = true;
 			}
 			else {
-				wxMessageBox(wxString::Format(_("Cannot find a camera matching %s in database\n"), camspec.c_str()));
+				wxMessageBox(wxString::Format(_("Error: Cannot find a camera matching %s in database."), camspec.c_str()));
 				success = false;
 			}
 			lf_free (cameras);
@@ -456,7 +456,10 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 					success = true;
 				}
 				else {
-					wxMessageBox(wxString::Format(_("Cannot find a lens matching %s in database\n"), lensspec.c_str()));
+					if (lensspec.find("(not found)") != std::string::npos) 
+						wxMessageBox(_("Error: Lens not specified."));
+					else
+						wxMessageBox(wxString::Format(_("Error: Cannot find a lens matching %s and %s in database."), camspec.c_str(), lensspec.c_str()));
 					success = false;
 				}
 				lf_free (lenses);
