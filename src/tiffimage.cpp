@@ -225,7 +225,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		}
 
 		TIFFWriteDirectory( tif );
-	
+/*
 		uint64 dir_offset = 0;
 		TIFFCreateEXIFDirectory(tif);
 
@@ -252,7 +252,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		if (!TIFFWriteCustomDirectory( tif, &dir_offset)) printf("TIFFWriteCustomDirectory failed\n");
 		if (!TIFFSetDirectory(tif, 0)) printf("TIFFSetDirectory failed\n");
 		if (!TIFFSetField(tif, TIFFTAG_EXIFIFD, dir_offset )) printf("TIFFSetField failed\n");
-		
+*/		
 
 		(void) TIFFClose(tif);
 		if (buf) _TIFFfree(buf);
