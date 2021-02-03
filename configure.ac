@@ -135,6 +135,14 @@ then
 	CXXFLAGS="$CXXFLAGS -DUSE_LCMS_FASTFLOAT"
 fi
 
+#exiv2:
+PKG_CHECK_MODULES([EXIV2],[exiv2], [
+	CPPFLAGS="$EXIV2_CFLAGS $CPPFLAGS"
+	LIBS="$EXIV2_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
+
 
 #libraw-dcraw:
 AC_ARG_ENABLE([dcraw],

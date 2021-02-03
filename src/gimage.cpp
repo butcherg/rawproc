@@ -18,6 +18,7 @@
 #include "gimage/strutil.h"
 #include "fileutil.h"
 #include "cJSON.h"
+#include "exiv2/exiv2.hpp"
 #ifdef USE_LIBRTPROCESS
 #include <rtprocess/librtprocess.h>
 #endif
@@ -6027,6 +6028,23 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 //Savers:
 
 
+GIMAGE_ERROR gImage::insertMetadata(std::string filename, bool includeprofile)
+{
+	Exiv2::ExifData exifData;
+	
+	//exifData["Exif.Photo.ISOSpeedRatings"].setValue(imginfo["ISOSPeedRatings"]);
+	//exifData["Exif.Photo.ExposureTime"].setValue(imginfo["ExposureTime"]);
+	//exifData["Exif.Photo.FNumber"].setValue(imginfo["FNumber"]);
+	//exifData["Exif.Photo.FocalLength"].setValue(imginfo["FocalLength"]);
+	exifData["Exif.Photo.ImageDescription"].setValue(imginfo["ImageDescription"]);
+	//exifData.sortByTag(); 
+	auto image = Exiv2::ImageFactory::open(filename);
+	image->setExifData(exifData);
+	image->writeMetadata();
+
+	return GIMAGE_OK;
+}
+
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
@@ -6042,10 +6060,11 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
 
 	if (ftype == FILETYPE_TIFF) {
-		if (profile)
-			return saveTIFF(filename, bitfmt, params, profile, intent);
-		else
-			return saveTIFF(filename, bitfmt, params);
+		//if (profile)
+		//	return saveTIFF(filename, bitfmt, params, profile, intent);
+		//else
+			GIMAGE_ERROR result = saveTIFF(filename, bitfmt, params);
+			if (result == GIMAGE_OK) insertMetadata(filename);
 	}
 	if (ftype == FILETYPE_JPEG) {
 		if (profile)

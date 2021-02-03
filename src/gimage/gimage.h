@@ -376,6 +376,8 @@ class gImage
 		//void ApplyYShear(double rangle, int threadcount);
 		
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
+		
+		GIMAGE_ERROR insertMetadata(std::string filename, bool includeprofile=true);
 
 
 
