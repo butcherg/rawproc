@@ -941,6 +941,8 @@ std::string gImage::LibraryVersions()
 	std::ostringstream s;
 	s << (int) cmsGetEncodedCMMversion();
 	verstring.append(s.str());
+	verstring.append("\nExiv2: ");
+	verstring.append(EXV_PACKAGE_VERSION);
 	//verstring.append("\n");
 	return verstring;
 
