@@ -119,16 +119,17 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			if (sampleformat == SAMPLEFORMAT_VOID) info["SampleFormat"]="void";
 		}
 		if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &uval)) info["Orientation"]=tostr(uval);
-
+/*
 		if (TIFFGetField(tif, TIFFTAG_ICCPROFILE, &len, &buffer)) {
 			*icc_m = new char[len];
 			memcpy(*icc_m, buffer, len);
 			*icclength = len;
 		}
-		else {
+*/
+//		else {
 			*icc_m = NULL;
 			*icclength = 0;
-		}
+//		}
 		
 		img = new char[w*h*c*(b/8)];
 		buf = (char *) _TIFFmalloc(TIFFScanlineSize(tif));
@@ -141,7 +142,7 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			dst += stride;
 		}
 		
-
+/*
 		uint32 read_dir_offset; uint32 count;
 		float fval;
 		uint16 * sval;
@@ -154,6 +155,7 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			}
 			else printf("TIFFReadEXIFDirectory failed\n");
 		}
+*/
 		
 		*width = w;
 		*height = h;

@@ -355,7 +355,7 @@ char * _loadJPEG(const char *filename,
 		parse_APP1marker(marker->data-2, marker->data_length, info);
 		marker = marker->next;
 	}
-
+/*
 	if (read_icc_profile (&cinfo, &buffer, &len)) {
 		*iccprofile = new char[len];
 		memcpy(*iccprofile, buffer, len);
@@ -363,9 +363,10 @@ char * _loadJPEG(const char *filename,
 		*icclength = len;
 	}
 	else {
+*/
 		*iccprofile = NULL;
 		*icclength = 0;
-	}
+//	}
 
 	jpeg_start_decompress(&cinfo);
 

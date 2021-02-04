@@ -153,13 +153,14 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 
 	unsigned char * marker;
 	unsigned marker_length;
+/*
 	if (png_get_eXIf_1(png, pinfo, &marker_length, &marker))
 		parse_eXIf_chunk(marker, marker_length, info);
-
+*/
 	//for (std::map<std::string,std::string>::iterator it=info.begin(); it!=info.end(); ++it) {
 	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str());
 	//}
-
+/*
 	if (png_get_valid(png, pinfo, PNG_INFO_iCCP))
 	{
 		unsigned ProfileLen;
@@ -177,9 +178,10 @@ char * _loadPNG(const char *filename, unsigned *width, unsigned *height, unsigne
 		*icclength = ProfileLen;
 	}
 	else {
+*/
 		*icc_m = NULL;
 		*icclength = 0;
-	}
+//	}
 
 	png_read_update_info(png, pinfo);
 

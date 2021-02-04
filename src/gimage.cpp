@@ -5888,13 +5888,73 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 //Loaders:
 
+GIMAGE_ERROR gImage::getMetadata(std::string filename)
+{
+	auto image = Exiv2::ImageFactory::open(filename);
+	assert(image.get() != 0);
+	image->readMetadata();
+ 
+	Exiv2::ExifData &exifData = image->exifData();
+	
+	//exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+	
+	//rationals/floats:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ExposureTime")) != exifData.end())
+		imginfo["ExposureTime"] = tostr(exifData["Exif.Photo.ExposureTime"].toFloat());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FNumber")) != exifData.end())
+		imginfo["FNumber"] = tostr(exifData["Exif.Photo.FNumber"].toFloat());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength")) != exifData.end())
+		imginfo["FocalLength"] = tostr(exifData["Exif.Photo.FocalLength"].toFloat());
+		
+	//uints:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ISOSpeedRatings")) != exifData.end())
+		imginfo["ISOSpeedRatings"] = tostr((unsigned short) exifData["Exif.Photo.ISOSpeedRatings"].toLong());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation")) != exifData.end())
+		imginfo["Orientation"] = tostr((unsigned short) exifData["Exif.Image.Orientation"].toLong());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.PhotometricInterpretation")) != exifData.end())
+		imginfo["PhotometricInterpretation"] = tostr((unsigned short) exifData["Exif.Image.PhotometricInterpretation"].toLong());
+		
+	//strings:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.ImageDescription")) != exifData.end())
+		imginfo["ImageDescription"] = exifData["Exif.Image.ImageDescription"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Make")) != exifData.end())
+		imginfo["Make"] = exifData["Exif.Image.Make"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Model")) != exifData.end())
+		imginfo["Model"] = exifData["Exif.Image.Model"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.LensModel")) != exifData.end())
+		imginfo["LensModel"] = exifData["Exif.Photo.LensModel"].toString();
+		
+	//ICC profile:
+	char * prof;
+	if (image->iccProfileDefined()) {
+		prof = new char[image->iccProfile()->size_]; 
+		memcpy(prof, image->iccProfile()->pData_, image->iccProfile()->size_);
+		setProfile(prof, image->iccProfile()->size_);
+	}
+
+	return GIMAGE_OK;
+}
+
 gImage gImage::loadImageFile(const char * filename, std::string params)
 {
+	gImage image;
 	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
 
-	if (ext == FILETYPE_TIFF) return gImage::loadTIFF(filename, params);
-	else if (ext == FILETYPE_JPEG) return gImage::loadJPEG(filename, params);
-	else if (ext == FILETYPE_PNG) return gImage::loadPNG(filename, params);
+	if (ext == FILETYPE_TIFF) {
+		image = gImage::loadTIFF(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
+	else if (ext == FILETYPE_JPEG) {
+		image = gImage::loadJPEG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
+	else if (ext == FILETYPE_PNG) {
+		image = gImage::loadPNG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
 	else return gImage::loadRAW(filename, params);
 }
 
