@@ -6126,23 +6126,37 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
 
 	GIMAGE_ERROR result;
+	
+	//if a profile was passed in params, convert to it, otherwise save with the assigned profile
 	if (ftype == FILETYPE_TIFF) {
-		result = saveTIFF(filename, bitfmt, params);
+		if (profile)
+			result = saveTIFF(filename, bitfmt, params, profile, intent); //saveTIFF will convert image to the specified profile
+		else
+			result = saveTIFF(filename, bitfmt, params);//saveTIFF will save the image in the assigned profile (if one is assigned...)
 	}
 	else if (ftype == FILETYPE_JPEG) {
-		result = saveJPEG(filename, bitfmt, params);
+		if (profile)
+			result = saveJPEG(filename, bitfmt, params, profile, intent);
+		else
+			result = saveJPEG(filename, bitfmt, params);
 	}
 	else if (ftype == FILETYPE_PNG) {
-		result = savePNG(filename, bitfmt, params);
+		if (profile)
+			result = savePNG(filename, bitfmt, params, profile, intent);
+		else
+			result = savePNG(filename, bitfmt, params);
 	}
 	else if (ftype == FILETYPE_DATA) {
 		return saveData(filename, bitfmt, params);
 	}
 	
-	bool excludeexif = true;
-	if (p.find("excludeexif") == p.end()) excludeexif = false;
-	bool excludeicc = true;
-	if (p.find("excludeicc") == p.end()) excludeicc = false;
+	bool excludeexif = false;
+	if (p.find("excludeexif") != p.end()) excludeexif = true;
+	bool excludeicc = false;
+	if (p.find("excludeicc") != p.end()) excludeicc = true;
+	
+	//don't include a profile if there was none either in the gImage class or specified for output transform:
+	if (profile == NULL & this->profile == NULL) excludeicc = true;
 	
 	if (result == GIMAGE_OK) { 
 		if (excludeexif & excludeicc) //neither
@@ -6190,6 +6204,114 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 }
 
 
+
+GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+	unsigned b = 8;
+	if (bits == BPP_8)  b = 8;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+	
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writeJPEG(filename, getTransformedImageData(BPP_8, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize); 
+			//_writeJPEG(filename, getImageData(BPP_8, profile),  w, h, c, imginfo, params); 
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params, this->profile, profile_length);
+		else
+			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params);
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+	unsigned b = 0;
+	if (bits == BPP_16) b = 16;
+	else if (bits == BPP_8)  b = 8;
+	else if (bits == BPP_FP | bits == BPP_UFP) b = 32;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
+		else
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+
+	unsigned b = 0;
+	if (bits == BPP_16) b = 16;
+	else if (bits == BPP_8)  b = 8;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writePNG(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize);
+			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params, this->profile, profile_length);	
+		else
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params);	
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+//saves the image as row/column comma-separated text data
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);
@@ -6379,111 +6501,6 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 	else return GIMAGE_UNSUPPORTED_FILEFORMAT;
 }
 
-GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-	unsigned b = 8;
-	if (bits == BPP_8)  b = 8;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-	
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writeJPEG(filename, getTransformedImageData(BPP_8, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize); 
-			//_writeJPEG(filename, getImageData(BPP_8, profile),  w, h, c, imginfo, params); 
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params, this->profile, profile_length);
-		else
-			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params);
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
-
-GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-	unsigned b = 0;
-	if (bits == BPP_16) b = 16;
-	else if (bits == BPP_8)  b = 8;
-	else if (bits == BPP_FP | bits == BPP_UFP) b = 32;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
-		else
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
-
-GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-
-	unsigned b = 0;
-	if (bits == BPP_16) b = 16;
-	else if (bits == BPP_8)  b = 8;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writePNG(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize);
-			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params, this->profile, profile_length);	
-		else
-			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params);	
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
 
 
 //ICC Profiles:
