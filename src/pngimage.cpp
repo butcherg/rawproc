@@ -275,6 +275,7 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 		PNG_FILTER_TYPE_DEFAULT
 	);
 
+/*
 	if (p.find("excludeexif") == p.end()) {
 		unsigned char * marker;
 		unsigned markerlength;
@@ -285,7 +286,7 @@ bool _writePNG(const char *filename, char *imagedata, unsigned width, unsigned h
 	if (p.find("excludeicc") == p.end()) 
 		if (iccprofile) 
 			png_set_iCCP(png, pinfo, "Embedded Profile", 0, (png_const_bytep)iccprofile, iccprofilelength);
-
+*/
 
 	png_write_info(png, pinfo);
 	

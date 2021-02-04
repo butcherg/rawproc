@@ -452,6 +452,7 @@ bool _writeJPEG(const char *filename,
 
 	jpeg_start_compress(&cinfo, TRUE);
 
+/*
 	//$ <li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br>
 	if (p.find("excludeexif") == p.end()) {
 		marker =  construct_APP1marker(info, &markerlength);
@@ -463,6 +464,7 @@ bool _writeJPEG(const char *filename,
 	if (p.find("excludeicc") == p.end()) {
 		if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
 	}
+*/
 
 	row_stride = cinfo.image_width * cinfo.input_components;
 	dst = (JSAMPROW) imagedata;

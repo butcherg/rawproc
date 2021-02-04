@@ -6029,7 +6029,7 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 
 
 //inserMetadata uses Exiv2 for all output file types, saves a pre-defined subset of the input file's metadata
-GIMAGE_ERROR gImage::insertMetadata(std::string filename, bool includeprofile)
+GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile)
 {
 	Exiv2::ExifData exifData;
 
@@ -6093,9 +6093,13 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, bool includeprofile)
 	exifData.sortByTag(); 
 	auto image = Exiv2::ImageFactory::open(filename);
 	image->setExifData(exifData);
-	if (includeprofile) {
-		Exiv2::DataBuf iccprofile((Exiv2::byte *) profile, profile_length);
-		image->setIccProfile(iccprofile);
+	if (profile != NULL) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+		Exiv2::DataBuf iccprof((Exiv2::byte *) iccprofile, iccprofilesize);
+		image->setIccProfile(iccprof);
+		delete [] iccprofile;
 	}
 	image->writeMetadata();
 
@@ -6120,21 +6124,19 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 		//if (profile)
 		//	return saveTIFF(filename, bitfmt, params, profile, intent);
 		//else
-			GIMAGE_ERROR result = saveTIFF(filename, bitfmt, params);
-			if (result == GIMAGE_OK) insertMetadata(filename, false);
-			return result;
+		GIMAGE_ERROR result = saveTIFF(filename, bitfmt, params);
+		if (result == GIMAGE_OK) insertMetadata(filename, profile);
+		return result;
 	}
 	if (ftype == FILETYPE_JPEG) {
-		if (profile)
-			return saveJPEG(filename, bitfmt, params, profile, intent);
-		else
-			return saveJPEG(filename, bitfmt, params);
+		GIMAGE_ERROR result = saveJPEG(filename, bitfmt, params);
+		if (result == GIMAGE_OK) insertMetadata(filename, profile);
+		return result;
 	}
 	if (ftype == FILETYPE_PNG) {
-		if (profile)
-			return savePNG(filename, bitfmt, params, profile, intent);
-		else
-			return savePNG(filename, bitfmt, params);
+		GIMAGE_ERROR result = savePNG(filename, bitfmt, params);
+		if (result == GIMAGE_OK) insertMetadata(filename, profile);
+		return result;
 	}
 	if (ftype == FILETYPE_DATA) {
 		return saveData(filename, bitfmt, params);

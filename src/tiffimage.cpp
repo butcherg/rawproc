@@ -225,34 +225,6 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		}
 
 		TIFFWriteDirectory( tif );
-/*
-		uint64 dir_offset = 0;
-		TIFFCreateEXIFDirectory(tif);
-
-		if (info.find("ISOSpeedRatings") != info.end())  {
-			uint16 iso = (uint16) atoi(info["ISOSpeedRatings"].c_str());
-			if (!TIFFSetField(tif, EXIFTAG_ISOSPEEDRATINGS, 1, &iso)) printf("TIFFSetField failed\n");
-		}
-
-		if (info.find("ExposureTime") != info.end())  {
-			double extime = atof(info["ExposureTime"].c_str());
-			if (!TIFFSetField(tif, EXIFTAG_EXPOSURETIME, extime)) printf("TIFFSetField failed\n");
-		}
-
-		if (info.find("FNumber") != info.end())  {
-			double fnbr = atof(info["FNumber"].c_str());
-			if (!TIFFSetField(tif, EXIFTAG_FNUMBER, fnbr)) printf("TIFFSetField failed\n");
-		}
-
-		if (info.find("FocalLength") != info.end())  {
-			double flen = atof(info["FocalLength"].c_str());
-			if (!TIFFSetField(tif, EXIFTAG_FOCALLENGTH, flen)) printf("TIFFSetField failed\n");
-		}
-
-		if (!TIFFWriteCustomDirectory( tif, &dir_offset)) printf("TIFFWriteCustomDirectory failed\n");
-		if (!TIFFSetDirectory(tif, 0)) printf("TIFFSetDirectory failed\n");
-		if (!TIFFSetField(tif, TIFFTAG_EXIFIFD, dir_offset )) printf("TIFFSetField failed\n");
-*/		
 
 		(void) TIFFClose(tif);
 		if (buf) _TIFFfree(buf);
