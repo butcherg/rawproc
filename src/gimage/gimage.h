@@ -377,7 +377,7 @@ class gImage
 		
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
 		
-		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL);
+		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
 
 
 

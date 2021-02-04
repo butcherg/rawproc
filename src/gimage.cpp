@@ -6031,68 +6031,71 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 
 
 //inserMetadata uses Exiv2 for all output file types, saves a pre-defined subset of the input file's metadata
-GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile)
+GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
 {
 	Exiv2::ExifData exifData;
 
-	//rationals:	
-	float exposuretime = atof(imginfo["ExposureTime"].c_str());
-	int numerator, denominator;
-	if (exposuretime < 1.0) {
-		numerator = 1;
-		denominator = 1.0 / exposuretime;
-	}
-	else {
-		numerator = exposuretime;
-		denominator = 1;
-	}
-	exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
+	if (!excludeexif) {
+		//rationals:	
+		float exposuretime = atof(imginfo["ExposureTime"].c_str());
+		int numerator, denominator;
+		if (exposuretime < 1.0) {
+			numerator = 1;
+			denominator = 1.0 / exposuretime;
+		}
+		else {
+			numerator = exposuretime;
+			denominator = 1;
+		}
+		exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
 	
-	float fnumber = atof(imginfo["FNumber"].c_str());
-	//int numerator, denominator;
-	if (fnumber < 1.0) {
-		numerator = 1;
-		denominator = 1.0 / fnumber;
-	}
-	else {
-		numerator = fnumber;
-		denominator = 1;
-	}
-	exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
+		float fnumber = atof(imginfo["FNumber"].c_str());
+		//int numerator, denominator;
+		if (fnumber < 1.0) {
+			numerator = 1;
+			denominator = 1.0 / fnumber;
+		}
+		else {
+			numerator = fnumber;
+			denominator = 1;
+		}
+		exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
 	
-	float focallength = atof(imginfo["FocalLength"].c_str());
-	//int numerator, denominator;
-	if (focallength < 1.0) {
-		numerator = 1;
-		denominator = 1.0 / focallength;
-	}
-	else {
-		numerator = focallength;
-		denominator = 1;
-	}
-	exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
+		float focallength = atof(imginfo["FocalLength"].c_str());
+		//int numerator, denominator;
+		if (focallength < 1.0) {
+			numerator = 1;
+			denominator = 1.0 / focallength;
+		}
+		else {
+			numerator = focallength;
+			denominator = 1;
+		}
+		exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
 	
-	//shorts:
-	uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
-	exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
+		//shorts:
+		uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
+		exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
 
-	uint16_t orientation = atoi(imginfo["Orientation"].c_str());
-	exifData["Exif.Image.Orientation"] =  orientation;
+		uint16_t orientation = atoi(imginfo["Orientation"].c_str());
+		exifData["Exif.Image.Orientation"] =  orientation;
 	
-	uint16_t photometricinterpretation = 2;  //RGB, default 
-	if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
-	exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
+		uint16_t photometricinterpretation = 2;  //RGB, default 
+		if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
+		exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
 	
-	//ASCIIs:
-	exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
+		//ASCIIs:
+		exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
 
-	exifData["Exif.Image.Make"] = imginfo["Make"];
+		exifData["Exif.Image.Make"] = imginfo["Make"];
 
-	exifData["Exif.Image.Model"] = imginfo["Model"];
+		exifData["Exif.Image.Model"] = imginfo["Model"];
 
-	exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+		exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
 	
-	exifData.sortByTag(); 
+		exifData.sortByTag(); 
+	}
+	
 	auto image = Exiv2::ImageFactory::open(filename);
 	image->setExifData(exifData);
 	if (profile != NULL) {
@@ -6122,29 +6125,41 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
 
+	GIMAGE_ERROR result;
 	if (ftype == FILETYPE_TIFF) {
-		//if (profile)
-		//	return saveTIFF(filename, bitfmt, params, profile, intent);
-		//else
-		GIMAGE_ERROR result = saveTIFF(filename, bitfmt, params);
-		if (result == GIMAGE_OK) insertMetadata(filename, profile);
-		return result;
+		result = saveTIFF(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_JPEG) {
-		GIMAGE_ERROR result = saveJPEG(filename, bitfmt, params);
-		if (result == GIMAGE_OK) insertMetadata(filename, profile);
-		return result;
+	else if (ftype == FILETYPE_JPEG) {
+		result = saveJPEG(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_PNG) {
-		GIMAGE_ERROR result = savePNG(filename, bitfmt, params);
-		if (result == GIMAGE_OK) insertMetadata(filename, profile);
-		return result;
+	else if (ftype == FILETYPE_PNG) {
+		result = savePNG(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_DATA) {
+	else if (ftype == FILETYPE_DATA) {
 		return saveData(filename, bitfmt, params);
 	}
-	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
-	return lasterror;
+	
+	bool excludeexif = true;
+	if (p.find("excludeexif") == p.end()) excludeexif = false;
+	bool excludeicc = true;
+	if (p.find("excludeicc") == p.end()) excludeicc = false;
+	
+	if (result == GIMAGE_OK) { 
+		if (excludeexif & excludeicc) //neither
+			insertMetadata(filename, NULL, true);
+		else if (excludeicc) //exif only
+			insertMetadata(filename);
+		else if (excludeexif) //icc only;
+			insertMetadata(filename, profile, true);
+		else //both
+			insertMetadata(filename, profile);
+
+		return result;
+	}
+	else {
+		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+		return lasterror;
+	}
 }
 
 GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string params)
