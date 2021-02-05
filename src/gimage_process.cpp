@@ -765,6 +765,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		std::string camera = dib.getInfoValue("Model");;
 		if (paramexists(params, "camera")) camera = params["camera"];
 		std::string lens = dib.getInfoValue("Lens");
+		if (lens == std::string()) lens = dib.getInfoValue("LensModel");
 		if (paramexists(params, "lens")) camera = params["lens"];
 
 		_mark();

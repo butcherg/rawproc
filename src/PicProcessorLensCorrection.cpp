@@ -315,6 +315,8 @@ PicProcessorLensCorrection::PicProcessorLensCorrection(lfDatabase * lfdatabase, 
 
 	if (info.find("Lens") != info.end())
 		metadatalens = wxString(info["Lens"].c_str());
+	else if (info.find("LensModel") != info.end())
+		metadatalens = wxString(info["LensModel"].c_str());
 	else
 		metadatalens = "(none)";
 
