@@ -860,6 +860,8 @@ std::string gImage::getProfilePath()
 
 std::map<std::string,std::string> gImage::getInfo(const char * filename)
 {
+		return loadImageFileInfo(filename);
+/*
 	unsigned width, height, colors, bpp, icclength;
 	char * iccprofile;
 	std::map<std::string, std::string> imgdata;
@@ -869,7 +871,9 @@ std::map<std::string,std::string> gImage::getInfo(const char * filename)
 	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
 	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
 	if (ftype == FILETYPE_PNG) _loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata);
+
 	return imgdata;
+*/
 }
 
 //Check the file type of an existing image file; is it suitable for opening?
@@ -5890,41 +5894,19 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 GIMAGE_ERROR gImage::getMetadata(std::string filename)
 {
+	for (std::map<std::string, std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
+		printf("%s: %s\n",it->first.c_str(), it->second.c_str()); fflush(stdout);
+	}
+	
+	std::map<std::string,std::string> imdat = loadImageFileInfo(filename.c_str());
+	
+	for (std::map<std::string, std::string>::iterator it=imdat.begin(); it!=imdat.end(); ++it) 
+		imginfo[it->first] = it->second;
+	
 	auto image = Exiv2::ImageFactory::open(filename);
 	assert(image.get() != 0);
 	image->readMetadata();
  
-	Exiv2::ExifData &exifData = image->exifData();
-	
-	//exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
-	
-	//rationals/floats:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ExposureTime")) != exifData.end())
-		imginfo["ExposureTime"] = tostr(exifData["Exif.Photo.ExposureTime"].toFloat());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FNumber")) != exifData.end())
-		imginfo["FNumber"] = tostr(exifData["Exif.Photo.FNumber"].toFloat());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength")) != exifData.end())
-		imginfo["FocalLength"] = tostr(exifData["Exif.Photo.FocalLength"].toFloat());
-		
-	//uints:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ISOSpeedRatings")) != exifData.end())
-		imginfo["ISOSpeedRatings"] = tostr((unsigned short) exifData["Exif.Photo.ISOSpeedRatings"].toLong());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation")) != exifData.end())
-		imginfo["Orientation"] = tostr((unsigned short) exifData["Exif.Image.Orientation"].toLong());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.PhotometricInterpretation")) != exifData.end())
-		imginfo["PhotometricInterpretation"] = tostr((unsigned short) exifData["Exif.Image.PhotometricInterpretation"].toLong());
-		
-	//strings:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.ImageDescription")) != exifData.end())
-		imginfo["ImageDescription"] = exifData["Exif.Image.ImageDescription"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Make")) != exifData.end())
-		imginfo["Make"] = exifData["Exif.Image.Make"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Model")) != exifData.end())
-		imginfo["Model"] = exifData["Exif.Image.Model"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.LensModel")) != exifData.end())
-		imginfo["LensModel"] = exifData["Exif.Photo.LensModel"].toString();
-		
-	//ICC profile:
 	char * prof;
 	if (image->iccProfileDefined()) {
 		prof = new char[image->iccProfile()->size_]; 
@@ -5960,25 +5942,51 @@ gImage gImage::loadImageFile(const char * filename, std::string params)
 
 std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filename)
 {
-	unsigned width, height, bpp, colors, icclength;
-	BPP bits;
-	char * iccprofile;
 	std::map<std::string,std::string> imgdata;
-	std::string params;
-	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
-
-	if (ext == FILETYPE_TIFF) {
-		_loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata); 
-	}
-	else if (ext == FILETYPE_JPEG) {
-		_loadJPEGInfo(filename, &width, &height, &colors, imgdata); 
-	}
-	else if (ext == FILETYPE_PNG) {
-		_loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata); 
-	}
-	else {
-		_loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata); 
-	}
+	
+	auto image = Exiv2::ImageFactory::open(filename);
+	assert(image.get() != 0);
+	image->readMetadata();
+ 
+	Exiv2::ExifData &exifData = image->exifData();
+	
+	//exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+	
+	//rationals/floats:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ExposureTime")) != exifData.end())
+		imgdata["ExposureTime"] = tostr(exifData["Exif.Photo.ExposureTime"].toFloat());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FNumber")) != exifData.end())
+		imgdata["FNumber"] = tostr(exifData["Exif.Photo.FNumber"].toFloat());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength")) != exifData.end())
+		imgdata["FocalLength"] = tostr(exifData["Exif.Photo.FocalLength"].toFloat());
+		
+	//uints:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ISOSpeedRatings")) != exifData.end())
+		imgdata["ISOSpeedRatings"] = tostr((unsigned short) exifData["Exif.Photo.ISOSpeedRatings"].toLong());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation")) != exifData.end())
+		imgdata["Orientation"] = tostr((unsigned short) exifData["Exif.Image.Orientation"].toLong());
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.PhotometricInterpretation")) != exifData.end())
+		imgdata["PhotometricInterpretation"] = tostr((unsigned short) exifData["Exif.Image.PhotometricInterpretation"].toLong());
+		
+	//strings:
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.ImageDescription")) != exifData.end())
+		imgdata["ImageDescription"] = exifData["Exif.Image.ImageDescription"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Make")) != exifData.end())
+		imgdata["Make"] = exifData["Exif.Image.Make"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Model")) != exifData.end())
+		imgdata["Model"] = exifData["Exif.Image.Model"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.LensModel")) != exifData.end())
+		imgdata["LensModel"] = exifData["Exif.Photo.LensModel"].toString();
+	
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Artist")) != exifData.end())
+		imgdata["Artist"] = exifData["Exif.Image.Artist"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.DateTimeOriginal")) != exifData.end())
+		imgdata["DateTimeOriginal"] = exifData["Exif.Image.DateTimeOriginal"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Software")) != exifData.end())
+		imgdata["Software"] = exifData["Exif.Image.Software"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Copyright")) != exifData.end())
+		imgdata["Copyright"] = exifData["Exif.Image.Copyright"].toString();
+	
 	return imgdata;
 }
 
@@ -6097,61 +6105,72 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 
 	if (!excludeexif) {
 		//rationals:	
-		float exposuretime = atof(imginfo["ExposureTime"].c_str());
 		int numerator, denominator;
-		if (exposuretime < 1.0) {
-			numerator = 1;
-			denominator = 1.0 / exposuretime;
+		if (imginfo.find("ExposureTime") != imginfo.end()) {
+			float exposuretime = atof(imginfo["ExposureTime"].c_str());
+			if (exposuretime < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / exposuretime;
+			}
+			else {
+				numerator = exposuretime;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
 		}
-		else {
-			numerator = exposuretime;
-			denominator = 1;
+
+		if (imginfo.find("FNumber") != imginfo.end()) {
+			float fnumber = atof(imginfo["FNumber"].c_str());
+			if (fnumber < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / fnumber;
+			}
+			else {
+				numerator = fnumber;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
 		}
-		exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
-	
-		float fnumber = atof(imginfo["FNumber"].c_str());
-		//int numerator, denominator;
-		if (fnumber < 1.0) {
-			numerator = 1;
-			denominator = 1.0 / fnumber;
+
+		if (imginfo.find("FocalLength") != imginfo.end()) {
+			float focallength = atof(imginfo["FocalLength"].c_str());
+			if (focallength < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / focallength;
+			}
+			else {
+				numerator = focallength;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
 		}
-		else {
-			numerator = fnumber;
-			denominator = 1;
-		}
-		exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
-	
-		float focallength = atof(imginfo["FocalLength"].c_str());
-		//int numerator, denominator;
-		if (focallength < 1.0) {
-			numerator = 1;
-			denominator = 1.0 / focallength;
-		}
-		else {
-			numerator = focallength;
-			denominator = 1;
-		}
-		exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
 	
 		//shorts:
-		uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
-		exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
+		if (imginfo.find("ISOSpeedRatings") != imginfo.end()) {
+			uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
+			exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
+		}
 
-		uint16_t orientation = atoi(imginfo["Orientation"].c_str());
-		exifData["Exif.Image.Orientation"] =  orientation;
+		if (imginfo.find("Orientation") != imginfo.end()) {
+			uint16_t orientation = atoi(imginfo["Orientation"].c_str());
+			exifData["Exif.Image.Orientation"] =  orientation;
+		}
 	
 		uint16_t photometricinterpretation = 2;  //RGB, default 
 		if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
 		exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
 	
 		//ASCIIs:
-		exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
-
-		exifData["Exif.Image.Make"] = imginfo["Make"];
-
-		exifData["Exif.Image.Model"] = imginfo["Model"];
-
-		exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+		if (imginfo.find("ImageDescription") != imginfo.end()) exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
+		if (imginfo.find("Make") != imginfo.end()) exifData["Exif.Image.Make"] = imginfo["Make"];
+		if (imginfo.find("Model") != imginfo.end()) exifData["Exif.Image.Model"] = imginfo["Model"];
+		if (imginfo.find("LensModel") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["LensModel"];
+		else if (imginfo.find("Lens") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+		if (imginfo.find("Artist") != imginfo.end()) exifData["Exif.Image.Artist"] = imginfo["Artist"];
+		if (imginfo.find("DateTimeOriginal") != imginfo.end()) exifData["Exif.Image.DateTimeOriginal"] = imginfo["DateTimeOriginal"];
+		if (imginfo.find("Software") != imginfo.end()) exifData["Exif.Image.Software"] = imginfo["Software"];
+		if (imginfo.find("Copyright") != imginfo.end()) exifData["Exif.Image.Copyright"] = imginfo["Copyright"];
+		
 	
 		exifData.sortByTag(); 
 	}

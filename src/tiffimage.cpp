@@ -16,10 +16,12 @@ const char * tiffVersion()
 
 bool _checkTIFF(const char *filename)
 {
+	TIFFSetErrorHandler(0);
 	if (TIFFOpen(filename, "r") != NULL) return true;
 	return false;
 }
 
+/*
 bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info)
 {
 	char *img, *buf;
@@ -73,6 +75,7 @@ bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsi
 	}
 	else return false;
 }
+*/
 
 char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsigned *numcolors, unsigned *numbits, std::map<std::string,std::string> &info, std::string params="", char ** icc_m=NULL, unsigned  *icclength=0)
 {
@@ -104,21 +107,21 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		if (config != PLANARCONFIG_CONTIG) return NULL;
 
 		char *infobuf;
-		if (TIFFGetField(tif, TIFFTAG_ARTIST, &infobuf)) info["Artist"]=infobuf; 
-		if (TIFFGetField(tif, TIFFTAG_MAKE, &infobuf))  info["Make"]=infobuf;
-		if (TIFFGetField(tif, TIFFTAG_MODEL, &infobuf))  info["Model"]=infobuf;
-		if (TIFFGetField(tif, TIFFTAG_SOFTWARE, &infobuf))  info["Software"]=infobuf; 
-		if (TIFFGetField(tif, TIFFTAG_COPYRIGHT, &infobuf))  info["Copyright"]=infobuf; 
-		if (TIFFGetField(tif, TIFFTAG_LENSINFO, &infobuf))  info["LensInfo"]=infobuf; 
-		if (TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &infobuf))  info["ImageDescription"]=infobuf; 
-		if (TIFFGetField(tif, TIFFTAG_DATETIME, &infobuf)) info["DateTime"]=infobuf;
-		if (TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleformat)) {
-			if (sampleformat == SAMPLEFORMAT_UINT) info["SampleFormat"]="uint";
-			if (sampleformat == SAMPLEFORMAT_INT) info["SampleFormat"]="int";
-			if (sampleformat == SAMPLEFORMAT_IEEEFP) info["SampleFormat"]="float";
-			if (sampleformat == SAMPLEFORMAT_VOID) info["SampleFormat"]="void";
-		}
-		if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &uval)) info["Orientation"]=tostr(uval);
+		//if (TIFFGetField(tif, TIFFTAG_ARTIST, &infobuf)) info["Artist"]=infobuf; 
+		//if (TIFFGetField(tif, TIFFTAG_MAKE, &infobuf))  info["Make"]=infobuf;
+		//if (TIFFGetField(tif, TIFFTAG_MODEL, &infobuf))  info["Model"]=infobuf;
+		//if (TIFFGetField(tif, TIFFTAG_SOFTWARE, &infobuf))  info["Software"]=infobuf; 
+		//if (TIFFGetField(tif, TIFFTAG_COPYRIGHT, &infobuf))  info["Copyright"]=infobuf; 
+		//if (TIFFGetField(tif, TIFFTAG_LENSINFO, &infobuf))  info["LensInfo"]=infobuf; 
+		//if (TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &infobuf))  info["ImageDescription"]=infobuf; 
+		//if (TIFFGetField(tif, TIFFTAG_DATETIME, &infobuf)) info["DateTime"]=infobuf;
+		//if (TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleformat)) {
+		//	if (sampleformat == SAMPLEFORMAT_UINT) info["SampleFormat"]="uint";
+		//	if (sampleformat == SAMPLEFORMAT_INT) info["SampleFormat"]="int";
+		//	if (sampleformat == SAMPLEFORMAT_IEEEFP) info["SampleFormat"]="float";
+		//	if (sampleformat == SAMPLEFORMAT_VOID) info["SampleFormat"]="void";
+		//}
+		//if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &uval)) info["Orientation"]=tostr(uval);
 /*
 		if (TIFFGetField(tif, TIFFTAG_ICCPROFILE, &len, &buffer)) {
 			*icc_m = new char[len];
@@ -174,6 +177,8 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 	unsigned char *buf;
 	uint32 w, h;
 	uint16 c, b;
+	
+	TIFFSetErrorHandler(0);
 
 	TIFF* tif = TIFFOpen(filename, "w");
 	if (tif) {
@@ -196,18 +201,18 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		// We set the strip size of the file to be size of one row of pixels
 		TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, width*numcolors));
 
-		if (info.find("Artist") != info.end())  TIFFSetField(tif, TIFFTAG_ARTIST, info["Artist"].c_str());
-		if (info.find("Make") != info.end())  TIFFSetField(tif, TIFFTAG_MAKE, info["Make"].c_str());
-		if (info.find("Model") != info.end())  TIFFSetField(tif, TIFFTAG_MODEL, info["Model"].c_str());
-		if (info.find("Software") != info.end())  TIFFSetField(tif, TIFFTAG_SOFTWARE, info["Software"].c_str());
-		if (info.find("Copyright") != info.end())  TIFFSetField(tif, TIFFTAG_COPYRIGHT, info["Copyright"].c_str());
-		if (info.find("LensInfo") != info.end())  TIFFSetField(tif, TIFFTAG_LENSINFO, info["LensInfo"].c_str());
-		if (info.find("DateTime") != info.end()) TIFFSetField(tif, TIFFTAG_DATETIME, info["DateTime"].c_str());
-		if (info.find("ImageDescription") != info.end())  TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, info["ImageDescription"].c_str());
-		if (info.find("Orientation") != info.end()) {
-			uint16 orient = (uint16) atoi(info["Orientation"].c_str());
-			TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
-		}
+		//if (info.find("Artist") != info.end())  TIFFSetField(tif, TIFFTAG_ARTIST, info["Artist"].c_str());
+		//if (info.find("Make") != info.end())  TIFFSetField(tif, TIFFTAG_MAKE, info["Make"].c_str());
+		//if (info.find("Model") != info.end())  TIFFSetField(tif, TIFFTAG_MODEL, info["Model"].c_str());
+		//if (info.find("Software") != info.end())  TIFFSetField(tif, TIFFTAG_SOFTWARE, info["Software"].c_str());
+		//if (info.find("Copyright") != info.end())  TIFFSetField(tif, TIFFTAG_COPYRIGHT, info["Copyright"].c_str());
+		//if (info.find("LensInfo") != info.end())  TIFFSetField(tif, TIFFTAG_LENSINFO, info["LensInfo"].c_str());
+		//if (info.find("DateTime") != info.end()) TIFFSetField(tif, TIFFTAG_DATETIME, info["DateTime"].c_str());
+		//if (info.find("ImageDescription") != info.end())  TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, info["ImageDescription"].c_str());
+		//if (info.find("Orientation") != info.end()) {
+		//	uint16 orient = (uint16) atoi(info["Orientation"].c_str());
+		//	TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
+		//}
 
 		//if (iccprofile) TIFFSetField(tif, TIFFTAG_ICCPROFILE, iccprofilelength, iccprofile);
 				

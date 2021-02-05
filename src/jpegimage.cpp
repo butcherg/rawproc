@@ -253,6 +253,7 @@ bool _checkJPEG(const char *filename)
 	return false;
 }
 
+/*
 bool _loadJPEGInfo(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
@@ -292,7 +293,6 @@ bool _loadJPEGInfo(const char *filename,
 		marker = marker->next;
 	}
 
-	/*
 	if (read_icc_profile (&cinfo, &buffer, &len)) {
 		*iccprofile = new char[len];
 		memcpy(*iccprofile, buffer, len);
@@ -303,7 +303,6 @@ bool _loadJPEGInfo(const char *filename,
 		*iccprofile = NULL;
 		*icclength = 0;
 	}
-	*/
 
 	*width = cinfo.image_width;
 	*height = cinfo.image_height;
@@ -313,6 +312,7 @@ bool _loadJPEGInfo(const char *filename,
 
 	return true;
 }
+*/
 
 char * _loadJPEG(const char *filename, 
 			unsigned *width, 
@@ -348,14 +348,15 @@ char * _loadJPEG(const char *filename,
 
 	jpeg_read_header(&cinfo, TRUE);
 
-	jpeg_marker_struct * marker = cinfo.marker_list;
-	std::map<std::string,std::string> imageinfo;
+//	jpeg_marker_struct * marker = cinfo.marker_list;
+//	std::map<std::string,std::string> imageinfo;
 
+/*
 	while (marker != NULL) {
 		parse_APP1marker(marker->data-2, marker->data_length, info);
 		marker = marker->next;
 	}
-/*
+
 	if (read_icc_profile (&cinfo, &buffer, &len)) {
 		*iccprofile = new char[len];
 		memcpy(*iccprofile, buffer, len);

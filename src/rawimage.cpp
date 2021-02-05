@@ -943,6 +943,7 @@ char * _loadRAW(const char *filename,
 		info["Lens"] = RawProcessor.imgdata.lens.Lens;
 	else
 		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
+	
 
 	//Normalize libraw orientation for EXIF:
 
@@ -962,7 +963,7 @@ char * _loadRAW(const char *filename,
 	struct tm * timeinfo;
 	timeinfo = localtime (&rawtime);
 	strftime (buffer,80,"%Y:%m:%d %H:%M:%S",timeinfo);
-	info["DateTime"] = buffer;  
+	info["DateTimeOriginal"] = buffer;  
 
 	
 	cmsHPROFILE profile = NULL;
