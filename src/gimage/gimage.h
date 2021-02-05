@@ -339,7 +339,7 @@ class gImage
 		static gImage loadTIFF(const char * filename, std::string params);
 		static gImage loadPNG(const char * filename, std::string params);
 		static gImage loadImageFile(const char * filename, std::string params);
-		static std::map<std::string,std::string> loadImageFileInfo(const char * filename);
+		static std::map<std::string,std::string> loadMetadata(const char * filename);
 
 #ifdef USE_DCRAW
 		static void setdcrawPath(std::string path);

@@ -860,7 +860,7 @@ std::string gImage::getProfilePath()
 
 std::map<std::string,std::string> gImage::getInfo(const char * filename)
 {
-		return loadImageFileInfo(filename);
+	return loadMetadata(filename);
 /*
 	unsigned width, height, colors, bpp, icclength;
 	char * iccprofile;
@@ -5890,57 +5890,100 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 }
 
 
-//Loaders:
-
-GIMAGE_ERROR gImage::getMetadata(std::string filename)
+//Exiv2 Metadata handlers:
+//inserMetadata uses Exiv2 for all output file types, saves a pre-defined subset of the input file's metadata
+GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
 {
-	for (std::map<std::string, std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
-		printf("%s: %s\n",it->first.c_str(), it->second.c_str()); fflush(stdout);
+	Exiv2::ExifData exifData;
+
+	if (!excludeexif) {
+		//rationals:	
+		int numerator, denominator;
+		if (imginfo.find("ExposureTime") != imginfo.end()) {
+			float exposuretime = atof(imginfo["ExposureTime"].c_str());
+			if (exposuretime < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / exposuretime;
+			}
+			else {
+				numerator = exposuretime;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
+		}
+
+		if (imginfo.find("FNumber") != imginfo.end()) {
+			float fnumber = atof(imginfo["FNumber"].c_str());
+			if (fnumber < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / fnumber;
+			}
+			else {
+				numerator = fnumber;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
+		}
+
+		if (imginfo.find("FocalLength") != imginfo.end()) {
+			float focallength = atof(imginfo["FocalLength"].c_str());
+			if (focallength < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / focallength;
+			}
+			else {
+				numerator = focallength;
+				denominator = 1;
+			}
+			exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
+		}
+	
+		//shorts:
+		if (imginfo.find("ISOSpeedRatings") != imginfo.end()) {
+			uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
+			exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
+		}
+
+		if (imginfo.find("Orientation") != imginfo.end()) {
+			uint16_t orientation = atoi(imginfo["Orientation"].c_str());
+			exifData["Exif.Image.Orientation"] =  orientation;
+		}
+	
+		uint16_t photometricinterpretation = 2;  //RGB, default 
+		if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
+		exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
+	
+		//ASCIIs:
+		if (imginfo.find("ImageDescription") != imginfo.end()) exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
+		if (imginfo.find("Make") != imginfo.end()) exifData["Exif.Image.Make"] = imginfo["Make"];
+		if (imginfo.find("Model") != imginfo.end()) exifData["Exif.Image.Model"] = imginfo["Model"];
+		if (imginfo.find("LensModel") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["LensModel"];
+		else if (imginfo.find("Lens") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
+		if (imginfo.find("Artist") != imginfo.end()) exifData["Exif.Image.Artist"] = imginfo["Artist"];
+		if (imginfo.find("DateTimeOriginal") != imginfo.end()) exifData["Exif.Photo.DateTimeOriginal"] = imginfo["DateTimeOriginal"];
+		//if (imginfo.find("DateTime") != imginfo.end()) exifData["Exif.Image.DateTime"] = imginfo["DateTime"];
+		if (imginfo.find("Software") != imginfo.end()) exifData["Exif.Image.Software"] = imginfo["Software"];
+		if (imginfo.find("Copyright") != imginfo.end()) exifData["Exif.Image.Copyright"] = imginfo["Copyright"];
+		
+		exifData.sortByTag(); 
 	}
-	
-	std::map<std::string,std::string> imdat = loadImageFileInfo(filename.c_str());
-	
-	for (std::map<std::string, std::string>::iterator it=imdat.begin(); it!=imdat.end(); ++it) 
-		imginfo[it->first] = it->second;
 	
 	auto image = Exiv2::ImageFactory::open(filename);
-	assert(image.get() != 0);
-	image->readMetadata();
- 
-	char * prof;
-	if (image->iccProfileDefined()) {
-		prof = new char[image->iccProfile()->size_]; 
-		memcpy(prof, image->iccProfile()->pData_, image->iccProfile()->size_);
-		setProfile(prof, image->iccProfile()->size_);
+	image->setExifData(exifData);
+	if (profile != NULL) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+		Exiv2::DataBuf iccprof((Exiv2::byte *) iccprofile, iccprofilesize);
+		image->setIccProfile(iccprof);
+		delete [] iccprofile;
 	}
+	image->writeMetadata();
 
 	return GIMAGE_OK;
 }
 
-gImage gImage::loadImageFile(const char * filename, std::string params)
-{
-	gImage image;
-	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
-
-	if (ext == FILETYPE_TIFF) {
-		image = gImage::loadTIFF(filename, params);
-		if (image.getWidth() != 0) image.getMetadata(filename);
-		return image;
-	}
-	else if (ext == FILETYPE_JPEG) {
-		image = gImage::loadJPEG(filename, params);
-		if (image.getWidth() != 0) image.getMetadata(filename);
-		return image;
-	}
-	else if (ext == FILETYPE_PNG) {
-		image = gImage::loadPNG(filename, params);
-		if (image.getWidth() != 0) image.getMetadata(filename);
-		return image;
-	}
-	else return gImage::loadRAW(filename, params);
-}
-
-std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filename)
+std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 {
 	std::map<std::string,std::string> imgdata;
 	
@@ -5980,14 +6023,69 @@ std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filenam
 	
 	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Artist")) != exifData.end())
 		imgdata["Artist"] = exifData["Exif.Image.Artist"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.DateTimeOriginal")) != exifData.end())
-		imgdata["DateTimeOriginal"] = exifData["Exif.Image.DateTimeOriginal"].toString();
+	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal")) != exifData.end())
+		imgdata["DateTimeOriginal"] = exifData["Exif.Photo.DateTimeOriginal"].toString();
+	//if (exifData.findKey(Exiv2::ExifKey("Exif.Image.DateTime")) != exifData.end())
+	//	imgdata["DateTime"] = exifData["Exif.Image.DateTime"].toString();
 	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Software")) != exifData.end())
 		imgdata["Software"] = exifData["Exif.Image.Software"].toString();
 	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Copyright")) != exifData.end())
 		imgdata["Copyright"] = exifData["Exif.Image.Copyright"].toString();
 	
 	return imgdata;
+}
+
+GIMAGE_ERROR gImage::getMetadata(std::string filename)
+{
+	//debugging: displays any data collected prior to using exiv2:
+	//for (std::map<std::string, std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
+	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str()); fflush(stdout);
+	//}
+	
+	std::map<std::string,std::string> imdat = loadMetadata(filename.c_str());
+	
+	for (std::map<std::string, std::string>::iterator it=imdat.begin(); it!=imdat.end(); ++it) 
+		imginfo[it->first] = it->second;
+	
+	auto image = Exiv2::ImageFactory::open(filename);
+	assert(image.get() != 0);
+	image->readMetadata();
+ 
+	char * prof;
+	if (image->iccProfileDefined()) {
+		prof = new char[image->iccProfile()->size_]; 
+		memcpy(prof, image->iccProfile()->pData_, image->iccProfile()->size_);
+		setProfile(prof, image->iccProfile()->size_);
+	}
+
+	return GIMAGE_OK;
+}
+
+
+
+//Loaders:
+
+gImage gImage::loadImageFile(const char * filename, std::string params)
+{
+	gImage image;
+	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
+
+	if (ext == FILETYPE_TIFF) {
+		image = gImage::loadTIFF(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
+	else if (ext == FILETYPE_JPEG) {
+		image = gImage::loadJPEG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
+	else if (ext == FILETYPE_PNG) {
+		image = gImage::loadPNG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
+	else return gImage::loadRAW(filename, params);
 }
 
 
@@ -6098,97 +6196,6 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 //Savers:
 
 
-//inserMetadata uses Exiv2 for all output file types, saves a pre-defined subset of the input file's metadata
-GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
-{
-	Exiv2::ExifData exifData;
-
-	if (!excludeexif) {
-		//rationals:	
-		int numerator, denominator;
-		if (imginfo.find("ExposureTime") != imginfo.end()) {
-			float exposuretime = atof(imginfo["ExposureTime"].c_str());
-			if (exposuretime < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / exposuretime;
-			}
-			else {
-				numerator = exposuretime;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
-		}
-
-		if (imginfo.find("FNumber") != imginfo.end()) {
-			float fnumber = atof(imginfo["FNumber"].c_str());
-			if (fnumber < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / fnumber;
-			}
-			else {
-				numerator = fnumber;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
-		}
-
-		if (imginfo.find("FocalLength") != imginfo.end()) {
-			float focallength = atof(imginfo["FocalLength"].c_str());
-			if (focallength < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / focallength;
-			}
-			else {
-				numerator = focallength;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
-		}
-	
-		//shorts:
-		if (imginfo.find("ISOSpeedRatings") != imginfo.end()) {
-			uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
-			exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
-		}
-
-		if (imginfo.find("Orientation") != imginfo.end()) {
-			uint16_t orientation = atoi(imginfo["Orientation"].c_str());
-			exifData["Exif.Image.Orientation"] =  orientation;
-		}
-	
-		uint16_t photometricinterpretation = 2;  //RGB, default 
-		if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
-		exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
-	
-		//ASCIIs:
-		if (imginfo.find("ImageDescription") != imginfo.end()) exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
-		if (imginfo.find("Make") != imginfo.end()) exifData["Exif.Image.Make"] = imginfo["Make"];
-		if (imginfo.find("Model") != imginfo.end()) exifData["Exif.Image.Model"] = imginfo["Model"];
-		if (imginfo.find("LensModel") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["LensModel"];
-		else if (imginfo.find("Lens") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
-		if (imginfo.find("Artist") != imginfo.end()) exifData["Exif.Image.Artist"] = imginfo["Artist"];
-		if (imginfo.find("DateTimeOriginal") != imginfo.end()) exifData["Exif.Image.DateTimeOriginal"] = imginfo["DateTimeOriginal"];
-		if (imginfo.find("Software") != imginfo.end()) exifData["Exif.Image.Software"] = imginfo["Software"];
-		if (imginfo.find("Copyright") != imginfo.end()) exifData["Exif.Image.Copyright"] = imginfo["Copyright"];
-		
-	
-		exifData.sortByTag(); 
-	}
-	
-	auto image = Exiv2::ImageFactory::open(filename);
-	image->setExifData(exifData);
-	if (profile != NULL) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-		Exiv2::DataBuf iccprof((Exiv2::byte *) iccprofile, iccprofilesize);
-		image->setIccProfile(iccprof);
-		delete [] iccprofile;
-	}
-	image->writeMetadata();
-
-	return GIMAGE_OK;
-}
 
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
