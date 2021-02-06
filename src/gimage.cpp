@@ -5892,29 +5892,6 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 //Exiv2 Metadata handlers:
 
-std::vector<std::string> taglist_rational = {
-	"Exif.Photo.ExposureTime",
-	"Exif.Photo.FNumber",
-	"Exif.Photo.FocalLength",
-};
-
-std::vector<std::string> taglist_short = {
-	"Exif.Photo.ISOSpeedRatings",
-	"Exif.Image.Orientation",
-	"Exif.Image.PhotometricInterpretation"
-};
-
-std::vector<std::string> taglist_ascii = {
-	"Exif.Image.ImageDescription",
-	"Exif.Image.Make",
-	"Exif.Image.Model",
-	"Exif.Photo.LensModel",
-	"Exif.Image.Artist",
-	"Exif.Photo.DateTimeOriginal",
-	"Exif.Image.Software",
-	"Exif.Image.Copyright"
-};
-
 std::vector<std::string> taglist = {
 	"Exif.Photo.ExposureTime",
 	"Exif.Photo.FNumber",
@@ -5932,6 +5909,7 @@ std::vector<std::string> taglist = {
 	"Exif.Image.Copyright"
 };
 
+//writes metadata from the gImage instance to a file:
 GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
 {
 	Exiv2::ExifData exifData;
@@ -5981,41 +5959,6 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 		}
 	}
 
-/*
-	//rationals:
-	int numerator, denominator;
-	for (std::vector<std::string>::iterator it=taglist_rational.begin(); it!=taglist_rational.end(); ++it) {
-		std::string name = split(*it,".")[2];
-		if (imginfo.find(name) != imginfo.end()) {
-			float val = atof(imginfo[name].c_str());
-			if (val < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / val;
-			}
-			else {
-				numerator = val;
-				denominator = 1;
-			}
-			exifData[*it] = Exiv2::Rational(numerator, denominator);
-		}
-	}
-	
-	//shorts:
-	for (std::vector<std::string>::iterator it=taglist_short.begin(); it!=taglist_short.end(); ++it) {
-		std::string name = split(*it,".")[2];
-		if (imginfo.find(name) != imginfo.end()) {
-			uint16_t isospeedratings = atoi(imginfo[name].c_str());
-			exifData[*it] =  isospeedratings;
-		}
-	}
-	
-	//asciis:
-	for (std::vector<std::string>::iterator it=taglist_ascii.begin(); it!=taglist_ascii.end(); ++it) {
-		std::string name = split(*it,".")[2];
-		if (imginfo.find(name) != imginfo.end()) 
-			exifData[*it] = imginfo[name];
-	}
-*/	
 	exifData.sortByTag(); 
 	
 	auto image = Exiv2::ImageFactory::open(filename);
@@ -6033,6 +5976,7 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 	return GIMAGE_OK;
 }
 
+//loads metadata from a file into a std::map:
 std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 {
 	std::map<std::string,std::string> imgdata;
@@ -6073,6 +6017,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 	return imgdata;
 }
 
+//loads metadata from a file into the gImage instance:
 GIMAGE_ERROR gImage::getMetadata(std::string filename)
 {
 	//debugging: displays any data collected prior to using exiv2:
