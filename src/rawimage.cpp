@@ -938,11 +938,11 @@ char * _loadRAW(const char *filename,
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
-		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
+		info["LensModel"] = RawProcessor.imgdata.lens.makernotes.Lens;
 	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
-		info["Lens"] = RawProcessor.imgdata.lens.Lens;
+		info["LensModel"] = RawProcessor.imgdata.lens.Lens;
 	else
-		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
+		info["LensModel"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
 	
 
 	//Normalize libraw orientation for EXIF:
