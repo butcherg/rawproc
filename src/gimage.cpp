@@ -5891,82 +5891,132 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 
 //Exiv2 Metadata handlers:
-//inserMetadata uses Exiv2 for all output file types, saves a pre-defined subset of the input file's metadata
+
+std::vector<std::string> taglist_rational = {
+	"Exif.Photo.ExposureTime",
+	"Exif.Photo.FNumber",
+	"Exif.Photo.FocalLength",
+};
+
+std::vector<std::string> taglist_short = {
+	"Exif.Photo.ISOSpeedRatings",
+	"Exif.Image.Orientation",
+	"Exif.Image.PhotometricInterpretation"
+};
+
+std::vector<std::string> taglist_ascii = {
+	"Exif.Image.ImageDescription",
+	"Exif.Image.Make",
+	"Exif.Image.Model",
+	"Exif.Photo.LensModel",
+	"Exif.Image.Artist",
+	"Exif.Photo.DateTimeOriginal",
+	"Exif.Image.Software",
+	"Exif.Image.Copyright"
+};
+
+std::vector<std::string> taglist = {
+	"Exif.Photo.ExposureTime",
+	"Exif.Photo.FNumber",
+	"Exif.Photo.FocalLength",
+	"Exif.Photo.ISOSpeedRatings",
+	"Exif.Image.Orientation",
+	"Exif.Image.PhotometricInterpretation",
+	"Exif.Image.ImageDescription",
+	"Exif.Image.Make",
+	"Exif.Image.Model",
+	"Exif.Photo.LensModel",
+	"Exif.Image.Artist",
+	"Exif.Photo.DateTimeOriginal",
+	"Exif.Image.Software",
+	"Exif.Image.Copyright"
+};
+
 GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
 {
 	Exiv2::ExifData exifData;
-
-	if (!excludeexif) {
-		//rationals:	
-		int numerator, denominator;
-		if (imginfo.find("ExposureTime") != imginfo.end()) {
-			float exposuretime = atof(imginfo["ExposureTime"].c_str());
-			if (exposuretime < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / exposuretime;
-			}
-			else {
-				numerator = exposuretime;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.ExposureTime"] = Exiv2::Rational(numerator, denominator);
-		}
-
-		if (imginfo.find("FNumber") != imginfo.end()) {
-			float fnumber = atof(imginfo["FNumber"].c_str());
-			if (fnumber < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / fnumber;
-			}
-			else {
-				numerator = fnumber;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.FNumber"] = Exiv2::Rational(numerator, denominator);
-		}
-
-		if (imginfo.find("FocalLength") != imginfo.end()) {
-			float focallength = atof(imginfo["FocalLength"].c_str());
-			if (focallength < 1.0) {
-				numerator = 1;
-				denominator = 1.0 / focallength;
-			}
-			else {
-				numerator = focallength;
-				denominator = 1;
-			}
-			exifData["Exif.Photo.FocalLength"] = Exiv2::Rational(numerator, denominator);
-		}
+	int numerator, denominator;
 	
-		//shorts:
-		if (imginfo.find("ISOSpeedRatings") != imginfo.end()) {
-			uint16_t isospeedratings = atoi(imginfo["ISOSpeedRatings"].c_str());
-			exifData["Exif.Photo.ISOSpeedRatings"] =  isospeedratings;
+	for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+		std::string name = split(*it,".")[2];
+		if (imginfo.find(name) != imginfo.end()) {
+			switch (Exiv2::ExifKey(*it).defaultTypeId()) {
+				case Exiv2::unsignedRational:
+				case Exiv2::signedRational:
+				{
+					float val = atof(imginfo[name].c_str());
+					if (val < 1.0) {
+						numerator = 1;
+						denominator = 1.0 / val;
+					}
+					else {
+						numerator = val;
+						denominator = 1;
+					}
+					exifData[*it] = Exiv2::Rational(numerator, denominator);
+					break;
+				}
+				case Exiv2::unsignedByte:
+				case Exiv2::unsignedShort:
+				case Exiv2::unsignedLong:
+				case Exiv2::signedByte:
+				case Exiv2::signedShort:
+				case Exiv2::signedLong:
+				case Exiv2::unsignedLongLong:
+				case Exiv2::signedLongLong:
+				{
+					uint16_t val = atoi(imginfo[name].c_str());
+					exifData[*it] =  val;
+					break;
+				}
+				case Exiv2::asciiString:
+				case Exiv2::date:
+				case Exiv2::time:
+				case Exiv2::comment:
+				{
+					exifData[*it] = imginfo[name];
+					break;
+				}
+			}
 		}
-
-		if (imginfo.find("Orientation") != imginfo.end()) {
-			uint16_t orientation = atoi(imginfo["Orientation"].c_str());
-			exifData["Exif.Image.Orientation"] =  orientation;
-		}
-	
-		uint16_t photometricinterpretation = 2;  //RGB, default 
-		if (imginfo["Libraw.Mosaiced"] =="1") photometricinterpretation = 32803; //pre-demosaiced 
-		exifData["Exif.Image.PhotometricInterpretation"] =  photometricinterpretation;
-	
-		//ASCIIs:
-		if (imginfo.find("ImageDescription") != imginfo.end()) exifData["Exif.Image.ImageDescription"] = imginfo["ImageDescription"];
-		if (imginfo.find("Make") != imginfo.end()) exifData["Exif.Image.Make"] = imginfo["Make"];
-		if (imginfo.find("Model") != imginfo.end()) exifData["Exif.Image.Model"] = imginfo["Model"];
-		if (imginfo.find("LensModel") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["LensModel"];
-		else if (imginfo.find("Lens") != imginfo.end()) exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
-		if (imginfo.find("Artist") != imginfo.end()) exifData["Exif.Image.Artist"] = imginfo["Artist"];
-		if (imginfo.find("DateTimeOriginal") != imginfo.end()) exifData["Exif.Photo.DateTimeOriginal"] = imginfo["DateTimeOriginal"];
-		//if (imginfo.find("DateTime") != imginfo.end()) exifData["Exif.Image.DateTime"] = imginfo["DateTime"];
-		if (imginfo.find("Software") != imginfo.end()) exifData["Exif.Image.Software"] = imginfo["Software"];
-		if (imginfo.find("Copyright") != imginfo.end()) exifData["Exif.Image.Copyright"] = imginfo["Copyright"];
-		
-		exifData.sortByTag(); 
 	}
+
+/*
+	//rationals:
+	int numerator, denominator;
+	for (std::vector<std::string>::iterator it=taglist_rational.begin(); it!=taglist_rational.end(); ++it) {
+		std::string name = split(*it,".")[2];
+		if (imginfo.find(name) != imginfo.end()) {
+			float val = atof(imginfo[name].c_str());
+			if (val < 1.0) {
+				numerator = 1;
+				denominator = 1.0 / val;
+			}
+			else {
+				numerator = val;
+				denominator = 1;
+			}
+			exifData[*it] = Exiv2::Rational(numerator, denominator);
+		}
+	}
+	
+	//shorts:
+	for (std::vector<std::string>::iterator it=taglist_short.begin(); it!=taglist_short.end(); ++it) {
+		std::string name = split(*it,".")[2];
+		if (imginfo.find(name) != imginfo.end()) {
+			uint16_t isospeedratings = atoi(imginfo[name].c_str());
+			exifData[*it] =  isospeedratings;
+		}
+	}
+	
+	//asciis:
+	for (std::vector<std::string>::iterator it=taglist_ascii.begin(); it!=taglist_ascii.end(); ++it) {
+		std::string name = split(*it,".")[2];
+		if (imginfo.find(name) != imginfo.end()) 
+			exifData[*it] = imginfo[name];
+	}
+*/	
+	exifData.sortByTag(); 
 	
 	auto image = Exiv2::ImageFactory::open(filename);
 	image->setExifData(exifData);
@@ -5993,44 +6043,32 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
  
 	Exiv2::ExifData &exifData = image->exifData();
 	
-	//exifData["Exif.Photo.LensModel"] = imginfo["Lens"];
-	
-	//rationals/floats:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ExposureTime")) != exifData.end())
-		imgdata["ExposureTime"] = tostr(exifData["Exif.Photo.ExposureTime"].toFloat());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FNumber")) != exifData.end())
-		imgdata["FNumber"] = tostr(exifData["Exif.Photo.FNumber"].toFloat());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength")) != exifData.end())
-		imgdata["FocalLength"] = tostr(exifData["Exif.Photo.FocalLength"].toFloat());
-		
-	//uints:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.ISOSpeedRatings")) != exifData.end())
-		imgdata["ISOSpeedRatings"] = tostr((unsigned short) exifData["Exif.Photo.ISOSpeedRatings"].toLong());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation")) != exifData.end())
-		imgdata["Orientation"] = tostr((unsigned short) exifData["Exif.Image.Orientation"].toLong());
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.PhotometricInterpretation")) != exifData.end())
-		imgdata["PhotometricInterpretation"] = tostr((unsigned short) exifData["Exif.Image.PhotometricInterpretation"].toLong());
-		
-	//strings:
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.ImageDescription")) != exifData.end())
-		imgdata["ImageDescription"] = exifData["Exif.Image.ImageDescription"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Make")) != exifData.end())
-		imgdata["Make"] = exifData["Exif.Image.Make"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Model")) != exifData.end())
-		imgdata["Model"] = exifData["Exif.Image.Model"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.LensModel")) != exifData.end())
-		imgdata["LensModel"] = exifData["Exif.Photo.LensModel"].toString();
-	
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Artist")) != exifData.end())
-		imgdata["Artist"] = exifData["Exif.Image.Artist"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal")) != exifData.end())
-		imgdata["DateTimeOriginal"] = exifData["Exif.Photo.DateTimeOriginal"].toString();
-	//if (exifData.findKey(Exiv2::ExifKey("Exif.Image.DateTime")) != exifData.end())
-	//	imgdata["DateTime"] = exifData["Exif.Image.DateTime"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Software")) != exifData.end())
-		imgdata["Software"] = exifData["Exif.Image.Software"].toString();
-	if (exifData.findKey(Exiv2::ExifKey("Exif.Image.Copyright")) != exifData.end())
-		imgdata["Copyright"] = exifData["Exif.Image.Copyright"].toString();
+	for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+		std::string name = split(*it,".")[2];
+		if (exifData.findKey(Exiv2::ExifKey(*it)) != exifData.end())
+			switch (exifData[*it].typeId()) {
+				case Exiv2::unsignedRational:
+				case Exiv2::signedRational:
+					imgdata[name] = tostr(exifData[*it].toFloat());
+					break;
+				case Exiv2::unsignedByte:
+				case Exiv2::unsignedShort:
+				case Exiv2::unsignedLong:
+				case Exiv2::signedByte:
+				case Exiv2::signedShort:
+				case Exiv2::signedLong:
+				case Exiv2::unsignedLongLong:
+				case Exiv2::signedLongLong:
+					imgdata[name] = tostr((unsigned short) exifData[*it].toLong());
+					break;
+				case Exiv2::asciiString:
+				case Exiv2::date:
+				case Exiv2::time:
+				case Exiv2::comment:
+					imgdata[name] = exifData[*it].toString();
+					break;
+			}
+	}
 	
 	return imgdata;
 }
