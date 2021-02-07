@@ -3080,7 +3080,7 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 		}
 	}
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 
 	image = halfimage;
 	w /=2;
@@ -3138,7 +3138,7 @@ bool gImage::ApplyMosaicColor(int threadcount)
 		}
 	}
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	c = 3;
 	return true;
 }
@@ -3202,7 +3202,7 @@ bool gImage::ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	free (rawdata[0]);
 	free( rawdata );
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3252,7 +3252,7 @@ bool gImage::ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3296,7 +3296,7 @@ bool gImage::ApplyDemosaicDCB(LIBRTPROCESS_PREPOST prepost, int iterations, bool
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3348,7 +3348,7 @@ bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, i
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3392,7 +3392,7 @@ bool gImage::ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3487,7 +3487,7 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3532,7 +3532,7 @@ bool gImage::ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost, int iterations, in
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3571,7 +3571,7 @@ bool gImage::ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost, int threadcou
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3613,7 +3613,7 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
-	imginfo["PhotometricInterpretation"] = 2;  //RGB
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -5909,13 +5909,13 @@ std::vector<std::string> taglist = {
 	"Exif.Photo.FocalLength",
 	"Exif.Photo.ISOSpeedRatings",
 	"Exif.Image.Orientation",
-	"Exif.Image.PhotometricInterpretation",
+	"Exif.Image.PhotometricInterpretation",  //only saves to TIFF
 	"Exif.Image.ImageDescription",
 	"Exif.Image.Make",
 	"Exif.Image.Model",
 	"Exif.Photo.LensModel",
 	"Exif.Image.Artist",
-	"Exif.Photo.DateTimeOriginal",
+	"Exif.Photo.DateTimeOriginal",  //TIFF/EP (6.0) specifies Exif.Image.DateTimeOriginal
 	"Exif.Image.Software",
 	"Exif.Image.Copyright"
 };
@@ -5927,12 +5927,14 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 	int numerator, denominator;
 	
 	for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+		//printf("%s %ld: ",(*it).c_str(), Exiv2::ExifKey(*it).defaultTypeId());  //keep for debugging
 		std::string name = split(*it,".")[2];
 		if (imginfo.find(name) != imginfo.end()) {
 			switch (Exiv2::ExifKey(*it).defaultTypeId()) {
 				case Exiv2::unsignedRational:
 				case Exiv2::signedRational:
 				{
+					//printf("float.\n"); fflush(stdout);  //keep for debugging
 					float val = atof(imginfo[name].c_str());
 					if (val < 1.0) {
 						numerator = 1;
@@ -5954,6 +5956,7 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 				case Exiv2::unsignedLongLong:
 				case Exiv2::signedLongLong:
 				{
+					//printf("integer.\n"); fflush(stdout);  //keep for debugging
 					uint16_t val = atoi(imginfo[name].c_str());
 					exifData[*it] =  val;
 					break;
@@ -5963,9 +5966,13 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 				case Exiv2::time:
 				case Exiv2::comment:
 				{
+					//printf("string.\n"); fflush(stdout);  //keep for debugging
 					exifData[*it] = imginfo[name];
 					break;
 				}
+				default:
+					//printf("no output.\n"); fflush(stdout);  //keep for debugging
+					break;
 			}
 		}
 	}

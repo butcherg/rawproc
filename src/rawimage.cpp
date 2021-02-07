@@ -979,6 +979,7 @@ char * _loadRAW(const char *filename,
 		info["Libraw.top_margin"] = tostr(S.top_margin);
 		info["Libraw.left_margin"] = tostr(S.left_margin);
 		info["Libraw.Mosaiced"] = "1";
+		info["PhotometricInterpretation"] = "32803"; //Color Filter Array;
 
 
 		*numcolors = 1;

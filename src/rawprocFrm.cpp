@@ -658,6 +658,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		if (it->first == "ExifTag") continue;
 		if (it->first.find("Libraw") != std::string::npos) if (librawinclude == 0) continue;
 		if (it->first == "FNumber") apt = atof(it->second.c_str()); 
+		
 		if (it->first == "ExposureTime") {
 			exp = atof(it->second.c_str());
 			if (exp >= 1.0)
@@ -665,8 +666,14 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 			else
 				exif.Append(wxString::Format("<b>%s:</b> 1/%d sec<br>\n",it->first.c_str(),int(1.0/exp)));
 		}
+		else if (it->first == "PhotometricInterpretation") {
+			if (it->second == "2") exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),"RGB"));
+			else if (it->second == "32803") exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),"CFA"));
+			else exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
+		}
 		else 
 			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
+		
 	}
 	char buff[4096];
 
