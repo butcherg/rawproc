@@ -2839,16 +2839,20 @@ std::vector<double>  gImage::ApplyWhiteBalance(double redmult, double greenmult,
 						float val;
 						switch (xtarray[row][col]) {
 							case 0: //r
-								image[pos].r *= redmult;
+								//image[pos].r *= redmult;
+								image[pos].g = image[pos].b = image[pos].r *= redmult;
 								break;
 							case 1: //g or g1
-								image[pos].r *= greenmult; 
+								//image[pos].r *= greenmult; 
+								image[pos].g = image[pos].b = image[pos].r *= greenmult;
 								break;
 							case 2:  //b
-								image[pos].r *= bluemult;
+								//image[pos].r *= bluemult;
+								image[pos].g = image[pos].b = image[pos].r *= bluemult;
 								break;
 							case 3: // g2
-								image[pos].r *= greenmult;
+								//image[pos].r *= greenmult;
+								image[pos].g = image[pos].b = image[pos].r *= greenmult;
 								break;
 						}
 					}
