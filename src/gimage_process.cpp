@@ -1062,7 +1062,7 @@ std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::st
 				dib.ApplySubtract(0.0, subtract, 0.0, 0.0, true, threadcount);
 			}
 			else if (params["channel"] == "blue") {
-				dib.ApplySubtract(0.0, 0.0, subtract, true, threadcount);
+				dib.ApplySubtract(0.0, 0.0, 0.0, subtract, true, threadcount);
 			}
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = string_format("subtract:%s,value",params["channel"].c_str());

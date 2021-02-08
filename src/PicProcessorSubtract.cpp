@@ -40,7 +40,7 @@ class SubtractPanel: public PicProcPanel
 			camb = new wxRadioButton(this, SUBTRACTCAMERA, _("camera:"));
 			subb->SetValue(true);
 
-			subtract = new myFloatCtrl(this, wxID_ANY, 0.0, 2);
+			subtract = new myFloatCtrl(this, wxID_ANY, 0.0, 7);
 			darkfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
 			cam = new wxStaticText(this, wxID_ANY, "--", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE);
 
