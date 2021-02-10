@@ -305,6 +305,7 @@ class gImage
 		void ApplyToneMapFilmic(float A=6.2f, float B=0.5f, float C=1.7f, float D=0.06f, float power=2.2f, bool normalize=false, int threadcount=0);
 		void ApplyToneMapLogGamma(int threadcount=0);
 		void ApplyNormalization(float newmin, float newmax, int threadcount=0);
+		void ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount=0);
 
 		//blur/noise algorithms:
 		void ApplyNLMeans(double sigma, int local, int patch, float threshold=-1.0, int threadcount=0); //-1 bypasses threshold, 0.0 and up bypasses any pixel >= threshold
