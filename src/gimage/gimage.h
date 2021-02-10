@@ -118,7 +118,9 @@ enum GIMAGE_ERROR {
 	GIMAGE_LF_NO_DATABASE,
 	GIMAGE_LF_WRONG_FORMAT,
 	GIMAGE_LF_CAMERA_NOT_FOUND,
-	GIMAGE_LF_LENS_NOT_FOUND
+	GIMAGE_LF_LENS_NOT_FOUND,
+	
+	GIMAGE_EXIV2_METADATAWRITE_FAILED
 };
 
 enum LIBRTPROCESS_PREPOST { 
@@ -340,7 +342,7 @@ class gImage
 		static gImage loadPNG(const char * filename, std::string params);
 		static gImage loadImageFile(const char * filename, std::string params);
 		static std::map<std::string,std::string> loadMetadata(const char * filename);
-
+		
 #ifdef USE_DCRAW
 		static void setdcrawPath(std::string path);
 #endif
@@ -376,7 +378,7 @@ class gImage
 		//void ApplyYShear(double rangle, int threadcount);
 		
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
-		
+
 		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
 		GIMAGE_ERROR getMetadata(std::string filename);
 

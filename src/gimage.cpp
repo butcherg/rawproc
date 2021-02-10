@@ -861,19 +861,6 @@ std::string gImage::getProfilePath()
 std::map<std::string,std::string> gImage::getInfo(const char * filename)
 {
 	return loadMetadata(filename);
-/*
-	unsigned width, height, colors, bpp, icclength;
-	char * iccprofile;
-	std::map<std::string, std::string> imgdata;
-	GIMAGE_FILETYPE ftype = gImage::getFileType(filename);
-	
-	if (ftype == FILETYPE_TIFF) _loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata);
-	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
-	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
-	if (ftype == FILETYPE_PNG) _loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata);
-
-	return imgdata;
-*/
 }
 
 //Check the file type of an existing image file; is it suitable for opening?
@@ -5903,6 +5890,8 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 
 //Exiv2 Metadata handlers:
 
+//This is the tag list rawproc will read from and write to JPEGs, TIFFs, and PNGs
+//The list has to be palatable to all three formats.
 std::vector<std::string> taglist = {
 	"Exif.Photo.ExposureTime",
 	"Exif.Photo.FNumber",
@@ -5989,7 +5978,13 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 		image->setIccProfile(iccprof);
 		delete [] iccprofile;
 	}
-	image->writeMetadata();
+	
+	try {
+		image->writeMetadata();
+	}
+	catch (int e) {
+		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
+	}
 
 	return GIMAGE_OK;
 }
@@ -5999,37 +5994,43 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 {
 	std::map<std::string,std::string> imgdata;
 	
-	auto image = Exiv2::ImageFactory::open(filename);
-	assert(image.get() != 0);
-	image->readMetadata();
- 
-	Exiv2::ExifData &exifData = image->exifData();
+	try {
+		auto image = Exiv2::ImageFactory::open(filename);
+		//assert(image.get() != 0);
+		image->readMetadata();
+		Exiv2::ExifData &exifData = image->exifData();
 	
-	for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
-		std::string name = split(*it,".")[2];
-		if (exifData.findKey(Exiv2::ExifKey(*it)) != exifData.end())
-			switch (exifData[*it].typeId()) {
-				case Exiv2::unsignedRational:
-				case Exiv2::signedRational:
-					imgdata[name] = tostr(exifData[*it].toFloat());
-					break;
-				case Exiv2::unsignedByte:
-				case Exiv2::unsignedShort:
-				case Exiv2::unsignedLong:
-				case Exiv2::signedByte:
-				case Exiv2::signedShort:
-				case Exiv2::signedLong:
-				case Exiv2::unsignedLongLong:
-				case Exiv2::signedLongLong:
-					imgdata[name] = tostr((unsigned short) exifData[*it].toLong());
-					break;
-				case Exiv2::asciiString:
-				case Exiv2::date:
-				case Exiv2::time:
-				case Exiv2::comment:
-					imgdata[name] = exifData[*it].toString();
-					break;
+		for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+			std::string name = split(*it,".")[2];
+			if (exifData.findKey(Exiv2::ExifKey(*it)) != exifData.end()) {
+				switch (exifData[*it].typeId()) {
+					case Exiv2::unsignedRational:
+					case Exiv2::signedRational:
+						imgdata[name] = tostr(exifData[*it].toFloat());
+						break;
+					case Exiv2::unsignedByte:
+					case Exiv2::unsignedShort:
+					case Exiv2::unsignedLong:
+					case Exiv2::signedByte:
+					case Exiv2::signedShort:
+					case Exiv2::signedLong:
+					case Exiv2::unsignedLongLong:
+					case Exiv2::signedLongLong:
+						imgdata[name] = tostr((unsigned short) exifData[*it].toLong());
+						break;
+					case Exiv2::asciiString:
+					case Exiv2::date:
+					case Exiv2::time:
+					case Exiv2::comment:
+						imgdata[name] = exifData[*it].toString();
+						break;
+				}
 			}
+		}
+	}
+	catch (...) {
+		imgdata["Error"] = "Metadata read failure.";
+		return imgdata;
 	}
 	
 	return imgdata;
@@ -6037,7 +6038,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 
 //loads metadata from a file into the gImage instance:
 GIMAGE_ERROR gImage::getMetadata(std::string filename)
-{
+{	
 	//debugging: displays any data collected prior to using exiv2:
 	//for (std::map<std::string, std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
 	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str()); fflush(stdout);
@@ -6045,13 +6046,18 @@ GIMAGE_ERROR gImage::getMetadata(std::string filename)
 	
 	std::map<std::string,std::string> imdat = loadMetadata(filename.c_str());
 	
+	if (imdat.find("Error") != imdat.end()) {
+		imginfo["Error"] = imdat["Error"];
+		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
+	}
+
 	for (std::map<std::string, std::string>::iterator it=imdat.begin(); it!=imdat.end(); ++it) 
 		imginfo[it->first] = it->second;
 	
 	auto image = Exiv2::ImageFactory::open(filename);
 	assert(image.get() != 0);
 	image->readMetadata();
- 
+	 
 	char * prof;
 	if (image->iccProfileDefined()) {
 		prof = new char[image->iccProfile()->size_]; 
@@ -6247,13 +6253,13 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	
 	if (result == GIMAGE_OK) { 
 		if (excludeexif & excludeicc) //neither
-			insertMetadata(filename, NULL, true);
+			result = insertMetadata(filename, NULL, true);
 		else if (excludeicc) //exif only
-			insertMetadata(filename);
+			result = insertMetadata(filename);
 		else if (excludeexif) //icc only;
-			insertMetadata(filename, profile, true);
+			result = insertMetadata(filename, profile, true);
 		else //both
-			insertMetadata(filename, profile);
+			result = insertMetadata(filename, profile);
 
 		return result;
 	}
@@ -6276,18 +6282,43 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 	}
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
+	
+	GIMAGE_ERROR result;
 
 	if (ftype == FILETYPE_TIFF) {
-		return saveTIFF(filename, bitfmt, params);
+		result = saveTIFF(filename, bitfmt, params);
 	}
 	if (ftype == FILETYPE_JPEG) {
-		return saveJPEG(filename, bitfmt, params);
+		result = saveJPEG(filename, bitfmt, params);
 	}
 	if (ftype == FILETYPE_PNG) {
-		return savePNG(filename, bitfmt, params);
+		result = savePNG(filename, bitfmt, params);
 	}
-	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
-	return lasterror;
+	
+	bool excludeexif = false;
+	if (p.find("excludeexif") != p.end()) excludeexif = true;
+	bool excludeicc = false;
+	if (p.find("excludeicc") != p.end()) excludeicc = true;
+	
+	//don't include a profile if there was none either in the gImage class or specified for output transform:
+	if (profile == NULL & this->profile == NULL) excludeicc = true;
+	
+	if (result == GIMAGE_OK) { 
+		if (excludeexif & excludeicc) //neither
+			result = insertMetadata(filename, NULL, true);
+		else if (excludeicc) //exif only
+			result = insertMetadata(filename);
+		else if (excludeexif) //icc only;
+			result = insertMetadata(filename, profile, true);
+		else //both
+			result = insertMetadata(filename, profile);
+
+		return result;
+	}
+	else {
+		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+		return lasterror;
+	}
 }
 
 
