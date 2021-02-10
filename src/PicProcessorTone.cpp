@@ -506,7 +506,7 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 			std::map<std::string,std::string> params;
 			params["L"] = p[0].ToStdString();
 			params["c"] = p[1].ToStdString();;
-			//printf("duallogistic: %s, %s...\n", params["L"].c_str(), params["c"].c_str()); fflush(stdout);
+			printf("duallogistic: %s, %s...\n", params["L"].c_str(), params["c"].c_str()); fflush(stdout);
 			mark();
 			dib->ApplyToneMapDualLogistic(params, threadcount);
 			m_display->SetModified(true);
