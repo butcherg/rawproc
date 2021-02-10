@@ -94,8 +94,8 @@ class TonePanel: public PicProcPanel
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
 			
-			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 0.2, 2, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
-			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 0.2, 2, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 1.0, 1, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 1.0, 1, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
 
 			wxArrayString str;
 			str.Add("channel");
