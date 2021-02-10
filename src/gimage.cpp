@@ -2821,7 +2821,7 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 	}
 }
 
-/*
+
 void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
 {
 	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
@@ -2837,20 +2837,21 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
 		float t = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
-		if (t < L) {  //left
+		if (t < L) {  //left 
 			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))));  
 			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))));  
 			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))));  
 		}
-		else {  //right
-			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) ))) + L - 1.0);
-			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) ))) + L - 1.0);
-			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) ))) + L - 1.0);
+		else {  //right	
+			if (image[pos].r > 0.0) image[pos].r = fmax(0.0,((2.0 - L) /(1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + (L - 1.0));
+			if (image[pos].g > 0.0) image[pos].g = fmax(0.0,((2.0 - L) /(1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + (L - 1.0));
+			if (image[pos].b > 0.0) image[pos].b = fmax(0.0,((2.0 - L) /(1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + (L - 1.0));
 		}
 	}
 }
-*/
 
+
+/*
 void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
 {
 	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
@@ -2869,23 +2870,23 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 			if (image[pos].r < L) 
 				image[pos].r = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].r - (L/2))  )));  //left
 			else 
-				image[pos].r = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].r - (L/2)) ))) + L - 1; //right
+				image[pos].r = ((2 - L) / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].r - (L/2)) )))) + (L - 1); //right
 		}
 		if (image[pos].g > 0.0) {
 			if (image[pos].g < L) 
 				image[pos].g = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].g - (L/2))  )));  //left
 			else 
-				image[pos].g = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].g - (L/2)) ))) + L - 1; //right
+				image[pos].g = ((2 - L) / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].g - (L/2)) )))) + (L - 1); //right
 		}
 		if (image[pos].b > 0.0) {
 			if (image[pos].b < L) 
 				image[pos].b = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].b - (L/2)) )));  //left
 			else 
-				image[pos].b = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].b - (L/2)) ))) + L - 1; //right
+				image[pos].b = ((2 - L) / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].b - (L/2)) )))) + (L - 1); //right
 		}
 	}
 }
-
+*/
 
 //White Balance
 //

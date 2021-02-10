@@ -94,8 +94,8 @@ class TonePanel: public PicProcPanel
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
 			
-			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 0.2, 4, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
-			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 0.2, 4, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 0.2, 2, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 0.2, 2, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
 
 			wxArrayString str;
 			str.Add("channel");
@@ -394,7 +394,7 @@ class TonePanel: public PicProcPanel
 
 		void floatParamChanged(wxCommandEvent& event)
 		{
-			if (gamb->GetValue() | filmicb->GetValue()) t.Start(500,wxTIMER_ONE_SHOT);
+			if (gamb->GetValue() | filmicb->GetValue() | duallogisticb->GetValue()) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 		
 		void floatParamUpdated(wxCommandEvent& event)
@@ -407,7 +407,8 @@ class TonePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (gamb->GetValue()) processTone(TONEGAMMA);
-			if (filmicb->GetValue()) processTone(TONEFILMIC);
+			else if (filmicb->GetValue()) processTone(TONEFILMIC);
+			else if (duallogisticb->GetValue()) processTone(TONEDUALLOGISTIC);
 		}
 
 		std::vector<float> makeXArray(unsigned arraysize)
