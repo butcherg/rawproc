@@ -2808,7 +2808,7 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 	if (parameters.find("L") != parameters.end()) L = atof(parameters["L"].c_str());
 	float c = 1.0; //???????????
 	if (parameters.find("c") != parameters.end()) c = atof(parameters["c"].c_str());
-
+	
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
 		if (image[pos].r > 0.0) {
@@ -2834,36 +2834,6 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 		else image[pos].b = 0.0;
 	}
 }
-
-/*
-void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
-{
-	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
-	//https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/75
-
-	float e = 2.71828; 
-
-	float L = 0.2;
-	if (parameters.find("L") != parameters.end()) L = atof(parameters["L"].c_str());
-	float c = 1.0; //???????????
-	if (parameters.find("c") != parameters.end()) c = atof(parameters["c"].c_str());
-	
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned pos=0; pos<image.size(); pos++) {
-		float t = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
-		if (t < L/2.0) {  //left 
-			(image[pos].r >= 0.0) ? image[pos].r = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))) : 0.0;
-			(image[pos].g >= 0.0) ? image[pos].g = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))) : 0.0;
-			(image[pos].b >= 0.0) ? image[pos].b = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))) : 0.0;
-		}
-		else {  //right	
-			(image[pos].r >= 0.0) ? image[pos].r = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + L - 1.0 : 0.0;
-			(image[pos].g >= 0.0) ? image[pos].g = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + L - 1.0 : 0.0;
-			(image[pos].b >= 0.0) ? image[pos].b = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + L - 1.0 : 0.0;
-		}
-	}
-}
-*/
 
 
 //White Balance

@@ -94,8 +94,8 @@ class TonePanel: public PicProcPanel
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
 			
-			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 1.0, 1, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
-			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 1.0, 1, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlL = new myFloatCtrl(this, wxID_ANY, "L:", 0.002, 3, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
+			dlc = new myFloatCtrl(this, wxID_ANY, "c:", 1.0, 2, wxDefaultPosition, wxSize(80,TEXTCTRLHEIGHT));
 
 			wxArrayString str;
 			str.Add("channel");
@@ -504,9 +504,8 @@ bool PicProcessorTone::processPicture(gImage *processdib)
 			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: dual logistic..."));
 			m_tree->SetItemText(id, _("tone:duallogistic"));
 			std::map<std::string,std::string> params;
-			params["L"] = p[0].ToStdString();
-			params["c"] = p[1].ToStdString();;
-			printf("duallogistic: %s, %s...\n", params["L"].c_str(), params["c"].c_str()); fflush(stdout);
+			params["L"] = p[1].ToStdString();
+			params["c"] = p[2].ToStdString();;
 			mark();
 			dib->ApplyToneMapDualLogistic(params, threadcount);
 			m_display->SetModified(true);
