@@ -2813,23 +2813,23 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 	for (unsigned pos=0; pos<image.size(); pos++) {
 		if (image[pos].r > 0.0) {
 			if (image[pos].r < L/2.0) 
-				image[pos].r = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))); 
+				image[pos].r = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))); 
 			else 
-				image[pos].r = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + L - 1.0; 
+				image[pos].r = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + L - 1.0; 
 		}
 		else image[pos].r = 0.0;
 		if (image[pos].g > 0.0) {
 			if (image[pos].g < L/2.0) 
-				image[pos].g = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))); 
+				image[pos].g = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))); 
 			else 
-				image[pos].g = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + L - 1.0; 
+				image[pos].g = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + L - 1.0; 
 		}
 		else image[pos].g = 0.0;
 		if (image[pos].b > 0.0) {
 			if (image[pos].b < L/2.0) 
-				image[pos].b = L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))); 
+				image[pos].b = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))); 
 			else 
-				image[pos].b = ((2.0 - L) / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + L - 1.0; 
+				image[pos].b = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + L - 1.0; 
 		}
 		else image[pos].b = 0.0;
 	}
