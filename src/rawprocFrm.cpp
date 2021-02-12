@@ -449,7 +449,10 @@ void rawprocFrm::OnAUIActivate(wxAuiManagerEvent& event)
 
 void rawprocFrm::ClearParamPane()
 {
-	while (parambook->GetPageCount()) parambook->DeletePage(0);
+	while (parambook->GetPageCount()) {
+		parambook->DeletePage(0);
+		wxMilliSleep(100); //attempt to mitigate the occasional segfault buried in gtk...
+	}
 }
 
 void rawprocFrm::OnSize(wxSizeEvent& event)
