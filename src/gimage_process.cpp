@@ -1156,16 +1156,16 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			result["commandstring"] = "tone:loggamma";
 			imgmsg = "loggamma";
 		}
-		else if (params["mode"] == "duallogistic") {
+		else if (params["mode"] == "doublelogistic") {
 			_mark();
 			std::map<std::string,std::string> p;
 			p["L"] = params["L"];
 			p["c"] = params["c"];
 			dib.ApplyToneMapDualLogistic(p, threadcount);
 			result["duration"] = std::to_string(_duration());
-			result["treelabel"] = "tone:duallogistic";
-			result["commandstring"] = "tone:duallogistic";
-			imgmsg = "duallogistic";
+			result["treelabel"] = "tone:doublelogistic";
+			result["commandstring"] = "tone:doublelogistic";
+			imgmsg = "doublelogistic";
 		}
 		else if (params["mode"] == "filmic") {
 			float A = atof(params["A"].c_str());

@@ -1337,9 +1337,9 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 			pmap["mode"] = "loggamma";
 			pmap["cmdlabel"] = "tone:loggamma";
 		}
-		else if (p[0] == "duallogistic") {
-			pmap["mode"] = "duallogistic";
-			pmap["cmdlabel"] = "tone:duallogistic";
+		else if (p[0] == "doublelogistic") {
+			pmap["mode"] = "doublelogistic";
+			pmap["cmdlabel"] = "tone:doublelogistic";
 			pmap["L"] = "0.2";
 			pmap["c"] = "0.2";
 			if (psize >=2) {
@@ -1347,7 +1347,7 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 					pmap["L"] = p[1];
 				}
 				else {
-					pmap["error"] = "tone:ParseError - duallogistic L needs a float"; 
+					pmap["error"] = "tone:ParseError - doublelogistic L needs a float"; 
 					return pmap;
 				}
 			}
@@ -1356,7 +1356,7 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 					pmap["c"] = p[2];
 				}
 				else {
-					pmap["error"] = "tone:ParseError - duallogistic c needs a float"; 
+					pmap["error"] = "tone:ParseError - doublelogistic c needs a float"; 
 					return pmap;
 				}
 			}
