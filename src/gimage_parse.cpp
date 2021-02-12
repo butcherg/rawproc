@@ -1297,7 +1297,7 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 
 		if (p[0] == "gamma") {
 			if (psize >=2) {
-				if (isFloat(p[0])) {
+				if (isFloat(p[1])) {
 					pmap["mode"] = "gamma";
 					pmap["cmdlabel"] = "tone:gamma";
 					pmap["value"] = p[1];
