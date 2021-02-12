@@ -2750,33 +2750,6 @@ void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power,
 	}
 }
 
-/*
-void gImage::ApplyToneMapLogGamma(int threadcount)
-{
-	//The HEVC version of the ARIB STD-B67 algorithm, as defined in:
-	//https://en.wikipedia.org/wiki/Hybrid_Log-Gamma
-
-	double a = 0.17883277, b = 0.28466892, c = 0.55991073;
-	double rubicon = 1.0/12.0;
-	double sqrt3 = sqrt(3);
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned pos=0; pos<image.size(); pos++) {
-		float t = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
-		if (t > rubicon) {
-			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, a * log(12*image[pos].r - b) + c); 
-			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, a * log(12*image[pos].g - b) + c); 
-			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, a * log(12*image[pos].b - b) + c); 
-		}
-		else {
-			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, sqrt3 * pow(image[pos].r, 0.5)); 
-			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, sqrt3 * pow(image[pos].g, 0.5)); 
-			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, sqrt3 * pow(image[pos].b, 0.5)); 
-		}
-	}
-}
-*/
-
-
 void gImage::ApplyToneMapLogGamma(int threadcount)
 {
 	//The HEVC version of the ARIB STD-B67 algorithm, as defined in:
@@ -2793,22 +2766,24 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 			else 
 				image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
 		}
+		else image[pos].r = 0.0;
 		if (image[pos].g > 0.0) {
 			if (image[pos].g > rubicon) 
 				image[pos].g = a * log(12*image[pos].g - b) + c; 
 			else 
 				image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
 		}
+		else image[pos].g = 0.0;
 		if (image[pos].b > 0.0) {
 			if (image[pos].b > rubicon) 
 				image[pos].b = a * log(12*image[pos].b - b) + c; 
 			else 
 				image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
 		}
+		else image[pos].b = 0.0;
 	}
 }
 
-/*
 void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
 {
 	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
@@ -2821,55 +2796,29 @@ void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> paramet
 	float c = 1.0; //???????????
 	if (parameters.find("c") != parameters.end()) c = atof(parameters["c"].c_str());
 	
-	#pragma omp parallel for num_threads(threadcount)
-	for (unsigned pos=0; pos<image.size(); pos++) {
-		float t = (image[pos].r + image[pos].g + image[pos].b) / 3.0;
-		if (t < L) {  //left
-			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))));  
-			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))));  
-			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, L / (1.0 + pow(e,(-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))));  
-		}
-		else {  //right
-			if (image[pos].r > 0.0) image[pos].r = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) ))) + L - 1.0);
-			if (image[pos].g > 0.0) image[pos].g = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) ))) + L - 1.0);
-			if (image[pos].b > 0.0) image[pos].b = fmax(0.0, 2.0 - L / (1.0 + pow(e,(-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) ))) + L - 1.0);
-		}
-	}
-}
-*/
-
-void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
-{
-	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
-	//https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/75
-	
-	float e = 2.71828; 
-
-	float L = 0.2;
-	if (parameters.find("L") != parameters.end()) L = atof(parameters["L"].c_str());
-	float c = 1.0; //???????????
-	if (parameters.find("c") != parameters.end()) c = atof(parameters["c"].c_str());
-
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned pos=0; pos<image.size(); pos++) {
 		if (image[pos].r > 0.0) {
-			if (image[pos].r < L) 
-				image[pos].r = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].r - (L/2))  )));  //left
+			if (image[pos].r < L/2.0) 
+				image[pos].r = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))); 
 			else 
-				image[pos].r = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].r - (L/2)) ))) + L - 1; //right
+				image[pos].r = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + L - 1.0; 
 		}
+		else image[pos].r = 0.0;
 		if (image[pos].g > 0.0) {
-			if (image[pos].g < L) 
-				image[pos].g = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].g - (L/2))  )));  //left
+			if (image[pos].g < L/2.0) 
+				image[pos].g = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))); 
 			else 
-				image[pos].g = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].g - (L/2)) ))) + L - 1; //right
+				image[pos].g = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + L - 1.0; 
 		}
+		else image[pos].g = 0.0;
 		if (image[pos].b > 0.0) {
-			if (image[pos].b < L) 
-				image[pos].b = L / (1 + pow(e,(-4 * (c/L)  * (image[pos].b - (L/2)) )));  //left
+			if (image[pos].b < L/2.0) 
+				image[pos].b = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))); 
 			else 
-				image[pos].b = 2 - L / (1 + pow(e,(-4 * (c/(2-L))  * (image[pos].b - (L/2)) ))) + L - 1; //right
+				image[pos].b = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + L - 1.0; 
 		}
+		else image[pos].b = 0.0;
 	}
 }
 
