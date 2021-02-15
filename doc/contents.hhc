@@ -115,6 +115,11 @@
 				</OBJECT>
 				
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Higlight Recovery">
+				<param name="Local" value="hlrecover.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Lens Correction">
 				<param name="Local" value="lenscorrection.html">
 				</OBJECT>

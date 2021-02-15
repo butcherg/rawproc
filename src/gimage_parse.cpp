@@ -727,6 +727,11 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 	return pmap;
 }
 
+//img <li><b>hlrecover</b>
+//img <ul>
+//img <li>no parameters</b> - use after whitebalance and demosaic to mitigate stacked data due to blown highlights</li>
+//img </ul>
+//img </li><br>
 std::map<std::string,std::string> parse_hlrecover(std::string paramstring)
 {
 	std::map<std::string,std::string> pmap;
@@ -742,8 +747,8 @@ std::map<std::string,std::string> parse_hlrecover(std::string paramstring)
 	}
 
 	else { //positional
-		std::vector<std::string> p = split(paramstring, ",");
-		int psize = p.size();
+		//std::vector<std::string> p = split(paramstring, ","); //hlrecover has no parameters, for the time being...
+		//int psize = p.size();
 		
 		pmap["mode"] = "hlrecover";
 		pmap["cmdlabel"] = "hlrecover";
