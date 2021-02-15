@@ -1,0 +1,19 @@
+<html><title>Highlight Recovery</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
+
+<h3 id="Highlight Recovery">Highlight Recovery</h3>
+<p>This tool is based on the RawTherapee highlight recovery tool, graciously provided in librtprocess.  rawproc's integration
+of this tool is decidedly less feature-rich than RawTherapee; indeed, there are no parameters for the user to mess with.</p>
+<p>The specific use case for this tool is in the mitigation of over-exposed highlights.  If you whitebalance, demosaic, and 
+then apply a blackwhitepoint tool that scales to the data extents and you see either magenta or cyan discoloration in your 
+highlights, add this tool and it <b>should</b> go away.  There are dependencies on the demosaic algorithm used and/or the 
+amount of blown highlights that I do not yet understand, so this tool may not mitigate your particular situation.  In that
+case, a rather coarse way to deal with it is to select the minwhite checkbox in data option of the blackwhite tool, which 
+will put the white point at the lowest max of R, G, and B, effectively driving blown highlights to white.</p>  
+
+<p>Really, you should endeavor to expose to preserve your highlights...</p>
+
+<p align=center><img src=hlrecover.png></p>
+
+<!--<p><b>Properties:</b> See tool.hlrecover.* in <a href=confparams.html#tool.hlrecover>Configuration Properties</a></p>-->
+
+</body></html>
