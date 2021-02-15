@@ -2787,7 +2787,7 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
 {
 	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
-	//https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/75
+	//https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/76
 
 	float e = 2.71828; 
 
