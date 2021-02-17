@@ -6287,8 +6287,13 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	bool excludeicc = false;
 	if (p.find("excludeicc") != p.end()) excludeicc = true;
 	
-	//don't include a profile if there was none either in the gImage class or specified for output transform:
-	if (profile == NULL & this->profile == NULL) excludeicc = true;
+	cmsHPROFILE saveprofile = NULL;
+	if (profile) 
+		saveprofile = profile;
+	else if (this->profile) 
+		saveprofile = cmsOpenProfileFromMem(getProfile(), getProfileLength());
+		
+	if (saveprofile == NULL) excludeicc = true;
 	
 	if (result == GIMAGE_OK) { 
 		if (excludeexif & excludeicc) //neither
@@ -6296,9 +6301,9 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 		else if (excludeicc) //exif only
 			result = insertMetadata(filename);
 		else if (excludeexif) //icc only;
-			result = insertMetadata(filename, profile, true);
+			result = insertMetadata(filename, saveprofile, true);
 		else //both
-			result = insertMetadata(filename, profile);
+			result = insertMetadata(filename, saveprofile);
 
 		return result;
 	}

@@ -687,7 +687,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
 		if (icc) {
 			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s<br>\n", wxString(buff)));
+			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s (%d)<br>\n", wxString(buff), profile_length));
 			cmsCloseProfile(icc);
 		}
 		else exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> failed (%d)<br>\n",profile_length));
