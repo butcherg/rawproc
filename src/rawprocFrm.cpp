@@ -552,8 +552,8 @@ void rawprocFrm::SetStartPath(wxString path)
 	openfilepath = path;
 }
 
-void rawprocFrm::OnClose(wxCloseEvent& event)
-{	
+void rawprocFrm::Shutdown()
+{
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
 			return;
@@ -580,46 +580,23 @@ void rawprocFrm::OnClose(wxCloseEvent& event)
 	if ( help.GetFrame() ) // returns NULL if no help frame active
 		help.GetFrame()->Close(true);
 	// now we can safely delete the config pointer
-	event.Skip();
 	delete wxConfig::Set(NULL);
 #ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
+}
+
+void rawprocFrm::OnClose(wxCloseEvent& event)
+{	
+	event.Skip();
+	Shutdown();
 	Destroy();
 }
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
-	if (pic->Modified())
-		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
-			return;
-			
-	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
-		if (IsMaximized()) {
-			myConfig::getConfig().setValue("app.window.lastremembered","maximized");
-		}
-		else {
-			int w, h;
-			GetSize(&w,&h);
-			std::string dim = string_format("%dx%d", w, h);
-			myConfig::getConfig().setValue("app.window.lastremembered",dim);
-		}
-		myConfig::getConfig().flush();
-	}
-			
-	commandtree->DeleteAllItems();
-	pic->BlankPic();
-	histogram->BlankPic();
-	//parambook->DeleteAllPages();
-	ClearParamPane();
-	if ( help.GetFrame() ) // returns NULL if no help frame active
-		help.GetFrame()->Close(true);
-	// now we can safely delete the config pointer
 	event.Skip();
-	delete wxConfig::Set(NULL);
-#ifndef SIZERLAYOUT
-	mgr.UnInit();
-#endif
+	Shutdown();
 	Destroy();
 }
 

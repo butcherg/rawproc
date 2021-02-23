@@ -20,6 +20,8 @@
 	#include <wx/wxprec.h>
 #endif
 
+#include "rawprocFrm.h"
+
 class rawprocFrmApp : public wxApp
 {
 	public:
@@ -27,6 +29,9 @@ class rawprocFrmApp : public wxApp
 		int OnExit();
 		int OnRun();
 		void OnFatalException();
+		
+	private:
+		rawprocFrm* frame;
 };
 
 #endif

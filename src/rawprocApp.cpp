@@ -8,7 +8,6 @@
 //---------------------------------------------------------------------------
 
 #include "rawprocApp.h"
-#include "rawprocFrm.h"
 
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -52,7 +51,7 @@ bool rawprocFrmApp::OnInit()
 	configfilepath = wxString(getRawprocConfPath(std::string(configfile.c_str())));
 	if (configfilepath != "(none)") myConfig::loadConfig(configfilepath);
 	
-	rawprocFrm* frame = new rawprocFrm(NULL);
+	frame = new rawprocFrm(NULL);
 	frame->SetIcon(icon_xpm);
 	SetTopWindow(frame);
 	frame->Show();
@@ -133,6 +132,7 @@ int rawprocFrmApp::OnRun()
 
 void rawprocFrmApp::OnFatalException()
 {
-	wxMessageBox("rawprocFrmApp::OnFatalException...");
+	frame->Shutdown();
+	frame->Destroy();
 }
 
