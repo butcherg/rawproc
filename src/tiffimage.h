@@ -4,14 +4,14 @@
 const char * tiffVersion();
 
 bool _checkTIFF(const char *filename);
-
+/*
 bool _loadTIFFInfo(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
 			unsigned *numcolors, 
 			unsigned *numbits, 
 			std::map<std::string,std::string> &info);
-
+*/
 char * _loadTIFF(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 

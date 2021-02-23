@@ -938,11 +938,12 @@ char * _loadRAW(const char *filename,
 
 	//Lens nomenclature for LensFun:
 	if (strlen(RawProcessor.imgdata.lens.makernotes.Lens) > 0)
-		info["Lens"] = RawProcessor.imgdata.lens.makernotes.Lens;
+		info["LensModel"] = RawProcessor.imgdata.lens.makernotes.Lens;
 	else if (strlen(RawProcessor.imgdata.lens.Lens) > 0)
-		info["Lens"] = RawProcessor.imgdata.lens.Lens;
+		info["LensModel"] = RawProcessor.imgdata.lens.Lens;
 	else
-		info["Lens"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
+		info["LensModel"] = lens_lookup(RawProcessor.imgdata.lens.makernotes.LensID);
+	
 
 	//Normalize libraw orientation for EXIF:
 
@@ -962,7 +963,7 @@ char * _loadRAW(const char *filename,
 	struct tm * timeinfo;
 	timeinfo = localtime (&rawtime);
 	strftime (buffer,80,"%Y:%m:%d %H:%M:%S",timeinfo);
-	info["DateTime"] = buffer;  
+	info["DateTimeOriginal"] = buffer;  
 
 	
 	cmsHPROFILE profile = NULL;
@@ -978,6 +979,7 @@ char * _loadRAW(const char *filename,
 		info["Libraw.top_margin"] = tostr(S.top_margin);
 		info["Libraw.left_margin"] = tostr(S.left_margin);
 		info["Libraw.Mosaiced"] = "1";
+		info["PhotometricInterpretation"] = "32803"; //Color Filter Array;
 
 
 		*numcolors = 1;

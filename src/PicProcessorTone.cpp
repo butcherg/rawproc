@@ -3,6 +3,8 @@
 #include "myRowSizer.h"
 #include "myToneCurvePane.h"
 #include "myFloatCtrl.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
@@ -21,10 +23,11 @@
 #define TONELOG2 7906
 #define TONELOGGAM 7907
 #define TONEFILMIC 7908
-#define TONECURVE 7909
-#define TONENORM 7910
-#define TONEFILMICRESET 7911
-#define TONECURVECOPY 7912
+#define TONEDUALLOGISTIC 7909
+#define TONECURVE 7910
+#define TONENORM 7911
+#define TONEFILMICRESET 7912
+#define TONECURVECOPY 7913
 
 class ToneCurveDialog: public wxDialog
 {
@@ -71,6 +74,7 @@ class TonePanel: public PicProcPanel
 			//log2b = new wxRadioButton(this, TONELOG2, "log2");
 			hybloggamb = new wxRadioButton(this, TONELOGGAM, _("loggamma"));
 			filmicb = new wxRadioButton(this, TONEFILMIC, _("filmic"));
+			doublelogisticb = new wxRadioButton(this, TONEDUALLOGISTIC, _("doublelogistic"));
 
 			tonenorm = new wxCheckBox(this, TONENORM, _("norm"));
 			tonenorm->SetValue(false);
@@ -91,6 +95,11 @@ class TonePanel: public PicProcPanel
 			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str()), 2, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
+			
+			//parm tool.tone.doublelogistic.L: Default value for doublelogistic L operator power, sets the position of the transition from the left equation to the right equation. Default=0.002
+			dlL = new myFloatCtrl(this, wxID_ANY, "L:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.L","0.002").c_str()), 3, wxDefaultPosition, wxSize(70,TEXTCTRLHEIGHT));
+			//parm tool.tone.doublelogistic.c: Default value for doublelogistic c operator power, sets the height of the right equation.  Default=3.0
+			dlc = new myFloatCtrl(this, wxID_ANY, "c:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.c","3.0").c_str()), 2, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 
 			wxArrayString str;
 			str.Add("channel");
@@ -130,6 +139,14 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(hybloggamb, flags);
+			
+			//doublelogistic:
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(doublelogisticb, flags);
+			m->AddRowItem(dlL, flags);
+			m->AddRowItem(dlc, flags);
 
 			//filmic:
 			m->NextRow(wxSizerFlags().Expand());
@@ -148,6 +165,7 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(filmicC, flags);
 			//m->NextRow();
 			m->AddRowItem(filmicD, flags);
+			
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow(wxSizerFlags().Expand());
@@ -215,6 +233,14 @@ class TonePanel: public PicProcPanel
 			if (p[0] == "loggamma") {
 				hybloggamb->SetValue(true);
 				tonemode = TONELOGGAM;
+			}
+			if (p[0] == "doublelogistic") {
+				doublelogisticb->SetValue(true);
+				tonemode = TONEDUALLOGISTIC;
+				if (p.GetCount() >=2) 
+					dlL->SetFloatValue(atof(p[1].c_str()));
+				if (p.GetCount() >=3) 
+					dlc->SetFloatValue(atof(p[2].c_str()));
 			}
 			if (p[0] == "filmic") {
 				filmicb->SetValue(true);
@@ -353,6 +379,9 @@ class TonePanel: public PicProcPanel
 				case TONELOGGAM:
 					q->setParams(wxString::Format("loggamma"));
 					break;
+				case TONEDUALLOGISTIC:
+					q->setParams(wxString::Format("doublelogistic,%f,%f",dlL->GetFloatValue(), dlc->GetFloatValue()));
+					break;
 				case TONEFILMIC:
 					if (tonenorm->GetValue())
 						q->setParams(wxString::Format("filmic,%0.2f,%0.2f,%0.2f,%0.2f,%0.2f,norm",filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue()));
@@ -369,19 +398,21 @@ class TonePanel: public PicProcPanel
 
 		void floatParamChanged(wxCommandEvent& event)
 		{
-			if (gamb->GetValue() | filmicb->GetValue()) t.Start(500,wxTIMER_ONE_SHOT);
+			if (gamb->GetValue() | filmicb->GetValue() | doublelogisticb->GetValue()) t.Start(500,wxTIMER_ONE_SHOT);
 		}
 		
 		void floatParamUpdated(wxCommandEvent& event)
 		{
 			if (gamb->GetValue()) processTone(TONEGAMMA);
 			if (filmicb->GetValue()) processTone(TONEFILMIC);
+			if (doublelogisticb->GetValue()) processTone(TONEDUALLOGISTIC);
 		}
 		
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (gamb->GetValue()) processTone(TONEGAMMA);
-			if (filmicb->GetValue()) processTone(TONEFILMIC);
+			else if (filmicb->GetValue()) processTone(TONEFILMIC);
+			else if (doublelogisticb->GetValue()) processTone(TONEDUALLOGISTIC);
 		}
 
 		std::vector<float> makeXArray(unsigned arraysize)
@@ -400,6 +431,12 @@ class TonePanel: public PicProcPanel
 				X.ApplyToneMapReinhard(channel, tonenorm->GetValue());
 			}
 			else if (hybloggamb->GetValue()) X.ApplyToneMapLogGamma();
+			else if (doublelogisticb->GetValue()) {
+				std::map<std::string,std::string> p;
+				p["L"] = wxString::Format("%f",dlL->GetFloatValue()).ToStdString();
+				p["c"] = wxString::Format("%f",dlc->GetFloatValue()).ToStdString();
+				X.ApplyToneMapDualLogistic(p);
+			}
 			else if (filmicb->GetValue())  X.ApplyToneMapFilmic(filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue(), tonenorm->GetValue());
 
 			for (unsigned i=0; i<x.size(); i++) xarray.push_back(x[i].r);
@@ -408,9 +445,9 @@ class TonePanel: public PicProcPanel
 
 	private:
 		wxTimer t;
-		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power;
+		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power, *dlL, *dlc;
 		wxCheckBox *enablebox, *tonenorm;
-		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb;
+		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb, *doublelogisticb;
 		wxChoice *reinop;
 		myToneCurvePane *tcpane;
 		int tonemode;
@@ -432,91 +469,51 @@ void PicProcessorTone::createPanel(wxSimplebook* parent)
 
 bool PicProcessorTone::processPicture(gImage *processdib) 
 {
-	wxString d;
-	wxArrayString p = split(c,",");
-	bool result = true;
-
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.tone.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
+	if (!processingenabled) return true;
 	
-	dib = processdib;
-	if (!global_processing_enabled) return true;
+	((wxFrame*) m_display->GetParent())->SetStatusText(_("tone..."));
+	bool ret = true;
+	std::map<std::string,std::string> result;
 
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
 
-	if (processingenabled) {
-		if (p[0] == "gamma") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: gamma..."));
-			m_tree->SetItemText(id, _("tone:gamma"));
-			double gamma = 1.0;
-			if (p.size() >= 2) gamma = atof(p[1].c_str());
-			mark();
-			dib->ApplyToneMapGamma(gamma, threadcount);
-			m_display->SetModified(true);
-			d = duration();
-
+	if (!pstr.empty())
+		params = parse_tone(std::string(pstr));
+	
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
+	}
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_tone(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
 		}
-		else if (p[0] == "loggamma") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: hybrid log gamma..."));
-			m_tree->SetItemText(id, _("tone:loggamma"));
-			mark();
-			dib->ApplyToneMapLogGamma(threadcount);
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
 			m_display->SetModified(true);
-			d = duration();
-
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.tone.log","0") == "1"))
+					log(wxString::Format(_("tool=tone,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
 		}
-		else if (p[0] == "log2") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: log2..."));
-			m_tree->SetItemText(id, _("tone:log2"));
-			mark();
-			dib->ApplyToneMapLog2(threadcount);
-			m_display->SetModified(true);
-			d = duration();
-		}
-		else if (p[0] == "reinhard") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: reinhard..."));
-			m_tree->SetItemText(id, _("tone:reinhard"));
-			bool channel = true;
-			if (p.size() >= 2) if (p[1] == "luminance") channel = false;
-			bool norm = false;
-			if (p.size() >= 3) if (p[2] == "norm") norm = true;
-			mark();
-			dib->ApplyToneMapReinhard(channel, norm, threadcount);
-			m_display->SetModified(true);
-			d = duration();
-		}
-		else if (p[0] == "filmic") {
-			((wxFrame*) m_display->GetParent())->SetStatusText(_("tone: filmic..."));
-			m_tree->SetItemText(id, _("tone:filmic"));
-			double filmicA = 6.2;
-			double filmicB = 0.5;
-			double filmicC = 1.7;
-			double filmicD = 0.06;
-			double power = 2.2;
-			bool norm = false;
-			if (p.size() >= 2) filmicA = atof(p[1].c_str());
-			if (p.size() >= 3) filmicB = atof(p[2].c_str());
-			if (p.size() >= 4) filmicC = atof(p[3].c_str());
-			if (p.size() >= 5) filmicD = atof(p[4].c_str());
-			if (p.size() >= 6) power = atof(p[5].c_str());
-			if (p.size() >= 7 && p[6] == "norm") norm = true;
-			mark();
-			dib->ApplyToneMapFilmic(filmicA, filmicB, filmicC, filmicD, power, norm, threadcount);
-			m_display->SetModified(true);
-			d = duration();
-		}
-
-		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.tone.log","0") == "1"))
-			log(wxString::Format(_("tool=tone:%s,imagesize=%dx%d,threads=%d,time=%s"),p[0],dib->getWidth(), dib->getHeight(),threadcount,d));
 	}
 
-	dirty = false;
-
+	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
+	return ret;
 }
 
 

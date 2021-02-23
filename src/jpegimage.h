@@ -5,6 +5,7 @@ const char * jpegVersion();
 
 bool _checkJPEG(const char *filename);
 
+/*
 bool _loadJPEGInfo(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
@@ -13,6 +14,7 @@ bool _loadJPEGInfo(const char *filename,
 //			std::string params="",
 //			char ** iccprofile=NULL, 
 //			unsigned  *icclength=0);
+*/
 
 char * _loadJPEG(const char *filename, 
 			unsigned *width, 

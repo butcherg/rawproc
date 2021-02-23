@@ -1327,7 +1327,7 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 
 		if (p[0] == "gamma") {
 			if (psize >=2) {
-				if (isFloat(p[0])) {
+				if (isFloat(p[1])) {
 					pmap["mode"] = "gamma";
 					pmap["cmdlabel"] = "tone:gamma";
 					pmap["value"] = p[1];
@@ -1366,6 +1366,30 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 		else if (p[0] == "loggamma") {
 			pmap["mode"] = "loggamma";
 			pmap["cmdlabel"] = "tone:loggamma";
+		}
+		else if (p[0] == "doublelogistic") {
+			pmap["mode"] = "doublelogistic";
+			pmap["cmdlabel"] = "tone:doublelogistic";
+			pmap["L"] = "0.2";
+			pmap["c"] = "0.2";
+			if (psize >=2) {
+				if (isFloat(p[1])) {
+					pmap["L"] = p[1];
+				}
+				else {
+					pmap["error"] = "tone:ParseError - doublelogistic L needs a float"; 
+					return pmap;
+				}
+			}
+			if (psize >=3) {
+				if (isFloat(p[2])) {
+					pmap["c"] = p[2];
+				}
+				else {
+					pmap["error"] = "tone:ParseError - doublelogistic c needs a float"; 
+					return pmap;
+				}
+			}
 		}
 		else if (p[0] == "filmic") {
 			pmap["mode"] = "filmic";

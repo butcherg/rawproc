@@ -8,11 +8,19 @@ the right place.</p>
 
 <p>Available tone operators:
 <ul>
-<li>gamma: The same function as in the original gamma tool, which will eventually be removed.  Default: 1.0, or no-change.</li>
-<li>reinhart: Applies the simple Reinhart function, val / (1-val), to either the individual channels, or as a computed 
+<li><b>gamma:</b> The same function as in the original gamma tool, which will eventually be removed.  Default: 1.0, or no-change.</li>
+<li><b>reinhart:</b> Applies the simple Reinhart function, val / (1-val), to either the individual channels, or as a computed 
 change to the luminance of each pixel.  Default: channel.</li>
-<li>loggamma: The HEVC version of the ARIB STD-B67 algorithm, as defined in https://en.wikipedia.org/wiki/Hybrid_Log-Gamma.</li>
-<li>filmic: The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog: <pre>
+<li><b>loggamma:</b> The HEVC version of the ARIB STD-B67 algorithm, as defined in <a href=https://en.wikipedia.org/wiki/Hybrid_Log-Gamma>https://en.wikipedia.org/wiki/Hybrid_Log-Gamma</a></li>
+<li><b>doublelogistic:</b>This is a filmic-sort of curve, the toe provided by one logistic function, the mid-part and upper
+roll-off provided by another logistic function.  Two parameters:
+<ul>
+	<li>L: Scales both functions and is the point where the two curves meet.  Use this parameter to place the toe.</li>
+	<li>c: Sets the steepness of the middle part of both curves.  Use this parameter to lift/lower the image brightness.</li>
+</ul>
+The function description can be found at <a href=https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/76>https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/76</a></li>
+
+<li><b>filmic:</b> The filmic algorithm is the original one, attributed to HP Duiker, copied from John Hable's blog: <pre>
 R(x) = pow((x(6.2x+.5))/(x(6.2x+1.7)+0.06),2.2)
 </pre>  
 rawproc parameterizes the coefficients as follows: 

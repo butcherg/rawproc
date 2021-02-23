@@ -18,6 +18,7 @@
 #include "gimage/strutil.h"
 #include "fileutil.h"
 #include "cJSON.h"
+#include "exiv2/exiv2.hpp"
 #ifdef USE_LIBRTPROCESS
 #include <rtprocess/librtprocess.h>
 #endif
@@ -859,16 +860,7 @@ std::string gImage::getProfilePath()
 
 std::map<std::string,std::string> gImage::getInfo(const char * filename)
 {
-	unsigned width, height, colors, bpp, icclength;
-	char * iccprofile;
-	std::map<std::string, std::string> imgdata;
-	GIMAGE_FILETYPE ftype = gImage::getFileType(filename);
-	
-	if (ftype == FILETYPE_TIFF) _loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata);
-	if (ftype == FILETYPE_RAW) _loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata);
-	if (ftype == FILETYPE_JPEG) _loadJPEGInfo(filename, &width, &height, &colors, imgdata);
-	if (ftype == FILETYPE_PNG) _loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata);
-	return imgdata;
+	return loadMetadata(filename);
 }
 
 //Check the file type of an existing image file; is it suitable for opening?
@@ -940,6 +932,8 @@ std::string gImage::LibraryVersions()
 	std::ostringstream s;
 	s << (int) cmsGetEncodedCMMversion();
 	verstring.append(s.str());
+	verstring.append("\nExiv2: ");
+	verstring.append(EXV_PACKAGE_VERSION);
 	//verstring.append("\n");
 	return verstring;
 
@@ -2756,7 +2750,6 @@ void gImage::ApplyToneMapFilmic(float A, float B, float C, float D, float power,
 	}
 }
 
-
 void gImage::ApplyToneMapLogGamma(int threadcount)
 {
 	//The HEVC version of the ARIB STD-B67 algorithm, as defined in:
@@ -2773,21 +2766,61 @@ void gImage::ApplyToneMapLogGamma(int threadcount)
 			else 
 				image[pos].r = sqrt3 * pow(image[pos].r, 0.5); 
 		}
+		else image[pos].r = 0.0;
 		if (image[pos].g > 0.0) {
 			if (image[pos].g > rubicon) 
 				image[pos].g = a * log(12*image[pos].g - b) + c; 
 			else 
 				image[pos].g = sqrt3 * pow(image[pos].g, 0.5); 
 		}
+		else image[pos].g = 0.0;
 		if (image[pos].b > 0.0) {
 			if (image[pos].b > rubicon) 
 				image[pos].b = a * log(12*image[pos].b - b) + c; 
 			else 
 				image[pos].b = sqrt3 * pow(image[pos].b, 0.5); 
 		}
+		else image[pos].b = 0.0;
 	}
 }
 
+void gImage::ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount)
+{
+	//Dual-Logistic tone curve postulated by @McCap at discuss.pixls.us:
+	//https://discuss.pixls.us/t/new-sigmoid-scene-to-display-mapping/22635/76
+
+	float e = 2.71828; 
+
+	float L = 0.2;
+	if (parameters.find("L") != parameters.end()) L = atof(parameters["L"].c_str());
+	float c = 1.0; //???????????
+	if (parameters.find("c") != parameters.end()) c = atof(parameters["c"].c_str());
+	
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned pos=0; pos<image.size(); pos++) {
+		if (image[pos].r > 0.0) {
+			if (image[pos].r < L/2.0) 
+				image[pos].r = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].r - (L/2.0)) ))); 
+			else 
+				image[pos].r = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].r - (L/2.0)) )))) + L - 1.0; 
+		}
+		else image[pos].r = 0.0;
+		if (image[pos].g > 0.0) {
+			if (image[pos].g < L/2.0) 
+				image[pos].g = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].g - (L/2.0)) ))); 
+			else 
+				image[pos].g = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].g - (L/2.0)) )))) + L - 1.0; 
+		}
+		else image[pos].g = 0.0;
+		if (image[pos].b > 0.0) {
+			if (image[pos].b < L/2.0) 
+				image[pos].b = L / (1.0 + exp((-4.0 * (c/L)  * (image[pos].b - (L/2.0)) ))); 
+			else 
+				image[pos].b = ((2.0 - L) / (1.0 + exp((-4.0 * (c/(2.0-L))  * (image[pos].b - (L/2.0)) )))) + L - 1.0; 
+		}
+		else image[pos].b = 0.0;
+	}
+}
 
 
 //White Balance
@@ -3077,6 +3110,7 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 		}
 	}
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 
 	image = halfimage;
 	w /=2;
@@ -3134,6 +3168,7 @@ bool gImage::ApplyMosaicColor(int threadcount)
 		}
 	}
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	c = 3;
 	return true;
 }
@@ -3197,6 +3232,7 @@ bool gImage::ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	free (rawdata[0]);
 	free( rawdata );
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3246,6 +3282,7 @@ bool gImage::ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3289,6 +3326,7 @@ bool gImage::ApplyDemosaicDCB(LIBRTPROCESS_PREPOST prepost, int iterations, bool
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3340,6 +3378,7 @@ bool gImage::ApplyDemosaicAMAZE(LIBRTPROCESS_PREPOST prepost, double initGain, i
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3383,6 +3422,7 @@ bool gImage::ApplyDemosaicIGV(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3477,6 +3517,7 @@ bool gImage::ApplyDemosaicAHD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3521,6 +3562,7 @@ bool gImage::ApplyDemosaicLMMSE(LIBRTPROCESS_PREPOST prepost, int iterations, in
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3559,6 +3601,7 @@ bool gImage::ApplyDemosaicXTRANSFAST(LIBRTPROCESS_PREPOST prepost, int threadcou
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -3600,6 +3643,7 @@ bool gImage::ApplyDemosaicXTRANSMARKESTEIJN(LIBRTPROCESS_PREPOST prepost, int pa
 	RT_free(red);
 	RT_free(rawdata);
 	imginfo["Libraw.Mosaiced"] = "0";
+	imginfo["PhotometricInterpretation"] = "2";  //RGB
 	return true;
 }
 
@@ -5919,40 +5963,211 @@ std::vector<long> gImage::Histogram(unsigned channel, unsigned &hmax)
 }
 
 
+//Exiv2 Metadata handlers:
+
+//This is the tag list rawproc will read from and write to JPEGs, TIFFs, and PNGs
+//The list has to be palatable to all three formats.
+std::vector<std::string> taglist = {
+	"Exif.Photo.ExposureTime",
+	"Exif.Photo.FNumber",
+	"Exif.Photo.FocalLength",
+	"Exif.Photo.ISOSpeedRatings",
+	"Exif.Image.Orientation",
+	"Exif.Image.PhotometricInterpretation",  //only saves to TIFF
+	"Exif.Image.ImageDescription",
+	"Exif.Image.Make",
+	"Exif.Image.Model",
+	"Exif.Photo.LensModel",
+	"Exif.Image.Artist",
+	"Exif.Photo.DateTimeOriginal",  //TIFF/EP (6.0) specifies Exif.Image.DateTimeOriginal
+	"Exif.Image.Software",
+	"Exif.Image.Copyright"
+};
+
+//writes metadata from the gImage instance to a file:
+GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, bool excludeexif)
+{
+	Exiv2::ExifData exifData;
+	int numerator, denominator;
+	
+	for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+		//printf("%s %ld: ",(*it).c_str(), Exiv2::ExifKey(*it).defaultTypeId());  //keep for debugging
+		std::string name = split(*it,".")[2];
+		if (imginfo.find(name) != imginfo.end()) {
+			switch (Exiv2::ExifKey(*it).defaultTypeId()) {
+				case Exiv2::unsignedRational:
+				case Exiv2::signedRational:
+				{
+					//printf("float.\n"); fflush(stdout);  //keep for debugging
+					float val = atof(imginfo[name].c_str());
+					if (val < 1.0) {
+						numerator = 1;
+						denominator = 1.0 / val;
+					}
+					else {
+						numerator = val;
+						denominator = 1;
+					}
+					exifData[*it] = Exiv2::Rational(numerator, denominator);
+					break;
+				}
+				case Exiv2::unsignedByte:
+				case Exiv2::unsignedShort:
+				case Exiv2::unsignedLong:
+				case Exiv2::signedByte:
+				case Exiv2::signedShort:
+				case Exiv2::signedLong:
+				case Exiv2::unsignedLongLong:
+				case Exiv2::signedLongLong:
+				{
+					//printf("integer.\n"); fflush(stdout);  //keep for debugging
+					uint16_t val = atoi(imginfo[name].c_str());
+					exifData[*it] =  val;
+					break;
+				}
+				case Exiv2::asciiString:
+				case Exiv2::date:
+				case Exiv2::time:
+				case Exiv2::comment:
+				{
+					//printf("string.\n"); fflush(stdout);  //keep for debugging
+					exifData[*it] = imginfo[name];
+					break;
+				}
+				default:
+					//printf("no output.\n"); fflush(stdout);  //keep for debugging
+					break;
+			}
+		}
+	}
+
+	exifData.sortByTag(); 
+	
+	auto image = Exiv2::ImageFactory::open(filename);
+	image->setExifData(exifData);
+	if (profile != NULL) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+		Exiv2::DataBuf iccprof((Exiv2::byte *) iccprofile, iccprofilesize);
+		image->setIccProfile(iccprof);
+		delete [] iccprofile;
+	}
+	
+	try {
+		image->writeMetadata();
+	}
+	catch (int e) {
+		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
+	}
+
+	return GIMAGE_OK;
+}
+
+//loads metadata from a file into a std::map:
+std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
+{
+	std::map<std::string,std::string> imgdata;
+	
+	try {
+		auto image = Exiv2::ImageFactory::open(filename);
+		//assert(image.get() != 0);
+		image->readMetadata();
+		Exiv2::ExifData &exifData = image->exifData();
+	
+		for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
+			std::string name = split(*it,".")[2];
+			if (exifData.findKey(Exiv2::ExifKey(*it)) != exifData.end()) {
+				switch (exifData[*it].typeId()) {
+					case Exiv2::unsignedRational:
+					case Exiv2::signedRational:
+						imgdata[name] = tostr(exifData[*it].toFloat());
+						break;
+					case Exiv2::unsignedByte:
+					case Exiv2::unsignedShort:
+					case Exiv2::unsignedLong:
+					case Exiv2::signedByte:
+					case Exiv2::signedShort:
+					case Exiv2::signedLong:
+					case Exiv2::unsignedLongLong:
+					case Exiv2::signedLongLong:
+						imgdata[name] = tostr((unsigned short) exifData[*it].toLong());
+						break;
+					case Exiv2::asciiString:
+					case Exiv2::date:
+					case Exiv2::time:
+					case Exiv2::comment:
+						imgdata[name] = exifData[*it].toString();
+						break;
+				}
+			}
+		}
+	}
+	catch (...) {
+		imgdata["Error"] = "Metadata read failure.";
+		return imgdata;
+	}
+	
+	return imgdata;
+}
+
+//loads metadata from a file into the gImage instance:
+GIMAGE_ERROR gImage::getMetadata(std::string filename)
+{	
+	//debugging: displays any data collected prior to using exiv2:
+	//for (std::map<std::string, std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
+	//	printf("%s: %s\n",it->first.c_str(), it->second.c_str()); fflush(stdout);
+	//}
+	
+	std::map<std::string,std::string> imdat = loadMetadata(filename.c_str());
+	
+	if (imdat.find("Error") != imdat.end()) {
+		imginfo["Error"] = imdat["Error"];
+		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
+	}
+
+	for (std::map<std::string, std::string>::iterator it=imdat.begin(); it!=imdat.end(); ++it) 
+		imginfo[it->first] = it->second;
+	
+	auto image = Exiv2::ImageFactory::open(filename);
+	assert(image.get() != 0);
+	image->readMetadata();
+	 
+	char * prof;
+	if (image->iccProfileDefined()) {
+		prof = new char[image->iccProfile()->size_]; 
+		memcpy(prof, image->iccProfile()->pData_, image->iccProfile()->size_);
+		setProfile(prof, image->iccProfile()->size_);
+	}
+
+	return GIMAGE_OK;
+}
+
+
+
 //Loaders:
 
 gImage gImage::loadImageFile(const char * filename, std::string params)
 {
-	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
-
-	if (ext == FILETYPE_TIFF) return gImage::loadTIFF(filename, params);
-	else if (ext == FILETYPE_JPEG) return gImage::loadJPEG(filename, params);
-	else if (ext == FILETYPE_PNG) return gImage::loadPNG(filename, params);
-	else return gImage::loadRAW(filename, params);
-}
-
-std::map<std::string,std::string> gImage::loadImageFileInfo(const char * filename)
-{
-	unsigned width, height, bpp, colors, icclength;
-	BPP bits;
-	char * iccprofile;
-	std::map<std::string,std::string> imgdata;
-	std::string params;
+	gImage image;
 	GIMAGE_FILETYPE ext = gImage::getFileType(filename);
 
 	if (ext == FILETYPE_TIFF) {
-		_loadTIFFInfo(filename, &width, &height, &colors, &bpp, imgdata); 
+		image = gImage::loadTIFF(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
 	}
 	else if (ext == FILETYPE_JPEG) {
-		_loadJPEGInfo(filename, &width, &height, &colors, imgdata); 
+		image = gImage::loadJPEG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
 	}
 	else if (ext == FILETYPE_PNG) {
-		_loadPNGInfo(filename, &width, &height, &colors, &bpp, imgdata); 
+		image = gImage::loadPNG(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
 	}
-	else {
-		_loadRAWInfo(filename, &width, &height, &colors, &bpp, imgdata); 
-	}
-	return imgdata;
+	else return gImage::loadRAW(filename, params);
 }
 
 
@@ -6063,6 +6278,7 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 //Savers:
 
 
+
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
@@ -6077,29 +6293,60 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
 
+	GIMAGE_ERROR result;
+	
+	//if a profile was passed in params, convert to it, otherwise save with the assigned profile
 	if (ftype == FILETYPE_TIFF) {
 		if (profile)
-			return saveTIFF(filename, bitfmt, params, profile, intent);
+			result = saveTIFF(filename, bitfmt, params, profile, intent); //saveTIFF will convert image to the specified profile
 		else
-			return saveTIFF(filename, bitfmt, params);
+			result = saveTIFF(filename, bitfmt, params);//saveTIFF will save the image in the assigned profile (if one is assigned...)
 	}
-	if (ftype == FILETYPE_JPEG) {
+	else if (ftype == FILETYPE_JPEG) {
 		if (profile)
-			return saveJPEG(filename, bitfmt, params, profile, intent);
+			result = saveJPEG(filename, bitfmt, params, profile, intent);
 		else
-			return saveJPEG(filename, bitfmt, params);
+			result = saveJPEG(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_PNG) {
+	else if (ftype == FILETYPE_PNG) {
 		if (profile)
-			return savePNG(filename, bitfmt, params, profile, intent);
+			result = savePNG(filename, bitfmt, params, profile, intent);
 		else
-			return savePNG(filename, bitfmt, params);
+			result = savePNG(filename, bitfmt, params);
 	}
-	if (ftype == FILETYPE_DATA) {
+	else if (ftype == FILETYPE_DATA) {
 		return saveData(filename, bitfmt, params);
 	}
-	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
-	return lasterror;
+	
+	bool excludeexif = false;
+	if (p.find("excludeexif") != p.end()) excludeexif = true;
+	bool excludeicc = false;
+	if (p.find("excludeicc") != p.end()) excludeicc = true;
+	
+	cmsHPROFILE saveprofile = NULL;
+	if (profile) 
+		saveprofile = profile;
+	else if (this->profile) 
+		saveprofile = cmsOpenProfileFromMem(getProfile(), getProfileLength());
+		
+	if (saveprofile == NULL) excludeicc = true;
+	
+	if (result == GIMAGE_OK) { 
+		if (excludeexif & excludeicc) //neither
+			result = insertMetadata(filename, NULL, true);
+		else if (excludeicc) //exif only
+			result = insertMetadata(filename);
+		else if (excludeexif) //icc only;
+			result = insertMetadata(filename, saveprofile, true);
+		else //both
+			result = insertMetadata(filename, saveprofile);
+
+		return result;
+	}
+	else {
+		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+		return lasterror;
+	}
 }
 
 GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string params)
@@ -6115,21 +6362,154 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 	}
 
 	GIMAGE_FILETYPE ftype = gImage::getFileNameType(filename);
+	
+	GIMAGE_ERROR result;
 
 	if (ftype == FILETYPE_TIFF) {
-		return saveTIFF(filename, bitfmt, params);
+		result = saveTIFF(filename, bitfmt, params);
 	}
 	if (ftype == FILETYPE_JPEG) {
-		return saveJPEG(filename, bitfmt, params);
+		result = saveJPEG(filename, bitfmt, params);
 	}
 	if (ftype == FILETYPE_PNG) {
-		return savePNG(filename, bitfmt, params);
+		result = savePNG(filename, bitfmt, params);
 	}
-	lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
-	return lasterror;
+	
+	bool excludeexif = false;
+	if (p.find("excludeexif") != p.end()) excludeexif = true;
+	bool excludeicc = false;
+	if (p.find("excludeicc") != p.end()) excludeicc = true;
+	
+	//don't include a profile if there was none either in the gImage class or specified for output transform:
+	if (profile == NULL & this->profile == NULL) excludeicc = true;
+	
+	if (result == GIMAGE_OK) { 
+		if (excludeexif & excludeicc) //neither
+			result = insertMetadata(filename, NULL, true);
+		else if (excludeicc) //exif only
+			result = insertMetadata(filename);
+		else if (excludeexif) //icc only;
+			result = insertMetadata(filename, profile, true);
+		else //both
+			result = insertMetadata(filename, profile);
+
+		return result;
+	}
+	else {
+		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
+		return lasterror;
+	}
 }
 
 
+
+GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+	unsigned b = 8;
+	if (bits == BPP_8)  b = 8;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+	
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writeJPEG(filename, getTransformedImageData(BPP_8, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize); 
+			//_writeJPEG(filename, getImageData(BPP_8, profile),  w, h, c, imginfo, params); 
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params, this->profile, profile_length);
+		else
+			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params);
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+	unsigned b = 0;
+	if (bits == BPP_16) b = 16;
+	else if (bits == BPP_8)  b = 8;
+	else if (bits == BPP_FP | bits == BPP_UFP) b = 32;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
+		else
+			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
+{
+
+	unsigned b = 0;
+	if (bits == BPP_16) b = 16;
+	else if (bits == BPP_8)  b = 8;
+	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
+
+	if (profile) {
+		char * iccprofile;
+		cmsUInt32Number iccprofilesize;
+		makeICCProfile(profile, iccprofile, iccprofilesize);
+
+		try {
+			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
+			_writePNG(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize);
+			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
+		}
+		catch (std::exception &e) {
+			lasterror = GIMAGE_EXCEPTION;
+			delete [] iccprofile;
+			return lasterror;
+		}
+
+		delete [] iccprofile;
+	}
+	else {
+		if (this->profile)
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params, this->profile, profile_length);	
+		else
+			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params);	
+	}
+	lasterror = GIMAGE_OK; 
+	return lasterror;
+}
+
+//saves the image as row/column comma-separated text data
 GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string params)
 {
 	std::map<std::string,std::string> p = parseparams(params);
@@ -6319,111 +6699,6 @@ GIMAGE_ERROR gImage::saveData(const char * filename, BPP bits, std::string param
 	else return GIMAGE_UNSUPPORTED_FILEFORMAT;
 }
 
-GIMAGE_ERROR gImage::saveJPEG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-	unsigned b = 8;
-	if (bits == BPP_8)  b = 8;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-	
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writeJPEG(filename, getTransformedImageData(BPP_8, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize); 
-			//_writeJPEG(filename, getImageData(BPP_8, profile),  w, h, c, imginfo, params); 
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params, this->profile, profile_length);
-		else
-			_writeJPEG(filename, getImageData(BPP_8),  w, h, c, b, imginfo, params);
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
-
-GIMAGE_ERROR gImage::saveTIFF(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-	unsigned b = 0;
-	if (bits == BPP_16) b = 16;
-	else if (bits == BPP_8)  b = 8;
-	else if (bits == BPP_FP | bits == BPP_UFP) b = 32;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writeTIFF(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo, this->profile, profile_length);	
-		else
-			_writeTIFF(filename, getImageData(bits),  w, h, c, b, imginfo);	
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
-
-GIMAGE_ERROR gImage::savePNG(const char * filename, BPP bits, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
-{
-
-	unsigned b = 0;
-	if (bits == BPP_16) b = 16;
-	else if (bits == BPP_8)  b = 8;
-	else {lasterror = GIMAGE_UNSUPPORTED_PIXELFORMAT; return lasterror;}
-
-	if (profile) {
-		char * iccprofile;
-		cmsUInt32Number iccprofilesize;
-		makeICCProfile(profile, iccprofile, iccprofilesize);
-
-		try {
-			//Pick one, getTransformedImageData() seems to produce less noise, but is slower:
-			_writePNG(filename, getTransformedImageData(bits, profile, intent),  w, h, c, b, imginfo, params, iccprofile, iccprofilesize);
-			//_writeTIFF(filename, getImageData(bits, profile),  w, h, c, b, imginfo, iccprofile, iccprofilesize);
-		}
-		catch (std::exception &e) {
-			lasterror = GIMAGE_EXCEPTION;
-			delete [] iccprofile;
-			return lasterror;
-		}
-
-		delete [] iccprofile;
-	}
-	else {
-		if (this->profile)
-			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params, this->profile, profile_length);	
-		else
-			_writePNG(filename, getImageData(bits),  w, h, c, b, imginfo, params);	
-	}
-	lasterror = GIMAGE_OK; 
-	return lasterror;
-}
 
 
 //ICC Profiles:

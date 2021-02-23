@@ -8,7 +8,7 @@
 
 
 myToneCurvePane::myToneCurvePane(wxWindow* parent, const wxPoint &pos, const wxSize &size) :
- wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
+ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_NONE)
 {
 	scale = 1.0;
 	Bind(wxEVT_PAINT, &myToneCurvePane::paintEvent, this);

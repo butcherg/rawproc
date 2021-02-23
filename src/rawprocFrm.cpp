@@ -638,6 +638,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		if (it->first == "ExifTag") continue;
 		if (it->first.find("Libraw") != std::string::npos) if (librawinclude == 0) continue;
 		if (it->first == "FNumber") apt = atof(it->second.c_str()); 
+		
 		if (it->first == "ExposureTime") {
 			exp = atof(it->second.c_str());
 			if (exp >= 1.0)
@@ -645,8 +646,14 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 			else
 				exif.Append(wxString::Format("<b>%s:</b> 1/%d sec<br>\n",it->first.c_str(),int(1.0/exp)));
 		}
+		else if (it->first == "PhotometricInterpretation") {
+			if (it->second == "2") exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),"RGB"));
+			else if (it->second == "32803") exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),"CFA"));
+			else exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
+		}
 		else 
 			exif.Append(wxString::Format("<b>%s:</b> %s<br>\n",it->first.c_str(),it->second.c_str()));
+		
 	}
 	char buff[4096];
 
@@ -660,7 +667,7 @@ void rawprocFrm::InfoDialog(wxTreeItemId item)
 		cmsHPROFILE icc = cmsOpenProfileFromMem(profile,profile_length);
 		if (icc) {
 			cmsUInt32Number n =  cmsGetProfileInfoASCII(icc, cmsInfoDescription, "en", "us", buff, 4096);
-			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s<br>\n", wxString(buff)));
+			exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> %s (%d)<br>\n", wxString(buff), profile_length));
 			cmsCloseProfile(icc);
 		}
 		else exif.Append(wxString::Format("<br>\n<b>ICC Profile:</b> failed (%d)<br>\n",profile_length));
@@ -1314,6 +1321,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 				configparams =  myConfig::getConfig().getValueOrDefault("output.data.parameters","");
 			}
 
+			GIMAGE_ERROR result;
 			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
 			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
 
@@ -1365,30 +1373,33 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 					profile = gImage::myCmsOpenProfileFromFile(profilepath.GetFullPath().ToStdString());
 				}
 				
-				
 				if (dib->getProfile()) {
 					if (profile) {
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
-						dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+						result = dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
 					}
 					else {
 						wxMessageBox(wxString::Format(_("No CMS profile file found, saving with the assigned internal color profile...")));
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s with working profile..."),fname));
-						dib->saveImageFile(fname, std::string(configparams.c_str()));
+						result = dib->saveImageFile(fname, std::string(configparams.c_str()));
 					}
 				}
 				else {
 					wxMessageBox(wxString::Format(_("No internal working profile found, saving without a color profile...")));
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
-					dib->saveImageFile(fname, std::string(configparams.c_str()));
+					result = dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
-
-
-
 			}
 			else {
 				WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
 				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
+			}
+			if (result == GIMAGE_UNSUPPORTED_FILEFORMAT) {
+				wxMessageBox("Error: Unsupported format.");
+				return;
+			}
+			if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
+				wxMessageBox("Image saved, but metadata insertion failed.");
 			}
 			
 			pic->SetModified(false);

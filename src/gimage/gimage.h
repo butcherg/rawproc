@@ -118,7 +118,9 @@ enum GIMAGE_ERROR {
 	GIMAGE_LF_NO_DATABASE,
 	GIMAGE_LF_WRONG_FORMAT,
 	GIMAGE_LF_CAMERA_NOT_FOUND,
-	GIMAGE_LF_LENS_NOT_FOUND
+	GIMAGE_LF_LENS_NOT_FOUND,
+	
+	GIMAGE_EXIV2_METADATAWRITE_FAILED
 };
 
 enum LIBRTPROCESS_PREPOST { 
@@ -303,6 +305,7 @@ class gImage
 		void ApplyToneMapFilmic(float A=6.2f, float B=0.5f, float C=1.7f, float D=0.06f, float power=2.2f, bool normalize=false, int threadcount=0);
 		void ApplyToneMapLogGamma(int threadcount=0);
 		void ApplyNormalization(float newmin, float newmax, int threadcount=0);
+		void ApplyToneMapDualLogistic(std::map<std::string, std::string> parameters, int threadcount=0);
 
 		//blur/noise algorithms:
 		void ApplyNLMeans(double sigma, int local, int patch, float threshold=-1.0, int threadcount=0); //-1 bypasses threshold, 0.0 and up bypasses any pixel >= threshold
@@ -340,8 +343,8 @@ class gImage
 		static gImage loadTIFF(const char * filename, std::string params);
 		static gImage loadPNG(const char * filename, std::string params);
 		static gImage loadImageFile(const char * filename, std::string params);
-		static std::map<std::string,std::string> loadImageFileInfo(const char * filename);
-
+		static std::map<std::string,std::string> loadMetadata(const char * filename);
+		
 #ifdef USE_DCRAW
 		static void setdcrawPath(std::string path);
 #endif
@@ -377,6 +380,9 @@ class gImage
 		//void ApplyYShear(double rangle, int threadcount);
 		
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
+
+		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
+		GIMAGE_ERROR getMetadata(std::string filename);
 
 
 

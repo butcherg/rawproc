@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([rawproc], [1.0.3], [glenn.butcher@gmail.com])
+AC_INIT([rawproc], [1.1dev], [glenn.butcher@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 #AC_CONFIG_HEADERS([config.h])
@@ -134,6 +134,14 @@ if test "$with_lcms2_fastfloat" != ""
 then
 	CXXFLAGS="$CXXFLAGS -DUSE_LCMS_FASTFLOAT"
 fi
+
+#exiv2:
+PKG_CHECK_MODULES([EXIV2],[exiv2], [
+	CPPFLAGS="$EXIV2_CFLAGS $CPPFLAGS"
+	LIBS="$EXIV2_LIBS $LIBS"
+],[
+	AC_MSG_ERROR([not found.])
+])
 
 
 #libraw-dcraw:
