@@ -6057,7 +6057,7 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 	try {
 		image->writeMetadata();
 	}
-	catch (int e) {
+	catch (Exiv2::AnyError& e) {
 		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
 	}
 
@@ -6103,7 +6103,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 			}
 		}
 	}
-	catch (...) {
+	catch (Exiv2::AnyError& e) {
 		imgdata["Error"] = "Metadata read failure.";
 		return imgdata;
 	}
