@@ -6282,6 +6282,10 @@ gImage gImage::loadPNG(const char * filename, std::string params)
 GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cmsHPROFILE profile, cmsUInt32Number intent)
 {
 	BPP bitfmt = BPP_8;
+	
+	std::map<std::string, std::string> fileparts = file_parts(filename);
+	std::string tempfile = fileparts["dir"] + fileparts["filename"] + "-tmp" + fileparts["ext"];
+	
 	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
@@ -6298,21 +6302,21 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 	//if a profile was passed in params, convert to it, otherwise save with the assigned profile
 	if (ftype == FILETYPE_TIFF) {
 		if (profile)
-			result = saveTIFF(filename, bitfmt, params, profile, intent); //saveTIFF will convert image to the specified profile
+			result = saveTIFF(tempfile.c_str(), bitfmt, params, profile, intent); //saveTIFF will convert image to the specified profile
 		else
-			result = saveTIFF(filename, bitfmt, params);//saveTIFF will save the image in the assigned profile (if one is assigned...)
+			result = saveTIFF(tempfile.c_str(), bitfmt, params);//saveTIFF will save the image in the assigned profile (if one is assigned...)
 	}
 	else if (ftype == FILETYPE_JPEG) {
 		if (profile)
-			result = saveJPEG(filename, bitfmt, params, profile, intent);
+			result = saveJPEG(tempfile.c_str(), bitfmt, params, profile, intent);
 		else
-			result = saveJPEG(filename, bitfmt, params);
+			result = saveJPEG(tempfile.c_str(), bitfmt, params);
 	}
 	else if (ftype == FILETYPE_PNG) {
 		if (profile)
-			result = savePNG(filename, bitfmt, params, profile, intent);
+			result = savePNG(tempfile.c_str(), bitfmt, params, profile, intent);
 		else
-			result = savePNG(filename, bitfmt, params);
+			result = savePNG(tempfile.c_str(), bitfmt, params);
 	}
 	else if (ftype == FILETYPE_DATA) {
 		return saveData(filename, bitfmt, params);
@@ -6331,27 +6335,36 @@ GIMAGE_ERROR gImage::saveImageFile(const char * filename, std::string params, cm
 		
 	if (saveprofile == NULL) excludeicc = true;
 	
-	if (result == GIMAGE_OK) { 
+	if (ftype != FILETYPE_DATA && result == GIMAGE_OK) { 
 		if (excludeexif & excludeicc) //neither
-			result = insertMetadata(filename, NULL, true);
+			result = insertMetadata(tempfile, NULL, true);
 		else if (excludeicc) //exif only
-			result = insertMetadata(filename);
+			result = insertMetadata(tempfile);
 		else if (excludeexif) //icc only;
-			result = insertMetadata(filename, saveprofile, true);
+			result = insertMetadata(tempfile, saveprofile, true);
 		else //both
-			result = insertMetadata(filename, saveprofile);
-
-		return result;
+			result = insertMetadata(tempfile, saveprofile);
 	}
 	else {
 		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
 		return lasterror;
 	}
+	
+	if (ftype != FILETYPE_DATA) {
+		file_copy(tempfile, filename);
+		file_delete(tempfile);
+	}
+	
+	return result;
 }
 
 GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string params)
 {
 	BPP bitfmt = BPP_8;
+	
+	std::map<std::string, std::string> fileparts = file_parts(filename);
+	std::string tempfile = fileparts["dir"] + fileparts["filename"] + "-tmp" + fileparts["ext"];
+	
 	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
@@ -6366,13 +6379,13 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 	GIMAGE_ERROR result;
 
 	if (ftype == FILETYPE_TIFF) {
-		result = saveTIFF(filename, bitfmt, params);
+		result = saveTIFF(tempfile.c_str(), bitfmt, params);
 	}
 	if (ftype == FILETYPE_JPEG) {
-		result = saveJPEG(filename, bitfmt, params);
+		result = saveJPEG(tempfile.c_str(), bitfmt, params);
 	}
 	if (ftype == FILETYPE_PNG) {
-		result = savePNG(filename, bitfmt, params);
+		result = savePNG(tempfile.c_str(), bitfmt, params);
 	}
 	
 	bool excludeexif = false;
@@ -6385,19 +6398,22 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 	
 	if (result == GIMAGE_OK) { 
 		if (excludeexif & excludeicc) //neither
-			result = insertMetadata(filename, NULL, true);
+			result = insertMetadata(tempfile, NULL, true);
 		else if (excludeicc) //exif only
-			result = insertMetadata(filename);
+			result = insertMetadata(tempfile);
 		else if (excludeexif) //icc only;
-			result = insertMetadata(filename, profile, true);
+			result = insertMetadata(tempfile, profile, true);
 		else //both
-			result = insertMetadata(filename, profile);
-
-		return result;
+			result = insertMetadata(tempfile, profile);
 	}
 	else {
 		lasterror = GIMAGE_UNSUPPORTED_FILEFORMAT; 
 		return lasterror;
+	}
+	
+	if (ftype != FILETYPE_DATA) {
+		file_copy(tempfile, filename);
+		file_delete(tempfile);
 	}
 }
 

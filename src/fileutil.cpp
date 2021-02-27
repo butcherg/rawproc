@@ -1,6 +1,8 @@
 
 #include "fileutil.h"
 #include <sys/stat.h>
+#include <stdio.h>
+#include <fstream>
 
 #ifdef _WIN32
 	#define WINVER 0x0600
@@ -130,11 +132,6 @@ std::string getCwdConfigFilePath()
 }
 
 
-bool file_exists(const std::string& filename) 
-{
-  struct stat buffer;   
-  return (stat (filename.c_str(), &buffer) == 0); 
-}
 
 std::string getRawprocConfPath(std::string conf_cmdline)
 {
@@ -159,3 +156,50 @@ std::string getRawprocConfPath(std::string conf_cmdline)
 	else return "(none)";
 }
 
+
+bool file_exists(const std::string& filename) 
+{
+  struct stat buffer;   
+  return (stat (filename.c_str(), &buffer) == 0); 
+}
+
+void file_copy(std::string frompath, std::string topath)
+{
+	std::ifstream  src(frompath, std::ios::binary);
+    std::ofstream  dst(topath,   std::ios::binary);
+    dst << src.rdbuf();
+}
+
+bool file_delete(std::string filepath)
+{
+	int i =  remove(filepath.c_str());
+	if (i == 0) return false; else return true;
+}
+
+std::map<std::string, std::string> file_parts(std::string filepath)
+{
+	std::map<std::string, std::string> fileparts;
+	char dirsep;
+#ifdef _WIN32
+	dirsep = '\\';
+#else
+	dirsep = '/';
+#endif
+	size_t dirpos = filepath.find_last_of(dirsep);
+	if (dirpos != std::string::npos) fileparts["dir"] = filepath.substr(0,dirpos+1);
+	size_t extpos = filepath.find_last_of(".");
+	if (extpos != std::string::npos) fileparts["ext"] = filepath.substr(extpos);
+	if (dirpos != std::string::npos) {
+		if (extpos != std::string::npos) {
+			fileparts["filename"] = filepath.substr(dirpos+1,(extpos) - (dirpos+1));
+		}
+		else {
+			fileparts["filename"] = filepath.substr(dirpos+1);
+		}
+	}
+	else {
+		fileparts["filename"] = filepath;
+	}
+	
+	return fileparts;
+}
