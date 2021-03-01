@@ -61,24 +61,27 @@ void myIntegerCtrl::SetIntegerValue(int value)
 	
 void myIntegerCtrl::OnWheel(wxMouseEvent& event)
 {
-	v = atoi(textbox->GetValue().c_str());
-	double inc = 1;
-	if (event.ShiftDown()) inc = 10;
-	if (event.ControlDown()) inc = 100;
-	if (event.GetWheelRotation() > 0) { 
-		v += inc;
+	if (textbox->HasFocus()) { 
+		v = atoi(textbox->GetValue().c_str());
+		double inc = 1;
+		if (event.ShiftDown()) inc = 10;
+		if (event.ControlDown()) inc = 100;
+		if (event.GetWheelRotation() > 0) { 
+			v += inc;
+		}
+		else {
+			v -= inc;
+		}
+		if (v > u) v = u;
+		if (v < l) v = l;
+		textbox->SetValue(wxString::Format(fmt,v));
+		textbox->Refresh();
+		wxCommandEvent e(myINTEGERCTRL_CHANGE);
+		e.SetEventObject(this);
+		e.SetString("change");
+		ProcessWindowEvent(e);
 	}
-	else {
-		v -= inc;
-	}
-	if (v > u) v = u;
-	if (v < l) v = l;
-	textbox->SetValue(wxString::Format(fmt,v));
-	textbox->Refresh();
-	wxCommandEvent e(myINTEGERCTRL_CHANGE);
-	e.SetEventObject(this);
-	e.SetString("change");
-	ProcessWindowEvent(e);
+	else event.Skip();
 }
 
 void myIntegerCtrl::OnEnter(wxCommandEvent& event)
