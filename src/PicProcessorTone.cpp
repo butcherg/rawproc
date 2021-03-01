@@ -94,7 +94,7 @@ class TonePanel: public PicProcPanel
 			//parm tool.tone.filmic.D: Default value for filmic tone operator D coefficient.  Default=0.06
 			filmicD = new myFloatCtrl(this, wxID_ANY, "D:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.D","0.06").c_str()), 2, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			//parm tool.tone.filmic.power: Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0
-			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
+			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
 			
 			//parm tool.tone.doublelogistic.L: Default value for doublelogistic L operator power, sets the position of the transition from the left equation to the right equation. Default=0.002
 			dlL = new myFloatCtrl(this, wxID_ANY, "L:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.L","0.002").c_str()), 3, wxDefaultPosition, wxSize(55,TEXTCTRLHEIGHT));
