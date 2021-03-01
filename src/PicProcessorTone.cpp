@@ -97,14 +97,14 @@ class TonePanel: public PicProcPanel
 			power   = new myFloatCtrl(this, wxID_ANY, "power:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.filmic.power","1.0").c_str()), 1);
 			
 			//parm tool.tone.doublelogistic.L: Default value for doublelogistic L operator power, sets the position of the transition from the left equation to the right equation. Default=0.002
-			dlL = new myFloatCtrl(this, wxID_ANY, "L:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.L","0.002").c_str()), 3, wxDefaultPosition, wxSize(50,TEXTCTRLHEIGHT));
+			dlL = new myFloatCtrl(this, wxID_ANY, "L:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.L","0.002").c_str()), 3, wxDefaultPosition, wxSize(55,TEXTCTRLHEIGHT));
 			//parm tool.tone.doublelogistic.c: Default value for doublelogistic c operator power, sets the height of the right equation.  Default=3.0
-			dlc = new myFloatCtrl(this, wxID_ANY, "c:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.c","3.0").c_str()), 2, wxDefaultPosition, wxSize(40,TEXTCTRLHEIGHT));
+			dlc = new myFloatCtrl(this, wxID_ANY, "c:", atof(myConfig::getConfig().getValueOrDefault("tool.tone.doublelogistic.c","3.0").c_str()), 2, wxDefaultPosition, wxSize(47,TEXTCTRLHEIGHT));
 
 			wxArrayString str;
 			str.Add("channel");
 			str.Add("luminance");
-			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(85,TEXTCTRLHEIGHT), str);
+			reinop = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(100,TEXTCTRLHEIGHT), str);
 
 			wxArrayString p = split(params,",");
 			setPanel(p);
