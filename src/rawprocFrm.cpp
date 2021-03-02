@@ -980,8 +980,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			return;
 		}
 		
-		pic->SetModified(false);
-		
 		//parm input.[jpeg|tiff|png].orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 1.  Gets the image out of trying to tell other software how to orient it.  Can be set for jpeg, tiff, or png images only; raw images have to wait until after demosaic to preserve the CFA orientation (see tool.demosaic.orient).  Default=0
 		if (fif == FILETYPE_JPEG) {
 			if (myConfig::getConfig().getValueOrDefault("input.jpeg.orient","0") == "1") {
@@ -1040,6 +1038,8 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			raw_default = wxString(myConfig::getConfig().getValueOrDefault("input.raw.default","colorspace:camera,assign subtract:camera whitebalance:camera demosaic:proof blackwhitepoint:rgb,data"));
 			raw_default_source = "input.raw.default";
 		}
+		
+		pic->SetModified(false);
 
 		//parm app.incrementaldisplay: 0|1, for addition of tool sequences, if 1, the display is rendered as each tool is added. if 0, the display render is deferred until the last tool is added.  Default=0;
 		bool incdisplay=false;
@@ -1174,8 +1174,6 @@ void rawprocFrm::OpenFileSource(wxString fname)
 				return;
 			}
 			
-			pic->SetModified(false);
-			
 			if (fif == FILETYPE_JPEG) {
 				if (myConfig::getConfig().getValueOrDefault("input.jpeg.orient","0") == "1") {
 					WxStatusBar1->SetStatusText(wxString::Format(_("Normalizing jpeg image orientation...")));
@@ -1233,6 +1231,8 @@ void rawprocFrm::OpenFileSource(wxString fname)
 			
 			opensource = true;
 			open = false;
+			
+			pic->SetModified(false);
 
 			SetStatusText(wxString::Format(_("Source of file:%s opened."),sourcefilename.GetFullName()));
 			commandtree->SetFocus();
