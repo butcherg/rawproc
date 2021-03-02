@@ -16,6 +16,8 @@ class myIntegerCtrl: public wxControl
 		void SetToolTip(const wxString &tipString);
 		void OnWheel(wxMouseEvent& event);
 		void OnEnter(wxCommandEvent& event);
+		void OnMouseEnter(wxMouseEvent& event);
+		void OnMouseLeave(wxMouseEvent& event);
 
 	private:
 		int v, l, u;

@@ -24,6 +24,8 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
+	Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
 }
 
 
@@ -46,6 +48,8 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float 
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
+	Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
 }
 		
 float myFloatCtrl::GetFloatValue()
@@ -64,6 +68,21 @@ void myFloatCtrl::SetIncrement(double increment)
 {
  	incr = increment;
 }
+
+void myFloatCtrl::OnMouseEnter(wxMouseEvent& event)
+{
+	//parm app.floatctrl.mousefocus: Toggles the focus-on-mouseenter behavior. Default=0, require mouse click to set focus.  Note: Setting this parameter to 1 may cause inopportune parameter changing... 
+	if (myConfig::getConfig().getValueOrDefault("app.floatctrl.mousefocus","0") == "1") {
+		textbox->SetFocus();
+		textbox->SetInsertionPoint(0);
+	}
+}
+
+void myFloatCtrl::OnMouseLeave(wxMouseEvent& event)
+{
+
+}
+
 	
 void myFloatCtrl::OnWheel(wxMouseEvent& event)
 {

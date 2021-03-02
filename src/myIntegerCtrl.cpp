@@ -23,6 +23,8 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, wxString label, in
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
+	Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
 }
 
 myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int lower, int upper, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE)
@@ -40,6 +42,8 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int low
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
+	Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
+	Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
 }
 
 void myIntegerCtrl::SetToolTip(const wxString &tipString)
@@ -58,6 +62,21 @@ void myIntegerCtrl::SetIntegerValue(int value)
 	v = value;
 	textbox->SetValue(wxString::Format(fmt,value));
 }
+
+void myIntegerCtrl::OnMouseEnter(wxMouseEvent& event)
+{
+	//parm app.integerctrl.mousefocus: Toggles the focus-on-mouseenter behavior. Default=0, require mouse click to set focus.  Note: Setting this parameter to 1 may cause inopportune parameter changing... 
+	if (myConfig::getConfig().getValueOrDefault("app.integerctrl.mousefocus","0") == "1") {
+		textbox->SetFocus();
+		textbox->SetInsertionPoint(0);
+	}
+}
+
+void myIntegerCtrl::OnMouseLeave(wxMouseEvent& event)
+{
+
+}
+
 	
 void myIntegerCtrl::OnWheel(wxMouseEvent& event)
 {

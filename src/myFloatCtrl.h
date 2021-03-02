@@ -18,6 +18,8 @@ class myFloatCtrl: public wxControl
 		void SetIncrement(double increment);
 		void OnWheel(wxMouseEvent& event);
 		void OnEnter(wxCommandEvent& event);
+		void OnMouseEnter(wxMouseEvent& event);
+		void OnMouseLeave(wxMouseEvent& event);
 
 	private:
 		double v, incr;
