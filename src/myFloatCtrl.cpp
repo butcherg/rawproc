@@ -24,8 +24,8 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, float value, unsigned 
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
-	Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
+	textbox->Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
+	textbox->Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
 }
 
 
@@ -48,8 +48,8 @@ myFloatCtrl::myFloatCtrl(wxWindow *parent, wxWindowID id, wxString label, float 
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myFloatCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myFloatCtrl::OnEnter, this);
-	Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
+	textbox->Bind(wxEVT_ENTER_WINDOW, &myFloatCtrl::OnMouseEnter, this);
+	textbox->Bind(wxEVT_LEAVE_WINDOW, &myFloatCtrl::OnMouseLeave, this);
 }
 		
 float myFloatCtrl::GetFloatValue()

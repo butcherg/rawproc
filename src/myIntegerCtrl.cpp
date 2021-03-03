@@ -23,8 +23,8 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, wxString label, in
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
-	Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
+	textbox->Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
+	textbox->Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
 }
 
 myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int lower, int upper, const wxPoint &pos, const wxSize &size): wxControl(parent, id, pos, size, wxBORDER_NONE)
@@ -42,8 +42,8 @@ myIntegerCtrl::myIntegerCtrl(wxWindow *parent, wxWindowID id, int value, int low
 	SetSizerAndFit(b);
 	Bind(wxEVT_MOUSEWHEEL, &myIntegerCtrl::OnWheel, this);
 	Bind(wxEVT_TEXT_ENTER, &myIntegerCtrl::OnEnter, this);
-	Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
-	Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
+	textbox->Bind(wxEVT_ENTER_WINDOW, &myIntegerCtrl::OnMouseEnter, this);
+	textbox->Bind(wxEVT_LEAVE_WINDOW, &myIntegerCtrl::OnMouseLeave, this);
 }
 
 void myIntegerCtrl::SetToolTip(const wxString &tipString)
