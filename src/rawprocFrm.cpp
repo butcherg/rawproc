@@ -553,11 +553,11 @@ void rawprocFrm::SetStartPath(wxString path)
 	openfilepath = path;
 }
 
-void rawprocFrm::Shutdown()
+bool rawprocFrm::Shutdown()
 {
 	if (pic->Modified())
 		if (wxMessageBox("Image is modified, continue to exit?", "Confirm", wxYES_NO, this) == wxNO) 
-			return;
+			return false;
 			
 	//parm app.window.rememberlast: If 1, rawproc will remember the dimensions or maximized window state at exit and restore that when it's re-run. Default: 1
 	if(myConfig::getConfig().getValueOrDefault("app.window.rememberlast","1") == "1") {
@@ -585,20 +585,24 @@ void rawprocFrm::Shutdown()
 #ifndef SIZERLAYOUT
 	mgr.UnInit();
 #endif
+	return true;
 }
 
 void rawprocFrm::OnClose(wxCloseEvent& event)
-{	
-	event.Skip();
-	Shutdown();
+{
+	if (event.CanVeto() & !Shutdown()) {
+		event.Veto();
+		return;
+		
+	}
 	Destroy();
 }
 
 void rawprocFrm::MnuexitClick(wxCommandEvent& event)
 {
 	event.Skip();
-	Shutdown();
-	Destroy();
+	if (Shutdown())
+		Destroy();
 }
 
 void rawprocFrm::SetThumbMode(int mode)

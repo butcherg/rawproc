@@ -222,7 +222,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	wxString getRootTool();  //returns input filename and any input processing params (':')
 	wxString getToolChain();
 	
-	void Shutdown();
+	bool Shutdown();
 		
 	private:
 		void OnClose(wxCloseEvent& event);
