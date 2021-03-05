@@ -34,7 +34,11 @@ class CurvePanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, CURVEENABLE, _("curve:"));
 			enablebox->SetValue(true);
+			
 			curve = new CurvePane(this, params);
+			//param tool.curve.histogram: Toggles view of input image histogram in the curve pane background.  Default=1
+			if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+				curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
@@ -71,10 +75,14 @@ class CurvePanel: public PicProcPanel
 		{
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
+				if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+					curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 				q->processPic();
 			}
 			else {
 				q->enableProcessing(false);
+				if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+					curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 				q->processPic();
 			}
 		}
@@ -126,7 +134,8 @@ class CurvePanel: public PicProcPanel
 					radius->SetFloatValue(atof(p["radius"].c_str()));
 					ev0->SetFloatValue(atof(p["ev0"].c_str()));
 				}
-*/
+*/				if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+					curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 				q->processPic();
 				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
@@ -140,6 +149,8 @@ class CurvePanel: public PicProcPanel
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 			((PicProcessorCurve *) q)->setChannel(ch);
 			q->setParams(ch+","+curve->getControlPoints());
+			if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+				curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 			q->processPic();
 			event.Skip();
 		}
@@ -151,6 +162,8 @@ class CurvePanel: public PicProcPanel
 				((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 				((PicProcessorCurve *) q)->setChannel(ch);
 				q->setParams(ch+","+curve->getControlPoints());
+				if (myConfig::getConfig().getValueOrDefault("tool.curve.histogram","1") == "1")
+					curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 				q->processPic();
 			}
 		}
@@ -162,8 +175,14 @@ class CurvePanel: public PicProcPanel
 			((PicProcessorCurve *) q)->setControlPoints(curve->getPoints());
 			((PicProcessorCurve *) q)->setChannel(ch);
 			q->setParams(ch+","+curve->getControlPoints());
+			curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 			q->processPic();
 			event.Skip();
+		}
+		
+		void bumpHistogram()
+		{
+			curve->setHistogram(q->getPreviousPicProcessor()->getProcessedPic().Histogram());
 		}
 
 
@@ -220,6 +239,8 @@ bool PicProcessorCurve::processPicture(gImage *processdib)
 {
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("curve..."));
 	bool result = true;
+	
+	((CurvePanel *) toolpanel)->bumpHistogram();
 
 	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.curve.cores","0").c_str());
 	if (threadcount == 0) 

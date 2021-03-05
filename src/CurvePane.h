@@ -35,6 +35,7 @@ public:
 	wxString getYPoints();
 	std::vector<cp> getPoints();
 	void setPoints(std::vector<cp> pts);
+	void setHistogram(std::vector<long> hgram);
 	void bump(int i);
  
     // some useful events
@@ -52,6 +53,7 @@ public:
 
 private:
 	vector< vector<int> > data;
+	std::vector<long> histogram;
 	int x, y, z;
 	wxWindow * p;
 	Curve c;

@@ -366,6 +366,18 @@ void CurvePane::render(wxDC&  dc)
 	int m=10;
 	int radius = atoi(myConfig::getConfig().getValueOrDefault("tool.curve.controlpointradius","5").c_str());
 
+	//histogram:
+	float hmax = 0.0;
+	int inc = 30;
+	wxColour hc = b; hc.Set(b.Red()+inc, b.Green()+inc, b.Blue()+inc);
+	dc.SetPen(hc);
+	for (unsigned i=0; i<histogram.size(); i++) {
+		if (hmax < histogram[i]) hmax = histogram[i];
+	}
+	for (unsigned i=0; i<histogram.size(); i++) {
+		//dc.DrawLine(m+px,h-m-py,m+x,h-m-y);
+		dc.DrawLine(m+i,h-m-0,m+i,h-m-((float) histogram[i]/hmax)*255.0);
+	}
 	
 	//center lines:
 	if (g < 192)
@@ -411,6 +423,11 @@ void CurvePane::render(wxDC&  dc)
 		dc.DrawCircle(m+controlpts[i].x,h-m-controlpts[i].y,radius);
 		dc.SetPen(*wxBLACK_PEN);
 	}
+}
+
+void CurvePane::setHistogram(std::vector<long> hgram)
+{
+	histogram = hgram;
 }
 
 
