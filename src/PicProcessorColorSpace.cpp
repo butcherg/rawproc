@@ -126,7 +126,7 @@ class ColorspacePanel: public PicProcPanel
 			m->AddSpacer(3);
 			m->AddRowItem(camb, flags);
 			m->AddRowItem(makemodel, flags);
-			m->AddRowItem(camdatstatus, flags);
+			//m->AddRowItem(camdatstatus, flags); //stopped populating when I switched to gimage_process
 			m->NextRow();
 			m->AddRowItem(primaries, flags);
 			m->NextRow();
