@@ -70,11 +70,13 @@ void myIntegerCtrl::OnMouseEnter(wxMouseEvent& event)
 		textbox->SetFocus();
 		textbox->SetInsertionPoint(0);
 	}
+	event.Skip();
 }
 
 void myIntegerCtrl::OnMouseLeave(wxMouseEvent& event)
 {
-
+	GetParent()->SetFocus();
+	event.Skip();
 }
 
 	

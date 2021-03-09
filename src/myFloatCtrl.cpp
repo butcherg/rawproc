@@ -76,11 +76,13 @@ void myFloatCtrl::OnMouseEnter(wxMouseEvent& event)
 		textbox->SetFocus();
 		textbox->SetInsertionPoint(0);
 	}
+	event.Skip();
 }
 
 void myFloatCtrl::OnMouseLeave(wxMouseEvent& event)
 {
-
+	GetParent()->SetFocus();
+	event.Skip();
 }
 
 	
