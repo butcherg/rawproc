@@ -30,16 +30,21 @@ y = pow((x(Ax+B))/(x(Ax+C))+D,Power)
 
 Usage notes:
 <ul>
-	<li>The Power coefficient is really a gamma, used in Hable's blog post to compare filmic to Reinhard.  
+	<li>The Power coefficient is really an inverse gamma, used in Hable's blog post to compare filmic to Reinhard.  
 	Setting it to 1.0 nulls its effect.</li>
 	<li>A affects the middle part of the curve.</li>
 	<li>B affects the toe of the curve, flattening it as the value is reduced.</li>
 	<li>C affects the shoulder of the curve.</li>
-	<li>D inversely affects the middle part of the curve.</li>
+	<li>D inversely affects the toe of the curve.</li>
 </ul>
 </li>
 </ul>
 </p>
+
+<p>The numbers in the various parameter boxes can be changed with the mouse thumbwheel, incremented/decremented with each 
+notch.  For float parameters, holding the Ctrl key while rolling the thumbwheel changes the third digit from the right; 
+holding the Shift key changes the second digit from the right; rolling the thumbwheel with no key pressed changes the 
+rightmost digit.</p>
 
 <p>
 The curve plot at the bottom of the tool pane graphically depicts the chosen tone curve.  The curve is computed using the 
