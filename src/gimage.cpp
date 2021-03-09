@@ -6415,6 +6415,8 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 		file_copy(tempfile, filename);
 		file_delete(tempfile);
 	}
+	
+	return result;
 }
 
 
