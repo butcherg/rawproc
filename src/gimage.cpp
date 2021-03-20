@@ -6365,7 +6365,6 @@ GIMAGE_ERROR gImage::saveImageFileNoProfile(const char * filename, std::string p
 	std::map<std::string, std::string> fileparts = file_parts(filename);
 	std::string tempfile = fileparts["dir"] + fileparts["filename"] + "-tmp" + fileparts["ext"];
 	
-	//$ <li><b>channelformat</b>=8bit|16bit|float|unboundedfloat: Applies to PNG (8bit, 16bit) and TIFF (8bit, 16bit, float).  Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0. </li>
 	std::map<std::string, std::string> p = parseparams(params);
 	if (p.find("channelformat") != p.end()) {
 		if (p["channelformat"] == "8bit")  bitfmt = BPP_8;
