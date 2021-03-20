@@ -174,14 +174,17 @@ bool saveFile (gImage &savedib, std::string outfilename, std::string params, std
 	if (filetype == FILETYPE_JPEG) {
 		profilepath.append(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile",""));
 		intentstr = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","perceptual");
+		if (params.empty()) params = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","quality=95");
 	}
 	else if (filetype == FILETYPE_TIFF) {
 		profilepath.append(myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile",""));
 		intentstr = myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","perceptual");
+		if (params.empty()) params = myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
 	}
 	else if (filetype == FILETYPE_PNG) {
 		profilepath.append(myConfig::getConfig().getValueOrDefault("output.png.cms.profile",""));
 		intentstr = myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","perceptual");
+		if (params.empty()) params= myConfig::getConfig().getValueOrDefault("output.png.parameters","");
 	}
 				
 	if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
@@ -191,7 +194,7 @@ bool saveFile (gImage &savedib, std::string outfilename, std::string params, std
 
 	_mark();
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
-	printf("Saving file %s %s... ",outfilename.c_str(), params.c_str());
+	printf("Saving the file %s %s... ",outfilename.c_str(), params.c_str());
 	dib.setInfo("Software","img 0.1");
 	dib.setInfo("ImageDescription", commandstring);
 	
