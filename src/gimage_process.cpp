@@ -1311,10 +1311,23 @@ std::map<std::string,std::string> process_1dlut(gImage &dib, std::map<std::strin
 		result["threadcount"] = std::to_string(threadcount);
 		
 		if (params["mode"] == "file") {
+			std::vector<pix> lut;
+			_mark();
 			
+			// read a simple csv file, for now...
+			std::ifstream infile(params["lutfile"]);
+			float r, g, b;
+			lut.push_back((struct pix) {0, 0, 0});
+			while (infile >> r >> g >> b) {
+				lut.push_back((struct pix) {r, g, b});
+			}
+			infile.close();
 			
+			dib.Apply1DLUT(lut, threadcount);
+			
+			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "colorspace:file";
-			imgmsg = string_format("file,%s",params["icc"].c_str());
+			imgmsg = string_format("file,%s",params["lutfile"].c_str());
 		}
 		else {
 			 result["error"] = string_format("1dlut:ProcessError - unrecognized mode: %s",params["mode"].c_str());

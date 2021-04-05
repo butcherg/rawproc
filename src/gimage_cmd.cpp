@@ -69,6 +69,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "subtract") params = parse_subtract(parms);
 	else if (command == "tone") params = parse_tone(parms);
 	else if (command == "whitebalance") params = parse_whitebalance(parms);
+	else if (command == "1dlut") params = parse_1dlut(parms);
 	else if (command == "group"){ 
 		params["cmdlabel"] = "group"; 
 		params["mode"] = "default";
@@ -110,6 +111,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "subtract") result =  process_subtract(dib, params);
 	else if (command == "tone") result =  process_tone(dib, params);
 	else if (command == "whitebalance") result =  process_whitebalance(dib, params);
+	else if (command == "1dlut") result =  process_1dlut(dib, params);
 	else if (command == "group") result = process_group(dib, params, print);
 	
 			
