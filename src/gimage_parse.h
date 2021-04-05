@@ -29,5 +29,6 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring);
 std::map<std::string,std::string> parse_subtract(std::string paramstring);
 std::map<std::string,std::string> parse_tone(std::string paramstring);
 std::map<std::string,std::string> parse_whitebalance(std::string paramstring);
+std::map<std::string,std::string> parse_1dlut(std::string paramstring);
 
 #endif

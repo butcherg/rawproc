@@ -10,6 +10,9 @@
 #include "CameraData.h"
 #include "cJSON.h"
 #include <math.h> 
+#include <fstream>
+#include <sstream>
+#include <string>
 
 int getThreadCount(int threadcount) { 
 	if (threadcount == 0) 
@@ -1291,6 +1294,34 @@ std::map<std::string,std::string> process_whitebalance(gImage &dib, std::map<std
 		result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 	}
  	return result;
+}
+
+std::map<std::string,std::string> process_1dlut(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "whitebalance:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "file") {
+			
+			
+			result["treelabel"] = "colorspace:file";
+			imgmsg = string_format("file,%s",params["icc"].c_str());
+		}
+		else {
+			 result["error"] = string_format("1dlut:ProcessError - unrecognized mode: %s",params["mode"].c_str());
+			 return result;
+		}
+	}
+	return result;
 }
 
 std::map<std::string,std::string> process_group(gImage &dib, std::map<std::string,std::string> params, bool print)
