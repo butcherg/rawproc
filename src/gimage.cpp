@@ -2594,6 +2594,7 @@ pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
 //Looking for a way to encode various camera log curves, decided to use
 //a 1DLUT...
 //
+
 bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 {
 	float s = (float) lut.size();
@@ -2627,6 +2628,29 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 	
 	return true;
 }
+
+/*
+bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
+{
+	Curve rc, gc, bc;
+	unsigned ls = lut.size();
+	for (unsigned i=0; i<ls; i++) {
+		float x = (float) i / (float) ls;
+		rc.insertpoint(x, lut[i].r);
+		gc.insertpoint(x, lut[i].g);
+		bc.insertpoint(x, lut[i].b);
+	}
+	
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i=0; i<w*h; i++) {
+		image[i].r = rc.getpoint(image[i].r);
+		image[i].g = bc.getpoint(image[i].g);
+		image[i].b = gc.getpoint(image[i].b);
+	}
+	
+	return true;
+}
+*/
 
 //y = (y0*(x1-x) + y1*(x-x0)) / (x1-x0)  //linear interpolation
 
