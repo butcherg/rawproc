@@ -1195,10 +1195,21 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 		}
 		else if (params["mode"] == "lut") {
 			std::vector<pix> lut;
+			
+			std::string lutfilepath = filepath_normalize(myConfig::getConfig().getValueOrDefault("tool.tone.lut.filepath","."));
+			std::string lutfile;
+			if (!file_exists(lutfilepath+params["lutfile"])) {
+				result["error"] = string_format("tone:ProcessError - lut file not found: %s",params["lutfile"].c_str());
+				return result;
+			}
+			else {
+				lutfile = lutfilepath+params["lutfile"];
+			}
+			
 			_mark();
 			
 			// read a simple single-value file, load into a 1DLUT, for now...
-			std::ifstream infile(params["lutfile"]);
+			std::ifstream infile(lutfile);
 			float v;
 			lut.push_back((struct pix) {0.0, 0.0, 0.0});
 			while (infile >> v) {
@@ -1209,9 +1220,9 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			dib.Apply1DLUT(lut, threadcount);
 			
 			result["duration"] = std::to_string(_duration());
-			result["treelabel"] = "colorspace:file";
-			result["commandstring"] = string_format("1dlut:%s", params["lutfile"]);
-			imgmsg = string_format("%s",params["lutfile"].c_str());
+			result["treelabel"] = "tone:lut";
+			result["commandstring"] = string_format("tone:lut:%s", params["lutfile"]);
+			imgmsg = string_format("lut,%s",params["lutfile"].c_str());
 		}
 		else if (params["mode"] == "filmic") {
 			float A = atof(params["A"].c_str());

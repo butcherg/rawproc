@@ -24,10 +24,11 @@
 #define TONELOGGAM 7907
 #define TONEFILMIC 7908
 #define TONEDUALLOGISTIC 7909
-#define TONECURVE 7910
-#define TONENORM 7911
-#define TONEFILMICRESET 7912
-#define TONECURVECOPY 7913
+#define TONELUT 7910
+#define TONECURVE 7911
+#define TONENORM 7912
+#define TONEFILMICRESET 7913
+#define TONECURVECOPY 7914
 
 class ToneCurveDialog: public wxDialog
 {
@@ -75,6 +76,9 @@ class TonePanel: public PicProcPanel
 			hybloggamb = new wxRadioButton(this, TONELOGGAM, _("loggamma"));
 			filmicb = new wxRadioButton(this, TONEFILMIC, _("filmic"));
 			doublelogisticb = new wxRadioButton(this, TONEDUALLOGISTIC, _("doublelogistic"));
+			lutb = new wxRadioButton(this, TONELUT, _("lut"));
+
+			lutfile = new wxTextCtrl(this, wxID_ANY, "(none)", wxDefaultPosition, wxSize(150,TEXTCTRLHEIGHT));
 
 			tonenorm = new wxCheckBox(this, TONENORM, _("norm"));
 			tonenorm->SetValue(false);
@@ -119,6 +123,14 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 			m->AddRowItem(new wxBitmapButton(this, TONECOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->AddRowItem(new wxBitmapButton(this, TONEPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+						
+			//lut:
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(lutb, flags);
+			m->AddRowItem(lutfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
+			m->AddRowItem(new wxButton(this, TONELUT, _("Select")), flags);
 
 			//gamma:
 			m->NextRow(wxSizerFlags().Expand());
@@ -190,6 +202,7 @@ class TonePanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &TonePanel::OnPaste, this, TONEPASTE);
 			Bind(wxEVT_BUTTON, &TonePanel::OnReset, this, TONEFILMICRESET);
 			Bind(wxEVT_BUTTON, &TonePanel::OnCurveCopy, this, TONECURVECOPY);
+			Bind(wxEVT_BUTTON, &TonePanel::selectLUTFile, this, TONELUT);
 			Bind(myFLOATCTRL_CHANGE, &TonePanel::floatParamChanged, this);
 			Bind(myFLOATCTRL_UPDATE, &TonePanel::floatParamUpdated, this);
 			Bind(wxEVT_CHECKBOX, &TonePanel::onEnable, this, TONEENABLE);
@@ -233,6 +246,12 @@ class TonePanel: public PicProcPanel
 			if (p[0] == "loggamma") {
 				hybloggamb->SetValue(true);
 				tonemode = TONELOGGAM;
+			}
+			if (p[0] == "lut") {
+				lutb->SetValue(true);
+				tonemode = TONELUT;
+				if (p.GetCount() >=2) 
+					lutfile->SetValue(wxString(p[1]));
 			}
 			if (p[0] == "doublelogistic") {
 				doublelogisticb->SetValue(true);
@@ -360,10 +379,23 @@ class TonePanel: public PicProcPanel
 			processTone(tonemode);
 			event.Skip();
 		}
+		
+		void selectLUTFile(wxCommandEvent& event)
+		{
+			wxFileName fname, pname;
+			//parm tool.tone.lut.filepath: Directory path containing the rawproc LUTS. Default=current working directory.
+			wxString lutpath = wxString(myConfig::getConfig().getValueOrDefault("tool.tone.lut.filepath","."));
+			fname.Assign(wxFileSelector(_("Select lut file"), lutpath));
+			lutfile->SetValue(fname.GetFullName());
+			if (tonemode == TONELUT) processTone(tonemode);
+		}
 
 		void processTone(int src)
 		{
 			switch (src) {
+				case TONELUT:
+					q->setParams(wxString::Format("lut,%s",lutfile->GetValue()));
+					break;
 				case TONEGAMMA:
 					q->setParams(wxString::Format("gamma,%0.2f",gamma->GetFloatValue()));
 					break;
@@ -447,7 +479,8 @@ class TonePanel: public PicProcPanel
 		wxTimer t;
 		myFloatCtrl *gamma, *filmicA, *filmicB, *filmicC, *filmicD, *power, *dlL, *dlc;
 		wxCheckBox *enablebox, *tonenorm;
-		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb, *doublelogisticb;
+		wxRadioButton *gamb, *reinb, *log2b, *hybloggamb, *filmicb, *doublelogisticb, *lutb;
+		wxTextCtrl *lutfile;
 		wxChoice *reinop;
 		myToneCurvePane *tcpane;
 		int tonemode;
