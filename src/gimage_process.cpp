@@ -1327,7 +1327,9 @@ std::map<std::string,std::string> process_1dlut(gImage &dib, std::map<std::strin
 			
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "colorspace:file";
-			imgmsg = string_format("file,%s",params["lutfile"].c_str());
+			result["commandstring"] = string_format("1dlut:%s", params["lutfile"]);
+			imgmsg = string_format("%s",params["lutfile"].c_str());
+			result["imgmsg"] = string_format("%s (%d threads, %ssec)",imgmsg.c_str(), threadcount, result["duration"].c_str());
 		}
 		else {
 			 result["error"] = string_format("1dlut:ProcessError - unrecognized mode: %s",params["mode"].c_str());
