@@ -1300,6 +1300,7 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 //img <li><b>:reinhard,channel|luminance[,norm]</b></li>
 //img <li><b>:log2</b></li>
 //img <li><b>:loggamma</b></li>
+//img <li><b>:lut,lutfile</b></li>
 //img <li><b>:filmic[,&lt;Afloat&gt;,&lt;Bfloat&gt;,&lt;Cfloat&gt;,&lt;Dfloat&gt;][,&lt;pfloat&gt;][,norm]</b></li>
 //img </ul>
 //img </li><br>
@@ -1362,6 +1363,17 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 		else if (p[0] == "log2") {
 			pmap["mode"] = "log2";
 			pmap["cmdlabel"] = "tone:log2";
+		}
+		else if (p[0] == "lut") {
+			pmap["mode"] = "lut";
+			pmap["cmdlabel"] = "tone:lut";
+			if (psize >= 1) {
+				pmap["lutfile"] = p[1];
+			}
+			else {
+				pmap["error"] = "tone:ParseError - No LUT file specified"; 
+				return pmap;
+			}
 		}
 		else if (p[0] == "loggamma") {
 			pmap["mode"] = "loggamma";
@@ -1609,35 +1621,4 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 	return pmap;
 }
 
-//img <li><b>1dlut:,&lt;lutfilename,&gt;</b> - Apply the 1DLUT contained in the named LUT file.  
-//img .cube LUTs are the only recognized LUT files.
-//img </li><br>
-std::map<std::string,std::string> parse_1dlut(std::string paramstring)
-{
-	std::map<std::string,std::string> pmap;
-	//collect all defaults into pmap:
-
-	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
-		pmap = parse_JSONparams(paramstring);
-	}
-
-	//if string has name=val;name=val.., pairs, just parse them into pmap:
-	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
-	}
-
-	else { //positional
-		std::vector<std::string> p = split(paramstring, ",");
-		int psize = p.size();
-		
-		pmap["mode"] = "file";
-		if (psize >= 1)
-			pmap["lutfile"] = p[0];
-		else {
-			pmap["error"] = "1dlut:ParseError - No file specified"; 
-			return pmap;
-		}
-	}
-	return pmap;
-}
 

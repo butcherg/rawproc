@@ -1193,6 +1193,26 @@ std::map<std::string,std::string> process_tone(gImage &dib, std::map<std::string
 			result["commandstring"] = "tone:doublelogistic";
 			imgmsg = "doublelogistic";
 		}
+		else if (params["mode"] == "lut") {
+			std::vector<pix> lut;
+			_mark();
+			
+			// read a simple single-value file, load into a 1DLUT, for now...
+			std::ifstream infile(params["lutfile"]);
+			float v;
+			lut.push_back((struct pix) {0.0, 0.0, 0.0});
+			while (infile >> v) {
+				lut.push_back((struct pix) {v, v, v});
+			}
+			infile.close();
+			
+			dib.Apply1DLUT(lut, threadcount);
+			
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "colorspace:file";
+			result["commandstring"] = string_format("1dlut:%s", params["lutfile"]);
+			imgmsg = string_format("%s",params["lutfile"].c_str());
+		}
 		else if (params["mode"] == "filmic") {
 			float A = atof(params["A"].c_str());
 			float B = atof(params["B"].c_str());
