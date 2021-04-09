@@ -2598,13 +2598,14 @@ pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
 bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 {
 	float s = (float) lut.size();
+	pix b = lut.back();
 	float inc = 1.0 / s;
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned i=0; i<w*h; i++) {
 		float x, y, x0, y0, x1, y1;
 		
-		if (image[i].r > 1.0) 
-			image[i].r = 1.0;
+		if (image[i].r > b.r) 
+			image[i].r = b.r;
 		else if (image[i].r < 0.0) 
 			image[i].r = 0.0;
 		else {
@@ -2616,8 +2617,8 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 			image[i].r = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 		}
 		
-		if (image[i].g > 1.0) 
-			image[i].g = 1.0;
+		if (image[i].g > b.g) 
+			image[i].g = b.g;
 		else if (image[i].g < 0.0) 
 			image[i].g = 0.0;
 		else {
@@ -2629,8 +2630,8 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 			image[i].g = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 		}
 		
-		if (image[i].b > 1.0) 
-			image[i].b = 1.0;
+		if (image[i].b > b.b) 
+			image[i].b = b.b;
 		else if (image[i].b < 0.0) 
 			image[i].b = 0.0;
 		else {
