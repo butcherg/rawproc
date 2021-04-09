@@ -2603,27 +2603,44 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 	for (unsigned i=0; i<w*h; i++) {
 		float x, y, x0, y0, x1, y1;
 		
-		x = image[i].r;
-		x0 = (int) (s*image[i].r) * inc;
-		x1 = ((int) (s*image[i].r) * inc) + inc;
-		y0 = lut[(int) (s*image[i].r)].r;
-		y1 = lut[(int) (s*image[i].r) + 1].r;
-		image[i].r = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+		if (image[i].r > 1.0) 
+			image[i].r = 1.0;
+		else if (image[i].r < 0.0) 
+			image[i].r = 0.0;
+		else {
+			x = image[i].r;
+			x0 = (int) (s*x) * inc;
+			x1 = ((int) (s*x) * inc) + inc;
+			y0 = lut[(int) (s*x)].r;
+			y1 = lut[(int) (s*x) + 1].r;
+			image[i].r = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+		}
 		
-		x = image[i].g;
-		x0 = (int) (s*image[i].g) * inc;
-		x1 = ((int) (s*image[i].g) * inc) + inc;
-		y0 = lut[(int) (s*image[i].g)].g;
-		y1 = lut[(int) (s*image[i].g) + 1].r;
-		image[i].g = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+		if (image[i].g > 1.0) 
+			image[i].g = 1.0;
+		else if (image[i].g < 0.0) 
+			image[i].g = 0.0;
+		else {
+			x = image[i].g;
+			x0 = (int) (s*x) * inc;
+			x1 = ((int) (s*x) * inc) + inc;
+			y0 = lut[(int) (s*x)].r;
+			y1 = lut[(int) (s*x) + 1].g;
+			image[i].g = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+		}
 		
-		x = image[i].b;
-		x0 = (int) (s*image[i].b) * inc;
-		x1 = ((int) (s*image[i].b) * inc) + inc;
-		y0 = lut[(int) (s*image[i].b)].b;
-		y1 = lut[(int) (s*image[i].b) + 1].b;
-		image[i].b = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
-		
+		if (image[i].b > 1.0) 
+			image[i].b = 1.0;
+		else if (image[i].b < 0.0) 
+			image[i].b = 0.0;
+		else {
+			x = image[i].b;
+			x0 = (int) (s*x) * inc;
+			x1 = ((int) (s*x) * inc) + inc;
+			y0 = lut[(int) (s*x)].r;
+			y1 = lut[(int) (s*x) + 1].b;
+			image[i].b = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+		}
 	}
 	
 	return true;
