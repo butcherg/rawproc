@@ -2594,6 +2594,7 @@ pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
 //Looking for a way to encode various camera log curves, decided to use
 //a 1DLUT...
 //
+//This LUT operator assumes a domain of 0.0 - 1.0.  All input values not in this domain are clamped to it
 
 bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 {
