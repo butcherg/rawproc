@@ -254,7 +254,7 @@ class gImage
 		void ApplyToneCurve(std::vector<cp> ctpts, GIMAGE_CHANNEL channel, int threadcount=0);
 		void ApplyToneLine(double low, double high, GIMAGE_CHANNEL channel, int threadcount=0);
 		bool ApplyHaldCLUT(std::string filename, int threadcount=0);
-		bool Apply1DLUT(std::vector<pix> lut, int threadcount);
+		bool Apply1DLUT(std::vector<pix> lut, int threadcount=0);
 
 
 		//image geometry algorithms:

@@ -2595,6 +2595,7 @@ pix correct_pixel(pix input, gImage& clutimage, unsigned int level)
 //a 1DLUT...
 //
 //This LUT operator assumes a domain of 0.0 - 1.0.  All input values not in this domain are clamped to it
+//from https://en.wikipedia.org/wiki/Linear_interpolation
 
 bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 {
@@ -2605,8 +2606,10 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 	for (unsigned i=0; i<w*h; i++) {
 		float x, y, x0, y0, x1, y1;
 		
-		if (image[i].r > b.r) 
-			image[i].r = b.r;
+		//if (image[i].r > b.r) 
+		//	image[i].r = b.r;
+		if (image[i].r >= 1.0) 
+			image[i].r = 1.0;
 		else if (image[i].r < 0.0) 
 			image[i].r = 0.0;
 		else {
@@ -2618,28 +2621,32 @@ bool gImage::Apply1DLUT(std::vector<pix> lut, int threadcount)
 			image[i].r = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 		}
 		
-		if (image[i].g > b.g) 
-			image[i].g = b.g;
+		//if (image[i].g > b.g) 
+		//	image[i].g = b.g;
+		if (image[i].g >= 1.0) 
+			image[i].g = 1.0;
 		else if (image[i].g < 0.0) 
 			image[i].g = 0.0;
 		else {
 			x = image[i].g;
 			x0 = (int) (s*x) * inc;
 			x1 = ((int) (s*x) * inc) + inc;
-			y0 = lut[(int) (s*x)].r;
+			y0 = lut[(int) (s*x)].g;
 			y1 = lut[(int) (s*x) + 1].g;
 			image[i].g = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 		}
 		
-		if (image[i].b > b.b) 
-			image[i].b = b.b;
+		//if (image[i].b > b.b) 
+		//	image[i].b = b.b;
+		if (image[i].b >= 1.0) 
+			image[i].b = 1.0;
 		else if (image[i].b < 0.0) 
 			image[i].b = 0.0;
 		else {
 			x = image[i].b;
 			x0 = (int) (s*x) * inc;
 			x1 = ((int) (s*x) * inc) + inc;
-			y0 = lut[(int) (s*x)].r;
+			y0 = lut[(int) (s*x)].b;
 			y1 = lut[(int) (s*x) + 1].b;
 			image[i].b = (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 		}

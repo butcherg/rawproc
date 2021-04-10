@@ -8,9 +8,11 @@
 #include "myConfig.h"
 #include "util.h"
 #include "gimage/curve.h"
+#include "fileutil.h"
 #include "copy.xpm"
 #include "paste.xpm"
 #include "undo.xpm"
+#include <fstream>
 
 #include <wx/clipbrd.h>
 
@@ -468,6 +470,19 @@ class TonePanel: public PicProcPanel
 				p["L"] = wxString::Format("%f",dlL->GetFloatValue()).ToStdString();
 				p["c"] = wxString::Format("%f",dlc->GetFloatValue()).ToStdString();
 				X.ApplyToneMapDualLogistic(p);
+			}
+			else if (lutb->GetValue()) {
+				std::vector<pix> lut;
+				std::string lutfilepath = filepath_normalize(myConfig::getConfig().getValueOrDefault("tool.tone.lut.filepath","."));
+				std::string lutfilename = lutfilepath+lutfile->GetValue().ToStdString();
+				std::ifstream infile(lutfilename);
+				float v;
+				lut.push_back((struct pix) {0.0, 0.0, 0.0});
+				while (infile >> v) {
+					lut.push_back((struct pix) {v, v, v});
+				}
+				infile.close();
+				X.Apply1DLUT(lut);
 			}
 			else if (filmicb->GetValue())  X.ApplyToneMapFilmic(filmicA->GetFloatValue(),filmicB->GetFloatValue(),filmicC->GetFloatValue(),filmicD->GetFloatValue(),power->GetFloatValue(), tonenorm->GetValue());
 
