@@ -177,8 +177,8 @@ class myFileDropTarget: public wxFileDropTarget
 
 void MyLogErrorHandler(cmsContext ContextID, cmsUInt32Number code, const char *text)
 {
-	//wxMessageBox(wxString::Format("CMS Error %d: %s", code, text));
-	//printf("CMS Error %d: %s\n", code, text);
+	if ((myConfig::getConfig().getValueOrDefault("app.cms.errorlog","0") == "1")) 
+		log(wxString::Format(_("LittleCMS error %d: %s"),code, wxString(text)));
 }
 
 rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &position, const wxSize& size, long style)
@@ -236,7 +236,9 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 	if (! ret)
 		wxMessageBox(wxString::Format("Failed adding %s",helpfile.GetFullPath()));
 
-	cmsSetLogErrorHandler(MyLogErrorHandler);
+	//parm app.cms.errorlog: 0|1, turns on/off LittleCMS error logging to the log file specified in log.filename.  Default=0
+	if (myConfig::getConfig().getValueOrDefault("app.cms.errorlog","0") == "1")
+		cmsSetLogErrorHandler(MyLogErrorHandler);
 
 	propdiag = nullptr;
 
