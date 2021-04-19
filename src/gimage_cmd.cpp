@@ -33,7 +33,7 @@ std::string buildcommand(std::string cmd, std::map<std::string,std::string> para
 	return c;
 }
 
-std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, bool print)
+std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, bool verbose)
 {
 	std::string commandstring = std::string();
 	
@@ -84,7 +84,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	}
 			
 	//if (print) printf("-%s-... ",params["cmdlabel"].c_str()); 
-	if (print) printf("%s: ",command.c_str()); 
+	if (verbose) printf("%s: ",command.c_str()); 
 	fflush(stdout);
 
 	//processing
@@ -110,7 +110,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "subtract") result =  process_subtract(dib, params);
 	else if (command == "tone") result =  process_tone(dib, params);
 	else if (command == "whitebalance") result =  process_whitebalance(dib, params);
-	else if (command == "group") result = process_group(dib, params, print);
+	else if (command == "group") result = process_group(dib, params, verbose);
 	
 			
 	//process error catching:
@@ -118,10 +118,13 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 		return result["error"];  
 	}
 
-	if (print & command != "group") 
-		//printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
-		printf("%s\n",result["imgmsg"].c_str());
-	fflush(stdout);
+	if (verbose) {
+		if (command != "group") {
+			//printf(" (%s threads, %ssec)\n",result["threadcount"].c_str(),result["duration"].c_str()); 
+			printf("%s [%d]\n",result["imgmsg"].c_str(), verbose);
+			fflush(stdout);
+		}
+	}
 
 	//commandstring += buildcommand(cmd, params);
 	if (paramexists(result, "commandstring"))

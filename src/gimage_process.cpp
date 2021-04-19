@@ -1370,7 +1370,7 @@ std::map<std::string,std::string> process_1dlut(gImage &dib, std::map<std::strin
 	return result;
 }
 
-std::map<std::string,std::string> process_group(gImage &dib, std::map<std::string,std::string> params, bool print)
+std::map<std::string,std::string> process_group(gImage &dib, std::map<std::string,std::string> params, bool verbose)
 {
 	std::map<std::string,std::string> result;
 	
@@ -1379,11 +1379,11 @@ std::map<std::string,std::string> process_group(gImage &dib, std::map<std::strin
 	}
 	//nominal processing:
 	else {
-		if (print) printf("\n"); fflush(stdout);
+		if (verbose) printf("\n"); fflush(stdout);
 		std::vector<std::string> cmdlist = split(std::string(params["cmdstring"]), ";");
 		for (int i=0; i<cmdlist.size(); i++) {
-			if (print) printf("\t"); fflush(stdout);
-			do_cmd(dib, cmdlist[i], std::string(), true);
+			if (verbose) printf("\t"); fflush(stdout);
+			do_cmd(dib, cmdlist[i], std::string(), verbose);
 		}
 	}
 	return result;

@@ -159,7 +159,7 @@ void strappend(char* s, char c)
 int _CRT_glob = 0;
 bool force = false;
 
-bool saveFile (gImage &savedib, std::string outfilename, std::string params, std::string commandstring)
+bool saveFile (gImage &savedib, std::string outfilename, std::string params, std::string commandstring, bool verbose)
 {
 
 	gImage dib = savedib;
@@ -194,7 +194,7 @@ bool saveFile (gImage &savedib, std::string outfilename, std::string params, std
 
 	_mark();
 	//printf("Saving file %s %s... ",outfile[0].c_str(), outfile[1].c_str());
-	printf("Saving the file %s %s... ",outfilename.c_str(), params.c_str());
+	if (verbose) { printf("Saving the file %s %s... ",outfilename.c_str(), params.c_str()); fflush(stdout); }
 	dib.setInfo("Software","img 0.1");
 	dib.setInfo("ImageDescription", commandstring);
 	
@@ -205,7 +205,7 @@ bool saveFile (gImage &savedib, std::string outfilename, std::string params, std
 		dib.saveImageFile(outfilename.c_str(), params.c_str());
 
 	if (dib.getLastError() == GIMAGE_OK) {
-		printf("done. (%fsec)\n",_duration());
+		if (verbose) printf("done. (%fsec)\n",_duration());
 		return true;
 	}
 	else {
@@ -311,16 +311,20 @@ int main (int argc, char **argv)
 
 	std::string conffile;
 	bool noconf = false;
+	bool verbose = false;
 	int f;
 	//opterr = 0;
 
-	while ((f = getopt(argc, argv, (char *) "fnc:")) != -1)
+	while ((f = getopt(argc, argv, (char *) "fnvc:")) != -1)
 		switch(f) {
 			case 'f':  //force processing even if output file exists
 				force = true;
 				break;
 			case 'n': //no config file is used
 				noconf = true;
+				break;
+			case 'v': //verbose output
+				verbose = true;
 				break;
 			case 'c': //use the specified config file
 				conffile = std::string(optarg);
@@ -522,7 +526,7 @@ if (!force) {
 int toprocess = files.size() - alreadyexist;
 
 
-printf("number of input files to be processed: %d\n", toprocess);
+printf("number of input files to be processed: %d (%d)\n", toprocess, verbose);
 if (!force)  printf("number of output files that already exist, skipping: %d\n",alreadyexist);
 printf("\n"); fflush(stdout);
 
@@ -547,14 +551,18 @@ for (int f=0; f<files.size(); f++)
 
 	commandstring = "rawproc-img ";
 
-	printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
+	if (verbose) {
+		printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
+	}
+	else printf("%d/%d: %s\n",count, toprocess, iname); fflush(stdout);
+	
 	_mark();
 	gImage dib = gImage::loadImageFile(iname, infile[1]);
 	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
 		printf("error: (%fsec) - Image not loaded correctly\n",_duration()); fflush(stdout);
 		continue;
 	}
-	printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight()); fflush(stdout);
+	if (verbose) printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight()); fflush(stdout);
 
 	commandstring += getfile(std::string(iname));
 	if (infile[1] != "") commandstring += ":" + infile[1];
@@ -566,13 +574,13 @@ for (int f=0; f<files.size(); f++)
 	for (int i=0; i<commands.size(); i++) {
 		if (commands[i] == "input.raw.default") {
 			std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue("input.raw.default"), " ");
-			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i], files[f].variant);
+			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i], files[f].variant, verbose);
 		}
 		else {
-			std::string cmdstr = do_cmd(dib, commands[i], files[f].variant);
+			std::string cmdstr = do_cmd(dib, commands[i], files[f].variant, verbose);
 			fflush(stdout);
 			if (cmdstr.find("Error")  != std::string::npos) {
-				printf("%s\n",cmdstr.c_str());
+				//printf("%s\n",cmdstr.c_str());
 				exit(1);
 			}
 			else commandstring += cmdstr;
@@ -582,10 +590,10 @@ for (int f=0; f<files.size(); f++)
 	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
 	//printf("Orientation: %d\n", orientation);
 	if (orientation != 1) {
-		printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
+		if (verbose) printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
 		_mark();
 		dib.NormalizeRotation();
-		printf("done. (%fsec)\n",_duration()); fflush(stdout);
+		if (verbose) printf("done. (%fsec)\n",_duration()); fflush(stdout);
 	}
 
 	char outfilename[256];
@@ -641,8 +649,8 @@ for (int f=0; f<files.size(); f++)
 	}
 
 
-	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring));
-	printf("\n");
+	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring), verbose);
+	if (verbose) printf("\n");
 
 }
 
