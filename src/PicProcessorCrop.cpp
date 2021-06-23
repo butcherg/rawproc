@@ -303,8 +303,8 @@ class CropPane: public wxPanel
 			mousemoved = true;
 			mousex = event.m_x;
 			mousey = event.m_y;
-			//Refresh();
-			//Update();
+			Refresh();
+			Update();
 			PaintNow();
 			event.Skip();
 		}

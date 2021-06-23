@@ -1262,6 +1262,10 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 	wxFileName profilepath;
 	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
 	std::string iccfile;
+	
+	if (filename.GetExt() == wxEmptyString)\
+		//param output.defaultfileextension: The default file extension to use in the File->Save dialog.  Default=jpg
+		filename.SetExt(wxString(myConfig::getConfig().getValueOrDefault("output.defaultfileextension","jpg")));
 
 	if (!sourcefilename.IsOk()) 
 		fname = wxFileSelector(_("Save image..."),filename.GetPath(),filename.GetName(),filename.GetExt(),_("JPEG files (*.jpg)|*.jpg|TIFF files (*.tif)|*.tif|PNG files (*.png)|*.png |Data files (*.csv)|*.csv"),wxFD_SAVE);  // 
