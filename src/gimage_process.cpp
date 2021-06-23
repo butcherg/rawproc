@@ -703,7 +703,9 @@ std::map<std::string,std::string> process_hlrecover(gImage &dib, std::map<std::s
 		result["threadcount"] = std::to_string(threadcount);
 		
 		_mark();
+#ifdef USE_LIBRTPROCESS
 		dib.ApplyHLRecover(threadcount);
+#endif
 		result["duration"] = std::to_string(_duration());
 		result["commandstring"] = string_format("hlrecover");
 		result["treelabel"] = "hlrecover";
