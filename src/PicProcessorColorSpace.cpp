@@ -74,8 +74,8 @@ class ColorspacePanel: public PicProcPanel
 			makemodel = new wxStaticText(this,wxID_ANY, makemodelstr); //, wxDefaultPosition, wxSize(30, -1));
 			primaries = new wxStaticText(this,wxID_ANY, ""); //, wxDefaultPosition, wxSize(30, -1));
 			primarysource = new wxStaticText(this,wxID_ANY, "");
-			camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			camdatstatus->SetToolTip(_("Open a dialog to review the sources found and loaded for camera data"));
+			//camdatstatus = new wxBitmapButton(this, COLORCAMERASTATUS, wxBitmap(listview_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
+			//camdatstatus->SetToolTip(_("Open a dialog to review the sources found and loaded for camera data"));
 
 			std::map<std::string,std::string> p = proc->paramMap(params.ToStdString(), "profile,op,intent,bpc");
 
