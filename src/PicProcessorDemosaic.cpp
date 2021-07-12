@@ -31,7 +31,7 @@
 #define DEMOSAICXTRANFAST 6915
 
 //#define DCBITERATIONS 6916
-//#define DCBENHANCE 6917
+#define DCBENHANCE 6917
 #endif
 
 
@@ -65,7 +65,7 @@ class DemosaicPanel: public PicProcPanel
 			dcbb = new wxRadioButton(this, DEMOSAICDCB, "dcb:");
 			dcbb->SetToolTip("");
 				dcb_iterations = new myIntegerCtrl(this, wxID_ANY, "iterations:", 1, 1, 5, wxDefaultPosition, wxSize(50,-1));
-				dcb_enhance = new wxCheckBox(this, wxID_ANY, "enhance:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+				dcb_enhance = new wxCheckBox(this, DCBENHANCE, "enhance:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 			igvb = new wxRadioButton(this, DEMOSAICIGV, "igv");
 			igvb->SetToolTip("");
 			lmmseb = new wxRadioButton(this, DEMOSAICLMMSE, "lmmse:");
@@ -208,7 +208,7 @@ colorb->Enable(true);
 			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
-			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this);
+			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this, DCBENHANCE);
 			Bind(wxEVT_RADIOBUTTON, &DemosaicPanel::algorithmChanged, this);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnCopy, this, DEMOSAICCOPY);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnPaste, this, DEMOSAICPASTE);
@@ -427,6 +427,7 @@ bool PicProcessorDemosaic::processPicture(gImage *processdib)
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("demosaic..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;
+	dib = processdib;
 
 	std::map<std::string,std::string> params;
 	std::string pstr = getParams().ToStdString();
