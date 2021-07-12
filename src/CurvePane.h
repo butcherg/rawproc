@@ -19,7 +19,6 @@ public:
 	~CurvePane();
 	bool ToggleToolTip();
 	void paintEvent(wxPaintEvent & evt);	
-	void paintNow();
 	void OnTimer(wxTimerEvent& event);
 	void OnSize(wxSizeEvent & evt);
 	void render(wxDC& dc);

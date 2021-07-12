@@ -76,7 +76,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	Bind(wxEVT_KEY_DOWN, &CurvePane::keyPressed, this);
 	Bind(wxEVT_MOUSEWHEEL, &CurvePane::mouseWheelMoved, this);
 
-	paintNow();
+	Refresh();
 
 }
 
@@ -101,14 +101,6 @@ bool CurvePane::ToggleToolTip()
 void CurvePane::paintEvent(wxPaintEvent & evt)
 {
 	wxPaintDC dc(this);
-	//wxBufferedPaintDC bdc(this);
-	render(dc);
-}
-
-void CurvePane::paintNow()
-{
-	wxClientDC dc(this);
-	//wxBufferedDC bdc(&dc);
 	render(dc);
 }
 
@@ -131,10 +123,9 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 	int m=10;
 	int w, h;
 	mousemoved = true;
-	wxClientDC dc(this);
-	dc.GetSize(&w, &h);
+	GetSize(&w, &h);
 	if( mousemotion) {
-		pos = event.GetLogicalPosition(dc);
+		pos = event.GetPosition();
 		pos.x = pos.x-m;
 		pos.y = h-m-pos.y;
 		if (selectedCP.x > -1.0) {
@@ -147,7 +138,7 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 		}
 		mouseCP.x = (double) pos.x;
 		mouseCP.y = (double) pos.y;
-		paintNow();
+		Refresh();
 		wxCommandEvent e(myCURVE_CHANGE);
 		e.SetEventObject(this);
 		e.SetString("update");
@@ -167,9 +158,8 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	mousemotion=true;
 	//parm tool.curve.landingradius: radius of control point area sensitive to mouseclicks.  Doesn't have to be the radius of the control point circle.  Default=5
 	int landingradius = atoi(myConfig::getConfig().getValueOrDefault("tool.curve.landingradius","5").c_str());
-	wxClientDC dc(this);
-	dc.GetSize(&w, &h);
-	pos = event.GetLogicalPosition(dc);
+	GetSize(&w, &h);
+	pos = event.GetPosition();
 	pos.x = pos.x-m;
 	pos.y = h-m-pos.y;
 
@@ -179,7 +169,7 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 	int pt = c.isctrlpoint(pos.x,pos.y,landingradius);
 	if (pt != -1) {
 		selectedCP = c.getctrlpoint(pt);
-		paintNow();
+		Refresh();
 		return;
 	}
 
@@ -190,7 +180,7 @@ void CurvePane::mouseLeftDown(wxMouseEvent& event)
 				c.insertpoint(x,y);
 				selectedCP.x = x;
 				selectedCP.y = y;
-				paintNow();
+				Refresh();
 				return;
 			}
 		}
@@ -201,7 +191,7 @@ void CurvePane::mouseReleased(wxMouseEvent& event)
 {
 	if (mousemotion) {
 		mousemotion=false;
-		paintNow();
+		Refresh();
 		if (mousemoved) {
 			wxCommandEvent e(myCURVE_UPDATE);
 			e.SetEventObject(this);
@@ -219,7 +209,7 @@ void CurvePane::mouseRightDown(wxMouseEvent& event)
 	c.insertpoint(255.0,255.0);
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
-	paintNow();
+	Refresh();
 	wxCommandEvent e(myCURVE_UPDATE);
 	e.SetEventObject(this);
 	e.SetString("update");
@@ -235,7 +225,7 @@ void CurvePane::mouseDclick(wxMouseEvent& event)
 	c.deletepoint(selectedCP.x, selectedCP.y);
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
-	paintNow();
+	Refresh();
 	wxCommandEvent e(myCURVE_UPDATE);
 	e.SetEventObject(this);
 	e.SetString("update");
@@ -261,7 +251,7 @@ void CurvePane::mouseWheelMoved(wxMouseEvent& event)
 			if (selectedCP.y < 0.0) selectedCP.y = 0.0; if (selectedCP.y > 255.0) selectedCP.y = 255.0;
 			c.insertpoint((double) selectedCP.x, (double) selectedCP.y);
 			t->Start(500,wxTIMER_ONE_SHOT);
-			paintNow();
+			Refresh();
 		}
 	}
 }
@@ -282,7 +272,7 @@ void CurvePane::keyPressed(wxKeyEvent &event)
 		case 127:  //delete
 		case 8: //Backspace
 			c.deletepoint(selectedCP.x, selectedCP.y);
-			paintNow();
+			Refresh();
 			
 			e.SetEventObject(this);
 			e.SetString("update");
