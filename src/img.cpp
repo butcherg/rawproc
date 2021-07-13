@@ -647,6 +647,21 @@ for (int f=0; f<files.size(); f++)
 		printf("%s\n",stats.c_str()); fflush(stdout);
 		exit(0);
 	}
+	else if (strcmp(outfilename,"rgbat") == 0) {
+		int w = dib.getWidth();
+		int h = dib.getHeight();
+		std::vector<std::string> coords = split (outfile[1], ",");
+		int x = atoi(coords[0].c_str());
+		int y = atoi(coords[1].c_str());
+		unsigned pos = x + y*w;
+		std::vector<pix>& img = dib.getImageData();
+		if (pos < w*h) {
+			pix rgb = img[pos];
+			printf("%f,%f,%f\n", rgb.r, rgb.g, rgb.b);
+		} else printf("coordinates out of image bounds\n");
+		exit(0);
+		
+	}
 
 
 	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring), verbose);
