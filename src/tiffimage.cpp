@@ -26,20 +26,20 @@ bool _loadTIFFInfo(const char *filename, unsigned *width, unsigned *height, unsi
 {
 	char *img, *buf;
 	FILE * infile;
-	uint32 w, h;
-	uint16 c, b;
+	uint32_t w, h;
+	uint16_t c, b;
 
 	TIFF* tif = TIFFOpen(filename, "r");
 	if (tif) {
 
 		size_t npixels;
-		uint32* raster;
+		uint32_t* raster;
 
-		uint32 imagelength, imagewidth;
-		uint16 config, nsamples, uval;
-		uint32 read_dir_offset; uint32 count;
+		uint32_t imagelength, imagewidth;
+		uint16_t config, nsamples, uval;
+		uint32_t read_dir_offset; uint32_t count;
 		float fval;
-		uint16 * sval;
+		uint16_t * sval;
         
 		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
 		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
@@ -81,8 +81,8 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 {
 	char *img, *buf;
 	FILE * infile;
-	uint32 w, h;
-	uint16 c, b;
+	uint32_t w, h;
+	uint16_t c, b;
 
 	TIFFSetErrorHandler(0);
 
@@ -90,10 +90,10 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 	if (tif) {
 
 		size_t npixels;
-		uint32* raster;
+		uint32_t* raster;
 
-		uint32 imagelength, imagewidth;
-		uint16 config, nsamples, sampleformat, uval;
+		uint32_t imagelength, imagewidth;
+		uint16_t config, nsamples, sampleformat, uval;
 
 		unsigned len;
 		char * buffer;
@@ -146,9 +146,9 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 		}
 		
 /*
-		uint32 read_dir_offset; uint32 count;
+		uint32_t read_dir_offset; uint32_t count;
 		float fval;
-		uint16 * sval;
+		uint16_t * sval;
 		if (TIFFGetField(tif, TIFFTAG_EXIFIFD, &read_dir_offset )) {
 			if (TIFFReadEXIFDirectory(tif, read_dir_offset)) {
 				if (TIFFGetField( tif, EXIFTAG_FNUMBER, &fval)) info["FNumber"] = tostr(fval);
@@ -175,8 +175,8 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 {
 	char *img;
 	unsigned char *buf;
-	uint32 w, h;
-	uint16 c, b;
+	uint32_t w, h;
+	uint16_t c, b;
 	
 	TIFFSetErrorHandler(0);
 
@@ -210,7 +210,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		//if (info.find("DateTime") != info.end()) TIFFSetField(tif, TIFFTAG_DATETIME, info["DateTime"].c_str());
 		//if (info.find("ImageDescription") != info.end())  TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, info["ImageDescription"].c_str());
 		//if (info.find("Orientation") != info.end()) {
-		//	uint16 orient = (uint16) atoi(info["Orientation"].c_str());
+		//	uint16_t orient = (uint16_t) atoi(info["Orientation"].c_str());
 		//	TIFFSetField(tif, TIFFTAG_ORIENTATION, 1, &orient);
 		//}
 
