@@ -1,6 +1,7 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
 <li><b>app.about.lensdatabasecheck</b>:  1|0, if set, the lensfun database version will be checked against the server. Default: 1</li>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(0,0,0)</li>
+<li><b>app.cms.errorlog</b>:  0|1, turns on/off LittleCMS error logging to the log file specified in log.filename.  Default=0</li>
 <li><b>app.dock.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)</li>
 <li><b>app.dock.width</b>:  Specifies width of dock (command, histogram, parameters panels) at startup.  Default=300</li>
 <li><b>app.floatctrl.backgroundcolor</b>:  Specifies the float control background color. Can be a RGB triple or a single gray, 0-255.  Default=192,255,192</li>
@@ -163,6 +164,7 @@
 <li><a name="tool.tone"><b>tool.tone.filmic.power</b>:  Default value for filmic tone operator power coefficient.  Set this to 1.0 to remove the effect of this coefficient.  Default=1.0</li>
 <li><a name="tool.tone"><b>tool.tone.gamma</b>:  Default value for gamma tone operator.  Default=2.2</li>
 <li><a name="tool.tone"><b>tool.tone.initialvalue</b>:  The initial value of the tone tool, 1.0=no change (linear).  Default=gamma,1.0</li>
+<li><a name="tool.tone"><b>tool.tone.lut.filepath</b>:  Directory path containing the rawproc LUTS. Default=current working directory.</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.digits</b>:  (float), number of fractional digits.  Default=3</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.increment</b>:  (float), maximum multiplier value.  Default=0.001</li>
 <li><a name="tool.whitebalance"><b>tool.whitebalance.max</b>:  (float), maximum multiplier value.  Default=3.0</li>

@@ -256,6 +256,7 @@ rawprocFrm::rawprocFrm(wxWindow *parent, wxWindowID id, const wxString &title, c
 			}
 		}
 	}
+	Bind(wxEVT_MOVE, &rawprocFrm::OnMove, this);
 }
 
 void rawprocFrm::CreateGUIControls()
@@ -466,6 +467,7 @@ void rawprocFrm::OnSize(wxSizeEvent& event)
 
 void rawprocFrm::OnMove(wxMoveEvent& event)
 {
+printf ("move...\n");
 	int new_display_number = wxDisplay::GetFromWindow(this);
 	if (display_number != new_display_number) {
 		printf("display changed: %d to %d\n",display_number, new_display_number); fflush(stdout);
