@@ -2,12 +2,42 @@
 
 <h3 id="Tone">Tone</h3>
 <p>Applies the selected tone curve to the image.  This is just a somewhat random selection of functions, mainly for messing
-with.  I still use a manually-constructed per-image curve for my tone transforms, but some of these hold promise if used in 
-the right place.</p>
+with.</p>
 <p align=center><img src=tone.png></img></p>
 
 <p>Available tone operators:
 <ul>
+<li><b>lut:</b> Applies a 1DLUT specified by the selected file.  The file should contain a list of numbers from 0.0 to 1.0 that describe a curve. The following C program creates a 1DLUT of the proper format for the ARIB STD-B67 log-gamma curve:
+<pre>
+//Compile: g++ -o loggamma loggamma.c
+//Usage: ./loggamma > loggamma.lut
+
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+float lin2loggamma(float in)
+{
+        double a = 0.17883277, b = 0.28466892, c = 0.55991073;
+        double rubicon = 1.0/12.0;
+        double sqrt3 = sqrt(3);
+
+        if (in > rubicon) 
+                return a * log(12*in - b) + c; 
+        else 
+                return sqrt3 * pow(in, 0.5); 
+}
+
+int main()
+{
+	float in, log;
+	float increment = 1.0 / 20.0; //20 steps, make this larger for better resolution...
+	
+	for (in=0.0; in<=1.0; in+=increment) 
+		printf("%f\n", lin2loggamma(in));
+}
+
+
+</pre>
 <li><b>gamma:</b> The same function as in the original gamma tool, which will eventually be removed.  Default: 1.0, or no-change.</li>
 <li><b>reinhart:</b> Applies the simple Reinhart function, val / (1-val), to either the individual channels, or as a computed 
 change to the luminance of each pixel.  Default: channel.</li>
