@@ -424,7 +424,7 @@ void rawprocFrm::CreateGUIControls()
 #else
 	mgr.AddPane(pic, wxAuiPaneInfo().Center().Caption("Image").CloseButton(false).Movable(false));
 #endif
-	mgr.AddPane(commandtree, pinfo.Caption(wxT("Commands")).Position(0));
+	mgr.AddPane(commandtree, pinfo.Caption(wxT("Tool Chain:")).Position(0));
 	mgr.AddPane(histogram,   pinfo.Caption(wxT("Histogram")).Position(1).Fixed());  //.Resizable());  //Fixed());    //ToDo: myHistogramPane needs a sizer to preserve aspect...  ??
 	mgr.AddPane(parambook,   pinfo.Caption(wxT("Parameters")).Position(2).Resizable().MinSize(285,320).FloatingSize(285,320));
 	commandtree->SetFocus();
@@ -468,7 +468,7 @@ void rawprocFrm::OnMove(wxMoveEvent& event)
 {
 	int new_display_number = wxDisplay::GetFromWindow(this);
 	if (display_number != new_display_number) {
-		//printf("display changed: %d to %d\n",display_number, new_display_number); fflush(stdout);
+		printf("display changed: %d to %d\n",display_number, new_display_number); fflush(stdout);
 		display_number = new_display_number;
 		if (pic) pic->RefreshPic();
 	}
