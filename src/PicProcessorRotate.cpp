@@ -4,6 +4,7 @@
 #include "myConfig.h"
 #include "gimage_parse.h"
 #include "gimage_process.h"
+#include "myFloatCtrl.h"
 #include "util.h"
 #include "undo.xpm"
 #include "run.xpm"
@@ -279,7 +280,8 @@ class RotatePanel: public PicProcPanel
 			r45 = new wxRadioButton(this, ROTATE45, _("Rotate < 45:"));
 			b->Add(r45 , 0, wxALIGN_LEFT | wxALL, 1);
 			
-			rotate = new rotateSlider(this, wxID_ANY, initialvalue);
+			//rotate = new rotateSlider(this, wxID_ANY, initialvalue);
+			rotate = new myFloatCtrl(this, wxID_ANY, "", 0.0);
 			b->Add(rotate , 0, wxALIGN_LEFT | wxALL, 1);
 			
 			
@@ -311,7 +313,10 @@ class RotatePanel: public PicProcPanel
 			else if ((int) initialvalue == 90) r90->SetValue(true);
 			else if ((int) initialvalue == 180) r180->SetValue(true);
 			else if ((int) initialvalue == 270) r270->SetValue(true);
-			else r45->SetValue(true);
+			else {
+				r45->SetValue(true);
+				rotate->SetFloatValue(initialvalue);
+			}
 			
 			rotateSelection();
 			SetSizerAndFit(b);
@@ -328,6 +333,8 @@ class RotatePanel: public PicProcPanel
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &RotatePanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_TIMER, &RotatePanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &RotatePanel::OnKey,  this);
+			Bind(myFLOATCTRL_CHANGE, &RotatePanel::floatParamChanged, this);
+			Bind(myFLOATCTRL_UPDATE, &RotatePanel::floatParamUpdated, this);
 			Thaw();
 		}
 
@@ -375,13 +382,41 @@ class RotatePanel: public PicProcPanel
 		void OnTimer(wxTimerEvent& event)
 		{
 			if (autocrop->GetValue())
-				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 			else
-				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 			q->processPic();
 			DeletePendingEvents();
 			t.Stop();
 			event.Skip();
+		}
+		
+		void floatParamChanged(wxCommandEvent& event)
+		{
+			preview->setAutocrop(autocrop->GetValue());
+			preview->Rotate(rotate->GetFloatValue());
+			if (thumb) {
+				thumb = false;
+			}
+			else {
+				t.Start(500,wxTIMER_ONE_SHOT);
+				Refresh();
+				Update();
+			}
+		}
+		
+		void floatParamUpdated(wxCommandEvent& event)
+		{
+			preview->setAutocrop(autocrop->GetValue());
+			preview->Rotate(rotate->GetFloatValue());
+			if (thumb) {
+				thumb = false;
+			}
+			else {
+				t.Start(500,wxTIMER_ONE_SHOT);
+				Refresh();
+				Update();
+			}
 		}
 		
 		void rotateSelection()
@@ -397,7 +432,7 @@ class RotatePanel: public PicProcPanel
 				//preview->Show(true);
 				
 				preview->setAutocrop(autocrop->GetValue());
-				rotation = rotate->GetValue()/10.0;
+				rotation = rotate->GetFloatValue();
 				if (autocrop->GetValue())
 					q->setParams(wxString::Format("%2.1f,autocrop",rotation));
 				else
@@ -433,7 +468,7 @@ class RotatePanel: public PicProcPanel
 		void OnChanged(wxCommandEvent& event)
 		{
 			preview->setAutocrop(autocrop->GetValue());
-			preview->Rotate(rotate->GetValue()/10.0);
+			preview->Rotate(rotate->GetFloatValue());
 			if (thumb) {
 				thumb = false;
 			}
@@ -448,7 +483,7 @@ class RotatePanel: public PicProcPanel
 		void OnThumbTrack(wxCommandEvent& event)
 		{
 			thumb = true;
-			preview->Rotate(rotate->GetValue()/10.0);
+			preview->Rotate(rotate->GetFloatValue());
 			event.Skip();
 			Refresh();
 			Update();
@@ -458,9 +493,9 @@ class RotatePanel: public PicProcPanel
 		{
 			preview->setAutocrop(autocrop->GetValue());
 			if (autocrop->GetValue())
-				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 			else
-				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 			event.Skip();
 			q->processPic();
 			thumb = true;
@@ -469,11 +504,11 @@ class RotatePanel: public PicProcPanel
 		void OnButton(wxCommandEvent& event)
 		{
 			double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.rotate.initialvalue","0.0").c_str());
-			rotate->SetValue(resetval);
+			rotate->SetFloatValue(resetval);
 			if (autocrop->GetValue())
-				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f,autocrop",rotate->GetFloatValue()));
 			else
-				q->setParams(wxString::Format("%2.1f",rotate->GetValue()/10.0));
+				q->setParams(wxString::Format("%2.1f",rotate->GetFloatValue()));
 			preview->Rotate(0.0);
 			Refresh();
 			q->processPic();
@@ -484,7 +519,8 @@ class RotatePanel: public PicProcPanel
 	private:
 		wxCheckBox *autocrop, *enablebox;
 		wxRadioButton *r45, *r90, *r180, *r270, *rH, *rV;
-		rotateSlider *rotate;
+		//rotateSlider *rotate;
+		myFloatCtrl *rotate;
 		wxTimer t;
 		RotatePreview *preview;
 		bool thumb;
