@@ -48,6 +48,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	std::map<std::string,std::string> params;
 
 	if (command == "blackwhitepoint") params = parse_blackwhitepoint(parms);
+	else if (command == "banding") params = parse_banding(parms);
 	else if (command == "add") params = parse_add(parms);
 	else if (command == "colorspace") params = parse_colorspace(parms);
 	else if (command == "crop") params = parse_crop(parms);
@@ -90,6 +91,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	//processing
 	if (command == "blackwhitepoint") result =  process_blackwhitepoint(dib, params);
 	else if (command == "add") result =  process_add(dib, params);
+	else if (command == "banding") result =  process_banding(dib, params);
 	else if (command == "colorspace") result =  process_colorspace(dib, params);
 	else if (command == "crop") result =  process_crop(dib, params);
 	else if (command == "cropspectrum") result =  process_cropspectrum(dib, params);

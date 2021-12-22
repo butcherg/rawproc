@@ -115,6 +115,49 @@ std::map<std::string,std::string> parse_add(std::string paramstring)
 	return pmap;
 }
 
+
+
+//img <li><b>banding:&lt;darkheight&gt;,&ltlightheight&gt;,&ltev&gt;,&ltoffset&gt; </b> - multiply dark bands by the ev.  offset pads the top.
+//img </li><br>
+std::map<std::string,std::string> parse_banding(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+	std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize < 3) {
+			pmap["error"] = string_format("banding:ParseError - not enough parameters.");
+			return pmap;
+		}
+		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "banding";
+		pmap["darkheight"] = p[0];
+		pmap["lightheight"] = p[1];
+		pmap["ev"] = p[2];
+		if (psize > 3)
+			pmap["rolloff"] = p[3];
+		else
+			pmap["rolloff"] = "0";
+		if (psize > 4)
+			pmap["offset"] = p[4];
+		else
+			pmap["offset"] = "0";
+	}
+	return pmap;
+}
+
 //img <li><b>blackwhitepoint</b>
 //img <ul>
 //img <li><b>NULL</b> - do auto on rgb.</li>

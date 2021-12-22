@@ -5,6 +5,7 @@
 #include "gimage/gimage.h"
 
 std::map<std::string,std::string> process_add(gImage &dib, std::map<std::string,std::string> params);
+std::map<std::string,std::string> process_banding(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::string,std::string> params);
 std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string,std::string> params);

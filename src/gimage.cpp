@@ -4611,7 +4611,39 @@ void gImage::ApplyResize(std::string params, int threadcount)
 	}
 }
 
+//Banding
+//
+//I recently shot a choral concert in a church, and some light source was throwing pulsation
+//that showed up in images with a shutter speed > 1/120sec. Yuk.  I'm loathe to throw tools in 
+//rawproc for such, but this one represents a situation that's not easy to discover until you
+//get home.  So, here's a stab at making a took to address it...
+//
+//Essentially, the three parameters describe the height of the alternating darker and lighter
+//bands, and the EV compensation to be applied to the darker band.  I expect to implement the
+//determination of the band heights in the GUI, basically interactive as one dials through the
+//heights.
+//
 
+void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, unsigned rolloff, unsigned offset, int threadcount)
+{
+	double mult = pow(2.0,ev);
+	unsigned period = darkheight + lightheight;
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		float m = mult;
+		int p = offset + (y % period);
+		if (p < rolloff) m *= (float) p/ (float) rolloff;
+		if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
+		for (unsigned x=0; x<w; x++) {
+			unsigned pos = x + y*w;
+			if (offset + (y % period) <= darkheight) {
+				image[pos].r *= m;
+				image[pos].g *= m;
+				image[pos].b *= m;
+			}
+		}
+	}
+}
 
 
 //Redeye

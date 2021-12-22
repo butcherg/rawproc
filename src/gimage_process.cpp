@@ -76,6 +76,49 @@ std::map<std::string,std::string> process_add(gImage &dib, std::map<std::string,
 	return result;
 }
 
+std::map<std::string,std::string> process_banding(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "banding:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.banding.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+
+		//tool-specific setup:
+		unsigned dh = atoi(params["darkheight"].c_str());
+		unsigned lh = atoi(params["lightheight"].c_str());
+		unsigned of;
+		if (params.find("offset") == params.end()) 
+			of = atoi(params["offset"].c_str());
+		else
+			of = 0;
+		unsigned ro;
+		if (params.find("rolloff") == params.end()) 
+			ro = atoi(params["rolloff"].c_str());
+		else
+			ro = 0;
+		float ev = atof(params["ev"].c_str());
+		
+		
+		//tool-specific logic:
+		if (params["mode"] == "default") {
+			_mark();
+			dib.ApplyBanding(dh, lh, ev, ro, of, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "banding";
+			result["imgmsg"] = string_format("%d,%d,%0.2f,%d, %d (%d threads, %ssec)", dh, lh, ev, ro, of, threadcount, result["duration"].c_str());
+		}
+		
+	}
+	return result;
+}
+
 
 std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<std::string,std::string> params)
 {
