@@ -4628,12 +4628,15 @@ void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, u
 {
 	double mult = pow(2.0,ev);
 	unsigned period = darkheight + lightheight;
+	if (period == 0) return;
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
 		float m = mult;
 		int p = offset + (y % period);
-		if (p < rolloff) m *= (float) p/ (float) rolloff;
-		if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
+		if (rolloff > 0) {
+			if (p < rolloff) m *= (float) p/ (float) rolloff;
+			if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
+		}
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
 			if (offset + (y % period) <= darkheight) {

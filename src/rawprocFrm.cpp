@@ -40,6 +40,7 @@
 #include "PicProcessorCACorrect.h"
 #include "PicProcessorHLRecover.h"
 #include "PicProcessorAdd.h"
+#include "PicProcessorBanding.h"
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -120,6 +121,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_CACORRECT, rawprocFrm::MnuCACorrect)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
+	EVT_MENU(ID_MNU_BANDING, rawprocFrm::MnuBanding)
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #ifdef USE_LENSFUNUPDATE
@@ -301,47 +303,48 @@ void rawprocFrm::CreateGUIControls()
 	
 	wxMenu *ID_MNU_ADDMnu_Obj = new wxMenu();
 	
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ADDITION,	_("Add"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ADDITION,		_("Add"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BANDING,		_("Banding"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_BLACKWHITEPOINT,	_("Black/White Point"), _(""), wxITEM_NORMAL);
 #ifdef USE_LIBRTPROCESS
 	//disable - figure out cacorrect
-	//ID_MNU_ADDMnu_Obj->Append(ID_MNU_CACORRECT,	_("CACorrect"), _(""), wxITEM_NORMAL);
-#endif
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,	_("Colorspace"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,		_("Crop"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,		_("Curve"), _(""), wxITEM_NORMAL);
+	//ID_MNU_ADDMnu_Obj->Append(ID_MNU_CACORRECT,		_("CACorrect"), _(""), wxITEM_NORMAL);
+#endif	
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_COLORSPACE,		_("Colorspace"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CROP,			_("Crop"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_CURVE,			_("Curve"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DEMOSAIC,		_("Demosaic"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,	_("Denoise"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_DENOISE,		_("Denoise"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,		_("Exposure Compensation"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,			_("Gamma"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,			_("Gray"), _(""), wxITEM_NORMAL);
 #ifdef USE_LIBRTPROCESS
 	//disable - figure out hlrecover
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,		_("HLRecover"), _(""), wxITEM_NORMAL);
 #endif
 #ifdef USE_LENSFUN
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,	_("Lens Correction"), _(""), wxITEM_NORMAL);
 #endif
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SUBTRACT,	_("Subtract"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->AppendSeparator();
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GROUP,	_("Group"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,	_("Tool List..."), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,		_("Redeye"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,		_("Resize"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,		_("Rotate"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,		_("Saturation"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,		_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SUBTRACT,		_("Subtract"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,			_("Tone"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,		_("White Balance"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->AppendSeparator();	
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GROUP,			_("Group"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TOOLLIST,		_("Tool List..."), _(""), wxITEM_NORMAL);
+		
 	
-	
-	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, _("Add"));
+	WxMenuBar1->Append(ID_MNU_ADDMnu_Obj, 			_("Add"));
 	
 	wxMenu *ID_MNU_HELPMnu_Obj = new wxMenu();
-	ID_MNU_HELPMnu_Obj->Append(ID_MNU_VIEWHELP, _("View Help..."), _(""), wxITEM_NORMAL);
-	ID_MNU_HELPMnu_Obj->Append(ID_MNU_SHOWCOMMAND, _("Show Command..."), _(""), wxITEM_NORMAL);
-	ID_MNU_HELPMnu_Obj->Append(ID_MNU_ABOUT, _("About..."), _(""), wxITEM_NORMAL);
-	WxMenuBar1->Append(ID_MNU_HELPMnu_Obj, _("Help"));
+	ID_MNU_HELPMnu_Obj->Append(ID_MNU_VIEWHELP, 		_("View Help..."), _(""), wxITEM_NORMAL);
+	ID_MNU_HELPMnu_Obj->Append(ID_MNU_SHOWCOMMAND, 		_("Show Command..."), _(""), wxITEM_NORMAL);
+	ID_MNU_HELPMnu_Obj->Append(ID_MNU_ABOUT, 		_("About..."), _(""), wxITEM_NORMAL);
+	WxMenuBar1->Append(ID_MNU_HELPMnu_Obj, 			_("Help"));
 	SetMenuBar(WxMenuBar1);
 
 	WxStatusBar1 = new wxStatusBar(this, ID_WXSTATUSBAR1);
@@ -763,25 +766,26 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	PicProcessor *p;
 	name.Trim(); command.Trim();
 
-	if (name == "saturation") 			p = new PicProcessorSaturation("saturation",command, commandtree, pic);
-	else if (name == "curve")			p = new PicProcessorCurve("curve",command, commandtree, pic);
+	if (name == "saturation") 		p = new PicProcessorSaturation("saturation",command, commandtree, pic);
+	else if (name == "curve")		p = new PicProcessorCurve("curve",command, commandtree, pic);
 	else if (name == "cacorrect")		p = new PicProcessorCACorrect("cacorrect",command, commandtree, pic);
 	else if (name == "hlrecover")		p = new PicProcessorHLRecover("hlrecover",command, commandtree, pic);
 	else if (name == "gray")       		p = new PicProcessorGray("gray",command, commandtree, pic);
 	else if (name == "crop")       		p = new PicProcessorCrop("crop",command, commandtree, pic);
-	else if (name == "resize")			p = new PicProcessorResize("resize",command, commandtree, pic);
+	else if (name == "resize")		p = new PicProcessorResize("resize",command, commandtree, pic);
 	else if (name == "blackwhitepoint")	p = new PicProcessorBlackWhitePoint("blackwhitepoint",command, commandtree, pic);
 	else if (name == "sharpen")     	p = new PicProcessorSharpen("sharpen",command, commandtree, pic);
-	else if (name == "rotate")			p = new PicProcessorRotate("rotate",command, commandtree, pic);
-	else if (name == "denoise")			p = new PicProcessorDenoise("denoise",command, commandtree, pic);
-	else if (name == "redeye")			p = new PicProcessorRedEye("redeye",command, commandtree, pic);
+	else if (name == "rotate")		p = new PicProcessorRotate("rotate",command, commandtree, pic);
+	else if (name == "denoise")		p = new PicProcessorDenoise("denoise",command, commandtree, pic);
+	else if (name == "redeye")		p = new PicProcessorRedEye("redeye",command, commandtree, pic);
 	else if (name == "exposure")		p = new PicProcessorExposure("exposure", command, commandtree, pic);
 	else if (name == "colorspace")		p = new PicProcessorColorSpace("colorspace", command, commandtree, pic);
 	else if (name == "whitebalance")	p = new PicProcessorWhiteBalance("whitebalance", command, commandtree, pic);
-	else if (name == "tone")			p = new PicProcessorTone("tone", command, commandtree, pic);
-	else if (name == "add")				p = new PicProcessorAdd("add", command, commandtree, pic);
+	else if (name == "tone")		p = new PicProcessorTone("tone", command, commandtree, pic);
+	else if (name == "add")			p = new PicProcessorAdd("add", command, commandtree, pic);
+	else if (name == "banding")		p = new PicProcessorBanding("banding", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
-	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
+	else if (name == "group")		p = new PicProcessorGroup("group", command, commandtree, pic);
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	{
 		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
@@ -2257,6 +2261,20 @@ void rawprocFrm::MnuSubtract(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding subtract tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuBanding(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorBanding *p = new PicProcessorBanding("banding", "0,0,0.0,0,0", commandtree, pic);
+		p->createPanel(parambook);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding banding tool failed: %s"),e.what()));
 	}
 }
 

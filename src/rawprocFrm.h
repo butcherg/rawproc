@@ -128,6 +128,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_BATCH = 1043,
 			ID_MNU_DATAUPDATE = 1044,
 			ID_MNU_ADDITION = 1045,
+			ID_MNU_BANDING = 1046,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -183,6 +184,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuTone(wxCommandEvent& event);
 	void MnuSubtract(wxCommandEvent& event);
 	void MnuAdd(wxCommandEvent& event);
+	void MnuBanding(wxCommandEvent& event);
 	void MnuGroup(wxCommandEvent& event);
 
 	void Mnusave1009Click(wxCommandEvent& event);
