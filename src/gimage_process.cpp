@@ -93,16 +93,12 @@ std::map<std::string,std::string> process_banding(gImage &dib, std::map<std::str
 		//tool-specific setup:
 		unsigned dh = atoi(params["darkheight"].c_str());
 		unsigned lh = atoi(params["lightheight"].c_str());
-		unsigned of;
+		unsigned of = 0;
 		if (params.find("offset") == params.end()) 
 			of = atoi(params["offset"].c_str());
-		else
-			of = 0;
-		unsigned ro;
+		unsigned ro = 5;
 		if (params.find("rolloff") == params.end()) 
 			ro = atoi(params["rolloff"].c_str());
-		else
-			ro = 0;
 		float ev = atof(params["ev"].c_str());
 		
 		

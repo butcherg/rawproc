@@ -137,6 +137,8 @@ std::map<std::string,std::string> parse_banding(std::string paramstring)
 	std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
+		printf("psize: %d\n", psize); fflush(stdout);
+		
 		if (psize < 3) {
 			pmap["error"] = string_format("banding:ParseError - not enough parameters.");
 			return pmap;
@@ -146,11 +148,11 @@ std::map<std::string,std::string> parse_banding(std::string paramstring)
 		pmap["darkheight"] = p[0];
 		pmap["lightheight"] = p[1];
 		pmap["ev"] = p[2];
-		if (psize > 3)
+		if (psize >= 4)
 			pmap["rolloff"] = p[3];
 		else
 			pmap["rolloff"] = "0";
-		if (psize > 4)
+		if (psize >= 5)
 			pmap["offset"] = p[4];
 		else
 			pmap["offset"] = "0";
