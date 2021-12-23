@@ -4633,16 +4633,16 @@ void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, u
 	for (unsigned y=0; y<h; y++) {
 		float m = mult;
 		int p = offset + (y % period);
-		if (rolloff > 0) {
-			if (p < rolloff) m *= (float) p/ (float) rolloff;
-			if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
-		}
+		//if (rolloff > 0) {
+		//	if (p < rolloff) m *= (float) p/ (float) rolloff;
+		//	if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
+		//}
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
-			if (offset + (y % period) <= darkheight) {
-				image[pos].r *= m;
-				image[pos].g *= m;
-				image[pos].b *= m;
+			if ((y % period) <= darkheight) {
+				image[pos].r *= mult;
+				image[pos].g *= mult;
+				image[pos].b *= mult;
 			}
 		}
 	}

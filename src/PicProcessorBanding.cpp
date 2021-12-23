@@ -10,6 +10,8 @@
 #include "util.h"
 #include "undo.xpm"
 
+#include <stdio.h>
+
 #define BANDINGENABLE 8600
 
 class BandingPanel: public PicProcPanel
@@ -21,34 +23,25 @@ class BandingPanel: public PicProcPanel
 			SetSize(parent->GetSize());
 			
 			std::map<std::string,std::string> parm = parse_banding(params.ToStdString());
-			
-			//wxArrayString str;
-			//str.Add("rgb");
-			//str.Add("red");
-			//str.Add("green");
-			//str.Add("blue");
-			//chan = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
-
-			//double initialvalue = atof(params.c_str());
 
 			enablebox = new wxCheckBox(this, BANDINGENABLE, _("banding:"));
 			enablebox->SetValue(true);
 
-			//saturate = new myFloatCtrl(this, wxID_ANY, 1.0, 2, wxDefaultPosition,wxDefaultSize);
 			darkh = new myIntegerCtrl(this, wxID_ANY, "dark height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
 			lighth = new myIntegerCtrl(this, wxID_ANY, "light height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
-			evcomp = new myFloatCtrl(this, wxID_ANY, "ev comp:", 1.0, 2, wxDefaultPosition,wxDefaultSize);
+			evcomp = new myFloatCtrl(this, wxID_ANY, "ev comp:", 0.01, 2, wxDefaultPosition,wxDefaultSize);
 			rolloff = new myIntegerCtrl(this, wxID_ANY, "rolloff:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
-			offset = new myIntegerCtrl(this, wxID_ANY, "offset height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
-			//btn = new wxBitmapButton(this, wxID_ANY, wxBitmap(undo_xpm), wxPoint(0,0), wxSize(-1,-1), wxBU_EXACTFIT);
-			//btn->SetToolTip(_("Reset to default"));
+			offset = new myIntegerCtrl(this, wxID_ANY, "offset height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);			
+
+			if (parm.find("darkheight") != parm.end()) darkh->SetIntegerValue(atoi(parm["darkheight"].c_str()));
+			if (parm.find("lightheight") != parm.end()) lighth->SetIntegerValue(atoi(parm["lightheight"].c_str()));
+			if (parm.find("ev") != parm.end()) evcomp->SetFloatValue(atof(parm["ev"].c_str()));
 			
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxSizerFlags patchflags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT);
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
-			//m->AddRowItem(chan, wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -62,11 +55,8 @@ class BandingPanel: public PicProcPanel
 			m->AddRowItem(rolloff,flags);
 			m->NextRow();
 			m->AddRowItem(offset,flags);
-			//m->AddRowItem(btn,flags);
 			m->End();
-			
-			//chan->SetStringSelection(wxString(parm["channel"]));
-			//saturate->SetFloatValue(atof(parm["banding"].c_str()));
+
 
 			SetSizerAndFit(m);
 			SetFocus();
@@ -76,8 +66,6 @@ class BandingPanel: public PicProcPanel
 			Bind(myINTEGERCTRL_CHANGE,&BandingPanel::OnChanged, this);
 			Bind(myINTEGERCTRL_UPDATE,&BandingPanel::OnEnter, this);
 			Bind(wxEVT_CHECKBOX, &BandingPanel::onEnable, this, BANDINGENABLE);
-			//Bind(wxEVT_BUTTON, &BandingPanel::OnButton, this);
-			//Bind(wxEVT_CHOICE, &BandingPanel::channelChanged, this);
 			Bind(wxEVT_TIMER, &BandingPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &BandingPanel::OnKey,  this);
 			Thaw();
@@ -97,7 +85,6 @@ class BandingPanel: public PicProcPanel
 
 		void OnEnter(wxCommandEvent& event)
 		{
-			//q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d",
 				darkh->GetIntegerValue(),
 				lighth->GetIntegerValue(),
@@ -107,13 +94,6 @@ class BandingPanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
-		
-		//void channelChanged(wxCommandEvent& event)
-		//{
-		//	q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
-		//	q->processPic();
-		//	event.Skip();
-		//}
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -122,7 +102,6 @@ class BandingPanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			//q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
 			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d",
 				darkh->GetIntegerValue(),
 				lighth->GetIntegerValue(),
@@ -132,22 +111,6 @@ class BandingPanel: public PicProcPanel
 			q->processPic();
 			event.Skip();
 		}
-
-		//void OnButton(wxCommandEvent& event)
-		//{
-		//	double resetval = atof(myConfig::getConfig().getValueOrDefault("tool.banding.initialvalue","1.0").c_str());
-		//	saturate->SetFloatValue(resetval);
-		//	//q->setParams(wxString::Format("%s,%0.2f,%f", chan->GetString(chan->GetSelection()), saturate->GetFloatValue(), 0.0 ));
-		//	q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d",
-		//		darkh->GetIntegerValue(),
-		//		lighth->GetIntegerValue(),
-		//		evcomp->GetFloatValue(),
-		//		rolloff->GetIntegerValue(),
-		//		offset->GetIntegerValue()));
-		//	q->processPic();
-		//	event.Skip();
-		//}
-
 
 	private:
 		wxChoice *chan;
