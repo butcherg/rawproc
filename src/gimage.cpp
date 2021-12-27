@@ -4629,21 +4629,23 @@ void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, u
 	double mult = pow(2.0,ev);
 	unsigned period = darkheight + lightheight;
 	if (period == 0) return;
+	
+	// prepare column:
+	std::vector<float> col;
+	for (unsigned i=0; i<offset; i++) col.push_back(1.0);
+	for (unsigned i=offset; i<h; i+=period) {  //this may end up being larger than image h, but the apply code won't use any more than it needs...
+		for (unsigned j=0; j<darkheight; j++) col.push_back(mult);
+		for (unsigned k=0; k<lightheight; k++) col.push_back(1.0);
+	}
+	
+	//apply column:
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
-		float m = mult;
-		int p = offset + (y % period);
-		//if (rolloff > 0) {
-		//	if (p < rolloff) m *= (float) p/ (float) rolloff;
-		//	if (p > p-offset & p < period) m *= (float) p/ (float) rolloff;
-		//}
 		for (unsigned x=0; x<w; x++) {
 			unsigned pos = x + y*w;
-			if ((y % period) <= darkheight) {
-				image[pos].r *= mult;
-				image[pos].g *= mult;
-				image[pos].b *= mult;
-			}
+			image[pos].r *= col[y];
+			image[pos].g *= col[y];
+			image[pos].b *= col[y];
 		}
 	}
 }

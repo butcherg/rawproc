@@ -36,6 +36,8 @@ class BandingPanel: public PicProcPanel
 			if (parm.find("darkheight") != parm.end()) darkh->SetIntegerValue(atoi(parm["darkheight"].c_str()));
 			if (parm.find("lightheight") != parm.end()) lighth->SetIntegerValue(atoi(parm["lightheight"].c_str()));
 			if (parm.find("ev") != parm.end()) evcomp->SetFloatValue(atof(parm["ev"].c_str()));
+			if (parm.find("offset") != parm.end()) offset->SetIntegerValue(atoi(parm["offset"].c_str()));
+			if (parm.find("rolloff") != parm.end()) rolloff->SetIntegerValue(atof(parm["rolloff"].c_str()));
 			
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxSizerFlags patchflags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT);
