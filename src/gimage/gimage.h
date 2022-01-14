@@ -313,7 +313,7 @@ class gImage
 		void ApplyWaveletDenoise(double strength, int threadcount=0);
 
 		//specialty algorithms:
-		void ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, unsigned rolloff=0, unsigned offset=0, int threadcount=0);
+		void ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, unsigned rolloff=0, unsigned offset=0, unsigned skew=0, int threadcount=0);
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);
 		void ApplyTint(double red,double green,double blue, int threadcount=0);
 		void ApplyGray(double redpct, double greenpct, double bluepct, int threadcount=0);

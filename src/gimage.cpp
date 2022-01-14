@@ -4624,18 +4624,21 @@ void gImage::ApplyResize(std::string params, int threadcount)
 //heights.
 //
 
-void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, unsigned rolloff, unsigned offset, int threadcount)
+void gImage::ApplyBanding(unsigned darkheight, unsigned lightheight, float ev, unsigned rolloff, unsigned offset, unsigned skew, int threadcount)
 {
+	printf("gImage::ApplyBanding: skew=%d\n", skew); fflush(stdout);
 	double mult = pow(2.0,ev);
 	unsigned period = darkheight + lightheight;
 	if (period == 0) return;
 	
 	// prepare column:
 	std::vector<float> col;
+	unsigned skw = 0;
 	for (unsigned i=0; i<offset; i++) col.push_back(1.0);
 	for (unsigned i=offset; i<h; i+=period) {  //this may end up being larger than image h, but the apply code won't use any more than it needs...
 		for (unsigned j=0; j<darkheight; j++) col.push_back(mult);
-		for (unsigned k=0; k<lightheight; k++) col.push_back(1.0);
+		for (unsigned k=0; k<lightheight+skw; k++) col.push_back(1.0);
+		skw+=skew;
 	}
 	
 	//apply column:

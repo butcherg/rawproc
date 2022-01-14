@@ -99,15 +99,18 @@ std::map<std::string,std::string> process_banding(gImage &dib, std::map<std::str
 		unsigned ro = 0;
 		if (params.find("rolloff") != params.end()) 
 			ro = atoi(params["rolloff"].c_str());
+		unsigned sk = 0;
+		if (params.find("skew") != params.end()) 
+			sk = atoi(params["skew"].c_str());
 		float ev = atof(params["ev"].c_str());
 	
 		//tool-specific logic:
 		if (params["mode"] == "default") {
 			_mark();
-			dib.ApplyBanding(dh, lh, ev, ro, of, threadcount);
+			dib.ApplyBanding(dh, lh, ev, ro, of, sk, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "banding";
-			result["imgmsg"] = string_format("%d,%d,%0.2f,%d, %d (%d threads, %ssec)", dh, lh, ev, ro, of, threadcount, result["duration"].c_str());
+			result["imgmsg"] = string_format("%d,%d,%0.2f,%d, %d, %d (%d threads, %ssec)", dh, lh, ev, ro, of, sk, threadcount, result["duration"].c_str());
 		}
 		
 	}

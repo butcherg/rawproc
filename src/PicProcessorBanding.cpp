@@ -31,13 +31,15 @@ class BandingPanel: public PicProcPanel
 			lighth = new myIntegerCtrl(this, wxID_ANY, "light height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
 			evcomp = new myFloatCtrl(this, wxID_ANY, "ev comp:", 0.01, 2, wxDefaultPosition,wxDefaultSize);
 			rolloff = new myIntegerCtrl(this, wxID_ANY, "rolloff:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
-			offset = new myIntegerCtrl(this, wxID_ANY, "offset height:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);			
+			offset = new myIntegerCtrl(this, wxID_ANY, "offset:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
+			skew = new myIntegerCtrl(this, wxID_ANY, "skew:", 0, 0, 1000, wxDefaultPosition,wxDefaultSize);
 
 			if (parm.find("darkheight") != parm.end()) darkh->SetIntegerValue(atoi(parm["darkheight"].c_str()));
 			if (parm.find("lightheight") != parm.end()) lighth->SetIntegerValue(atoi(parm["lightheight"].c_str()));
 			if (parm.find("ev") != parm.end()) evcomp->SetFloatValue(atof(parm["ev"].c_str()));
 			if (parm.find("offset") != parm.end()) offset->SetIntegerValue(atoi(parm["offset"].c_str()));
 			if (parm.find("rolloff") != parm.end()) rolloff->SetIntegerValue(atof(parm["rolloff"].c_str()));
+			if (parm.find("skew") != parm.end()) skew->SetIntegerValue(atof(parm["skew"].c_str()));
 			
 			wxSizerFlags flags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM);
 			wxSizerFlags patchflags = wxSizerFlags().Center().Border(wxLEFT|wxRIGHT);
@@ -57,6 +59,8 @@ class BandingPanel: public PicProcPanel
 			m->AddRowItem(rolloff,flags);
 			m->NextRow();
 			m->AddRowItem(offset,flags);
+			m->NextRow();
+			m->AddRowItem(skew,flags);
 			m->End();
 
 
@@ -87,12 +91,13 @@ class BandingPanel: public PicProcPanel
 
 		void OnEnter(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d",
+			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d,%d",
 				darkh->GetIntegerValue(),
 				lighth->GetIntegerValue(),
 				evcomp->GetFloatValue(),
 				rolloff->GetIntegerValue(),
-				offset->GetIntegerValue()));
+				offset->GetIntegerValue(),
+				skew->GetIntegerValue()));
 			q->processPic();
 			event.Skip();
 		}
@@ -104,19 +109,20 @@ class BandingPanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d",
+			q->setParams(wxString::Format("%d,%d,%0.2f,%d,%d,%d",
 				darkh->GetIntegerValue(),
 				lighth->GetIntegerValue(),
 				evcomp->GetFloatValue(),
 				rolloff->GetIntegerValue(),
-				offset->GetIntegerValue()));
+				offset->GetIntegerValue(),
+				skew->GetIntegerValue()));
 			q->processPic();
 			event.Skip();
 		}
 
 	private:
 		wxChoice *chan;
-		myIntegerCtrl *darkh, *lighth, *rolloff, *offset;
+		myIntegerCtrl *darkh, *lighth, *rolloff, *offset, *skew;
 		myFloatCtrl *evcomp;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;

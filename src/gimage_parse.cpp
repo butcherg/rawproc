@@ -150,6 +150,8 @@ std::map<std::string,std::string> parse_banding(std::string paramstring)
 			pmap["rolloff"] = p[3];
 		if (psize >= 5)
 			pmap["offset"] = p[4];
+		if (psize >= 6)
+			pmap["skew"] = p[5];
 	}
 	return pmap;
 }
