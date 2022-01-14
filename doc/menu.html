@@ -47,6 +47,13 @@ more information on the available parameters.</li><br>
 Provides a more comprehensive listing of the image metadata than the Image Information menu in the command
 pop-up menu.  A path to exiftool must be present in exif.command in the Properties list.</li><br>
 
+<li><b>Edit->Edit Metadata:</b> Opens a dialog box containing the image metadata <i>from the selected
+tool in the ToolChain</i>.  You can add, change, and delete metadata tags here, note that changing
+the tags destined for export requires specific attention to the accuracy of the tag name and value
+format.  <b>Note: Changing a tag in a given tool image DOES NOT automatically change that tag in 
+downstream tool images; you need to instigate a change in the current tool to make metadata changes 
+properly propagate through the rest of the tool chain.</b></li><br>
+
 <li><b>Data update:</b>Kicks off a version check, download, and installation of a newer version of the
 lensfun database than is presently installed at tool.lenscorrection.databasepath, or installs it if not 
 already there.</li><br>
