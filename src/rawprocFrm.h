@@ -53,6 +53,7 @@
 #include "PicPanel.h"
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"
+#include "myMetadataDialog.h"
 
 //#define SIZERLAYOUT
 
@@ -128,6 +129,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_BATCH = 1043,
 			ID_MNU_DATAUPDATE = 1044,
 			ID_MNU_ADDITION = 1045,
+			ID_MNU_EDITMETADATA = 1046,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -206,6 +208,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuLensCorrection(wxCommandEvent& event);
 #endif
 	void MnuDemosaic(wxCommandEvent& event);
+	void MnuEditMetadata(wxCommandEvent& event);
 	void UpdateConfig(wxPropertyGridEvent& event);
 	void SetStartPath(wxString path);
 	void SetBackground();
@@ -243,6 +246,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 		wxSimplebook* parambook;
 		myHistogramPane *histogram;
 		PropertyDialog *propdiag;
+		MetadataDialog *tagdiag;
 
 		gImage *d;
 		wxImage *img;

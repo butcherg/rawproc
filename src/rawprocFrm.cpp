@@ -128,6 +128,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 #endif
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
+	EVT_MENU(ID_MNU_EDITMETADATA, rawprocFrm::MnuEditMetadata)
 	EVT_TREE_KEY_DOWN(ID_COMMANDTREE,rawprocFrm::CommandTreeKeyDown)
 	//EVT_CHAR(rawprocFrm::CharEvent)
 	//EVT_CHAR_HOOK(rawprocFrm::CharEvent)
@@ -292,6 +293,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->AppendSeparator();
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
+	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EDITMETADATA, _("Edit Metadata..."), _(""), wxITEM_NORMAL);
 #ifdef USE_LENSFUNUPDATE
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
 #endif
@@ -1770,6 +1772,18 @@ void rawprocFrm::MnuProperties(wxCommandEvent& event)
 void rawprocFrm::MnuEXIF(wxCommandEvent& event)
 {
 	EXIFDialog(filename);
+}
+
+void rawprocFrm::MnuEditMetadata(wxCommandEvent& event)
+{
+	gImage *dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPicPointer();
+	//tagdiag = new MetadataDialog(this, wxID_ANY, _("Metadata"), wxDefaultPosition, wxSize(640,480));
+	//tagdiag->LoadMetadata(dib);
+	//tagdiag->Show();
+	
+	MetadataDialog tagdiag(this, wxID_ANY, _("Metadata"), wxDefaultPosition, wxSize(640,480));
+	tagdiag.LoadMetadata(dib);
+	tagdiag.ShowModal();
 }
 
 void rawprocFrm::MnuBatchClick(wxCommandEvent& event)

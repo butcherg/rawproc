@@ -181,6 +181,8 @@ class gImage
 		BPP getBits();
 		std::string getBitsStr();
 		std::map<std::string,std::string> getInfo();
+		bool setInfoValue(std::string name, std::string value);
+		bool deleteInfoValue(std::string name);
 		std::string getInfoValue(std::string name);
 		char * getProfile();
 		unsigned getProfileLength();

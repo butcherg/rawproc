@@ -835,6 +835,23 @@ std::map<std::string,std::string> gImage::getInfo()
 	return imginfo;
 }
 
+bool gImage::setInfoValue(std::string name, std::string value)
+{
+	imginfo[name] = value;
+	return true;
+}
+
+bool gImage::deleteInfoValue(std::string name)
+{
+	if (imginfo.find(name) != imginfo.end()) {
+		imginfo.erase(name);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 std::string gImage::getInfoValue(std::string name)
 {
 	if (imginfo.find(name) != imginfo.end())
