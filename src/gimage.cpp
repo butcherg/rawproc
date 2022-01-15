@@ -3189,6 +3189,32 @@ bool gImage::rgbCam(float (&rgb_cam)[3][4])
 	else return false;
 }
 
+
+//Some astro cameras encode "quad-bayer" pixels; this routine de-bins them to regular bayer arrays:
+bool gImage::Apply2x2DeBin(int threadcount)
+{
+	unsigned cfarray[2][2];
+	if (!cfArray(cfarray)) return false;  //only set up for Bayer raws
+	int cfarraydim = 2;
+
+	std::vector<pix> bayerimage;
+	bayerimage.resize((h/2)*(w/2));
+	
+	//make a cfarray for the 4x4 binned mosaic:
+    	unsigned qfarray[4][4] = {
+			{cfarray[0][0],cfarray[0][0],cfarray[0][1],cfarray[0][1]},
+			{cfarray[0][0],cfarray[0][0],cfarray[0][1],cfarray[0][1]},
+			{cfarray[1][0],cfarray[1][0],cfarray[1][1],cfarray[1][1]},
+			{cfarray[1][0],cfarray[1][0],cfarray[1][1],cfarray[1][1]}
+	};
+	unsigned qfarraydim = 4;
+	
+	
+	
+	
+	
+}
+
 bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 {
 	unsigned cfarray[2][2];

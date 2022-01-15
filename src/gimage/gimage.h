@@ -285,6 +285,7 @@ class gImage
 		//demosaic algorithms:
 		bool ApplyDemosaicHalf(bool resize=false, int threadcount=0);
 		bool ApplyMosaicColor(int threadcount=0);
+		bool Apply2x2DeBin(int threadcount=0);
 #ifdef USE_LIBRTPROCESS
 		bool ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
 		bool ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
