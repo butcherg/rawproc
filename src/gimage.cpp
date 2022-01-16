@@ -3209,10 +3209,40 @@ bool gImage::Apply2x2DeBin(int threadcount)
 	};
 	unsigned qfarraydim = 4;
 	
+	std::vector<pix> halfimage;
+	halfimage.resize((h/2)*(w/2));
 	
+	//int cnt[4] = {0, 0, 0, 0};
+	for (unsigned y=0; y<h-(qfarraydim-1); y+=qfarraydim) {
+		for (unsigned x=0; x<w-(qfarraydim-1); x+=qfarraydim) {
+			float pix[4] = {0.0, 0.0, 0.0, 0.0};
+			
+			for (unsigned r=0; r<qfarraydim; r++) {  //walk the 4x4 image subset, collect the channel values 
+				for (unsigned c=0; c<qfarraydim; c++) {
+					//int pos = (x+c) + (y*w+r);
+					int pos = (x+c) + (y+r) * w;
+					pix[ qfarray[r][c] ] += image[pos].r; 
+					//cnt[qfarray[r][c]]++;
+				}
+			}
+			for (unsigned r=0; r<cfarraydim; r++) {
+				for (unsigned c=0; c<cfarraydim; c++) {
+					int pos = ((x/cfarraydim) + c) + ((y/cfarraydim) + r) * w/cfarraydim;
+					int ppos = r*2 + c;
+					halfimage[pos].r = pix[ppos] / 4.0;
+				}
+			}
+		}
+	}
+	//for (unsigned i=0; i<4; i++) {
+	//	printf("%d: %d\n", i, cnt[i]);
+	//	fflush(stdout);
+	//}
 	
-	
-	
+	image = halfimage;
+	w /=2;
+	h /=2;
+	return true;
 }
 
 bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
@@ -3220,6 +3250,10 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 	unsigned cfarray[2][2];
 	if (!cfArray(cfarray)) return false;  //only set up for Bayer raws
 	int arraydim = 2;
+	
+	if (imginfo.find("Libraw.debin") != imginfo.end())
+		if (imginfo["Libraw.debin"] == "1") 
+			Apply2x2DeBin(threadcount);
 
 	std::vector<pix> halfimage;
 	halfimage.resize((h/2)*(w/2));
@@ -3231,7 +3265,8 @@ bool gImage::ApplyDemosaicHalf(bool resize, int threadcount)
 			float pix[4] = {0.0, 0.0, 0.0, 0.0};
 			for (unsigned r=0; r<arraydim; r++) {  //walk the 2x2 image subset, collect the channel values 
 				for (unsigned c=0; c<arraydim; c++) {
-					int pos = (x+c) + (y+r) * w;
+					//int pos = (x+c) + (y*w+r);
+					int pos = (x+c) + (y+r) *w;
 					pix[ cfarray[r][c] ] += image[pos].r;
 				}
 			}
@@ -3379,6 +3414,10 @@ bool gImage::ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost, int threadcount)
 	for (int y=0; y<2; y++) 
 		for (int x=0; x<2; x++) 
 			if (cfarray[y][x] == 3) cfarray[y][x] = 1;
+		
+	if (imginfo.find("Libraw.debin") != imginfo.end())
+		if (imginfo["Libraw.debin"] == "1") 
+			Apply2x2DeBin(threadcount);
 
 	//allocation using JaggedArray, doesn't require free:
 	//librtprocess::JaggedArray<float> rawdata(w, h);
