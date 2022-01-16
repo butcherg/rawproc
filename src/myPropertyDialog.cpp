@@ -253,7 +253,7 @@ void PropertyDialog::AddProp(wxCommandEvent& event)
 			if (!PropExists(add->GetName())) {
 				pg->Append(new wxStringProperty(add->GetName(), add->GetName(), add->GetValue()));
 				pg->Sort();
-				wxMessageBox(wxString::Format(_("Changed %s to %s."), add->GetName(), add->GetValue()));
+				//wxMessageBox(wxString::Format(_("Changed %s to %s."), add->GetName(), add->GetValue()));
 				myConfig::getConfig().setValue((const char  *) add->GetName().mb_str(),  (const char  *) add->GetValue().mb_str());
 				if (!myConfig::getConfig().flush()) wxMessageBox(_("Write to configuration file failed."));
 			}
