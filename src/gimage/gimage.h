@@ -120,7 +120,9 @@ enum GIMAGE_ERROR {
 	GIMAGE_LF_CAMERA_NOT_FOUND,
 	GIMAGE_LF_LENS_NOT_FOUND,
 	
-	GIMAGE_EXIV2_METADATAWRITE_FAILED
+	GIMAGE_EXIV2_METADATAWRITE_FAILED,
+	
+	GIMAGE_GMIC_ERROR
 };
 
 enum LIBRTPROCESS_PREPOST { 
@@ -285,7 +287,6 @@ class gImage
 		//demosaic algorithms:
 		bool ApplyDemosaicHalf(bool resize=false, int threadcount=0);
 		bool ApplyMosaicColor(int threadcount=0);
-		bool Apply2x2DeBin(int threadcount=0);
 #ifdef USE_LIBRTPROCESS
 		bool ApplyDemosaicVNG(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
 		bool ApplyDemosaicRCD(LIBRTPROCESS_PREPOST prepost=LIBRTPROCESS_DEMOSAIC, int threadcount=0);
@@ -339,7 +340,12 @@ class gImage
 		int lensfunAvailableModifications(lfDatabase * ldb, std::string camera, std::string lens); //returns OR-ed set of LF_MODIFY_XXXX flags
 		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
-#endif		
+#endif
+
+#ifdef USE_GMIC
+		//uses libgmic to apply a G'MIC script to the gImage:
+		GIMAGE_ERROR ApplyGMICScript(std::string script);
+#endif
 
 		//Image loaders.  Return a new gImage
 		static gImage loadRAW(const char * filename, std::string params);

@@ -173,6 +173,22 @@ else
 
 fi
 
+#G'MIC:
+AC_ARG_ENABLE([gmic],
+        AS_HELP_STRING([--enable-gmic], [enables gmic.])
+)
+if test "$enable_gmic" == "yes"
+then
+	PKG_CHECK_MODULES([GMIC],[gmic], [
+		CPPFLAGS="$GMIC_CFLAGS $CPPFLAGS"
+		LIBS="$GMIC_LIBS $LIBS"
+	],[
+		AC_MSG_ERROR([not found.])
+	])
+	CXXFLAGS="$CXXFLAGS -DUSE_GMIC"
+fi
+AM_CONDITIONAL(GMIC, test x$enable_gmic = xyes)
+
 #lensfun:
 AC_ARG_ENABLE([lensfun],
         AS_HELP_STRING([--enable-lensfun], [enables lensfun.])
@@ -181,7 +197,7 @@ if test "$enable_lensfun" == "yes"
 then
 	PKG_CHECK_MODULES([LENSFUN],[lensfun], [
 		CPPFLAGS="$LENSFUN_CFLAGS $CPPFLAGS"
-		LIBS="$LENSFUN_LIBS -lcurl -larchive $LIBS"
+		LIBS="$LENSFUN_LIBS $LIBS"
 	],[
 		AC_MSG_ERROR([not found.])
 	])
