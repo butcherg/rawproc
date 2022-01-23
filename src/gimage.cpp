@@ -829,6 +829,7 @@ std::string gImage::getLastErrorMessage()
 	if (lasterror == GIMAGE_APPLYCOLORSPACE_BADTRANSFORM) return "GIMAGE_APPLYCOLORSPACE_BADTRANSFORM";
 	
 	if (lasterror == GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM) return "GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM";
+	if (lasterror == GIMAGE_GMIC_ERROR) return lasterrormsg;
 	return "(none)";
 }
 
@@ -5431,6 +5432,16 @@ GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)
 		gmic(script.c_str(), image_list, image_names);
 	} 
 	catch (gmic_exception &e) {
+		lasterror = GIMAGE_GMIC_ERROR;
+		lasterrormsg = std::string(e.what());
+		image_list.assign(0);
+		return GIMAGE_GMIC_ERROR;
+	}
+	
+	if (image_list._width == 0) {
+		lasterror = GIMAGE_GMIC_ERROR;
+		lasterrormsg = "GMIC: script returned 0 images";
+		image_list.assign(0);
 		return GIMAGE_GMIC_ERROR;
 	}
 	

@@ -677,7 +677,7 @@ std::map<std::string,std::string> process_gmic(gImage &dib, std::map<std::string
 		std::string script( (std::istreambuf_iterator<char>(ifs) ),(std::istreambuf_iterator<char>()    ) );
 		_mark();
 		if (dib.ApplyGMICScript(script) != GIMAGE_OK) {
-			result["error"] = "G'MIC processing error.";
+			result["error"] = dib.getLastErrorMessage();
 		}
 		else {
 			result["duration"] = std::to_string(_duration());

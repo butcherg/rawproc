@@ -408,6 +408,7 @@ class gImage
 		static std::string profilepath;
 		
 		GIMAGE_ERROR lasterror;
+		std::string lasterrormsg;
 
 		RESIZE_FILTER lensfun_interp_method;
 
