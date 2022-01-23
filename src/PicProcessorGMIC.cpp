@@ -8,12 +8,13 @@
 #include "gimage_parse.h"
 #include "gimage_process.h"
 #include <wx/textfile.h>
-#include "wx/fswatcher.h"
+#include <wx/datetime.h>
 
 #define GMICENABLE 8600
 #define GMICFILESELECT 8601
 #define GMICFILESAVE 8602
 #define GMICUPDATE 8603
+#define GMICAUTOUPDATE 8604
 
 class GMICPanel: public PicProcPanel
 {
@@ -24,7 +25,7 @@ class GMICPanel: public PicProcPanel
 			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
-			enablebox = new wxCheckBox(this, GMICENABLE, _("group:"));
+			enablebox = new wxCheckBox(this, GMICENABLE, _("gmic:"));
 			enablebox->SetValue(true);
 
 			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
@@ -34,6 +35,7 @@ class GMICPanel: public PicProcPanel
 			//edit->SetValue(editstring);
 			
 			file = new wxStaticText(this, wxID_ANY, "(no file)");
+			autobox = new wxCheckBox(this, GMICAUTOUPDATE, _("auto update"));
 			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
@@ -50,18 +52,23 @@ class GMICPanel: public PicProcPanel
 			
 			//m->NextRow();
 			m->AddRowItem(new wxButton(this, GMICUPDATE, _("Run Script")), flags);
+			m->AddRowItem(autobox, flags);
 			m->End();
 
 			SetSizerAndFit(m);
+			
+			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &GMICPanel::onEnable, this, GMICENABLE);
 			Bind(wxEVT_BUTTON, &GMICPanel::selectFile, this, GMICFILESELECT);
 			//Bind(wxEVT_BUTTON, &GMICPanel::saveFile, this, GMICFILESAVE);
 			Bind(wxEVT_BUTTON, &GMICPanel::updateScript, this, GMICUPDATE);
 			Bind(wxEVT_CHAR_HOOK, &GMICPanel::OnKey,  this);
-			Bind(wxEVT_FSWATCHER, &GMICPanel::OnFileSystemEvent, this);
+			Bind(wxEVT_TIMER, &GMICPanel::OnTimer,  this);
+			Bind(wxEVT_CHECKBOX, &GMICPanel::onAuto, this, GMICAUTOUPDATE);
 			Thaw();
 		}
+		
 
 		void onEnable(wxCommandEvent& event)
 		{
@@ -76,11 +83,6 @@ class GMICPanel: public PicProcPanel
 		}
 
 		void updateScript(wxCommandEvent& event)
-		{
-			q->processPic();
-		}
-		
-		void OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 		{
 			q->processPic();
 		}
@@ -107,19 +109,46 @@ class GMICPanel: public PicProcPanel
 			wxFileName filepath(fname);
 
 			if (filepath.FileExists()) {
+				scriptfile = filepath;
+				modtime = filepath.GetModificationTime();
 				file->SetLabel(filepath.GetFullName());
 				((PicProcessorGMIC *) q)->setSource(filepath.GetFullName());
 				q->setParams(filepath.GetFullName());
 				q->processPic();
+				
 			}
 			else wxMessageBox(_("Error: script file not found."));
+		}
+		
+		void onAuto(wxCommandEvent& event)
+		{
+			if (autobox->IsChecked()) {
+				t.Stop();
+				modtime = scriptfile.GetModificationTime();
+				t.Start(500,wxTIMER_ONE_SHOT);
+			}
+			else t.Stop();
+		}
+		
+		void OnTimer(wxTimerEvent& event)
+		{
+			wxDateTime m = scriptfile.GetModificationTime();
+			if (!m.IsEqualTo(modtime)) {
+				q->processPic();
+				modtime = m;
+			}
+			if (autobox->IsChecked()) t.Start(500,wxTIMER_ONE_SHOT);
+			event.Skip();
 		}
 
 
 	private:
-		wxCheckBox *enablebox;
+		wxCheckBox *enablebox, *autobox;
 		wxTextCtrl *edit;
 		wxStaticText *file;
+		wxFileName scriptfile;
+		wxDateTime modtime;
+		wxTimer t;
 
 };
 
@@ -146,7 +175,7 @@ void PicProcessorGMIC::createPanel(wxSimplebook* parent)
 void PicProcessorGMIC::setSource(wxString src)
 {
 	source = src;
-	m_tree->SetItemText(id, n+":"+source);
+	//m_tree->SetItemText(id, n+":"+source);
 }
 
 wxString PicProcessorGMIC::getSource()
