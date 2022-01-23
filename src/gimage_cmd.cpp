@@ -56,6 +56,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "demosaic") params = parse_demosaic(parms);
 	else if (command == "denoise") params = parse_denoise(parms);
 	else if (command == "exposure") params = parse_exposure(parms);
+#ifdef USE_GMIC
+	else if (command == "gmic") params = parse_gmic(parms);
+#endif
 	else if (command == "gray") params = parse_gray(parms);
 	else if (command == "hlrecover") params = parse_hlrecover(parms);
 #ifdef USE_LENSFUN
@@ -97,6 +100,9 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "demosaic") result =  process_demosaic(dib, params);
 	else if (command == "denoise") result =  process_denoise(dib, params);
 	else if (command == "exposure") result =  process_exposure(dib, params);
+#ifdef USE_GMIC
+	else if (command == "gmic") result =  process_exposure(dib, params);
+#endif
 	else if (command == "gray") result =  process_gray(dib, params);
 	else if (command == "hlrecover") result =  process_hlrecover(dib, params);
 #ifdef USE_LENSFUN

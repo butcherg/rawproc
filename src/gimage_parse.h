@@ -16,6 +16,9 @@ std::map<std::string,std::string> parse_curve(std::string paramstring);
 std::map<std::string,std::string> parse_demosaic(std::string paramstring);
 std::map<std::string,std::string> parse_denoise(std::string paramstring);
 std::map<std::string,std::string> parse_exposure(std::string paramstring);
+#ifdef USE_GMIC
+std::map<std::string,std::string> parse_gmic(std::string paramstring);
+#endif
 std::map<std::string,std::string> parse_gray(std::string paramstring);
 std::map<std::string,std::string> parse_hlrecover(std::string paramstring);
 #ifdef USE_LENSFUN

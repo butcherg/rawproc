@@ -21,6 +21,10 @@ rawproc_SOURCES += lensfun_dbupdate.cpp lensfun_dbupdate.h
 endif
 endif
 
+if GMIC
+rawproc_SOURCES += PicProcessorGMIC.cpp PicProcessorGMIC.h
+endif
+
 if WIN32
 rawproc_SOURCES += rawprocRes.rc
 endif

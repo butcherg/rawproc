@@ -40,6 +40,9 @@
 #include "PicProcessorCACorrect.h"
 #include "PicProcessorHLRecover.h"
 #include "PicProcessorAdd.h"
+#ifdef USE_GMIC
+#include "PicProcessorGMIC.h"
+#endif
 #ifdef USE_LENSFUN
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
@@ -120,6 +123,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_CACORRECT, rawprocFrm::MnuCACorrect)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
+#ifdef USE_GMIC
+	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
+#endif
 #ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
 #ifdef USE_LENSFUNUPDATE
@@ -317,6 +323,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_EXPOSURE,	_("Exposure Compensation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GAMMA,		_("Gamma"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GRAY,		_("Gray"), _(""), wxITEM_NORMAL);
+#ifdef USE_GMIC
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_GMIC,		_("G'MIC"), _(""), wxITEM_NORMAL);
+#endif
 #ifdef USE_LIBRTPROCESS
 	//disable - figure out hlrecover
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
@@ -784,6 +793,9 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "add")				p = new PicProcessorAdd("add", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
+#ifdef USE_GMIC
+	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
+#endif
 #ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	{
 		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
@@ -2290,6 +2302,21 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 	}
 }
 
+#ifdef USE_GMIC
+void rawprocFrm::MnuGMIC(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorGMIC *p = new PicProcessorGMIC("gmic", "", commandtree, pic);
+		p->createPanel(parambook);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding gmic tool failed: %s"),e.what()));
+	}
+}
+#endif
 
 void rawprocFrm::MnuCut1201Click(wxCommandEvent& event)
 {

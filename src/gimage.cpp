@@ -5441,11 +5441,15 @@ GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)
 	gptr = rptr + (img._height*img._width);
 	bptr = gptr + (img._height*img._width);
 	
-	for (unsigned i=0; i<w*h; i++) {
+	for (unsigned i=0; i<img._width*img._height; i++) {
 		newimage[i].r = *(rptr++);
 		newimage[i].g = *(gptr++);
 		newimage[i].b = *(bptr++);
 	}
+	w = img._width;
+	h = img._height;
+	
+	image_list.assign(0);
 	
 	image = newimage;
 	

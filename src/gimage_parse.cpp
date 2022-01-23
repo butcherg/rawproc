@@ -658,6 +658,37 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 	return pmap;
 }
 
+#ifdef USE_GMIC
+std::map<std::string,std::string> parse_gmic(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize > 0) {
+			pmap["filename"] = p[0];
+		}
+			
+		pmap["mode"] = "script";
+		pmap["cmdlabel"] = "gmic";
+		
+	}
+	return pmap;
+}
+#endif
+
 //img <li><b>gray</b>
 //img <ul>
 //img <li><b>:&lt;redfloat&gt;,&lt;greenfloat&gt;,&lt;bluefloat&gt;</b> - grayscale the image using the specified RGB multipliers.</li>
