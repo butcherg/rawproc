@@ -5444,6 +5444,13 @@ GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)
 		image_list.assign(0);
 		return GIMAGE_GMIC_ERROR;
 	}
+
+	if (img._spectrum != 3) {  //not RGB
+		lasterror = GIMAGE_GMIC_ERROR;
+		lasterrormsg = "GMIC: script returned image that is not 3-channel (RGB)";
+		image_list.assign(0);
+		return GIMAGE_GMIC_ERROR;
+	}
 	
 	std::vector<pix> newimage;
 	newimage.resize(img._height*img._width);
