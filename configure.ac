@@ -9,8 +9,10 @@ AC_CONFIG_SRCDIR([src/tiffimage.cpp])
 m4_include(wxwin.m4)
 m4_include(ax_cxx_compile_stdcxx.m4)
 
+AC_LANG([C++])
 
 # Checks for programs.
+AC_PROG_CC
 AC_PROG_CXX
 AC_OPENMP
 #AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
@@ -179,12 +181,25 @@ AC_ARG_ENABLE([gmic],
 )
 if test "$enable_gmic" == "yes"
 then
-	PKG_CHECK_MODULES([GMIC],[gmic], [
-		CPPFLAGS="$GMIC_CFLAGS $CPPFLAGS"
-		LIBS="$GMIC_LIBS $LIBS"
-	],[
-		AC_MSG_ERROR([not found.])
+	AC_CHECK_HEADERS_ONCE([gmic.h])
+	
+	#adapted from https://stackoverflow.com/questions/1021962/how-to-test-a-c-library-usability-in-configure-in
+	AC_MSG_CHECKING([libgmic])
+	saved_ldflags="${LDFLAGS}"                                                          
+	LDFLAGS="${LDFLAGS} -lgmic"                                                
+	AC_RUN_IFELSE(
+		[AC_LANG_PROGRAM(
+			[#include <gmic.h>], 
+			[gmic_list<float> images;]
+		)],
+		[
+			LIBS="$LIBS -lgmic"
+			AC_MSG_RESULT([yes])
+		],                                           
+		[AC_MSG_ERROR([libgmic not found.])
 	])
+	LDFLAGS="${saved_ldflags}"       
+
 	CXXFLAGS="$CXXFLAGS -DUSE_GMIC"
 fi
 AM_CONDITIONAL(GMIC, test x$enable_gmic = xyes)
