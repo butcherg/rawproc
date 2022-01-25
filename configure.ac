@@ -34,6 +34,27 @@ choke me
 #run the win32 check macro:
 MINGW_AC_WIN32_NATIVE_HOST
 
+AC_DEFUN([RP_FIND_GMIC], [
+	#adapted from https://stackoverflow.com/questions/1021962/how-to-test-a-c-library-usability-in-configure-in
+	AC_MSG_CHECKING([libgmic])
+	saved_ldflags="${LDFLAGS}"                                                          
+	LDFLAGS="${LDFLAGS} -lgmic"                                                
+	AC_RUN_IFELSE(
+		[
+			AC_LANG_PROGRAM(
+				[#include <gmic.h>], 
+				[gmic_list<float> images;]
+			)
+		],
+		[
+			LIBS="$LIBS -lgmic"
+			AC_MSG_RESULT([yes])
+		],		
+		[AC_MSG_ERROR([libgmic not found.])]
+	)
+	LDFLAGS="${saved_ldflags}"
+])
+
 
 
 #Process enables:
@@ -181,24 +202,13 @@ AC_ARG_ENABLE([gmic],
 )
 if test "$enable_gmic" == "yes"
 then
-	AC_CHECK_HEADERS_ONCE([gmic.h])
-	
-	#adapted from https://stackoverflow.com/questions/1021962/how-to-test-a-c-library-usability-in-configure-in
-	AC_MSG_CHECKING([libgmic])
-	saved_ldflags="${LDFLAGS}"                                                          
-	LDFLAGS="${LDFLAGS} -lgmic"                                                
-	AC_RUN_IFELSE(
-		[AC_LANG_PROGRAM(
-			[#include <gmic.h>], 
-			[gmic_list<float> images;]
-		)],
-		[
-			LIBS="$LIBS -lgmic"
-			AC_MSG_RESULT([yes])
-		],                                           
-		[AC_MSG_ERROR([libgmic not found.])
+
+	PKG_CHECK_MODULES([GMIC],[gmic], [
+		CPPFLAGS="$GMIC_CFLAGS $CPPFLAGS"
+		LIBS="$GMIC_LIBS $LIBS"
+	],[
+		RP_FIND_GMIC
 	])
-	LDFLAGS="${saved_ldflags}"       
 
 	CXXFLAGS="$CXXFLAGS -DUSE_GMIC"
 fi
@@ -296,7 +306,7 @@ AC_TYPE_UINT64_T
 #AC_FUNC_MALLOC
 #AC_CHECK_FUNCS([clock_gettime floor modf pow rint setlocale sqrt strtol])
 
-CXXFLAGS="$OPENMP_CFLAGS $CXXFLAGS"
+CXXFLAGS="$OPENMP_CXXFLAGS $CXXFLAGS"
 LIBS="$OPENMP_CFLAGS $LIBS"
 
 #AC_SUBST(WX_CPPFLAGS)
