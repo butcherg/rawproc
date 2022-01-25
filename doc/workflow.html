@@ -32,7 +32,11 @@
 	to give me a linear RGB as the starting point for discretionary editing.</li><br>
 	
 	<li><b>input.raw.libraw.rawdata</b>: Set this to crop, to open raw files without any processing except to 
-	crop the unexposed borders.</li><br>
+	crop the unexposed borders. <i>Note: This parameter has somewhat weird yet significant behavior.  It has to be 
+	set to either '1' or 'crop' to open the raw-raw image right out of the file; setting it to anything else
+	or deleting it from the properties list will compel rawproc to start with a 'dcraw-developed' image.  This 
+	is legacy behavior I may remove in the future, do away with input.raw.libraw.rawdata and just start wtih 
+	the raw-raw data, no dcraw processing available...</i></li><br>
 	
 	<li><b>tool.lenscorrection.databasepath</b>: Set this to the directory in which you want the lensfun database
 	to reside.  lensfun will by default try to find the standard data directory for the host operating system,
