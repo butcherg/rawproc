@@ -40,6 +40,7 @@
 #include "PicProcessorCACorrect.h"
 #include "PicProcessorHLRecover.h"
 #include "PicProcessorAdd.h"
+#include "PicProcessorScript.h"
 #ifdef USE_GMIC
 #include "PicProcessorGMIC.h"
 #endif
@@ -123,6 +124,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_CACORRECT, rawprocFrm::MnuCACorrect)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
+	EVT_MENU(ID_MNU_SCRIPT, rawprocFrm::MnuScript)
 #ifdef USE_GMIC
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
 #endif
@@ -337,6 +339,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SCRIPT,	_("Script"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SUBTRACT,	_("Subtract"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
@@ -793,6 +796,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "add")				p = new PicProcessorAdd("add", command, commandtree, pic);
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
+	else if (name == "script")			p = new PicProcessorScript("script", command, commandtree, filename.GetFullName(), pic); 
 #ifdef USE_GMIC
 	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
 #endif
@@ -2299,6 +2303,21 @@ void rawprocFrm::MnuGroup(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding group tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuScript(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorScript *p = new PicProcessorScript("script", "", commandtree, filename.GetFullName(), pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1951);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding script tool failed: %s"),e.what()));
 	}
 }
 

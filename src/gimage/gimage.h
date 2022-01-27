@@ -198,6 +198,7 @@ class gImage
 		//Setters
 		void setInfo(std::string name, std::string value);
 		void setProfile(char * prof, unsigned proflength);
+		bool setImage(std::vector<pix> img, unsigned width, unsigned height);
 		void deleteProfile();
 
 		//calculators:

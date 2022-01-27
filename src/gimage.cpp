@@ -998,6 +998,15 @@ void gImage::setProfilePath(std::string ppath)
 	profilepath = ppath;
 }
 
+bool gImage::setImage(std::vector<pix> img, unsigned width, unsigned height)
+{
+	if (width * height != img.size()) return false;
+	image = img;
+	w = width;
+	h = height;
+	return true;
+}
+
 
 
 
