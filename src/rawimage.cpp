@@ -404,7 +404,8 @@ char * _loadRAW(const char *filename,
 #define P2 RawProcessor.imgdata.other
 // #define OUT RawProcessor.imgdata.params
 
-	RawProcessor.imgdata.rawparams.shot_select = 0;
+	//remove all use of shot_select, libraw changed its location and that vexes compilation in all situations...
+	//RawProcessor.imgdata.rawparams.shot_select = 0;
 	RawProcessor.imgdata.params.use_camera_wb = 1;
 	RawProcessor.imgdata.params.output_color = 1;	//sRGB
 	RawProcessor.imgdata.params.user_qual = 3;	//AHD
@@ -569,9 +570,10 @@ char * _loadRAW(const char *filename,
 		}
 	}
 
-	//raw <li><b>shot_select</b>=n - select image number for processing.  dcraw: -s [0..N-1]</li>
-	if (p.find("shot_select") != p.end()) 
-		RawProcessor.imgdata.rawparams.shot_select = atoi(p["shot_select"].c_str());
+	//deprecated <li><b>shot_select</b>=n - select image number for processing.  dcraw: -s [0..N-1]</li>
+	//remove all use of shot_select, libraw changed its location and that vexes compilation in all situations...
+	//if (p.find("shot_select") != p.end()) 
+	//	RawProcessor.imgdata.rawparams.shot_select = atoi(p["shot_select"].c_str());
 
 	//raw <li><b>bright</b>=1.0 - brighten image. Default=1.0, no brighten.  dcraw: -b &lt;num&gt;</li>
 	if (p.find("bright") != p.end()) 
