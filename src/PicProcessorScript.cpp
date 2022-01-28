@@ -31,6 +31,21 @@ class ScriptPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, SCRIPTENABLE, _("gmic:"));
 			enablebox->SetValue(true);
+			
+			wxArrayString str;
+			
+			std::map<std::string,unsigned> names;
+			std::map<std::string, std::string> ss =  myConfig::getConfig().getSubset("script.");
+			for (std::map<std::string, std::string>::iterator it=ss.begin(); it!=ss.end(); ++it) {
+				std::vector tokens = split(it->first, ".");
+				names[tokens[0]] = 1;
+			}
+			
+			for (std::map<std::string, unsigned>::iterator it = names.begin(); it!=names.end(); ++it)
+				str.Add(wxString(it->first.c_str()));
+
+			pgm = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			pgm->SetSelection(0);
 
 			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
 			//setEdit(params);
@@ -48,6 +63,7 @@ class ScriptPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
+			m->AddRowItem(pgm, flags);
 			m->AddRowItem(new wxButton(this, SCRIPTFILESELECT, _("Select File...")), flags);
 			m->AddRowItem(file, flags);
 			//m->AddRowItem(new wxButton(this, SCRIPTFILESAVE, _("Save File...")), flags);
@@ -153,10 +169,16 @@ class ScriptPanel: public PicProcPanel
 			if (autobox->IsChecked()) t.Start(500,wxTIMER_ONE_SHOT);
 			event.Skip();
 		}
+		
+		wxString GetProgram()
+		{
+			return pgm->GetString(pgm->GetSelection());
+		}
 
 
 	private:
 		wxCheckBox *enablebox, *autobox;
+		wxChoice *pgm;
 		wxTextCtrl *edit;
 		wxStaticText *file;
 		wxFileName scriptfile;
@@ -227,14 +249,23 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		inimage.SetExt("tif");
 		outimage.SetName(outimage.GetName()+"-out");
 		outimage.SetExt("tif");
-		//printf("Saving temp file: %s...\n", imgname.GetFullPath().ToStdString().c_str()); fflush(stdout);
-		dib->saveTIFF(inimage.GetFullName().ToStdString().c_str(), BPP_UFP, "");
+		wxString pgmstr = ((ScriptPanel *) toolpanel)->GetProgram();
+		std::string chanfmt = wxString::Format("script.%s.channelformat",pgmstr).ToStdString();
+		//parm script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
+		std::string channelformat = myConfig::getConfig().getValueOrDefault(chanfmt,"16bit");
+		BPP fmt = BPP_8;
+		if (channelformat == "8bit") fmt = BPP_8;
+		if (channelformat == "16bit") fmt = BPP_8;
+		if (channelformat == "float") fmt = BPP_FP;
+		if (channelformat == "unboundedfloat") fmt = BPP_UFP;
+		dib->saveTIFF(inimage.GetFullName().ToStdString().c_str(), fmt, "");
 		
 		//create command string
-		//parm script.gmic.command.command: Full path/filename to the gmic.exe program.  Default=(none), won't work without a valid program.
-		wxString scriptcommand = wxString(myConfig::getConfig().getValueOrDefault("script.gmic.command",""));
+		std::string scriptprop = wxString::Format("script.%s.command",pgmstr).ToStdString();
+		//parm script.[scriptprogram].command: Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.
+		wxString scriptcommand = wxString(myConfig::getConfig().getValueOrDefault(scriptprop,""));
 		if (scriptcommand == "") {
-			wxMessageBox("No gmic path defined in script.gmic.command");
+			wxMessageBox(wxString::Format("No %s path defined in script.%s.command", scriptprop));
 			return false;
 		}
 		
@@ -242,17 +273,24 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		std::ifstream ifs(fn);
 		std::string scr( (std::istreambuf_iterator<char>(ifs) ),(std::istreambuf_iterator<char>()    ) );
 		wxString script = wxString(scr);
+		script.Replace("\n", " ");
 		
-		wxString cmd = wxString::Format("%s %s %s output %s,float", scriptcommand, inimage.GetFullName(), script, outimage.GetFullName() );
-		//wxMessageBox(cmd);
+		std::string cmdstr = wxString::Format("script.%s.commandstring",pgmstr).ToStdString();
+		//parm script.[scriptprogram].commandstring: Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.
+		wxString cmd = wxString(myConfig::getConfig().getValueOrDefault(cmdstr,""));
+		cmd.Replace("[program]", scriptcommand);
+		cmd.Replace("[infile]", inimage.GetFullName());
+		cmd.Replace("[script]", script);
+		cmd.Replace("[outfile]", outimage.GetFullName());
+		//printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
 
 		//wxExecute command string, wait to finish
 		wxArrayString output, errors;
 		wxExecute (cmd, output, errors, wxEXEC_NODISABLE);
-		//wxMessageBox(wxString::Format("\nOutput:\n%s\n\nErrors:%s\n",output, errors));
 		
+		//get output image and put it in the dib:
 		gImage newdib(gImage::loadTIFF(outimage.GetFullName().ToStdString().c_str(), ""));
-		dib->setImage(newdib.getImageData(), newdib.getWidth(), newdib.getHeight()); //retain the metadata and profile
+		dib->setImage(newdib.getImageData(), newdib.getWidth(), newdib.getHeight()); //retains the metadata and profile
 		
 		//result = process_gmic(*dib, params)
 		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
