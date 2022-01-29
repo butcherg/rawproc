@@ -15,6 +15,7 @@ class PicProcessorScript: public PicProcessor
 		wxString getSource();
 		void setImageName(wxString img);
 		wxString getImageName();
+		void SetMenuString(wxString pgm);
 
 	private:
 		wxString source, img;

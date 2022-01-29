@@ -1162,6 +1162,41 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 	return pmap;
 }
 
+//img <li><b>script:program,scriptfile</b> - Use the program and corresponging script file to modify the image.  Note: Currently only implemented in rawproc; img won't recognize the tool.
+//img </li><br>
+std::map<std::string,std::string> parse_script(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize != 2) {
+			pmap["error"] = "script:ParseError - missing program or script"; 
+			return pmap;
+		}
+		
+		pmap["program"] = p[0];
+		pmap["script"] = p[1];
+		pmap["mode"] = "default";
+		pmap["cmdlabel"] = "saturation";
+	}
+	return pmap;
+	
+}
+
+
 //img <li><b>sharpen</b>
 //img <ul>
 //img <li><b>:usm[,&lt;sfloat&gt;][,&lt;rfloat&gt;]</b> - apply usm sharpen with the specified sigma and radius.</li>

@@ -18,7 +18,8 @@
 #define SCRIPTFILESELECT 8701
 #define SCRIPTFILESAVE 8702
 #define SCRIPTUPDATE 8703
-#define SCRIPTAUTOUPDATE 8607
+#define SCRIPTAUTOUPDATE 8604
+#define SCRIPTPGMUPDATE 8605
 
 class ScriptPanel: public PicProcPanel
 {
@@ -29,7 +30,7 @@ class ScriptPanel: public PicProcPanel
 			Freeze();
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 
-			enablebox = new wxCheckBox(this, SCRIPTENABLE, _("gmic:"));
+			enablebox = new wxCheckBox(this, SCRIPTENABLE, _("script:"));
 			enablebox->SetValue(true);
 			
 			wxArrayString str;
@@ -44,7 +45,7 @@ class ScriptPanel: public PicProcPanel
 			for (std::map<std::string, unsigned>::iterator it = names.begin(); it!=names.end(); ++it)
 				str.Add(wxString(it->first.c_str()));
 
-			pgm = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
+			pgm = new wxChoice(this, SCRIPTPGMUPDATE, wxDefaultPosition, wxDefaultSize, str);
 			pgm->SetSelection(0);
 
 			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
@@ -56,6 +57,15 @@ class ScriptPanel: public PicProcPanel
 			file = new wxStaticText(this, wxID_ANY, "(no file)");
 			autobox = new wxCheckBox(this, SCRIPTAUTOUPDATE, _("auto update"));
 			
+			retainbox = new wxCheckBox(this, wxID_ANY, _("retain files"));
+			
+			std::map<std::string,std::string> p = parse_script(params.ToStdString());
+			if (p.find("program") != p.end()) pgm->SetSelection(pgm->FindString(p["program"]));
+			if (p.find("script") != p.end()) file->SetLabel(wxString(p["script"]));
+			
+			//supports file invalidation (no file) if the pgm is changed.
+			pgmsel = pgm->GetSelection();
+			
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 
@@ -63,7 +73,11 @@ class ScriptPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
+			m->AddRowItem(new wxStaticText(this, wxID_ANY, "program: "), flags);
 			m->AddRowItem(pgm, flags);
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
 			m->AddRowItem(new wxButton(this, SCRIPTFILESELECT, _("Select File...")), flags);
 			m->AddRowItem(file, flags);
 			//m->AddRowItem(new wxButton(this, SCRIPTFILESAVE, _("Save File...")), flags);
@@ -73,6 +87,7 @@ class ScriptPanel: public PicProcPanel
 			//m->NextRow();
 			m->AddRowItem(new wxButton(this, SCRIPTUPDATE, _("Run Script")), flags);
 			m->AddRowItem(autobox, flags);
+			m->AddRowItem(retainbox, flags);
 			m->End();
 
 			SetSizerAndFit(m);
@@ -81,6 +96,8 @@ class ScriptPanel: public PicProcPanel
 				scriptfile = wxFileName(params);
 				file->SetLabel(scriptfile.GetFullName());
 			}
+			
+			((PicProcessorScript *) q)->SetMenuString(GetProgram());
 
 			t.SetOwner(this);
 
@@ -91,6 +108,7 @@ class ScriptPanel: public PicProcPanel
 			Bind(wxEVT_CHAR_HOOK, &ScriptPanel::OnKey,  this);
 			Bind(wxEVT_TIMER, &ScriptPanel::OnTimer,  this);
 			Bind(wxEVT_CHECKBOX, &ScriptPanel::onAuto, this, SCRIPTAUTOUPDATE);
+			Bind(wxEVT_CHOICE, &ScriptPanel::onPgm, this, SCRIPTPGMUPDATE);
 			Thaw();
 		}
 		
@@ -140,9 +158,9 @@ class ScriptPanel: public PicProcPanel
 				file->SetLabel(filepath.GetFullName());
 				((PicProcessorScript *) q)->setSource(filepath.GetFullPath());
 				if (filepath.GetPath() == wxFileName::GetCwd())
-					q->setParams(filepath.GetFullName());
+					q->setParams(wxString::Format("%s,%s",pgm->GetString(pgm->GetSelection()),filepath.GetFullName()));
 				else
-					q->setParams(filepath.GetFullPath());
+					q->setParams(wxString::Format("%s,%s",pgm->GetString(pgm->GetSelection()),filepath.GetFullPath()));
 				q->processPic();
 				
 			}
@@ -163,6 +181,13 @@ class ScriptPanel: public PicProcPanel
 		{
 			wxDateTime m = scriptfile.GetModificationTime();
 			if (!m.IsEqualTo(modtime)) {
+				wxFileName filepath = file->GetLabel();
+				filepath.MakeAbsolute();
+				if (filepath.GetPath() == wxFileName::GetCwd())
+					q->setParams(wxString::Format("%s,%s",pgm->GetString(pgm->GetSelection()),filepath.GetFullName()));
+				else
+					q->setParams(wxString::Format("%s,%s",pgm->GetString(pgm->GetSelection()),filepath.GetFullPath()));
+
 				q->processPic();
 				modtime = m;
 			}
@@ -170,19 +195,33 @@ class ScriptPanel: public PicProcPanel
 			event.Skip();
 		}
 		
+		void onPgm(wxCommandEvent& event)
+		{
+			if(pgmsel != pgm->GetSelection())
+				file->SetLabel("(no file)");
+			((PicProcessorScript *) q)->SetMenuString(GetProgram());
+			pgmsel = pgm->GetSelection();
+		}
+		
 		wxString GetProgram()
 		{
 			return pgm->GetString(pgm->GetSelection());
 		}
+		
+		bool RetainFiles()
+		{
+			return retainbox->IsChecked();
+		}
 
 
 	private:
-		wxCheckBox *enablebox, *autobox;
+		wxCheckBox *enablebox, *autobox, *retainbox;
 		wxChoice *pgm;
 		wxTextCtrl *edit;
 		wxStaticText *file;
 		wxFileName scriptfile;
 		wxDateTime modtime;
+		int pgmsel;
 		wxTimer t;
 
 };
@@ -211,12 +250,16 @@ void PicProcessorScript::createPanel(wxSimplebook* parent)
 void PicProcessorScript::setSource(wxString src)
 {
 	source = src;
-	//m_tree->SetItemText(id, n+":"+source);
 }
 
 wxString PicProcessorScript::getSource()
 {
 	return source;
+}
+
+void PicProcessorScript::SetMenuString(wxString pgm)
+{
+	m_tree->SetItemText(id, n+":"+pgm);
 }
 
 bool PicProcessorScript::processPicture(gImage *processdib) 
@@ -231,25 +274,21 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 	std::string pstr = getParams().ToStdString();
 
 	if (!pstr.empty())
-		//params = parse_gmic(std::string(pstr));
+		params = parse_script(std::string(pstr));
 	
 	if (params.find("error") != params.end()) {
 		wxMessageBox(params["error"]);
 		ret = false; 
 	}
-	//else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-	//	wxMessageBox("Error - no mode");
-	//	ret = false;
-	//}
-	else { 
-		//create temp file from dib
+	else {
+		//create temp file from dib:
 		wxFileName inimage, outimage;
 		inimage = outimage = img;
 		inimage.SetName(inimage.GetName()+"-in");
 		inimage.SetExt("tif");
 		outimage.SetName(outimage.GetName()+"-out");
 		outimage.SetExt("tif");
-		wxString pgmstr = ((ScriptPanel *) toolpanel)->GetProgram();
+		wxString pgmstr = params["program"];
 		std::string chanfmt = wxString::Format("script.%s.channelformat",pgmstr).ToStdString();
 		//parm script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
 		std::string channelformat = myConfig::getConfig().getValueOrDefault(chanfmt,"16bit");
@@ -260,16 +299,13 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		if (channelformat == "unboundedfloat") fmt = BPP_UFP;
 		dib->saveTIFF(inimage.GetFullName().ToStdString().c_str(), fmt, "");
 		
-		//create command string
+		//create command string:
 		std::string scriptprop = wxString::Format("script.%s.command",pgmstr).ToStdString();
 		//parm script.[scriptprogram].command: Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.
 		wxString scriptcommand = wxString(myConfig::getConfig().getValueOrDefault(scriptprop,""));
-		if (scriptcommand == "") {
-			wxMessageBox(wxString::Format("No %s path defined in script.%s.command", scriptprop));
-			return false;
-		}
+		if (scriptcommand == "") return false;
 		
-		std::string fn = source.ToStdString();
+		std::string fn = params["script"];
 		std::ifstream ifs(fn);
 		std::string scr( (std::istreambuf_iterator<char>(ifs) ),(std::istreambuf_iterator<char>()    ) );
 		wxString script = wxString(scr);
@@ -284,16 +320,23 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		cmd.Replace("[outfile]", outimage.GetFullName());
 		//printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
 
-		//wxExecute command string, wait to finish
+		//wxExecute command string, wait to finish:
 		wxArrayString output, errors;
 		wxExecute (cmd, output, errors, wxEXEC_NODISABLE);
 		
 		//get output image and put it in the dib:
 		gImage newdib(gImage::loadTIFF(outimage.GetFullName().ToStdString().c_str(), ""));
 		dib->setImage(newdib.getImageData(), newdib.getWidth(), newdib.getHeight()); //retains the metadata and profile
+
+		// delete temp image files if the retain box is not checked:
+		if (!((ScriptPanel *) toolpanel)->RetainFiles()) {
+			wxRemoveFile(inimage.GetFullName());
+			wxRemoveFile(outimage.GetFullName());
+		}
 		
-		//result = process_gmic(*dib, params)
-		if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
+		//result = process_gmic(*dib, params)  //ToDo: replace all above with this line...
+		
+		//if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
 		
 		//if (result.find("error") != result.end()) {
 		//	wxMessageBox(wxString(result["error"]));
