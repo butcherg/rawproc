@@ -64,6 +64,7 @@ class PicPanel: public wxPanel
 		void OnMouseEnter(wxMouseEvent& event);
 		void OnMouseLeave(wxMouseEvent& event);
 		void OnTimer(wxTimerEvent& event);
+		void StopStatusBar(bool s);
 
 		void setStatusBar();
         
@@ -95,6 +96,8 @@ class PicPanel: public wxPanel
 		
 		myHistogramPane *histogram;
 		wxTreeCtrl *commandtree;
+		
+		bool stopstatbar;
 
     
 };

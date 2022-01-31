@@ -83,7 +83,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = false;
+	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = stopstatbar = false;
 
 	thumbvisible = true;
 	histogram = hgram;
@@ -635,6 +635,7 @@ wxBitmap * PicPanel::getBitmap()
 
 void PicPanel::setStatusBar()
 {
+	if (stopstatbar) return;
 	if (!display_dib) return;
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh) {
@@ -1439,7 +1440,10 @@ void PicPanel::OnRightDown(wxMouseEvent& event)
 
 }
 
-
+void PicPanel::StopStatusBar(bool s)
+{
+	stopstatbar = s;
+}
 
 
 

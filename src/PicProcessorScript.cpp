@@ -305,6 +305,7 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		ret = false; 
 	}
 	else {
+		m_display->StopStatusBar(true);  //keeps image replacement and image query for status bar from stopming on each other...
 		//create temp file from dib:
 		wxFileName inimage, outimage;
 		inimage = outimage = img;
@@ -327,7 +328,10 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		std::string scriptprop = wxString::Format("script.%s.command",pgmstr).ToStdString();
 		//parm script.[scriptprogram].command: Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.
 		wxString scriptcommand = wxString(myConfig::getConfig().getValueOrDefault(scriptprop,""));
-		if (scriptcommand == "") return false;
+		if (scriptcommand == "") {
+			m_display->StopStatusBar(false);
+			return false;
+		}
 		
 		std::string fn = params["script"];
 		std::ifstream ifs(fn);
@@ -342,7 +346,7 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		cmd.Replace("[infile]", inimage.GetFullName());
 		cmd.Replace("[script]", script);
 		cmd.Replace("[outfile]", outimage.GetFullName());
-		printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
+		//printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
 
 		//wxExecute command string, wait to finish:
 		wxArrayString output, errors;
@@ -360,6 +364,8 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 			wxRemoveFile(inimage.GetFullName());
 			wxRemoveFile(outimage.GetFullName());
 		}
+		
+		m_display->StopStatusBar(false);
 		
 		//result = process_gmic(*dib, params)  //ToDo: replace all above with this line...
 		
