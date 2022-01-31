@@ -627,5 +627,15 @@ wxColour wxString2wxColour(wxString s)
 	return wxColour(r,g,b);
 }
 
+wxString toWxString(wxArrayString s)
+{
+	wxString r;
+	for (unsigned i=0; i<s.GetCount(); i++) {
+		r.Append(s[i]);
+		if (!s[i].Contains("\n")) r.Append("\n");
+	}
+	return r;
+}
+
 
 
