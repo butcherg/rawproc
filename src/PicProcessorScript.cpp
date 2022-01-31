@@ -20,6 +20,7 @@
 #define SCRIPTUPDATE 8703
 #define SCRIPTAUTOUPDATE 8604
 #define SCRIPTPGMUPDATE 8605
+#define SCRIPTOUTPUT 8606
 
 class ScriptPanel: public PicProcPanel
 {
@@ -55,9 +56,12 @@ class ScriptPanel: public PicProcPanel
 			//edit->SetValue(editstring);
 			
 			file = new wxStaticText(this, wxID_ANY, "(no file)");
-			autobox = new wxCheckBox(this, SCRIPTAUTOUPDATE, _("auto update"));
+			autobox = new wxCheckBox(this, SCRIPTAUTOUPDATE, _("auto update"), wxDefaultPosition, wxDefaultSize);
 			
-			retainbox = new wxCheckBox(this, wxID_ANY, _("retain files"));
+			retainbox = new wxCheckBox(this, wxID_ANY, _("retain files"), wxDefaultPosition, wxDefaultSize);
+			
+			outputbtn = new wxButton(this, SCRIPTOUTPUT, _("Output"));
+			outputbtn->Enable(false);
 			
 			std::map<std::string,std::string> p = parse_script(params.ToStdString());
 			if (p.find("program") != p.end()) pgm->SetSelection(pgm->FindString(p["program"]));
@@ -82,12 +86,15 @@ class ScriptPanel: public PicProcPanel
 			m->AddRowItem(file, flags);
 			//m->AddRowItem(new wxButton(this, SCRIPTFILESAVE, _("Save File...")), flags);
 			m->NextRow();
-			//m->AddRowItem(edit, flags);
 			
+			//m->AddRowItem(edit, flags);
 			//m->NextRow();
+			
 			m->AddRowItem(new wxButton(this, SCRIPTUPDATE, _("Run Script")), flags);
 			m->AddRowItem(autobox, flags);
 			m->AddRowItem(retainbox, flags);
+			m->NextRow();
+			m->AddRowItem(outputbtn, flags);
 			m->End();
 
 			SetSizerAndFit(m);
@@ -105,6 +112,7 @@ class ScriptPanel: public PicProcPanel
 			Bind(wxEVT_BUTTON, &ScriptPanel::selectFile, this, SCRIPTFILESELECT);
 			//Bind(wxEVT_BUTTON, &ScriptPanel::saveFile, this, SCRIPTFILESAVE);
 			Bind(wxEVT_BUTTON, &ScriptPanel::updateScript, this, SCRIPTUPDATE);
+			Bind(wxEVT_BUTTON, &ScriptPanel::onOutput, this, SCRIPTOUTPUT);
 			Bind(wxEVT_CHAR_HOOK, &ScriptPanel::OnKey,  this);
 			Bind(wxEVT_TIMER, &ScriptPanel::OnTimer,  this);
 			Bind(wxEVT_CHECKBOX, &ScriptPanel::onAuto, this, SCRIPTAUTOUPDATE);
@@ -203,6 +211,11 @@ class ScriptPanel: public PicProcPanel
 			pgmsel = pgm->GetSelection();
 		}
 		
+		void onOutput(wxCommandEvent& event)
+		{
+			wxMessageBox(cmdoutput, "Program Output");
+		}
+		
 		wxString GetProgram()
 		{
 			return pgm->GetString(pgm->GetSelection());
@@ -212,15 +225,26 @@ class ScriptPanel: public PicProcPanel
 		{
 			return retainbox->IsChecked();
 		}
+		
+		void setCmdOutput(wxString o)
+		{
+			cmdoutput = o;
+			if (cmdoutput.Length() > 0) 
+				outputbtn->Enable(true);
+			else
+				outputbtn->Enable(false);
+		}
 
 
 	private:
 		wxCheckBox *enablebox, *autobox, *retainbox;
+		wxButton *outputbtn;
 		wxChoice *pgm;
 		wxTextCtrl *edit;
 		wxStaticText *file;
 		wxFileName scriptfile;
 		wxDateTime modtime;
+		wxString cmdoutput;
 		int pgmsel;
 		wxTimer t;
 
@@ -292,9 +316,9 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		std::string chanfmt = wxString::Format("script.%s.channelformat",pgmstr).ToStdString();
 		//parm script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
 		std::string channelformat = myConfig::getConfig().getValueOrDefault(chanfmt,"16bit");
-		BPP fmt = BPP_8;
+		BPP fmt = BPP_16;
 		if (channelformat == "8bit") fmt = BPP_8;
-		if (channelformat == "16bit") fmt = BPP_8;
+		if (channelformat == "16bit") fmt = BPP_16;
 		if (channelformat == "float") fmt = BPP_FP;
 		if (channelformat == "unboundedfloat") fmt = BPP_UFP;
 		dib->saveTIFF(inimage.GetFullName().ToStdString().c_str(), fmt, "");
@@ -318,11 +342,14 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		cmd.Replace("[infile]", inimage.GetFullName());
 		cmd.Replace("[script]", script);
 		cmd.Replace("[outfile]", outimage.GetFullName());
-		//printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
+		printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
 
 		//wxExecute command string, wait to finish:
 		wxArrayString output, errors;
 		wxExecute (cmd, output, errors, wxEXEC_NODISABLE);
+		//wxMessageBox(wxString::Format("output: %s\n\nerrors: %s\n", output, errors), "Execution Result"); 
+		//printf("output: %s\n\nerrors: %s\n", toWxString(output).ToStdString().c_str(), toWxString(errors).ToStdString().c_str()); fflush(stdout);
+		((ScriptPanel *) toolpanel)->setCmdOutput(wxString::Format("output:\n%s\n\nerrors:\n%s\n", toWxString(output), toWxString(errors)));
 		
 		//get output image and put it in the dib:
 		gImage newdib(gImage::loadTIFF(outimage.GetFullName().ToStdString().c_str(), ""));
