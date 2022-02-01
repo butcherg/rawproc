@@ -177,6 +177,12 @@ class ScriptPanel: public PicProcPanel
 		
 		void onAuto(wxCommandEvent& event)
 		{
+			if (!scriptfile.FileExists()) { 
+				wxMessageBox("Select a script file first.");
+				autobox->SetValue(false); 
+				event.Skip(); 
+				return;
+			}
 			if (autobox->IsChecked()) {
 				t.Stop();
 				modtime = scriptfile.GetModificationTime();
@@ -209,6 +215,8 @@ class ScriptPanel: public PicProcPanel
 				file->SetLabel("(no file)");
 			((PicProcessorScript *) q)->SetMenuString(GetProgram());
 			pgmsel = pgm->GetSelection();
+			autobox->SetValue(false); 
+			setCmdOutput("");
 		}
 		
 		void onOutput(wxCommandEvent& event)
@@ -346,25 +354,39 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		cmd.Replace("[infile]", inimage.GetFullName());
 		cmd.Replace("[script]", script);
 		cmd.Replace("[outfile]", outimage.GetFullName());
-		//printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
 
-		//wxExecute command string, wait to finish:
-		wxArrayString output, errors;
-		wxExecute (cmd, output, errors, wxEXEC_NODISABLE);
-		//wxMessageBox(wxString::Format("output: %s\n\nerrors: %s\n", output, errors), "Execution Result"); 
-		//printf("output: %s\n\nerrors: %s\n", toWxString(output).ToStdString().c_str(), toWxString(errors).ToStdString().c_str()); fflush(stdout);
-		((ScriptPanel *) toolpanel)->setCmdOutput(wxString::Format("output:\n%s\n\nerrors:\n%s\n", toWxString(output), toWxString(errors)));
-		
-		//get output image and put it in the dib:
-		gImage newdib(gImage::loadTIFF(outimage.GetFullName().ToStdString().c_str(), ""));
-		dib->setImage(newdib.getImageData(), newdib.getWidth(), newdib.getHeight()); //retains the metadata and profile
-
-		// delete temp image files if the retain box is not checked:
-		if (!((ScriptPanel *) toolpanel)->RetainFiles()) {
-			wxRemoveFile(inimage.GetFullName());
-			wxRemoveFile(outimage.GetFullName());
+		//Execute command string, wait to finish:
+		std::string shellstr = wxString::Format("script.%s.shell",pgmstr).ToStdString();
+		//parm script.[scriptprogram].shell: Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.
+		std::string shell = myConfig::getConfig().getValueOrDefault(shellstr,"");
+		if (shell.size() > 0) {
+			cmd = shell + " " + cmd;
+			printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
+			wxExecuteEnv env;
+			wxExecute(cmd,wxEXEC_SYNC,NULL,&env);
 		}
-		
+		else {
+			wxArrayString output, errors;
+			printf("%s\n", cmd.ToStdString().c_str()); fflush(stdout);
+			wxExecute (cmd, output, errors, wxEXEC_NODISABLE);
+			if (output.GetCount() > 0 | errors.GetCount() > 0)
+				((ScriptPanel *) toolpanel)->setCmdOutput(wxString::Format("output:\n%s\n\nerrors:\n%s\n", toWxString(output), toWxString(errors)));
+			else
+				((ScriptPanel *) toolpanel)->setCmdOutput("");
+		}
+
+		//get output image and put it in the dib:
+		if (outimage.FileExists()) {
+			gImage newdib(gImage::loadTIFF(outimage.GetFullName().ToStdString().c_str(), ""));
+			dib->setImage(newdib.getImageData(), newdib.getWidth(), newdib.getHeight()); //retains the metadata and profile
+			// delete temp image files if the retain box is not checked:
+			if (!((ScriptPanel *) toolpanel)->RetainFiles()) {
+				wxRemoveFile(inimage.GetFullName());
+				wxRemoveFile(outimage.GetFullName());
+			}
+		}
+		else wxMessageBox("Script failed to produce result file.");
+
 		m_display->StopStatusBar(false);
 		
 		//result = process_gmic(*dib, params)  //ToDo: replace all above with this line...
