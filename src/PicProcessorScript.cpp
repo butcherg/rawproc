@@ -39,7 +39,7 @@ class ScriptPanel: public PicProcPanel
 			std::map<std::string,unsigned> names;
 			std::map<std::string, std::string> ss =  myConfig::getConfig().getSubset("script.");
 			for (std::map<std::string, std::string>::iterator it=ss.begin(); it!=ss.end(); ++it) {
-				std::vector tokens = split(it->first, ".");
+				std::vector<std::string> tokens = split(it->first, ".");
 				names[tokens[0]] = 1;
 			}
 			
