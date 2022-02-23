@@ -57,6 +57,11 @@ class GMICPanel: public PicProcPanel
 
 			SetSizerAndFit(m);
 			
+			if (!params.IsEmpty()) {
+				scriptfile = wxFileName(params);
+				file->SetLabel(scriptfile.GetFullName());
+			}
+
 			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &GMICPanel::onEnable, this, GMICENABLE);
@@ -104,16 +109,20 @@ class GMICPanel: public PicProcPanel
 			//wxFileName toollistpath;
 			//toollistpath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("app.toollistpath","")));
 
-			wxString fname = wxFileSelector(_("Open GMIC Script..."));  //, toollistpath.GetPath());
+			wxString fname = wxFileSelector(_("Open GMIC Script..."), scriptfile.GetPath());  //, toollistpath.GetPath());
 			if (fname == "") return;
 			wxFileName filepath(fname);
 
 			if (filepath.FileExists()) {
+				filepath.MakeAbsolute();
 				scriptfile = filepath;
 				modtime = filepath.GetModificationTime();
 				file->SetLabel(filepath.GetFullName());
-				((PicProcessorGMIC *) q)->setSource(filepath.GetFullName());
-				q->setParams(filepath.GetFullName());
+				((PicProcessorGMIC *) q)->setSource(filepath.GetFullPath());
+				if (filepath.GetPath() == wxFileName::GetCwd())
+					q->setParams(filepath.GetFullName());
+				else
+					q->setParams(filepath.GetFullPath());
 				q->processPic();
 				
 			}
