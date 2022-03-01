@@ -112,6 +112,10 @@
 <li><b>output.tiff.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li>
 <li><b>output.tiff.cms.renderingintent</b>:  Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.tiff.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul></li>
+<li><b>script.[scriptprogram].channelformat</b>:  8bit|16bit|float|unboundedfloat. Default=16bit.</li>
+<li><b>script.[scriptprogram].command</b>:  Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.</li>
+<li><b>script.[scriptprogram].commandstring</b>:  Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.</li>
+<li><b>script.[scriptprogram].shell</b>:  Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.</li>
 <li><a name="tool.*"><b>tool.*.cores</b>:  Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li>
 <li><a name="tool.*"><b>tool.*.log</b>:  Turns on logging for the specified tool.  Default=0</li>
 <li><a name="tool.all"><b>tool.all.log</b>:  Turns on logging for all tools.  Default=0</li>

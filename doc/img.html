@@ -157,6 +157,8 @@ the aspect ratio (0 is passed to the Apply function and it does the aspect compu
 </li><br>
 <li><b>saturation:[rgb|red|green|blue],&lt;saturationfloat&gt;[,&lt;thresholdfloat&gt; ]</b> - apply HSL saturation to the image in the amount specified. If channel is specified, restrict application to it; if threshold is specified (not used for rgb), restrict application to only values above it. 
 </li><br>
+<li><b>script:program,scriptfile</b> - Use the program and corresponging script file to modify the image.  Note: Currently only implemented in rawproc; img won't recognize the tool.
+</li><br>
 <li><b>sharpen</b>
 <ul>
 <li><b>:usm[,&lt;sfloat&gt;][,&lt;rfloat&gt;]</b> - apply usm sharpen with the specified sigma and radius.</li>

@@ -1,0 +1,27 @@
+<html><title>G'MIC</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
+
+<h3 id="GMIC">G'MIC</h3>
+<p>The toolchain organization of rawproc was inspired by G'MIC, a command-line image processor.  G'MIC has a library interface,
+and I should have incorporated it a long time ago...</p>
+
+<p>Note: While this documentation will exist in any rawproc build, the G'MIC tool will only be incorporated in the program if 
+--enable-gmic is included in the autoconf ./configure command line.  Including G'MIC in the rawproc build requires the availability 
+of the G'MIC library in a location that can be #included and linked in the rawproc build.</p>
+
+<p>This tool will pass a rawproc internal image to a G'MIC script and take the result back into the rawproc toolchain.  G'MIC 
+scripts are specified as files, by default located in the same directory as the one from which the opened image was obtained.
+A different directory can be specified as an absolute path.  Once the script file is specified, the script is run once; by default,
+if the script file is subsequently changed, the "Run Script" button needs to be clicked to re-apply it to the image.  This
+behavior is overridden by the "auto update" checkbox; if this box is checked, rawproc will re-apply the script whenever the file 
+is changed.</p>
+
+<p>One has to be careful writing G'MIC scripts for use with rawproc, 
+as rawproc passes the image to G'MIC in its internal magnitudes, 0.0 - 1.0.  Do note that rawproc will not clip internal values 
+> 1.0 if they exist.  So, if one has G'MIC scripts that depend on a 0-255 black-to-white range, they will need to be reconsidered.
+<p align=center><img src=gmic.png></p>
+
+<p><b>Properties:</b> See tool.gmic.log in <a href=confparams.html>Configuration Properties</a></p>
+
+
+
+</body></html>

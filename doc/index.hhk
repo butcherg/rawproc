@@ -88,6 +88,11 @@
 			<param name="Name" value="Gamma">
 			<param name="Local" value="gamma.html">
 			</OBJECT>
+			
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="G'MIC">
+			<param name="Local" value="gmic.html">
+			</OBJECT>
 
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Grayscale">
