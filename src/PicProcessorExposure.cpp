@@ -118,11 +118,11 @@ class ExposurePanel: public PicProcPanel
 		{
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
-				processEV();
+				q->processPic();
 			}
 			else {
 				q->enableProcessing(false);
-				processEV();
+				q->processPic();
 			}
 		}
 
