@@ -1,0 +1,32 @@
+<html><title>Script</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"><body>
+
+<h3 id="Script">Script</h3>
+<p>The script tool is a generalization of the G'MIC tool, where a rawproc image can be passed to a image command line tool and
+the script's output image is re-ingested by rawproc as the tool result.  The tool has been tested wtih G'MIC and ImageMagick,
+but the definition properties are general enough for most other script-based image processing programs.</p>
+
+<p>This tool will pass a rawproc internal image to an instance of a pre-defined image processing script and take the result back into the rawproc toolchain. Scripts are specified as files, by default located in the same directory as the one from which the opened image was obtained.
+A different directory can be specified as an absolute path.  Once the script file is specified, the script is run once; by default,
+if the script file is subsequently changed, the "Run Script" button needs to be clicked to re-apply it to the image.  This
+behavior is overridden by the "auto update" checkbox; if this box is checked, rawproc will re-apply the script whenever the file 
+is changed.</p>
+
+<p>If the script is not run in a separate shell (see <b>tool.script.[scripting program].shell</b>), the Output button will be enabled
+at the completion of the script execution and the button can be clicked to see the script output.</p>
+
+<p>Before a scripting program can be used in rawproc, the associated <b>tool.script.[scripting program]</b> properties need to be defined.  
+For instance, if G'MIC is to be used as as scripting program, <b>tool.script.gmic.command</b>, <b>tool.script.gmic.commandstring</b>, 
+ <b>tool.script.gmic.shell</b>, and <b>tool.script.gmic.channelformat</b> need to be defined.  rawproc will populate the 
+"program:" drop-down selector in the script paramters pane with the third term of the <b>tool.script.[scriptprogram].*</b> parameters, and use 
+the properties corresponding the selection in "program:".</p>
+
+<p>One has to be careful writing scripts for use with rawproc, 
+as rawproc passes the image to the script program in its internal magnitudes, 0.0 - 1.0.  Do note that rawproc will not clip internal values 
+> 1.0 if they exist.  So, if one has scripts that depend on a 0-255 black-to-white range, they will need to be reconsidered.
+<p align=center><img src=script.png></p>
+
+<p><b>Properties:</b> See tool.script.* in <a href=confparams.html#tool.script>Configuration Properties</a></p>
+
+
+
+</body></html>

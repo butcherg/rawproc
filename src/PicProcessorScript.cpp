@@ -37,7 +37,7 @@ class ScriptPanel: public PicProcPanel
 			wxArrayString str;
 			
 			std::map<std::string,unsigned> names;
-			std::map<std::string, std::string> ss =  myConfig::getConfig().getSubset("script.");
+			std::map<std::string, std::string> ss =  myConfig::getConfig().getSubset("tool.script.");
 			for (std::map<std::string, std::string>::iterator it=ss.begin(); it!=ss.end(); ++it) {
 				std::vector<std::string> tokens = split(it->first, ".");
 				names[tokens[0]] = 1;
@@ -323,7 +323,7 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		outimage.SetExt("tif");
 		wxString pgmstr = params["program"];
 		std::string chanfmt = wxString::Format("tool.script.%s.channelformat",pgmstr).ToStdString();
-		//parm tool.script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
+		//parm tool.script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat, this is the image bit format to be used in the TIFF files used for input to and output from the script program Default=16bit.
 		std::string channelformat = myConfig::getConfig().getValueOrDefault(chanfmt,"16bit");
 		BPP fmt = BPP_16;
 		if (channelformat == "8bit") fmt = BPP_8;
@@ -348,7 +348,7 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		script.Replace("\n", " ");
 		
 		std::string cmdstr = wxString::Format("tool.script.%s.commandstring",pgmstr).ToStdString();
-		//parm tool.script.[scriptprogram].commandstring: Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.
+		//parm tool.script.[scriptprogram].commandstring: Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.  The [] parameters will be replaced with the script program, input file, script file, and output file names at invocation.
 		wxString cmd = wxString(myConfig::getConfig().getValueOrDefault(cmdstr,""));
 		cmd.Replace("[program]", scriptcommand);
 		cmd.Replace("[infile]", inimage.GetFullName());
@@ -357,7 +357,7 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 
 		//Execute command string, wait to finish:
 		std::string shellstr = wxString::Format("tool.script.%s.shell",pgmstr).ToStdString();
-		//parm tool.script.[scriptprogram].shell: Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.
+		//parm tool.script.[scriptprogram].shell: Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process, no shell window.  Note: rawproc's wxcmd is available for use here as a single-command shell that will display its execution.
 		std::string shell = myConfig::getConfig().getValueOrDefault(shellstr,"");
 		if (shell.size() > 0) {
 			cmd = shell + " " + cmd;

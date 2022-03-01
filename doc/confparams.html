@@ -112,10 +112,6 @@
 <li><b>output.tiff.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto</li>
 <li><b>output.tiff.cms.renderingintent</b>:  Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.tiff.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul></li>
-<li><b>script.[scriptprogram].channelformat</b>:  8bit|16bit|float|unboundedfloat. Default=16bit.</li>
-<li><b>script.[scriptprogram].command</b>:  Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.</li>
-<li><b>script.[scriptprogram].commandstring</b>:  Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.</li>
-<li><b>script.[scriptprogram].shell</b>:  Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.</li>
 <li><a name="tool.*"><b>tool.*.cores</b>:  Sets the number of processing cores used by the tool.  0=use all available, -N=use available minus n.  Default=0);</li>
 <li><a name="tool.*"><b>tool.*.log</b>:  Turns on logging for the specified tool.  Default=0</li>
 <li><a name="tool.all"><b>tool.all.log</b>:  Turns on logging for all tools.  Default=0</li>
@@ -156,6 +152,10 @@
 <li><a name="tool.resize"><b>tool.resize.y</b>:  Default resize of the height dimension.  Default=0 (calculate value to preserve aspect)</li>
 <li><a name="tool.rotate"><b>tool.rotate.initialvalue</b>:  The initial (and reset button) angle of the rotate tool, 0=no change.  Default=0</li>
 <li><a name="tool.saturate"><b>tool.saturate.initialvalue</b>:  The initial (and reset button) value of the saturation tool, 1.0=no change.  Default=1.0</li>
+<li><a name="tool.script"><b>tool.script.[scriptprogram].channelformat</b>:  8bit|16bit|float|unboundedfloat, this is the image bit format to be used in the TIFF files used for input to and output from the script program Default=16bit.</li>
+<li><a name="tool.script"><b>tool.script.[scriptprogram].command</b>:  Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.</li>
+<li><a name="tool.script"><b>tool.script.[scriptprogram].commandstring</b>:  Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.  The [] parameters will be replaced with the script program, input file, script file, and output file names at invocation.</li>
+<li><a name="tool.script"><b>tool.script.[scriptprogram].shell</b>:  Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process, no shell window.  Note: rawproc's wxcmd is available for use here as a single-command shell that will display its execution.</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
 <li><a name="tool.tone"><b>tool.tone.curve.arraysize</b>:  number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256</li>
 <li><a name="tool.tone"><b>tool.tone.curve.type</b>:  horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.</li>

@@ -153,6 +153,11 @@
 				<param name="Name" value="Saturate">
 				<param name="Local" value="saturate.html">
 				</OBJECT>
+			
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Script">
+				<param name="Local" value="script.html">
+				</OBJECT>
 
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Sharpen">
