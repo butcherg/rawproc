@@ -322,8 +322,8 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		outimage.SetName(outimage.GetName()+"-out");
 		outimage.SetExt("tif");
 		wxString pgmstr = params["program"];
-		std::string chanfmt = wxString::Format("script.%s.channelformat",pgmstr).ToStdString();
-		//parm script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
+		std::string chanfmt = wxString::Format("tool.script.%s.channelformat",pgmstr).ToStdString();
+		//parm tool.script.[scriptprogram].channelformat: 8bit|16bit|float|unboundedfloat. Default=16bit.
 		std::string channelformat = myConfig::getConfig().getValueOrDefault(chanfmt,"16bit");
 		BPP fmt = BPP_16;
 		if (channelformat == "8bit") fmt = BPP_8;
@@ -333,8 +333,8 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		dib->saveTIFF(inimage.GetFullName().ToStdString().c_str(), fmt, "");
 		
 		//create command string:
-		std::string scriptprop = wxString::Format("script.%s.command",pgmstr).ToStdString();
-		//parm script.[scriptprogram].command: Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.
+		std::string scriptprop = wxString::Format("tool.script.%s.command",pgmstr).ToStdString();
+		//parm tool.script.[scriptprogram].command: Full path/filename to the [scriptprogram].exe program.  Default=(none), won't work without a valid program.
 		wxString scriptcommand = wxString(myConfig::getConfig().getValueOrDefault(scriptprop,""));
 		if (scriptcommand == "") {
 			m_display->StopStatusBar(false);
@@ -347,8 +347,8 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		wxString script = wxString(scr);
 		script.Replace("\n", " ");
 		
-		std::string cmdstr = wxString::Format("script.%s.commandstring",pgmstr).ToStdString();
-		//parm script.[scriptprogram].commandstring: Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.
+		std::string cmdstr = wxString::Format("tool.script.%s.commandstring",pgmstr).ToStdString();
+		//parm tool.script.[scriptprogram].commandstring: Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.
 		wxString cmd = wxString(myConfig::getConfig().getValueOrDefault(cmdstr,""));
 		cmd.Replace("[program]", scriptcommand);
 		cmd.Replace("[infile]", inimage.GetFullName());
@@ -356,8 +356,8 @@ bool PicProcessorScript::processPicture(gImage *processdib)
 		cmd.Replace("[outfile]", outimage.GetFullName());
 
 		//Execute command string, wait to finish:
-		std::string shellstr = wxString::Format("script.%s.shell",pgmstr).ToStdString();
-		//parm script.[scriptprogram].shell: Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.
+		std::string shellstr = wxString::Format("tool.script.%s.shell",pgmstr).ToStdString();
+		//parm tool.script.[scriptprogram].shell: Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process.
 		std::string shell = myConfig::getConfig().getValueOrDefault(shellstr,"");
 		if (shell.size() > 0) {
 			cmd = shell + " " + cmd;
