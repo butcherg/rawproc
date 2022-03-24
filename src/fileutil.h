@@ -25,4 +25,7 @@ void file_copy(std::string frompath, std::string topath);
 bool file_delete(std::string filepath);
 bool file_exists(const std::string& filename);
 
+std::vector<std::string> dir_list(std::string path);
+std::string find_filepath(std::string filename);
+
 #endif

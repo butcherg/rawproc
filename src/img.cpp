@@ -312,11 +312,15 @@ int main (int argc, char **argv)
 	std::string conffile;
 	bool noconf = false;
 	bool verbose = false;
+	bool edit = false;
 	int f;
 	//opterr = 0;
 
-	while ((f = getopt(argc, argv, (char *) "fnvc:")) != -1)
+	while ((f = getopt(argc, argv, (char *) "efnvc:")) != -1)
 		switch(f) {
+			case 'e':  //Read input file's rawproc toolchain, edit it according to the specified changes, and process accordingly
+				edit = true;
+				break;
 			case 'f':  //force processing even if output file exists
 				force = true;
 				break;
@@ -531,142 +535,249 @@ if (!force)  printf("number of output files that already exist, skipping: %d\n",
 printf("\n"); fflush(stdout);
 
 int count = 0;
-for (int f=0; f<files.size(); f++)
-{
 
-	char iname[256];
-	strncpy(iname, files[f].infile.c_str(), 255);
-	
-	if (!force && file_exists(files[f].outfile.c_str())) {
-		//printf("%d/%d: Output file %s exists, skipping %s...\n",f+1, toprocess, files[f].outfile.c_str(), iname);
-		continue;
-	}
-	
-	if (!file_exists(iname)) {
-		printf("%d/%d: Input file %s doesn't exist...\n",f+1, toprocess, iname);
-		continue;
-	}
-
-	count++;
-
-	commandstring = "rawproc-img ";
-
-	if (verbose) {
-		printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
-	}
-	else printf("%d/%d: %s\n",count, toprocess, iname); fflush(stdout);
-	
-	_mark();
-	gImage dib = gImage::loadImageFile(iname, infile[1]);
-	if (dib.getWidth() == 0 | dib.getHeight() == 0) {
-		printf("error: (%fsec) - Image not loaded correctly\n",_duration()); fflush(stdout);
-		continue;
-	}
-	if (verbose) printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight()); fflush(stdout);
-
-	commandstring += getfile(std::string(iname));
-	if (infile[1] != "") commandstring += ":" + infile[1];
-	commandstring += " ";
-
-
-	
-	//process commands:
-	for (int i=0; i<commands.size(); i++) {
-		if (commands[i] == "input.raw.default") {
-			std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue("input.raw.default"), " ");
-			for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i], files[f].variant, verbose);
+if (edit) {
+	for (int f=0; f<files.size(); f++)
+	{
+		char iname[256];
+		strncpy(iname, files[f].infile.c_str(), 255);
+		
+		std::vector<std::string> commandlist;  //storage of the command list for editing
+		gImage editdib;  //the image to be processed with the edited command list
+		
+		if (!force && file_exists(files[f].outfile.c_str())) {
+			//printf("%d/%d: Output file %s exists, skipping %s...\n",f+1, toprocess, files[f].outfile.c_str(), iname);
+			continue;
 		}
-		else {
-			std::string cmdstr = do_cmd(dib, commands[i], files[f].variant, verbose);
+	
+		if (!file_exists(iname)) {
+			printf("%d/%d: Input file %s doesn't exist...\n",f+1, toprocess, iname);
+			continue;
+		}
+		
+		count++;
+
+		commandstring = "rawproc-img ";
+
+		if (verbose) {
+			printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
+		}
+		else printf("%d/%d: %s\n",count, toprocess, iname); fflush(stdout);
+		
+		_mark();
+		//open the image file, extract its commandlist:
+		gImage indib = gImage::loadImageFile(iname, infile[1]);
+		if (indib.getWidth() == 0 | indib.getHeight() == 0) {
+			printf("error: (%fsec) - Image not loaded correctly\n",_duration()); fflush(stdout);
+			continue;
+		}
+		if (verbose) printf("done. (%fsec)\n",_duration()); fflush(stdout);
+		
+		std::map<std::string, std::string> p = indib.getInfo(iname);
+		if (p.find("ImageDescription") != p.end()) {
+			if (p["ImageDescription"].find("rawproc") != std::string::npos) {
+				//printf("%s\n", p["ImageDescription"].c_str());
+				commandlist = split(p["ImageDescription"], " ");
+			}
+			else if (p["ImageDescription"].find("gimg") != std::string::npos) {
+				//printf("%s\n", p["ImageDescription"].c_str());
+				commandlist = split(p["ImageDescription"], " ");
+			}
+			else {
+				printf("rawproc toolchain not found.\n"); fflush(stdout);
+			}
+		}
+		
+		//extract the source file name
+		std::vector<std::string> srcfile = split(commandlist[1], ":");
+		if (srcfile.size() <2) srcfile.push_back(std::string());
+		
+		//open the source file, using find_filepath to search the adjacent directories:
+		gImage sourcedib = gImage::loadImageFile(find_filepath(srcfile[0]).c_str(), srcfile[1].c_str());
+
+		//edit the commandlist into editlist
+		std::vector<std::string> editlist;
+		for (std::vector<std::string>::iterator it=commandlist.begin(); it != commandlist.end(); ++it) {
+			for (int i=3; i<argc-1; i++) {
+				std::vector<std::string> fromto = split(std::string(argv[i]), "/");
+				if ((*it).find(fromto[0]) != std::string::npos) {
+					if (fromto.size() >=2) editlist.push_back(fromto[1]);
+				}
+				else if ((*it).size() > 0) editlist.push_back(*it);
+			}
+		}
+		//for (std::vector<std::string>::iterator it=editlist.begin(); it != editlist.end(); ++it)
+		//	printf("-%s-\n",(*it).c_str());
+		//printf("\n");
+		
+		
+		//apply the command list
+		for (int i=2; i<editlist.size(); i++) {
+			std::string cmdstr = do_cmd(sourcedib, editlist[i], "", verbose);
 			fflush(stdout);
 			if (cmdstr.find("Error")  != std::string::npos) {
-				//printf("%s\n",cmdstr.c_str());
+				printf("%s\n",cmdstr.c_str());
 				exit(1);
 			}
 			else commandstring += cmdstr;
 		}
-	}
+		
+		int orientation = atoi(sourcedib.getInfoValue("Orientation").c_str());
+		if (orientation != 1) {
+			if (verbose) printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
+			_mark();
+			sourcedib.NormalizeRotation();
+			if (verbose) printf("done. (%fsec)\n",_duration()); fflush(stdout);
+		}
 
-	int orientation = atoi(dib.getInfoValue("Orientation").c_str());
-	//printf("Orientation: %d\n", orientation);
-	if (orientation != 1) {
-		if (verbose) printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
+		char outfilename[256];
+		strncpy(outfilename, files[f].outfile.c_str(), 255);
+		
+		
+		//save the processed image
+		saveFile (sourcedib, std::string(outfilename), outfile[1], commandstring, verbose);
+		if (verbose) printf("\n");
+	
+	}
+}
+else {
+	for (int f=0; f<files.size(); f++)
+	{
+
+		char iname[256];
+		strncpy(iname, files[f].infile.c_str(), 255);
+	
+		if (!force && file_exists(files[f].outfile.c_str())) {
+			//printf("%d/%d: Output file %s exists, skipping %s...\n",f+1, toprocess, files[f].outfile.c_str(), iname);
+			continue;
+		}
+	
+		if (!file_exists(iname)) {
+			printf("%d/%d: Input file %s doesn't exist...\n",f+1, toprocess, iname);
+			continue;
+		}
+
+		count++;
+
+		commandstring = "rawproc-img ";
+
+		if (verbose) {
+			printf("%d/%d: Loading file %s %s... ",count, toprocess, iname, infile[1].c_str()); fflush(stdout);
+		}
+		else printf("%d/%d: %s\n",count, toprocess, iname); fflush(stdout);
+	
 		_mark();
-		dib.NormalizeRotation();
-		if (verbose) printf("done. (%fsec)\n",_duration()); fflush(stdout);
-	}
+		gImage dib = gImage::loadImageFile(iname, infile[1]);
+		if (dib.getWidth() == 0 | dib.getHeight() == 0) {
+			printf("error: (%fsec) - Image not loaded correctly\n",_duration()); fflush(stdout);
+			continue;
+		}
+		if (verbose) printf("done. (%fsec)\nImage size: %dx%d\n",_duration(), dib.getWidth(),dib.getHeight()); fflush(stdout);
 
-	char outfilename[256];
-	strncpy(outfilename, files[f].outfile.c_str(), 255);
+		commandstring += getfile(std::string(iname));
+		if (infile[1] != "") commandstring += ":" + infile[1];
+		commandstring += " ";
 
 
-	if (strcmp(outfilename, "info") == 0) {
-		std::map<std::string,std::string> imginfo = dib.getInfo();
-		for (std::map<std::string,std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
-			if (it->first == "ExposureTime") {
-				if (atof(it->second.c_str()) < 1.0) {
-					printf("%s: 1/%d\n",it->first.c_str(), int(round(1.0/atof(it->second.c_str()))));
+	
+		//process commands:
+		for (int i=0; i<commands.size(); i++) {
+			if (commands[i] == "input.raw.default") {
+				std::vector<std::string> cmdlist = split(myConfig::getConfig().getValue("input.raw.default"), " ");
+				for (unsigned i=0; i<cmdlist.size(); i++) do_cmd(dib, cmdlist[i], files[f].variant, verbose);
+			}
+			else {
+				std::string cmdstr = do_cmd(dib, commands[i], files[f].variant, verbose);
+				fflush(stdout);
+				if (cmdstr.find("Error")  != std::string::npos) {
+					//printf("%s\n",cmdstr.c_str());
+					exit(1);
+				}
+				else commandstring += cmdstr;
+			}
+		}
+
+		int orientation = atoi(dib.getInfoValue("Orientation").c_str());
+		//printf("Orientation: %d\n", orientation);
+		if (orientation != 1) {
+			if (verbose) printf("Normalizing image orientation from %d...",orientation); fflush(stdout);
+			_mark();
+			dib.NormalizeRotation();
+			if (verbose) printf("done. (%fsec)\n",_duration()); fflush(stdout);
+		}
+
+		char outfilename[256];
+		strncpy(outfilename, files[f].outfile.c_str(), 255);
+
+
+		if (strcmp(outfilename, "info") == 0) {
+			std::map<std::string,std::string> imginfo = dib.getInfo();
+			for (std::map<std::string,std::string>::iterator it=imginfo.begin(); it!=imginfo.end(); ++it) {
+				if (it->first == "ExposureTime") {
+					if (atof(it->second.c_str()) < 1.0) {
+						printf("%s: 1/%d\n",it->first.c_str(), int(round(1.0/atof(it->second.c_str()))));
+						fflush(stdout);
+					}
+				}
+				else {
+					printf("%s: %s\n",it->first.c_str(), it->second.c_str()); 
 					fflush(stdout);
 				}
 			}
-			else {
-				printf("%s: %s\n",it->first.c_str(), it->second.c_str()); 
+			printf("\n"); fflush(stdout);
+			exit(0);
+		}
+
+		else if (strcmp(outfilename,"histogram") == 0) {
+			std::vector<long> h = dib.Histogram();
+			printf("%ld",h[0]);
+			for (int i = 1; i < h.size(); i++) {
+				printf(",%ld",h[i]); 
 				fflush(stdout);
 			}
+			printf("\n"); fflush(stdout);
+			exit(0);
 		}
-		printf("\n"); fflush(stdout);
-		exit(0);
-	}
 
-	else if (strcmp(outfilename,"histogram") == 0) {
-		std::vector<long> h = dib.Histogram();
-		printf("%ld",h[0]);
-		for (int i = 1; i < h.size(); i++) {
-			printf(",%ld",h[i]); 
-			fflush(stdout);
+		else if (strcmp(outfilename,"cdf") == 0) {
+			long prev = 0;
+			std::vector<long> h = dib.Histogram();
+			printf("%ld",h[0]);
+			for (int i = 1; i < h.size(); i++) {
+				prev += h[i];
+				printf(",%ld",prev); 
+				fflush(stdout);
+			}
+			printf("\n"); fflush(stdout);
+			exit(0);
 		}
-		printf("\n"); fflush(stdout);
-		exit(0);
-	}
 
-	else if (strcmp(outfilename,"cdf") == 0) {
-		long prev = 0;
-		std::vector<long> h = dib.Histogram();
-		printf("%ld",h[0]);
-		for (int i = 1; i < h.size(); i++) {
-			prev += h[i];
-			printf(",%ld",prev); 
-			fflush(stdout);
+		else if (strcmp(outfilename,"stats") == 0) {
+			std::string stats = dib.Stats();
+			printf("%s\n",stats.c_str()); fflush(stdout);
+			exit(0);
 		}
-		printf("\n"); fflush(stdout);
-		exit(0);
-	}
-
-	else if (strcmp(outfilename,"stats") == 0) {
-		std::string stats = dib.Stats();
-		printf("%s\n",stats.c_str()); fflush(stdout);
-		exit(0);
-	}
-	else if (strcmp(outfilename,"rgbat") == 0) {
-		int w = dib.getWidth();
-		int h = dib.getHeight();
-		std::vector<std::string> coords = split (outfile[1], ",");
-		int x = atoi(coords[0].c_str());
-		int y = atoi(coords[1].c_str());
-		unsigned pos = x + y*w;
-		std::vector<pix>& img = dib.getImageData();
-		if (pos < w*h) {
-			pix rgb = img[pos];
-			printf("%f,%f,%f\n", rgb.r, rgb.g, rgb.b);
-		} else printf("coordinates out of image bounds\n");
-		exit(0);
+		else if (strcmp(outfilename,"rgbat") == 0) {
+			int w = dib.getWidth();
+			int h = dib.getHeight();
+			std::vector<std::string> coords = split (outfile[1], ",");
+			int x = atoi(coords[0].c_str());
+			int y = atoi(coords[1].c_str());
+			unsigned pos = x + y*w;
+			std::vector<pix>& img = dib.getImageData();
+			if (pos < w*h) {
+				pix rgb = img[pos];
+				printf("%f,%f,%f\n", rgb.r, rgb.g, rgb.b);
+			} else printf("coordinates out of image bounds\n");
+			exit(0);
 		
+		}
+
+
+		saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring), verbose);
+		if (verbose) printf("\n");
+
 	}
-
-
-	saveFile (dib, std::string(outfilename), outfile[1], std::string(commandstring), verbose);
-	if (verbose) printf("\n");
-
 }
 
 if (count == 1) {

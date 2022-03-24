@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <fstream>
+#include <filesystem>
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -199,3 +200,25 @@ std::map<std::string, std::string> file_parts(std::string filepath)
 	
 	return fileparts;
 }
+
+std::vector<std::string> dir_list(std::string path)
+{
+	std::vector<std::string> dirs;
+	for (const auto & entry : std::filesystem::directory_iterator(path))
+		if (entry.is_directory()) dirs.push_back(entry.path());
+	return dirs;
+}
+
+std::string find_filepath(std::string filename)
+{
+	if (file_exists(filename))   // it's in the cwd
+		return filename;
+	if (file_exists("../"+filename))   // it's in the parent directory
+		return "../"+filename;
+	std::vector<std::string> dirs = dir_list(".");
+	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); ++it)
+		if (file_exists(*it + "/" + filename))
+			return *it + "/" + filename;
+	return "(none)";
+}
+
