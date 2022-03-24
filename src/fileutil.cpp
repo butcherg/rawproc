@@ -2,6 +2,7 @@
 #include "fileutil.h"
 #include <sys/stat.h>
 #include <stdio.h>
+#include <vector>
 #include <fstream>
 #include <filesystem>
 
@@ -205,7 +206,7 @@ std::vector<std::string> dir_list(std::string path)
 {
 	std::vector<std::string> dirs;
 	for (const auto & entry : std::filesystem::directory_iterator(path))
-		if (entry.is_directory()) dirs.push_back(entry.path());
+		if (entry.is_directory()) dirs.push_back(entry.path().string());
 	return dirs;
 }
 
