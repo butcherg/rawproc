@@ -1139,31 +1139,17 @@ void rawprocFrm::OpenFileSource(wxString fname)
 		else {
 			SetStatusText(wxString::Format(_("Source script found, loading source file %s..."),ofilename) );
 
-			if (!wxFileName::FileExists(ofilename)) {
-				std::string dirlist;
-				//parm input.opensource.parentdirectory: Enable search of parent directory for source file.  Default=0
-				if (myConfig::getConfig().getValueOrDefault("input.opensource.parentdirectory","0") == "1") dirlist.append("..");
-				//parm input.opensource.subdirectory: Comma-separated list of subdirectories to search for source file. Default: (empty) 
-				if (myConfig::getConfig().exists("input.opensource.subdirectory")) dirlist.append("," + myConfig::getConfig().getValueOrDefault("input.opensource.subdirectory",""));
-				std::vector<std::string> dirs = split(dirlist,",");
-				bool sourcedirfound = false;
-				for (std::vector<std::string>::iterator it =  dirs.begin(); it != dirs.end(); ++it) {
-					wxFileName findfiledir(ofilename);
-					if (findfiledir.Normalize()) {
-						findfiledir.AppendDir(wxString(*it));  //see if source file is in the parent directory
-						if (findfiledir.Exists()) {
-							ofilename = findfiledir.GetFullPath();
-							sourcedirfound = true;
-							break;
-						}
-					}
-				}
-				if (!sourcedirfound) {
-					wxMessageBox(wxString::Format(_("Error: Source file %s not found in source, parent or sub directory"), ofilename));
-					SetStatusText("");
-					return;
-				}
+
+			//Now, searches in the current directory, the parent directory, and all subdirectories for the source file.  
+			//uses fileutil.cpp::find_filepath().  Needs C++17...
+			//input.opensource.parentdirectory and input.opensource.subdirectory are no longer needed...
+			std::string ofile =  find_filepath(ofilename.ToStdString());
+			if (ofile == "(none)") {
+				wxMessageBox(wxString::Format(_("Error: Source file %s not found in source, parent or sub directory"), ofilename));
+				SetStatusText("");
+				return;
 			}
+			ofilename = wxString(ofile);
 
 			GIMAGE_FILETYPE fif;
 			fif = gImage::getFileType(ofilename.c_str());
