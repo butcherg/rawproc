@@ -588,31 +588,51 @@ if (edit) {
 			}
 		}
 		
+		//printf("Commandlist: \n");
+		//for (std::vector<std::string>::iterator it=commandlist.begin(); it != commandlist.end(); ++it)
+		//	printf("-%s-\n",(*it).c_str());
+		//printf("\n\n");
+		
 		//extract the source file name
 		std::vector<std::string> srcfile = split(commandlist[1], ":");
-		if (srcfile.size() <2) srcfile.push_back(std::string());
+		if (srcfile.size() <2) srcfile.push_back(std::string()); //add a blank parameter list if there's none there
 		
 		//open the source file, using find_filepath to search the adjacent directories:
 		gImage sourcedib = gImage::loadImageFile(find_filepath(srcfile[0]).c_str(), srcfile[1].c_str());
 
-		//edit the commandlist into editlist
+		//apply the commandlist changes to the toolchain, push into editlist
 		std::vector<std::string> editlist;
-		for (std::vector<std::string>::iterator it=commandlist.begin(); it != commandlist.end(); ++it) {
-			for (int i=3; i<argc-1; i++) {
-				std::vector<std::string> fromto = split(std::string(argv[i]), "/");
-				if ((*it).find(fromto[0]) != std::string::npos) {
-					if (fromto.size() >=2) editlist.push_back(fromto[1]);
+		//for (std::vector<std::string>::iterator it=commandlist.begin(); it != commandlist.end(); ++it) {
+		for (int i=2; i<commandlist.size(); i++) {
+			//for (int j=3; j<argc-1; j++) {
+			for (int j=0; j<commands.size(); j++) {
+				std::vector<std::string> fromto = split(commands[j], "/");
+				if (commandlist[i].find(fromto[0]) != std::string::npos) {
+					if (fromto.size() == 3) {  //  findstr/fromstr/tostr, replace substring in the command
+						replace_all(commandlist[i], fromto[1], fromto[2]);
+					}
+					else if (fromto.size() == 2) { // findstr/tocmd, replace the command 
+						commandlist[i] = fromto[1];
+					}
+					else if (fromto.size() == 1) {  // findstr/, delete command
+						commandlist[i] = std::string();
+					}
 				}
-				else if ((*it).size() > 0) editlist.push_back(*it);
 			}
+			if (commandlist[i].size() > 0) editlist.push_back(commandlist[i]);
 		}
+		
+		//printf("Editlist: \n");
 		//for (std::vector<std::string>::iterator it=editlist.begin(); it != editlist.end(); ++it)
 		//	printf("-%s-\n",(*it).c_str());
-		//printf("\n");
+		//printf("\n\n");
 		
+		commandstring += getfile(srcfile[0]);
+		if (srcfile[1] != "") commandstring += ":" + srcfile[1];
+		commandstring += " ";
 		
-		//apply the command list
-		for (int i=2; i<editlist.size(); i++) {
+		//apply the command list to the image
+		for (int i=0; i<editlist.size(); i++) {
 			std::string cmdstr = do_cmd(sourcedib, editlist[i], "", verbose);
 			fflush(stdout);
 			if (cmdstr.find("Error")  != std::string::npos) {
