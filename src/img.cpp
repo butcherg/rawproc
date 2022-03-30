@@ -537,6 +537,7 @@ printf("\n"); fflush(stdout);
 int count = 0;
 
 if (edit) {
+	if (verbose) printf("Edit mode: opening files, extracting and editing toochain, and applying the edited toolchain to the source files\n"); fflush(stdout);
 	for (int f=0; f<files.size(); f++)
 	{
 		char iname[256];
@@ -597,8 +598,14 @@ if (edit) {
 		std::vector<std::string> srcfile = split(commandlist[1], ":");
 		if (srcfile.size() <2) srcfile.push_back(std::string()); //add a blank parameter list if there's none there
 		
+		if (verbose) printf("Loading source file %s %s... \n", srcfile[0].c_str(), srcfile[1].c_str()); fflush(stdout);
+
 		//open the source file, using find_filepath to search the adjacent directories:
 		gImage sourcedib = gImage::loadImageFile(find_filepath(srcfile[0]).c_str(), srcfile[1].c_str());
+		if (sourcedib.getWidth() == 0) {
+			printf("Error - file %s not found.\n",srcfile[0].c_str());
+			continue;
+		}
 
 		//apply the commandlist changes to the toolchain, push into editlist
 		std::vector<std::string> editlist;
