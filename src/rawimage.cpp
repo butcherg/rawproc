@@ -17,6 +17,10 @@
 #include "gimage/gimage.h"
 #include "nikonlensid.h"
 
+//use for reading rgb(a) from libraw
+struct uspix { unsigned short r, g, b; };
+struct uspixa { unsigned short r, g, b, a; };
+
 void printBits(size_t const size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
@@ -973,6 +977,18 @@ char * _loadRAW(const char *filename,
 	*icc_m=NULL;
 	*icclength = 0;
 	
+	/* keep for debugging float images...
+	if (RawProcessor.imgdata.rawdata.raw_alloc) printf("raw_alloc\n");
+	if (RawProcessor.imgdata.rawdata.raw_image) printf("raw_image\n");
+	if (RawProcessor.imgdata.rawdata.color3_image) printf("color3_image\n");
+	if (RawProcessor.imgdata.rawdata.color4_image) printf("color4_image\n");
+	if (RawProcessor.imgdata.rawdata.float_image) printf("float_image\n");
+	if (RawProcessor.imgdata.rawdata.float3_image) printf("float3_image\n");
+	if (RawProcessor.imgdata.rawdata.float4_image) printf("float4_image\n");
+	fflush(stdout);
+	*/
+	
+	
 	if (rawdata) {
 		info["Libraw.raw_width"] = tostr(S.raw_width);
 		info["Libraw.raw_height"] = tostr(S.raw_height);
@@ -980,13 +996,7 @@ char * _loadRAW(const char *filename,
 		info["Libraw.height"] = tostr(S.height);
 		info["Libraw.top_margin"] = tostr(S.top_margin);
 		info["Libraw.left_margin"] = tostr(S.left_margin);
-		info["Libraw.Mosaiced"] = "1";
-		info["PhotometricInterpretation"] = "32803"; //Color Filter Array;
-
-
-		*numcolors = 1;
-		*numbits = 16;
-
+		
 		if (p["rawdata"].compare("crop") == 0) {
 /*			//old code (prior to commit 6a3ab0) in case I don't like raw2image...  :D
 			*width = S.width;
@@ -1024,13 +1034,50 @@ char * _loadRAW(const char *filename,
 					dst[pos] = RawProcessor.imgdata.image[r*S.width+c][RawProcessor.COLOR(r,c)];
 				}
 			}
+			*numcolors = 1;
+			*numbits = 16;
+			info["Libraw.Mosaiced"] = "1";
+			info["PhotometricInterpretation"] = "32803"; //Color Filter Array;
 		}
 		else {
 			*width = S.raw_width;
 			*height = S.raw_height;
 			
-			img = new char[S.raw_width*S.raw_height*2];
-			memcpy(img, (char *) RawProcessor.imgdata.rawdata.raw_image, S.raw_width*S.raw_height*2);
+			if (RawProcessor.imgdata.rawdata.raw_image) {
+				img = new char[S.raw_width*S.raw_height*2];
+				memcpy(img, (char *) RawProcessor.imgdata.rawdata.raw_image, S.raw_width*S.raw_height*2);
+				*numcolors = 1;
+				*numbits = 16;
+				info["Libraw.Mosaiced"] = "1";
+				info["PhotometricInterpretation"] = "32803"; //Color Filter Array;
+			}
+			else if (RawProcessor.imgdata.rawdata.color3_image) {
+				img = new char[S.raw_width*S.raw_height*(2*3)];
+				memcpy(img, (char *) RawProcessor.imgdata.rawdata.color3_image, S.raw_width*S.raw_height*(2*3));
+				*numcolors = 3;
+				*numbits = 16;
+				info["Libraw.Mosaiced"] = "0";
+				info["PhotometricInterpretation"] = "2"; //RGB;
+			}
+			else if (RawProcessor.imgdata.rawdata.color4_image) {
+				img = new char[S.raw_width*S.raw_height*(2*3)];
+				uspix * timg = (uspix *) img;
+				uspixa * limg = (uspixa *)RawProcessor.imgdata.rawdata.color4_image;
+				//memcpy(img, (char *) RawProcessor.imgdata.rawdata.color3_image, S.raw_width*S.raw_height*(2*3));
+				for (unsigned i=0; i< S.raw_width*S.raw_height; i++) {
+					timg[i].r = limg[i].r;
+					timg[i].g = limg[i].g;
+					timg[i].b = limg[i].b;
+				}
+				*numcolors = 3;
+				*numbits = 16;
+				info["Libraw.Mosaiced"] = "0";
+				info["PhotometricInterpretation"] = "2"; //RGB;
+			}
+			else { //return empty image
+				return NULL;
+			}
+			
 		}
 	
 		RawProcessor.imgdata.params.output_color = 0;
