@@ -12,6 +12,8 @@
 #define CROPENABLE 9500
 #define CROPCOPY 9501
 #define CROPPASTE 9502
+#define CROPBOX 9503
+#define CROPCAMERA 9504
 
 wxDECLARE_EVENT(myCROP_UPDATE, wxCommandEvent);
 wxDEFINE_EVENT(myCROP_UPDATE, wxCommandEvent);
@@ -340,6 +342,8 @@ class CropPanel: public PicProcPanel
 			Freeze();
 			wxImage img;
 			SetDoubleBuffered(true);
+			
+			wxArrayString p = split(params, ",");
 
 			img = gImage2wxImage(proc->getPreviousPicProcessor()->getProcessedPic());
 
@@ -356,7 +360,9 @@ class CropPanel: public PicProcPanel
 					}
 				}
 			}
-
+			
+			boxb   = new wxRadioButton(this, CROPBOX,   _("interactive:"));
+			camb   = new wxRadioButton(this, CROPCAMERA, _("camera:"));
 
 			enablebox = new wxCheckBox(this, CROPENABLE, _("crop:"));
 			enablebox->SetValue(true);
@@ -370,6 +376,16 @@ class CropPanel: public PicProcPanel
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
+			m->NextRow();
+			m->AddRowItem(camb, flags);
+			
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+
+
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(boxb, flags);
+
 			m->NextRow(wxSizerFlags(1).Expand());
 			m->AddRowItem(cpane, 
 				wxSizerFlags(1).Left().Shaped().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
@@ -379,11 +395,19 @@ class CropPanel: public PicProcPanel
 			m->Layout();
 		
 			SetFocus();
+			
+			if (p[0] == "camera") {
+				camb->SetValue(true);
+			}
+			else {
+				boxb->SetValue(true);
+			}
 
 			Bind(wxEVT_CHECKBOX, &CropPanel::onEnable, this, CROPENABLE);
 			Bind(myCROP_UPDATE, &CropPanel::OnCropUpdate, this);
 			Bind(wxEVT_BUTTON, &CropPanel::OnCopy, this, CROPCOPY);
 			Bind(wxEVT_BUTTON, &CropPanel::OnPaste, this, CROPPASTE);
+			Bind(wxEVT_RADIOBUTTON, &CropPanel::OnRadioButton, this);
 			q->getCommandTree()->Bind(wxEVT_TREE_SEL_CHANGED, &CropPanel::OnCommandtreeSelChanged, this);
 			Bind(wxEVT_CHAR_HOOK, &CropPanel::OnKey,  this);
 			Thaw();
@@ -609,20 +633,38 @@ class CropPanel: public PicProcPanel
 			Refresh();
 		}
 
-
+		void OnRadioButton(wxCommandEvent& event)
+		{
+			int x1, y1, x2, y2;
+			cropmode = event.GetId();
+			switch (cropmode) {
+				case CROPBOX:
+					q->setParams(cpane->getParams());
+					q->processPic();
+					break;
+				case CROPCAMERA:
+					q->setParams("camera");
+					q->processPic();
+					break;
+			}
+		}
 
 
 		void OnCropUpdate(wxCommandEvent& event)
 		{
-			q->setParams(cpane->getParams());
-			q->processPic();
+			if (cropmode == CROPBOX) {
+				q->setParams(cpane->getParams());
+				q->processPic();
+			}
 		}
 
 
 	private:
 		cmsHTRANSFORM hTransform;
+		wxRadioButton *boxb, *camb;
 		wxCheckBox *enablebox;
 		CropPane *cpane;
+		int cropmode;
 
 };
 

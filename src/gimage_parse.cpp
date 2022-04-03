@@ -323,7 +323,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 }
 
 
-//img <li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.</li>
+//img <li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; | camera </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.  'camera' builds a crop box from raw metadata.</li>
 //img </li><br>
 std::map<std::string,std::string> parse_crop(std::string paramstring)
 {
@@ -343,16 +343,25 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (psize < 4) {
+		if (psize == 1) {
+			if (p[0] == "camera") {
+				pmap["mode"] = "camera";
+				pmap["cmdlabel"] = "crop:camera";
+			}
+		}
+		else if (psize >= 4) {
+			pmap["mode"] = "default";
+			pmap["cmdlabel"] = "crop";
+			pmap["x"] = p[0];
+			pmap["y"] = p[1];
+			pmap["w"] = p[2];
+			pmap["h"] = p[3];
+		}
+		else {
 			pmap["error"] = string_format("crop:ParseError - not enough crop parameters.");
 			return pmap;
 		}
-		pmap["mode"] = "default";
-		pmap["cmdlabel"] = "crop";
-		pmap["x"] = p[0];
-		pmap["y"] = p[1];
-		pmap["w"] = p[2];
-		pmap["h"] = p[3];
+		
 		
 	}
 	return pmap;

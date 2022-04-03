@@ -335,6 +335,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 
 std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string,std::string> params)
 {
+	float x, y, w, h;
 	std::map<std::string,std::string> result;
 
 	//error-catching:
@@ -347,18 +348,57 @@ std::map<std::string,std::string> process_crop(gImage &dib, std::map<std::string
 		result["threadcount"] = std::to_string(threadcount);
 		
 		//tool-specific setup:
-		float x = atof(params["x"].c_str());
-		float y = atof(params["y"].c_str());
-		float w = atof(params["w"].c_str());
-		float h = atof(params["h"].c_str());
 		
 		//tool-specific logic:
 		if (params["mode"] == "default") {
+			float x = atof(params["x"].c_str());
+			float y = atof(params["y"].c_str());
+			float w = atof(params["w"].c_str());
+			float h = atof(params["h"].c_str());
 			_mark();
 			dib.ApplyRatioCrop(x, y, w, h, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["treelabel"] = "crop";
 			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)", x, y, w, h, threadcount, result["duration"].c_str());
+		}
+		else if (params["mode"] == "camera") {
+			int x1, y1, x2, y2;
+			
+			if (dib.getInfoValue("Libraw.left_margin") != std::string()) {
+				x1 = atoi(dib.getInfoValue("Libraw.left_margin").c_str()); 
+			}
+			else { 
+				result["error"] = "crop:ProcessError - missing camera parameter Libraw.left_margin.";
+				return result;
+			}
+			if (dib.getInfoValue("Libraw.top_margin") != std::string()) {
+				y1 = atoi(dib.getInfoValue("Libraw.top_margin").c_str());
+			}				
+			else {
+				result["error"] = "crop:ProcessError - missing camera parameter Libraw.top_margin.";
+				return result;
+			}
+			if (dib.getInfoValue("Libraw.width") != std::string()) {
+				x2 = x1 + atoi(dib.getInfoValue("Libraw.width").c_str()); 
+			}
+			else {
+				result["error"] = "crop:ProcessError - missing camera parameter Libraw.width.";
+				return result;
+			}
+			if (dib.getInfoValue("Libraw.height") != std::string()) {
+				y2 = y1 + atoi(dib.getInfoValue("Libraw.height").c_str());
+			}				
+			else {
+				result["error"] = "crop:ProcessError - missing camera parameter Libraw.height.";
+				return result;
+			}
+			_mark();
+			dib.ApplyCrop(x1, y1, x2, y2, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = "crop:camera";
+			result["imgmsg"] = string_format("camera (%d threads, %ssec)", threadcount, result["duration"].c_str());
+
+			
 		}
 		
 	}

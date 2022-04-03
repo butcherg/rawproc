@@ -1973,11 +1973,11 @@ void rawprocFrm::MnuGrayClick(wxCommandEvent& event)
 void rawprocFrm::MnuCropClick(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
-	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
-	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
-		wxMessageBox(_("Error: Crop can only be applied to RGB data."));
-		return;
-	}
+	//gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	//if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+	//	wxMessageBox(_("Error: Crop can only be applied to RGB data."));
+	//	return;
+	//}
 	SetStatusText("");
 	try {
 		PicProcessorCrop *p = new PicProcessorCrop("crop", commandtree, pic);
