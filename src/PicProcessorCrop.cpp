@@ -398,9 +398,11 @@ class CropPanel: public PicProcPanel
 			
 			if (p[0] == "camera") {
 				camb->SetValue(true);
+				cropmode = CROPCAMERA;
 			}
 			else {
 				boxb->SetValue(true);
+				cropmode = CROPBOX;
 			}
 
 			Bind(wxEVT_CHECKBOX, &CropPanel::onEnable, this, CROPENABLE);
