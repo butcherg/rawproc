@@ -27,6 +27,8 @@ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 	FloatCursor = true;
 	db = NULL;
 	
+	picr = picg = picb = 0.0;
+	
 	r = NULL; g = NULL; b = NULL;
 	rlen=0; glen=0; blen=0;
 	display_channels = CHANNEL_RGB;
@@ -34,6 +36,7 @@ wxWindow(parent, wxID_ANY, pos, size, wxBORDER_SUNKEN)
 	MouseX = 0; MouseY=0;
 	pressedDown = false;
 	inwindow = false;
+	showbucket = false;
 
 	if (myConfig::getConfig().getValueOrDefault("app.tooltip","0") == "1")
 		SetToolTip("space: Toggle channel order in display\nCtrl-c: Copy 256-bucket histogram to the clipboard\nd: Toggle bounded/unbounded histogram, display bounds/data bounds\ne: Toggle EV stop lines\nl Toggle labels\nt: Toggle tooltip display\nright-arrow: Pan right, Shift = x10, Ctrl = x100\nleft-arrow: Pan left, Shift = x10, Ctrl = x100\n");
@@ -65,6 +68,12 @@ myHistogramPane::~myHistogramPane()
 void myHistogramPane::OnSize(wxSizeEvent& event) 
 {
 	event.Skip();
+	Refresh();
+}
+
+void myHistogramPane::showBucket(bool b)
+{
+	showbucket = b;
 	Refresh();
 }
 
@@ -100,6 +109,14 @@ void myHistogramPane::BlankPic()
 	blankpic = true;
 	Refresh();
 	
+}
+
+void myHistogramPane::SetPicValue(float r, float g, float b)
+{
+	picr = r;
+	picg = g;
+	picb = b;
+	Refresh();
 }
 
 void myHistogramPane::RecalcHistogram()
@@ -375,6 +392,12 @@ void myHistogramPane::render(wxDC&  dc)
 //	wxString ws = wxString::Format("scale: %0.2f",wscale);
 //	int ww = wxSize(dc.GetTextExtent(ws)).GetWidth();
 //	dc.DrawText(ws, w-ww, h-lineheight-1);
+
+	if (showbucket) { 
+		float val = ((picr+picg+picb) /3.0) * hscale;
+		dc.SetPen(wxPen(wxColour(255,255,0),1));
+		dc.DrawLine(val,0,val,h);
+	}
 
 	if (inwindow) 
 		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bin:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));

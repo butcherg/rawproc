@@ -83,7 +83,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = stopstatbar = false;
+	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = stopstatbar = bucket = false;
 
 	thumbvisible = true;
 	histogram = hgram;
@@ -1040,6 +1040,11 @@ void PicPanel::OnMouseMove(wxMouseEvent& event)
 
 	mousex = mx;
 	mousey = my;
+	
+	if (display_dib && bucket) {
+		struct pix p = display_dib->getPixel(imagex, imagey);
+		histogram->SetPicValue(p.r, p.g, p.b);
+	}
 
 	setStatusBar();
 	event.Skip();
@@ -1083,6 +1088,8 @@ void PicPanel::SetColorManagement(bool b)
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	float dimagex, dimagey, increment, maxscale, minscale;
+	
+	struct pix p;
 
 	int panincrement = 1;
 	if (event.ShiftDown()) panincrement = 10;
@@ -1185,6 +1192,21 @@ void PicPanel::OnKey(wxKeyEvent& event)
 								wxTheClipboard->Close();
 								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
 							}
+					break;
+
+				//key b: Show histogram bucket for the pixel under the mouse pointer
+				case 66:
+					if (bucket) {
+						bucket=false;
+						histogram->showBucket(false);
+						//histogram->Update();
+					}
+					else {
+						bucket=true;
+						histogram->showBucket(true);
+						p = display_dib->getPixel(imagex, imagey);
+						histogram->SetPicValue(p.r, p.g, p.b);
+					}
 					break;
 
 				//key e: Exposure box toggle
