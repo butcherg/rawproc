@@ -30,6 +30,8 @@ public:
 	void RecalcHistogram();
 	void SetChannel(GIMAGE_CHANNEL channel);
 	void BlankPic();
+	void SetPicValue(float r, float g, float b);
+	void showBucket(bool b);
  
 	void render(wxDC& dc);
  
@@ -47,7 +49,7 @@ public:
 	void OnLoseFocus(wxFocusEvent& event);
 
 private:
-	bool blankpic, pressedDown;
+	bool blankpic, pressedDown, showbucket;
 	std::vector<long> rdata, gdata, bdata, smalldata;
 
 	gImage *db;
@@ -55,6 +57,8 @@ private:
 	
 	wxPoint *r, *g, *b;
 	int rlen, glen, blen;
+	
+	float picr, picg, picb;
 
 	int zerobucket, onebucket;
 	bool EVaxis, Unbounded, TextVisible, FloatCursor;

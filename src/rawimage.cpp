@@ -924,6 +924,12 @@ char * _loadRAW(const char *filename,
 		C.cmatrix[1][0],C.cmatrix[1][1],C.cmatrix[1][2],
 		C.cmatrix[2][0],C.cmatrix[2][1],C.cmatrix[2][2]);
 	info["Libraw.CameraMatrix"] = buffer;
+	
+	//metadata correction matrix:
+	snprintf(buffer, 4096, "%f,%f,%f,%f,%f,%f,%f,%f,%f", C.ccm[0][0],C.ccm[0][1],C.ccm[0][2],
+		C.ccm[1][0],C.ccm[1][1],C.ccm[1][2],
+		C.ccm[2][0],C.ccm[2][1],C.ccm[2][2]);
+	info["Libraw.CorrectionMatrix"] = buffer;
 
 	int cfadim = 2;			 //bayer
 	if (P1.filters == 9) cfadim = 6; //fuji x-trans
