@@ -6,10 +6,9 @@ friendly.  It doesn't do image management. With the exception of saturation, den
 tone manipulation.  It saves the processing applied in the EXIF of the saved image because I do not like the sidecar 
 concept.  It works internally with floating point pixel values.  Here's a list of the implemented manipulations:
 
+- Add
 - Black/White Point
-- Bright
 - Colorspace
-- Contrast
 - Crop
 - Curve
 - Demosaic
@@ -17,14 +16,17 @@ concept.  It works internally with floating point pixel values.  Here's a list o
 - Exposure
 - Gamma
 - Grayscale Conversion
-- Highlight
+- G'MIC
+- Highlight Recovery
 - Lens Correction
 - Redeye Correction
 - Resize
 - Rotate
 - Saturation
-- Shadow
+- Script
 - Sharpen
+- Subtract
+- Tone
 - White Balance
 
 You open an image, add whatever manipulations you want to apply to the list, then save the result.   You determine
@@ -115,13 +117,13 @@ Now, you have the files to proceed with ./configure... make... etc.
 If you're on a Debian/Ubuntu or derivatives, install these packages:
 
 <pre>
-sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev liblensfun-dev libraw-dev
+sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev libraw-dev
 </pre>
 
 If you enable lensfun:
 
 <pre>
-sudo apt-get install lensfun-dev libcurl-dev libarchive-dev
+sudo apt-get install liblensfun-dev libcurl4-openssl-dev libarchive-dev
 </pre>
 
 If you want to enjoy the fruits of librtprocess, the nascent effort to package the Raw Therapee
