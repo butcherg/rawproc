@@ -145,7 +145,7 @@ tar -xjvf wxWidgets-3.1.2.tar.bz2
 cd wxWidgets-3.1.2/
 mkdir build-linux
 cd build-linux
-../configure --disable-shared --enable-unicode
+../configure --disable-shared --enable-unicode --disable-debug
 make
 </pre>
 
