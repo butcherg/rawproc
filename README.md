@@ -114,6 +114,8 @@ Now, you have the files to proceed with ./configure... make... etc.
 
 ## Prerequisites:
 
+First, C++17 is necessary after commit #133d19, 2022-05-23.  gcc 11 uses it by default, and you need gcc >= 8 to compile past that commit.
+
 If you're on a Debian/Ubuntu or derivatives, install these packages:
 
 <pre>
@@ -143,9 +145,8 @@ tar -xjvf wxWidgets-3.1.2.tar.bz2
 cd wxWidgets-3.1.2/
 mkdir build-linux
 cd build-linux
-../configure --disable-shared --enable-unicode
+../configure --disable-shared --enable-unicode --disable-debug
 make
-make doc
 </pre>
 
 You can make install wxWidgets, I find it just as convenient to use their
@@ -159,13 +160,15 @@ do the following:
 <pre>
 mkdir build-linux
 cd build-linux
-../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS=-O3
+../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS="-O3 --std=c++17"
 make
 sudo make install
 </pre>
 
 ...and there you go, rawproc, img, and exif binaries will be installed in
 /usr/local/bin.
+
+Note: -std=c++17 in CXXFLAGS is only needed for gcc versions >=8 and < 11.   
 
 ## Other Tasks
 
@@ -181,7 +184,7 @@ cp src/rawproc.conf ~/.rawproc/.
 </pre>
 
 Right now, rawproc will only look for its help file in the directory containing the executable.  rawproc will look for 
-a rawproc.conf in a few places, but the best place to put it is in a ~/.rawproc directory.  Future versions will use that
+a rawproc.conf in a few places, but the best place to put it is in a ~/.rawproc directory (linux).  Future versions will use that
 directory as a default for other stuff, like cms.profilepath and the lensfun database.
 
 ## Building img without rawproc
