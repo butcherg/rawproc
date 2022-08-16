@@ -6170,7 +6170,12 @@ std::vector<std::string> taglist = {
 	"Exif.Image.Artist",
 	"Exif.Photo.DateTimeOriginal",  //TIFF/EP (6.0) specifies Exif.Image.DateTimeOriginal
 	"Exif.Image.Software",
-	"Exif.Image.Copyright"
+	"Exif.Image.Copyright", 
+	//from DNG files, color matrix to use if none is found in the internal data...
+	"Exif.Image.CalibrationIlluminant1",
+	"Exif.Image.CalibrationIlluminant2",
+	"Exif.Image.ColorMatrix1",
+	"Exif.Image.ColorMatrix2"
 };
 
 //writes metadata from the gImage instance to a file:
@@ -6267,10 +6272,11 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 		for (std::vector<std::string>::iterator it=taglist.begin(); it!=taglist.end(); ++it) {
 			std::string name = split(*it,".")[2];
 			if (exifData.findKey(Exiv2::ExifKey(*it)) != exifData.end()) {
+				//imgdata[name] = exifData[*it].toString();
 				switch (exifData[*it].typeId()) {
 					case Exiv2::unsignedRational:
 					case Exiv2::signedRational:
-						imgdata[name] = tostr(exifData[*it].toFloat());
+						imgdata[name] = exifData[*it].toString();  //provides all the rationals in the tag as space-separated strings of 'x/y'...
 						break;
 					case Exiv2::unsignedByte:
 					case Exiv2::unsignedShort:
@@ -6356,7 +6362,11 @@ gImage gImage::loadImageFile(const char * filename, std::string params)
 		if (image.getWidth() != 0) image.getMetadata(filename);
 		return image;
 	}
-	else return gImage::loadRAW(filename, params);
+	else {
+		image = gImage::loadRAW(filename, params);
+		if (image.getWidth() != 0) image.getMetadata(filename);
+		return image;
+	}
 }
 
 

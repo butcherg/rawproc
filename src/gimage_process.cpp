@@ -190,6 +190,12 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 
 }
 
+float ratstr2flt(std::string s) {
+	std::vector<std::string> fs = split(s, "/");
+	if (fs.size() < 2) return 0.0;
+	return atof(fs[0].c_str()) / atof(fs[1].c_str());
+}
+
 std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
@@ -242,7 +248,7 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				result["dcraw_primaries"] = params["icc"];
 			}
 			
-			if (dcraw_primaries.empty()) { //Last resort, look in the LibRaw metadata
+			if (dcraw_primaries.empty()) { //next, look in the LibRaw metadata
 				std::string libraw_primaries = dib.getInfoValue("Libraw.CamXYZ");
 				std::vector<std::string> primaries = split(libraw_primaries, ",");
 				if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
@@ -261,6 +267,44 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 				}
 				
 			}
+			
+			if (dcraw_primaries.empty()) { //finally, if there's a D65 ColorMatrix (from a DNG raw...)
+				if (dib.getInfoValue("CalibrationIlluminant1") == "21") {  // 21=D65
+					std::vector<std::string> primaries = split(dib.getInfoValue("ColorMatrix1"), " ");
+					if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
+						params["icc"] = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
+							int(ratstr2flt(primaries[0]) * 10000),
+							int(ratstr2flt(primaries[1]) * 10000),
+							int(ratstr2flt(primaries[2]) * 10000),
+							int(ratstr2flt(primaries[3]) * 10000),
+							int(ratstr2flt(primaries[4]) * 10000),
+							int(ratstr2flt(primaries[5]) * 10000),
+							int(ratstr2flt(primaries[6]) * 10000),
+							int(ratstr2flt(primaries[7]) * 10000),
+							int(ratstr2flt(primaries[8]) * 10000));
+						result["dcraw_source"] = "ColorMatrix1";
+						result["dcraw_primaries"] = params["icc"];
+					}
+				}
+				if (dib.getInfoValue("CalibrationIlluminant2") == "21") {  // 21=D65
+					std::vector<std::string> primaries = split(dib.getInfoValue("ColorMatrix2"), " ");
+					if (primaries.size() >= 9 & atof(primaries[0].c_str()) != 0.0) {
+						params["icc"] = string_format("%d,%d,%d,%d,%d,%d,%d,%d,%d",
+							int(ratstr2flt(primaries[0]) * 10000),
+							int(ratstr2flt(primaries[1]) * 10000),
+							int(ratstr2flt(primaries[2]) * 10000),
+							int(ratstr2flt(primaries[3]) * 10000),
+							int(ratstr2flt(primaries[4]) * 10000),
+							int(ratstr2flt(primaries[5]) * 10000),
+							int(ratstr2flt(primaries[6]) * 10000),
+							int(ratstr2flt(primaries[7]) * 10000),
+							int(ratstr2flt(primaries[8]) * 10000));
+						result["dcraw_source"] = "ColorMatrix2";
+						result["dcraw_primaries"] = params["icc"];
+					}
+				}
+			}
+			
 			if (!params["icc"].empty()) {
 				result["treelabel"] = "colorspace:camera";
 				icc = params["icc"];
