@@ -7389,9 +7389,11 @@ cmsHPROFILE gImage::makeLCMSdcrawProfile(const std::string name, float gamma)
 
 void gImage::makeICCProfile(cmsHPROFILE hProfile, char *& profile, cmsUInt32Number  &profilesize)
 {
-	cmsSaveProfileToMem(hProfile, NULL, &profilesize);
-	profile = new char[profilesize];
-	cmsSaveProfileToMem(hProfile, profile, &profilesize);
+	if (hProfile != NULL) {
+		cmsSaveProfileToMem(hProfile, NULL, &profilesize);
+		profile = new char[profilesize];
+		cmsSaveProfileToMem(hProfile, profile, &profilesize);
+	}
 }
 
 
