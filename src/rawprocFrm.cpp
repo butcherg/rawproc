@@ -1338,8 +1338,8 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			}
 
 			GIMAGE_ERROR result;
-			//parmdontuse output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
-			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
+			//parmdontuse output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1  (Note: use excludeicc in the output params property instead...)
+			//if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
 
 				wxString intentstr;
 				cmsUInt32Number intent = INTENT_PERCEPTUAL;
@@ -1405,11 +1405,11 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
 					result = dib->saveImageFile(fname, std::string(configparams.c_str()));
 				}
-			}
-			else {
-				WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
-				dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
-			}
+			//}
+			//else {
+			//	WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
+			//	dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
+			//}
 			if (result == GIMAGE_UNSUPPORTED_FILEFORMAT) {
 				wxMessageBox("Error: Unsupported format.");
 				return;
