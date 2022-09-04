@@ -1338,7 +1338,7 @@ void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
 			}
 
 			GIMAGE_ERROR result;
-			//parm output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
+			//parmdontuse output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1
 			if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
 
 				wxString intentstr;
