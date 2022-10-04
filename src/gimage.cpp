@@ -335,6 +335,48 @@ pix gImage::getPixel(unsigned x,  unsigned y)
 		return nullpix;
 }
 
+std::string gImage::getPixelString(unsigned x,  unsigned y, unsigned radius, float multiplier)
+{
+	char buf[256];
+	pix accum = nullpix;
+	unsigned count = 0;
+	for (unsigned i=x-(radius-1); i<=x+(radius-1); i++) {
+		for (unsigned j=y-(radius-1); j<=y+(radius-1); j++) {
+			pix p = getPixel(i,j);
+			accum.r += p.r;
+			accum.g += p.g;
+			accum.b += p.b;
+			count++;
+		}
+	}
+	accum.r = (accum.r / count) * multiplier;
+	accum.g = (accum.g / count) * multiplier;
+	accum.b = (accum.b / count) * multiplier;
+	
+	snprintf(buf, 256, "%f,%f,%f", accum.r, accum.g, accum.b);
+	return std::string(buf);
+}
+
+std::string gImage::getPixelString(unsigned x, unsigned y)
+{
+	char buf[256];
+	pix p = getPixel(x,y);
+	snprintf(buf, 256, "%f,%f,%f", p.r, p.g, p.b);
+	return std::string(buf);
+}
+
+std::string gImage::getPixelString(unsigned x, unsigned y, unsigned radius)
+{
+	std::string pixstr;
+	for (unsigned i=x-(radius-1); i<=x+(radius-1); i++) {
+		for (unsigned j=y-(radius-1); j<=y+(radius-1); j++) {
+			std::string p = getPixelString(i,j);
+			pixstr.append(p+"\n");
+		}
+	}
+	return pixstr;
+}
+
 std::vector<float> gImage::getPixelArray(unsigned x,  unsigned y)
 {
 	int i = x + y*w;

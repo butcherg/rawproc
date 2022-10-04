@@ -145,6 +145,9 @@ class gImage
 
 		//pixel getters
 		pix getPixel(unsigned x,  unsigned y);
+		std::string getPixelString(unsigned x, unsigned y); //comma-separated triple
+		std::string getPixelString(unsigned x, unsigned y, unsigned radius); //comma-separated triples of the area surrounding x,y, one per line
+		std::string getPixelString(unsigned x,  unsigned y, unsigned radius, float multiplier);  //comma-separated triple, average of the patch
 		std::vector<float> getPixelArray(unsigned x,  unsigned y);
 
 		//image array getters

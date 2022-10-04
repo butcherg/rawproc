@@ -1187,10 +1187,13 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					if (event.ControlDown()) 
 						if (display_dib)
 							if (wxTheClipboard->Open()) {
-								struct pix p = display_dib->getPixel(imagex, imagey);
-								wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
+								//struct pix p = display_dib->getPixel(imagex, imagey);
+								//wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
+								wxString pixstr = wxString(display_dib->getPixelString(imagex, imagey, 2, 255));
+								wxTheClipboard->SetData( new wxTextDataObject(pixstr));
 								wxTheClipboard->Close();
-								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
+								//((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
+								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%s) copied to clipboard",imagex, imagey, pixstr));
 							}
 					break;
 
