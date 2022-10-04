@@ -1088,6 +1088,9 @@ void PicPanel::SetColorManagement(bool b)
 void PicPanel::OnKey(wxKeyEvent& event)
 {
 	float dimagex, dimagey, increment, maxscale, minscale;
+	int patchradius, patchscale;
+	bool patchrawdata;
+	wxString pixstr;
 	
 	struct pix p;
 
@@ -1187,13 +1190,25 @@ void PicPanel::OnKey(wxKeyEvent& event)
 					if (event.ControlDown()) 
 						if (display_dib)
 							if (wxTheClipboard->Open()) {
-								//struct pix p = display_dib->getPixel(imagex, imagey);
-								//wxTheClipboard->SetData( new wxTextDataObject(wxString::Format("%f,%f,%f", p.r, p.g, p.b)) );
-								wxString pixstr = wxString(display_dib->getPixelString(imagex, imagey, 2, 255));
+								//parm display.clipboard.rawdata: 1|0, 1 copies all the 0.0-1.0 pixel triplets of a patch in to the copy string, 0 averages the values to provide a single RGB triplet.  Default=0.  Note: the rawdata string is suitable for pasting into a spreadsheet, one pixel per row, and scaling is not applied.
+								patchrawdata = false;
+								if (atoi(myConfig::getConfig().getValueOrDefault("display.clipboard.patchrawdata","0").c_str()) == 1)
+									patchrawdata = true;
+								//parm display.clipboard.patchradius: Number of layers of surrounding pixels to collect for a clipboard copy. Default=1, just the single pixel.
+								patchradius = atoi(myConfig::getConfig().getValueOrDefault("display.clipboard.patchradius","1").c_str());
+								//parm clipboard.patchscale: Number to multiply each 0.0-1.0 pixel value in a clipboard copy. Use 255 to get 8-bit display values.  Default=1
+								patchscale = atoi(myConfig::getConfig().getValueOrDefault("display.clipboard.patchscale","1").c_str());
+								
+								if (patchrawdata) 
+									pixstr = wxString(display_dib->getPixelString(imagex, imagey, patchradius));
+								else
+									pixstr = wxString(display_dib->getPixelString(imagex, imagey, patchradius, patchscale));
+								
+								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d copied to clipboard, radius: %d, scale: %d, rawdata: %d",imagex, imagey, patchradius, patchscale, patchrawdata));
+									
 								wxTheClipboard->SetData( new wxTextDataObject(pixstr));
 								wxTheClipboard->Close();
-								//((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%f,%f,%f) copied to clipboard",imagex, imagey, p.r, p.g, p.b));
-								((wxFrame *) GetParent())->SetStatusText(wxString::Format("RGB at %d,%d (%s) copied to clipboard",imagex, imagey, pixstr));
+								
 							}
 					break;
 
