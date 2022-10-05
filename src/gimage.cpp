@@ -335,6 +335,48 @@ pix gImage::getPixel(unsigned x,  unsigned y)
 		return nullpix;
 }
 
+std::vector<pix> gImage::getPixelPatch(unsigned x, unsigned y, unsigned radius, float multiplier, bool average)
+{
+	std::vector<pix> pixvec;
+	for (unsigned i=x-(radius-1); i<=x+(radius-1); i++) {
+		for (unsigned j=y-(radius-1); j<=y+(radius-1); j++) {
+			pix p = getPixel(i,j);
+			p.r *= multiplier;
+			p.g *= multiplier;
+			p.b *= multiplier;
+			pixvec.push_back(p);
+		}
+	}
+	if (average) {
+		pix accum = nullpix;
+		unsigned count = pixvec.size();
+		for (unsigned i=0; i< count; i++) {
+			accum.r += pixvec[i].r;
+			accum.g += pixvec[i].g;
+			accum.b += pixvec[i].b;
+		}
+		accum.r = (accum.r / count);
+		accum.g = (accum.g / count);
+		accum.b = (accum.b / count);
+		pixvec.clear();
+		pixvec.push_back(accum);
+	}
+	return pixvec;
+}
+
+std::string gImage::getPixelString(std::vector<pix> pixvec)
+{
+	std::string pixstr;
+	char buf[256];
+	for (unsigned i=0; i< pixvec.size(); i++) {
+		snprintf(buf, 256, "%f,%f,%f\n", pixvec[i].r, pixvec[i].g, pixvec[i].b);
+		pixstr.append(std::string(buf));
+	}
+	return pixstr;
+}
+
+//old routines, get rid:
+
 std::string gImage::getPixelString(unsigned x,  unsigned y, unsigned radius, float multiplier)
 {
 	char buf[256];
