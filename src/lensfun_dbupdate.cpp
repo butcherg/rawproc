@@ -30,7 +30,7 @@
 #define mkdir(A, B) mkdir(A)
 #endif
 
-#define LENSFUN_SOURCEFORGE_URL "http://lensfun.sourceforge.net/db/"
+#define LENSFUN_SOURCEFORGE_URL "https://lensfun.sourceforge.net/db/"
 #define LENSFUN_BRONGER_URL     "https://wilson.bronger.org/lensfun-db/"
 
 std::string repository_url = LENSFUN_SOURCEFORGE_URL;
