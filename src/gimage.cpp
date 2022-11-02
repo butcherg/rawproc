@@ -6346,6 +6346,7 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 {
 	std::map<std::string,std::string> imgdata;
+	Exiv2::LogMsg::setLevel(Exiv2::LogMsg::error); //suppress all exiv2 messages to stderr except errors
 	
 	try {
 		auto image = Exiv2::ImageFactory::open(filename);
