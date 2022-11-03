@@ -208,7 +208,9 @@ colorb->Enable(true);
 			t.SetOwner(this);
 
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::onEnable, this, DEMOSAICENABLE);
+#ifdef USE_LIBRTPROCESS
 			Bind(wxEVT_CHECKBOX, &DemosaicPanel::paramChanged, this, DCBENHANCE);
+#endif
 			Bind(wxEVT_RADIOBUTTON, &DemosaicPanel::algorithmChanged, this);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnCopy, this, DEMOSAICCOPY);
 			Bind(wxEVT_BUTTON, &DemosaicPanel::OnPaste, this, DEMOSAICPASTE);
