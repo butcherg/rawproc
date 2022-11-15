@@ -6347,6 +6347,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 {
 	std::map<std::string,std::string> imgdata;
 	Exiv2::LogMsg::setLevel(Exiv2::LogMsg::error); //suppress all exiv2 messages to stderr except errors
+	int i;
 	
 	try {
 		auto image = Exiv2::ImageFactory::open(filename);
@@ -6361,7 +6362,9 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 				switch (exifData[*it].typeId()) {
 					case Exiv2::unsignedRational:
 					case Exiv2::signedRational:
-						imgdata[name] = exifData[*it].toString();  //provides all the rationals in the tag as space-separated strings of 'x/y'...
+						//imgdata[name] = exifData[*it].toString();  //provides all the rationals in the tag as space-separated strings of 'x/y'...
+						for (i=0; i<exifData[*it].count(); i++)
+							imgdata[name] += tostr(exifData[*it].toFloat(i)) + " "; //provides all the rationals in the tag as space-separated strings of floats...
 						break;
 					case Exiv2::unsignedByte:
 					case Exiv2::unsignedShort:
