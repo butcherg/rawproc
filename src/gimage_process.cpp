@@ -326,12 +326,20 @@ std::map<std::string,std::string> process_colorspace(gImage &dib, std::map<std::
 		}
 		else if (params["mode"] == "file") {
 			if (params["icc"] != "(none)") {
-				if (!file_exists(profilepath+params["icc"])) {
+				//first, search cwd:
+				std::string cwd = getCwd();
+				if (file_exists(cwd+params["icc"])) {
+					icc = cwd+params["icc"];
+				}
+				//next, search profilepath:
+				else if (file_exists(profilepath+params["icc"])) {
+					
+					icc = profilepath+params["icc"];
+				}
+				//finally, error out:
+				else {
 					result["error"] = string_format("colorspace:ProcessError - file not found: %s",params["icc"].c_str());
 					return result;
-				}
-				else {
-					icc = profilepath+params["icc"];
 				}
 			}
 			result["treelabel"] = "colorspace:file";

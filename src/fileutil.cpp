@@ -111,8 +111,12 @@ std::string getCwd()
 
 	char * result = getcwd( buff, 4096 );
 	std::string cwd( buff );
-
-	return cwd;
+#ifdef _WIN32
+	return cwd+"\\";
+#else
+	return cwd+"/";
+#endif
+	
 }
 
 std::string getCwdConfigFilePath()
