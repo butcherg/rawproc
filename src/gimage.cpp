@@ -306,7 +306,7 @@ gImage::gImage(unsigned width, unsigned height, unsigned colors, std::map<std::s
 
 gImage::~gImage()
 {
-	if (profile) delete [] profile;
+	if (profile) delete profile;
 }
 
 
