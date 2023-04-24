@@ -15,13 +15,17 @@ if the script file is subsequently changed, the "Run Script" button needs to be 
 behavior is overridden by the "auto update" checkbox; if this box is checked, rawproc will re-apply the script whenever the file 
 is changed.</p>
 
+<p>There are two ways to specify a script:
+<ol>
+<li>Script file: This way reads a G'MIC script from an external text file.  The file name is specified in the tool entry in the tool chain.</li>
+<li>Embeddded script: This way saves the script in the toolchain embedded in the exported image.  The script is entered into the text box in the parameters pane.  So the script doesn't interfere with including the toolchain in a command line invocation, it is encoded in the toolchain as string of hex values.  The unencoded script can be saved to a separate file.</li>
+</ol>
+
 <p>One has to be careful writing G'MIC scripts for use with rawproc, 
 as rawproc passes the image to G'MIC in its internal magnitudes, 0.0 - 1.0.  Do note that rawproc will not clip internal values 
 > 1.0 if they exist.  So, if one has G'MIC scripts that depend on a 0-255 black-to-white range, they will need to be reconsidered.
 <p align=center><img src=gmic.png></p>
 
 <p><b>Properties:</b> See tool.gmic.log in <a href=confparams.html>Configuration Properties</a></p>
-
-
 
 </body></html>

@@ -11,10 +11,14 @@
 #include <wx/datetime.h>
 
 #define GMICENABLE 8600
-#define GMICFILESELECT 8601
-#define GMICFILESAVE 8602
-#define GMICUPDATE 8603
-#define GMICAUTOUPDATE 8604
+#define GMICFILE 8601
+#define GMICSCRIPT 8602
+#define GMICFILESELECT 8603
+//#define GMICFILESAVE 8604
+#define GMICFILEUPDATE 8605
+#define GMICAUTOUPDATE 8606
+#define GMICSCRIPTUPDATE 8607
+#define GMICSCRIPTSAVE 8608
 
 class GMICPanel: public PicProcPanel
 {
@@ -27,8 +31,12 @@ class GMICPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, GMICENABLE, _("gmic:"));
 			enablebox->SetValue(true);
+			
+			fileb = new wxRadioButton(this, GMICFILE, _("file:"));
+			scriptb = new wxRadioButton(this, GMICSCRIPT, _("script"));
 
-			//edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
+			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
+			script = new wxStaticText(this, wxID_ANY,"");
 			//setEdit(params);
 			//wxString editstring = params;
 			//editstring.Replace(";","\n");
@@ -44,22 +52,43 @@ class GMICPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
+			m->AddRowItem(fileb, flags);
+			m->NextRow();
 			m->AddRowItem(new wxButton(this, GMICFILESELECT, _("Select File...")), flags);
 			m->AddRowItem(file, flags);
 			//m->AddRowItem(new wxButton(this, GMICFILESAVE, _("Save File...")), flags);
 			m->NextRow();
-			//m->AddRowItem(edit, flags);
 			
 			//m->NextRow();
-			m->AddRowItem(new wxButton(this, GMICUPDATE, _("Run Script")), flags);
+			m->AddRowItem(new wxButton(this, GMICFILEUPDATE, _("Run File")), flags);
 			m->AddRowItem(autobox, flags);
+			
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(scriptb, flags);
+			m->NextRow();
+			m->AddRowItem(edit, flags);
+			m->NextRow();
+			m->AddRowItem(new wxButton(this, GMICSCRIPTUPDATE, _("Run Script")), flags);
+			m->AddRowItem(new wxButton(this, GMICSCRIPTSAVE, _("Save Script...")), flags);
+			m->AddRowItem(script, flags);
+			
 			m->End();
 
 			SetSizerAndFit(m);
 			
 			if (!params.IsEmpty()) {
-				scriptfile = wxFileName(params);
-				file->SetLabel(scriptfile.GetFullName());
+				std::vector<std::string> p = split(params.ToStdString(), ",");
+				if (p[0] == "script") {
+					edit->SetValue(wxString(gmic_decode(p[1])));
+					scriptb->SetValue(true);
+				}
+				else {
+					scriptfile = wxFileName(params);
+					file->SetLabel(scriptfile.GetFullName());
+					fileb->SetValue(true);
+				}
 			}
 
 			t.SetOwner(this);
@@ -67,31 +96,54 @@ class GMICPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &GMICPanel::onEnable, this, GMICENABLE);
 			Bind(wxEVT_BUTTON, &GMICPanel::selectFile, this, GMICFILESELECT);
 			//Bind(wxEVT_BUTTON, &GMICPanel::saveFile, this, GMICFILESAVE);
-			Bind(wxEVT_BUTTON, &GMICPanel::updateScript, this, GMICUPDATE);
+			Bind(wxEVT_BUTTON, &GMICPanel::update, this, GMICFILEUPDATE);
 			Bind(wxEVT_CHAR_HOOK, &GMICPanel::OnKey,  this);
 			Bind(wxEVT_TIMER, &GMICPanel::OnTimer,  this);
 			Bind(wxEVT_CHECKBOX, &GMICPanel::onAuto, this, GMICAUTOUPDATE);
+			Bind(wxEVT_BUTTON, &GMICPanel::update, this, GMICSCRIPTUPDATE);
+			Bind(wxEVT_BUTTON, &GMICPanel::saveScript, this, GMICSCRIPTSAVE);
+			Bind(wxEVT_RADIOBUTTON, &GMICPanel::update, this);
 			Thaw();
 		}
 		
 
 		void onEnable(wxCommandEvent& event)
 		{
-			if (enablebox->GetValue()) {
+			if (enablebox->GetValue()) 
 				q->enableProcessing(true);
-				q->processPic();
-			}
-			else {
+			else 
 				q->enableProcessing(false);
+			processGMIC();
+		}
+		
+		void processGMIC()
+		{
+			/*
+			switch (src) {
+				case GMICFILEUPDATE:
+					q->setParams(filestr);
+					break;
+				case GMICSCRIPTUPDATE:
+					q->setParams(wxString::Format("script,%s", wxString(gmic_encode(edit->GetValue().ToStdString()))));
+					break;
+			}
+			*/
+			if (fileb->GetValue()) {
+				q->setParams(filestr);
 				q->processPic();
 			}
+			else if (scriptb->GetValue()) {
+				q->setParams(wxString::Format("script,%s", wxString(gmic_encode(edit->GetValue().ToStdString()))));
+				q->processPic();
+			}
+			Refresh();
 		}
 
-		void updateScript(wxCommandEvent& event)
+		void update(wxCommandEvent& event)
 		{
-			q->processPic();
+			processGMIC();
 		}
-
+		
 		void setEdit(wxString commandstring)
 		{
 			//commandstring.Replace(";","\n");
@@ -99,11 +151,6 @@ class GMICPanel: public PicProcPanel
 		}
 
 		void selectFile(wxCommandEvent& event)
-		{
-			selectFile();
-		}
-
-		void selectFile()
 		{
 			wxString commandstring;
 			//wxFileName toollistpath;
@@ -120,13 +167,34 @@ class GMICPanel: public PicProcPanel
 				file->SetLabel(filepath.GetFullName());
 				((PicProcessorGMIC *) q)->setSource(filepath.GetFullPath());
 				if (filepath.GetPath() == wxFileName::GetCwd())
-					q->setParams(filepath.GetFullName());
+					//q->setParams(filepath.GetFullName());
+					filestr = filepath.GetFullName();
 				else
-					q->setParams(filepath.GetFullPath());
-				q->processPic();
+					//q->setParams(filepath.GetFullPath());
+					filestr = filepath.GetFullPath();
+				fileb->SetValue(true);
+				processGMIC();
 				
 			}
 			else wxMessageBox(_("Error: script file not found."));
+		}
+		
+		void saveScript(wxCommandEvent& event)
+		{
+			wxString scriptstring = wxFileSelector(_("Save script..."),"","","",_("Script files (*.txt)|*.txt|"),wxFD_SAVE);
+			if (scriptstring == "") return;
+			wxFileName scriptname(scriptstring);
+			
+			wxFile f;
+			if (!f.Open(scriptname.GetFullPath(), wxFile::write)) {
+				wxMessageBox(wxString::Format("Script file %s save failed.",scriptname.GetFullName()));
+			}
+			else {
+				f.Write(edit->GetValue());
+				f.Close();
+				wxMessageBox(wxString::Format("Script file %s saved.",scriptname.GetFullName()));
+				script->SetLabel(scriptname.GetFullName());
+			}
 		}
 		
 		void onAuto(wxCommandEvent& event)
@@ -152,9 +220,11 @@ class GMICPanel: public PicProcPanel
 
 
 	private:
+		wxRadioButton *fileb, *scriptb;
 		wxCheckBox *enablebox, *autobox;
 		wxTextCtrl *edit;
-		wxStaticText *file;
+		wxStaticText *file, *script;
+		wxString filestr;
 		wxFileName scriptfile;
 		wxDateTime modtime;
 		wxTimer t;

@@ -686,7 +686,10 @@ std::map<std::string,std::string> parse_gmic(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (psize > 0) {
+		if (p[0] == "script") {
+			pmap["script"] = gmic_decode(p[1]);
+		}
+		else {
 			pmap["filename"] = p[0];
 		}
 			

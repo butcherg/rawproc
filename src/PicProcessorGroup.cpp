@@ -25,6 +25,7 @@ class GroupPanel: public PicProcPanel
 			enablebox->SetValue(true);
 
 			edit = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,200), wxTE_MULTILINE);
+			
 			setEdit(params);
 			//wxString editstring = params;
 			//editstring.Replace(";","\n");

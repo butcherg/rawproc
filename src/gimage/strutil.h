@@ -29,4 +29,8 @@ std::string paramstring(std::map<std::string, std::string> &p);
 std::string string_format(const std::string fmt, ...);
 std::string nexttoken(std::string &strng, std::string delims);
 
+//url-encode/decode gmic command sequences"
+std::string gmic_encode(std::string s);
+std::string gmic_decode(std::string script);
+
 #endif

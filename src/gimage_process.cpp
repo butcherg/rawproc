@@ -778,6 +778,17 @@ std::map<std::string,std::string> process_gmic(gImage &dib, std::map<std::string
 			result["imgmsg"] = string_format("%s (%ssec)",params["filename"].c_str(), result["duration"].c_str());
 		}
 	}
+	else if (params.find("script") != params.end()) {
+		if (dib.ApplyGMICScript(params["script"]) != GIMAGE_OK) {
+			result["error"] = dib.getLastErrorMessage();
+		}
+		else {
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("gmic:script");
+			result["treelabel"] = "gmic";
+			result["imgmsg"] = string_format("script (%ssec)", result["duration"].c_str());
+		}
+	}
 	return result;
 }
 #endif
