@@ -286,7 +286,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 		}
 
 		//else if (std::count(p[0].begin(), p[0].end(), ',') == 8) {
-		else if (isInt(p[0])) {
+		else if (isInt(p[0]) | isFloat(p[0])) {
 			pmap["mode"] = "primaries";
 			pmap["icc"] = 
 				string_format("%s,%s,%s,%s,%s,%s,%s,%s,%s",p[0].c_str(),p[1].c_str(),p[2].c_str(),p[3].c_str(),p[4].c_str(),p[5].c_str(),p[6].c_str(),p[7].c_str(),p[8].c_str());

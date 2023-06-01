@@ -192,7 +192,7 @@ std::map<std::string,std::string> process_blackwhitepoint(gImage &dib, std::map<
 
 float ratstr2flt(std::string s) {
 	std::vector<std::string> fs = split(s, "/");
-	if (fs.size() < 2) return 0.0;
+	if (fs.size() < 2) return atof(fs[0].c_str());  //assume one number is already a float
 	return atof(fs[0].c_str()) / atof(fs[1].c_str());
 }
 

@@ -211,6 +211,8 @@ class ColorspacePanel: public PicProcPanel
 		{
 			if (cpmode == COLORPROFILE) {
 				wxString profilestr = edit->GetValue();
+				profilestr.Replace("\t", ",");
+				profilestr.Replace(" ", ",");
 				wxString operstr = operselect->GetString(operselect->GetSelection());
 				wxString intentstr = intentselect->GetString(intentselect->GetSelection());
 				if (bpc->GetValue()) intentstr.Append(",bpc");

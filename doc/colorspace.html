@@ -16,8 +16,10 @@ current colorspace to a new one.  This tool has two modes:</p>
 		"srgb-v2-g22", "srgb-output" will invoke a binary ICC profile embedded in rawproc of the specified version and gamma.  
 		srgb-v2-g22" and "srgb-output" are the same file. </li>
 	</ul>
-<li>a set of nine comma-separated integers, representing the dcraw color primaries for a particular camera.  For example, 
-	the Nikon D7000 primaries are 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181.  These can also be specified as a
+<li>a set of nine comma-separated integers or floats, representing the dcraw color primaries for a particular camera.  
+	Integer sets follow the dcraw convention; for example, 
+	the Nikon D7000 primaries are 8198,-2239,-724,-4871,12389,2798,-1043,2050,7181.  Float sets follow the Adobe Digital 
+	Negative (DNG) convention for a D65 ColorMatrix* tag; for example, for an Apple IPhone 8 DNG, 0.829948 -0.273887 -0.097103 -0.572908 1.3635 0.170901 -0.0863387 0.136364 0.536422.  These sets can also be specified as a
 	JSON array, e.g., [ 8198, -2239, -724, -4871, 12389, 2798, -1043, 2050, 7181 ]</li><br>
 </ul>
 which is then used either to transform the image from the 

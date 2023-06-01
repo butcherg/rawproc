@@ -7171,10 +7171,16 @@ cmsHPROFILE gImage::makeLCMSAdobeCoeffProfile(std::string adobecoeff)
 	for (unsigned i=0; i<3; i++) {
 		for (unsigned j=0; j<3; j++) {
 			unsigned pos = i*3+j;
-			if (pos < mat.size())
-				in_XYZ[i][j] = atof(mat[pos].c_str())/10000.0;
-			else
+			float coeff = atof(mat[pos].c_str());
+			if (pos < mat.size()) {
+				if (abs(coeff) > 10.0)
+					in_XYZ[i][j] = coeff/10000.0;
+				else
+					in_XYZ[i][j] = coeff;
+			}
+			else {
 				in_XYZ[i][j] = 0.0;
+			}
 		}
 	}
 
