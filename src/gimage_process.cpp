@@ -824,9 +824,10 @@ std::map<std::string,std::string> process_hlrecover(gImage &dib, std::map<std::s
 {
 	std::map<std::string,std::string> result;
 
+#ifdef USE_LIBRTPROCESS
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		result["error"] = "curve:ProcessError - no mode";
+		result["error"] = "hlrecover:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
@@ -834,14 +835,18 @@ std::map<std::string,std::string> process_hlrecover(gImage &dib, std::map<std::s
 		result["threadcount"] = std::to_string(threadcount);
 		
 		_mark();
-#ifdef USE_LIBRTPROCESS
-		dib.ApplyHLRecover(threadcount);
-#endif
-		result["duration"] = std::to_string(_duration());
-		result["commandstring"] = string_format("hlrecover");
-		result["treelabel"] = "hlrecover";
-		result["imgmsg"] = string_format("(%d threads, %ssec)", threadcount, result["duration"].c_str());
+
+		if (dib.ApplyHLRecover(threadcount)) {
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("hlrecover");
+			result["treelabel"] = "hlrecover";
+			result["imgmsg"] = string_format("(%d threads, %ssec)", threadcount, result["duration"].c_str());
+		}
+		else result["error"] = "hlrecover:ProcessError - operator failed, no white balance data";
 	}
+#else
+	result["error"] = "hlrecover:ProcessError - operator not available";
+#endif
 	return result;
 }
 

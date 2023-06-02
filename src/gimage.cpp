@@ -3928,9 +3928,12 @@ bool gImage::ApplyHLRecover(int threadcount)
 	std::vector<std::string> camwb = split(getInfoValue("Libraw.WhiteBalance"), ",");
 	//float clippoint = atof(getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
 	float clippoint = 65535.0;
-	clmax[0] = clippoint * atof(camwb[0].c_str());
-	clmax[1] = clippoint * atof(camwb[1].c_str());
-	clmax[2] = clippoint * atof(camwb[2].c_str());
+	if (camwb.size() >= 3) {
+		clmax[0] = clippoint * atof(camwb[0].c_str());
+		clmax[1] = clippoint * atof(camwb[1].c_str());
+		clmax[2] = clippoint * atof(camwb[2].c_str());
+	}
+	else return false;
 
 	//printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 

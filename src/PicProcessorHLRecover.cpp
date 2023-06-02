@@ -132,13 +132,18 @@ bool PicProcessorHLRecover::processPicture(gImage *processdib)
 	if (global_processing_enabled & processingenabled) {
 		mark();
 #ifdef USE_LIBRTPROCESS
-		dib->ApplyHLRecover(threadcount);
-#endif
+		if (dib->ApplyHLRecover(threadcount)) {
+
 		m_display->SetModified(true);
 		wxString d = duration();
 
 		if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.hlrecover.log","0") == "1"))
 			log(wxString::Format(_("tool=hlrecover,imagesize=%dx%d,threads=%d,time=%s"),dib->getWidth(), dib->getHeight(),threadcount,d));
+		}
+		else wxMessageBox("HLRecover: operation failed, no white balance data");
+#else
+		wxMessageBox("HLRecover: operation not available");
+#endif
 
 	}
 
