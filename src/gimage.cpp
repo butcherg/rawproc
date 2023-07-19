@@ -69,7 +69,7 @@ using namespace half_float::literal;
 #define SCALE_CURVE 256.0
 #endif
 
-inline unsigned sqr(const unsigned x) { return x*x; }
+inline int sqr(const int x) { return x*x; }
 
 const char * gImageVersion()
 {
@@ -4783,6 +4783,60 @@ void gImage::ApplyRedeye(std::vector<coord> points, double threshold, unsigned l
 		}
 	}
 }
+
+
+// Spot removal
+//
+// Bit of an experiment in spot removal. Both routines work from an x,y image coordinate 
+//and spot radius.  Radial takes the ring region immediately outside the spot 
+//(patchradius-radius) and uses it to fill the spot with those values (average, invividual 
+//linear interpolation, not sure yet).  Clone uses a separately defined patch to fill the 
+//spot, akin to a clone operation.
+
+void gImage::ApplySpotRemovalRadial(unsigned spotx, unsigned spoty, float spotradius, int threadcount)
+{
+	int sr = (int) spotradius;
+	float pr = spotradius * 2;
+	#pragma omp parallel for num_threads(threadcount)
+	for (int x=-sr; x <= sr; x++) {
+		for (int y=-sr; y<=sr; y++) {
+			//compute the radial of spot point relative to the spot origin
+			float a = atan2(x, y);
+			//compute the patch point with the patch radius and spot radial
+			unsigned px =  (unsigned) (pr*cos(a));
+			unsigned py = (unsigned) (pr*sin(a));
+			if (sqrt(sqr(x - px) + (y-py)) > spotradius) continue;
+			unsigned spotpos = (spotx+x) + (spoty+y)*w;
+			unsigned patchpos = (spotx+px) + (spoty+py)*w;
+			image[spotpos].r=image[patchpos].r;
+			image[spotpos].g=image[patchpos].g;
+			image[spotpos].b=image[patchpos].b;
+		}
+	}
+}
+
+void gImage::ApplySpotRemovalClone(unsigned spotx, unsigned spoty, unsigned patchx, unsigned patchy, unsigned patchsize, int threadcount)
+{
+	int ps = (int) patchsize /2;
+	#pragma omp parallel for num_threads(threadcount)
+	for (int x=-ps; x<=ps; x++) {
+		for (int y=-ps; y<=ps; y++) {
+			int sx = (int) spotx + x;
+			int sy = (int) spoty + y;
+			int px = (int) patchx + x;
+			int py = (int) patchy + y;
+			unsigned d = sqrt(sqr(sx - spotx) + sqr(sy -spoty));
+			if (d > patchsize/2) continue;
+			unsigned spotpos = sx + sy*w;
+			unsigned patchpos = px + py*w;
+			image[spotpos].r=image[patchpos].r;
+			image[spotpos].g=image[patchpos].g;
+			image[spotpos].b=image[patchpos].b;
+		}
+	}
+}
+
+
 
 GIMAGE_ERROR gImage::ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp, int threadcount)
 {

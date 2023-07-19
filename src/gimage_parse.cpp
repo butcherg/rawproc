@@ -1300,6 +1300,106 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 }
 
 //img <li><b>subtract</b>
+//img </li><br>
+std::map<std::string,std::string> parse_spot(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		//if (psize ==3 ) {  //radial 
+		if (p[0] == "radial") {
+			if (isInt(p[1])) {
+				pmap["spotx"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[0].c_str()); 
+				return pmap;
+			}
+			if (isInt(p[2])) {
+				pmap["spoty"] = p[2];
+			}
+			else { 
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[1].c_str()); 
+				return pmap;
+			}
+			if (isFloat(p[3])) {
+				pmap["spotradius"] = p[3];
+			}
+			else { 
+				pmap["error"] = string_format("spot:ParseError - Not float: %s",p[2].c_str()); 
+				return pmap;
+			}
+			pmap["mode"] = "radial";
+			pmap["cmdlabel"] = "spot:radial";
+		}
+		//else if (psize == 5) {  //clone
+		else if (p[0] == "clone") {
+			if (isInt(p[1])) {
+				pmap["spotx"] = p[1];
+			}
+			else {
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[0].c_str()); 
+				return pmap;
+			}
+			if (isInt(p[2])) {
+				pmap["spoty"] = p[2];
+			}
+			else { 
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[1].c_str()); 
+				return pmap;
+			}
+			if (isInt(p[3])) {
+				pmap["patchx"] = p[3];
+			}
+			else {
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[2].c_str()); 
+				return pmap;
+			}
+			if (isInt(p[4])) {
+				pmap["patchy"] = p[4];
+			}
+			else { 
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[3].c_str()); 
+				return pmap;
+			}
+			if (isInt(p[5])) {
+				pmap["patchsize"] = p[5];
+			}
+			else { 
+				pmap["error"] = string_format("spot:ParseError - Not integer: %s",p[4].c_str()); 
+				return pmap;
+			}
+			pmap["mode"] = "clone";
+			pmap["cmdlabel"] = "spot:clone";
+		}
+		//else if (psize == 1) { //file of radial/clone corrections
+		else if (p[0] == "file") {
+			pmap["mode"] = "file";
+			pmap["filename"] = p[1];
+			pmap["cmdlabel"] = "spot:file";
+		}
+		else {
+			pmap["error"] = string_format("spot:ParseError - Invalid mode."); 
+			return pmap;
+		}
+	}
+	return pmap;
+}
+
+//img <li><b>subtract</b>
 //img <ul>
 //img <li><b>:&lt;float&gt;</b> - Subtracts a float value to each image channel value.</li>
 //img <li><b>:&lt;filename&gt;</b> - Subtracts a file containing a RGB image of the same dimensions.</li>

@@ -1177,6 +1177,71 @@ std::map<std::string,std::string> process_sharpen(gImage &dib, std::map<std::str
 	return result;
 }
 
+std::map<std::string,std::string> process_spot(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+	
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "spot:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.subtract.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "radial") {
+		
+			unsigned spotx = atoi(params["spotx"].c_str());
+			unsigned spoty = atoi(params["spoty"].c_str());
+			float spotradius = atof(params["spotradius"].c_str());
+		
+			_mark();
+			dib.ApplySpotRemovalRadial(spotx, spoty, spotradius, threadcount);
+		
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = string_format("spot:radial");
+			result["imgmsg"] = string_format("radial (%d threads, %ssec)",threadcount, result["duration"].c_str());
+		}
+		else if (params["mode"] == "clone") {
+			unsigned spotx = atoi(params["spotx"].c_str());
+			unsigned spoty = atoi(params["spoty"].c_str());
+			unsigned patchx = atoi(params["patchx"].c_str());
+			unsigned patchy = atoi(params["patchy"].c_str());
+			unsigned patchsize = atoi(params["patchsize"].c_str());
+			
+			_mark();
+			dib.ApplySpotRemovalClone(spotx, spoty, patchx, patchy, patchsize, threadcount);
+
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = string_format("spot:clone");
+			result["imgmsg"] = string_format("clone (%d threads, %ssec)",threadcount, result["duration"].c_str());
+		}
+		else if (params["mode"] == "file") {
+			std::ifstream ifs(params["filename"]);
+			std::string spots( (std::istreambuf_iterator<char>(ifs) ),(std::istreambuf_iterator<char>()    ) );
+			std::vector<std::string> spot = split(spots, "\n");
+			for (std::vector<std::string>::iterator it=spot.begin(); it!=spot.end(); ++it) {
+				std::vector<std::string> p = split(*it, ",");
+				if (p.size() == 3) {
+					printf("radial\n");
+				}
+				else if (p.size() == 5) {
+					printf("clone");
+				}
+				else {
+					result["error"] = "spot:ProcessError - improper parameters";
+				}
+			}
+		}
+		else {
+			result["error"] = string_format("spot:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
+		}
+	}
+	return result;
+}
+
 std::map<std::string,std::string> process_subtract(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;

@@ -69,6 +69,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "rotate") params = parse_rotate(parms);
 	else if (command == "saturation") params = parse_saturation(parms);
 	else if (command == "sharpen") params = parse_sharpen(parms);
+	else if (command == "spot") params = parse_spot(parms);
 	else if (command == "subtract") params = parse_subtract(parms);
 	else if (command == "tone") params = parse_tone(parms);
 	else if (command == "whitebalance") params = parse_whitebalance(parms);
@@ -113,6 +114,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "rotate") result =  process_rotate(dib, params);
 	else if (command == "saturation") result =  process_saturation(dib, params);
 	else if (command == "sharpen") result =  process_sharpen(dib, params);
+	else if (command == "spot") result =  process_spot(dib, params);
 	else if (command == "subtract") result =  process_subtract(dib, params);
 	else if (command == "tone") result =  process_tone(dib, params);
 	else if (command == "whitebalance") result =  process_whitebalance(dib, params);

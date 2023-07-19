@@ -30,6 +30,7 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring);
 std::map<std::string,std::string> parse_saturation(std::string paramstring);
 std::map<std::string,std::string> parse_script(std::string paramstring);
 std::map<std::string,std::string> parse_sharpen(std::string paramstring);
+std::map<std::string,std::string> parse_spot(std::string paramstring);
 std::map<std::string,std::string> parse_subtract(std::string paramstring);
 std::map<std::string,std::string> parse_tone(std::string paramstring);
 std::map<std::string,std::string> parse_whitebalance(std::string paramstring);

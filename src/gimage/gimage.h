@@ -327,6 +327,8 @@ class gImage
 		void ApplyRedeye(std::vector<coord> points, double threshold, unsigned limit, bool desaturate=false, double desaturatepercent=1.0, int threadcount=0);
 		void ApplyTint(double red,double green,double blue, int threadcount=0);
 		void ApplyGray(double redpct, double greenpct, double bluepct, int threadcount=0);
+		void ApplySpotRemovalRadial(unsigned spotx, unsigned spoty, float spotradius, int threadcount=0);
+		void ApplySpotRemovalClone(unsigned spotx, unsigned spoty, unsigned patchx, unsigned patchy, unsigned patchsize, int threadcount=0);
 
 		//colorspace operators:
 		GIMAGE_ERROR ApplyColorspace(std::string iccfile, cmsUInt32Number intent, bool blackpointcomp=false, int threadcount=0);
