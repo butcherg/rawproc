@@ -288,7 +288,7 @@ bool PicProcessorSharpen::processPicture(gImage *processdib)
 			m_display->SetModified(true);
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.sharpen.log","0") == "1"))
-					log(wxString::Format(_("tool=saturation,%s,imagesize=%dx%d,threads=%s,time=%s"),
+					log(wxString::Format(_("tool=sharpen,%s,imagesize=%dx%d,threads=%s,time=%s"),
 						params["mode"].c_str(),
 						dib->getWidth(), 
 						dib->getHeight(),
