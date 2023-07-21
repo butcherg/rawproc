@@ -4797,6 +4797,7 @@ void gImage::ApplySpotRemovalRadial(unsigned spotx, unsigned spoty, float spotra
 {
 	int sr = (int) spotradius;
 	float pr = spotradius * 2;
+	int imgsize = w*h;
 	#pragma omp parallel for num_threads(threadcount)
 	for (int x=-sr; x <= sr; x++) {
 		for (int y=-sr; y<=sr; y++) {
@@ -4808,6 +4809,8 @@ void gImage::ApplySpotRemovalRadial(unsigned spotx, unsigned spoty, float spotra
 			if (sqrt(sqr(x - px) + (y-py)) > spotradius) continue;
 			unsigned spotpos = (spotx+x) + (spoty+y)*w;
 			unsigned patchpos = (spotx+px) + (spoty+py)*w;
+			if (spotpos >= imgsize) continue;
+			if (patchpos >= imgsize) continue;
 			image[spotpos].r=image[patchpos].r;
 			image[spotpos].g=image[patchpos].g;
 			image[spotpos].b=image[patchpos].b;
@@ -4818,6 +4821,7 @@ void gImage::ApplySpotRemovalRadial(unsigned spotx, unsigned spoty, float spotra
 void gImage::ApplySpotRemovalClone(unsigned spotx, unsigned spoty, unsigned patchx, unsigned patchy, unsigned patchsize, int threadcount)
 {
 	int ps = (int) patchsize /2;
+	int imgsize = w*h;
 	#pragma omp parallel for num_threads(threadcount)
 	for (int x=-ps; x<=ps; x++) {
 		for (int y=-ps; y<=ps; y++) {
@@ -4829,6 +4833,8 @@ void gImage::ApplySpotRemovalClone(unsigned spotx, unsigned spoty, unsigned patc
 			if (d > patchsize/2) continue;
 			unsigned spotpos = sx + sy*w;
 			unsigned patchpos = px + py*w;
+			if (spotpos >= imgsize) continue;
+			if (patchpos >= imgsize) continue;
 			image[spotpos].r=image[patchpos].r;
 			image[spotpos].g=image[patchpos].g;
 			image[spotpos].b=image[patchpos].b;

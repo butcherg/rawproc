@@ -35,25 +35,33 @@ class SpotPanel: public PicProcPanel
 			fileb  = new wxRadioButton(this, SPOTFILE, _("file"));
 			spot = new wxStaticText(this, wxID_ANY, _("--,--"));
 			patch = new wxStaticText(this, wxID_ANY, _("--,--"));
-			
+
 			//parm tool.spot.radius: Default value for spot/patch radius.  Default=20
 			radius = new myIntegerCtrl(this, wxID_ANY, "Radius:", atoi(myConfig::getConfig().getValueOrDefault("tool.spot.radius","20").c_str()), 0, 100);
 
 			cloneb->SetValue(true);
 			spotmode = SPOTCLONE;
-			
 
-			wxArrayString p = split(params,",");
-			if (p.size() >= 1) {
-				if (p[0] == "radial") {
+			wxArrayString pm = split(params,",");
+			
+			if (pm.size() >= 1) {
+				if (pm[0] == "radial") {
 					radialb->SetValue(true);
 					spotmode = SPOTRADIAL;
+					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
+					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
+					if (pm.size() >= 4) radius->SetIntegerValue(atoi(pm[3].c_str()));
 				}
-				else if (p[0] == "clone") {
+				else if (pm[0] == "clone") {
 					cloneb->SetValue(true);
 					spotmode = SPOTCLONE;
+					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
+					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
+					if (pm.size() >= 4) p.x = atoi(pm[3].c_str());
+					if (pm.size() >= 5) p.y = atoi(pm[4].c_str());
+					if (pm.size() >= 6) radius->SetIntegerValue(atoi(pm[5].c_str()));
 				}
-				else if (p[0] == "file") {
+				else if (pm[0] == "file") {
 					fileb->SetValue(true);
 					spotmode = SPOTFILE;
 				}
@@ -63,11 +71,13 @@ class SpotPanel: public PicProcPanel
 				}
 			}
 			
+
+
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-			
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("Spot:")), flags);
 			m->AddRowItem(spot, flags);
@@ -77,16 +87,16 @@ class SpotPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
-			m->AddRowItem(radialb,flags);
-
-			m->NextRow();
 			m->AddRowItem(cloneb,flags);
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, _("Patch:")), flags);
 			m->AddRowItem(patch, flags);
-			
+
+			m->NextRow();
+			m->AddRowItem(radialb,flags);
+
 			m->NextRow();
 			m->AddRowItem(fileb,flags);
-			
+
 			m->End();
 			SetSizerAndFit(m);
 			SetFocus();
@@ -117,18 +127,18 @@ class SpotPanel: public PicProcPanel
 		{
 			t.Start(500,wxTIMER_ONE_SHOT);
 		}
-		
+
 		void OnTimer(wxTimerEvent& event)
 		{
 			processSP();
 		}
-		
+
 		void paramChanged(wxCommandEvent& event)
 		{
 			processSP();
 			event.Skip();
 		}
-		
+
 		void SetSpot(coord spot)
 		{
 			s=spot;
@@ -136,7 +146,7 @@ class SpotPanel: public PicProcPanel
 			Refresh();
 			processSP();
 		}
-		
+
 		void SetPatch(coord patch)
 		{
 			p=patch;
@@ -144,7 +154,7 @@ class SpotPanel: public PicProcPanel
 			Refresh();
 			processSP();
 		}
-		
+
 		int GetRadius()
 		{
 			return radius->GetIntegerValue();
@@ -160,7 +170,7 @@ class SpotPanel: public PicProcPanel
 			processSP();
 			event.Skip();
 		}
-		
+
 		wxString DCList()
 		{
 			wxString dclist;
@@ -205,7 +215,6 @@ class SpotPanel: public PicProcPanel
 		myIntegerCtrl * radius;
 		int spotmode;
 		wxTimer t;
-
 };
 
 
@@ -223,6 +232,7 @@ PicProcessorSpot::~PicProcessorSpot()
 void PicProcessorSpot::createPanel(wxSimplebook* parent)
 {
 	toolpanel = new SpotPanel(parent, this, c);
+	dcList = ((SpotPanel *) toolpanel)->DCList();
 	parent->ShowNewPage(toolpanel);
 	toolpanel->Refresh();
 	toolpanel->Update();
@@ -231,7 +241,7 @@ void PicProcessorSpot::createPanel(wxSimplebook* parent)
 bool PicProcessorSpot::processPicture(gImage *processdib) 
 {
 	if (!processingenabled) return true;
-	
+
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("spot..."));
 	bool ret = true;
 	std::map<std::string,std::string> result;
@@ -241,7 +251,7 @@ bool PicProcessorSpot::processPicture(gImage *processdib)
 
 	if (!pstr.empty())
 		params = parse_spot(std::string(pstr));
-	
+
 	if (params.find("error") != params.end()) {
 		wxMessageBox(params["error"]);
 		ret = false; 
@@ -253,7 +263,7 @@ bool PicProcessorSpot::processPicture(gImage *processdib)
 	else { 
 		dcList = ((SpotPanel *) toolpanel)->DCList();
 		result = process_spot(*dib, params);
-		
+
 		if (result.find("error") != result.end()) {
 			wxMessageBox(wxString(result["error"]));
 			ret = false;
