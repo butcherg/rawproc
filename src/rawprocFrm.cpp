@@ -41,6 +41,7 @@
 #include "PicProcessorHLRecover.h"
 #include "PicProcessorAdd.h"
 #include "PicProcessorScript.h"
+#include "PicProcessorSpot.h"
 #ifdef USE_GMIC
 #include "PicProcessorGMIC.h"
 #endif
@@ -125,6 +126,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_HLRECOVER, rawprocFrm::MnuHLRecover)
 	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
 	EVT_MENU(ID_MNU_SCRIPT, rawprocFrm::MnuScript)
+	EVT_MENU(ID_MNU_SPOT, rawprocFrm::MnuSpot)
 #ifdef USE_GMIC
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
 #endif
@@ -341,6 +343,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SATURATION,	_("Saturation"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SCRIPT,	_("Script"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SHARPEN,	_("Sharpen"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SPOT,	_("Spot"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_SUBTRACT,	_("Subtract"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_TONE,		_("Tone"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_WHITEBALANCE,	_("White Balance"), _(""), wxITEM_NORMAL);
@@ -797,6 +800,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "subtract")		p = new PicProcessorSubtract("subtract", command, commandtree, pic);
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 	else if (name == "script")			p = new PicProcessorScript("script", command, commandtree, filename.GetFullName(), pic); 
+	else if (name == "spot")			p = new PicProcessorSpot("spot", command, commandtree, pic);
 #ifdef USE_GMIC
 	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
 #endif
@@ -2054,6 +2058,25 @@ void rawprocFrm::MnuSharpenClick(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding sharpen tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuSpot(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	gImage dib = ((PicProcessor *) commandtree->GetItemData(commandtree->GetSelection()))->getProcessedPic();
+	if (dib.getInfoValue("Libraw.Mosaiced") == "1") {
+		wxMessageBox(_("Error: Spot can only be applied to RGB data."));
+		return;
+	}
+	SetStatusText("");
+	try {
+		PicProcessorSpot *p = new PicProcessorSpot("spot", "clone,0,0,0,0,0", commandtree, pic);
+		p->createPanel(parambook);
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding spot tool failed: %s"),e.what()));
 	}
 }
 

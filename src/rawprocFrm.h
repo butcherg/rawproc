@@ -132,6 +132,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_EDITMETADATA = 1046,
 			ID_MNU_GMIC = 1047,
 			ID_MNU_SCRIPT = 1048,
+			ID_MNU_SPOT = 1049,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -189,6 +190,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuAdd(wxCommandEvent& event);
 	void MnuGroup(wxCommandEvent& event);
 	void MnuScript(wxCommandEvent& event);
+	void MnuSpot(wxCommandEvent& event);
 
 	void Mnusave1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);

@@ -822,6 +822,21 @@ void PicPanel::render(wxDC &dc)
 				dc.DrawLine(px+scale, py+scale, px, py+scale);
 				dc.DrawLine(px, py+scale, px, py);
 			}
+			if (c[0] == "circle") {
+				if (c.GetCount() < 4) continue;
+				int px = (atoi(c[1].c_str())-viewposx) * scale + imageposx;
+				int py = (atoi(c[2].c_str())-viewposy) * scale + imageposy;
+				int pr = atoi(c[3].c_str()) * scale;
+				int mx = (unsigned) ((float) pr*cos(0));
+				int my = (unsigned) ((float) pr*sin(0));
+				for (float d = 5.0; d<=360.0; d+=5.0) {
+					float rd = d*(3.1416/180.0);
+					int nx = (unsigned) ((float) pr*cos(rd));
+					int ny = (unsigned) ((float) pr*sin(rd));
+					dc.DrawLine(px+mx, py-my, px+nx, py-ny);
+					mx = nx; my = ny;
+				}
+			}
 		}
 	}
 
