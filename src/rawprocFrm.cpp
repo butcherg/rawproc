@@ -1536,14 +1536,6 @@ void rawprocFrm::CommandTreeStateClick(wxTreeEvent& event)
 //wxEVT_TREE_SEL_CHANGING
 void rawprocFrm::CommandTreeSelChanging(wxTreeEvent& event)
 {
-	wxTreeItemId parentitem = commandtree->GetItemParent(event.GetItem());
-	if (parentitem.IsOk()) {
-		std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
-		if (parentitemlabel == "group") {
-			//event.Veto();
-			commandtree->SelectItem(parentitem);
-		}
-	}
 	event.Skip();
 }
 
