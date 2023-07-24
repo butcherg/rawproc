@@ -1553,6 +1553,12 @@ void rawprocFrm::CommandTreeSelChanged(wxTreeEvent& event)
 	SetStatusText("");
 	wxTreeItemId item = event.GetItem();
 	if (item.IsOk()) { 
+		wxTreeItemId parentitem = commandtree->GetItemParent(event.GetItem());
+		std::string parentitemlabel = bifurcate(commandtree->GetItemText(parentitem).ToStdString(), ':')[0];
+		if (parentitemlabel == "group") {
+			//event.Veto();
+			commandtree->SelectItem(parentitem);
+		}
 		if ((PicProcessor *) commandtree->GetItemData(item))
 			if (parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()) != wxNOT_FOUND) {
 				parambook->SetSelection(parambook->FindPage(((PicProcessor *) commandtree->GetItemData(item))->getPanel()));
