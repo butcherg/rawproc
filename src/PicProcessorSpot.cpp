@@ -9,12 +9,198 @@
 #include "undo.xpm"
 #include "util.h"
 
+#include <wx/grid.h>
+
 #include <vector>
 
 #define SPOTENABLE 8800
 #define SPOTRADIAL  8801
 #define SPOTCLONE   8802
 #define SPOTFILE	8803
+#define SPOTLIST	8804
+
+struct spt {
+	unsigned sx, sy, px, py, pr;
+};
+
+class pointList: public wxGrid
+{
+public:
+	pointList(wxWindow *parent): wxGrid(parent, wxID_ANY)
+	{
+		CreateGrid( 0, 5 );
+		SetSelectionMode(wxGridSelectRows);
+		//HideRowLabels();
+		SetRowLabelSize(20);
+		SetColLabelValue (0, "sx");
+		SetColLabelValue (1, "sy");
+		SetColLabelValue (2, "px");
+		SetColLabelValue (3, "py");
+		SetColLabelValue (4, "r");
+		SetColFormatNumber(0);
+		SetColFormatNumber(1);
+		SetColFormatNumber(2);
+		SetColFormatNumber(3);
+		SetColFormatNumber(4);
+		AutoSizeColumns();
+		//SetColSize(0,-1);
+		//SetColSize(1,-1);
+		//SetColSize(2,-1);
+		//SetColSize(3,-1);
+		//SetColSize(4,-1);
+	}
+	
+	int size()
+	{
+		return GetNumberRows();
+	}
+	
+	int push_back(spt p)
+	{
+		AppendRows(1);
+		int row = GetNumberRows()-1;
+		SetCellValue(row, 0, wxString::Format("%d",p.sx));
+		SetCellValue(row, 1, wxString::Format("%d",p.sy));
+		SetCellValue(row, 2, wxString::Format("%d",p.px));
+		SetCellValue(row, 3, wxString::Format("%d",p.py));
+		SetCellValue(row, 4, wxString::Format("%d",p.pr));	
+		AutoSizeColumns();
+		return row;
+	}
+	
+	std::vector<spt> getPoints()
+	{
+		std::vector<spt> points;
+		for (int i=0; i< size(); i++) {
+			spt p;
+			p.sx = atoi(GetCellValue(i, 0).ToStdString().c_str());
+			p.sy = atoi(GetCellValue(i, 1).ToStdString().c_str());
+			p.px = atoi(GetCellValue(i, 2).ToStdString().c_str());
+			p.py = atoi(GetCellValue(i, 3).ToStdString().c_str());
+			p.pr =  atoi(GetCellValue(i, 4).ToStdString().c_str());
+			points.push_back(p);
+		}
+		return points;
+	}
+	
+	std::string getPointString()
+	{
+		std::string pstr;
+		for (int i=0; i< size(); i++) {
+			pstr += GetCellValue(i, 0).ToStdString(); pstr += ",";
+			pstr += GetCellValue(i, 1).ToStdString(); pstr += ",";
+			pstr += GetCellValue(i, 2).ToStdString(); pstr += ",";
+			pstr += GetCellValue(i, 3).ToStdString(); pstr += ",";
+			pstr += GetCellValue(i, 4).ToStdString(); pstr += ";";
+		}
+		return pstr;
+	}
+	
+	void setPointString(wxString ps)
+	{
+		DeleteRows(0,GetNumberRows());
+		wxArrayString pts = split(ps, ";");
+		for (int i=0; i<pts.size(); i++) {
+			AppendRows(1);
+			int row = GetNumberRows()-1;
+			wxArrayString pv = split(pts[i], ",");
+			SetCellValue(row, 0, pv[0]);
+			SetCellValue(row, 1, pv[1]);
+			SetCellValue(row, 2, pv[2]);
+			SetCellValue(row, 3, pv[3]);
+			SetCellValue(row, 4, pv[4]);
+		}
+		AutoSizeColumns();
+	}
+	
+	void setPoints(std::vector<spt> pts)
+	{
+		//ClearGrid();
+		DeleteRows(0,GetNumberRows());
+		for (int i=0; i< pts.size(); i++) {
+			AppendRows(1);
+			int row = GetNumberRows()-1;
+			SetCellValue(row, 0, wxString::Format("%d",pts[i].sx));
+			SetCellValue(row, 1, wxString::Format("%d",pts[i].sy));
+			SetCellValue(row, 2, wxString::Format("%d",pts[i].px));
+			SetCellValue(row, 3, wxString::Format("%d",pts[i].py));
+			SetCellValue(row, 4, wxString::Format("%d",pts[i].pr));	
+		}
+		AutoSizeColumns();
+	}
+	
+	void insert(int row, spt p)
+	{
+		InsertRows(row);
+		SetCellValue(row, 0, wxString::Format("%d",p.sx));
+		SetCellValue(row, 1, wxString::Format("%d",p.sy));
+		SetCellValue(row, 2, wxString::Format("%d",p.px));
+		SetCellValue(row, 3, wxString::Format("%d",p.py));
+		SetCellValue(row, 4, wxString::Format("%d",p.pr));	
+		AutoSizeColumns();
+	}
+	
+	void changePatch(int row, coord p)
+	{
+		SetCellValue(row, 2, wxString::Format("%d", p.x));
+		SetCellValue(row, 3, wxString::Format("%d", p.y));
+		AutoSizeColumns();
+	}
+	
+	void changeRadius(int row, unsigned r)
+	{
+		SetCellValue(row, 4, wxString::Format("%d", r));
+		AutoSizeColumns();
+	}
+	
+	bool erase(int pt)
+	{
+		bool t = DeleteRows(pt);
+		AutoSizeColumns();
+		return t;
+	}
+	
+	void select(int pt)
+	{
+		SelectRow(pt);
+		GoToCell(pt,0);
+	}
+	
+	int getSelected()
+	{
+		if (size() <= 0) return -1;
+		wxArrayInt i = GetSelectedRows();
+		if (i.GetCount() > 0) return i[0];
+		return -1;
+	}
+	
+	spt operator[](int index) const
+	{
+		spt p;
+		p.sx = atoi(GetCellValue(index, 0).ToStdString().c_str());
+		p.sy = atoi(GetCellValue(index, 1).ToStdString().c_str());
+		p.px = atoi(GetCellValue(index, 2).ToStdString().c_str());
+		p.py = atoi(GetCellValue(index, 3).ToStdString().c_str());
+		p.pr = atoi(GetCellValue(index, 4).ToStdString().c_str());
+		return p;
+	} 
+	
+	spt at(int index)
+	{
+		spt p;
+		p.sx = atoi(GetCellValue(index, 0).ToStdString().c_str());
+		p.sy = atoi(GetCellValue(index, 1).ToStdString().c_str());
+		p.px = atoi(GetCellValue(index, 2).ToStdString().c_str());
+		p.py = atoi(GetCellValue(index, 3).ToStdString().c_str());
+		p.pr = atoi(GetCellValue(index, 4).ToStdString().c_str());
+		return p;
+	}
+	
+	
+private:
+	
+	
+};
 
 class SpotPanel: public PicProcPanel
 {
@@ -33,14 +219,17 @@ class SpotPanel: public PicProcPanel
 			radialb = new wxRadioButton(this, SPOTRADIAL, _("radial"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			cloneb  = new wxRadioButton(this, SPOTCLONE, _("clone"));
 			fileb  = new wxRadioButton(this, SPOTFILE, _("file"));
+			clonelistb  = new wxRadioButton(this, SPOTLIST, _("clone list"));
+			
 			spot = new wxStaticText(this, wxID_ANY, _("--,--"));
 			patch = new wxStaticText(this, wxID_ANY, _("--,--"));
 
 			//parm tool.spot.radius: Default value for spot/patch radius.  Default=20
 			radius = new myIntegerCtrl(this, wxID_ANY, "Radius:", atoi(myConfig::getConfig().getValueOrDefault("tool.spot.radius","20").c_str()), 0, 100);
+			clist = new pointList(this);
 
-			cloneb->SetValue(true);
-			spotmode = SPOTCLONE;
+			clonelistb->SetValue(true);
+			spotmode = SPOTLIST;
 
 			wxArrayString pm = split(params,",");
 			
@@ -65,9 +254,14 @@ class SpotPanel: public PicProcPanel
 					fileb->SetValue(true);
 					spotmode = SPOTFILE;
 				}
+				else if (true) { //isInt(pm[0])) {
+					clonelistb->SetValue(true);
+					spotmode = SPOTLIST;
+					clist->setPointString(params);
+				}
 				else {
-					radialb->SetValue(true);
-					spotmode = SPOTRADIAL;
+					clonelistb->SetValue(true);
+					spotmode = SPOTLIST;
 				}
 			}
 			
@@ -96,6 +290,11 @@ class SpotPanel: public PicProcPanel
 
 			m->NextRow();
 			m->AddRowItem(fileb,flags);
+			
+			m->NextRow();
+			m->AddRowItem(clonelistb,flags);
+			m->NextRow();
+			m->Add(clist, wxSizerFlags(1).Expand());
 
 			m->End();
 			SetSizerAndFit(m);
@@ -108,6 +307,7 @@ class SpotPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &SpotPanel::onEnable, this, SPOTENABLE);
 			Bind(wxEVT_TIMER, &SpotPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SpotPanel::OnKey,  this);
+			clist->Bind(wxEVT_GRID_CELL_CHANGED, &SpotPanel::OnGrid, this);
 			Thaw();
 		}
 
@@ -122,6 +322,12 @@ class SpotPanel: public PicProcPanel
 				q->processPic();
 			}
 		}
+		
+		void OnGrid(wxGridEvent &event)
+		{
+			q->processPic();
+			Refresh();
+		}
 
 		void OnChanged(wxCommandEvent& event)
 		{
@@ -130,6 +336,11 @@ class SpotPanel: public PicProcPanel
 
 		void OnTimer(wxTimerEvent& event)
 		{
+			if (spotmode == SPOTLIST) {
+				int row = clist->getSelected();
+				if (row < 0) return;
+				clist->changeRadius(row, radius->GetIntegerValue());
+			}
 			processSP();
 		}
 
@@ -154,6 +365,36 @@ class SpotPanel: public PicProcPanel
 			Refresh();
 			processSP();
 		}
+		
+		void AddSpot(coord spot)
+		{
+			int lr = 15;
+			spt sp;
+			for (int i = 0; i < clist->size(); i++) {
+				spt e = clist->at(i);
+				if ((spot.x > e.sx-lr) & (spot.x < e.sx+lr)) {
+					if ((spot.y > e.sy-lr) & (spot.y < e.sy+lr)) {
+						clist->erase(i);
+						if (clist->size() > 0) clist->SelectRow(i-1);
+						processSP();
+						return;
+					}
+				}
+			}
+			sp.sx = spot.x; sp.sy = spot.y; sp.px = 0; sp.py = 0; sp.pr = radius->GetIntegerValue();
+			int row = clist->push_back(sp);
+			clist->SelectRow(row);
+			processSP();
+		}
+		
+		void AddPatch(coord patch)
+		{
+			if (clist->size() <= 0) return;
+			int row = clist->getSelected();
+			if (row < 0) return;
+			clist->changePatch(row, patch);
+			processSP();
+		}
 
 		int GetRadius()
 		{
@@ -174,8 +415,17 @@ class SpotPanel: public PicProcPanel
 		wxString DCList()
 		{
 			wxString dclist;
-			if (p.x != 0) dclist.Append(wxString::Format("circle,%d,%d,%d;", p.x, p.y, radius->GetIntegerValue()/2));
-			if (s.x != 0) dclist.Append(wxString::Format("cross,%d,%d", s.x, s.y));
+			if (spotmode == SPOTCLONE) {
+				if (p.x != 0) dclist.Append(wxString::Format("circle,%d,%d,%d;", p.x, p.y, radius->GetIntegerValue()/2));
+				if (s.x != 0) dclist.Append(wxString::Format("cross,%d,%d;", s.x, s.y));
+			}
+			else if (spotmode == SPOTLIST) {
+				for (int i = 0; i < clist->size(); i++) {
+					spt e = clist->at(i);
+					if (e.sx > 0 & e.sy > 0) dclist.Append(wxString::Format("cross,%d,%d;", e.sx, e.sy));
+					if (e.px > 0 & e.py > 0) dclist.Append(wxString::Format("circle,%d,%d,%d;", e.px, e.py, e.pr/2));
+				}
+			}
 			return dclist;
 		}
 
@@ -195,8 +445,14 @@ class SpotPanel: public PicProcPanel
 			}
 			else if (spotmode == SPOTFILE) {
 				//to-do...
-					q->setParams(wxString::Format("file,%s","foo.txt"));
+				q->setParams(wxString::Format("file,%s","foo.txt"));
+				q->processPic();
+			}
+			else if (spotmode == SPOTLIST) {
+				//if (clist->size() > 0) {
+					q->setParams(wxString(clist->getPointString()));
 					q->processPic();
+				//}
 			}
 		}
 
@@ -209,10 +465,12 @@ class SpotPanel: public PicProcPanel
 	private:
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox;
-		wxRadioButton *radialb, *cloneb, *fileb;
+		wxRadioButton *radialb, *cloneb, *fileb, *clonelistb;
 		wxStaticText *spot, *patch;
 		coord s, p;
 		myIntegerCtrl * radius;
+		std::vector<spt> splist;
+		pointList * clist;
 		int spotmode;
 		wxTimer t;
 };
@@ -257,7 +515,7 @@ bool PicProcessorSpot::processPicture(gImage *processdib)
 		ret = false; 
 	}
 	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		wxMessageBox("Error - no mode");
+		//wxMessageBox("Error - no mode");
 		ret = false;
 	}
 	else { 
@@ -294,12 +552,14 @@ void PicProcessorSpot::OnLeftDown(wxMouseEvent& event)
 	if (m_tree->GetSelection() == GetId()) {
 		if (event.ShiftDown()) {
 			patch = m_display->GetImgCoords();
-			((SpotPanel *) toolpanel)->SetPatch(patch);
+			//((SpotPanel *) toolpanel)->SetPatch(patch);
+			((SpotPanel *) toolpanel)->AddPatch(patch);
 			dcList = ((SpotPanel *) toolpanel)->DCList();
 		}
 		else if (event.ControlDown()) {
 			spot = m_display->GetImgCoords();
-			((SpotPanel *) toolpanel)->SetSpot(spot);
+			//((SpotPanel *) toolpanel)->SetSpot(spot);
+			((SpotPanel *) toolpanel)->AddSpot(spot);
 			dcList = ((SpotPanel *) toolpanel)->DCList();
 		}
 	}

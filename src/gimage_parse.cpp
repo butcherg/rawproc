@@ -1391,8 +1391,13 @@ std::map<std::string,std::string> parse_spot(std::string paramstring)
 			pmap["filename"] = p[1];
 			pmap["cmdlabel"] = "spot:file";
 		}
+		else if (isInt(p[0])) {
+			pmap["mode"] = "list";
+			pmap["spotlist"] = paramstring;
+			pmap["cmdlabel"] = "spot:list";
+		}
 		else {
-			pmap["error"] = string_format("spot:ParseError - Invalid mode."); 
+			pmap["error"] = string_format("spot:ParseError - Invalid mode or list."); 
 			return pmap;
 		}
 	}

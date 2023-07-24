@@ -1235,6 +1235,27 @@ std::map<std::string,std::string> process_spot(gImage &dib, std::map<std::string
 				}
 			}
 		}
+		else if (params["mode"] == "list") {
+			std::vector<std::string> splist = split(params["spotlist"], ";");
+			
+			_mark();
+			for (int i=0; i<splist.size(); i++) {
+				std::vector<std::string> sp = split(splist[i], ",");
+				if (sp.size() == 5) {
+					unsigned spotx = atoi(sp[0].c_str());
+					unsigned spoty = atoi(sp[1].c_str());
+					unsigned patchx = atoi(sp[2].c_str());
+					unsigned patchy = atoi(sp[3].c_str());
+					unsigned patchsize = atoi(sp[4].c_str());
+					if (patchx != 0 & patchy != 0)
+						dib.ApplySpotRemovalClone(spotx, spoty, patchx, patchy, patchsize, threadcount);
+				}
+			}
+			
+			result["duration"] = std::to_string(_duration());
+			result["treelabel"] = string_format("spot:list");
+			result["imgmsg"] = string_format("list, %d spots (%d threads, %ssec)",splist.size(), threadcount, result["duration"].c_str());
+		}
 		else {
 			result["error"] = string_format("spot:ProcessError - Unrecognized mode: %s.",params["mode"].c_str());
 		}
