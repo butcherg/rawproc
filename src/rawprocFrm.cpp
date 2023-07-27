@@ -2069,8 +2069,13 @@ void rawprocFrm::MnuSpot(wxCommandEvent& event)
 	}
 	SetStatusText("");
 	try {
-		PicProcessorSpot *p = new PicProcessorSpot("spot", "clone,0,0,0,0,0", commandtree, pic);
+		//parm tool.spot.initialmode: The initial mode of the spot tool, Default=(blank), which gives list mode
+		wxString defmode =  wxString(myConfig::getConfig().getValueOrDefault("tool.spot.initialmode",""));
+		PicProcessorSpot *p = new PicProcessorSpot("spot", defmode, commandtree, pic);
 		p->createPanel(parambook);
+		//parm tool.spot.initialdisplay: The initial display mode of the spot tool, Default=1, check the display box
+		if (myConfig::getConfig().getValueOrDefault("tool.spot.initialdisplay","1") == "1") 
+			CommandTreeSetDisplay(p->GetId(),1750);
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1751);
 	}
 	catch (std::exception& e) {
