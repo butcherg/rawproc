@@ -8,6 +8,8 @@
 #include "gimage_process.h"
 #include "undo.xpm"
 #include "util.h"
+#include "copy.xpm"
+#include "paste.xpm"
 
 #include <wx/grid.h>
 
@@ -18,6 +20,8 @@
 #define SPOTCLONE   8802
 #define SPOTFILE	8803
 #define SPOTLIST	8804
+#define SPOTCOPY	8805
+#define SPOTPASTE	8806
 
 struct spt {
 	unsigned sx, sy, px, py, pr;
@@ -230,45 +234,13 @@ class SpotPanel: public PicProcPanel
 
 			clonelistb->SetValue(true);
 			spotmode = SPOTLIST;
-
-			wxArrayString pm = split(params,",");
 			
-			if (pm.size() >= 1) {
-				if (pm[0] == "radial") {
-					radialb->SetValue(true);
-					spotmode = SPOTRADIAL;
-					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
-					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
-					if (pm.size() >= 4) radius->SetIntegerValue(atoi(pm[3].c_str()));
-				}
-				else if (pm[0] == "clone") {
-					cloneb->SetValue(true);
-					spotmode = SPOTCLONE;
-					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
-					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
-					if (pm.size() >= 4) p.x = atoi(pm[3].c_str());
-					if (pm.size() >= 5) p.y = atoi(pm[4].c_str());
-					if (pm.size() >= 6) radius->SetIntegerValue(atoi(pm[5].c_str()));
-				}
-				else if (pm[0] == "file") {
-					fileb->SetValue(true);
-					spotmode = SPOTFILE;
-				}
-				else if (true) { //isInt(pm[0])) {
-					clonelistb->SetValue(true);
-					spotmode = SPOTLIST;
-					clist->setPointString(params);
-				}
-				else {
-					clonelistb->SetValue(true);
-					spotmode = SPOTLIST;
-				}
-			}
-			
-
+			setParamString(params);
 
 			myRowSizer *m = new myRowSizer(wxSizerFlags().Expand());
 			m->AddRowItem(enablebox, wxSizerFlags(1).Left().Border(wxLEFT|wxTOP));
+			m->AddRowItem(new wxBitmapButton(this, SPOTCOPY, wxBitmap(copy_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
+			m->AddRowItem(new wxBitmapButton(this, SPOTPASTE, wxBitmap(paste_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), flags);
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
@@ -307,8 +279,47 @@ class SpotPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &SpotPanel::onEnable, this, SPOTENABLE);
 			Bind(wxEVT_TIMER, &SpotPanel::OnTimer,  this);
 			Bind(wxEVT_CHAR_HOOK, &SpotPanel::OnKey,  this);
+			Bind(wxEVT_BUTTON, &SpotPanel::OnCopy, this, SPOTCOPY);
+			Bind(wxEVT_BUTTON, &SpotPanel::OnPaste, this, SPOTPASTE);
 			clist->Bind(wxEVT_GRID_CELL_CHANGED, &SpotPanel::OnGrid, this);
 			Thaw();
+		}
+		
+		void setParamString(wxString params)
+		{
+			wxArrayString pm = split(params,",");
+			
+			if (pm.size() >= 1) {
+				if (pm[0] == "radial") {
+					radialb->SetValue(true);
+					spotmode = SPOTRADIAL;
+					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
+					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
+					if (pm.size() >= 4) radius->SetIntegerValue(atoi(pm[3].c_str()));
+				}
+				else if (pm[0] == "clone") {
+					cloneb->SetValue(true);
+					spotmode = SPOTCLONE;
+					if (pm.size() >= 2) s.x = atoi(pm[1].c_str());
+					if (pm.size() >= 3) s.y = atoi(pm[2].c_str());
+					if (pm.size() >= 4) p.x = atoi(pm[3].c_str());
+					if (pm.size() >= 5) p.y = atoi(pm[4].c_str());
+					if (pm.size() >= 6) radius->SetIntegerValue(atoi(pm[5].c_str()));
+				}
+				else if (pm[0] == "file") {
+					fileb->SetValue(true);
+					spotmode = SPOTFILE;
+				}
+				else if (true) { //isInt(pm[0])) {
+					clonelistb->SetValue(true);
+					spotmode = SPOTLIST;
+					clist->setPointString(params);
+				}
+				else {
+					clonelistb->SetValue(true);
+					spotmode = SPOTLIST;
+				}
+			}
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -321,6 +332,23 @@ class SpotPanel: public PicProcPanel
 				q->enableProcessing(false);
 				q->processPic();
 			}
+		}
+		
+		void OnCopy(wxCommandEvent& event)
+		{
+			q->copyParamsToClipboard();
+			((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Copied command to clipboard: %s"),q->getCommand()));
+		}
+		
+		void OnPaste(wxCommandEvent& event)
+		{
+			if (q->pasteParamsFromClipboard()) {
+				setParamString(q->getParams());
+				q->processPic();
+				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
+				Refresh();
+			}
+			else wxMessageBox(wxString::Format("Invalid Paste"));
 		}
 		
 		void OnGrid(wxGridEvent &event)
@@ -484,7 +512,6 @@ PicProcessorSpot::PicProcessorSpot(wxString name, wxString command, wxTreeCtrl *
 PicProcessorSpot::~PicProcessorSpot()
 {
 	m_display->Unbind(wxEVT_LEFT_DOWN, &PicProcessorSpot::OnLeftDown, this);
-//	m_display->SetDrawList("");
 }
 
 void PicProcessorSpot::createPanel(wxSimplebook* parent)
@@ -515,7 +542,6 @@ bool PicProcessorSpot::processPicture(gImage *processdib)
 		ret = false; 
 	}
 	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...
-		//wxMessageBox("Error - no mode");
 		ret = false;
 	}
 	else { 
