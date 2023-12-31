@@ -131,7 +131,8 @@ class TonePanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(lutb, flags);
-			m->AddRowItem(lutfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
+			//m->AddRowItem(lutfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());  //wx3.1
+			m->AddRowItem(lutfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).Center());
 			m->AddRowItem(new wxButton(this, TONELUT, _("Select")), flags);
 
 			//gamma:

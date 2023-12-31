@@ -88,14 +88,16 @@ class SubtractPanel: public PicProcPanel
 			m->AddRowItem(fileb, flags);
 
 			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(darkfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
+			//m->AddRowItem(darkfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());  //wx3.1
+			m->AddRowItem(darkfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).Center());
 			m->AddRowItem(new wxButton(this, wxID_ANY, _("Select")), flags);
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			m->NextRow();
-			m->AddRowItem(camb, flags.CenterVertical());
+			//m->AddRowItem(camb, flags.CenterVertical());  //wx3.1
+			m->AddRowItem(camb, flags.Center());
 			m->AddRowItem(cam, flags);
 			m->NextRow();
 

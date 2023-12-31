@@ -11,7 +11,7 @@ class cmdProcess;
 class wxCmdApp : public wxApp
 {
 public:
-	virtual bool OnInit() wxOVERRIDE;
+	virtual bool OnInit(); //wxOVERRIDE;
 };
 
 class wxCmdFrame : public wxFrame
@@ -49,7 +49,7 @@ public:
 		m_cmd = cmd;
 	}
 
-	virtual void OnTerminate(int pid, int status) wxOVERRIDE
+	virtual void OnTerminate(int pid, int status) //wxOVERRIDE
 	{
 		while ( HasInput() )
 			;

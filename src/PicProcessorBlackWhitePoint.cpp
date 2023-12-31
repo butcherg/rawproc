@@ -115,7 +115,8 @@ class BlackWhitePointPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this, wxID_ANY, "               "),flags);
 			m->AddRowItem(minwhite, flags);
-			m->AddRowItem(datminwht, flags.CenterVertical());
+			//m->AddRowItem(datminwht, flags.CenterVertical());  //wx3.1
+			m->AddRowItem(datminwht, flags.Center());
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));

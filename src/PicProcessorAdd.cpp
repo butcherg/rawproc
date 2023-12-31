@@ -96,7 +96,8 @@ class AddPanel: public PicProcPanel
 			m->AddRowItem(fileb, flags);
 
 			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(addfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical());
+			//m->AddRowItem(addfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).CenterVertical()); wx3.1
+			m->AddRowItem(addfile,  wxSizerFlags(1).Left().Border(wxLEFT|wxTOP).Center());
 			m->AddRowItem(new wxButton(this, wxID_ANY, _("Select")), flags);
 
 			m->NextRow(wxSizerFlags().Expand());

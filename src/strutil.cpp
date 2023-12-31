@@ -240,7 +240,7 @@ std::string gmic_decode(std::string s)
 	std::string t;
 	char c[5];
 	for (unsigned i = 0; i<s.size(); i += 2) {
-		sscanf(s.c_str()+i, "%2X", c);
+		sscanf(s.c_str()+i, "%2X", (unsigned int *) c);
 		c[1] = '\0';
 		t.append(c);
 	}
