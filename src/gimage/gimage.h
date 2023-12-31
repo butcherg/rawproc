@@ -7,9 +7,7 @@
 #include <lcms2.h>
 #include "curve.h"
 
-#ifdef USE_LENSFUN
 #include <lensfun/lensfun.h>
-#endif
 
 #if defined PIXhalf
 #include "gimage/half.hpp"
@@ -341,7 +339,6 @@ class gImage
 		PIXTYPE getB(float x, float y);
 		pix getRGB(float x, float y);
 
-#ifdef USE_LENSFUN		
 		//Lensfun database and correction methods. 
 		//From the lensfun library, gImage users need to know the lfDatabase class and the LF_MODIFY_XXXX flags
 		GIMAGE_ERROR lensfunLoadLensDatabase(std::string lensfundatadir, lfDatabase **ldb);
@@ -349,7 +346,6 @@ class gImage
 		int lensfunAvailableModifications(lfDatabase * ldb, std::string camera, std::string lens); //returns OR-ed set of LF_MODIFY_XXXX flags
 		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
-#endif
 
 #ifdef USE_GMIC
 		//uses libgmic to apply a G'MIC script to the gImage:

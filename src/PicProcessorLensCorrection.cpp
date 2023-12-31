@@ -144,8 +144,10 @@ class LensCorrectionPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
 			
 			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().CenterVertical());
-			m->AddRowItem(algo, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
+			//m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().CenterVertical());  //wx3.0
+			m->AddRowItem(new wxStaticText(this,-1, "algorithm:"), wxSizerFlags(0).Right().Center());
+			//m->AddRowItem(algo, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));  //wx3.0
+			m->AddRowItem(algo, wxSizerFlags(0).Right().Center().Border(wxRIGHT|wxTOP));
 			//m->AddRowItem(new wxStaticText(this,-1, "geometry:"), wxSizerFlags(0).Right().CenterVertical());
 			//m->AddRowItem(geom, wxSizerFlags(0).Right().CenterVertical().Border(wxRIGHT|wxTOP));
 			
