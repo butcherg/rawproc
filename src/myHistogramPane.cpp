@@ -400,7 +400,7 @@ void myHistogramPane::render(wxDC&  dc)
 	}
 
 	if (inwindow) 
-		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bin:%d rgb:%d,%d,%d",mlx,mlr,mlg,mlb));
+		if (mlx >=0 & mlx <hscale) ((wxFrame *) GetParent())->SetStatusText(wxString::Format("bin:%d rgb:%ld,%ld,%ld",mlx,mlr,mlg,mlb));
 
 }
 

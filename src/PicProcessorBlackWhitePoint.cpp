@@ -382,15 +382,18 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	else {
 		wxArrayString p = split(command,",");
 		if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
-			if (p.GetCount() == 1) {
+			if (p.GetCount() == 2) {
 				std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
 				blk = bwpts[0];
 				wht = bwpts[1];
 				setParams(wxString::Format("%s,%d,%d",p[0],(unsigned) blk, (unsigned) wht));
 			}
-			else {
+			else if (p.GetCount() == 3) {
 				setParams(wxString::Format("%s,%s,%s",p[0],p[1],p[2]));
 				
+			}
+			else {
+				printf("rawproc error, blackwhitepoint: p.GetCount(): %ld\n", p.GetCount());
 			}
 		}
 //		setParams(command);

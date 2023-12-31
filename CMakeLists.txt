@@ -4,14 +4,22 @@ cmake_minimum_required(VERSION 3.15)
 project(rawproc LANGUAGES CXX C)
 
 string(TIMESTAMP BUILDDATE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVERSION=\\\"1.3\\\"  -DBUILDDATE=\\\"${BUILDDATE}\\\"")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -DVERSION=\\\"1.3\\\"  -DBUILDDATE=\\\"${BUILDDATE}\\\"")
 
 add_executable(rawproc src/rawprocApp.cpp)
 add_executable(img src/img.cpp)
 add_executable(wxcmd src/wxcmd.cpp)
 add_executable(exif src/exif.cpp)
 
-add_custom_target(doc zip -v -r -j rawprocdoc.zip . -i doc/*.html doc/*.css doc/*.png doc/*.hh* USES_TERMINAL WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+add_custom_target(doc 	
+			COMMAND
+				bash -c "zip -v -r -j rawprocdoc.zip \
+				${CMAKE_CURRENT_SOURCE_DIR}/doc/*.html \
+				${CMAKE_CURRENT_SOURCE_DIR}/doc/*.css \
+				${CMAKE_CURRENT_SOURCE_DIR}/doc/*.png \
+				${CMAKE_CURRENT_SOURCE_DIR}/doc/*.hh* "
+			VERBATIM
+		)
 
 add_subdirectory(src)
 
