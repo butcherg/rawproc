@@ -134,21 +134,8 @@ demosaic routines, you'll at present need to compile and install librtprocess fr
 https://github.com/CarVac/librtprocess
 
 Instructions to do so are in the librtprocess README.  Once you've done that, you'll be able to use
---enable-librtprocess in rawproc's ./configure.  Otherwise, the demosaic tool will only allow the
+-DLIBRTPROCESS=ON in rawproc's cmake command.  Otherwise, the demosaic tool will only allow the
 internal algorithms half, half_resize, and color.
-
-Next, if you want to compile rawproc, get the wxWidgets sources and do a static compile:
-
-<pre>
-wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.2/wxWidgets-3.1.2.tar.bz2
-tar -xjvf wxWidgets-3.1.2.tar.bz2
-cd wxWidgets-3.1.2/
-mkdir build-linux
-cd build-linux
-../configure --disable-shared --enable-unicode --disable-debug
-make
-sudo make install
-</pre>
 
 The above will put the librtprocess include file, library, and cmake FIND module in /usr/local.  
 
