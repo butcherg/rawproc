@@ -165,12 +165,12 @@ if you installed libcurl and libarchive, put -DLENSFUNDBUPDATE=ON" in the cmake 
 
 The OS distros don't usually keep up with the libraries you'd like to see current, like Libraw.  Accordingly, I've build in the CMake build system the capability to point to self-compiled libraries in arbitrary locations.  To do this, in the cmake command include the appropriate *FLAGS and *LIB entries for the library(s) you've previously compiled.  The available libraries to use for this option are:
 
-LittleCMS2: LCMS2FLAGS and LCMS2LIB
-Libraw: LIBRAWFLAGS and LIBRAWLIB
-Lensfun: LENSFULFLAGS and LENSFUNLIB
-exiv2: EXIV2FLAGS and EXIV2LIB
-G'MIC: GMICFLAGS and GMICLIB
-librtprocess: LIBRTPROCESSFLAGS and LIBRTPROCESSLIB
+- LittleCMS2: LCMS2FLAGS and LCMS2LIB
+- Libraw: LIBRAWFLAGS and LIBRAWLIB
+- Lensfun: LENSFULFLAGS and LENSFUNLIB
+- exiv2: EXIV2FLAGS and EXIV2LIB
+- G'MIC: GMICFLAGS and GMICLIB
+- librtprocess: LIBRTPROCESSFLAGS and LIBRTPROCESSLIB
 
 To use this option, for, say, LIbraw, run cmake like this:
 
