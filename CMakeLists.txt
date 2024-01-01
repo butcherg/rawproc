@@ -14,6 +14,14 @@ if(GMIC)
 	add_compile_options(-DUSE_GMIC)
 endif(GMIC)
 
+if (LIBRTPROCESS)
+	add_compile_options(-DUSE_LIBRTPROCESS)
+endif(LIBRTPROCESS)
+
+if (LENSFUNDBUPDATE)
+	add_compile_options(-DUSE_LENSFUNDBUPDATE)
+endif(LENSFUNDBUPDATE)
+
 add_executable(rawproc src/rawprocApp.cpp)
 add_executable(img src/img.cpp)
 add_executable(wxcmd src/wxcmd.cpp)
@@ -193,3 +201,13 @@ if (LIBRTPROCESS)
 	endif (LIBRTPROCESSFLAGS AND LIBRTPROCESSLIB)
 endif (LIBRTPROCESS)
 
+#lensfun dbupdate, require libcurl and libarchive:
+if(LENSFUNDBUPDATE)
+	find_package(CURL REQUIRED)
+	include_directories(${CURL_INCLUDE_DIR})
+	target_link_libraries(rawproc ${CURL_LIBRARIES})
+	
+	find_package(LibArchive REQUIRED)
+	include_directories(${LibArchive_INCLUDE_DIR})
+	target_link_libraries(rawproc ${LibArchive_LIBRARIES})
+endif(LENSFUNDBUPDATE)

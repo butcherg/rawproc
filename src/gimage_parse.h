@@ -21,9 +21,7 @@ std::map<std::string,std::string> parse_gmic(std::string paramstring);
 #endif
 std::map<std::string,std::string> parse_gray(std::string paramstring);
 std::map<std::string,std::string> parse_hlrecover(std::string paramstring);
-#ifdef USE_LENSFUN
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring);
-#endif
 std::map<std::string,std::string> parse_redeye(std::string paramstring);
 std::map<std::string,std::string> parse_resize(std::string paramstring);
 std::map<std::string,std::string> parse_rotate(std::string paramstring);

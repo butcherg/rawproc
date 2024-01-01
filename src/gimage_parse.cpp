@@ -806,7 +806,8 @@ std::map<std::string,std::string> parse_hlrecover(std::string paramstring)
 //img <li><b>:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby </b> - param=value format.</li>
 //img </ul>
 //img </li><br>
-#ifdef USE_LENSFUN
+
+
 //laundrylist - lenscorrection:([ca][,vig][,dist][,autocrop])[,nearest|bilinear|lanczos3],[reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby)
 //nameval - lenscorrection:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby - 
 std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
@@ -860,7 +861,6 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 	pmap["cmdlabel"] = "lenscorrection";
 	return pmap;
 }
-#endif
 
 //img <li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
 //img </li><br>

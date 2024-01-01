@@ -42,17 +42,19 @@
 #include "PicProcessorAdd.h"
 #include "PicProcessorScript.h"
 #include "PicProcessorSpot.h"
+
 #ifdef USE_GMIC
 #include "PicProcessorGMIC.h"
 #endif
-#ifdef USE_LENSFUN
+
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
+
+#ifdef USE_LENSFUNUPDATEDB
 #include <lensfun/lensfun.h>
-#ifdef USE_LENSFUNUPDATE
+#endif
+
 #include "lensfun_dbupdate.h"
-#endif
-#endif
 #include "PicProcessorDemosaic.h"
 #include "myHistogramDialog.h"
 #include "myBatchDialog.h"
@@ -130,11 +132,9 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 #ifdef USE_GMIC
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
 #endif
-#ifdef USE_LENSFUN
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUNDBUPDATE
 	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
-#endif
 #endif
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
 	EVT_MENU(ID_MNU_TOOLLIST, rawprocFrm::MnuToolList)
@@ -304,7 +304,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EDITMETADATA, _("Edit Metadata..."), _(""), wxITEM_NORMAL);
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUNDBUPDATE
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
@@ -334,9 +334,7 @@ void rawprocFrm::CreateGUIControls()
 	//disable - figure out hlrecover
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
 #endif
-#ifdef USE_LENSFUN
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
-#endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
@@ -750,7 +748,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 //ToDo: expand to include camconst.json, elle's profiles?  Maybe even a rawproc.conf...
 void rawprocFrm::MnuData(wxCommandEvent& event)
 {
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUNUPDATEDB
 	SetStatusText("Updating lensfun database...");
 	std::string lensfundbpath;
 	
@@ -804,7 +802,6 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 #ifdef USE_GMIC
 	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
 #endif
-#ifdef USE_LENSFUN
 	else if (name == "lenscorrection")	{
 		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
 		if (lfdb)
@@ -812,7 +809,6 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 		else
 			return id;
 	}
-#endif
 	else if (name == "demosaic")		p = new PicProcessorDemosaic("demosaic", command, commandtree, pic);
 	else return id;
 	id = p->GetId();
@@ -2203,8 +2199,6 @@ void rawprocFrm::MnuColorSpace(wxCommandEvent& event)
 	}
 }
 
-
-#ifdef USE_LENSFUN
 void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 {
 	if (commandtree->IsEmpty()) return;
@@ -2229,7 +2223,6 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));
 	}
 }
-#endif
 
 void rawprocFrm::MnuDemosaic(wxCommandEvent& event)
 {
@@ -2431,19 +2424,16 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString WxWidgetsVersion = wxString::Format("%s %d.%d.%d", wxversion.GetName(), wxversion.GetMajor(), wxversion.GetMinor(), wxversion.GetMicro());
 	wxString libraries = wxString(gImage::LibraryVersions());
 
-#ifdef USE_LENSFUN
 	libraries.Append(wxString::Format("\nLensfun: %d.%d.%d",LF_VERSION_MAJOR,LF_VERSION_MINOR,LF_VERSION_MICRO));
-#endif
 	wxString pixtype = wxString(gImage::getRGBCharacteristics());
 
 	wxString description(wxString::Format(_("Basic camera raw file and image editor.\n\nLibraries:\n%s\n%s\n\nPixel Format: %s\n\nConfiguration file: %s"), WxWidgetsVersion, libraries.c_str(),pixtype, configfile));
 
-#ifdef USE_LENSFUN
 	std::string lensfundbpath = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
 	wxString lensfundb = "Lensfun Database";
 	lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUNDBUPDATE
 	//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
 	if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
 		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {
@@ -2455,7 +2445,6 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	}
 #endif
 	description.Append(wxString::Format(_("\n%s"), lensfundb));
-#endif
 
 #ifdef BUILDDATE
 	wxString builddate = wxString(BUILDDATE);

@@ -209,9 +209,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuHLRecover(wxCommandEvent& event);
 	void MnuWhiteBalance(wxCommandEvent& event);
 	void MnuToolList(wxCommandEvent& event);
-#ifdef USE_LENSFUN
 	void MnuLensCorrection(wxCommandEvent& event);
-#endif
 #ifdef USE_GMIC
 	void MnuGMIC(wxCommandEvent& event);
 #endif

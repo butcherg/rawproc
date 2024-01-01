@@ -61,9 +61,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 #endif
 	else if (command == "gray") params = parse_gray(parms);
 	else if (command == "hlrecover") params = parse_hlrecover(parms);
-#ifdef USE_LENSFUN
 	else if (command == "lenscorrection") params = parse_lenscorrection(parms);
-#endif
 	else if (command == "redeye") params = parse_redeye(parms);
 	else if (command == "resize") params = parse_resize(parms);
 	else if (command == "rotate") params = parse_rotate(parms);
@@ -106,9 +104,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 #endif
 	else if (command == "gray") result =  process_gray(dib, params);
 	else if (command == "hlrecover") result =  process_hlrecover(dib, params);
-#ifdef USE_LENSFUN
 	else if (command == "lenscorrection") result =  process_lenscorrection(dib, params);
-#endif
 	else if (command == "redeye") result =  process_redeye(dib, params);
 	else if (command == "resize") result =  process_resize(dib, params);
 	else if (command == "rotate") result =  process_rotate(dib, params);
