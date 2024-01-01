@@ -100,17 +100,11 @@ processing in Raw Therapee and GIMP.
 If  you want to gripe or comment about rawproc, I'll be occasionally monitoring the pixels.us forums.  If I subsequently 
 commit anything interesting to the respository, I'll shout it out there.
 
-# Building a github Checkout
+# Building rawproc
 
-If you clone the github repository, do these things first:
+As of 2023-12-31, rawproc now has a CMake build system.  Along with it, rawproc was scrubbed to be able to use wxWidgets 3.0, the current version available in the Ubuntu/Debian package repositories.  Accordingly, you can now compile rawproc with (mostly) operating system packages, no need to compile wxWidgets (!)
 
-<pre>
-aclocal
-autoconf
-automake --add-missing
-</pre>
-
-Now, you have the files to proceed with ./configure... make... etc.
+The build instructions are now oriented to the new build system, but I'm leaving the autotools scripts in-place for the time being.
 
 ## Prerequisites:
 
@@ -119,13 +113,19 @@ First, C++17 is necessary after commit #133d19, 2022-05-23.  gcc 11 uses it by d
 If you're on a Debian/Ubuntu or derivatives, install these packages:
 
 <pre>
-sudo apt-get install libjpeg-dev libtiff-dev libpng-dev liblcms2-dev libraw-dev
+sudo apt-get install libjpeg-dev libtiff-dev libpng-dev libwxgtk3.0-gtk3-dev liblcms2-dev libraw-dev liblensfun-dev liblensfun-data-v1 libexiv2-dev
 </pre>
 
-If you enable lensfun:
+If you enable lensfun_dbupdate:
 
 <pre>
-sudo apt-get install liblensfun-dev libcurl4-openssl-dev libarchive-dev
+sudo apt-get libcurl4-openssl-dev libarchive-dev
+</pre>
+
+If you enable G'MIC (using the library, not the script):
+
+<pre>
+sudo apt-get libgmic-dev
 </pre>
 
 If you want to enjoy the fruits of librtprocess, the nascent effort to package the Raw Therapee
@@ -134,23 +134,10 @@ demosaic routines, you'll at present need to compile and install librtprocess fr
 https://github.com/CarVac/librtprocess
 
 Instructions to do so are in the librtprocess README.  Once you've done that, you'll be able to use
---enable-librtprocess in rawproc's ./configure.  Otherwise, the demosaic tool will only allow the
+-DLIBRTPROCESS=ON in rawproc's cmake command.  Otherwise, the demosaic tool will only allow the
 internal algorithms half, half_resize, and color.
 
-Next, if you want to compile rawproc, get the wxWidgets sources and do a static compile:
-
-<pre>
-wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.2/wxWidgets-3.1.2.tar.bz2
-tar -xjvf wxWidgets-3.1.2.tar.bz2
-cd wxWidgets-3.1.2/
-mkdir build-linux
-cd build-linux
-../configure --disable-shared --enable-unicode --disable-debug
-make
-</pre>
-
-You can make install wxWidgets, I find it just as convenient to use their
-wx-config script to link in-place. 
+The above will put the librtprocess include file, library, and cmake FIND module in /usr/local.  
 
 ## Building rawproc
 
@@ -160,17 +147,38 @@ do the following:
 <pre>
 mkdir build-linux
 cd build-linux
-../configure --enable-lensfun --enable-librtprocess --with-wx-config=/path/to/wxWidgets-3.1.2/build-linux/wx-config CXXFLAGS="-O3 --std=c++17"
+cmake ..
 make
+make doc
 sudo make install
 </pre>
 
-...and there you go, rawproc, img, and exif binaries will be installed in
-/usr/local/bin.
+...and there you go, rawproc, img, wxcmd, and exif binaries will be installed in /usr/local/bin.
 
-Note: -std=c++17 in CXXFLAGS is only needed for gcc versions >=8 and < 11.   
+If you installed librtprocess, put "-DLIBRTPROCESS=ON" in the cmake command before the ".."
 
-## Other Tasks
+If you installed libgmic, put "-DGMIC=ON" in the cmake command.
+
+if you installed libcurl and libarchive, put -DLENSFUNDBUPDATE=ON" in the cmake command.
+
+## Using Static Libraries
+
+The OS distros don't usually keep up with the libraries you'd like to see current, like Libraw.  Accordingly, I've build in the CMake build system the capability to point to self-compiled libraries in arbitrary locations.  To do this, in the cmake command include the appropriate *FLAGS and *LIB entries for the library(s) you've previously compiled.  The available libraries to use for this option are:
+
+- LittleCMS2: LCMS2FLAGS and LCMS2LIB
+- Libraw: LIBRAWFLAGS and LIBRAWLIB
+- Lensfun: LENSFULFLAGS and LENSFUNLIB
+- exiv2: EXIV2FLAGS and EXIV2LIB
+- G'MIC: GMICFLAGS and GMICLIB
+- librtprocess: LIBRTPROCESSFLAGS and LIBRTPROCESSLIB
+
+To use this option, for, say, LIbraw, run cmake like this:
+
+    cmake -DLIBRAWFLAGS=-I<path to Libraw include directory> -DLIBRAWLIB=<path to Libraw library file> ..
+
+If BOTH of those -D options are defined, the OS package search will be bypassed in favor of your specification.
+
+## Other Tasks (not current)
 
 If you're building from source in either Linux or MSYS2, you'll also need to build and manually install your configuration and help files.  In the build directory:
 
