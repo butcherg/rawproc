@@ -155,11 +155,11 @@ sudo make install
 
 ...and there you go, rawproc, img, wxcmd, and exif binaries will be installed in /usr/local/bin.
 
-If you installed librtprocess, put "-DLIBRTPROCESS=ON" in the cmake command before the ".."
+If you want librtprocess and have installed librtprocess, put `-DLIBRTPROCESS=ON` in the cmake command before the ".."
 
-If you installed libgmic, put "-DGMIC=ON" in the cmake command.
+If you want G'MIC and have installed libgmic, put `-DGMIC=ON` in the cmake command.
 
-if you installed libcurl and libarchive, put -DLENSFUNDBUPDATE=ON" in the cmake command.
+if you want in-program lensfun update and have installed libcurl and libarchive, put `-DLENSFUNDBUPDATE=ON` in the cmake command.
 
 ## Using Self-Built Static Libraries
 
