@@ -161,7 +161,9 @@ If you installed libgmic, put "-DGMIC=ON" in the cmake command.
 
 if you installed libcurl and libarchive, put -DLENSFUNDBUPDATE=ON" in the cmake command.
 
-## Using Static Libraries
+## Using Self-Built Static Libraries
+
+<b>NOTE: This really doesn't work so well in CMake.  I'm going to leave it in, but I caution anyone who tries to use it.  GMIC is excepted, as that's the only way I've found to point to it.  For the meantime, I'm going to continue using the Autotools build system for my static linking...</b>
 
 The OS distros don't usually keep up with the libraries you'd like to see current, like Libraw.  Accordingly, I've build in the CMake build system the capability to point to self-compiled libraries in arbitrary locations.  To do this, in the cmake command include the appropriate *FLAGS and *LIB entries for the library(s) you've previously compiled.  The available libraries to use for this option are:
 
