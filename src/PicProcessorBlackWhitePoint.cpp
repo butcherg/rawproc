@@ -355,6 +355,7 @@ class BlackWhitePointPanel: public PicProcPanel
 
 PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display): PicProcessor(name, command,  tree, display) 
 {
+/*
 	int i;
 	double blk, wht;
 	wht = 255; blk = 0;
@@ -368,7 +369,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	long whtinitial = atoi(myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.whiteinitialvalue","255").c_str());
 	//parm tool.blackwhitepoint.automode: The calculation mode for auto.  tone=find the points based on the tone; min=find the points based on the min of the channel maxes. Default: tone
 	wxString automode = myConfig::getConfig().getValueOrDefault("tool.blackwhitepoint.automode","tone").c_str();
-	
+
 	if (command == "") {
 		std::vector<double> bwpts;
 		if (automode=="min")
@@ -381,8 +382,9 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 	}
 	else {
 		wxArrayString p = split(command,",");
+		printf("command: %s\n", command.ToStdString().c_str());
 		if ((p[0] == "rgb") | (p[0] == "red") | (p[0] == "green") | (p[0] == "blue")) {
-			if (p.GetCount() == 2) {
+			if (p.GetCount() == 1) {
 				std::vector<double> bwpts = getPreviousPicProcessor()->getProcessedPic().CalculateBlackWhitePoint(blkthresh, whtthresh, true, whtinitial, std::string(p[0].c_str()));
 				blk = bwpts[0];
 				wht = bwpts[1];
@@ -398,6 +400,7 @@ PicProcessorBlackWhitePoint::PicProcessorBlackWhitePoint(wxString name, wxString
 		}
 //		setParams(command);
 	}
+	*/
 }
 
 void PicProcessorBlackWhitePoint::createPanel(wxSimplebook* parent)
