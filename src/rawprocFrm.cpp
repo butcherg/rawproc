@@ -50,7 +50,7 @@
 #include "PicProcessorLensCorrection.h"
 #include <locale.h>
 
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUN_DBUPDATE
 #include <lensfun/lensfun.h>
 #endif
 
@@ -133,7 +133,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
 #endif
 	EVT_MENU(ID_MNU_LENSCORRECTION, rawprocFrm::MnuLensCorrection)
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUN_DBUPDATE
 	EVT_MENU(ID_MNU_DATAUPDATE,rawprocFrm::MnuData)
 #endif
 	EVT_MENU(ID_MNU_DEMOSAIC, rawprocFrm::MnuDemosaic)
@@ -304,7 +304,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_PROPERTIES,_("Properties..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EXIF, _("EXIF..."), _(""), wxITEM_NORMAL);
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_EDITMETADATA, _("Edit Metadata..."), _(""), wxITEM_NORMAL);
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUN_DBUPDATE
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_DATAUPDATE, _("Data update..."), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_EDITMnu_Obj->Append(ID_MNU_BATCH, _("Batch..."), _(""), wxITEM_NORMAL);
@@ -748,7 +748,7 @@ void rawprocFrm::EXIFDialog(wxFileName filename)
 //ToDo: expand to include camconst.json, elle's profiles?  Maybe even a rawproc.conf...
 void rawprocFrm::MnuData(wxCommandEvent& event)
 {
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUN_DBUPDATE
 	SetStatusText("Updating lensfun database...");
 	std::string lensfundbpath;
 	
@@ -2433,7 +2433,7 @@ void rawprocFrm::MnuAbout1011Click(wxCommandEvent& event)
 	wxString lensfundb = "Lensfun Database";
 	lensfundb.Append(wxString::Format(": %s",wxString(lensfundbpath)));
 
-#ifdef USE_LENSFUNUPDATE
+#ifdef USE_LENSFUN_DBUPDATE
 	//parm app.about.lensdatabasecheck: 1|0, if set, the lensfun database version will be checked against the server. Default: 1
 	if (myConfig::getConfig().getValueOrDefault("app.about.lensdatabasecheck","1") == "1") {
 		switch (lensfun_dbcheck(LF_MAX_DATABASE_VERSION, lensfundbpath)) {

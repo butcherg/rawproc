@@ -24,11 +24,11 @@ if(GMIC)
 	)
 endif(GMIC)
 
-if(LENSFUNDBUPDATE)
+if(LENSFUN_DBUPDATE)
 	target_sources(rawproc PUBLIC
 		lensfun_dbupdate.cpp
 	)
-endif(LENSFUNDBUPDATE)
+endif(LENSFUN_DBUPDATE)
 
 target_include_directories(rawproc PRIVATE ".")
 target_include_directories(rawproc PRIVATE "gimage")

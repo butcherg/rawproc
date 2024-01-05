@@ -19,9 +19,9 @@ if (LIBRTPROCESS)
 	add_compile_options(-DUSE_LIBRTPROCESS)
 endif(LIBRTPROCESS)
 
-if (LENSFUNDBUPDATE)
-	add_compile_options(-DUSE_LENSFUNDBUPDATE)
-endif(LENSFUNDBUPDATE)
+if (LENSFUN_DBUPDATE)
+	add_compile_options(-DUSE_LENSFUN_DBUPDATE)
+endif(LENSFUN_DBUPDATE)
 
 
 
@@ -273,7 +273,7 @@ if (LIBRTPROCESS)
 endif (LIBRTPROCESS)
 
 #lensfun dbupdate, require libcurl and libarchive:
-if(LENSFUNDBUPDATE)
+if(LENSFUN_DBUPDATE)
 	find_package(CURL REQUIRED)
 	include_directories(${CURL_INCLUDE_DIR})
 	target_link_libraries(rawproc ${CURL_LIBRARIES})
@@ -281,8 +281,13 @@ if(LENSFUNDBUPDATE)
 	find_package(LibArchive REQUIRED)
 	include_directories(${LibArchive_INCLUDE_DIR})
 	target_link_libraries(rawproc ${LibArchive_LIBRARIES})
-endif(LENSFUNDBUPDATE)
+endif(LENSFUN_DBUPDATE)
 
+if(WIN32)
+	target_link_libraries(rawproc wsock32 ws2_32)
+	target_link_libraries(img wsock32 ws2_32)
+	target_link_libraries(exif wsock32 ws2_32)
+endif(WIN32)
 
 if (LCMS2LFLAGS)
 	add_link_options(${LCMS2LFLAGS})
@@ -292,9 +297,9 @@ if (LIBRAWLFLAGS)
 	add_link_options(${LIBRAWLFLAGS})
 endif(LIBRAWLFLAGS)
 
-#if (LENSFUNLFLAGS)
-#	add_link_options(${LENSFUNLFLAGS})
-#endif(LENSFUNLFLAGS)
+if (LENSFUNLFLAGS)
+	add_link_options(${LENSFUNLFLAGS})
+endif(LENSFUNLFLAGS)
 
 if (EXIV2LFLAGS)
 	add_link_options(${EXIV2LFLAGS})
