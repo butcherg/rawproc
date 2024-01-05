@@ -39,6 +39,7 @@ bool rawprocFrmApp::OnInit()
 	wxString fname;
 	wxString psep = wxFileName::GetPathSeparator();
 
+	wxDisableAsserts();
 	wxInitAllImageHandlers();
 	wxFileSystem::AddHandler(new wxZipFSHandler);
 	
