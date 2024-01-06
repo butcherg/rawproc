@@ -18,11 +18,11 @@ target_sources(exif PUBLIC
 	exif.cpp curve.cpp elapsedtime.cpp gimage.cpp jpegexif.cpp jpegimage.cpp myConfig.cpp pngimage.cpp rawimage.cpp strutil.cpp fileutil.cpp tiffimage.cpp cJSON.c
 	)
 	
-if(GMIC)
+if(GMIC OR (GMICINC AND GMICLIB))
 	target_sources(rawproc PUBLIC
 		PicProcessorGMIC.cpp PicProcessorGMIC.h
 	)
-endif(GMIC)
+endif(GMIC OR (GMICINC AND GMICLIB))
 
 if(LENSFUN_DBUPDATE)
 	target_sources(rawproc PUBLIC
