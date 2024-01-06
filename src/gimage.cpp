@@ -1036,8 +1036,8 @@ std::string gImage::LibraryVersions()
 	verstring.append("\nLittleCMS2: ");
 	std::ostringstream s;
 	s << (int) cmsGetEncodedCMMversion();
-#if USE_LCMS2_FASTFLOAT
-	s << "(w/fastfloat)";
+#ifdef USE_LCMS_FASTFLOAT
+	s << " (w/fastfloat)";
 #endif
 	verstring.append(s.str());
 	verstring.append("\nExiv2: ");
