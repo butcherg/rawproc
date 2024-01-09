@@ -33,6 +33,10 @@
 #define LF_0395
 #endif
 
+#if LF_VERSION == ((0 << 24) | (3 << 16) | (99 << 8) | 0)
+#define LF_0399
+#endif
+
 #define PI            3.14159265358979323846
 #ifndef M_PI
 #define M_PI PI
@@ -5307,7 +5311,7 @@ GIMAGE_ERROR gImage::lensfunLoadLensDatabase(std::string lensfundatadir, lfDatab
 	lensfundatadir.append(string_format("/version_%d", LF_MAX_DATABASE_VERSION));
 
 	if (!lensfundatadir.empty()) {
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 		e = (*ldb)->Load(lensfundatadir.c_str());
 		if (e == LF_NO_DATABASE) g = GIMAGE_LF_NO_DATABASE; 
 		if (e == LF_WRONG_FORMAT) g = GIMAGE_LF_WRONG_FORMAT;  
@@ -5382,7 +5386,7 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 	lns = lenses [0];
 	
 	float crop = cam->CropFactor;
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 	int mods =  lns->AvailableModifications(crop);
 #else
 	int mods =  LF_MODIFY_TCA | LF_MODIFY_VIGNETTING | LF_MODIFY_DISTORTION | LF_MODIFY_GEOMETRY | LF_MODIFY_SCALE;
@@ -5435,7 +5439,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	lf_free (lenses);
 	
 				
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 	lfModifier *mod = new lfModifier (lns, atof(imginfo["FocalLength"].c_str()), cam->CropFactor, getWidth(), getHeight(), LF_PF_F32, false);
 
 	// Enable desired modifications
@@ -5555,7 +5559,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 			}
 		}
 	}
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 	delete mod;
 #else
 	mod->Destroy();

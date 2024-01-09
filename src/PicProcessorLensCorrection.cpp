@@ -31,6 +31,10 @@
 #define LF_0395
 #endif
 
+#if LF_VERSION == ((0 << 24) | (3 << 16) | (99 << 8) | 0)
+#define LF_0399
+#endif
+
 
 class LensCorrectionPanel: public PicProcPanel
 {
@@ -296,7 +300,7 @@ lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
 	lensfundatadir.append(string_format("/version_%d", LF_MAX_DATABASE_VERSION));
 
 	if (lensfundatadir != "") {
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 		e = lfdb->Load(lensfundatadir.c_str());
 		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s."),wxString(lensfundatadir)));
 		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect."),wxString(lensfundatadir)));
@@ -477,7 +481,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 					if (cp["algo"] == "lanczos3") dib->initInterpolation(FILTER_LANCZOS3);
 				}
 				
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 /*"old" 0.3.95:
 				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
 
@@ -617,7 +621,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 						}
 					}
 				}
-#ifdef LF_0395
+#if defined LF_0395 || defined LF_0399
 				delete mod;
 #else
 				mod->Destroy();
