@@ -11,35 +11,17 @@ string(TIMESTAMP BUILDDATE)
 add_compile_options(-ggdb -DVERSION="1.3"  -DBUILDDATE="${BUILDDATE}")
 #add_link_options(-lz)
 
-if (LCMS2CFLAGS)
-	add_compile_options(${LCMS2CFLAGS})
-endif(LCMS2CFLAGS)
+option(BUILD_LENSFUN "download and build lensfun instead of using installed package" OFF)
+option(BUILD_LIBRAW "download and build libraw instead of using installed package" OFF)
+option(BUILD_EXIV2 "download and build exiv2 instead of using installed package" OFF)
 
-if (LIBRAWCFLAGS)
-	add_compile_options(${LIBRAWCFLAGS})
-endif(LIBRAWCFLAGS)
-
-#if (LENSFUNCFLAGS)
-#	add_compile_options(${LENSFUNCFLAGS})
-#endif(LENSFUNCFLAGS)
-
-if (EXIV2CFLAGS)
-	add_compile_options(${EXIV2CFLAGS})
-endif(EXIV2CFLAGS)
-
-if (GMICCFLAGS)
-	add_compile_options(${GMICCFLAGS})
-endif(GMICCFLAGS)
-
-if (LIBRTPROCESSFLAGS)
-	add_compile_options(${LIBRTPROCESSFLAGS})
-endif(LIBRTPROCESSFLAGS)
 
 add_executable(rawproc src/rawprocApp.cpp)
 add_executable(img src/img.cpp)
 add_executable(wxcmd src/wxcmd.cpp)
 add_executable(exif src/exif.cpp)
 
+# make doc:
 add_custom_target(doc 	
 	COMMAND
 		bash -c "zip -v -r -j rawprocdoc.zip \
@@ -137,16 +119,33 @@ else()
 endif(LCMS2INC AND LCMS2LIB)
 
 #Libraw:
-if (LIBRAWINC AND LIBRAWLIB)
-	include_directories ("${LIBRAWINC}")
-	target_link_libraries(rawproc "${LIBRAWLIB}")
-	target_link_libraries(img "${LIBRAWLIB}")
-	target_link_libraries(img "${LIBRAWLIB}")
-	if (LIBRAWFLAGS)
-		message(STATUS "Libraw hand-configured with LIBRAWFLAGS, LIBRAWINC and LIBRAWLIB")
-	else()
-		message(STATUS "Libraw hand-configured with LIBRAWINC and LIBRAWLIB")
-	endif (LIBRAWFLAGS)
+if (BUILD_LIBRAW)
+	message(STATUS "Configuring libraw 0.21.1 as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(libraw_download
+		PREFIX external/libraw
+		URL	https://www.libraw.org/data/LibRaw-0.21.2.tar.gz
+		#URL	https://www.libraw.org/data/LibRaw-0.20.2.tar.gz
+		DOWNLOAD_NO_PROGRESS true
+		CONFIGURE_COMMAND ../libraw_download/configure --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples
+		INSTALL_COMMAND make install DESTDIR=${CMAKE_CURRENT_BINARY_DIR}/external
+		
+	)
+	#set(LIBRAW_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/libraw/src/libraw_download/libraw)
+	#set(LIBRAW_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/libraw/src/libraw_download-build/lib/.libs)
+	
+	set(LIBRAW_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/local/include)
+	set(LIBRAW_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/local/lib)
+	
+	add_library(libraw SHARED IMPORTED)
+	set_target_properties(libraw PROPERTIES IMPORTED_LOCATION ${LIBRAW_LIB_DIR}/libraw.a)
+	set(LIBRAW_FOUND TRUE)
+	add_dependencies(rawproc libraw_download)
+	
+	include_directories(${LIBRAW_INCLUDE_DIR})
+	target_link_libraries(rawproc libraw -lz -lm)
+	target_link_libraries(img libraw -lz -lm)
+	target_link_libraries(exif libraw -lz -lm)
 	
 else()
 	pkg_check_modules(LIBRAW REQUIRED libraw)
@@ -158,30 +157,33 @@ else()
 	else()
 		message(STATUS "libraw not found")
 	endif(LIBRAW_FOUND)
-endif(LIBRAWINC AND LIBRAWLIB)
+endif(BUILD_LIBRAW)
 
 #Lensfun:
-if (LENSFUNINC AND LENSFUNLIB)
-	if (LENSFUNCFLAGS)
-		target_compile_options(rawproc PRIVATE ${LENSFUNCFLAGS})
-		target_compile_options(img PRIVATE ${LENSFUNCFLAGS})
-		target_compile_options(exif PRIVATE ${LENSFUNCFLAGS})
-	endif(LENSFUNCFLAGS)
-	if (LENSFUNLFLAGS)
-		target_link_options(rawproc PRIVATE ${LENSFUNLFLAGS})
-		target_link_options(img PRIVATE ${LENSFUNLFLAGS})
-		target_link_options(exif PRIVATE ${LENSFUNLFLAGS})
-	endif(LENSFUNLFLAGS)
-	include_directories ("${LENSFUNINC}")
-	target_link_libraries(rawproc "${LENSFUNLIB}")
-	target_link_libraries(img "${LENSFUNLIB}")
-	target_link_libraries(exif "${LENSFUNLIB}")
-	if (LENSFUNFLAGS)
-		message(STATUS "Lensfun hand-configured with LENSFUNFLAGS, LENSFUNINC and LENSFUNLIB")
-	else()
-		message(STATUS "Lensfun hand-configured with LENSFUNINC and LENSFUNLIB")
-	endif (LENSFUNFLAGS)
+
+
+if (BUILD_LENSFUN)
+	message(STATUS "Configuring lensfun 0.3.99 (last code commit) as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(lensfun_download
+		PREFIX external/lensfun
+		GIT_REPOSITORY    https://github.com/lensfun/lensfun.git
+		GIT_TAG           35c0017
+		GIT_PROGRESS      ON
+		CMAKE_ARGS -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_STATIC=ON -DCMAKE_INSTALL_PREFIX:PATH=external
+	)
+	set(LENSFUN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lensfun/src/lensfun_download-build/external/include)
+	set(LENSFUN_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lensfun/src/lensfun_download-build/libs/lensfun)
 	
+	add_library(lensfun SHARED IMPORTED)
+	set_target_properties(lensfun PROPERTIES IMPORTED_LOCATION ${LENSFUN_LIB_DIR}/liblensfun.a)
+	set(LENSFUN_FOUND TRUE)
+	add_dependencies(rawproc lensfun_download)
+	
+	include_directories(${LENSFUN_INCLUDE_DIR})
+	target_link_libraries(rawproc lensfun -lglib-2.0)
+	target_link_libraries(img lensfun -lglib-2.0)
+	target_link_libraries(exif lensfun -lglib-2.0)
 else()
 	pkg_check_modules(LENSFUN REQUIRED lensfun)
 	if (LENSFUN_FOUND)
@@ -192,19 +194,39 @@ else()
 	else()
 		message(STATUS "lensfun not found")
 	endif(LENSFUN_FOUND)
-endif (LENSFUNINC AND LENSFUNLIB)
+endif(BUILD_LENSFUN)
+
+
 
 #exiv2:
-if (EXIV2INC AND EXIV2LIB)
-	include_directories ("${EXIV2INC}")
-	target_link_libraries(rawproc "${EXIV2LIB}")
-	target_link_libraries(img "${EXIV2LIB}")
-	target_link_libraries(exif "${EXIV2LIB}")
-	if (EXIV2FLAGS)
-		message(STATUS "exiv2 hand-configured with EXIV2FLAGS, EXIV2INC and EXIV2LIB")
-	else()
-		message(STATUS "exiv2 hand-configured with EXIV2INC and EXIV2LIB")
-	endif (EXIV2FLAGS)
+if (BUILD_EXIV2)
+	message(STATUS "Configuring exiv2 0.27.1 as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(exiv2_download
+		PREFIX external/exiv2
+		GIT_REPOSITORY    https://github.com/Exiv2/exiv2.git
+		GIT_TAG           v0.27.7
+		GIT_PROGRESS      ON
+		CMAKE_ARGS   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DEXIV2_ENABLE_XMP=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF -DEXIV2_BUILD_SAMPLES=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
+	)
+	set(EXIV2_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/exiv2/src/exiv2_download-build/external/include)
+	set(EXIV2_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/exiv2/src/exiv2_download-build/external/lib)
+	
+	add_library(exiv2 SHARED IMPORTED)
+	set_target_properties(exiv2 PROPERTIES IMPORTED_LOCATION ${EXIV2_LIB_DIR}/libexiv2.a)
+	set(EXIV2_FOUND TRUE)
+	add_dependencies(rawproc exiv2_download)
+	
+	include_directories(${EXIV2_INCLUDE_DIR})
+	target_link_libraries(rawproc exiv2)
+	target_link_libraries(img exiv2)
+	target_link_libraries(exif exiv2)
+	
+	#for 0.27, take out if code upgraded to 0.28
+	target_compile_options(rawproc PRIVATE -Wno-deprecated-declarations)
+	target_compile_options(img PRIVATE -Wno-deprecated-declarations)
+	target_compile_options(exif PRIVATE -Wno-deprecated-declarations)
+	
 	
 else()
 	pkg_check_modules(EXIV2 REQUIRED exiv2)
@@ -216,7 +238,7 @@ else()
 	else()
 		message(STATUS "exiv2 not found")
 	endif(EXIV2_FOUND)
-endif (EXIV2INC AND EXIV2LIB)
+endif (BUILD_EXIV2)
 
 
 #Optional Features:
@@ -249,22 +271,30 @@ elseif(GMIC)
 		message(STATUS "gmic not found")
 	endif(GMIC_FOUND)
 endif (GMICINC AND GMICLIB)
-
-#librtprocess:
-if (LIBRTPROCESSINC AND LIBRTPROCESSLIB)
-	target_compile_options(rawproc PRIVATE -DUSE_LIBRTPROCESS)
-	target_compile_options(img PRIVATE -DUSE_LIBRTPROCESS)
-	target_compile_options(exif PRIVATE -DUSE_LIBRTPROCESS)
-	include_directories("${LIBRTPROCESSINC}")
-	target_link_libraries(rawproc "${LIBRTPROCESSLIB}")
-	target_link_libraries(img "${LIBRTPROCESSLIB}")
-	target_link_libraries(exif "${LIBRTPROCESSLIB}")
 	
-	if (LIBRTPROCESSFLAGS)
-		message(STATUS "LIBRTPROCESSFLAGS hand-configured with LIBRTPROCESSFLAGS, LIBRTPROCESSINC and LIBRTPROCESSLIB")
-	else()
-		message(STATUS "LIBRTPROCESSFLAGS hand-configured with LIBRTPROCESSINC and LIBRTPROCESSLIB")
-	endif (LIBRTPROCESSFLAGS)
+	
+if (BUILD_LIBRTPROCESS)
+	message(STATUS "Configuring librtprocess as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(librtprocess_download
+		PREFIX external/librtprocess
+		GIT_REPOSITORY   https://github.com/CarVac/librtprocess.git
+		GIT_TAG           0.12.0
+		GIT_PROGRESS      ON
+		CMAKE_ARGS   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
+	)
+	set(LIBRTPROCESS_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/include)
+	set(LIBRTPROCESS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/lib)
+	
+	add_library(librtprocess SHARED IMPORTED)
+	set_target_properties(librtprocess PROPERTIES IMPORTED_LOCATION ${LIBRTPROCESS_LIB_DIR}/librtprocess.a)
+	set(LIBRTPROCESS_FOUND TRUE)
+	add_dependencies(rawproc librtprocess_download)
+	
+	include_directories(${LIBRTPROCESS_INCLUDE_DIR})
+	target_link_libraries(rawproc librtprocess)
+	target_link_libraries(img librtprocess)
+	target_link_libraries(exif librtprocess)	
 elseif(LIBRTPROCESS)
 	pkg_check_modules(LIBRTPROCESS REQUIRED rtprocess)
 	if (LIBRTPROCESS_FOUND)
@@ -276,9 +306,9 @@ elseif(LIBRTPROCESS)
 		target_link_libraries(img ${LIBRTPROCESS_LIBRARIES})
 		target_link_libraries(exif ${LIBRTPROCESS_LIBRARIES})
 	else()
-		message(STATUS "gmic not found")
+		message(STATUS "librtprocess not found")
 	endif(LIBRTPROCESS_FOUND)
-endif (LIBRTPROCESSINC AND LIBRTPROCESSLIB)
+endif (BUILD_LIBRTPROCESS)
 
 
 #lensfun dbupdate, require libcurl and libarchive:
@@ -295,32 +325,15 @@ if(LENSFUN_DBUPDATE)
 	
 endif(LENSFUN_DBUPDATE)
 
+#Just put it in at the end...
+target_link_libraries(rawproc -lz)
+target_link_libraries(img -lz)
+target_link_libraries(exif -lz)
+
 if(WIN32)
 	target_link_libraries(rawproc wsock32 ws2_32)
 	target_link_libraries(img wsock32 ws2_32)
 	target_link_libraries(exif wsock32 ws2_32)
 endif(WIN32)
 
-if (LCMS2LFLAGS)
-	add_link_options(${LCMS2LFLAGS})
-endif(LCMS2LFLAGS)
 
-if (LIBRAWLFLAGS)
-	add_link_options(${LIBRAWLFLAGS})
-endif(LIBRAWLFLAGS)
-
-if (LENSFUNLFLAGS)
-	add_link_options(${LENSFUNLFLAGS})
-endif(LENSFUNLFLAGS)
-
-if (EXIV2LFLAGS)
-	add_link_options(${EXIV2LFLAGS})
-endif(EXIV2LFLAGS)
-
-if (GMICLFLAGS)
-	add_link_options(${GMICLFLAGS})
-endif(GMICLFLAGS)
-
-if (LIBRTPROCESSLFLAGS)
-	add_link_options(${LIBRTPROCESSLFLAGS})
-endif(LIBRTPROCESSLFLAGS)
