@@ -11,9 +11,11 @@ string(TIMESTAMP BUILDDATE)
 add_compile_options(-ggdb -DVERSION="1.3"  -DBUILDDATE="${BUILDDATE}")
 #add_link_options(-lz)
 
+option(BUILD_LCMS2 "download and build littlecms2 instead of using installed package" OFF)
 option(BUILD_LENSFUN "download and build lensfun instead of using installed package" OFF)
 option(BUILD_LIBRAW "download and build libraw instead of using installed package" OFF)
 option(BUILD_EXIV2 "download and build exiv2 instead of using installed package" OFF)
+option(BUILD_LIBRTPROCESS "download and build librtprocess instead of using installed package" OFF)
 
 
 add_executable(rawproc src/rawprocApp.cpp)
@@ -82,24 +84,39 @@ target_link_libraries(exif ${PNG_LIBRARIES})
 
 
 #LittleCMS2:
-if (LCMS2INC AND LCMS2LIB)
-	include_directories ("${LCMS2INC}")
-	target_link_libraries(rawproc "${LCMS2LIB}")
-	target_link_libraries(img "${LCMS2LIB}")
-	target_link_libraries(exif "${LCMS2LIB}")
-	if (LCMS2_FASTFLOATLIB)
-		target_link_libraries(rawproc "${LCMS2_FASTFLOATLIB}")
-		target_link_libraries(img "${LCMS2_FASTFLOATLIB}")
-		target_compile_options(rawproc PRIVATE -DUSE_LCMS_FASTFLOAT)
-		target_compile_options(img PRIVATE -DUSE_LCMS_FASTFLOAT)
-		target_compile_options(exif PRIVATE -DUSE_LCMS_FASTFLOAT)
-		message(STATUS "LittleCMS2 FAST FLOAT enabled...")
-	endif (LCMS2_FASTFLOATLIB)
-	if (LCMS2FLAGS)
-		message(STATUS "LittleCMS2 hand-configured with LCMS2FLAGS, LCMS2INC and LCMS2LIB")
-	else()
-		message(STATUS "LittleCMS2 hand-configured with LCMS2INC and LCMS2LIB")
-	endif (LCMS2FLAGS)
+if (BUILD_LCMS2)
+	message(STATUS "Configuring lcms2 2.16 as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(lcms2_download
+		PREFIX external/lcms2
+		GIT_REPOSITORY    https://github.com/mm2/Little-CMS.git
+		GIT_TAG           453baf #lcms2.16
+		GIT_PROGRESS      ON
+		CONFIGURE_COMMAND ../lcms2_download/configure --enable-static --disable-shared --with-threads --with-fastfloat
+		INSTALL_COMMAND  ""   #make install DESTDIR=${CMAKE_CURRENT_BINARY_DIR}/external
+		
+	)
+	
+	set(LCMS2_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lcms2/src/lcms2_download/include)
+	set(LCMS2_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lcms2/src/lcms2_download-build/src/.libs)
+	set(LCMS2_FASTFLOAT_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lcms2/src/lcms2_download/plugins/fast_float/include)
+	set(LCMS2_LIB_FASTFLOAT_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lcms2/src/lcms2_download-build/plugins/fast_float/src/.libs)
+	
+	add_library(lcms2 STATIC IMPORTED)
+	add_library(lcms2_fastfloat STATIC IMPORTED)
+	set_target_properties(lcms2 PROPERTIES IMPORTED_LOCATION ${LCMS2_LIB_DIR}/liblcms2.a)
+	set_target_properties(lcms2_fastfloat PROPERTIES IMPORTED_LOCATION ${LCMS2_LIB_FASTFLOAT_DIR}/liblcms2_fast_float.a)
+	set(LCMS2_FOUND TRUE)
+	add_dependencies(rawproc lcms2_download)
+	
+	include_directories(${LCMS2_INCLUDE_DIR} ${LCMS2_FASTFLOAT_INCLUDE_DIR})
+	target_link_libraries(rawproc lcms2 lcms2_fastfloat)
+	target_link_libraries(img lcms2 lcms2_fastfloat)
+	target_link_libraries(exif lcms2 lcms2_fastfloat)
+	
+	target_compile_options(rawproc PRIVATE -DUSE_LCMS_FASTFLOAT)
+	target_compile_options(img PRIVATE -DUSE_LCMS_FASTFLOAT)
+	target_compile_options(exif PRIVATE -DUSE_LCMS_FASTFLOAT)
 else()
 	pkg_check_modules(LCMS2 REQUIRED lcms2)
 	if (LCMS2_FOUND)
@@ -107,16 +124,16 @@ else()
 		target_link_libraries(rawproc ${LCMS2_LIBRARIES})
 		target_link_libraries(img ${LCMS2_LIBRARIES})
 		target_link_libraries(exif ${LCMS2_LIBRARIES})
-		if (LCMS2_FASTFLOAT)
+		#if (LCMS2_FASTFLOAT)
 			target_compile_options(rawproc PRIVATE -DUSE_LCMS_FASTFLOAT)
 			target_compile_options(img PRIVATE -DUSE_LCMS_FASTFLOAT)
 			target_compile_options(exif PRIVATE -DUSE_LCMS_FASTFLOAT)
 			message(STATUS "LittleCMS2 FAST FLOAT enabled...")
-		endif (LCMS2_FASTFLOAT)
+		#endif (LCMS2_FASTFLOAT)
 	else()
 		message(STATUS "lcms2 not found")
 	endif(LCMS2_FOUND)
-endif(LCMS2INC AND LCMS2LIB)
+endif(BUILD_LCMS2)
 
 #Libraw:
 if (BUILD_LIBRAW)
@@ -137,7 +154,7 @@ if (BUILD_LIBRAW)
 	set(LIBRAW_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/local/include)
 	set(LIBRAW_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/local/lib)
 	
-	add_library(libraw SHARED IMPORTED)
+	add_library(libraw STATIC IMPORTED)
 	set_target_properties(libraw PROPERTIES IMPORTED_LOCATION ${LIBRAW_LIB_DIR}/libraw.a)
 	set(LIBRAW_FOUND TRUE)
 	add_dependencies(rawproc libraw_download)
@@ -170,17 +187,22 @@ if (BUILD_LENSFUN)
 		GIT_REPOSITORY    https://github.com/lensfun/lensfun.git
 		GIT_TAG           35c0017
 		GIT_PROGRESS      ON
-		CMAKE_ARGS -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_STATIC=ON -DCMAKE_INSTALL_PREFIX:PATH=external
+		CMAKE_ARGS -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_STATIC=ON -DBUILD_TESTS=OFF -DBUILD_LENSTOOL=OFF -DINSTALL_PYTHON_MODULE=OFF -DINSTALL_HELPER_SCRIPTS=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
+		#INSTALL_COMMAND ""
 	)
-	set(LENSFUN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lensfun/src/lensfun_download-build/external/include)
-	set(LENSFUN_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lensfun/src/lensfun_download-build/libs/lensfun)
+	set(LENSFUN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external//lensfun/src/lensfun_download-build/external/include)
+	set(LENSFUN_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/lensfun/src/lensfun_download-build//external/lib)
+
 	
-	add_library(lensfun SHARED IMPORTED)
+	add_library(lensfun STATIC IMPORTED)
 	set_target_properties(lensfun PROPERTIES IMPORTED_LOCATION ${LENSFUN_LIB_DIR}/liblensfun.a)
 	set(LENSFUN_FOUND TRUE)
 	add_dependencies(rawproc lensfun_download)
 	
-	include_directories(${LENSFUN_INCLUDE_DIR})
+	#include_directories(${LENSFUN_INCLUDE_DIR})
+	target_include_directories(rawproc PRIVATE ${LENSFUN_INCLUDE_DIR})
+	target_include_directories(img PRIVATE ${LENSFUN_INCLUDE_DIR})
+	target_include_directories(exif PRIVATE ${LENSFUN_INCLUDE_DIR})
 	target_link_libraries(rawproc lensfun -lglib-2.0)
 	target_link_libraries(img lensfun -lglib-2.0)
 	target_link_libraries(exif lensfun -lglib-2.0)
@@ -205,14 +227,14 @@ if (BUILD_EXIV2)
 	ExternalProject_Add(exiv2_download
 		PREFIX external/exiv2
 		GIT_REPOSITORY    https://github.com/Exiv2/exiv2.git
-		GIT_TAG           v0.27.7
+		GIT_TAG           3c648b #v0.27.7
 		GIT_PROGRESS      ON
 		CMAKE_ARGS   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DEXIV2_ENABLE_XMP=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF -DEXIV2_BUILD_SAMPLES=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
 	)
 	set(EXIV2_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/exiv2/src/exiv2_download-build/external/include)
 	set(EXIV2_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/exiv2/src/exiv2_download-build/external/lib)
 	
-	add_library(exiv2 SHARED IMPORTED)
+	add_library(exiv2 STATIC IMPORTED)
 	set_target_properties(exiv2 PROPERTIES IMPORTED_LOCATION ${EXIV2_LIB_DIR}/libexiv2.a)
 	set(EXIV2_FOUND TRUE)
 	add_dependencies(rawproc exiv2_download)
@@ -279,14 +301,15 @@ if (BUILD_LIBRTPROCESS)
 	ExternalProject_Add(librtprocess_download
 		PREFIX external/librtprocess
 		GIT_REPOSITORY   https://github.com/CarVac/librtprocess.git
-		GIT_TAG           0.12.0
-		GIT_PROGRESS      ON
+		GIT_TAG          ed4501 #0.12.0
+		GIT_PROGRESS     ON
 		CMAKE_ARGS   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
+		install_command ""
 	)
 	set(LIBRTPROCESS_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/include)
 	set(LIBRTPROCESS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/lib)
 	
-	add_library(librtprocess SHARED IMPORTED)
+	add_library(librtprocess STATIC IMPORTED)
 	set_target_properties(librtprocess PROPERTIES IMPORTED_LOCATION ${LIBRTPROCESS_LIB_DIR}/librtprocess.a)
 	set(LIBRTPROCESS_FOUND TRUE)
 	add_dependencies(rawproc librtprocess_download)
@@ -294,8 +317,12 @@ if (BUILD_LIBRTPROCESS)
 	include_directories(${LIBRTPROCESS_INCLUDE_DIR})
 	target_link_libraries(rawproc librtprocess)
 	target_link_libraries(img librtprocess)
-	target_link_libraries(exif librtprocess)	
-elseif(LIBRTPROCESS)
+	target_link_libraries(exif librtprocess)
+	
+	target_compile_options(rawproc PRIVATE -DUSE_LIBRTPROCESS)
+	target_compile_options(img PRIVATE -DUSE_LIBRTPROCESS)
+	target_compile_options(exif PRIVATE -DUSE_LIBRTPROCESS)
+else()
 	pkg_check_modules(LIBRTPROCESS REQUIRED rtprocess)
 	if (LIBRTPROCESS_FOUND)
 		target_compile_options(rawproc PRIVATE -DUSE_LIBRTPROCESS)
