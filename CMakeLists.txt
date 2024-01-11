@@ -9,13 +9,14 @@ project(rawproc LANGUAGES CXX C)
 string(TIMESTAMP BUILDDATE)
 
 add_compile_options(-ggdb -DVERSION="1.3"  -DBUILDDATE="${BUILDDATE}")
-#add_link_options(-lz)
 
 option(BUILD_LCMS2 "download and build littlecms2 instead of using installed package" OFF)
 option(BUILD_LENSFUN "download and build lensfun instead of using installed package" OFF)
 option(BUILD_LIBRAW "download and build libraw instead of using installed package" OFF)
 option(BUILD_EXIV2 "download and build exiv2 instead of using installed package" OFF)
 option(BUILD_LIBRTPROCESS "download and build librtprocess instead of using installed package" OFF)
+option(LENSFUN_DBUPDATE "enable the code and library links to update the lensfun database from the menu.  Enables a network connection..." OFF)
+option(GMIC "enable the code and library links to use G'MIC in img and rawproc.  Requires libgmic to be installed in a system location." OFF)
 
 
 add_executable(rawproc src/rawprocApp.cpp)
@@ -38,29 +39,10 @@ add_subdirectory(src)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(rawproc  OpenMP::OpenMP_CXX)
+	target_link_libraries(rawproc  OpenMP::OpenMP_CXX)
 	target_link_libraries(img  OpenMP::OpenMP_CXX)
 	target_link_libraries(exif  OpenMP::OpenMP_CXX)
 endif()
-
-if(WXDIR)
-	execute_process(COMMAND bash -c "${WXDIR}/wx-config --cxxflags" OUTPUT_VARIABLE WX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-	execute_process(COMMAND bash -c "${WXDIR}/wx-config --libs base core propgrid aui html" OUTPUT_VARIABLE WX_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE )
-	list(APPEND CMAKE_CXX_FLAGS "${WX_FLAGS}")
-	target_link_libraries(rawproc ${WX_LIBS})
-	target_link_libraries(wxcmd ${WX_LIBS})
-	target_link_libraries(img ${WX_LIBS})
-	target_link_libraries(exif ${WX_LIBS})
-	message(STATUS "wxWidgets configured with wx-config at ${WXDIR}")
-else()
-	find_package(wxWidgets REQUIRED COMPONENTS std aui propgrid)
-	message(STATUS "includes: ${wxWidgets_USE_FILE}")
-	include(${wxWidgets_USE_FILE})
-	target_link_libraries(rawproc ${wxWidgets_LIBRARIES})
-	target_link_libraries(wxcmd ${wxWidgets_LIBRARIES})
-	target_link_libraries(img ${wxWidgets_LIBRARIES})
-	target_link_libraries(exif ${wxWidgets_LIBRARIES})
-endif(WXDIR)
 
 find_package(PkgConfig REQUIRED)
 
@@ -82,8 +64,29 @@ target_link_libraries(rawproc ${PNG_LIBRARIES})
 target_link_libraries(img ${PNG_LIBRARIES})
 target_link_libraries(exif ${PNG_LIBRARIES})
 
+#WxWidgets:
+#if WXDIR contains a path to a built wxWidgets library set, wx-config there will be used to provide the includes and libs.  Otherwise, a system package will be found.
+if(WXDIR)
+	execute_process(COMMAND bash -c "${WXDIR}/wx-config --cxxflags" OUTPUT_VARIABLE WX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+	execute_process(COMMAND bash -c "${WXDIR}/wx-config --libs base core propgrid aui html" OUTPUT_VARIABLE WX_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE )
+	list(APPEND CMAKE_CXX_FLAGS "${WX_FLAGS}")
+	target_link_libraries(rawproc ${WX_LIBS})
+	target_link_libraries(wxcmd ${WX_LIBS})
+	target_link_libraries(img ${WX_LIBS})
+	target_link_libraries(exif ${WX_LIBS})
+	message(STATUS "wxWidgets configured with wx-config at ${WXDIR}")
+else()
+	find_package(wxWidgets REQUIRED COMPONENTS std aui propgrid)
+	message(STATUS "includes: ${wxWidgets_USE_FILE}")
+	include(${wxWidgets_USE_FILE})
+	target_link_libraries(rawproc ${wxWidgets_LIBRARIES})
+	target_link_libraries(wxcmd ${wxWidgets_LIBRARIES})
+	target_link_libraries(img ${wxWidgets_LIBRARIES})
+	target_link_libraries(exif ${wxWidgets_LIBRARIES})
+endif(WXDIR)
 
 #LittleCMS2:
+#Github repo, autotools configure/make, retrive from build location references
 if (BUILD_LCMS2)
 	message(STATUS "Configuring lcms2 2.16 as an external project.")
 	include(ExternalProject)
@@ -136,6 +139,7 @@ else()
 endif(BUILD_LCMS2)
 
 #Libraw:
+#URL download, autotools configure/make, no install, retrive from build location references
 if (BUILD_LIBRAW)
 	message(STATUS "Configuring libraw 0.21.1 as an external project.")
 	include(ExternalProject)
@@ -176,9 +180,9 @@ else()
 	endif(LIBRAW_FOUND)
 endif(BUILD_LIBRAW)
 
+
 #Lensfun:
-
-
+#Github repo, cmake, right now install to in-tree location, will change to build location references
 if (BUILD_LENSFUN)
 	message(STATUS "Configuring lensfun 0.3.99 (last code commit) as an external project.")
 	include(ExternalProject)
@@ -221,6 +225,7 @@ endif(BUILD_LENSFUN)
 
 
 #exiv2:
+#Github repo, cmake, install in-tree to resolve .in header creation
 if (BUILD_EXIV2)
 	message(STATUS "Configuring exiv2 0.27.1 as an external project.")
 	include(ExternalProject)
@@ -308,7 +313,8 @@ elseif(GMIC)
 	endif(GMIC_FOUND)
 endif (BUILD_GMIC)
 	
-	
+#librtprocess
+#Github repo, cmake, 
 if (BUILD_LIBRTPROCESS)
 	message(STATUS "Configuring librtprocess as an external project.")
 	include(ExternalProject)
@@ -318,10 +324,10 @@ if (BUILD_LIBRTPROCESS)
 		GIT_TAG          ed4501 #0.12.0
 		GIT_PROGRESS     ON
 		CMAKE_ARGS   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=external
-		install_command ""
+		INSTALL_COMMAND ""
 	)
-	set(LIBRTPROCESS_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/include)
-	set(LIBRTPROCESS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/external/lib)
+	set(LIBRTPROCESS_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download/src/include)
+	set(LIBRTPROCESS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/librtprocess/src/librtprocess_download-build/src)
 	
 	add_library(librtprocess STATIC IMPORTED)
 	set_target_properties(librtprocess PROPERTIES IMPORTED_LOCATION ${LIBRTPROCESS_LIB_DIR}/librtprocess.a)
