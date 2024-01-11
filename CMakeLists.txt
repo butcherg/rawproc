@@ -266,19 +266,33 @@ endif (BUILD_EXIV2)
 #Optional Features:
 
 #gmic:
-if (GMICINC AND GMICLIB)
-	include_directories("${GMICINC}")
-	target_link_libraries(rawproc "${GMICLIB}")
-	target_link_libraries(img "${GMICLIB}")
-	target_link_libraries(exif "${GMICLIB}")
+if (BUILD_GMIC)
+	message(STATUS "Configuring G'MIC as an external project.")
+	include(ExternalProject)
+	ExternalProject_Add(gmic_download
+		PREFIX external/gmic
+		GIT_REPOSITORY   https://github.com/GreycLab/gmic.git
+		GIT_TAG          e040689 #v3.3.2
+		GIT_PROGRESS     ON
+		CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=external
+		install_command ""
+	)
+	set(GMIC_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/external/include)
+	set(GMIC_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/external/lib)
+	
+	add_library(gmic STATIC IMPORTED)
+	set_target_properties(gmic PROPERTIES IMPORTED_LOCATION ${GMIC_LIB_DIR}/libgmic.a)
+	set(GMIC_FOUND TRUE)
+	add_dependencies(gmic gmic_download)
+	
+	include_directories(${GMIC_INCLUDE_DIR})
+	target_link_libraries(rawproc gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
+	target_link_libraries(img gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
+	target_link_libraries(exif gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
+	
 	target_compile_options(rawproc PRIVATE -DUSE_GMIC)
 	target_compile_options(img PRIVATE -DUSE_GMIC)
 	target_compile_options(exif PRIVATE -DUSE_GMIC)
-	if (GMICFLAGS)
-		message(STATUS "GMIC hand-configured with GMICFLAGS, GMICINC and GMICLIB")
-	else()
-		message(STATUS "GMIC hand-configured with GMICINC and GMICLIB")
-	endif (GMICFLAGS)
 elseif(GMIC)
 	pkg_check_modules(GMIC REQUIRED gmic)
 	if (GMIC_FOUND)
@@ -292,7 +306,7 @@ elseif(GMIC)
 	else()
 		message(STATUS "gmic not found")
 	endif(GMIC_FOUND)
-endif (GMICINC AND GMICLIB)
+endif (BUILD_GMIC)
 	
 	
 if (BUILD_LIBRTPROCESS)
