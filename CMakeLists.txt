@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 MESSAGE("CMAKE_HOST_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME}")
 MESSAGE("CMAKE_HOST_SYSTEM_VERSION ${CMAKE_HOST_SYSTEM_VERSION}")
 
+
 project(rawproc LANGUAGES CXX C)
 
 string(TIMESTAMP BUILDDATE)
@@ -15,14 +16,18 @@ option(BUILD_LENSFUN "download and build lensfun instead of using installed pack
 option(BUILD_LIBRAW "download and build libraw instead of using installed package" OFF)
 option(BUILD_EXIV2 "download and build exiv2 instead of using installed package" OFF)
 option(BUILD_LIBRTPROCESS "download and build librtprocess instead of using installed package" OFF)
+
 option(LENSFUN_DBUPDATE "enable the code and library links to update the lensfun database from the menu.  Enables a network connection..." OFF)
-option(GMIC "enable the code and library links to use G'MIC in img and rawproc.  Requires libgmic to be installed in a system location." OFF)
+option(GMIC "enable the code and library links to use G'MIC in img and rawproc." OFF)
+option(LIBRTPROCESS "enable the code and library links to use librtprocess in img and rawproc." OFF)
 
 
-add_executable(rawproc src/rawprocApp.cpp)
-add_executable(img src/img.cpp)
+add_executable(rawproc src/rawprocApp.cpp $<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
+add_executable(img src/img.cpp $<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
 add_executable(wxcmd src/wxcmd.cpp)
-add_executable(exif src/exif.cpp)
+add_executable(exif src/exif.cpp $<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:util>)
+
+#$<TARGET_OBJECTS:objlib>
 
 # make doc:
 add_custom_target(doc 	
@@ -127,12 +132,12 @@ else()
 		target_link_libraries(rawproc ${LCMS2_LIBRARIES})
 		target_link_libraries(img ${LCMS2_LIBRARIES})
 		target_link_libraries(exif ${LCMS2_LIBRARIES})
-		#if (LCMS2_FASTFLOAT)
+		if (LCMS2_FASTFLOAT)
 			target_compile_options(rawproc PRIVATE -DUSE_LCMS_FASTFLOAT)
 			target_compile_options(img PRIVATE -DUSE_LCMS_FASTFLOAT)
 			target_compile_options(exif PRIVATE -DUSE_LCMS_FASTFLOAT)
 			message(STATUS "LittleCMS2 FAST FLOAT enabled...")
-		#endif (LCMS2_FASTFLOAT)
+		endif (LCMS2_FASTFLOAT)
 	else()
 		message(STATUS "lcms2 not found")
 	endif(LCMS2_FOUND)
@@ -342,7 +347,7 @@ if (BUILD_LIBRTPROCESS)
 	target_compile_options(rawproc PRIVATE -DUSE_LIBRTPROCESS)
 	target_compile_options(img PRIVATE -DUSE_LIBRTPROCESS)
 	target_compile_options(exif PRIVATE -DUSE_LIBRTPROCESS)
-else()
+elseif(LIBRTPROCESS)
 	pkg_check_modules(LIBRTPROCESS REQUIRED rtprocess)
 	if (LIBRTPROCESS_FOUND)
 		target_compile_options(rawproc PRIVATE -DUSE_LIBRTPROCESS)
