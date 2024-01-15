@@ -145,12 +145,12 @@ cd over to the rawproc directory and
 do the following:
 
 <pre>
-mkdir build-linux
-cd build-linux
-cmake ..
-make
-make doc
-sudo make install
+$ mkdir build-linux
+$ cd build-linux
+$ cmake -DLIBRTPROCESS=ON -DGMIC=ON..
+$ make
+$ make doc
+$ sudo make install
 </pre>
 
 ...and there you go, rawproc, img, wxcmd, and exif binaries will be installed in /usr/local/bin.
@@ -161,53 +161,110 @@ If you want G'MIC and have installed libgmic, put `-DGMIC=ON` in the cmake comma
 
 if you want in-program lensfun update and have installed libcurl and libarchive, put `-DLENSFUNDBUPDATE=ON` in the cmake command.
 
-## Using Self-Built Static Libraries
+## Building Alternate Libaries With rawproc
 
-<b>NOTE: This really doesn't work so well in CMake.  I'm going to leave it in, but I caution anyone who tries to use it.  GMIC is excepted, as that's the only way I've found to point to it.  For the meantime, I'm going to continue using the Autotools build system for my static linking...</b>
+The rawproc cmakek build system is set up to also build selected libraries in lieu of using system-installed libraries.  For a given library, a BUILD_(library) option is set ON to kick off a download/build/incorporate task in the rawproc build invocation.  To configure that, structure the cmake  invocation thusly:
 
-The OS distros don't usually keep up with the libraries you'd like to see current, like Libraw.  Accordingly, I've build in the CMake build system the capability to point to self-compiled libraries in arbitrary locations.  To do this, in the cmake command include the appropriate *FLAGS and *LIB entries for the library(s) you've previously compiled.  The available libraries to use for this option are:
+<pre>
+$ cmake -G "MSYS Makefiles" -DBUILD_LENSFUN=ON ..
+</pre>
 
-- LittleCMS2: LCMS2FLAGS and LCMS2LIB
-- Libraw: LIBRAWFLAGS and LIBRAWLIB
-- Lensfun: LENSFULFLAGS and LENSFUNLIB
-- exiv2: EXIV2FLAGS and EXIV2LIB
-- G'MIC: GMICFLAGS and GMICLIB
-- librtprocess: LIBRTPROCESSFLAGS and LIBRTPROCESSLIB
+and, when 'make' is subsequently invoked, the lensfun github repository will be cloned, lensfun will be built, and the includes and libraries will 
+be made available to the rawproc build.  
 
-To use this option, for, say, LIbraw, run cmake like this:
+The available BUILD_ options are:
 
-    cmake -DLIBRAWFLAGS=-I<path to Libraw include directory> -DLIBRAWLIB=<path to Libraw library file> ..
+- BUILD_LCMS2 
+- BUILD_LENSFUN 
+- BUILD_LIBRAW
+- BUILD_EXIV2 
+- BUILD_LIBRTPROCESS 
 
-If BOTH of those -D options are defined, the OS package search will be bypassed in favor of your specification.
+Some of the libraries are git-cloned, some are downloaded from the appropriate release page.  Regarding building, some are built with CMake, some are built with GNU autotools configure.  The detrimental implication of the autotools builds is that the library configure commands are executed everytime rawproc is make-ed, which significantly impacts the rawproc build time.  If you're building rawproc once to use, this is probably not a problem.
+
+The various library versions downloaded have been picked to be the most recent available.  This is hard-coded in the CMakeLists.txt file, but should be easy enough to find to change.
+
+## Setting Up Alternate Libraries Externally
+
+rawproc's cmake build system is set up to find libraries installed with pkg-config .pc files.  Accordingly, pkgconfig can be compelled to search an alternate library directory to find self-built libraries outside the system library structure.  To do this, one only has to download and build the selected libraries, and install them to a separate library directory.  Then, run the cmake configuration with the PKG_CONFIG_PATH environment variable altered to prepend the separate library directory to the variable contents.  Here are the steps to do this:
+
+1. Make a "build-support" directory somewhere to hold the alternate packages and the alternate library directory:
+
+<pre>
+$ mkdir build-support
+</pre>
+
+2. In the build-support directory, unpack or git clone the desired libraries.  We'll use lensfun as an example:
+
+<pre>
+$ cd build-support
+$ git clone https://github.com/lensfun/lensfun
+</pre>
+
+
+3. Build the library per its particular instructions, but add an install prefix path to the cmake invocation:
+
+<pre>
+$ cd lensfun
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_INSTALL_PREFIX=../../usr ..
+</pre>
+
+4. install the library:
+
+<pre>
+    $ make install
+</pre>
+
+Do 1-4 for each subsequent desired library.  After that's done, in build-support will be a usr/ directory containing lib and include subdirectories.
+
+Now, when building rawproc, it helps to write a shell script to capture the configuration.  Particularly, modify the environment variable PKG_CONFIG_PATH to start with the path to the build-support/usr directory.  Here's the script I use to do this:
+
+<pre>
+#!/bin/bash
+
+#Sets compile flags in every compile command:
+export CFLAGS="-ggdb -Wno-deprecated-declarations"
+export CXXFLAGS="-ggdb  -Wno-deprecated-declarations"
+
+#Prepends the alternate library directory to the PKG_CONFIG_PATH environment variable
+export PKG_CONFIG_PATH="/c/msys64/home/glenn/ImageStuff/rawproc10/build-support/usr/lib/pkgconfig:${PKG_CONFIG_PATH}"
+echo $PKG_CONFIG_PATH
+
+#If 'clean' is specified in the script invocation, clean the build directory except for the configure.sh (this) file
+if [ "$1" == 'clean' ]; then
+        find . ! -name 'configure.sh' -type f -exec rm -f {} +
+fi
+
+#cmake invocation:
+cmake -G "MSYS Makefiles" -DLIBRTPROCESS=ON -DLENSFUN_DBUPDATE=ON  ..
+</pre>
+
+CMake will now find the alternate libraries first, but still find the distro-installed libraries.  You can do this for all 
+libraries except for wxWidgets; if you have compiled an alternate wxWidgets, WXDIR is to be used to specify the path to 
+the built library directory containing the wx-config program, like this:
+
+    $ cmake -G "MSYS Makefiles" -DWXDIR=/path/to/wxWidgets-3.X.Y/build ..
+
+Note that librtprocess also requires specifying `-DLIBRTPROCESS=ON` in the cmake invocation to incorporate the library.
 
 ## Other Tasks (not current)
 
 If you're building from source in either Linux or MSYS2, you'll also need to build and manually install your configuration and help files.  In the build directory:
 
 <pre>
-make docpages
-make doc
-make conf
-sudo cp src/rawprocdoc.zip /usr/local/bin/.
-mkdir ~/.rawproc
-cp src/rawproc.conf ~/.rawproc/.
+$ make docpages
+$ make doc
+$ make conf
+$ sudo cp src/rawprocdoc.zip /usr/local/bin/.
+$ mkdir ~/.rawproc
+$ cp src/rawproc.conf ~/.rawproc/.
 </pre>
 
 Right now, rawproc will only look for its help file in the directory containing the executable.  rawproc will look for 
 a rawproc.conf in a few places, but the best place to put it is in a ~/.rawproc directory (linux).  Future versions will use that
 directory as a default for other stuff, like cms.profilepath and the lensfun database.
-
-## Building img without rawproc
-
-If you just want to build the img command line program, without the wxWidgets library, then do this:
-
-<pre>
-mkdir build-linux
-cd build-linux
-../configure --enable-lensfun --enable-librtprocess --disable-wxwidgets CXXFLAGS=-O3
-cd src
-make img
-</pre>
 
 # Notes
 
@@ -216,3 +273,4 @@ As of Version 1.0Dev, I recommend setting the tool.lenscorrection.databasepath t
 
 2. Color management requires the user to specify a profile directory, and in that directory shall go all profiles used, 
 camera, working, and display/output.  rawproc doesn't use the operating system color management facilities.
+
