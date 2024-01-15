@@ -252,7 +252,7 @@ then
 	],[
 		AC_MSG_ERROR([not found.])
 	])
-	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUNUPDATE"
+	CXXFLAGS="$CXXFLAGS -DUSE_LENSFUN_DBUPDATE"
 	
 fi
 AM_CONDITIONAL(LENSFUNUPDATE, test x$enable_lensfunupdate = xyes)

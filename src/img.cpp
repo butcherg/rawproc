@@ -716,8 +716,8 @@ else {
 			else {
 				std::string cmdstr = do_cmd(dib, commands[i], files[f].variant, verbose);
 				fflush(stdout);
-				if (cmdstr.find("Error")  != std::string::npos) {
-					//printf("%s\n",cmdstr.c_str());
+				if (cmdstr.find("Error")  != std::string::npos | cmdstr.find("error")  != std::string::npos) {
+					printf("%s\n",cmdstr.c_str());
 					exit(1);
 				}
 				else commandstring += cmdstr;
