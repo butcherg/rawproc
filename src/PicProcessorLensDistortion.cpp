@@ -36,26 +36,17 @@ class LensDistortionPanel: public PicProcPanel
 		{
 			Freeze();
 			//double rm, gm, bm;
-			wxSize spinsize(50, TEXTCTRLHEIGHT);
+			wxSize spinsize(60, TEXTCTRLHEIGHT);
 			
-			//wxArrayString parm = split(params, ",");
-
-			//parm tool.whitebalance.min: (float), minimum multiplier value.  Default=0.001
-			//double min = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.min","0.001").c_str());
-			//parm tool.whitebalance.max: (float), maximum multiplier value.  Default=3.0
-			//double max = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.max","3.0").c_str());
-			//parm tool.whitebalance.digits: (float), number of fractional digits.  Default=3
-			//double digits = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.digits","3.0").c_str());
-			//parm tool.whitebalance.increment: (float), maximum multiplier value.  Default=0.001
-			//double increment = atof(myConfig::getConfig().getValueOrDefault("tool.whitebalance.increment","0.001").c_str());
+			ad = false;
 
 			enablebox = new wxCheckBox(this, LDENABLE, _("lens distortion:"));
 			enablebox->SetValue(true);
 
-			a = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			b = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			c = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
-			d = new myFloatCtrl(this, wxID_ANY, 1.0, 3, wxDefaultPosition, spinsize);
+			a = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			b = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			c = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			d = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
 			
 			autod = new wxCheckBox(this, LDAUTOD, _("d=1-(a+b+c):"));
 			
@@ -74,7 +65,7 @@ class LensDistortionPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			unsigned labelwidth = 20;
-			//multipliers:
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("a:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(a, flags);
