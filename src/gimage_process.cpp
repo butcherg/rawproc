@@ -959,7 +959,7 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 		//result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
 		
 	}
-	//return result;
+	return result;
 }
 
 std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<std::string,std::string> params)
@@ -979,7 +979,11 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 		double a = atof(params["a"].c_str());
 		double b = atof(params["b"].c_str());
 		double c = atof(params["c"].c_str());
-		double d = atof(params["d"].c_str());
+		double d;
+		if (paramexists(params, "d"))
+			d = atof(params["d"].c_str());
+		else
+			d = 1-(a+b+c);
 		
 		_mark();
 		dib.ApplyDistortionCorrection(a, b, c, d, threadcount);

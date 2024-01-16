@@ -5398,8 +5398,9 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
+	printf("getting lens database...\n"); fflush(stdout);
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
-	
+	printf("doing lens correction...\n"); fflush(stdout);
 	int ModifyFlags = modops;
 	initInterpolation(algo);
 	
@@ -5610,16 +5611,28 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float 
 			int rx = x - centerx;
 			int ry = y - centery;
 
+			//compute radius of the destination pixel:
 			float r_dst = (sqrt(sqr((float) rx ) + sqr((float) ry ))) / (float) norm;
+			
+			//using r_dst, compute the radius to the source pixel (inverse transform)
 			float r_src = ((a*pow(r_dst,3) + b*pow(r_dst,2) + c*r_dst + d) * r_dst);  //money-maker...
+			
+			//calculate the radial vector of the source pixel
 			float vector = atan2(ry, rx); // - 1.570796;
+			
+			//calculate the normalized x/y coordinate of the source pixel
 			float rdx = r_src * cos(vector);
 			float rdy = r_src * sin(vector);
+			
+			//convert normalized pixel coordinates to actual image coordinates
 			int dx = centerx + rdx * (float) norm;
 			int dy = centery + rdy * (float) norm;
-			int pos_src = x + (y * w);
-			int pos_dst = dx + (dy * w);
-			image[pos_dst] = src[pos_src];
+			
+			//copy the distorted-location source pixel to the undistorted location:
+			int pos_dst = x + (y * w);
+			int pos_src = dx + (dy * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst] = src[pos_src];
 		}
 	}
 	

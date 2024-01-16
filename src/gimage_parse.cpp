@@ -881,7 +881,7 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (psize == 4) {
+		if (psize >= 3) {
 			
 			if (isFloat(p[0])) { 
 				pmap["a"]   = p[0]; 
@@ -904,6 +904,8 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[2].c_str()); 
 				return pmap; 
 			}
+		}
+		if (psize == 4) {
 			if (isFloat(p[3])) { 
 				pmap["d"]   = p[3]; 
 			}
@@ -912,12 +914,12 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 				return pmap; 
 			}
 		}
-		else {
-			pmap["error"] = string_format("gray:ParseError -invalid parameters: %s.",paramstring.c_str()); 
-			return pmap;
+		if (psize < 3 | psize > 4) {
+			pmap["error"] = "lensdistortion:ParseError - invalid number of parameters."; 
+			return pmap; 
 		}
-	
 	}
+	
 	pmap["mode"] = "default";
 	pmap["cmdlabel"] = "lensdistortion";
 	pmap["paramstring"] = paramstring;
