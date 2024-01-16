@@ -302,8 +302,28 @@ lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
 	if (lensfundatadir != "") {
 #if defined LF_0395 || defined LF_0399
 		e = lfdb->Load(lensfundatadir.c_str());
-		if (e == LF_NO_DATABASE) wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s."),wxString(lensfundatadir)));
-		if (e == LF_WRONG_FORMAT) wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect."),wxString(lensfundatadir)));
+		if (e == LF_NO_DATABASE) 
+			wxMessageBox(wxString::Format(_("Error: Cannot open lens correction database at %s."),wxString(lensfundatadir)));
+		if (e == LF_WRONG_FORMAT) 
+			wxMessageBox(wxString::Format(_("Error: Lens correction database at %s format is incorrect."),wxString(lensfundatadir)));
+		
+		if (e == LF_NO_ERROR) {
+			//parm tool.lenscorrection.useuserdata = 0/1: Set to 1 to use a user-supplied lensfun data file located at tool.lenscorrection.userdata.  Default: 0
+			if (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.useuserdata","0") == "1") {
+				//parm tool.lenscorrection.userdata (lensfun v0.3.95 or greater): If specified, use this path/file.xml to load alternate lens definitions per the instructions given in the lensfun documentation.  Ignored if lensfun version is less than 0.3.95
+				if ( myConfig::getConfig().exists("tool.lenscorrection.userdata")) {
+					std::string altdb = myConfig::getConfig().getValue("tool.lenscorrection.userdata");
+					e = lfdb->Load(altdb.c_str());
+					if (e != LF_NO_ERROR) {
+						wxMessageBox(wxString::Format(_("Error: Cannot open user lens correction data file at %s."),wxString(altdb)));
+					}
+					else {
+						wxMessageBox(wxString::Format(_("Successfully opened user lens correction data file at %s."),wxString(altdb)));
+					}
+				}
+			}
+		}
+		
 #else
 		if (lfdb->LoadDirectory(lensfundatadir.c_str())) 
 			e = LF_NO_ERROR;
@@ -396,8 +416,11 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection..."));
 	bool result = true;
 	GIMAGE_ERROR ret;
+	wxString d;
 
 	std::map<std::string, std::string> cp = parseparams(std::string(getParams().c_str()));
+	
+	//GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 	
 	std::string camspec, lensspec;
 	
@@ -439,7 +462,7 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 
 	if (processingenabled) {
 		if (ModifyFlags) {
-			mark();
+			//mark();
 			bool success = false;
 
 			const lfCamera *cam = NULL;
@@ -475,168 +498,28 @@ bool PicProcessorLensCorrection::processPicture(gImage *processdib)
 
 
 			if (success) {
+				
+				RESIZE_FILTER algo = FILTER_BOX;
 				if (cp.find("algo") != cp.end()) {
-					if (cp["algo"] == "nearest") dib->initInterpolation(FILTER_BOX);
-					if (cp["algo"] == "bilinear") dib->initInterpolation(FILTER_BILINEAR);
-					if (cp["algo"] == "lanczos3") dib->initInterpolation(FILTER_LANCZOS3);
-				}
-				
-#if defined LF_0395 || defined LF_0399
-/*"old" 0.3.95:
-				lfModifier *mod = new lfModifier (cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
-
-				// Enable desired modifications
-				int modflags = 0;
-
-				if (ModifyFlags & LF_MODIFY_TCA)
-					modflags |= mod->EnableTCACorrection(lens, atof(info["FocalLength"].c_str()));
-				if (ModifyFlags & LF_MODIFY_VIGNETTING)
-					modflags |= mod->EnableVignettingCorrection(lens, atof(info["FocalLength"].c_str()), atof(info["FNumber"].c_str()), 1000.0f);
-				if (ModifyFlags & LF_MODIFY_DISTORTION)
-					modflags |= mod->EnableDistortionCorrection(lens, atof(info["FocalLength"].c_str()));
-				if (ModifyFlags & LF_MODIFY_GEOMETRY)
-					modflags |= mod->EnableProjectionTransform(lens, atof(info["FocalLength"].c_str()), LF_RECTILINEAR);
-				if (ModifyFlags & LF_MODIFY_SCALE)
-					modflags |= mod->EnableScaling(1.0);
-*/
-//"new" 0.3.95, master:
-				lfModifier *mod = new lfModifier (lens, atof(info["FocalLength"].c_str()), cam->CropFactor, dib->getWidth(), dib->getHeight(), LF_PF_F32, false);
-
-				// Enable desired modifications
-				int modflags = 0;
-
-				if (ModifyFlags & LF_MODIFY_TCA)
-					modflags |= mod->EnableTCACorrection();
-				if (ModifyFlags & LF_MODIFY_VIGNETTING)
-					modflags |= mod->EnableVignettingCorrection(atof(info["FNumber"].c_str()), 1000.0f);
-				if (ModifyFlags & LF_MODIFY_DISTORTION)
-					modflags |= mod->EnableDistortionCorrection();
-				if (ModifyFlags & LF_MODIFY_GEOMETRY)
-					modflags |= mod->EnableProjectionTransform(LF_RECTILINEAR);
-				if (ModifyFlags & LF_MODIFY_SCALE)
-					modflags |= mod->EnableScaling(mod->GetAutoScale(false));
-
-#else
-				lfModifier *mod = lfModifier::Create (lens, lens->CropFactor, dib->getWidth(), dib->getHeight());
-				int modflags = mod->Initialize (
-	        			lens, 
-					LF_PF_F32, 
-					atof(info["FocalLength"].c_str()), 
-					atof(info["FNumber"].c_str()),
-	        			1.0f, //opts.Distance
-					1.0f, //opts.Scale, 
-					LF_RECTILINEAR, //opts.TargetGeom,
-					ModifyFlags, 
-					false //opts.Inverse
-				);
-
-				if (ModifyFlags & LF_MODIFY_SCALE) mod->AddCoordCallbackScale(0.0);
-#endif
-
-				unsigned w = dib->getWidth();
-				unsigned h = dib->getHeight();
-
-				if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#1
-					((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection: vignetting..."));
-					pix * newimg = dib->getImageDataRaw();
-					bool ok = true;
-
-					#pragma omp parallel for num_threads(threadcount)
-					for (unsigned y = 0; y < h; y++) {
-						unsigned p = y*w;
-						ok = mod->ApplyColorModification (&newimg[p], 0.0, y, w, 1, LF_CR_3 (RED, GREEN, BLUE), w);
-					}
+					if (cp["algo"] == "nearest") algo = FILTER_BOX;
+					if (cp["algo"] == "bilinear") algo = FILTER_BILINEAR;
+					if (cp["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
 				}
 
-				if ((ModifyFlags & LF_MODIFY_DISTORTION) & (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
-					((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection: chromatic abberation and distortion..."));
-					gImage olddib(*dib);
-					pix * newimg = dib->getImageDataRaw();
-					bool ok = true;
-					int lwidth = w * 2 * 3;
-			
-					#pragma omp parallel for num_threads(threadcount)
-					for (unsigned y = 0; y < h; y++) {
-						float pos[lwidth];
-						ok = mod->ApplySubpixelGeometryDistortion (0.0, y, w, 1, pos);
-						if (ok) {
-							unsigned s=0;
-							for (unsigned x = 0; x < w; x++) {
-								unsigned p = x + y*w;
-								newimg[p].r = olddib.getR (pos [s], pos [s+1]);
-								newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
-								newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
-								s += 2 * 3;
-							}
-						}
-					}
-	
-				}
+				mark();
+				GIMAGE_ERROR ret = dib->ApplyLensCorrection(ldb, ModifyFlags, GEOMETRY_RETICLINEAR, algo, threadcount, camspec, lensspec);
+				d = duration();
+				m_display->SetModified(true);
 
-				else {  //#2, or #3
-	
-					if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
-						((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection: distortion..."));
-						gImage olddib(*dib);
-						pix * newimg = dib->getImageDataRaw();
-						bool ok = true;
-						int lwidth = w * 2;
-				
-						#pragma omp parallel for num_threads(threadcount)
-						for (unsigned y = 0; y < h; y++) {
-							float pos[lwidth];
-							ok = mod->ApplyGeometryDistortion (0.0, y, w, 1, pos);
-							if (ok) {
-								unsigned s=0;
-								for (unsigned x = 0; x < w; x++) {
-									unsigned p = x + y*w;
-									newimg[p] = olddib.getRGB (pos [s], pos [s+1]);
-									s += 2;
-								}
-							}
-						}
-					}
-		
-					if (ModifyFlags & LF_MODIFY_TCA) {  //#3
-						((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection: chromatic abberation..."));
-						gImage olddib(*dib);
-						pix * newimg = dib->getImageDataRaw();
-						bool ok = true;
-						int lwidth = w * 2 * 3;
-				
-						#pragma omp parallel for num_threads(threadcount)
-						for (unsigned y = 0; y < h; y++) {
-							float pos[lwidth];
-							ok = mod->ApplySubpixelDistortion (0.0, y, w, 1, pos);
-							if (ok) {
-								unsigned s=0;
-								for (unsigned x = 0; x < w; x++) {
-									unsigned p = x + y*w;
-									newimg[p].r = olddib.getR (pos [s], pos [s+1]);
-									newimg[p].g = olddib.getG (pos [s+2], pos [s+3]);
-									newimg[p].b = olddib.getB (pos [s+4], pos [s+5]);
-									s += 2 * 3;
-								}
-							}
-						}
-					}
-				}
-#if defined LF_0395 || defined LF_0399
-				delete mod;
-#else
-				mod->Destroy();
-#endif
-			}
-			
-			m_display->SetModified(true);
-			wxString d = duration();
-
-			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
+				if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
 				log(wxString::Format(_("tool=lenscorrection,%s,imagesize=%dx%d,time=%s"),getParams(), dib->getWidth(), dib->getHeight(),d));
+			
+			}
+
+			m_display->SetModified(true);
 	
 		}
 	}
-
 	dirty = false;
 
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
