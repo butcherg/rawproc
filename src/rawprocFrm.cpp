@@ -42,6 +42,7 @@
 #include "PicProcessorAdd.h"
 #include "PicProcessorScript.h"
 #include "PicProcessorSpot.h"
+#include "PicProcessorLensDistortion.h"
 
 #ifdef USE_GMIC
 #include "PicProcessorGMIC.h"
@@ -129,6 +130,8 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_ADDITION, rawprocFrm::MnuAdd)
 	EVT_MENU(ID_MNU_SCRIPT, rawprocFrm::MnuScript)
 	EVT_MENU(ID_MNU_SPOT, rawprocFrm::MnuSpot)
+	EVT_MENU(ID_MNU_LENSDISTORTION, rawprocFrm::MnuLensDistortion)
+	
 #ifdef USE_GMIC
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
 #endif
@@ -335,6 +338,7 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
+	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSDISTORTION,_("Lens Distortion"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
@@ -799,6 +803,7 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 	else if (name == "script")			p = new PicProcessorScript("script", command, commandtree, filename.GetFullName(), pic); 
 	else if (name == "spot")			p = new PicProcessorSpot("spot", command, commandtree, pic);
+	else if (name == "lensdistortion")			p = new PicProcessorLensDistortion("lensdistortion", command, commandtree, pic);
 #ifdef USE_GMIC
 	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
 #endif
@@ -2221,6 +2226,21 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding lenscorrection tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuLensDistortion(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorLensDistortion *p = new PicProcessorLensDistortion("lensdistortion", "0.0,0.0,0.0,1.0", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding lensdistortion tool failed: %s"),e.what()));
 	}
 }
 
