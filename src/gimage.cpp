@@ -5579,6 +5579,9 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 // r_src =  (ar_dst^3 + br_dst*2 + cr_dst + d)r_dst
 //
 //where a, b, and c are lens-specific parameters that shape the non-linear polynomial and d is a scaling parameter. 
+//
+//This is a 'toy' implementation, not for the production of quality images.  Specifically, it's missing a better 
+//destination pixel interpolator
 
 GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float d, int threadcount)
 {
@@ -5597,17 +5600,8 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
 		for (unsigned x=0; x<w; x++) {
-			/*
-			float r_dst = (sqrt(sqr(x - centerx) + sqr(y - centery)))/norm; 
-			float r_src = ((a*pow(r_dst,3) + b*pow(r_dst,2) + c*r_dst + d) * r_dst)/norm;  //money-maker...
-			float vector = atan2(y-centery, x-centerx);
-			int dx = round(r_src*cos(vector));
-			int dy = round(r_src*sin(vector));
-			int pos_src = x + (y * w);
-			int pos_dst = dx + (dy * w);
-			image[pos_dst] = src[pos_src];
-			*/
-	
+
+			//compute pixel coordinates with centerx,centery origin:
 			int rx = x - centerx;
 			int ry = y - centery;
 
