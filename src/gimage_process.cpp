@@ -933,7 +933,14 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 
 		_mark();
 		res =  dib.ApplyLensCorrection(ldb, modops, geometry, algo, threadcount, camera, lens);
-		if (res ==  GIMAGE_LF_NO_DATABASE) {
+		if (res == GIMAGE_OK) {
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
+			result["treelabel"] = "lenscorrection";
+			result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
+			return result;
+		}
+		else if (res ==  GIMAGE_LF_NO_DATABASE) {
 			result["error"] = "lenscorrection:ProcessError - No database instance";
 			return result;
 		}
@@ -945,13 +952,44 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 			result["error"] = string_format("lenscorrection:ProcessError - Lens not found: %s", lens.c_str());
 			return result;
 		}
-		result["duration"] = std::to_string(_duration());
-		result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
-		result["treelabel"] = "lenscorrection";
-		result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
+		
+		//result["duration"] = std::to_string(_duration());
+		//result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
+		//result["treelabel"] = "lenscorrection";
+		//result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
 		
 	}
+	//return result;
+}
+
+std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "lensdistortion:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.lensdistortion.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		double a = atof(params["a"].c_str());
+		double b = atof(params["b"].c_str());
+		double c = atof(params["c"].c_str());
+		double d = atof(params["d"].c_str());
+		
+		_mark();
+		dib.ApplyDistortionCorrection(a, b, c, d, threadcount);
+		result["duration"] = std::to_string(_duration());
+		result["commandstring"] = string_format("lensdistortion:%0.2f,%0.2f,%0.2f,%0.2f",a,b,c,d);
+		//result["treelabel"] = "gray";
+		result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",a, b, c, d, threadcount, result["duration"].c_str());
+	}
 	return result;
+	
 }
 
 std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::string,std::string> params)

@@ -346,6 +346,9 @@ class gImage
 		int lensfunAvailableModifications(lfDatabase * ldb, std::string camera, std::string lens); //returns OR-ed set of LF_MODIFY_XXXX flags
 		GIMAGE_ERROR ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo, int threadcount=0, std::string camera=std::string(), std::string lens=std::string());
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
+		
+		//Lens correction algorithms
+		GIMAGE_ERROR ApplyDistortionCorrection(float a, float b, float c, float d, int threadcount);
 
 #ifdef USE_GMIC
 		//uses libgmic to apply a G'MIC script to the gImage:

@@ -5569,6 +5569,63 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 }
 
 
+//Lens Distortion Correction
+//
+//Correcting lens distortion is accomplished with a "warp" operation, where pixels are moved along a radial vector
+//from one radius to another, based on the image center = w < h ? w/2 : h/2.  The algorithm walks the destination
+//image array, using r_dst to calculate the r_src from which to pull the pixel as follows:
+//
+// r_src =  (ar_dst^3 + br_dst*2 + cr_dst + d)r_dst
+//
+//where a, b, and c are lens-specific parameters that shape the non-linear polynomial and d is a scaling parameter. 
+
+GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float d, int threadcount)
+{
+	std::vector<pix> src = image;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i = 0; i<image.size(); i++) {
+		image[i].r = 0.0;
+		image[i].g = 0.0;
+		image[i].b = 0.0;
+	}
+
+	int centerx = w/2; int centery = h/2;
+	int norm = w > h? h/2: w/2;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+			/*
+			float r_dst = (sqrt(sqr(x - centerx) + sqr(y - centery)))/norm; 
+			float r_src = ((a*pow(r_dst,3) + b*pow(r_dst,2) + c*r_dst + d) * r_dst)/norm;  //money-maker...
+			float vector = atan2(y-centery, x-centerx);
+			int dx = round(r_src*cos(vector));
+			int dy = round(r_src*sin(vector));
+			int pos_src = x + (y * w);
+			int pos_dst = dx + (dy * w);
+			image[pos_dst] = src[pos_src];
+			*/
+	
+			int rx = x - centerx;
+			int ry = y - centery;
+
+			float r_dst = (sqrt(sqr((float) rx ) + sqr((float) ry ))) / (float) norm;
+			float r_src = ((a*pow(r_dst,3) + b*pow(r_dst,2) + c*r_dst + d) * r_dst);  //money-maker...
+			float vector = atan2(ry, rx); // - 1.570796;
+			float rdx = r_src * cos(vector);
+			float rdy = r_src * sin(vector);
+			int dx = centerx + rdx * (float) norm;
+			int dy = centery + rdy * (float) norm;
+			int pos_src = x + (y * w);
+			int pos_dst = dx + (dy * w);
+			image[pos_dst] = src[pos_src];
+		}
+	}
+	
+	return GIMAGE_OK;
+}
+
 #ifdef USE_GMIC
 GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)
 {

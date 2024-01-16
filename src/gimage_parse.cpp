@@ -862,6 +862,69 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 	return pmap;
 }
 
+
+std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (psize == 4) {
+			
+			if (isFloat(p[0])) { 
+				pmap["a"]   = p[0]; 
+			}
+			else { 
+				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[0].c_str()); 
+				return pmap; 
+			}
+			if (isFloat(p[1])) { 
+				pmap["b"]   = p[1]; 
+			}
+			else { 
+				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[1].c_str()); 
+				return pmap; 
+			}
+			if (isFloat(p[2])) { 
+				pmap["c"]   = p[2]; 
+			}
+			else { 
+				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[2].c_str()); 
+				return pmap; 
+			}
+			if (isFloat(p[3])) { 
+				pmap["d"]   = p[3]; 
+			}
+			else { 
+				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[3].c_str()); 
+				return pmap; 
+			}
+		}
+		else {
+			pmap["error"] = string_format("gray:ParseError -invalid parameters: %s.",paramstring.c_str()); 
+			return pmap;
+		}
+	
+	}
+	pmap["mode"] = "default";
+	pmap["cmdlabel"] = "lensdistortion";
+	pmap["paramstring"] = paramstring;
+	
+	return pmap;
+}
+
 //img <li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
 //img </li><br>
 std::map<std::string,std::string> parse_redeye(std::string paramstring)
