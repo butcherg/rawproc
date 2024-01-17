@@ -5583,7 +5583,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 //This is a 'toy' implementation, not for the production of quality images.  Specifically, it's missing a better 
 //destination pixel interpolator
 
-GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float d, int threadcount)
+GIMAGE_ERROR gImage::ApplyDistortionCorrectionPTLens(float a, float b, float c, float d, int threadcount)
 {
 	std::vector<pix> src = image;
 
@@ -5595,7 +5595,9 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float 
 	}
 
 	int centerx = w/2; int centery = h/2;
+	//PTLens normalization, based on 1.0 = distance to edge of smaller image dimension from image center
 	int norm = w > h? h/2: w/2;
+	
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {
@@ -5632,6 +5634,58 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrection(float a, float b, float c, float 
 	
 	return GIMAGE_OK;
 }
+
+GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2, float k3, int threadcount)
+{
+	std::vector<pix> src = image;
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i = 0; i<image.size(); i++) {
+		image[i].r = 0.0;
+		image[i].g = 0.0;
+		image[i].b = 0.0;
+	}
+
+	int centerx = w/2; int centery = h/2;
+	//Adobe normalization, based on 1.0 = most distant pixel from image center
+	int norm = sqrt(sqr(((float) w/2) + (float) sqr(h/2)));
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+
+			//compute pixel coordinates with centerx,centery origin:
+			int rx = x - centerx;
+			int ry = y - centery;
+
+			//compute radius of the destination pixel:
+			float r_dst = (sqrt(sqr((float) rx ) + sqr((float) ry ))) / (float) norm;
+			
+			//using r_dst, compute the radius to the source pixel (inverse transform)
+			float r_src = (k0 + k1*pow(r_dst,2) + k2*pow(r_dst,4) + k3*pow(r_dst,6))*r_dst;
+			
+			//calculate the radial vector of the source pixel
+			float vector = atan2(ry, rx); // - 1.570796;
+			
+			//calculate the normalized x/y coordinate of the source pixel
+			float rdx = r_src * cos(vector);
+			float rdy = r_src * sin(vector);
+			
+			//convert normalized pixel coordinates to actual image coordinates
+			int dx = centerx + rdx * (float) norm;
+			int dy = centery + rdy * (float) norm;
+			
+			//copy the distorted-location source pixel to the undistorted location:
+			int pos_dst = x + (y * w);
+			int pos_src = dx + (dy * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst] = src[pos_src];
+		}
+	}
+	
+	return GIMAGE_OK;
+}
+
 
 #ifdef USE_GMIC
 GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)

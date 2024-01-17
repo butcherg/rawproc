@@ -966,6 +966,8 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 {
 	std::map<std::string,std::string> result;
 	std::string imgmsg;
+	double a, b, c, d;  //ptlens
+	double k0, k1, k2, k3;  //adobe
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
@@ -976,21 +978,34 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.lensdistortion.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
 		
-		double a = atof(params["a"].c_str());
-		double b = atof(params["b"].c_str());
-		double c = atof(params["c"].c_str());
-		double d;
-		if (paramexists(params, "d"))
-			d = atof(params["d"].c_str());
-		else
-			d = 1-(a+b+c);
+		if (params["mode"] == "ptlens") {
+			a = atof(params["a"].c_str());
+			b = atof(params["b"].c_str());
+			c = atof(params["c"].c_str());
+			d;
+			if (paramexists(params, "d"))
+				d = atof(params["d"].c_str());
+			else
+				d = 1-(a+b+c);
+			_mark();
+			dib.ApplyDistortionCorrectionPTLens(a, b, c, d, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("lensdistortion(ptlens):%0.2f,%0.2f,%0.2f,%0.2f",a,b,c,d);
+			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",a, b, c, d, threadcount, result["duration"].c_str());
+		}
+		else if (params["mode"] == "adobe") {
+			k0 = atof(params["k0"].c_str());
+			k1 = atof(params["k1"].c_str());
+			k2 = atof(params["k2"].c_str());
+			k3 = atof(params["k3"].c_str());
+			_mark();
+			dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("lensdistortion(adobe):%0.2f,%0.2f,%0.2f,%0.2f",k0, k1, k2, k3);
+			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",k0, k1, k2, k3, threadcount, result["duration"].c_str());
+		}
+		else result["error"] = string_format("lensdistortion:ProcessError - bad mode: %s", params["mode"]);
 		
-		_mark();
-		dib.ApplyDistortionCorrection(a, b, c, d, threadcount);
-		result["duration"] = std::to_string(_duration());
-		result["commandstring"] = string_format("lensdistortion:%0.2f,%0.2f,%0.2f,%0.2f",a,b,c,d);
-		//result["treelabel"] = "gray";
-		result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",a, b, c, d, threadcount, result["duration"].c_str());
 	}
 	return result;
 	

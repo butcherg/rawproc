@@ -348,7 +348,8 @@ class gImage
 		//if camera or lens is empty, the method attempts to use the imginfo["Model"] and imginfo["Lens"]
 		
 		//Lens correction algorithms
-		GIMAGE_ERROR ApplyDistortionCorrection(float a, float b, float c, float d, int threadcount);
+		GIMAGE_ERROR ApplyDistortionCorrectionPTLens(float a, float b, float c, float d, int threadcount);
+		GIMAGE_ERROR ApplyDistortionCorrectionAdobe(float k0, float k1, float k2, float k3, int threadcount);
 
 #ifdef USE_GMIC
 		//uses libgmic to apply a G'MIC script to the gImage:

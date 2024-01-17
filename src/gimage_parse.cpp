@@ -881,46 +881,81 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (psize >= 3) {
+		if (p.size() >=1 & p[0] == "ptlens") {
+			pmap["mode"] = "ptlens";
+			if (psize >= 4) {
 			
-			if (isFloat(p[0])) { 
-				pmap["a"]   = p[0]; 
+				if (isFloat(p[1])) { 
+					pmap["a"]   = p[1]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[1].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[2])) { 
+					pmap["b"]   = p[2]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[2].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[3])) { 
+					pmap["c"]   = p[3]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[3].c_str()); 
+					return pmap; 
+				}
 			}
-			else { 
-				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[0].c_str()); 
-				return pmap; 
-			}
-			if (isFloat(p[1])) { 
-				pmap["b"]   = p[1]; 
-			}
-			else { 
-				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[1].c_str()); 
-				return pmap; 
-			}
-			if (isFloat(p[2])) { 
-				pmap["c"]   = p[2]; 
-			}
-			else { 
-				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[2].c_str()); 
-				return pmap; 
+			if (psize == 5) {
+				if (isFloat(p[4])) { 
+				pmap["d"]   = p[4]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[4].c_str()); 
+					return pmap; 
+				}
 			}
 		}
-		if (psize == 4) {
-			if (isFloat(p[3])) { 
-				pmap["d"]   = p[3]; 
-			}
-			else { 
-				pmap["error"] = string_format("lensdistortion:ParseError - invalid float: %s.",p[3].c_str()); 
-				return pmap; 
+		else if (p.size() >=1 & p[0] == "adobe") {
+			if (psize >= 5) {
+				pmap["mode"] = "adobe";
+				if (isFloat(p[1])) { 
+					pmap["k0"]   = p[1]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[1].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[2])) { 
+					pmap["k1"]   = p[2]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[2].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[3])) { 
+					pmap["k2"]   = p[3]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[3].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[4])) { 
+					pmap["k3"]   = p[4]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensdistortion:ParseError(ptlens) - invalid float: %s.",p[4].c_str()); 
+					return pmap; 
+				}
 			}
 		}
-		if (psize < 3 | psize > 4) {
+		if (psize < 4 ) {
 			pmap["error"] = "lensdistortion:ParseError - invalid number of parameters."; 
 			return pmap; 
 		}
 	}
 	
-	pmap["mode"] = "default";
 	pmap["cmdlabel"] = "lensdistortion";
 	pmap["paramstring"] = paramstring;
 	

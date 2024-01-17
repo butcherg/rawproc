@@ -2236,7 +2236,7 @@ void rawprocFrm::MnuLensDistortion(wxCommandEvent& event)
 	if (commandtree->IsEmpty()) return;
 	SetStatusText("");
 	try {
-		PicProcessorLensDistortion *p = new PicProcessorLensDistortion("lensdistortion", "0.0,0.0,0.0,1.0", commandtree, pic);
+		PicProcessorLensDistortion *p = new PicProcessorLensDistortion("lensdistortion", "ptlens,0.0,0.0,0.0,1.0", commandtree, pic);
 		p->createPanel(parambook);
 		//p->processPic();
 		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);

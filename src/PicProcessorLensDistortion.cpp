@@ -14,18 +14,25 @@
 #include "copy.xpm"
 #include "paste.xpm"
 
-#define LDENABLE 6400
+#define LDENABLE 8900
 
+#define LDPTLENS 8901
+#define LDADOBE 8902
 
-#define LDA 8901
-#define LDB 8902
-#define LDC 8903
-#define LDD 8904
-#define LDAUTOD 8905
+#define LDA 8903
+#define LDB 8904
+#define LDC 8905
+#define LDD 8906
+#define LDAUTOD 8907
 
-#define LDRESET 8909
-#define LDCOPY 8910
-#define LDPASTE 8911
+#define LDK0 8908
+#define LDK1 8909
+#define LDK2 8910
+#define LDK3 8911
+
+#define LDRESET 8915
+#define LDCOPY 8916
+#define LDPASTE 8917
 
 
 class LensDistortionPanel: public PicProcPanel
@@ -42,13 +49,22 @@ class LensDistortionPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, LDENABLE, _("lens distortion:"));
 			enablebox->SetValue(true);
+			
+			ptlensb =  new wxRadioButton(this, LDPTLENS, _("ptlens"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			adobeb =   new wxRadioButton(this, LDADOBE, _("adobe"));
 
 			a = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
 			b = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
 			c = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
 			d = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			
 			autod = new wxCheckBox(this, LDAUTOD, _("d=1-(a+b+c):"));
+			
+			k0 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			k1 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			k2 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			k3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			
+			
 			
 			btn = new wxBitmapButton(this, LDRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 			btn->SetToolTip(_("Reset coefficients to original values"));
@@ -66,6 +82,10 @@ class LensDistortionPanel: public PicProcPanel
 
 			unsigned labelwidth = 20;
 
+			//ptlens:
+			m->NextRow();
+			m->AddRowItem(ptlensb, flags);
+			
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("a:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(a, flags);
@@ -86,6 +106,31 @@ class LensDistortionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(btn, flags);
 			
+			//adobe:
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(adobeb, flags);
+			
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k0:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
+			m->AddRowItem(k0, flags);
+
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k1:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
+			m->AddRowItem(k1, flags);
+
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k2:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
+			m->AddRowItem(k2, flags);
+			
+			m->NextRow();
+			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k3:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
+			m->AddRowItem(k3, flags);
+
+			//m->NextRow();
+			//m->AddRowItem(btn, flags);
+			
 
 			m->End();
 			SetSizerAndFit(m);
@@ -94,14 +139,29 @@ class LensDistortionPanel: public PicProcPanel
 			params.Trim();
 			wxArrayString p = split(params,",");
 			
-			if (p.size() >= 3) {
-				a->SetFloatValue(atof(p[0].c_str()));
-				b->SetFloatValue(atof(p[1].c_str()));
-				c->SetFloatValue(atof(p[2].c_str()));
-			}
+			if (p[0] == "ptlens") {
+				if (p.size() >= 4) {
+					a->SetFloatValue(atof(p[1].c_str()));
+					b->SetFloatValue(atof(p[2].c_str()));
+					c->SetFloatValue(atof(p[3].c_str()));
+				}
 
-			if (p.size() >= 4) {
-				d->SetFloatValue(atof(p[3].c_str()));
+				if (p.size() >= 5) {
+					d->SetFloatValue(atof(p[4].c_str()));
+				}
+				else 
+					d->SetFloatValue(1.0);
+				
+				ldmode = LDPTLENS;
+				processLD();
+			}
+			else if (p[0] == "adobe") {
+				k0->SetFloatValue(atof(p[1].c_str()));
+				k1->SetFloatValue(atof(p[2].c_str()));
+				k2->SetFloatValue(atof(p[3].c_str()));
+				k3->SetFloatValue(atof(p[4].c_str()));
+				ldmode = LDADOBE;
+				processLD();
 			}
 
 			else 
@@ -125,8 +185,9 @@ class LensDistortionPanel: public PicProcPanel
 		
 		void OnReset(wxCommandEvent& event)
 		{
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",a->GetFloatValue(), a->GetFloatValue(), a->GetFloatValue()));
-			q->processPic();
+			processLD();
+			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",a->GetFloatValue(), a->GetFloatValue(), a->GetFloatValue()));
+			//q->processPic();
 			
 		}
 
@@ -134,11 +195,13 @@ class LensDistortionPanel: public PicProcPanel
 		{
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
-				q->processPic();
+				processLD();
+				//q->processPic();
 			}
 			else {
 				q->enableProcessing(false);
-				q->processPic();
+				processLD();
+				//q->processPic();
 			}
 		}
 
@@ -153,19 +216,32 @@ class LensDistortionPanel: public PicProcPanel
 		{
 			if (q->pasteParamsFromClipboard()) {
 				wxArrayString p = split(q->getParams(),",");
-				if (p.size() >= 3) {
-					a->SetFloatValue(atof(p[0].c_str()));
-					b->SetFloatValue(atof(p[1].c_str()));
-					c->SetFloatValue(atof(p[2].c_str()));
+				if (p[0] == "ptlens") {
+					if (p.size() >= 4) {
+						a->SetFloatValue(atof(p[1].c_str()));
+						b->SetFloatValue(atof(p[2].c_str()));
+						c->SetFloatValue(atof(p[3].c_str()));
+					}
+
+					if (p.size() >= 5) 
+						d->SetFloatValue(atof(p[4].c_str()));
+					else
+						d->SetFloatValue(1.0);
+					
+					ldmode = LDPTLENS;
+					processLD();
+				}
+				else if (p[0] == "adobe") {
+					k0->SetFloatValue(atof(p[1].c_str()));
+					k1->SetFloatValue(atof(p[2].c_str()));
+					k2->SetFloatValue(atof(p[3].c_str()));
+					k3->SetFloatValue(atof(p[4].c_str()));
+					ldmode = LDADOBE;
+					processLD();
 				}
 
-				if (p.size() >= 4) {
-					d->SetFloatValue(atof(p[3].c_str()));
-				}
-				
-				if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-				
-				q->processPic();
+				else 
+					wxMessageBox(wxString::Format(_("Error: ill-formed param string: %s"),q->getParams()));
 				((wxFrame *) GetGrandParent())->SetStatusText(wxString::Format(_("Pasted command from clipboard: %s"),q->getCommand()));
 			}
 			else wxMessageBox(wxString::Format(_("Invalid Paste")));
@@ -173,40 +249,52 @@ class LensDistortionPanel: public PicProcPanel
 
 
 
-		void processLD(int src)
+		void processLD()
 		{
-			if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
-			q->processPic();
-			Refresh();
+			if (ldmode == LDPTLENS) {
+				ptlensb->SetValue(true);
+				if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
+				q->setParams(wxString::Format("ptlens,%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
+				q->processPic();
+				Refresh();
+			}
+			else if (ldmode == LDADOBE) {
+				adobeb->SetValue(true);
+				q->setParams(wxString::Format("adobe,%0.3f,%0.3f,%0.3f,%0.3f",k0->GetFloatValue(), k1->GetFloatValue(), k2->GetFloatValue(), k3->GetFloatValue()));
+				q->processPic();
+				Refresh();
+			}
 		}
 
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
-			q->processPic();
+			//if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
+			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), //d->GetFloatValue()));
+			//q->processPic();
+			processLD();
 			Refresh();
 		}
 		
 		void onWheel(wxCommandEvent& event)
 		{
-			if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-			q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
-			q->processPic();
+			//if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
+			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
+			//q->processPic();
 			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
 		void OnTimer(wxTimerEvent& event)
 		{
-			q->processPic();
+			processLD();
 			Refresh();
 		}
 
 		void OnButton(wxCommandEvent& event)
 		{
-			processLD(event.GetId());
+			ldmode = event.GetId();
+			processLD();
+			event.Skip();
 		}
 		
 		void OnAutoD(wxCommandEvent& event)
@@ -215,15 +303,17 @@ class LensDistortionPanel: public PicProcPanel
 				ad = true;
 			else
 				ad = false;
-			processLD(event.GetId());
+			processLD();
 		}
 
 	private:
 		
-		myFloatCtrl *a, *b ,*c, *d;
+		myFloatCtrl *a, *b ,*c, *d, *k0, *k1, *k2, *k3;
 		bool ad;
+		wxRadioButton *ptlensb, *adobeb;
 		wxBitmapButton *btn;
 		wxCheckBox *enablebox, *autod;
+		int ldmode;
 		wxTimer t;
 
 };
