@@ -338,7 +338,9 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_HLRECOVER,	_("HLRecover"), _(""), wxITEM_NORMAL);
 #endif
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSCORRECTION,_("Lens Correction"), _(""), wxITEM_NORMAL);
-	ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSDISTORTION,_("Lens Distortion"), _(""), wxITEM_NORMAL);
+	//parm tool.lensdistortion.enable = 0/1: Set to 1 and restart rawproc to enable the Lens Distortion tool.  Default: 0
+	if (myConfig::getConfig().getValueOrDefault("tool.lensdistortion.enable","0") == "1")
+		ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSDISTORTION,_("Lens Distortion"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
