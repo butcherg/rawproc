@@ -5619,7 +5619,7 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionPTLens(float a, float b, float c, 
 			//calculate the normalized x/y coordinate of the source pixel
 			float rdx = r_src * cos(vector);
 			float rdy = r_src * sin(vector);
-			
+
 			//convert normalized pixel coordinates to actual image coordinates
 			int dx = centerx + rdx * (float) norm;
 			int dy = centery + rdy * (float) norm;
@@ -5647,8 +5647,8 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2
 	}
 
 	int centerx = w/2; int centery = h/2;
-	//Adobe normalization, based on 1.0 = most distant pixel from image center
-	int norm = sqrt(sqr(((float) w/2) + (float) sqr(h/2)));
+	//Adobe normalization, based on 1.0 = most distant pixel from image center 0,0 implied
+	int norm = sqrt(sqr(w/2) + sqr(h/2));
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned y=0; y<h; y++) {

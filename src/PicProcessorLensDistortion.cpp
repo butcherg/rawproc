@@ -53,16 +53,16 @@ class LensDistortionPanel: public PicProcPanel
 			ptlensb =  new wxRadioButton(this, LDPTLENS, _("ptlens"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			adobeb =   new wxRadioButton(this, LDADOBE, _("adobe"));
 
-			a = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			b = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			c = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			d = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			a = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); a->SetFloatValue(0.0);
+			b = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); b->SetFloatValue(0.0);
+			c = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); c->SetFloatValue(0.0);
+			d = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); d->SetFloatValue(1.0);
 			autod = new wxCheckBox(this, LDAUTOD, _("d=1-(a+b+c):"));
 			
-			k0 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			k1 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			k2 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
-			k3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize);
+			k0 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k0->SetFloatValue(1.0);
+			k1 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k1->SetFloatValue(0.0);
+			k2 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k2->SetFloatValue(0.0);
+			k3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k3->SetFloatValue(0.0);
 			
 			
 			
