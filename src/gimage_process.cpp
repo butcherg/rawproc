@@ -999,7 +999,8 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 			k2 = atof(params["k2"].c_str());
 			k3 = atof(params["k3"].c_str());
 			_mark();
-			dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
+			dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
+			//dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("lensdistortion(adobe):%0.2f,%0.2f,%0.2f,%0.2f",k0, k1, k2, k3);
 			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",k0, k1, k2, k3, threadcount, result["duration"].c_str());

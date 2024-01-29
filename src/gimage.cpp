@@ -5586,6 +5586,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 GIMAGE_ERROR gImage::ApplyDistortionCorrectionPTLens(float a, float b, float c, float d, int threadcount)
 {
 	std::vector<pix> src = image;
+	float r_max = 0.0;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned i = 0; i<image.size(); i++) {
@@ -5613,6 +5614,8 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionPTLens(float a, float b, float c, 
 			//using r_dst, compute the radius to the source pixel (inverse transform)
 			float r_src = ((a*pow(r_dst,3) + b*pow(r_dst,2) + c*r_dst + d) * r_dst);  //money-maker...
 			
+			if (r_dst - r_src > r_max) r_max = r_dst - r_src;
+			
 			//calculate the radial vector of the source pixel
 			float vector = atan2(ry, rx); // - 1.570796;
 			
@@ -5632,12 +5635,15 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionPTLens(float a, float b, float c, 
 		}
 	}
 	
+	printf("ptlens: r_max: %f norm: %d\n", r_max, norm); fflush(stdout);
+	
 	return GIMAGE_OK;
 }
 
 GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2, float k3, int threadcount)
 {
 	std::vector<pix> src = image;
+	float r_max = 0.0;
 
 	#pragma omp parallel for num_threads(threadcount)
 	for (unsigned i = 0; i<image.size(); i++) {
@@ -5660,9 +5666,12 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2
 
 			//compute radius of the destination pixel:
 			float r_dst = (sqrt(sqr((float) rx ) + sqr((float) ry ))) / (float) norm;
+			//r_dst = r_dst * 0.62345;
 			
 			//using r_dst, compute the radius to the source pixel (inverse transform)
 			float r_src = (k0 + k1*pow(r_dst,2) + k2*pow(r_dst,4) + k3*pow(r_dst,6))*r_dst;
+			
+			if (r_dst - r_src > r_max) r_max = r_dst - r_src;
 			
 			//calculate the radial vector of the source pixel
 			float vector = atan2(ry, rx); // - 1.570796;
@@ -5683,6 +5692,86 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2
 		}
 	}
 	
+	printf("adobe: r_max: %f norm: %d\n", r_max, norm); fflush(stdout);
+	
+	return GIMAGE_OK;
+}
+
+
+// This version implements the full radial/tangential distortion algorithm from the Adobe DNG WarpRetilinear definition,
+// ref: Adobe Digital Negative Specification 1.7.1.0 pp 106-108.  The equations are cross-referenced to the specification 
+// definition by their numerical sequence in the definition.  Any of the kr or kt paramters can be set to 0, no-op for 
+// that term; if you don't have cpx and/or cpy, they can be set to 0.5.
+
+GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, float kr1, float kr2, float kr3, float kt0, float kt1, float cpx, float cpy, int threadcount)
+{
+	float r_max = 0.0;
+	
+	//the blank destination image:
+	std::vector<pix> src = image;
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i = 0; i<image.size(); i++) {
+		image[i].r = 0.0;
+		image[i].g = 0.0;
+		image[i].b = 0.0;
+	}
+
+	// variables collected from the image:
+
+	float x0 = 0;
+	float y0 = 0;
+	float x1 = w;
+	float y1 = h;
+
+	//equations (3) through (7) can be done once before walking the image:
+
+	float cx = x0 + cpx*(x1 - x0); // (3)
+	float cy = y0 + cpy*(y1 - y0); // (4)
+
+	float mx = std::max(abs(x0 - cx), abs(x1 - cx)); // (5)
+	float my = std::max(abs(y0 - cy), abs(y1 - cy)); // (6)
+
+	float m = sqrt(mx*mx + my*my); // (7)
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+
+			float dx = (x - cx) / m; // (10)
+			float dy = (y - cy) / m; // (11)
+
+			float r = sqrt(dx*dx + dy*dy);  // (8)
+
+			//radial distortion:
+
+			float dxr = (kr0 + kr1*pow(r,2) + kr2*pow(r,4) + kr3*pow(r,6)) * dx; // (12), using (9)
+			float dyr = (kr0 + kr1*pow(r,2) + kr2*pow(r,4) + kr3*pow(r,6)) * dy; // (13), using (9)
+
+			//tangential distortion:
+
+			float dxt = kt0*(2*dx*dy) + kt1*(r*r + 2*(dx*dx)); // (14)
+			float dyt = kt1*(2*dx*dy) + kt0*(r*r + 2*(dy*dy)); // (15)
+
+			//final pixel relocation (x', y'):
+
+			int xp = cx + m*(dxr + dxt);  // (1)
+			int yp = cy + m*(dyr + dyt);  // (2)
+			
+			float r_dist = sqrt((x-xp)*(x-xp) + (y-yp)*(y-yp));
+			if (r_dist > r_max) r_max = r_dist;
+			
+			
+			//gImage-specific pixel translation:
+
+			int pos_dst = x + (y * w);
+			int pos_src = xp + (yp * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst] = src[pos_src];
+		}
+	}
+	
+	printf("adobe: r_max: %f max_d: %f\n", r_max, sqrt((w/2)*(w/2) + (h/2)*(h/2))); fflush(stdout);
+
 	return GIMAGE_OK;
 }
 

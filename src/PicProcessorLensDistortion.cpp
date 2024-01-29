@@ -29,6 +29,7 @@
 #define LDK1 8909
 #define LDK2 8910
 #define LDK3 8911
+#define LDAUTOK0 8912
 
 #define LDRESET 8915
 #define LDCOPY 8916
@@ -46,6 +47,7 @@ class LensDistortionPanel: public PicProcPanel
 			wxSize spinsize(60, TEXTCTRLHEIGHT);
 			
 			ad = false;
+			ak0 = false;
 
 			enablebox = new wxCheckBox(this, LDENABLE, _("lens distortion:"));
 			enablebox->SetValue(true);
@@ -63,6 +65,7 @@ class LensDistortionPanel: public PicProcPanel
 			k1 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k1->SetFloatValue(0.0);
 			k2 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k2->SetFloatValue(0.0);
 			k3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k3->SetFloatValue(0.0);
+			//autok0 = new wxCheckBox(this, LDAUTOK0, _("k0=1-(k1+2k2+3k3):"));  //save for solution...
 			
 			
 			
@@ -115,6 +118,7 @@ class LensDistortionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k0:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(k0, flags);
+			//m->AddRowItem(autok0, flags);  //save for solution...
 
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k1:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
@@ -176,6 +180,7 @@ class LensDistortionPanel: public PicProcPanel
 			Bind(myFLOATCTRL_UPDATE,&LensDistortionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnEnable, this, LDENABLE);
 			Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnAutoD, this, LDAUTOD);
+			//Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnAutoK0, this, LDAUTOK0);  //save for solution...
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnReset, this, LDRESET);
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnCopy, this, LDCOPY);
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnPaste, this, LDPASTE);
@@ -260,6 +265,7 @@ class LensDistortionPanel: public PicProcPanel
 			}
 			else if (ldmode == LDADOBE) {
 				adobeb->SetValue(true);
+				//if (ak0) k0->SetFloatValue(1-(k1->GetFloatValue() + 2*k2->GetFloatValue() + 3*k3->GetFloatValue()));  //save for solution...
 				q->setParams(wxString::Format("adobe,%0.3f,%0.3f,%0.3f,%0.3f",k0->GetFloatValue(), k1->GetFloatValue(), k2->GetFloatValue(), k3->GetFloatValue()));
 				q->processPic();
 				Refresh();
@@ -305,14 +311,23 @@ class LensDistortionPanel: public PicProcPanel
 				ad = false;
 			processLD();
 		}
+		
+		void OnAutoK0(wxCommandEvent& event)
+		{
+			if (autok0->GetValue()) 
+				ak0 = true;
+			else
+				ak0 = false;
+			processLD();
+		}
 
 	private:
 		
 		myFloatCtrl *a, *b ,*c, *d, *k0, *k1, *k2, *k3;
-		bool ad;
+		bool ad, ak0;
 		wxRadioButton *ptlensb, *adobeb;
 		wxBitmapButton *btn;
-		wxCheckBox *enablebox, *autod;
+		wxCheckBox *enablebox, *autod, *autok0;
 		int ldmode;
 		wxTimer t;
 
