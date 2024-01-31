@@ -38,20 +38,19 @@
 
 class LensDistortionPanel: public PicProcPanel
 {
-
 	public:
 		LensDistortionPanel(wxWindow *parent, PicProcessor *proc, wxString params): PicProcPanel(parent, proc, params)
 		{
 			Freeze();
 			//double rm, gm, bm;
 			wxSize spinsize(60, TEXTCTRLHEIGHT);
-			
+
 			ad = false;
 			ak0 = false;
 
 			enablebox = new wxCheckBox(this, LDENABLE, _("lens distortion:"));
 			enablebox->SetValue(true);
-			
+
 			ptlensb =  new wxRadioButton(this, LDPTLENS, _("ptlens"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 			adobeb =   new wxRadioButton(this, LDADOBE, _("adobe"));
 
@@ -60,18 +59,15 @@ class LensDistortionPanel: public PicProcPanel
 			c = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); c->SetFloatValue(0.0);
 			d = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); d->SetFloatValue(1.0);
 			autod = new wxCheckBox(this, LDAUTOD, _("d=1-(a+b+c):"));
-			
+
 			k0 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k0->SetFloatValue(1.0);
 			k1 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k1->SetFloatValue(0.0);
 			k2 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k2->SetFloatValue(0.0);
 			k3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); k3->SetFloatValue(0.0);
-			//autok0 = new wxCheckBox(this, LDAUTOK0, _("k0=1-(k1+2k2+3k3):"));  //save for solution...
-			
-			
-			
+			autok0 = new wxCheckBox(this, LDAUTOK0, _("compute k0:"));  //save for solution...
+
 			btn = new wxBitmapButton(this, LDRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 			btn->SetToolTip(_("Reset coefficients to original values"));
-
 
 			//Lay out with RowSizer:
 			//wxSizerFlags flags = wxSizerFlags().Left().CenterVertical().Border(wxLEFT|wxRIGHT|wxTOP); wx3.1
@@ -88,7 +84,7 @@ class LensDistortionPanel: public PicProcPanel
 			//ptlens:
 			m->NextRow();
 			m->AddRowItem(ptlensb, flags);
-			
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("a:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(a, flags);
@@ -100,7 +96,7 @@ class LensDistortionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("c:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(c, flags);
-			
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("d:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(d, flags);
@@ -108,17 +104,17 @@ class LensDistortionPanel: public PicProcPanel
 
 			m->NextRow();
 			m->AddRowItem(btn, flags);
-			
+
 			//adobe:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 			m->NextRow();
 			m->AddRowItem(adobeb, flags);
-			
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k0:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(k0, flags);
-			//m->AddRowItem(autok0, flags);  //save for solution...
+			m->AddRowItem(autok0, flags);  //save for solution...
 
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k1:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
@@ -127,14 +123,13 @@ class LensDistortionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k2:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(k2, flags);
-			
+
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k3:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(k3, flags);
 
 			//m->NextRow();
 			//m->AddRowItem(btn, flags);
-			
 
 			m->End();
 			SetSizerAndFit(m);
@@ -142,7 +137,7 @@ class LensDistortionPanel: public PicProcPanel
 			//parse parameters:
 			params.Trim();
 			wxArrayString p = split(params,",");
-			
+
 			if (p[0] == "ptlens") {
 				if (p.size() >= 4) {
 					a->SetFloatValue(atof(p[1].c_str()));
@@ -167,7 +162,6 @@ class LensDistortionPanel: public PicProcPanel
 				ldmode = LDADOBE;
 				processLD();
 			}
-
 			else 
 				wxMessageBox(_("Error: ill-formed param string"));
 
@@ -180,20 +174,17 @@ class LensDistortionPanel: public PicProcPanel
 			Bind(myFLOATCTRL_UPDATE,&LensDistortionPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnEnable, this, LDENABLE);
 			Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnAutoD, this, LDAUTOD);
-			//Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnAutoK0, this, LDAUTOK0);  //save for solution...
+			Bind(wxEVT_CHECKBOX, &LensDistortionPanel::OnAutoK0, this, LDAUTOK0);  //save for solution...
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnReset, this, LDRESET);
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnCopy, this, LDCOPY);
 			Bind(wxEVT_BUTTON, &LensDistortionPanel::OnPaste, this, LDPASTE);
 			Bind(wxEVT_CHAR_HOOK, &LensDistortionPanel::OnKey,  this);
 			Thaw();
 		}
-		
+
 		void OnReset(wxCommandEvent& event)
 		{
 			processLD();
-			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f",a->GetFloatValue(), a->GetFloatValue(), a->GetFloatValue()));
-			//q->processPic();
-			
 		}
 
 		void OnEnable(wxCommandEvent& event)
@@ -201,12 +192,10 @@ class LensDistortionPanel: public PicProcPanel
 			if (enablebox->GetValue()) {
 				q->enableProcessing(true);
 				processLD();
-				//q->processPic();
 			}
 			else {
 				q->enableProcessing(false);
 				processLD();
-				//q->processPic();
 			}
 		}
 
@@ -252,8 +241,6 @@ class LensDistortionPanel: public PicProcPanel
 			else wxMessageBox(wxString::Format(_("Invalid Paste")));
 		}
 
-
-
 		void processLD()
 		{
 			if (ldmode == LDPTLENS) {
@@ -265,28 +252,22 @@ class LensDistortionPanel: public PicProcPanel
 			}
 			else if (ldmode == LDADOBE) {
 				adobeb->SetValue(true);
-				//if (ak0) k0->SetFloatValue(1-(k1->GetFloatValue() + 2*k2->GetFloatValue() + 3*k3->GetFloatValue()));  //save for solution...
+				//if (ak0) k0->SetFloatValue(1-(k1->GetFloatValue() + k2->GetFloatValue() + k3->GetFloatValue())/2);  //save for solution...
+				if (ak0) k0->SetFloatValue(((PicProcessorLensDistortion *) q)->adobe_k0(k1->GetFloatValue(), k2->GetFloatValue(), k3->GetFloatValue()));
 				q->setParams(wxString::Format("adobe,%0.3f,%0.3f,%0.3f,%0.3f",k0->GetFloatValue(), k1->GetFloatValue(), k2->GetFloatValue(), k3->GetFloatValue()));
 				q->processPic();
 				Refresh();
 			}
 		}
 
-
 		void paramChanged(wxCommandEvent& event)
 		{
-			//if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), //d->GetFloatValue()));
-			//q->processPic();
 			processLD();
 			Refresh();
 		}
-		
+
 		void onWheel(wxCommandEvent& event)
 		{
-			//if (ad) d->SetFloatValue(1-(a->GetFloatValue() + b->GetFloatValue() + c->GetFloatValue()));
-			//q->setParams(wxString::Format("%0.3f,%0.3f,%0.3f,%0.3f",a->GetFloatValue(), b->GetFloatValue(), c->GetFloatValue(), d->GetFloatValue()));
-			//q->processPic();
 			t.Start(500,wxTIMER_ONE_SHOT);
 		}
 
@@ -302,7 +283,7 @@ class LensDistortionPanel: public PicProcPanel
 			processLD();
 			event.Skip();
 		}
-		
+
 		void OnAutoD(wxCommandEvent& event)
 		{
 			if (autod->GetValue()) 
@@ -311,7 +292,7 @@ class LensDistortionPanel: public PicProcPanel
 				ad = false;
 			processLD();
 		}
-		
+
 		void OnAutoK0(wxCommandEvent& event)
 		{
 			if (autok0->GetValue()) 
@@ -322,7 +303,7 @@ class LensDistortionPanel: public PicProcPanel
 		}
 
 	private:
-		
+
 		myFloatCtrl *a, *b ,*c, *d, *k0, *k1, *k2, *k3;
 		bool ad, ak0;
 		wxRadioButton *ptlensb, *adobeb;
@@ -347,6 +328,26 @@ void PicProcessorLensDistortion::createPanel(wxSimplebook* parent)
 	toolpanel->Update();
 }
 
+float PicProcessorLensDistortion::adobe_k0(float k1, float k2, float k3)
+{
+	//return 1-(k1+k2+k3)/2;
+
+	int w = dib->getWidth();
+	int h = dib->getHeight();
+
+	float normR = sqrt((w/2)*(w/2) + (h/2)*(h/2));
+
+	float wR = (w/2) / normR;
+	float hR = (h/2) / normR;
+
+	float wD = (k1*pow(wR,2) + k2*pow(wR,4) + k3*pow(wR,6)) * wR;
+	float hD = (k1*pow(hR,2) + k2*pow(hR,4) + k3*pow(hR,6)) * hR;
+
+	if (wD < hD)
+		return 1-(wD/2);
+	else
+		return 1-(hD/2);
+}
 
 bool PicProcessorLensDistortion::processPicture(gImage *processdib) 
 {
@@ -361,7 +362,7 @@ if (!processingenabled) return true;
 
 	if (!pstr.empty())
 		params = parse_lensdistortion(std::string(pstr));
-	
+
 	if (params.find("error") != params.end()) {
 		wxMessageBox(params["error"]);
 		ret = false; 

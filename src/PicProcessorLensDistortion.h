@@ -13,6 +13,8 @@ class PicProcessorLensDistortion: public PicProcessor
 		PicProcessorLensDistortion(wxString name, wxString command, wxTreeCtrl *tree, PicPanel *display);
 		void createPanel(wxSimplebook* parent);
 		bool processPicture(gImage *processdib);
+		
+		float adobe_k0(float k1, float k2, float k3);
 
 };
 
