@@ -350,7 +350,8 @@ class gImage
 		//Lens correction algorithms
 		GIMAGE_ERROR ApplyDistortionCorrectionPTLens(float a, float b, float c, float d, int threadcount);
 		GIMAGE_ERROR ApplyDistortionCorrectionAdobe(float k0, float k1, float k2, float k3, int threadcount);  //simple
-		GIMAGE_ERROR ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, float kr1, float kr2, float kr3, float kt0, float kt1, float cpx, float cpy, int threadcount);  //full implementation of the adobe opcode
+		GIMAGE_ERROR ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, float kr1, float kr2, float kr3, float kt0, float kt1, float cpx, float cpy, int threadcount);  //full implementation of the adobe opcode, except all channels are manipulated by a single coefficient set.
+		GIMAGE_ERROR ApplyVignettingCorrectionAdobeFixVignetteRadial(float k0, float k1, float k2, float k3, float k4,  float cpx, float cpy, int threadcount);  //full implementation of the adobe opcode, except all channels are manipulated by a single coefficient set.
 
 #ifdef USE_GMIC
 		//uses libgmic to apply a G'MIC script to the gImage:

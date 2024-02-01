@@ -1012,6 +1012,54 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 	
 }
 
+std::map<std::string,std::string> process_lensvignetting(gImage &dib, std::map<std::string,std::string> params)
+{
+	std::map<std::string,std::string> result;
+	std::string imgmsg;
+	//double a, b, c, d;  //ptlens
+	double k0=0.0, k1=0.0, k2=0.0, k3=0.0, k4=0.0;  //pa (1-3) and adobe (0-4)
+
+	//error-catching:
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+		result["error"] = "lensvignetting:ProcessError - no mode";
+	}
+	//nominal processing:
+	else {
+		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.lensvignetting.cores","0").c_str()));
+		result["threadcount"] = std::to_string(threadcount);
+		
+		if (params["mode"] == "pa") {
+			k1 = atof(params["k1"].c_str());
+			k2 = atof(params["k2"].c_str());
+			k3 = atof(params["k3"].c_str());
+			
+			_mark();
+			//dib.ApplyDistortionCorrectionPTLens(a, b, c, d, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("lensvignetting(pa):%0.2f,%0.2f,%0.2f",k1,k2,k3);
+			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f (%d threads, %ssec)",k1,k2,k3, threadcount, result["duration"].c_str());
+		}
+		else if (params["mode"] == "adobe") {
+			
+			if (params.find("k0") != params.end()) k0 = atof(params["k0"].c_str());
+			if (params.find("k1") != params.end()) k1 = atof(params["k1"].c_str());
+			if (params.find("k2") != params.end()) k2 = atof(params["k2"].c_str());
+			if (params.find("k3") != params.end()) k3 = atof(params["k3"].c_str());
+			if (params.find("k4") != params.end()) k4 = atof(params["k4"].c_str());
+			printf("process_lensvignetting: mode: adobe k0: %f  k1: %f  k2: %f  k3: %f  k4: %f\n", k0, k1, k2, k3, k4); fflush(stdout);
+			_mark();
+			dib.ApplyVignettingCorrectionAdobeFixVignetteRadial(k0, k1, k2, k3, k4, 0.5, 0.5, threadcount);
+			result["duration"] = std::to_string(_duration());
+			result["commandstring"] = string_format("lensvignetting(adobe):%0.2f,%0.2f,%0.2f,%0.2f,%02f",k0, k1, k2, k3, k4);
+			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f,%02f (%d threads, %ssec)",k0, k1, k2, k3, k4, threadcount, result["duration"].c_str());
+		}
+		else result["error"] = string_format("lensvignetting:ProcessError - bad mode: %s", params["mode"].c_str());
+		
+	}
+	return result;
+	
+}
+
 std::map<std::string,std::string> process_redeye(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;

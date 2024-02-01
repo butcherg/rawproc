@@ -5776,6 +5776,49 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, flo
 }
 
 
+// Implements the Adobe FixVignetteRadial opcode specified in the DNG Specification 1.7.1.0 pp 110-111.  The equations are 
+// cross-referenced to the specification definition by their numerical sequence in the definition.
+GIMAGE_ERROR gImage::ApplyVignettingCorrectionAdobeFixVignetteRadial(float k0, float k1, float k2, float k3, float k4,  float cpx, float cpy, int threadcount)
+{
+	// variables collected from the image:
+
+	float x0 = 0;
+	float y0 = 0;
+	float x1 = w;
+	float y1 = h;
+	
+	//equations (2) through (6) can be done once before walking the image:
+
+	float cx = x0 + cpx*(x1 - x0); // (2)
+	float cy = y0 + cpy*(y1 - y0); // (3)
+
+	float mx = std::max(abs(x0 - cx), abs(x1 - cx)); // (4)
+	float my = std::max(abs(y0 - cy), abs(y1 - cy)); // (5)
+
+	float m = sqrt(mx*mx + my*my); // (6)
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+
+			float r = (1/m) * sqrt((x-cx)*(x-cx) + (y-cy)*(y-cy));  //(7)
+
+			float g = 1 + k0*pow(r,2) + k1*pow(r,4) + k2*pow(r,6) + k3*pow(r,8) + k4*pow(r,10);  //(1)
+
+			////gImage-specific pixel modification:
+			int pos = x + (y * w);
+			if(pos <= w*h & pos <= w*h) {
+				image[pos].r *= g ;
+				image[pos].g *= g;
+				image[pos].b *= g;
+			}
+		}
+	}
+
+	return GIMAGE_OK;
+}
+
+
 #ifdef USE_GMIC
 GIMAGE_ERROR gImage::ApplyGMICScript(std::string script)
 {

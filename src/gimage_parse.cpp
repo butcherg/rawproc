@@ -962,6 +962,111 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 	return pmap;
 }
 
+std::map<std::string,std::string> parse_lensvignetting(std::string paramstring)
+{
+	std::map<std::string,std::string> pmap;
+	//collect all defaults into pmap:
+
+	if (paramstring.size() != 0 && paramstring.at(0) == '{') {  //if string is a JSON map, parse it into pmap;
+		pmap = parse_JSONparams(paramstring);
+	}
+
+	//if string has name=val;name=val.., pairs, just parse them into pmap:
+	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
+		pmap = parseparams(paramstring);  //from gimage/strutil.h
+	}
+
+	else { //positional
+		std::vector<std::string> p = split(paramstring, ",");
+		int psize = p.size();
+		
+		if (p.size() >=1 & p[0] == "pa") {
+			pmap["mode"] = "pa";
+			if (psize >= 4) {
+			
+				if (isFloat(p[1])) { 
+					pmap["k1"]   = p[1]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensvignetting:ParseError(da) - invalid float: %s.",p[1].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[2])) { 
+					pmap["k2"]   = p[2]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[2].c_str()); 
+					return pmap; 
+				}
+				if (isFloat(p[3])) { 
+					pmap["k3"]   = p[3]; 
+				}
+				else { 
+					pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[3].c_str()); 
+					return pmap; 
+				}
+			}
+		}
+		else if (p.size() >=1 & p[0] == "adobe") {
+			pmap["mode"] = "adobe";
+				if (p.size() >= 2) {
+					if (isFloat(p[1])) { 
+						pmap["k0"]   = p[1]; 
+					}
+					else { 
+						pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[1].c_str()); 
+						return pmap; 
+					}
+				}
+				if  (p.size() >= 3) {
+					if (isFloat(p[2])) { 
+						pmap["k1"]   = p[2]; 
+					}
+					else { 
+						pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[2].c_str()); 
+						return pmap; 
+					}
+				}
+				if  (p.size() >= 4) {
+					if (isFloat(p[3])) { 
+						pmap["k2"]   = p[3]; 
+					}
+					else { 
+						pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[3].c_str()); 
+						return pmap; 
+					}
+				}
+				if  (p.size() >= 5) {
+					if (isFloat(p[4])) { 
+						pmap["k3"]   = p[4]; 
+					}
+					else { 
+						pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[4].c_str()); 
+						return pmap; 
+					}
+				}
+				if  (p.size() >= 6) {
+					if (isFloat(p[5])) { 
+						pmap["k4"]   = p[5]; 
+					}
+					else { 
+						pmap["error"] = string_format("lensvignetting:ParseError(ptlens) - invalid float: %s.",p[5].c_str()); 
+						return pmap; 
+					}
+				}
+		}
+		//if (psize < 6 ) {
+		//	pmap["error"] = "lensvignetting:ParseError - invalid number of parameters."; 
+		//	return pmap; 
+		//}
+	}
+	
+	pmap["cmdlabel"] = "lensvignetting";
+	pmap["paramstring"] = paramstring;
+	
+	return pmap;
+}
+
 //img <li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
 //img </li><br>
 std::map<std::string,std::string> parse_redeye(std::string paramstring)

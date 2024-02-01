@@ -43,6 +43,7 @@
 #include "PicProcessorScript.h"
 #include "PicProcessorSpot.h"
 #include "PicProcessorLensDistortion.h"
+#include "PicProcessorLensVignetting.h"
 
 #ifdef USE_GMIC
 #include "PicProcessorGMIC.h"
@@ -131,6 +132,7 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_SCRIPT, rawprocFrm::MnuScript)
 	EVT_MENU(ID_MNU_SPOT, rawprocFrm::MnuSpot)
 	EVT_MENU(ID_MNU_LENSDISTORTION, rawprocFrm::MnuLensDistortion)
+	EVT_MENU(ID_MNU_LENSVIGNETTING, rawprocFrm::MnuLensVignetting)
 	
 #ifdef USE_GMIC
 	EVT_MENU(ID_MNU_GMIC, rawprocFrm::MnuGMIC)
@@ -341,6 +343,9 @@ void rawprocFrm::CreateGUIControls()
 	//parm tool.lensdistortion.enable = 0/1: Set to 1 and restart rawproc to enable the Lens Distortion tool.  Default: 0
 	if (myConfig::getConfig().getValueOrDefault("tool.lensdistortion.enable","0") == "1")
 		ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSDISTORTION,_("Lens Distortion"), _(""), wxITEM_NORMAL);
+	//parm tool.lensvignetting.enable = 0/1: Set to 1 and restart rawproc to enable the Lens Vignetting tool.  Default: 0
+	if (myConfig::getConfig().getValueOrDefault("tool.lensvignetting.enable","0") == "1")
+		ID_MNU_ADDMnu_Obj->Append(ID_MNU_LENSVIGNETTING,_("Lens Vignetting"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_REDEYE,	_("Redeye"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_RESIZE,	_("Resize"), _(""), wxITEM_NORMAL);
 	ID_MNU_ADDMnu_Obj->Append(ID_MNU_ROTATE,	_("Rotate"), _(""), wxITEM_NORMAL);
@@ -805,7 +810,8 @@ wxTreeItemId rawprocFrm::AddItem(wxString name, wxString command, bool display)
 	else if (name == "group")			p = new PicProcessorGroup("group", command, commandtree, pic);
 	else if (name == "script")			p = new PicProcessorScript("script", command, commandtree, filename.GetFullName(), pic); 
 	else if (name == "spot")			p = new PicProcessorSpot("spot", command, commandtree, pic);
-	else if (name == "lensdistortion")			p = new PicProcessorLensDistortion("lensdistortion", command, commandtree, pic);
+	else if (name == "lensdistortion")	p = new PicProcessorLensDistortion("lensdistortion", command, commandtree, pic);
+	else if (name == "lensvignetting")	p = new PicProcessorLensVignetting("lensvignetting", command, commandtree, pic);
 #ifdef USE_GMIC
 	else if (name == "gmic")			p = new PicProcessorGMIC("gmic", command, commandtree, pic);
 #endif
@@ -2243,6 +2249,21 @@ void rawprocFrm::MnuLensDistortion(wxCommandEvent& event)
 	}
 	catch (std::exception& e) {
 		wxMessageBox(wxString::Format(_("Error: Adding lensdistortion tool failed: %s"),e.what()));
+	}
+}
+
+void rawprocFrm::MnuLensVignetting(wxCommandEvent& event)
+{
+	if (commandtree->IsEmpty()) return;
+	SetStatusText("");
+	try {
+		PicProcessorLensVignetting *p = new PicProcessorLensVignetting("lensvignetting", "pa,0.0,0.0,0.0", commandtree, pic);
+		p->createPanel(parambook);
+		//p->processPic();
+		if (!commandtree->GetNextSibling(p->GetId()).IsOk()) CommandTreeSetDisplay(p->GetId(),1936);
+	}
+	catch (std::exception& e) {
+		wxMessageBox(wxString::Format(_("Error: Adding lensvignetting tool failed: %s"),e.what()));
 	}
 }
 

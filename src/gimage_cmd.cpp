@@ -63,6 +63,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "hlrecover") params = parse_hlrecover(parms);
 	else if (command == "lenscorrection") params = parse_lenscorrection(parms);
 	else if (command == "lensdistortion") params = parse_lensdistortion(parms);
+	else if (command == "lensvignetting") params = parse_lensvignetting(parms);
 	else if (command == "redeye") params = parse_redeye(parms);
 	else if (command == "resize") params = parse_resize(parms);
 	else if (command == "rotate") params = parse_rotate(parms);
@@ -107,6 +108,7 @@ std::string do_cmd(gImage &dib, std::string commandstr, std::string outfile, boo
 	else if (command == "hlrecover") result =  process_hlrecover(dib, params);
 	else if (command == "lenscorrection") result =  process_lenscorrection(dib, params);
 	else if (command == "lensdistortion") result =  process_lensdistortion(dib, params);
+	else if (command == "lensvignetting") result =  process_lensvignetting(dib, params);
 	else if (command == "redeye") result =  process_redeye(dib, params);
 	else if (command == "resize") result =  process_resize(dib, params);
 	else if (command == "rotate") result =  process_rotate(dib, params);
