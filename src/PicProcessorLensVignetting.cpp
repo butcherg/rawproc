@@ -31,9 +31,10 @@
 #define LVK3 9011
 #define LVAUTOK0 9012
 
-#define LVRESET 9015
-#define LVCOPY 9016
-#define LVPASTE 9017
+#define LVPARESET 9015
+#define LVADOBERESET 9016
+#define LVCOPY 9017
+#define LVPASTE 9018
 
 
 class LensVignettingPanel: public PicProcPanel
@@ -61,8 +62,11 @@ class LensVignettingPanel: public PicProcPanel
 			ak3 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); ak3->SetFloatValue(0.0);
 			ak4 = new myFloatCtrl(this, wxID_ANY, 1.0, 5, wxDefaultPosition, spinsize); ak4->SetFloatValue(0.0);
 
-			//btn = new wxBitmapButton(this, LDRESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-			//btn->SetToolTip(_("Reset coefficients to original values"));
+			pareset = new wxBitmapButton(this, LVPARESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+			pareset->SetToolTip(_("Reset pa coefficients to original values"));
+			
+			adobereset = new wxBitmapButton(this, LVADOBERESET, wxBitmap(undo_xpm), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+			adobereset->SetToolTip(_("Reset adobe coefficients to original values"));
 
 			//Lay out with RowSizer:
 			//wxSizerFlags flags = wxSizerFlags().Left().CenterVertical().Border(wxLEFT|wxRIGHT|wxTOP); wx3.1
@@ -76,7 +80,7 @@ class LensVignettingPanel: public PicProcPanel
 
 			unsigned labelwidth = 20;
 
-			//ptlens:
+			//pa:
 			m->NextRow();
 			m->AddRowItem(pab, flags);
 
@@ -92,9 +96,8 @@ class LensVignettingPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("c:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(pk3, flags);
 
-
-			//m->NextRow();
-			//m->AddRowItem(btn, flags);
+			m->NextRow();
+			m->AddRowItem(pareset, flags);
 
 			//adobe:
 			m->NextRow(wxSizerFlags().Expand());
@@ -122,8 +125,8 @@ class LensVignettingPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,wxID_ANY, _("k4:"), wxDefaultPosition, wxSize(labelwidth,TEXTHEIGHT)), flags);
 			m->AddRowItem(ak4, flags);
 
-			//m->NextRow();
-			//m->AddRowItem(btn, flags);
+			m->NextRow();
+			m->AddRowItem(adobereset, flags);
 
 			m->End();
 			SetSizerAndFit(m);
@@ -138,7 +141,9 @@ class LensVignettingPanel: public PicProcPanel
 					pk2->SetFloatValue(atof(p[2].c_str()));
 					pk3->SetFloatValue(atof(p[3].c_str()));
 				}
-				
+
+				capturePAParams();
+
 				lvmode = LVPA;
 				processLV();
 			}
@@ -148,6 +153,9 @@ class LensVignettingPanel: public PicProcPanel
 				if (p.size() >= 4) ak2->SetFloatValue(atof(p[3].c_str()));
 				if (p.size() >= 5) ak3->SetFloatValue(atof(p[4].c_str()));
 				if (p.size() >= 6) ak3->SetFloatValue(atof(p[5].c_str()));
+
+				captureAdobeParams();
+
 				lvmode = LVADOBE;
 				processLV();
 			}
@@ -162,15 +170,23 @@ class LensVignettingPanel: public PicProcPanel
 			Bind(myFLOATCTRL_CHANGE,&LensVignettingPanel::onWheel, this);
 			Bind(myFLOATCTRL_UPDATE,&LensVignettingPanel::paramChanged, this);
 			Bind(wxEVT_CHECKBOX, &LensVignettingPanel::OnEnable, this, LVENABLE);
-			//Bind(wxEVT_BUTTON, &LensVignettingPanel::OnReset, this, LVRESET);
+			Bind(wxEVT_BUTTON, &LensVignettingPanel::OnPAReset, this, LVPARESET);
+			Bind(wxEVT_BUTTON, &LensVignettingPanel::OnAdobeReset, this, LVADOBERESET);
 			Bind(wxEVT_BUTTON, &LensVignettingPanel::OnCopy, this, LVCOPY);
 			Bind(wxEVT_BUTTON, &LensVignettingPanel::OnPaste, this, LVPASTE);
 			Bind(wxEVT_CHAR_HOOK, &LensVignettingPanel::OnKey,  this);
 			Thaw();
 		}
 
-		void OnReset(wxCommandEvent& event)
+		void OnPAReset(wxCommandEvent&)
 		{
+			restorePAParams();
+			processLV();
+		}
+
+		void OnAdobeReset(wxCommandEvent& event)
+		{
+			restoreAdobeParams();
 			processLV();
 		}
 
@@ -203,7 +219,9 @@ class LensVignettingPanel: public PicProcPanel
 						pk2->SetFloatValue(atof(p[2].c_str()));
 						pk3->SetFloatValue(atof(p[3].c_str()));
 					}
-					
+
+					capturePAParams();
+
 					lvmode = LVPA;
 					processLV();
 				}
@@ -213,6 +231,9 @@ class LensVignettingPanel: public PicProcPanel
 					if (p.size() >= 4) ak2->SetFloatValue(atof(p[3].c_str()));
 					if (p.size() >= 5) ak3->SetFloatValue(atof(p[4].c_str()));
 					if (p.size() >= 6) ak4->SetFloatValue(atof(p[5].c_str()));
+					
+					captureAdobeParams();
+					
 					lvmode = LVADOBE;
 					processLV();
 				}
@@ -292,12 +313,43 @@ class LensVignettingPanel: public PicProcPanel
 		//		ak0 = false;
 		//	processLD();
 		//}
+		
+		void capturePAParams()
+		{
+			ppk1 = pk1->GetFloatValue();
+			ppk2 = pk2->GetFloatValue();
+			ppk3 = pk3->GetFloatValue();
+		}
+		
+		void restorePAParams()
+		{
+			pk1->SetFloatValue(ppk1);
+			pk2->SetFloatValue(ppk2);
+			pk3->SetFloatValue(ppk3);
+		}
+		
+		void captureAdobeParams() 
+		{
+			pak0 = ak0->GetFloatValue();
+			pak1 = ak1->GetFloatValue();
+			pak2 = ak2->GetFloatValue();
+			pak3 = ak3->GetFloatValue();
+		}
+		
+		void restoreAdobeParams()
+		{
+			ak0->SetFloatValue(pak0);
+			ak1->SetFloatValue(pak1);
+			ak2->SetFloatValue(pak2);
+			ak3->SetFloatValue(pak3);
+		}
 
 	private:
 
 		myFloatCtrl *pk1, *pk2 ,*pk3, *ak0, *ak1, *ak2, *ak3, *ak4;
+		float ppk1, ppk2, ppk3, pak0, pak1, pak2, pak3, pak4;
 		wxRadioButton *pab, *adobeb;
-		wxBitmapButton *btn;
+		wxBitmapButton *pareset, *adobereset;
 		wxCheckBox *enablebox;
 		int lvmode;
 		wxTimer t;
