@@ -351,6 +351,7 @@ class gImage
 		GIMAGE_ERROR ApplyDistortionCorrectionPTLens(float a, float b, float c, float d, int threadcount);
 		GIMAGE_ERROR ApplyDistortionCorrectionAdobe(float k0, float k1, float k2, float k3, int threadcount);  //simple
 		GIMAGE_ERROR ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, float kr1, float kr2, float kr3, float kt0, float kt1, float cpx, float cpy, int threadcount);  //full implementation of the adobe opcode, except all channels are manipulated by a single coefficient set.
+		GIMAGE_ERROR ApplyDistortionCorrectionAdobeWarpRetilinear(std::vector<std::vector<float>> kr, std::vector<std::vector<float>> kt, float cpx, float cpy, int threadcount);  //full adobe opcode implementation, including distinct sets of k parameters for each plane of the image
 		GIMAGE_ERROR ApplyVignettingCorrectionAdobeFixVignetteRadial(float k0, float k1, float k2, float k3, float k4,  float cpx, float cpy, int threadcount);  //full implementation of the adobe opcode, except all channels are manipulated by a single coefficient set.
 
 #ifdef USE_GMIC

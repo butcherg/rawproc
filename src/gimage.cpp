@@ -94,6 +94,7 @@ gImage::gImage()
 	w=0; 
 	h=0;
 	profile = NULL;
+	profile_length = 0;
 	lasterror = GIMAGE_OK;
 }
 
@@ -310,7 +311,7 @@ gImage::gImage(unsigned width, unsigned height, unsigned colors, std::map<std::s
 
 gImage::~gImage()
 {
-	if (profile) delete profile;
+	if ((profile_length > 0) && (profile != NULL)) delete profile;
 }
 
 
@@ -5398,9 +5399,7 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
-	printf("getting lens database...\n"); fflush(stdout);
 	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
-	printf("doing lens correction...\n"); fflush(stdout);
 	int ModifyFlags = modops;
 	initInterpolation(algo);
 	
@@ -5771,6 +5770,135 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, flo
 	}
 	
 	printf("adobe: r_max: %f max_d: %f\n", r_max, sqrt((w/2)*(w/2) + (h/2)*(h/2))); fflush(stdout);
+
+	return GIMAGE_OK;
+}
+
+// This version implements the full radial/tangential distortion algorithm from the Adobe DNG WarpRetilinear definition,
+// ref: Adobe Digital Negative Specification 1.7.1.0 pp 106-108.  The equations are cross-referenced to the specification 
+// definition by their numerical sequence in the definition.  The vector<vector<float>> contains the correction parameters 
+// for each of the red, green and blue planes
+
+GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(std::vector<std::vector<float>> kr, std::vector<std::vector<float>> kt, float cpx, float cpy, int threadcount)
+{	
+	//the blank destination image:
+	std::vector<pix> src = image;
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned i = 0; i<image.size(); i++) {
+		image[i].r = 0.0;
+		image[i].g = 0.0;
+		image[i].b = 0.0;
+	}
+
+	// variables collected from the image:
+
+	float x0 = 0;
+	float y0 = 0;
+	float x1 = w;
+	float y1 = h;
+
+	//equations (3) through (7) can be done once before walking the image:
+
+	float cx = x0 + cpx*(x1 - x0); // (3)
+	float cy = y0 + cpy*(y1 - y0); // (4)
+
+	float mx = std::max(abs(x0 - cx), abs(x1 - cx)); // (5)
+	float my = std::max(abs(y0 - cy), abs(y1 - cy)); // (6)
+
+	float m = sqrt(mx*mx + my*my); // (7)
+
+	#pragma omp parallel for num_threads(threadcount)
+	for (unsigned y=0; y<h; y++) {
+		for (unsigned x=0; x<w; x++) {
+
+			float dx = (x - cx) / m; // (10)
+			float dy = (y - cy) / m; // (11)
+
+			float r = sqrt(dx*dx + dy*dy);  // (8)
+
+			//set plane for the following code segment:
+			
+			int plane = 0;
+
+			//radial distortion:
+
+			float dxr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dx; // (12), using (9)
+			float dyr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dy; // (13), using (9)
+
+			//tangential distortion:
+
+			float dxt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dx*dx)); // (14)
+			float dyt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dy*dy)); // (15)
+
+			//final pixel relocation (x', y'):
+
+			int xp = cx + m*(dxr + dxt);  // (1)
+			int yp = cy + m*(dyr + dyt);  // (2)
+			
+			float r_dist = sqrt((x-xp)*(x-xp) + (y-yp)*(y-yp));
+			
+			//gImage-specific pixel translation:
+
+			int pos_dst = x + (y * w);
+			int pos_src = xp + (yp * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst].r = src[pos_src].r;
+			
+			
+			plane = 1;
+			
+			//radial distortion:
+
+			dxr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dx; // (12), using (9)
+			dyr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dy; // (13), using (9)
+
+			//tangential distortion:
+
+			dxt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dx*dx)); // (14)
+			dyt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dy*dy)); // (15)
+
+			//final pixel relocation (x', y'):
+
+			xp = cx + m*(dxr + dxt);  // (1)
+			yp = cy + m*(dyr + dyt);  // (2)
+			
+			r_dist = sqrt((x-xp)*(x-xp) + (y-yp)*(y-yp));
+			
+			//gImage-specific pixel translation:
+
+			//int pos_dst = x + (y * w);
+			pos_src = xp + (yp * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst].g = src[pos_src].g;
+			
+			
+			plane = 2;
+			
+			//radial distortion:
+
+			dxr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dx; // (12), using (9)
+			dyr = (kr[plane][0] + kr[plane][1]*pow(r,2) + kr[plane][2]*pow(r,4) + kr[plane][3]*pow(r,6)) * dy; // (13), using (9)
+
+			//tangential distortion:
+
+			dxt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dx*dx)); // (14)
+			dyt = kt[plane][0]*(2*dx*dy) + kt[plane][1]*(r*r + 2*(dy*dy)); // (15)
+
+			//final pixel relocation (x', y'):
+
+			xp = cx + m*(dxr + dxt);  // (1)
+			yp = cy + m*(dyr + dyt);  // (2)
+			
+			r_dist = sqrt((x-xp)*(x-xp) + (y-yp)*(y-yp));
+			
+			//gImage-specific pixel translation:
+
+			//int pos_dst = x + (y * w);
+			pos_src = xp + (yp * w);
+			if(pos_dst <= w*h & pos_src <= w*h)
+				image[pos_dst].b = src[pos_src].b;
+		}
+	}
 
 	return GIMAGE_OK;
 }

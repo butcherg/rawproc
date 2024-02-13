@@ -998,8 +998,22 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 			k1 = atof(params["k1"].c_str());
 			k2 = atof(params["k2"].c_str());
 			k3 = atof(params["k3"].c_str());
+			
+			//test of three-pane lensdistortion:adobe
+			std::vector<float> k_r = {k0, k1, k2, k3};
+			std::vector<std::vector<float>> kr;
+			kr.push_back(k_r);
+			kr.push_back(k_r);
+			kr.push_back(k_r);
+			std::vector<float> k_t = {0.0, 0.0};
+			std::vector<std::vector<float>> kt;
+			kt.push_back(k_t);
+			kt.push_back(k_t);
+			kt.push_back(k_t);
+			
 			_mark();
-			dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
+			//dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
+			dib.ApplyDistortionCorrectionAdobeWarpRetilinear(kr, kt, 0.5, 0.5, threadcount);
 			//dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("lensdistortion(adobe):%0.2f,%0.2f,%0.2f,%0.2f",k0, k1, k2, k3);
@@ -1046,7 +1060,6 @@ std::map<std::string,std::string> process_lensvignetting(gImage &dib, std::map<s
 			if (params.find("k2") != params.end()) k2 = atof(params["k2"].c_str());
 			if (params.find("k3") != params.end()) k3 = atof(params["k3"].c_str());
 			if (params.find("k4") != params.end()) k4 = atof(params["k4"].c_str());
-			printf("process_lensvignetting: mode: adobe k0: %f  k1: %f  k2: %f  k3: %f  k4: %f\n", k0, k1, k2, k3, k4); fflush(stdout);
 			_mark();
 			dib.ApplyVignettingCorrectionAdobeFixVignetteRadial(k0, k1, k2, k3, k4, 0.5, 0.5, threadcount);
 			result["duration"] = std::to_string(_duration());
