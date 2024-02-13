@@ -323,7 +323,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 }
 
 
-//img <li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; | camera </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.  'camera' builds a crop box from raw metadata.</li>
+//img <li><b>crop:&lt;x1&gt;,&lt;y1&gt;,&lt;x2&gt;,&lt;y2&gt; | camera </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.  'camera' builds a crop box from raw metadata.</li>
 //img </li><br>
 std::map<std::string,std::string> parse_crop(std::string paramstring)
 {
@@ -409,7 +409,7 @@ std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 }
 
 
-//img <li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lty1&gt;,...,&lt;xn&gt;,&ly;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
+//img <li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lt;y1&gt;,...,&lt;xn&gt;,&lt;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
 //img </li><br>
 std::map<std::string,std::string> parse_curve(std::string paramstring)
 {
@@ -1067,7 +1067,7 @@ std::map<std::string,std::string> parse_lensvignetting(std::string paramstring)
 	return pmap;
 }
 
-//img <li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
+//img <li><b>redeye: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
 //img </li><br>
 std::map<std::string,std::string> parse_redeye(std::string paramstring)
 {
@@ -1212,7 +1212,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 	return pmap;
 }
 
-//img <li><b>resize</b>:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
+//img <li><b>resize:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
 //img resize the image to the specified width and height, using the specified interpolation algorithm.  
 //img If only one number is provided, use it for the largest dimension and compute the other to preserve 
 //img the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
