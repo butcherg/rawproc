@@ -22,6 +22,7 @@ int getThreadCount(int threadcount) {
 	return threadcount;
 }
 
+
 std::map<std::string,std::string> process_add(gImage &dib, std::map<std::string,std::string> params)
 {
 	std::map<std::string,std::string> result;
@@ -856,108 +857,130 @@ std::map<std::string,std::string> process_lenscorrection(gImage &dib, std::map<s
 	std::string imgmsg;
 
 	//error-catching:
-	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
+	if (params.find("mode") == params.end()) {  //all variants need a mode, now...  //well, 'cept for lenscorrection.
 		result["error"] = "lenscorrrection:ProcessError - no mode";
 	}
 	//nominal processing:
 	else {
 		int threadcount = getThreadCount(atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.cores","0").c_str()));
 		result["threadcount"] = std::to_string(threadcount);
-		
-		lfDatabase *ldb;
-		
-		std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
 
-		GIMAGE_ERROR res =  dib.lensfunLoadLensDatabase(lensfundatadir, &ldb);
-		if (ldb == NULL) {
-			result["error"] = "lenscorrection:ProcessError - Database initialize failed";
-			return result;
+		if(params["mode"] == "camera") {
+			if (dib.getInfoValue("Model") == "NIKON Z 6") {
+				float k0=1.0, k1=0.0, k2=0.0, k3=0.0;
+
+				std::map<std::string,std::string> info = dib.getInfo();
+				
+				if (info.find("exiftool.RadialDistortionCoefficient3") != info.end()) k1 = atof(info["exiftool.RadialDistortionCoefficient3"].c_str());
+				if (info.find("exiftool.RadialDistortionCoefficient2") != info.end()) k2 = atof(info["exiftool.RadialDistortionCoefficient2"].c_str());
+				if (info.find("exiftool.RadialDistortionCoefficient1") != info.end()) k3 = atof(info["exiftool.RadialDistortionCoefficient1"].c_str());
+				k0 = 1-(k1+k2+k3) / 2;
+
+				_mark();
+				GIMAGE_ERROR res = dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
+				if (res == GIMAGE_OK) {
+					result["duration"] = std::to_string(_duration());
+					result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
+					result["treelabel"] = "lenscorrection:camera";
+					result["imgmsg"] = string_format("(%d threads, %ssec)", threadcount, result["duration"].c_str());
+					return result;
+				}
+			}
 		}
-		if (res ==  GIMAGE_LF_NO_DATABASE) {
-			result["error"] = string_format("lenscorrection:ProcessError - Database not found: %s", lensfundatadir.c_str());
-			return result;
-		}
-		else if (res ==  GIMAGE_LF_WRONG_FORMAT) {
-			result["error"] = "lenscorrection:ProcessError - Database is wrong format";
-			return result;
-		}
-		
-		int modops = 0;
-		imgmsg = params["ops"];
-		std::vector<std::string> ops = split(params["ops"], ",");
-		for (std::vector<std::string>::iterator it = ops.begin() ; it != ops.end(); ++it) {
-				if (*it == "ca") modops |= LF_MODIFY_TCA;
-				if (*it == "vig") modops |= LF_MODIFY_VIGNETTING;
-				if (*it == "dist") modops |= LF_MODIFY_DISTORTION;
-				if (*it == "autocrop") modops |= LF_MODIFY_SCALE;
-		}
-		
-		modops |= LF_MODIFY_GEOMETRY;
-		
-		LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR; //default
-		if (paramexists(params, "geometry")) {
-			imgmsg.append(string_format(",%s",params["geometry"].c_str()));
-			if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
-			else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
-			else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
-			else if (params["geometry"] == "equirectangular") geometry = GEOMETRY_EQUIRECTANGULAR;
-			else if (params["geometry"] == "orthographic") geometry = GEOMETRY_ORTHOGRAPHIC;
-			else if (params["geometry"] == "stereographic") geometry = GEOMETRY_STEREOGRAPHIC;
-			else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
-			else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
-			else {
-				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"].c_str());
+		else if(params["mode"] == "lensfun") {
+
+			lfDatabase *ldb;
+
+			std::string lensfundatadir = myConfig::getConfig().getValueOrDefault("tool.lenscorrection.databasepath",getAppConfigDir());
+
+			GIMAGE_ERROR res =  dib.lensfunLoadLensDatabase(lensfundatadir, &ldb);
+			if (ldb == NULL) {
+				result["error"] = "lenscorrection:ProcessError - Database initialize failed";
+				return result;
+			}
+			if (res ==  GIMAGE_LF_NO_DATABASE) {
+				result["error"] = string_format("lenscorrection:ProcessError - Database not found: %s", lensfundatadir.c_str());
+				return result;
+			}
+			else if (res ==  GIMAGE_LF_WRONG_FORMAT) {
+				result["error"] = "lenscorrection:ProcessError - Database is wrong format";
+				return result;
+			}
+
+			int modops = 0;
+			imgmsg = params["ops"];
+			std::vector<std::string> ops = split(params["ops"], ",");
+			for (std::vector<std::string>::iterator it = ops.begin() ; it != ops.end(); ++it) {
+					if (*it == "ca") modops |= LF_MODIFY_TCA;
+					if (*it == "vig") modops |= LF_MODIFY_VIGNETTING;
+					if (*it == "dist") modops |= LF_MODIFY_DISTORTION;
+					if (*it == "autocrop") modops |= LF_MODIFY_SCALE;
+			}
+
+			modops |= LF_MODIFY_GEOMETRY;
+
+			LENS_GEOMETRY geometry = GEOMETRY_RETICLINEAR; //default
+			if (paramexists(params, "geometry")) {
+				imgmsg.append(string_format(",%s",params["geometry"].c_str()));
+				if (params["geometry"] == "reticlinear") geometry = GEOMETRY_RETICLINEAR;
+				else if (params["geometry"] == "fisheye") geometry = GEOMETRY_FISHEYE;
+				else if (params["geometry"] == "panoramic") geometry = GEOMETRY_PANORAMIC;
+				else if (params["geometry"] == "equirectangular") geometry = GEOMETRY_EQUIRECTANGULAR;
+				else if (params["geometry"] == "orthographic") geometry = GEOMETRY_ORTHOGRAPHIC;
+				else if (params["geometry"] == "stereographic") geometry = GEOMETRY_STEREOGRAPHIC;
+				else if (params["geometry"] == "equisolid") geometry = GEOMETRY_EQUISOLID;
+				else if (params["geometry"] == "thoby") geometry = GEOMETRY_THOBY;
+				else {
+					result["error"] = string_format("lenscorrection:ProcessError - Unrecognized geometry: %s",params["geometry"].c_str());
+					return result;
+				}
+			}
+			else imgmsg.append(",reticlinear");
+
+			RESIZE_FILTER algo = FILTER_BOX;
+			if (paramexists(params, "algo")) {
+				imgmsg.append(string_format(",%s",params["algo"].c_str()));
+				if (params["algo"] == "nearest") algo = FILTER_BOX;
+				else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
+				else if (params["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
+				else {
+					result["error"] = string_format("lenscorrection:ProcessError - Unrecognized algorithm: %s",params["algo"].c_str());
+					return result;
+				}
+			}
+			else imgmsg.append(",nearest");
+
+			std::string camera = dib.getInfoValue("Model");;
+			if (paramexists(params, "camera")) camera = params["camera"];
+			std::string lens = dib.getInfoValue("Lens");
+			if (lens == std::string()) lens = dib.getInfoValue("LensModel");
+			if (paramexists(params, "lens")) camera = params["lens"];
+
+			_mark();
+			res =  dib.ApplyLensCorrection(ldb, modops, geometry, algo, threadcount, camera, lens);
+			if (res == GIMAGE_OK) {
+				result["duration"] = std::to_string(_duration());
+				result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
+				result["treelabel"] = "lenscorrection";
+				result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
+				return result;
+			}
+			else if (res ==  GIMAGE_LF_NO_DATABASE) {
+				result["error"] = "lenscorrection:ProcessError - No database instance";
+				return result;
+			}
+			else if (res ==  GIMAGE_LF_CAMERA_NOT_FOUND) {
+				result["error"] = string_format("lenscorrection:ProcessError - Camera not found: %s", camera.c_str());
+				return result;
+			}
+			else if (res ==  GIMAGE_LF_LENS_NOT_FOUND) {
+				result["error"] = string_format("lenscorrection:ProcessError - Lens not found: %s", lens.c_str());
 				return result;
 			}
 		}
-		else imgmsg.append(",reticlinear");
-		
-		RESIZE_FILTER algo = FILTER_BOX;
-		if (paramexists(params, "algo")) {
-			imgmsg.append(string_format(",%s",params["algo"].c_str()));
-			if (params["algo"] == "nearest") algo = FILTER_BOX;
-			else if (params["algo"] == "bilinear") algo = FILTER_BILINEAR;
-			else if (params["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
-			else {
-				result["error"] = string_format("lenscorrection:ProcessError - Unrecognized algorithm: %s",params["algo"].c_str());
-				return result;
-			}
+		else {
+			result["error"] = string_format("lenscorrection:ProcessError - invalid mode: %s", params["mode"].c_str());
 		}
-		else imgmsg.append(",nearest");
-		
-		std::string camera = dib.getInfoValue("Model");;
-		if (paramexists(params, "camera")) camera = params["camera"];
-		std::string lens = dib.getInfoValue("Lens");
-		if (lens == std::string()) lens = dib.getInfoValue("LensModel");
-		if (paramexists(params, "lens")) camera = params["lens"];
-
-		_mark();
-		res =  dib.ApplyLensCorrection(ldb, modops, geometry, algo, threadcount, camera, lens);
-		if (res == GIMAGE_OK) {
-			result["duration"] = std::to_string(_duration());
-			result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
-			result["treelabel"] = "lenscorrection";
-			result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
-			return result;
-		}
-		else if (res ==  GIMAGE_LF_NO_DATABASE) {
-			result["error"] = "lenscorrection:ProcessError - No database instance";
-			return result;
-		}
-		else if (res ==  GIMAGE_LF_CAMERA_NOT_FOUND) {
-			result["error"] = string_format("lenscorrection:ProcessError - Camera not found: %s", camera.c_str());
-			return result;
-		}
-		else if (res ==  GIMAGE_LF_LENS_NOT_FOUND) {
-			result["error"] = string_format("lenscorrection:ProcessError - Lens not found: %s", lens.c_str());
-			return result;
-		}
-		
-		//result["duration"] = std::to_string(_duration());
-		//result["commandstring"] = string_format("lenscorrection:%s",params["paramstring"].c_str());
-		//result["treelabel"] = "lenscorrection";
-		//result["imgmsg"] = string_format("%s,%s (%d threads, %ssec)", lens.c_str(), imgmsg.c_str(), threadcount, result["duration"].c_str());
-		
 	}
 	return result;
 }
@@ -966,8 +989,8 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 {
 	std::map<std::string,std::string> result;
 	std::string imgmsg;
-	double a, b, c, d;  //ptlens
-	double k0, k1, k2, k3;  //adobe
+	float a, b, c, d;  //ptlens
+	float k0, k1, k2, k3;  //adobe
 
 	//error-catching:
 	if (params.find("mode") == params.end()) {  //all variants need a mode, now...
@@ -999,22 +1022,26 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 			k2 = atof(params["k2"].c_str());
 			k3 = atof(params["k3"].c_str());
 			
-			//test of three-pane lensdistortion:adobe
+			//old simple one-plane corrections:
+			//_mark();
+			//dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
+			//dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
+			
+			//full three-pane lensdistortion:adobe
 			std::vector<float> k_r = {k0, k1, k2, k3};
 			std::vector<std::vector<float>> kr;
 			kr.push_back(k_r);
 			kr.push_back(k_r);
 			kr.push_back(k_r);
-			std::vector<float> k_t = {0.0, 0.0};
+			std::vector<float> k_t = {0.0, 0.0}; //hard-code no tangential distortion correction
 			std::vector<std::vector<float>> kt;
 			kt.push_back(k_t);
 			kt.push_back(k_t);
 			kt.push_back(k_t);
-			
 			_mark();
-			//dib.ApplyDistortionCorrectionAdobeWarpRetilinear(k0, k1, k2, k3, 0.0, 0.0, 0.5, 0.5, threadcount);
 			dib.ApplyDistortionCorrectionAdobeWarpRetilinear(kr, kt, 0.5, 0.5, threadcount);
-			//dib.ApplyDistortionCorrectionAdobe(k0, k1, k2, k3, threadcount);
+			
+			
 			result["duration"] = std::to_string(_duration());
 			result["commandstring"] = string_format("lensdistortion(adobe):%0.2f,%0.2f,%0.2f,%0.2f",k0, k1, k2, k3);
 			result["imgmsg"] = string_format("%0.2f,%0.2f,%0.2f,%0.2f (%d threads, %ssec)",k0, k1, k2, k3, threadcount, result["duration"].c_str());

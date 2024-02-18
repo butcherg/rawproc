@@ -65,6 +65,8 @@ void log(wxString msg);
 //int Command2RawFlags(wxString cmd);
 //wxString RawFlags2Command(int flags);
 
+std::vector<std::string> getExiftoolTags(wxString filename, wxString exifparameters);
+
 #endif
 
 

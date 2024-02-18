@@ -2224,8 +2224,8 @@ void rawprocFrm::MnuLensCorrection(wxCommandEvent& event)
 	try {
 		lfDatabase *lfdb =  PicProcessorLensCorrection::findLensfunDatabase();
 		if (lfdb) {
-			//parm tool.lenscorrection.default: The corrections to automatically apply. Default: none.
-			wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default",""));
+			//parm tool.lenscorrection.default: The corrections to automatically apply. Default: mode=lensfun.
+			wxString defaults =  wxString(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.default","mode=lensfun"));
 			PicProcessorLensCorrection *p = new PicProcessorLensCorrection(lfdb, "lenscorrection", defaults, commandtree, pic);
 			p->createPanel(parambook);
 			if (defaults != "") p->processPic();

@@ -119,6 +119,7 @@ enum GIMAGE_ERROR {
 	GIMAGE_LF_LENS_NOT_FOUND,
 	
 	GIMAGE_EXIV2_METADATAWRITE_FAILED,
+	GIMAGE_EXIFTOOL_METADATAREAD_FAILED,
 	
 	GIMAGE_GMIC_ERROR
 };
@@ -367,6 +368,9 @@ class gImage
 		static gImage loadImageFile(const char * filename, std::string params);
 		static std::map<std::string,std::string> loadMetadata(const char * filename);
 		
+		//Used to find and load lens correction parameters for given camera models:
+		GIMAGE_ERROR loadLensCorrectionMetadata(std::string filename);
+		
 #ifdef USE_DCRAW
 		static void setdcrawPath(std::string path);
 #endif
@@ -405,7 +409,7 @@ class gImage
 
 		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
 		GIMAGE_ERROR getMetadata(std::string filename);
-
+		
 
 
 	private:

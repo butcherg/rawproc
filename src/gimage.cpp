@@ -29,6 +29,85 @@
 //#include <rtprocess/jaggedarray.h>  //maybe, later....
 #include "icc_profiles.h"
 
+#ifdef WIN32
+#include <windows.h>
+
+//https://stackoverflow.com/questions/7063859/c-popen-command-without-console/59523254#59523254
+int runCmd(const char* cmd, std::string& outOutput) {
+
+    HANDLE g_hChildStd_OUT_Rd = NULL;
+    HANDLE g_hChildStd_OUT_Wr = NULL;
+    HANDLE g_hChildStd_ERR_Rd = NULL;
+    HANDLE g_hChildStd_ERR_Wr = NULL;
+
+    SECURITY_ATTRIBUTES sa;
+    // Set the bInheritHandle flag so pipe handles are inherited.
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+    if (!CreatePipe(&g_hChildStd_ERR_Rd, &g_hChildStd_ERR_Wr, &sa, 0))     { return 1; } // Create a pipe for the child process's STDERR.
+    if (!SetHandleInformation(g_hChildStd_ERR_Rd, HANDLE_FLAG_INHERIT, 0)) { return 1; } // Ensure the read handle to the pipe for STDERR is not inherited.
+    if (!CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &sa, 0))     { return 1; } // Create a pipe for the child process's STDOUT.
+    if (!SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)) { return 1; } // Ensure the read handle to the pipe for STDOUT is not inherited
+
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    bool bSuccess = FALSE;
+
+    // Set up members of the PROCESS_INFORMATION structure.
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+    // Set up members of the STARTUPINFO structure.
+    // This structure specifies the STDERR and STDOUT handles for redirection.
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError  = g_hChildStd_ERR_Wr;
+    siStartInfo.hStdOutput = g_hChildStd_OUT_Wr;
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    // Create the child process.
+    bSuccess = CreateProcess(
+        NULL,             // program name
+        (char*)cmd,       // command line
+        NULL,             // process security attributes
+        NULL,             // primary thread security attributes
+        TRUE,             // handles are inherited
+        CREATE_NO_WINDOW, // creation flags (this is what hides the window)
+        NULL,             // use parent's environment
+        NULL,             // use parent's current directory
+        &siStartInfo,     // STARTUPINFO pointer
+        &piProcInfo       // receives PROCESS_INFORMATION
+    );
+
+    CloseHandle(g_hChildStd_ERR_Wr);
+    CloseHandle(g_hChildStd_OUT_Wr);
+
+    // read output
+    #define BUFSIZE 4096
+    DWORD dwRead;
+    CHAR chBuf[BUFSIZE];
+    bool bSuccess2 = FALSE;
+    for (;;) { // read stdout
+        bSuccess2 = ReadFile(g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL);
+        if(!bSuccess2 || dwRead == 0) break;
+        std::string s(chBuf, dwRead);
+        outOutput += s;
+    }
+    dwRead = 0;
+    for (;;) { // read stderr
+        bSuccess2 = ReadFile(g_hChildStd_ERR_Rd, chBuf, BUFSIZE, &dwRead, NULL);
+        if(!bSuccess2 || dwRead == 0) break;
+        std::string s(chBuf, dwRead);
+        outOutput += s;
+    }
+
+    // The remaining open handles are cleaned up when this process terminates.
+    // To avoid resource leaks in a larger application,
+    // close handles explicitly.
+    return 0;
+}
+#endif
+
 #if LF_VERSION == ((0 << 24) | (3 << 16) | (95 << 8) | 0)
 #define LF_0395
 #endif
@@ -5690,9 +5769,7 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobe(float k0, float k1, float k2
 				image[pos_dst] = src[pos_src];
 		}
 	}
-	
-	printf("adobe: r_max: %f norm: %d\n", r_max, norm); fflush(stdout);
-	
+
 	return GIMAGE_OK;
 }
 
@@ -5768,8 +5845,6 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, flo
 				image[pos_dst] = src[pos_src];
 		}
 	}
-	
-	printf("adobe: r_max: %f max_d: %f\n", r_max, sqrt((w/2)*(w/2) + (h/2)*(h/2))); fflush(stdout);
 
 	return GIMAGE_OK;
 }
@@ -6872,7 +6947,49 @@ GIMAGE_ERROR gImage::getMetadata(std::string filename)
 	return GIMAGE_OK;
 }
 
+GIMAGE_ERROR gImage::loadLensCorrectionMetadata(std::string filename)
+{
+	std::string exif, params;
+	
+	//if (getInfoValue("Model").find("NIKON Z") != std::string::npos) {
+		params = " -*Distortion* -*Vignette* ";
+	//}
+	
+	
+	std::string exifcommand = "exiftool";  //myConfig::getConfig().getValueOrDefault("exif.command","");
+	//exifcommand.append(" -S -charset UTF8" + params + " " + "\"" + filename + "\"");
+	exifcommand.append(" -S " + params + " " + "\"" + filename + "\"");
+	
+	//printf("%s\n", exifcommand.c_str()); fflush(stdout);
+	
+#ifdef WIN32
+	//FILE* pipe = _popen(exifcommand.c_str(), "r");
+	runCmd(exifcommand.c_str(), exif);
+#else
+	FILE* pipe = popen(exifcommand.c_str(), "r");
 
+	if (!pipe) return GIMAGE_EXIFTOOL_METADATAREAD_FAILED;
+
+	while (!feof(pipe)) {
+		char c = (char) fgetc(pipe);
+		if (c == '\r') continue;
+		exif.append(&c);
+	}
+	pclose(pipe);
+#endif
+	
+	//printf("%s\n", exif.c_str()); fflush(stdout);
+	
+	std::vector<std::string> lines = split(exif, "\n");
+	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
+		std::vector<std::string> nameval = split(*it, ": ");
+		if (nameval.size() >= 2)
+			setInfo("exiftool."+nameval[0], nameval[1]);
+	}
+	
+	return GIMAGE_OK;
+
+}
 
 //Loaders:
 
@@ -6930,6 +7047,7 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 			break;
 	}
 	gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
+	I.loadLensCorrectionMetadata(filename);
 	delete [] image;
 	if (icclength && iccprofile) delete [] iccprofile;
 	return I;

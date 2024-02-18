@@ -822,43 +822,68 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
 		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		if (pmap.find("mode") == pmap.end()) pmap["mode"] = "lensfun";
+		pmap["cmdlabel"] = "lenscorrection:lensfun";
 	}
 
-	// no positional parameters for lenscorrection, use "laundry list" ...
-	else { //positional
-		std::vector<std::string> p = split(paramstring, ",");
-		int psize = p.size();
+	else { 
+		std::map<std::string, std::string> parms =  parseparams(paramstring);
 		
-		for (unsigned i=0; i<psize; i++) { //ca,vig,dist,autocrop
-			if (p[i] == "ca") pmap["ops"] += "ca,";
-			else if (p[i] == "vig") pmap["ops"] += "vig,";
-			else if (p[i] == "dist") pmap["ops"] += "dist,";
-			else if (p[i] == "autocrop") pmap["ops"] += "autocrop,";
-			
-			else if (p[i] == "nearest") pmap["algo"] = "nearest,";
-			else if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
-			else if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
-			
-			else if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear";
-			else if (p[i] == "fisheye") pmap["geometry"] = "fisheye";
-			else if (p[i] == "panoramic") pmap["geometry"] = "panoramic,";
-			else if (p[i] == "equirectangular") pmap["geometry"] = "equirectangula";
-			else if (p[i] == "orthographic") pmap["geometry"] = "orthographic";
-			else if (p[i] == "stereographic") pmap["geometry"] = "stereographic";
-			else if (p[i] == "equisolid") pmap["geometry"] = "equisolid";
-			else if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+		if (parms.find("mode") != parms.end()) {
+			if (parms["mode"] == "camera") {
+				pmap["mode"] = "camera";
+				pmap["cmdlabel"] = "lenscorrection:camera";
+			}
+			else if (parms["mode"] == "lensfun") {
+				pmap["mode"] = "lensfun";
+				pmap["cmdlabel"] = "lenscorrection:lensfun";
+				pmap["ops"] = parms["ops"];
+				if (parms.find("algo") != parms.end())
+					pmap["algo"] = parms["algo"];
+				else
+					pmap["algo"] = "nearest";
+				if (parms.find("geometry") != parms.end())
+					pmap["geometry"] = parms["geometry"];
+				else
+					pmap["geometry"] = "reticlinear";
+			}
 			else {
-				pmap["error"] = string_format("lenscorrection:ParseError - unrecognized parameter: %s",p[i].c_str()); 
+				pmap["error"] = string_format("lenscorrection:ParseError - bad mode: %s",parms["mode"].c_str()); 
 				return pmap;
 			}
 		}
-		size_t opssize = pmap["ops"].size();
-		if (opssize > 0) pmap["ops"].erase(opssize-1);  //get rid of the last comma
- 		
+		else {  // positional, default lensfun
+			std::vector<std::string> p = split(paramstring, ",");
+			int psize = p.size();
+			pmap["mode"] = "lensfun";
+			pmap["cmdlabel"] = "lenscorrection:lensfun";
+			for (unsigned i=0; i<psize; i++) { //ca,vig,dist,autocrop
+				if (p[i] == "ca") pmap["ops"] += "ca,";
+				else if (p[i] == "vig") pmap["ops"] += "vig,";
+				else if (p[i] == "dist") pmap["ops"] += "dist,";
+				else if (p[i] == "autocrop") pmap["ops"] += "autocrop,";
+			
+				else if (p[i] == "nearest") pmap["algo"] = "nearest,";
+				else if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
+				else if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
+			
+				else if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear";
+				else if (p[i] == "fisheye") pmap["geometry"] = "fisheye";
+				else if (p[i] == "panoramic") pmap["geometry"] = "panoramic,";
+				else if (p[i] == "equirectangular") pmap["geometry"] = "equirectangula";
+				else if (p[i] == "orthographic") pmap["geometry"] = "orthographic";
+				else if (p[i] == "stereographic") pmap["geometry"] = "stereographic";
+				else if (p[i] == "equisolid") pmap["geometry"] = "equisolid";
+				else if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+				else {
+					pmap["error"] = string_format("lenscorrection:ParseError - unrecognized parameter: %s",p[i].c_str()); 
+					return pmap;
+				}
+		
+			}
+		}
 	}
 
-	pmap["mode"] = "default";
-	pmap["cmdlabel"] = "lenscorrection";
 	return pmap;
 }
 

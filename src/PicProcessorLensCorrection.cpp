@@ -7,23 +7,27 @@
 #include "gimage/strutil.h"
 #include "fileutil.h"
 #include "myConfig.h"
+#include "gimage_parse.h"
+#include "gimage_process.h"
 
 #include <wx/listctrl.h>
 #include <wx/editlbox.h>
 
 #define LENSCORRECTIONENABLE 6300
-#define FILTERID 6301
-#define HIDEID 6302
+#define LENSCORRECTIONLENSFUN 6301
+#define LENSCORRECTIONCAMERA 6302
+#define FILTERID 6303
+#define HIDEID 6304
 
-#define LENSID 6303
-#define CAMERAID 6304
+#define LENSID 6305
+#define CAMERAID 6306
 
-#define LENSCORRECTIONS		6305
-#define LENSCORRECTION_CA	6306
-#define LENSCORRECTION_VIG	6307
-#define LENSCORRECTION_DIST	6308
-#define LENSCORRECTION_AUTOCROP 6309
-#define LENSCORRECTION_APPLY	6310
+#define LENSCORRECTIONS		6307
+#define LENSCORRECTION_CA	6308
+#define LENSCORRECTION_VIG	6309
+#define LENSCORRECTION_DIST	6310
+#define LENSCORRECTION_AUTOCROP 6311
+#define LENSCORRECTION_APPLY	6312
 
 //from darktable: src/iop/lens.cc
 //use to conditionally compile against lensfun 0.3.2/0.3.95
@@ -50,6 +54,10 @@ class LensCorrectionPanel: public PicProcPanel
 
 			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, _("lenscorrection:"));
 			enablebox->SetValue(true);
+			
+			lensfunb =  new wxRadioButton(this, LENSCORRECTIONLENSFUN, _("lensfun"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+			camerab =   new wxRadioButton(this, LENSCORRECTIONCAMERA, _("camera"));
+			
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT);
@@ -79,9 +87,14 @@ class LensCorrectionPanel: public PicProcPanel
 			//geom = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, str);
 			//geom->SetStringSelection("reticlinear");
 			
+			lcmode = LENSCORRECTIONLENSFUN;  // default if no mode
 
 			for (int i=0; i<parms.GetCount(); i++) {
 				wxArrayString nameval = split(parms[i], "=");
+				if (nameval[0] == "mode") {
+					if (nameval[1] == "camera") 
+						lcmode = LENSCORRECTIONCAMERA;
+				}
 				if (nameval[0] == "camera") {
 					cam->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
 				}
@@ -114,6 +127,9 @@ class LensCorrectionPanel: public PicProcPanel
 
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			
+			m->NextRow();
+			m->AddRowItem(lensfunb, flags);
 
 			//m->NextRow();
 			//m->AddRowItem(new wxStaticText(this,-1, " "), flags);
@@ -129,8 +145,8 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
 
-			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			//m->NextRow(wxSizerFlags().Expand());
+			//m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
 
 			//m->NextRow();
 			//m->AddRowItem(new wxStaticText(this,-1, " "), flags);
@@ -160,6 +176,13 @@ class LensCorrectionPanel: public PicProcPanel
 			m->AddRowItem(new wxStaticText(this,-1, " "), flags);
 			m->NextRow();
 			m->AddRowItem(new wxButton(this, LENSCORRECTION_APPLY, _("Apply"), wxDefaultPosition, wxSize(70,-1)), flags);
+			
+			m->NextRow(wxSizerFlags().Expand());
+			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+			m->NextRow();
+			m->AddRowItem(camerab, flags);
+			
+			
 			m->End();
 
 			SetSizerAndFit(m);
@@ -170,6 +193,7 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_TEXT,&LensCorrectionPanel::setAlternates, this);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::lensDialog, this);
 			Bind(wxEVT_RADIOBOX,&LensCorrectionPanel::paramChanged, this);
+			Bind(wxEVT_RADIOBUTTON, &LensCorrectionPanel::onButton, this);
 			//Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_CA, LENSCORRECTION_AUTOCROP);
 			Bind(wxEVT_BUTTON, &LensCorrectionPanel::paramChanged, this, LENSCORRECTION_APPLY);
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
@@ -256,36 +280,53 @@ class LensCorrectionPanel: public PicProcPanel
 
 		void paramChanged(wxCommandEvent& event)
 		{
-			wxString cmd;
-			wxString altcam = cam->GetValue();
-			if (altcam != "") paramAppend("camera", wxString(underscore(std::string(altcam.c_str())).c_str()), cmd);
-			wxString altlens = lens->GetValue();
-			if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
-
-			wxString ops;
-			if (ca->GetValue()) opAppend("ca",ops);
-			if (vig->GetValue()) opAppend("vig",ops);
-			if (dist->GetValue()) opAppend("dist",ops);
-			if (crop->GetValue()) opAppend("autocrop",ops);
-
-			if (ops != "") paramAppend("ops", ops, cmd);
-			if (dist->GetValue()) paramAppend("algo", algo->GetString(algo->GetSelection()), cmd);
-			
-			//wxString geometry = geom->GetString(geom->GetSelection()); 
-			//if (geometry != "reticlinear") paramAppend("geometry", geometry, cmd);
-
-			q->setParams(cmd);
-			q->processPic();
+			processLC();
 			event.Skip();
 		}
 
+		void processLC()
+		{
+			wxString cmd;
+
+			if (lcmode == LENSCORRECTIONLENSFUN) {
+				cmd = "mode=lensfun";
+				wxString altcam = cam->GetValue();
+				if (altcam != "") paramAppend("camera", wxString(underscore(std::string(altcam.c_str())).c_str()), cmd);
+				wxString altlens = lens->GetValue();
+				if (altlens != "") paramAppend("lens",wxString(underscore(std::string(altlens.c_str())).c_str()), cmd);
+
+				wxString ops;
+				if (ca->GetValue()) opAppend("ca",ops);
+				if (vig->GetValue()) opAppend("vig",ops);
+				if (dist->GetValue()) opAppend("dist",ops);
+				if (crop->GetValue()) opAppend("autocrop",ops);
+
+				if (ops != "") paramAppend("ops", ops, cmd);
+				if (dist->GetValue()) paramAppend("algo", algo->GetString(algo->GetSelection()), cmd);
+
+				q->setParams(cmd);
+				q->processPic();
+			}
+			else if (lcmode == LENSCORRECTIONCAMERA) {
+				cmd = "mode=camera";
+				q->setParams(cmd);
+				q->processPic();
+			}
+		}
+
+		void onButton(wxCommandEvent& event)
+		{
+			lcmode = event.GetId();
+			processLC();
+		}
 
 	private:
 		wxChoice *algo, *geom;
 		wxCheckBox *ca, *vig, *dist, *crop;
+		wxRadioButton *lensfunb, *camerab;
 		wxTextCtrl *cam, *lens;
 		wxCheckBox *enablebox;
-
+		int lcmode;
 };
 
 lfDatabase * PicProcessorLensCorrection::findLensfunDatabase()
@@ -413,119 +454,50 @@ int PicProcessorLensCorrection::getModifications()
 
 bool PicProcessorLensCorrection::processPicture(gImage *processdib) 
 {
+if (!processingenabled) return true;
+	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection..."));
-	bool result = true;
-	GIMAGE_ERROR ret;
-	wxString d;
+	bool ret = true;
+	std::map<std::string,std::string> result;
 
-	std::map<std::string, std::string> cp = parseparams(std::string(getParams().c_str()));
-	
-	//GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
-	
-	std::string camspec, lensspec;
-	
-	if (altcamera != "")
-		camspec = de_underscore(std::string(altcamera));
-	else if (metadatacamera != "(none)")
-		camspec = metadatacamera;
-	else
-		camspec = "(none)";
-	
-	if (altlens != "")
-		lensspec = de_underscore(std::string(altlens));
-	else if (metadatalens != "(none)")
-		lensspec = metadatalens;
-	else
-		lensspec = "(none)";
-	
-	int ModifyFlags = 0;  //ops=ca,vig,dist 
-	if (cp.find("ops") != cp.end()) {
-		std::vector<std::string> ops = split(cp["ops"], ",");
-		for (unsigned i=0; i<ops.size(); i++) {
-			if (ops[i] == "ca")   ModifyFlags |= LF_MODIFY_TCA;
-			if (ops[i] == "vig")  ModifyFlags |= LF_MODIFY_VIGNETTING;
-			if (ops[i] == "dist") ModifyFlags |= LF_MODIFY_DISTORTION;
-			if (ops[i] == "autocrop") ModifyFlags |= LF_MODIFY_SCALE;
-		}
+	std::map<std::string,std::string> params;
+	std::string pstr = getParams().ToStdString();
+
+	if (!pstr.empty())
+		params = parse_lenscorrection(std::string(pstr));
+
+	if (params.find("error") != params.end()) {
+		wxMessageBox(params["error"]);
+		ret = false; 
 	}
-	
-	int threadcount =  atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.cores","0").c_str());
-	if (threadcount == 0) 
-		threadcount = gImage::ThreadCount();
-	else if (threadcount < 0) 
-		threadcount = std::max(gImage::ThreadCount() + threadcount,0);
-
-	dib = processdib;
-	if (!global_processing_enabled) return true;
-
-	std::map<std::string, std::string> info = dib->getInfo();
-
-	if (processingenabled) {
-		if (ModifyFlags) {
-			//mark();
-			bool success = false;
-
-			const lfCamera *cam = NULL;
-			const lfCamera ** cameras = ldb->FindCamerasExt(NULL, camspec.c_str());
-			if (cameras) {
-				cam = cameras[0];
-				success = true;
-			}
-			else {
-				wxMessageBox(wxString::Format(_("Error: Cannot find a camera matching %s in database."), camspec.c_str()));
-				success = false;
-			}
-			lf_free (cameras);
-
-			const lfLens *lens = NULL;
-			const lfLens **lenses = NULL;
-			if (success) {
-				// try to find a matching lens in the database
-				lenses = ldb->FindLenses (cam, NULL, lensspec.c_str());
-				if (lenses) {
-					lens = lenses [0];
-					success = true;
-				}
-				else {
-					if (lensspec.find("(not found)") != std::string::npos) 
-						wxMessageBox(_("Error: Lens not specified."));
-					else
-						wxMessageBox(wxString::Format(_("Error: Cannot find a lens matching %s and %s in database."), camspec.c_str(), lensspec.c_str()));
-					success = false;
-				}
-				lf_free (lenses);
-			}
-
-
-			if (success) {
-				
-				RESIZE_FILTER algo = FILTER_BOX;
-				if (cp.find("algo") != cp.end()) {
-					if (cp["algo"] == "nearest") algo = FILTER_BOX;
-					if (cp["algo"] == "bilinear") algo = FILTER_BILINEAR;
-					if (cp["algo"] == "lanczos3") algo = FILTER_LANCZOS3;
-				}
-
-				mark();
-				GIMAGE_ERROR ret = dib->ApplyLensCorrection(ldb, ModifyFlags, GEOMETRY_RETICLINEAR, algo, threadcount, camspec, lensspec);
-				d = duration();
-				m_display->SetModified(true);
-
-				if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || (myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
-				log(wxString::Format(_("tool=lenscorrection,%s,imagesize=%dx%d,time=%s"),getParams(), dib->getWidth(), dib->getHeight(),d));
-			
-			}
-
+	else if (params.find("mode") == params.end()) {  //all variants need a mode, now...  
+		wxMessageBox("Error - no mode");
+		ret = false;
+	}
+	else { 
+		result = process_lenscorrection(*dib, params);
+		
+		if (result.find("error") != result.end()) {
+			wxMessageBox(wxString(result["error"]));
+			ret = false;
+		}
+		else {
+			if (paramexists(result,"treelabel")) m_tree->SetItemText(id, wxString(result["treelabel"]));
 			m_display->SetModified(true);
-	
+			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
+				(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
+					log(wxString::Format(_("tool=resize,%s,imagesize=%dx%d,threads=%s,time=%s"),
+						params["mode"].c_str(),
+						dib->getWidth(), 
+						dib->getHeight(),
+						result["threadcount"].c_str(),
+						result["duration"].c_str())
+					);
 		}
 	}
-	dirty = false;
 
+	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");
-	
-	return result;
+	return ret;
 }
-
-
 

@@ -637,5 +637,23 @@ wxString toWxString(wxArrayString s)
 	return r;
 }
 
+std::vector<std::string> getExiftoolTags(wxString filename, wxString exifparameters)
+{
+	std::vector<std::string> tags;
+	wxString exifcommand = wxString(myConfig::getConfig().getValueOrDefault("exif.command",""));
+	if (exifcommand == "") {
+		wxMessageBox("No exiftool path defined in exif.command");
+		return tags;
+	}
+	
+	wxString command = wxString::Format("%s %s \"%s\"",exifcommand, exifparameters, filename);
+	wxArrayString output;
+	wxArrayString errors;
+	wxExecute (command, output, errors, wxEXEC_NODISABLE);
 
-
+	for (int i=0; i<output.GetCount(); i++) {
+		tags.push_back(output[i].ToStdString());
+	}
+	
+	return tags;
+}
