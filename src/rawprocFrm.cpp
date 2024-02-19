@@ -968,6 +968,12 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			//parm input.raw.cms.profile: ICC profile to use if the input image doesn't have one.  Default=(none)
 			//template input.raw.cms.profile=iccfile
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
+			
+			//parm tool.lenscorrection.camera.enable = 0|1: Enable/disable loading lenscorrection camera metadata and including camera lenscorrection in the lenscorrecton tool. Default = 0;
+			int uselenscorrection = atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.camera.enable","0").c_str());
+			if (uselenscorrection == 1) {
+				configparams.Append("uselenscorrection=1;");
+			}
 		}
 		
 
@@ -979,7 +985,6 @@ void rawprocFrm::OpenFile(wxString fname) //, wxString params)
 			profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.cms.profile","")));
 		}
 
-		
 		if (fif == FILETYPE_TIFF) {
 			//parm input.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image reader.  Default=(none)
 			configparams = wxString(myConfig::getConfig().getValueOrDefault("input.tiff.parameters",""));
@@ -1172,14 +1177,18 @@ void rawprocFrm::OpenFileSource(wxString fname)
 
 			if (fif == FILETYPE_RAW) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.raw.cms.profile","")));
+				int uselenscorrection = atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.camera.enable","0").c_str());
+				if (uselenscorrection == 1) {
+					oparams.Append("uselenscorrection=1;");
+				}
 			}
-			if (fif == FILETYPE_JPEG) {
+			else if (fif == FILETYPE_JPEG) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.jpeg.cms.profile","")));
 			}
-			if (fif == FILETYPE_TIFF) {
+			else if (fif == FILETYPE_TIFF) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.tiff.cms.profile","")));
 			}
-			if (fif == FILETYPE_PNG) {
+			else if (fif == FILETYPE_PNG) {
 				profilepath.SetFullName(wxString(myConfig::getConfig().getValueOrDefault("input.png.cms.profile","")));
 			}
 

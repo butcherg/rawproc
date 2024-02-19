@@ -6951,16 +6951,19 @@ GIMAGE_ERROR gImage::loadLensCorrectionMetadata(std::string filename)
 {
 	std::string exif, params;
 	
-	//if (getInfoValue("Model").find("NIKON Z") != std::string::npos) {
+	//printf("loadLensCorrectionMetadata: Make: %s Model: %s\n", getInfoValue("Make").c_str(), getInfoValue("Model").c_str()); fflush(stdout);
+	
+	//logic to detect specific cameras and set up their camera metadata collection.  Aborts the routine if none are detected.
+	if (getInfoValue("Make").find("Nikon") != std::string::npos  &  getInfoValue("Model").find("Z") != std::string::npos) {
 		params = " -*Distortion* -*Vignette* ";
-	//}
+		setInfoValue("LensCorrection", "Nikon Z:dist");  //add vig when vignetting code is incorporated
+	}
+	else
+		return GIMAGE_OK;
 	
 	
 	std::string exifcommand = "exiftool";  //myConfig::getConfig().getValueOrDefault("exif.command","");
-	//exifcommand.append(" -S -charset UTF8" + params + " " + "\"" + filename + "\"");
 	exifcommand.append(" -S " + params + " " + "\"" + filename + "\"");
-	
-	//printf("%s\n", exifcommand.c_str()); fflush(stdout);
 	
 #ifdef WIN32
 	//FILE* pipe = _popen(exifcommand.c_str(), "r");
@@ -6977,8 +6980,6 @@ GIMAGE_ERROR gImage::loadLensCorrectionMetadata(std::string filename)
 	}
 	pclose(pipe);
 #endif
-	
-	//printf("%s\n", exif.c_str()); fflush(stdout);
 	
 	std::vector<std::string> lines = split(exif, "\n");
 	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
@@ -7047,7 +7048,8 @@ gImage gImage::loadRAW(const char * filename, std::string params)
 			break;
 	}
 	gImage I(image, width, height, colors, bits, imgdata, iccprofile, icclength);
-	I.loadLensCorrectionMetadata(filename);
+	if (params.find("uselenscorrection=1") != std::string::npos)
+		I.loadLensCorrectionMetadata(filename);
 	delete [] image;
 	if (icclength && iccprofile) delete [] iccprofile;
 	return I;

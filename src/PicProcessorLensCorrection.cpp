@@ -50,13 +50,15 @@ class LensCorrectionPanel: public PicProcPanel
 			wxSizerFlags flags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxTOP);
 			wxBoxSizer *b = new wxBoxSizer(wxVERTICAL); 
 
+			int uselenscorrection = atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.camera.enable","0").c_str());
+
 			wxArrayString parms = split(params, ";");
 
 			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, _("lenscorrection:"));
 			enablebox->SetValue(true);
 			
 			lensfunb =  new wxRadioButton(this, LENSCORRECTIONLENSFUN, _("lensfun"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-			camerab =   new wxRadioButton(this, LENSCORRECTIONCAMERA, _("camera"));
+			if (uselenscorrection) camerab =   new wxRadioButton(this, LENSCORRECTIONCAMERA, _("camera"));
 			
 			cam = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
 			lens = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200,TEXTCTRLHEIGHT),wxTE_PROCESS_ENTER);
@@ -177,10 +179,13 @@ class LensCorrectionPanel: public PicProcPanel
 			m->NextRow();
 			m->AddRowItem(new wxButton(this, LENSCORRECTION_APPLY, _("Apply"), wxDefaultPosition, wxSize(70,-1)), flags);
 			
-			m->NextRow(wxSizerFlags().Expand());
-			m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
-			m->NextRow();
-			m->AddRowItem(camerab, flags);
+			if (uselenscorrection) {
+				m->NextRow(wxSizerFlags().Expand());
+				m->AddRowItem(new wxStaticLine(this, wxID_ANY), wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM));
+				m->NextRow();
+				m->AddRowItem(camerab, flags);
+				m->AddRowItem(new wxStaticText(this,-1, wxString(q->getProcessedPicPointer()->getInfoValue("LensCorrection"))), flags);
+			}
 			
 			
 			m->End();
