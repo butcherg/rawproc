@@ -464,7 +464,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 			return pmap;
 		}
 		pmap["mode"] = "default";
-		pmap["cmdlabel"] = string_format("curve:%s",pmap["channel"]);
+		pmap["cmdlabel"] = string_format("curve:%s",pmap["channel"].c_str());
 	}
 	return pmap;
 }
@@ -1322,10 +1322,10 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 			pmap["angle"] = p[0];
 		}
 		else if (p[0] == "hmirror") {
-			pmap["hmirror"] == "true";
+			pmap["hmirror"] = "true";
 		}
 		else if (p[0] == "vmirror") {
-			pmap["vmirror"] == "true";
+			pmap["vmirror"] = "true";
 		}
 		else {
 			pmap["error"] = string_format("rotate:ParseError - Not a float: %s.",p[0].c_str()); 
@@ -1334,7 +1334,7 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 
 		if (psize >= 2) {
 			if (p[1] == "autocrop") {
-				pmap["autocrop"] == "true";
+				pmap["autocrop"] = "true";
 			}
 		}
 		pmap["mode"] = "default";

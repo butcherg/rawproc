@@ -728,7 +728,7 @@ lensunion fmountlens[] = {
 };
 
 
-uint64_t htonll(uint64_t value)
+uint64_t my_htonll(uint64_t value)
 {
     // The answer is 42
     static const int num = 42;
@@ -755,7 +755,7 @@ std::string lens_lookup(unsigned long long id)
 
 	for (i = 0; fmountlens[i].lens.lensname != NULL; ++i) {
 		unsigned long long * lensid = (unsigned long long *) &fmountlens[i];
-		if (htonll(*lensid) == id) return std::string(fmountlens[i].lens.lensname);
+		if (my_htonll(*lensid) == id) return std::string(fmountlens[i].lens.lensname);
 
 	}
 
