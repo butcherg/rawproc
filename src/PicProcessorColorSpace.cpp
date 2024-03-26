@@ -19,11 +19,12 @@
 #define COLORINTENT 6502
 #define COLORBPC 6503
 #define COLORFILE 6504
-#define COLORPROFILE 6505
-#define COLORCAMERA 6506
-#define COLORCAMERASTATUS 6507
-#define COLORPASTE	 6508
-#define COLORCOPY	 6509
+#define COLORFILECWD 6505
+#define COLORPROFILE 6506
+#define COLORCAMERA 6507
+#define COLORCAMERASTATUS 6508
+#define COLORPASTE	 6509
+#define COLORCOPY	 6510
 
 
 class ColorspacePanel: public PicProcPanel
@@ -111,7 +112,9 @@ class ColorspacePanel: public PicProcPanel
 			//edit box grows to select button:
 			m->NextRow(wxSizerFlags().Expand());
 			m->AddRowItem(edit, wxSizerFlags(1).Left().Border(wxLEFT|wxRIGHT|wxTOP));
+			m->NextRow();
 			m->AddRowItem(new wxButton(this, COLORFILE, "Select"), wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
+			m->AddRowItem(new wxButton(this, COLORFILECWD, "Select (cwd)"), wxSizerFlags(0).Right().Border(wxRIGHT|wxTOP));
 			m->NextRow();
 			m->AddSpacer(5);
 			m->AddRowItem(operselect, flags);
@@ -142,6 +145,7 @@ class ColorspacePanel: public PicProcPanel
 			Bind(wxEVT_TEXT_ENTER,&ColorspacePanel::paramChanged, this);
 			Bind(wxEVT_RADIOBUTTON, &ColorspacePanel::OnRadioButton, this);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this, COLORFILE);
+			Bind(wxEVT_BUTTON, &ColorspacePanel::selectProfile, this, COLORFILECWD);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::OnCopy, this, COLORCOPY);
 			Bind(wxEVT_BUTTON, &ColorspacePanel::OnPaste, this, COLORPASTE);
 			Bind(wxEVT_RADIOBOX,&ColorspacePanel::paramChanged, this);
@@ -278,7 +282,10 @@ class ColorspacePanel: public PicProcPanel
 		void selectProfile(wxCommandEvent& event)
 		{
 			wxFileName fname, pname;
-			pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath",((PicProcessorColorSpace *) q)->getOpenFilePath().ToStdString())));
+			if (event.GetId() == COLORFILE)
+				pname.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath",((PicProcessorColorSpace *) q)->getOpenFilePath().ToStdString())));
+			else
+				pname.AssignDir(wxFileName::GetCwd());
 
 #ifdef WIN32
 			pname.SetVolume(pname.GetVolume().MakeUpper());
