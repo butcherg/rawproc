@@ -8,8 +8,11 @@ image from distortion correction.
 
 <p align=center><img src=lenscorrection1.png></p>
 
-<p>The lensfun database is expected at its standard locations.  If the database is not found when the tool
-is added, an error dialog informs of the fact and the tool is not added to the chain.</p>
+<p>The lensfun database is expected at its standard locations.  Alternatively, if the tool.lenscorrection.databasepath 
+ontains a valid path, that will be used. If teh tool.lenscorrection.useuserdata is set to 1 AND tool.lenscorrection.userdata 
+contains a path to a valid lensfun data XML file, that file will be searched first for correction data, before the standard 
+lensfun database. If the database is not found when the tool is added, an error dialog informs of the fact and the tool is 
+not added to the chain.</p>
 
 <p>The tool's default is to use the image metadata vaules for camera and lens, if found.  If either cannot
 be found, values can be selected manually by clicking the "Select Camera" or "Select Lens" buttons; a dialog 
@@ -24,6 +27,16 @@ if they're selected manually; otherwise, the original image metadata is the assu
 </p>
 
 <p><b>Properties:</b> See tool.lenscorrection.* in <a href=confparams.html#tool.lenscorrection>Configuration Properties</a></p>
+
+<h3>Experimental: Camera-Supplied Lens Correction</h3>
+
+<p>If the tool.lenscorrection.camera.enable property is set to 1 and the camera make/model identifes a camera that delivers lens correction data, the lenscorrection tool will add a 'camera' mode to the tool.  This mode currently requires access to the exiftool program somewhere in the $PATH directory list (the exif.command property is not used); if this mode is enabled, exiftool will be executed in every file open operation, significantly adding to the import time.  If the camera make/model is supported, the camera mode will contain camera nomenclature followed by a list of the corrections to be applied, e.g., "Nikon Z:dist,vig".</p?
+
+<p>Note: tool.lenscorrection.camera.enable must be set to 1 when the file is opened in order to collect the correction information from the file metadata.</p>
+
+<p>If this mode is enabled and the camera is supported, the relevant correction information will be included in the Image Information selection in the tool popup menu.</p>
+
+<p>As of version 1.4, the only camera make/models for which this is available is the Nikon Z series, and only the distortion correction.</p>
 
 
 </body></html>

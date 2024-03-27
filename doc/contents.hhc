@@ -130,6 +130,16 @@
 				</OBJECT>
 				
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Lens Distortion">
+				<param name="Local" value="lensdistortion.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Lens Vignetting">
+				<param name="Local" value="lensvignetting.html">
+				</OBJECT>
+				
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Redeye">
 				<param name="Local" value="redeye.html">
 				</OBJECT>

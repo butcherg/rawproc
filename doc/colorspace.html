@@ -27,9 +27,15 @@ previous colorspace to the new one (convert) or to attach the profile to the ima
 of its current colorspace (assign).  Either a full file path name can be specified, or just a filename, 
 in which case the cms.profilepath property is consulted for the path.
 
-<p>The "Select Profile" button opens a file selector on the directory specified in cms.profilepath.  If a profile is selected
+<p>The "Select" button opens a file selector on the directory specified in cms.profilepath.  If a profile is selected
 from this directory, the command will include only the filename; if the selector is switched to a different directory, the command
 will include the full path of the profile.</p>
+
+<p>The "Select (cwd) button opens a file selector on the current working directory.  If a profile is selected
+from this directory, the command will include only the filename; if the selector is switched to a different directory, the command
+will include the full path of the profile.</p>
+
+<p>For either of the above Select buttons, a filename without a path will be searched for in first 1) the current working directory, then 2) the directory specified in the cms.profilpath property.  So, if an identically-named profile is present in both the cwd and cms.profilepath, the cwd profile will be selected.<p>
 
 <p>The Rendering Intent selection allows one to choose the algorithm used to handle conversion of 
 out-of-gamut colors.  Note that not all profiles allow use of all rendering intents; the LittleCMS 

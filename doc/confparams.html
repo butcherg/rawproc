@@ -1,4 +1,5 @@
 <html><head><title>Configuration Parameters</title><link rel="stylesheet" type="text/css" href="rawprocdoc.css"></head><body><h3>Configuration Parameters</h3><ul>
+<li><b>			//parmdontuse output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1  (Note: use excludeicc in the output params property instead...)</li>
 <li><b>app.about.lensdatabasecheck</b>:  1|0, if set, the lensfun database version will be checked against the server. Default: 1</li>
 <li><b>app.backgroundcolor</b>:  r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(0,0,0)</li>
 <li><b>app.cms.errorlog</b>:  0|1, turns on/off LittleCMS error logging to the log file specified in log.filename.  Default=0</li>
@@ -27,7 +28,10 @@
 <li><a name="batch"><b>batch.outputspec</b>:  Path/file specification for output.  Append output processing with a ':', e.g., *.jpg:quality=75.  Default: None, you need to specify your own.</li>
 <li><a name="batch"><b>batch.termcommand</b>:  path/executable to use as the batch command shell. Default: wxcmd (somewhere in $PATH)</li>
 <li><a name="batch"><b>batch.toolchain</b>:  The tool chain to be applied to each input image to produce the output image.  See the img command line documentation for syntax.</li>
+<li><b>clipboard.patchscale</b>:  Number to multiply each 0.0-1.0 pixel value in a clipboard copy. Use 255 to get 8-bit display values.  Default=1</li>
 <li><b>cms.profilepath</b>:  Directory path where ICC colorspace profiles can be found.  Default: (none, implies current working directory)</li>
+<li><b>display.clipboard.patchaverage</b>:  1|0, 0 copies all the 0.0-1.0 pixel triplets of a patch in to the copy string, 1 averages the values to provide a single RGB triplet.  Default=0.  Note: the raw data string is suitable for pasting into a spreadsheet, one pixel per row.</li>
+<li><b>display.clipboard.patchradius</b>:  Number of layers of surrounding pixels to collect for a clipboard copy. Default=1, just the single pixel.</li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
 <li><b>display.cms.blackpointcompensation</b>:  Perform display color transform with black point compensation.  Default=1  </li>
 <li><b>display.cms.displaygamma</b>:  Float number representing the gamma TRC to use if the displayprofile is one of the built-ins.  Default: 2.2</li>
@@ -86,8 +90,6 @@
 <li><b>input.jpeg.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image reader.  Default=(none)</li>
 <li><b>input.log</b>:  log the file input operation.  Default=0</li>
-<li><b>input.opensource.parentdirectory</b>:  Enable search of parent directory for source file.  Default=0</li>
-<li><b>input.opensource.subdirectory</b>:  Comma-separated list of subdirectories to search for source file. Default: (empty) </li>
 <li><b>input.png.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
 <li><b>input.png.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the PNG image reader.  Default=(none)</li>
 <li><b>input.raw.cms.profile</b>:  ICC profile to use if the input image doesn't have one.  Default=(none)</li>
@@ -101,7 +103,6 @@
 <li><b>output.*.thumbnails.directory</b>:  *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.</li>
 <li><b>output.*.thumbnails.parameters</b>:  *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.</li>
 <li><b>output.data.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the data writer.   Applicable parameters: <ul><li>outputmode=rgb|split|channelsummary: Specifies the output format. Default: rgb</li></ul></li>
-<li><b>output.embedprofile</b>:  Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1</li>
 <li><b>output.jpeg.cms.profile</b>:  If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb</li>
 <li><b>output.jpeg.cms.renderingintent</b>:  Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric</li>
 <li><b>output.jpeg.parameters</b>:  name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul> Default:quality=95.</li>
@@ -141,8 +142,13 @@
 <li><a name="tool.gray"><b>tool.gray.b</b>:  The initial (and reset button) value of the blue proportion for grayscale conversion. Default=0.07</li>
 <li><a name="tool.gray"><b>tool.gray.g</b>:  The initial (and reset button) value of the green proportion for grayscale conversion. Default=0.72</li>
 <li><a name="tool.gray"><b>tool.gray.r</b>:  The initial (and reset button) value of the red proportion for grayscale conversion. Default=0.21</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.camera.enable = 0|1</b>:  Enable/disable loading lenscorrection camera metadata and including camera lenscorrection in the lenscorrecton tool. Default = 0;</li>
 <li><a name="tool.lenscorrection"><b>tool.lenscorrection.databasepath</b>:  If specified, use this path to update and retrive for use the lensfun database.  The path specified should be the one that contains the 'version_x' folder that contains the lensfun XML files.  If none is specified, the same directory as the configuration file location is used. (rawproc does not allow lensfun to use the system data directories.)</li>
-<li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: none.</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.default</b>:  The corrections to automatically apply. Default: mode=lensfun.</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.userdata (lensfun v0.3.95 or greater)</b>:  If specified, use this path/file.xml to load alternate lens definitions per the instructions given in the lensfun documentation.  Ignored if lensfun version is less than 0.3.95</li>
+<li><a name="tool.lenscorrection"><b>tool.lenscorrection.useuserdata = 0/1</b>:  Set to 1 to use a user-supplied lensfun data file located at tool.lenscorrection.userdata.  Default: 0</li>
+<li><a name="tool.lensdistortion"><b>tool.lensdistortion.enable = 0/1</b>:  Set to 1 and restart rawproc to enable the Lens Distortion tool.  Default: 0</li>
+<li><a name="tool.lensvignetting"><b>tool.lensvignetting.enable = 0/1</b>:  Set to 1 and restart rawproc to enable the Lens Vignetting tool.  Default: 0</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturation</b>:  The initial (and reset button) desaturation toggle.  Default=0</li>
 <li><a name="tool.redeye"><b>tool.redeye.desaturationpercent</b>:  The initial (and reset button) desaturation percent.  Default=1.0</li>
 <li><a name="tool.redeye"><b>tool.redeye.radius</b>:  Defines the initial (and reset button) limit of the patch size.  Default=50</li>
@@ -157,6 +163,9 @@
 <li><a name="tool.script"><b>tool.script.[scriptprogram].commandstring</b>:  Command string for the script tool to run, e.g., "[program] [infile] [script] output [outfile],float" for a G'MIC invocation.  The [] parameters will be replaced with the script program, input file, script file, and output file names at invocation.</li>
 <li><a name="tool.script"><b>tool.script.[scriptprogram].shell</b>:  Shell to use to run the script application and script.  Default=(empty), script application will be run as its own process, no shell window.  Note: rawproc's wxcmd is available for use here as a single-command shell that will display its execution.</li>
 <li><a name="tool.sharpen"><b>tool.sharpen.initialvalue</b>:  The initial (and reset button) value of the sharpen tool, 0=no change.  Default=0</li>
+<li><a name="tool.spot"><b>tool.spot.initialdisplay</b>:  The initial display mode of the spot tool, Default=1, check the display box</li>
+<li><a name="tool.spot"><b>tool.spot.initialmode</b>:  The initial mode of the spot tool, Default=(blank), which gives list mode</li>
+<li><a name="tool.spot"><b>tool.spot.radius</b>:  Default value for spot/patch radius.  Default=20</li>
 <li><a name="tool.tone"><b>tool.tone.curve.arraysize</b>:  number of values between 0 and 1 delivered by the copy curve to clipboard button.  Default: 256</li>
 <li><a name="tool.tone"><b>tool.tone.curve.type</b>:  horizontal|vertical|curvetool.  If horizontal, a comma-separated list.  If vertical, one number per line. If curvetool, a curve tool command with a number of control points corresponding to the arraysize will be place in the clipboard; for this type, arraysize can't be larger than 255. Default: vertical.</li>
 <li><a name="tool.tone"><b>tool.tone.doublelogistic.L</b>:  Default value for doublelogistic L operator power, sets the position of the transition from the left equation to the right equation. Default=0.002</li>

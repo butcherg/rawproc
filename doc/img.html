@@ -100,11 +100,11 @@ filename, or overwrite the original img-produced JPEG</li>
 <li><b>:aces2065-1-v4-g10|adobergb-v4-g10| bt709-v4-g10|prophoto-v4-g10|rec2020-v4-g10|srgb-v4-g10|srgb-v2-g22| srgb-output[,assign|convert]</b> - use one of the built-in ICC profiles to assign|convert.</li>
 </ul>
 </li><br>
-<li><b>crop:&lt;x1&gt;,&lty1&gt;,&ltx2&gt;,&lty2&gt; </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.</li>
+<li><b>crop:&lt;x1&gt;,&lt;y1&gt;,&lt;x2&gt;,&lt;y2&gt; | camera </b> - extract subimage at top,left,bottom,right bounds and make the new image.  can be either int coords or 0.0-1.0 proportions to w|h.  'camera' builds a crop box from raw metadata.</li>
 </li><br>
 <li><b>cropspectrum:&lt;boundint&gt;,&lt;thresholdfloat&gt;</b> - Finds the brightest green pixel based on the 0.0-1.0 threshold and crops the image to the rows boundint/2 above and boundint/2 below.  Used to extract data from images of spectra.
 </li><br>
-<li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lty1&gt;,...,&lt;xn&gt;,&ly;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
+<li><b>curve:rgb|red|green|blue,&lt;x1&gt;,&lt;y1&gt;,...,&lt;xn&gt;,&lt;yn&gt;</b> - apply curve to the designated channel defined by the x,y coordinates, 0-255</b>
 </li><br>
 <li><b>demosaic</b>
 <ul>
@@ -146,9 +146,9 @@ filename, or overwrite the original img-produced JPEG</li>
 <li><b>:ops=<op1>...[;algo=nearest|bilinear|lanczos3][,geometry=reticlinear|fisheye|panoramic|equirectangular|orthographic|stereographic|equisolid|thoby </b> - param=value format.</li>
 </ul>
 </li><br>
-<li><b>redeye</b>: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
+<li><b>redeye: &lt;xint1&gt;,&lt;yint1&gt;[,&lt;xint2&gt;,&lt;yint2&gt;...],&lt;tint&gt;,&lt;lint&gt;</b> - Apply redeye correction at the points specified by xn,yn with the specified threshold and limit (limit is a radius) (img can only specify one x,y).
 </li><br>
-<li><b>resize</b>:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
+<li><b>resize:<wint>[,<hint>][,box|bilinear|bspline|bicubic|catmullrom|lanczos3]</b> -
 resize the image to the specified width and height, using the specified interpolation algorithm.  
 If only one number is provided, use it for the largest dimension and compute the other to preserve 
 the aspect ratio (0 is passed to the Apply function and it does the aspect computation).  
@@ -165,6 +165,8 @@ the aspect ratio (0 is passed to the Apply function and it does the aspect compu
 <li><b>:convolution[,&lt;afloat&gt;]</b> - apply convolution sharpen with the specified amount.</li>
 <li><b>:&lt;afloat&gt;</b> - apply convolution sharpening with the specified amount.</li>
 </ul>
+</li><br>
+<li><b>subtract</b>
 </li><br>
 <li><b>subtract</b>
 <ul>
