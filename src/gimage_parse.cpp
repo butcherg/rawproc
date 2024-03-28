@@ -906,7 +906,7 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (p.size() >=1 & p[0] == "ptlens") {
+		if ((p.size() >= 1) & (p[0] == "ptlens")) {
 			pmap["mode"] = "ptlens";
 			if (psize >= 4) {
 			
@@ -942,7 +942,7 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 				}
 			}
 		}
-		else if (p.size() >=1 & p[0] == "adobe") {
+		else if ((p.size() >= 1) & (p[0] == "adobe")) {
 			if (psize >= 5) {
 				pmap["mode"] = "adobe";
 				if (isFloat(p[1])) { 
@@ -1005,7 +1005,7 @@ std::map<std::string,std::string> parse_lensvignetting(std::string paramstring)
 		std::vector<std::string> p = split(paramstring, ",");
 		int psize = p.size();
 		
-		if (p.size() >=1 & p[0] == "pa") {
+		if ((p.size() >= 1) & (p[0] == "pa")) {
 			pmap["mode"] = "pa";
 			if (psize >= 4) {
 			
@@ -1032,7 +1032,7 @@ std::map<std::string,std::string> parse_lensvignetting(std::string paramstring)
 				}
 			}
 		}
-		else if (p.size() >=1 & p[0] == "adobe") {
+		else if ((p.size() >= 1) & (p[0] == "adobe")) {
 			pmap["mode"] = "adobe";
 				if (p.size() >= 2) {
 					if (isFloat(p[1])) { 

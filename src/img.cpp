@@ -295,7 +295,7 @@ getopt(int argc, char *argv[], char *optstring)
 std::string getFileType(std::string filename)
 {
 	size_t pos = filename.find_last_of(".");
-	if (pos = std::string::npos) return "";
+	if (pos == std::string::npos) return "";
 	std::string ext = filename.substr(pos);
 	if (ext == "jpg" | ext == "jpeg" | ext == "JPG" | ext == "JPEG") return "jpeg";
 	if (ext == "tif" | ext == "tiff" | ext == "TIF" | ext == "TIFF") return "tiff";
