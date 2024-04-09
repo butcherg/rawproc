@@ -164,6 +164,7 @@ std::string getAsString(std::string url)
 	std::string out;
 	CURL *curl_handle;
 	CURLcode res;
+	char errbuf[CURL_ERROR_SIZE];
  
 	struct MemoryStruct chunk;
  
@@ -177,13 +178,16 @@ std::string getAsString(std::string url)
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, errbuf);
 	res = curl_easy_perform(curl_handle);
  
 	if(res != CURLE_OK) {
+		printf("getAsString(): errbuf = %s\n", errbuf); fflush(stdout);
 		return out;
 	}
 	else {
 		out.assign(chunk.memory,chunk.size);
+		printf("getAsString(): successful.\n"); fflush(stdout);
 	}
  
 	curl_easy_cleanup(curl_handle);
@@ -315,6 +319,7 @@ lf_db_return lensfun_dbcheck(int version, std::string dbpath, std::string dburl)
 
 	//get versions.json:
 	std::string versions = getAsString(string_format("%sversions.json",repositoryurl.c_str()));
+	printf("lensfun_dbcheck(): versions = %s\n", versions.c_str()); fflush(stdout);
 
 	//parse timestamp and version numbers from downloaded versions.json:
 	std::string foo = removeall(versions,'[');
@@ -362,6 +367,7 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath, std::string dburl
 
 	//get versions.json:
 	std::string versions = getAsString(string_format("%sversions.json",repositoryurl.c_str()));
+	printf("lensfun_dbupdate(): versions = %s\n", versions.c_str()); fflush(stdout);
 
 	//parse timestamp and version numbers from downloaded versions.json:
 	std::string foo = removeall(versions,'[');
