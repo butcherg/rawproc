@@ -419,13 +419,14 @@ endif()
 #Optional Features:
 
 #gmic:
+set(GMIC_DEPS "-lcurl -lfftw3 -lm -ltiff -ljpeg -lpng -lz")  #-lfftw3_omp
 if (DEFINED BUILD_GMIC)
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
 		set(CMAKECMD "cmake")
 	endif()
-	set(CMAKE_ARGUMENTS -DBUILD_LIB=OFF -DBUILD_LIB_STATIC=ON -DBUILD_CLI=OFF -DBUILD_MAN=OFF -DBUILD_BASH_COMPLETION=OFF -DCMAKE_INSTALL_PREFIX:PATH=${BUILD_PREFIX})
+	set(CMAKE_ARGUMENTS -DCMAKE_CXX_FLAGS="-DCURL_STATICLIB" -DBUILD_LIB=OFF -DBUILD_LIB_STATIC=ON -DBUILD_CLI=OFF -DBUILD_MAN=OFF -DBUILD_BASH_COMPLETION=OFF -DCMAKE_INSTALL_PREFIX:PATH=${BUILD_PREFIX})
 	include(ExternalProject)
 	if (BUILD_GMIC STREQUAL "GITHUB")
 		message(STATUS "Configuring G'MIC as an external project (GitHub clone).")
@@ -476,13 +477,15 @@ if (DEFINED BUILD_GMIC)
 	add_dependencies(gmic gmic_download)
 	
 	include_directories(${GMIC_INCLUDE_DIR})
-	target_link_libraries(rawproc gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
-	target_link_libraries(img gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
-	target_link_libraries(exif gmic -lcurl -lfftw3_omp -lfftw3 -lm -ltiff -ljpeg -lpng)
+	target_link_libraries(rawproc gmic ${GMIC_DEPS}) 
+	target_link_libraries(img gmic ${GMIC_DEPS})
+	target_link_libraries(exif gmic ${GMIC_DEPS})
 	
 	target_compile_options(rawproc PRIVATE -DUSE_GMIC)
 	target_compile_options(img PRIVATE -DUSE_GMIC)
 	target_compile_options(exif PRIVATE -DUSE_GMIC)
+	
+	#add_definitions(-DCURL_STATICLIB)
 	
 elseif(GMIC)
 	pkg_check_modules(GMIC REQUIRED gmic)
@@ -494,6 +497,7 @@ elseif(GMIC)
 		target_compile_options(rawproc PRIVATE -DUSE_GMIC)
 		target_compile_options(img PRIVATE -DUSE_GMIC)
 		target_compile_options(exif PRIVATE -DUSE_GMIC)
+		#add_definitions(-DCURL_STATICLIB)
 	else()
 		message(STATUS "gmic not found")
 	endif(GMIC_FOUND)
