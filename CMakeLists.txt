@@ -1,33 +1,23 @@
 
-cmake_minimum_required(VERSION 3.15)
+#cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 cmake_policy(SET CMP0017 NEW)
 cmake_policy(SET CMP0020 NEW)
 
+#include(cmake/UniversalAppleBuild.cmake)
+
 MESSAGE("CMAKE_HOST_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME}")
 MESSAGE("CMAKE_HOST_SYSTEM_VERSION ${CMAKE_HOST_SYSTEM_VERSION}")
-project(rawproc LANGUAGES CXX C)
+project(rawproc VERSION 1.4.0 LANGUAGES CXX C)
 
 string(TIMESTAMP BUILDDATE)
 
 add_compile_options(-ggdb -DVERSION="1.3"  -DBUILDDATE="${BUILDDATE}")
 
-#option(HOST "provide the mxe prefix for the cross tools")
-#option(BUILD_LCMS2 "download and build littlecms2 instead of using installed package" OFF)
-#option(BUILD_LENSFUN "download and build lensfun instead of using installed package" OFF)
-#option(BUILD_LIBRAW "download and build libraw instead of using installed package" OFF)
-#option(BUILD_EXIV2 "download and build exiv2 instead of using installed package" OFF)
-#option(BUILD_LIBRTPROCESS "download and build librtprocess instead of using installed package" OFF)
-
-#option(LENSFUN_DBUPDATE "enable the code and library links to update the lensfun database from the menu.  Enables a network connection..." OFF)
-#option(GMIC "enable the code and library links to use G'MIC in img and rawproc." OFF)
-#option(LIBRTPROCESS "enable the code and library links to use librtprocess in img and rawproc." OFF)
-
-
 add_executable(rawproc src/rawprocApp.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
 add_executable(img src/img.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
 add_executable(wxcmd src/wxcmd.cpp)
 add_executable(exif src/exif.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:util>)
-
 
 # make doc:
 add_custom_target(doc 	
@@ -39,6 +29,29 @@ add_custom_target(doc
 		${CMAKE_CURRENT_SOURCE_DIR}/doc/*.hh* "
 	VERBATIM
 )
+
+add_custom_target(conf
+	COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf ${CMAKE_CURRENT_BINARY_DIR}/dcraw.c ${CMAKE_CURRENT_BINARY_DIR}/camconst.json
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/conffile.pl ${CMAKE_CURRENT_SOURCE_DIR}/src > ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf
+	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/camconst.json 
+	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR}. https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
+	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} "http://lensfun.sourceforge.net/db/version_${LENSFUN_DATABASE_VERSION}.tar.bz2"
+	#Not using the following anymore, easir to rely on rawproc's lensfun update capability
+	#COMMAND mkdir -p "${CMAKE_CURRENT_BINARY_DIR}/version_toohardtofigureout"
+	#COMMAND tar -xjvf ${CMAKE_CURRENT_BINARY_DIR}/${LENSFUN_DATABASE_VERSION}.tar.bz2 -C ${LENSFUN_DATABASE_VERSION}
+	#COMMAND echo "0" >${CMAKE_CURRENT_BINARY_DIR}/ ${LENSFUN_DATABASE_VERSION}/timestamp.txt
+	VERBATIM
+)
+
+add_custom_target(docpages
+	COMMAND sed -e 's/#VERSION#/$(VERSION)/' -e 's/#DATE#/$(DATE)/'  ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html.in > ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.pl $(srcdir)/src > ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/rawimage.cpp > ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/img.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/gimage_parse.cpp > ${CMAKE_CURRENT_SOURCE_DIR}doc/img.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/index.pl ${CMAKE_CURRENT_SOURCE_DIR}/doc > ${CMAKE_CURRENT_SOURCE_DIR}/doc/index.html
+	VERBATIM
+)
+
 
 #add_subdirectory(src)
 
@@ -255,8 +268,9 @@ endif ()
 
 #Lensfun:
 #Github repo, cmake, right now install to in-tree location, will change to build location references
-set(LENSFUN_DEPS "-lglib-2.0 -lintl -liconv -lpcre")
+#set(LENSFUN_DEPS "-lglib-2.0 -lintl -liconv -lpcre")
 if (DEFINED BUILD_LENSFUN)
+	set(LENSFUN_DEPS "-lglib-2.0 -lintl -liconv -lpcre")
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
@@ -304,6 +318,7 @@ if (DEFINED BUILD_LENSFUN)
 	endif()
 		
 	set(LENSFUN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include)
+	set(LENSFUN_INC_DIR ${LENSFUN_INCLUDE_DIR} CACHE STRING "Lensfun include directory")
 	set(LENSFUN_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib)
 	set(LENSFUN_LIB ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib/liblensfun.a)
 	
@@ -321,6 +336,7 @@ if (DEFINED BUILD_LENSFUN)
 else()
 	pkg_check_modules(LENSFUN REQUIRED lensfun)
 	if (LENSFUN_FOUND)
+		set(LENSFUN_INC_DIR ${LENSFUN_INCLUDE_DIR} CACHE STRING "Lensfun include directory")
 		include_directories(${LENSFUN_INCLUDE_DIR})
 		target_link_libraries(rawproc ${LENSFUN_LIBRARIES})
 		target_link_libraries(img ${LENSFUN_LIBRARIES})
@@ -333,11 +349,12 @@ endif ()
 
 #exiv2:
 #Github repo, cmake, install in-tree to resolve .in header creation
-set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
+#set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
 if (WIN32)
 	string(CONCAT EXIV2_DEPS "-lws2_32 -lpsapi")
 endif()
 if  (DEFINED BUILD_EXIV2)
+	set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
