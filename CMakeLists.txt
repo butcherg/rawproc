@@ -10,9 +10,10 @@ MESSAGE("CMAKE_HOST_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME}")
 MESSAGE("CMAKE_HOST_SYSTEM_VERSION ${CMAKE_HOST_SYSTEM_VERSION}")
 project(rawproc VERSION 1.4.0 LANGUAGES CXX C)
 
+#set(VERSION 1.4)
 string(TIMESTAMP BUILDDATE)
 
-add_compile_options(-ggdb -DVERSION="1.3"  -DBUILDDATE="${BUILDDATE}")
+add_compile_options(-ggdb -DVERSION="${CMAKE_PROJECT_VERSION}"  -DBUILDDATE="${BUILDDATE}")
 
 add_executable(rawproc src/rawprocApp.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
 add_executable(img src/img.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
@@ -35,8 +36,8 @@ add_custom_target(conf
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/conffile.pl ${CMAKE_CURRENT_SOURCE_DIR}/src > ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf
 	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/camconst.json 
 	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR}. https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
-	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} "http://lensfun.sourceforge.net/db/version_${LENSFUN_DATABASE_VERSION}.tar.bz2"
-	#Not using the following anymore, easir to rely on rawproc's lensfun update capability
+	#Not using the following anymore, easier to rely on rawproc's lensfun update capability
+	#COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} "http://lensfun.sourceforge.net/db/version_${LENSFUN_DATABASE_VERSION}.tar.bz2"
 	#COMMAND mkdir -p "${CMAKE_CURRENT_BINARY_DIR}/version_toohardtofigureout"
 	#COMMAND tar -xjvf ${CMAKE_CURRENT_BINARY_DIR}/${LENSFUN_DATABASE_VERSION}.tar.bz2 -C ${LENSFUN_DATABASE_VERSION}
 	#COMMAND echo "0" >${CMAKE_CURRENT_BINARY_DIR}/ ${LENSFUN_DATABASE_VERSION}/timestamp.txt
@@ -44,10 +45,10 @@ add_custom_target(conf
 )
 
 add_custom_target(docpages
-	COMMAND sed -e 's/#VERSION#/$(VERSION)/' -e 's/#DATE#/$(DATE)/'  ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html.in > ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html
-	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.pl $(srcdir)/src > ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.html
+	COMMAND sed -e s/\#VERSION\#/${CMAKE_PROJECT_VERSION}/ -e s/\#DATE\#/${BUILDDATE}/ ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html.in > ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.pl ${CMAKE_CURRENT_SOURCE_DIR}/src > ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.html
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/rawimage.cpp > ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.html
-	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/img.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/gimage_parse.cpp > ${CMAKE_CURRENT_SOURCE_DIR}doc/img.html
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/img.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/gimage_parse.cpp > ${CMAKE_CURRENT_SOURCE_DIR}/doc/img.html
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/index.pl ${CMAKE_CURRENT_SOURCE_DIR}/doc > ${CMAKE_CURRENT_SOURCE_DIR}/doc/index.html
 	VERBATIM
 )
@@ -118,7 +119,7 @@ if (DEFINED BUILD_LCMS2)
 	endif()
 	include(ExternalProject)
 	if (BUILD_LCMS2 STREQUAL "GITHUB")
-		message(STATUS "Configuring libraw lcms2 2.16 as an external project (GitHub clone).")
+		message(STATUS "Configuring lcms2 as an external project (GitHub clone).")
 		ExternalProject_Add(lcms2_download
 			PREFIX external/lcms2
 			GIT_REPOSITORY    https://github.com/mm2/Little-CMS.git
@@ -129,24 +130,26 @@ if (DEFINED BUILD_LCMS2)
 			UPDATE_COMMAND ""
 		)
 	elseif (BUILD_LCMS2 STREQUAL "SRCPKG")
-		message(STATUS "Configuring libraw lcms2 2.16 as an external project (URL download).")
+		message(STATUS "Configuring lcms2 as an external project (URL download).")
 		ExternalProject_Add(lcms2_download
 			PREFIX external/lcms2
+			#DOWNLOAD_DIR "external"
 			URL https://github.com/mm2/Little-CMS/releases/download/lcms2.16/lcms2-2.16.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CONFIGURE_COMMAND ../lcms2_download/configure ${HOSTPARM} --enable-static --disable-shared --with-threads --with-fastfloat --prefix=${BUILD_PREFIX}
 			INSTALL_COMMAND make install 
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_LCMS2})  #local path to file
-		message(STATUS "Configuring libraw lcms2 2.16 as an external project (local file).")
+		message(STATUS "Configuring lcms2 as an external project (local file: ${BUILD_LCMS2})")
 		ExternalProject_Add(lcms2_download
 			PREFIX external/lcms2
-			URL "${BUILD_LCMS2}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
+			#DOWNLOAD_DIR "external"
+			URL "${BUILD_LCMS2}" 
 			CONFIGURE_COMMAND ../lcms2_download/configure ${HOSTPARM} --enable-static --disable-shared --with-threads --with-fastfloat --prefix=${BUILD_PREFIX}
 			INSTALL_COMMAND make install 
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	else ()
 		message(FATAL_ERROR "BUILD_LCMS2 not valid: ${BUILD_LCMS2} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
@@ -181,9 +184,9 @@ else()
 	pkg_check_modules(LCMS2 REQUIRED lcms2)
 	if (LCMS2_FOUND)
 		include_directories(${LCMS2_INCLUDE_DIR})
-		target_link_libraries(rawproc ${LCMS2_LIBRARIES})
-		target_link_libraries(img ${LCMS2_LIBRARIES})
-		target_link_libraries(exif ${LCMS2_LIBRARIES})
+		target_link_libraries(rawproc ${LCMS2_LIBRARIES} ${LCMS2_DEPS})
+		target_link_libraries(img ${LCMS2_LIBRARIES} ${LCMS2_DEPS})
+		target_link_libraries(exif ${LCMS2_LIBRARIES} ${LCMS2_DEPS})
 		if (LCMS2_FASTFLOAT)
 			target_compile_options(rawproc PRIVATE -DUSE_LCMS_FASTFLOAT)
 			target_compile_options(img PRIVATE -DUSE_LCMS_FASTFLOAT)
@@ -206,7 +209,7 @@ if (DEFINED BUILD_LIBRAW)
 
 	include(ExternalProject)
 	if (BUILD_LIBRAW STREQUAL "GITHUB")
-		message(STATUS "Configuring libraw 0.21.1 as an external project (GitHub clone).")
+		message(STATUS "Configuring libraw as an external project (GitHub clone).")
 		ExternalProject_Add(libraw_download
 			PREFIX external/libraw
 			GIT_REPOSITORY    https://github.com/LibRaw/LibRaw/archive/refs/tags/0.21.2.tar.gz
@@ -216,24 +219,26 @@ if (DEFINED BUILD_LIBRAW)
 			UPDATE_COMMAND ""
 		)
 	elseif (BUILD_LIBRAW STREQUAL "SRCPKG")
-		message(STATUS "Configuring libraw 0.21.1 as an external project (URL download).")
+		message(STATUS "Configuring libraw as an external project (URL download).")
 		ExternalProject_Add(libraw_download
 			PREFIX external/libraw
+			#DOWNLOAD_DIR "external"
 			URL	https://www.libraw.org/data/LibRaw-0.21.2.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CONFIGURE_COMMAND ../libraw_download/configure ${HOSTPARM} --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples --prefix=${BUILD_PREFIX}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_LIBRAW} )
-		message(STATUS "Configuring libraw 0.21.1 as an external project (local file).")
+		message(STATUS "Configuring libraw as an external project (local file: ${BUILD_LIBRAW}).")
 		ExternalProject_Add(libraw_download
-			PREFIX external/libraw
-			URL	 "${BUILD_LIBRAW}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
-			CONFIGURE_COMMAND ../libraw_download/configure ${HOSTPARM} --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples --prefix=${BUILD_PREFIX}
-			INSTALL_COMMAND make install
-			UPDATE_COMMAND ""
+			PREFIX external/libraw 
+			#DOWNLOAD_DIR "external"
+			URL	 "${BUILD_LIBRAW}" 
+			CONFIGURE_COMMAND ../libraw_download/configure ${HOSTPARM} --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples --prefix=${BUILD_PREFIX} 
+			INSTALL_COMMAND make install 
+			UPDATE_COMMAND "" 
+			#DOWNLOAD_EXTRACT_TIMESTAMP true 
 		)
 	else ()
 		message(FATAL_ERROR "BUILD_LIBRAW not valid: ${BUILD_LIBRAW} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
@@ -248,9 +253,9 @@ if (DEFINED BUILD_LIBRAW)
 	set(LIBRAW_FOUND TRUE)
 	add_dependencies(rawproc libraw_download)
 	
-	target_link_libraries(rawproc "${LIBRAW_LIB}" -lz -lm)
-	target_link_libraries(img "${LIBRAW_LIB}" -lz -lm)
-	target_link_libraries(exif "${LIBRAW_LIB}" -lz -lm)
+	target_link_libraries(rawproc ${LIBRAW_LIB} ${LIBRAW_DEPS} z)
+	target_link_libraries(img ${LIBRAW_LIB}  ${LIBRAW_DEPS} z)
+	target_link_libraries(exif ${LIBRAW_LIB}  ${LIBRAW_DEPS} z)
 	target_include_directories(rawproc PRIVATE ${LIBRAW_INCLUDE_DIR})
 	target_include_directories(img PRIVATE ${LIBRAW_INCLUDE_DIR})
 	target_include_directories(exif PRIVATE ${LIBRAW_INCLUDE_DIR})
@@ -270,7 +275,6 @@ endif ()
 #Github repo, cmake, right now install to in-tree location, will change to build location references
 #set(LENSFUN_DEPS "-lglib-2.0 -lintl -liconv -lpcre")
 if (DEFINED BUILD_LENSFUN)
-	set(LENSFUN_DEPS "-lglib-2.0 -lintl -liconv -lpcre")
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
@@ -295,19 +299,19 @@ if (DEFINED BUILD_LENSFUN)
 		ExternalProject_Add(lensfun_download
 			PREFIX external/lensfun
 			#URL https://github.com/lensfun/lensfun/archive/refs/tags/v0.3.0.tar.gz #latest release????
+			#DOWNLOAD_DIR "external"
 			URL https://github.com/lensfun/lensfun/archive/refs/tags/v0.3.4.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
-			UPDATE_COMMAND ""
+			UPDATE_COMMAND DOWNLOAD_EXTRACT_TIMESTAMP true
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_LENSFUN})
-		message(STATUS "Configuring lensfun 0.3.99 as an external project (local file).")
+		message(STATUS "Configuring lensfun 0.3.99 as an external project (local file: ${BUILD_LENSFUN}).")
 		ExternalProject_Add(lensfun_download
+			URL ${BUILD_LENSFUN}
 			PREFIX external/lensfun
-			URL "${BUILD_LENSFUN}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
@@ -316,7 +320,7 @@ if (DEFINED BUILD_LENSFUN)
 	else ()
 		message(FATAL_ERROR "BUILD_LENSFUN not valid: ${BUILD_LENSFUN} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
 	endif()
-		
+
 	set(LENSFUN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include)
 	set(LENSFUN_INC_DIR ${LENSFUN_INCLUDE_DIR} CACHE STRING "Lensfun include directory")
 	set(LENSFUN_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib)
@@ -330,9 +334,9 @@ if (DEFINED BUILD_LENSFUN)
 	target_include_directories(rawproc PRIVATE ${LENSFUN_INCLUDE_DIR})
 	target_include_directories(img PRIVATE ${LENSFUN_INCLUDE_DIR})
 	target_include_directories(exif PRIVATE ${LENSFUN_INCLUDE_DIR})
-	target_link_libraries(rawproc ${LENSFUN_LIB}  ${LENSFUN_DEPS})
-	target_link_libraries(img ${LENSFUN_LIB} ${LENSFUN_DEPS})
-	target_link_libraries(exif ${LENSFUN_LIB} ${LENSFUN_DEPS})
+	target_link_libraries(rawproc ${LENSFUN_LIB}  ${LENSFUN_DEPS} glib-2.0)
+	target_link_libraries(img ${LENSFUN_LIB} ${LENSFUN_DEPS} glib-2.0)
+	target_link_libraries(exif ${LENSFUN_LIB} ${LENSFUN_DEPS} glib-2.0)
 else()
 	pkg_check_modules(LENSFUN REQUIRED lensfun)
 	if (LENSFUN_FOUND)
@@ -350,11 +354,11 @@ endif ()
 #exiv2:
 #Github repo, cmake, install in-tree to resolve .in header creation
 #set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
-if (WIN32)
-	string(CONCAT EXIV2_DEPS "-lws2_32 -lpsapi")
-endif()
+#if (WIN32)
+#	string(CONCAT EXIV2_DEPS "-lws2_32 -lpsapi")
+#endif()
 if  (DEFINED BUILD_EXIV2)
-	set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
+	#set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
@@ -379,23 +383,25 @@ if  (DEFINED BUILD_EXIV2)
 		message(STATUS "Configuring exiv2 0.27.7 as an external project (URL download).")
 		ExternalProject_Add(exiv2_download
 			PREFIX external/exiv2
+			#DOWNLOAD_DIR "external"
 			URL https://github.com/Exiv2/exiv2/releases/download/v0.27.7/exiv2-0.27.7-Source.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_EXIV2})
-		message(STATUS "Configuring exiv2 0.27.7 as an external project (local file).")
+		message(STATUS "Configuring exiv2 0.27.7 as an external project (local file: ${BUILD_EXIV2}).")
 		ExternalProject_Add(exiv2_download
 			PREFIX external/exiv2
+			#DOWNLOAD_DIR "external"
 			URL "${BUILD_EXIV2}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	else ()
 		message(FATAL_ERROR "BUILD_EXIV2 not valid: ${BUILD_EXIV2} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
@@ -451,7 +457,6 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			GIT_REPOSITORY   https://github.com/GreycLab/gmic.git
 			GIT_PROGRESS     ON
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
@@ -461,23 +466,25 @@ if (DEFINED BUILD_GMIC)
 		message(STATUS "Configuring G'MIC as an external project (URL download).")
 		ExternalProject_Add(gmic_download
 			PREFIX external/gmic
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 			URL https://github.com/GreycLab/gmic/releases/download/v.3.3.6/gmic_3.3.6.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_GMIC})
-		message(STATUS "Configuring G'MIC as an external project (local file).")
+		message(STATUS "Configuring G'MIC as an external project (local file: ${BUILD_GMIC}).")
 		ExternalProject_Add(gmic_download
 			PREFIX external/gmic
+			#DOWNLOAD_DIR "external"
 			URL "${BUILD_GMIC}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	else ()
 		message(FATAL_ERROR "BUILD_GMIC not valid: ${BUILD_GMIC} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
@@ -537,7 +544,6 @@ if (DEFINED BUILD_LIBRTPROCESS)
 			GIT_REPOSITORY   https://github.com/CarVac/librtprocess.git
 			GIT_TAG          ed4501 #0.12.0
 			GIT_PROGRESS     ON
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS  ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
@@ -547,23 +553,25 @@ if (DEFINED BUILD_LIBRTPROCESS)
 		message(STATUS "Configuring librtprocess as an external project (URL download).")
 		ExternalProject_Add(librtprocess_download
 			PREFIX external/librtprocess
+			#DOWNLOAD_DIR "external"
 			URL https://github.com/CarVac/librtprocess/archive/refs/tags/0.12.0.tar.gz
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS  ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_LIBRTPROCESS})
-		message(STATUS "Configuring librtprocess as an external project (local file).")
+		message(STATUS "Configuring librtprocess as an external project (local file: ${BUILD_LIBRTPROCESS}).")
 		ExternalProject_Add(librtprocess_download
 			PREFIX external/librtprocess
+			#DOWNLOAD_DIR "external"
 			URL "${BUILD_LIBRTPROCESS}"
-			DOWNLOAD_EXTRACT_TIMESTAMP true
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS  ${CMAKE_ARGUMENTS}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
+			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	else ()
 		message(FATAL_ERROR "BUILD_LIBRTPROCESS not valid: ${BUILD_LIBRTPROCESS} (Either GITHUB, SRCPKG, or valid local path/srcpackage")
