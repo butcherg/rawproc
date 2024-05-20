@@ -2,21 +2,22 @@
 
 <h1>rawproc</h1>
 <p>Version #VERSION#<br>
-#DATE#<br>
-This text Copyright 2017-2018, Glenn Butcher, All Rights Reserved.<br>
+Build Date: #DATE#<br>
+This text Copyright 2017-2024, Glenn Butcher, All Rights Reserved.<br>
 Code at https://github.com/butcherg/rawproc, licensed under the GPL V2
 </p>
 
 <h2>Libraries:</h2>
 <ul>
-	<li>wxWidgets, http://wxwidgets.org</li>
+	<li>wxWidgets, https://wxwidgets.org</li>
 	<li>LibRaw, https://www.libraw.org</li>
 	<li>librtprocess, https://github.com/CarVac/librtprocess</li>
 	<li>LibTIFF, http://www.libtiff.org</li>
-	<li>LibJPEG, http://libjpeg.sourceforge.net</li>
+	<li>LibJPEG, https://libjpeg.sourceforge.net</li>
 	<li>LibPNG, http://www.libpng.org/pub/png/libpng.html</li>
-	<li>Little CMS, http://www.littlecms.com</li>
-	<li>Lensfun, http://lensfun.sourceforge.net</li>
+	<li>Little CMS, https://www.littlecms.com</li>
+	<li>Lensfun, https://lensfun.github.io/</li>
+	<li>G'MIC, https://gmic.eu/</li>
 </ul>
 
 <h2>Camera Data:</h2>
