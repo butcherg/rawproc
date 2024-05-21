@@ -187,7 +187,7 @@ std::string getAsString(std::string url)
 	}
 	else {
 		out.assign(chunk.memory,chunk.size);
-		printf("getAsString(): successful.\n"); fflush(stdout);
+		//printf("getAsString(): successful.\n"); fflush(stdout);
 	}
  
 	curl_easy_cleanup(curl_handle);
@@ -319,7 +319,7 @@ lf_db_return lensfun_dbcheck(int version, std::string dbpath, std::string dburl)
 
 	//get versions.json:
 	std::string versions = getAsString(string_format("%sversions.json",repositoryurl.c_str()));
-	printf("lensfun_dbcheck(): versions = %s\n", versions.c_str()); fflush(stdout);
+	//printf("lensfun_dbcheck(): versions = %s\n", versions.c_str()); fflush(stdout);
 
 	//parse timestamp and version numbers from downloaded versions.json:
 	std::string foo = removeall(versions,'[');
@@ -367,7 +367,7 @@ lf_db_return lensfun_dbupdate(int version, std::string dbpath, std::string dburl
 
 	//get versions.json:
 	std::string versions = getAsString(string_format("%sversions.json",repositoryurl.c_str()));
-	printf("lensfun_dbupdate(): versions = %s\n", versions.c_str()); fflush(stdout);
+	//printf("lensfun_dbupdate(): versions = %s\n", versions.c_str()); fflush(stdout);
 
 	//parse timestamp and version numbers from downloaded versions.json:
 	std::string foo = removeall(versions,'[');
