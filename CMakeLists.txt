@@ -85,7 +85,7 @@ target_link_libraries(exif ${PNG_LIBRARIES})
 
 #WxWidgets:
 #if WXDIR contains a path to a built wxWidgets library set, wx-config there will be used to provide the includes and libs.  Otherwise, a system package will be found.
-if(WXDIR)
+if(DEFINED WXDIR)
 	execute_process(COMMAND bash -c "${WXDIR}/wx-config --cxxflags" OUTPUT_VARIABLE WX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 	execute_process(COMMAND bash -c "${WXDIR}/wx-config --libs base core propgrid aui html" OUTPUT_VARIABLE WX_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE )
 	list(APPEND CMAKE_CXX_FLAGS "${WX_FLAGS}")
@@ -102,7 +102,7 @@ else()
 	target_link_libraries(wxcmd ${wxWidgets_LIBRARIES})
 	target_link_libraries(img ${wxWidgets_LIBRARIES})
 	target_link_libraries(exif ${wxWidgets_LIBRARIES})
-endif(WXDIR)
+endif(DEFINED WXDIR)
 
 
 #Establishes the target install directory for any built libraries:
@@ -123,7 +123,7 @@ if (DEFINED BUILD_LCMS2)
 		ExternalProject_Add(lcms2_download
 			PREFIX external/lcms2
 			GIT_REPOSITORY    https://github.com/mm2/Little-CMS.git
-			GIT_TAG           453baf #lcms2.16
+			#GIT_TAG           453baf #lcms2.16
 			GIT_PROGRESS      ON
 			CONFIGURE_COMMAND ../lcms2_download/configure ${HOSTPARM} --enable-static --disable-shared --with-threads --with-fastfloat --prefix=${BUILD_PREFIX}
 			INSTALL_COMMAND make install 
@@ -212,9 +212,9 @@ if (DEFINED BUILD_LIBRAW)
 		message(STATUS "Configuring libraw as an external project (GitHub clone).")
 		ExternalProject_Add(libraw_download
 			PREFIX external/libraw
-			GIT_REPOSITORY    https://github.com/LibRaw/LibRaw/archive/refs/tags/0.21.2.tar.gz
+			GIT_REPOSITORY    https://github.com/LibRaw/LibRaw.git
 			GIT_PROGRESS      ON
-			CONFIGURE_COMMAND ../libraw_download/configure ${HOSTPARM} --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples --prefix=${BUILD_PREFIX}
+			CONFIGURE_COMMAND autoreconf -i <SOURCE_DIR> COMMAND ../libraw_download/configure ${HOSTPARM} --enable-static --disable-shared --enable-openmp --disable-jasper --disable-jpeg --disable-lcms --disable-examples --prefix=${BUILD_PREFIX}
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 		)
@@ -298,7 +298,6 @@ if (DEFINED BUILD_LENSFUN)
 		message(STATUS "Configuring lensfun 0.3.99 as an external project (URL download).")
 		ExternalProject_Add(lensfun_download
 			PREFIX external/lensfun
-			#URL https://github.com/lensfun/lensfun/archive/refs/tags/v0.3.0.tar.gz #latest release????
 			#DOWNLOAD_DIR "external"
 			URL https://github.com/lensfun/lensfun/archive/refs/tags/v0.3.4.tar.gz
 			CMAKE_COMMAND	${CMAKECMD}
@@ -358,7 +357,6 @@ endif ()
 #	string(CONCAT EXIV2_DEPS "-lws2_32 -lpsapi")
 #endif()
 if  (DEFINED BUILD_EXIV2)
-	#set(EXIV2_DEPS "-lintl -liconv -lcrypto -lssl -lz")  # expat gettext mman-win32 zlib
 	if (DEFINED HOST)
 		set(CMAKECMD "${HOST}-cmake")
 	else()
@@ -509,8 +507,6 @@ if (DEFINED BUILD_GMIC)
 	target_compile_options(img PRIVATE -DUSE_GMIC)
 	target_compile_options(exif PRIVATE -DUSE_GMIC)
 	
-	#add_definitions(-DCURL_STATICLIB)
-	
 elseif(GMIC)
 	pkg_check_modules(GMIC REQUIRED gmic)
 	if (GMIC_FOUND)
@@ -521,7 +517,6 @@ elseif(GMIC)
 		target_compile_options(rawproc PRIVATE -DUSE_GMIC)
 		target_compile_options(img PRIVATE -DUSE_GMIC)
 		target_compile_options(exif PRIVATE -DUSE_GMIC)
-		#add_definitions(-DCURL_STATICLIB)
 	else()
 		message(STATUS "gmic not found")
 	endif(GMIC_FOUND)
@@ -629,11 +624,6 @@ if(LENSFUN_DBUPDATE)
 	
 endif(LENSFUN_DBUPDATE)
 
-#Just put it in at the end...
-#target_link_libraries(rawproc -lz)
-#target_link_libraries(img -lz)
-#target_link_libraries(exif -lz)
-
 if(WIN32)
 	target_link_libraries(rawproc wsock32 ws2_32 psapi)
 	target_link_libraries(img wsock32 ws2_32 psapi)
@@ -641,3 +631,4 @@ if(WIN32)
 endif(WIN32)
 
 add_subdirectory(src)
+
