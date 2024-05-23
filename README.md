@@ -2,9 +2,10 @@
 Raw processor and general image processor.
 
 I wanted a simple raw processor.  Here it is.  It's primarily a desktop GUI application, but one day I'll make it tablet-
-friendly.  It doesn't do image management. With the exception of saturation, denoise, and sharpen tools, it only does 
-tone manipulation.  It saves the processing applied in the EXIF of the saved image because I do not like the sidecar 
-concept.  It works internally with floating point pixel values.  Here's a list of the implemented manipulations:
+friendly (well maybe, here in 2023 less enamored with the idea).  It doesn't do image management. There are no masking tools
+to localize processing.  No fancy color tools.  It saves the processing applied in the EXIF of the saved image because I 
+do not like the sidecar concept.  It works internally with floating point pixel values.  Here's a list of the implemented 
+manipulations:
 
 - Add
 - Black/White Point
@@ -16,9 +17,11 @@ concept.  It works internally with floating point pixel values.  Here's a list o
 - Exposure
 - Gamma
 - Grayscale Conversion
-- G'MIC
+- G'MIC (optional, specified at build time)
 - Highlight Recovery
 - Lens Correction
+- Lens Distortion (enabled in the configuration properties)
+- Lens Vignetting (enabled in the configuration properties)
 - Redeye Correction
 - Resize
 - Rotate
@@ -34,9 +37,10 @@ the order of the manipulations.  Also, you have to deal with the raw image, in t
 demosaic, colorspace conversion, and gamma are for you to make.  The input image is dark, so learn to deal with it.  
 And, in doing so, you'll learn valuable things about digital images.
 
-In the display, you can use the 't' key or double-click the upper-left thumbnail to toggle between a small repeat image for panning, a 255-value histogram, and no thumbnail.
-
-So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." menu item,  you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the manipulation list saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata.  This is my take on 'non-destructive' editing.
+So, you can open a RAW file, apply a list of manipulations, and save it as, say, a TIFF.  Then, using the "Open Source..." 
+menu item,  you can select the saved TIFF, and rawproc will open the original RAW file and automatically apply the 
+manipulation list saved in the TIFF.  The manipulations used to produce the TIFF are stored in its EXIF metadata. 
+This is my take on 'non-destructive' editing.
 
 rawproc also implements what I call 'incremental processing', in that each added manipulation does its thing against the 
 previous one and stores the result; adding a manipulation doesn't restart the whole processing chain, it just pulls the 
@@ -47,7 +51,7 @@ The check box by each manipulation sets the display to that manipulation's resul
 any previous (or subsequent) manipulation and play with it, seeing the result at the checked manipulation.  A kinda goofy
 way to display, but I'm warming to it... :)  
 
-This code is licensed for widespread use under the terms of the GPL.
+This code is licensed for widespread use under the terms of the GPL, Version 2.
 
 Contributed code and algorithmns:
 <ul>
@@ -71,10 +75,9 @@ I ended up writing my own image library, gimage, https://github.com/butcherg/gim
 endeavor, but well worth the effort, as I now have high-quality image algorithms with OpenMP threading throughout, with 
 color management tools to boot.  Also, gimage has only one internal tone representation, floating point.  Image
 manipulations are a little slower as a result, but I've done some pixel-peep comparisons and the tone gradations do
-look better.  double, float, or half floating point representations are selectable at compile-time; the 32-bit Windows 
-installer version uses half because I ran into heap limits with a 32-bit executable.  I compile my Linux version with 
-float; I can't see that using double provides any advantage worth the memory use for the tone ranges we work with in 
-general purpose photography.
+look better.  double, float, or half floating point representations are selectable at compile-time.  I compile my Linux 
+version with float; I can't see that using double provides any advantage worth the memory use for the tone ranges we 
+work with in general purpose photography.
 
 I offer no promise of support or enhancement, past offering the code on Github for you to fork. It is organized to compile 
 with the GNU g++ compiler, either native on Linux OSs or Mingw32 on Windows platforms.  I've compiled and run executables 
@@ -88,7 +91,8 @@ img input.jpg resize:640,0 sharpen:1 output.jpg
 </pre>
 
 img will allow wildcards in the input and output filespecifications, so you can use it to apply processing to all 
-images in a directory.  It will also read rawproc configuration files, so a workflow that starts with batch-produced JPEGs and continues with re-editing selected images in rawproc is seamless.
+images in a directory.  It will also read rawproc configuration files, so a workflow that starts with batch-produced JPEGs and 
+continues with re-editing selected images in rawproc is seamless.
 
 This code is essentially a hack; I started it with a wxDevC++ project, but abandoned that IDE some time ago.  I wrote code 
 for things I could understand; and shamelessly copied code (e.g., spline.h) for things I didn't want to spend the time 
@@ -97,7 +101,7 @@ doing this, and I now have a tool I can use in the field to do what I'll call 'c
 later time I can go back to the JPEG I produced and extract the manipulation list, use it as the start for more 'quality' 
 processing in Raw Therapee and GIMP.
 
-If  you want to gripe or comment about rawproc, I'll be occasionally monitoring the pixels.us forums.  If I subsequently 
+If  you want to gripe or comment about rawproc, I'll be occasionally monitoring the discuss.pixls.us forums.  If I subsequently 
 commit anything interesting to the respository, I'll shout it out there.
 
 # Building rawproc
@@ -196,6 +200,10 @@ for BUILD_LIBRAW.  For example, lensfun needs glib2, so a cmake command that dow
 $ cmake -DBUILD_LENSFUN=SRCPKG -DLENSFUN_DEPS=glib-2.0 ..
 </pre>
 
+Note that dependencies are identified by the name that would be specified on the link command line, e.g., -lglib-2.0, but without the '-l'.  
+If multiple libraries need to be provided, separate them with semi-colons, e.g., glib-2.0;intl;iconv - this complies with how cmake handles 
+lists of things.
+
 Finally, there are two optional libraries, librtprocess and G'MIC.  If you specify either -DBUILD_GMIC=... or -DGMIC=ON, libgmic will be 
 incorporated into rawproc, the latter switch will search for a system installation of libgmic.  Same for librtprocess, either 
 -DBUILD_LIBRTPROCESS=... or -DLIBRTPROCESS=ON.
@@ -210,3 +218,8 @@ $ pacman -S mingw-w64-x86_64-lcms2 mingw-w64-x86_64-libraw mingw-w64-x86_64-lens
 
 librtprocess and libgmic are not currently available from the MSYS2 package repository, so you'll have to use the BUILD_ switches.
 
+## Build Notes
+
+- The cmake build system does not yet provide well-considered install targets.
+- There are other switches that support a mxe cross-compile build, but I'm not going to document their use.
+- wxWidgets isn't supported by the BUILD_ concept; you either have to install a distro package or clone/download,build,compile wxWidgets in a separate source tree.  If you do the latter, you can point to it in the cmake command line with -DWXDIR=/path/to/wxwidgets_build_directory_containing_wx-config and the cmake build system will do the rest.
