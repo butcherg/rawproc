@@ -213,7 +213,7 @@ incorporated into rawproc, the latter switch will search for a system installati
 First, the guidance provided above applies to rawproc builds using MSYS2.  With that, the prerequistes are:
 
 <pre>
-$ pacman -S mingw-w64-x86_64-lcms2 mingw-w64-x86_64-libraw mingw-w64-x86_64-lensfun mingw-w64-x86_64-exiv2 libcurl-devel libarchive 
+$ pacman -S mingw-w64-x86_64-wxWidgets mingw-w64-x86_64-lcms2 mingw-w64-x86_64-libraw mingw-w64-x86_64-lensfun mingw-w64-x86_64-exiv2 libcurl-devel libarchive 
 </pre>
 
 librtprocess and libgmic are not currently available from the MSYS2 package repository, so you'll have to use the BUILD_ switches.
