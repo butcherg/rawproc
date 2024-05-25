@@ -457,9 +457,9 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			GIT_REPOSITORY   https://github.com/GreycLab/gmic.git
 			GIT_PROGRESS     ON
-			CMAKE_COMMAND	${CMAKECMD}
-			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
-			INSTALL_COMMAND make install
+			CONFIGURE_COMMAND ""
+			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			INSTALL_COMMAND cd src COMMAND make install
 			UPDATE_COMMAND ""
 		)
 	elseif (BUILD_GMIC STREQUAL "SRCPKG")
@@ -468,8 +468,8 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 			URL https://github.com/GreycLab/gmic/releases/download/v.3.3.6/gmic_3.3.6.tar.gz
-			CMAKE_COMMAND	${CMAKECMD}
-			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
+			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			INSTALL_COMMAND cd src COMMAND make install
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
@@ -480,8 +480,8 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			#DOWNLOAD_DIR "external"
 			URL "${BUILD_GMIC}"
-			CMAKE_COMMAND	${CMAKECMD}
-			CMAKE_ARGS   ${CMAKE_ARGUMENTS}
+			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			INSTALL_COMMAND cd src COMMAND make install
 			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
