@@ -458,7 +458,7 @@ if (DEFINED BUILD_GMIC)
 			GIT_REPOSITORY   https://github.com/GreycLab/gmic.git
 			GIT_PROGRESS     ON
 			CONFIGURE_COMMAND ""
-			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			BUILD_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
 			INSTALL_COMMAND cd src COMMAND make install
 			UPDATE_COMMAND ""
 		)
@@ -468,9 +468,9 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 			URL https://github.com/GreycLab/gmic/releases/download/v.3.3.6/gmic_3.3.6.tar.gz
-			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			CONFIGURE_COMMAND ""
+			BUILD_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
 			INSTALL_COMMAND cd src COMMAND make install
-			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
@@ -480,9 +480,9 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			#DOWNLOAD_DIR "external"
 			URL "${BUILD_GMIC}"
-			MAKE_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
+			CONFIGURE_COMMAND ""
+			BUILD_COMMAND cd src COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
 			INSTALL_COMMAND cd src COMMAND make install
-			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
