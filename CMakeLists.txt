@@ -449,7 +449,7 @@ if (DEFINED BUILD_GMIC)
 	else()
 		set(CMAKECMD "cmake")
 	endif()
-	set(CMAKE_ARGUMENTS -DCMAKE_CXX_FLAGS="-DCURL_STATICLIB" -DBUILD_LIB=OFF -DBUILD_LIB_STATIC=ON -DBUILD_CLI=OFF -DBUILD_MAN=OFF -DBUILD_BASH_COMPLETION=OFF -DCMAKE_INSTALL_PREFIX:PATH=${BUILD_PREFIX})
+	set(CMAKE_ARGUMENTS -DCMAKE_CXX_FLAGS="-DCURL_STATICLIB -Dcimg_display=0" -DBUILD_LIB=OFF -DBUILD_LIB_STATIC=ON -DBUILD_CLI=OFF -DBUILD_MAN=OFF -DBUILD_BASH_COMPLETION=OFF -DCMAKE_INSTALL_PREFIX:PATH=${BUILD_PREFIX})
 	include(ExternalProject)
 	if (BUILD_GMIC STREQUAL "GITHUB")
 		message(STATUS "Configuring G'MIC as an external project (GitHub clone).")
@@ -457,10 +457,9 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			GIT_REPOSITORY   https://github.com/GreycLab/gmic.git
 			GIT_PROGRESS     ON
-			CONFIGURE_COMMAND ""
-			BUILD_IN_SOURCE true
-			BUILD_COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
-			INSTALL_COMMAND cd src COMMAND make install
+			CMAKE_COMMAND	${CMAKECMD}
+			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
+			INSTALL_COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download/src/gmic.h ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include/. COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/libgmic.a ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib/.
 			UPDATE_COMMAND ""
 		)
 	elseif (BUILD_GMIC STREQUAL "SRCPKG")
@@ -469,23 +468,21 @@ if (DEFINED BUILD_GMIC)
 			PREFIX external/gmic
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 			URL https://github.com/GreycLab/gmic/releases/download/v.3.3.6/gmic_3.3.6.tar.gz
-			CONFIGURE_COMMAND ""
-			BUILD_IN_SOURCE true
-			BUILD_COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
-			INSTALL_COMMAND cd src COMMAND make install
+			CMAKE_COMMAND	${CMAKECMD}
+			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
+			INSTALL_COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download/src/gmic.h ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include/. COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/libgmic.a ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib/.
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
 	elseif (EXISTS ${BUILD_GMIC})
-		message(STATUS "Configuring G'MIC as an external project (local file: ${BUILD_GMIC}).")
+		message(STATUS "Configuring G'MIC as an external project (local file: ${BUILD_GMIC} PREFIX: ${BUILD_PREFIX}).")
 		ExternalProject_Add(gmic_download
 			PREFIX external/gmic
 			#DOWNLOAD_DIR "external"
 			URL "${BUILD_GMIC}"
-			CONFIGURE_COMMAND ""
-			BUILD_IN_SOURCE true
-			BUILD_COMMAND make X11_CFLAGS="-Dcimg_display=0" X11_LIBS="" PREFIX=${BUILD_PREFIX} lib
-			INSTALL_COMMAND cd src COMMAND make install
+			CMAKE_COMMAND	${CMAKECMD}
+			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
+			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
