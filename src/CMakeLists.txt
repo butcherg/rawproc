@@ -34,6 +34,12 @@ if(LENSFUN_DBUPDATE)
 	)
 endif(LENSFUN_DBUPDATE)
 
+if(WIN32)
+	target_sources(rawproc PUBLIC
+		rawprocRes.rc
+	)
+endif(WIN32)
+
 #target_include_directories(gimage PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/external/usr/local/include")
 
 
