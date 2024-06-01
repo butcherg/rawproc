@@ -29,12 +29,12 @@ SolidCompression=yes
 ;SourceDir=.\
 OutputDir=.
 VersionInfoDescription=rawproc and img are simple raw and image processors.
-VersionInfoCopyright=Copyright (C) 2015-2018 Glenn Butcher.
+VersionInfoCopyright=Copyright (C) 2015-2024 Glenn Butcher.
 ChangesEnvironment=true
 InfoBeforeFile=@INNO_SRCDIR@\winreadme.txt
 
-@INNO_ARCHITECURESALLOWED@
-@INNO_ARCHITECTURESINSTALLEDIN64BITMODE@
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -56,7 +56,7 @@ Source: "src\rawprocdoc.zip"; DestDir: "{app}"; Flags: ignoreversion
 Source: "src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
 Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
 Source: "src\camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
-Source: "src\@LENSFUN_DATABASE_VERSION@\*"; DestDir: "{userappdata}\rawproc\@LENSFUN_DATABASE_VERSION@"; Flags: ignoreversion 
+;Source: "src\@LENSFUN_DATABASE_VERSION@\*"; DestDir: "{userappdata}\rawproc\@LENSFUN_DATABASE_VERSION@"; Flags: ignoreversion 
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
