@@ -21,7 +21,7 @@ DisableProgramGroupPage=yes
 DisableWelcomePage=no
 PrivilegesRequired=admin
 UsedUserAreasWarning=no
-LicenseFile=#INNO_SRCDIR#\COPYING
+LicenseFile=COPYING
 OutputBaseFilename=rawproc-#VERSION#.exe
 Compression=lzma
 SolidCompression=yes
@@ -31,7 +31,7 @@ OutputDir=.
 VersionInfoDescription=rawproc and img are simple raw and image processors.
 VersionInfoCopyright=Copyright (C) 2015-2024 Glenn Butcher.
 ChangesEnvironment=true
-InfoBeforeFile=#INNO_SRCDIR#\winreadme.txt
+InfoBeforeFile=winreadme.txt
 
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
