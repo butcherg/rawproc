@@ -21,8 +21,8 @@ DisableProgramGroupPage=yes
 DisableWelcomePage=no
 PrivilegesRequired=admin
 UsedUserAreasWarning=no
-LicenseFile=COPYING
-OutputBaseFilename=rawproc-#VERSION#.exe
+LicenseFile=../COPYING
+OutputBaseFilename=rawproc-#VERSION#
 Compression=lzma
 SolidCompression=yes
 ;SourceDir=D:\Documents\rawproc\win
@@ -31,7 +31,7 @@ OutputDir=.
 VersionInfoDescription=rawproc and img are simple raw and image processors.
 VersionInfoCopyright=Copyright (C) 2015-2024 Glenn Butcher.
 ChangesEnvironment=true
-InfoBeforeFile=winreadme.txt
+InfoBeforeFile=../winreadme.txt
 
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
@@ -48,15 +48,15 @@ Name: "{userappdata}\rawproc"
 
 
 [Files]
-Source: "src\rawproc.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\img.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\wxcmd.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\rawprocdoc.zip"; DestDir: "{app}"; Flags: ignoreversion
+Source: "rawproc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "img.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "wxcmd.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "rawprocdoc.zip"; DestDir: "{app}"; Flags: ignoreversion
 
-Source: "src\rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
-Source: "src\dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
-Source: "src\camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
-;Source: "src\@LENSFUN_DATABASE_VERSION@\*"; DestDir: "{userappdata}\rawproc\@LENSFUN_DATABASE_VERSION@"; Flags: ignoreversion 
+Source: "rawproc.conf"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion confirmoverwrite uninsneveruninstall
+Source: "dcraw.c"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
+Source: "camconst.json"; DestDir: "{userappdata}\rawproc"; Flags: ignoreversion 
+;Source: "@LENSFUN_DATABASE_VERSION@\*"; DestDir: "{userappdata}\rawproc\@LENSFUN_DATABASE_VERSION@"; Flags: ignoreversion 
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

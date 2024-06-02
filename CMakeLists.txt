@@ -35,7 +35,7 @@ add_custom_target(conf
 	COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf ${CMAKE_CURRENT_BINARY_DIR}/dcraw.c ${CMAKE_CURRENT_BINARY_DIR}/camconst.json
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/conffile.pl ${CMAKE_CURRENT_SOURCE_DIR}/src > ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf
 	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/camconst.json 
-	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR}. https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
+	COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} https://raw.githubusercontent.com/Beep6581/RawTherapee/dev/rtengine/dcraw.c
 	#Not using the following anymore, easier to rely on rawproc's lensfun update capability
 	#COMMAND wget -P ${CMAKE_CURRENT_BINARY_DIR} "http://lensfun.sourceforge.net/db/version_${LENSFUN_DATABASE_VERSION}.tar.bz2"
 	#COMMAND mkdir -p "${CMAKE_CURRENT_BINARY_DIR}/version_toohardtofigureout"
@@ -44,7 +44,12 @@ add_custom_target(conf
 	VERBATIM
 )
 
-add_custom_target(docpages
+add_custom_target(build_win32_zip
+	COMMAND zip -j ${CMAKE_CURRENT_BINARY_DIR}/rawproc-${CMAKE_PROJECT_VERSION}.zip ${CMAKE_CURRENT_BINARY_DIR}/rawproc.exe ${CMAKE_CURRENT_BINARY_DIR}/img.exe ${CMAKE_CURRENT_BINARY_DIR}/wxcmd.exe ${CMAKE_CURRENT_BINARY_DIR}/rawprocdoc.zip ${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf ${CMAKE_CURRENT_BINARY_DIR}/dcraw.c ${CMAKE_CURRENT_BINARY_DIR}/camconst.json
+	VERBATIM
+)
+
+add_custom_target(build_docpages
 	COMMAND sed -e s/\#VERSION\#/${CMAKE_PROJECT_VERSION}/ -e s/\#DATE\#/${BUILDDATE}/ ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html.in > ${CMAKE_CURRENT_SOURCE_DIR}/doc/main.html
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.pl ${CMAKE_CURRENT_SOURCE_DIR}/src > ${CMAKE_CURRENT_SOURCE_DIR}/doc/confparams.html
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.pl ${CMAKE_CURRENT_SOURCE_DIR}/src/rawimage.cpp > ${CMAKE_CURRENT_SOURCE_DIR}/doc/rawparams.html
@@ -53,6 +58,16 @@ add_custom_target(docpages
 	VERBATIM
 )
 
+add_custom_target(build_linux_appimage
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/make-appimage.pl ${CMAKE_PROJECT_VERSION} BIN:${CMAKE_CURRENT_BINARY_DIR}/rawproc BIN:${CMAKE_CURRENT_BINARY_DIR}/rawprocdoc.zip BIN:${CMAKE_CURRENT_BINARY_DIR}/img BIN:${CMAKE_CURRENT_BINARY_DIR}/exif BIN:${CMAKE_CURRENT_BINARY_DIR}/wxcmd "BIN:${CMAKE_CURRENT_SOURCE_DIR}/src/icon.xpm" "BIN:${CMAKE_CURRENT_SOURCE_DIR}/rawproc.appdata.xml" DATA:${CMAKE_CURRENT_BINARY_DIR}/dcraw.c DATA:${CMAKE_CURRENT_BINARY_DIR}/camconst.json DATA:${CMAKE_CURRENT_BINARY_DIR}/rawproc.conf
+	VERBATIM
+)
+
+add_custom_target(build_win32_installer
+	COMMAND sed -e s/\#VERSION\#/${CMAKE_PROJECT_VERSION}/ ${CMAKE_CURRENT_SOURCE_DIR}/rawproc.iss.in > ${CMAKE_CURRENT_BINARY_DIR}/rawproc.iss
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/inno.sh rawproc-${CMAKE_PROJECT_VERSION} ${CMAKE_CURRENT_BINARY_DIR}/rawproc.iss WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	VERBATIM
+)
 
 #add_subdirectory(src)
 
@@ -459,7 +474,7 @@ if (DEFINED BUILD_GMIC)
 			GIT_PROGRESS     ON
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
-			INSTALL_COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download/src/gmic.h ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include/. COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/libgmic.a ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib/.
+			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 		)
 	elseif (BUILD_GMIC STREQUAL "SRCPKG")
@@ -470,7 +485,7 @@ if (DEFINED BUILD_GMIC)
 			URL https://github.com/GreycLab/gmic/releases/download/v.3.3.6/gmic_3.3.6.tar.gz
 			CMAKE_COMMAND	${CMAKECMD}
 			CMAKE_ARGS    ${CMAKE_ARGUMENTS}
-			INSTALL_COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download/src/gmic.h ${CMAKE_CURRENT_BINARY_DIR}/external/usr/include/. COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/external/gmic/src/gmic_download-build/libgmic.a ${CMAKE_CURRENT_BINARY_DIR}/external/usr/lib/.
+			INSTALL_COMMAND make install
 			UPDATE_COMMAND ""
 			#DOWNLOAD_EXTRACT_TIMESTAMP true
 		)
