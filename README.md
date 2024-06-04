@@ -67,6 +67,7 @@ Contributed code and algorithmns:
 	<li>Color Management: Primaries and black/white points from Elle Stone's make-elles-profiles.c, 
 	  https://github.com/ellelstone/elles_icc_profiles</li>
 	<li>Demosaic: librtprocess, https://github.com/CarVac/librtprocess</li>
+	<li>Adobe Distortion and Vignetting Correction: DNG Specification 1.7.1.0, https://helpx.adobe.com/content/dam/help/en/photoshop/pdf/DNG_Spec_1_7_1_0.pdf</li>
 </ul>
 
 I started rawproc development with FreeImage, http://freeimage.sourceforge.net/.  It served well to flesh out 
@@ -115,7 +116,7 @@ illustrated on a Linux (Debian/Ubuntu) system; a Windows build using MSYS2 will 
 
 First, current rawproc requires a C++17 compiler. gcc 11 uses it by default; gcc >= 8 requires the -std=C++17 switch.   gcc is extensively tested;  clang has not been tested but would probably work. 
 
-In order to build a basic rawproc, you need to install the following:
+In order to build a basic rawproc, you need to install the following (Ubuntu/Debian):
 
 <pre>
 sudo apt-get install libjpeg-dev libtiff-dev libpng-dev libwxgtk3.0-gtk3-dev liblcms2-dev libraw-dev liblensfun-dev libexiv2-dev
@@ -210,7 +211,7 @@ incorporated into rawproc, the latter switch will search for a system installati
 
 ## Windows Builds
 
-First, the guidance provided above applies to rawproc builds using MSYS2.  With that, the prerequistes are:
+First, the guidance provided above also applies to rawproc builds using MSYS2.  With that, the prerequistes are:
 
 <pre>
 $ pacman -S mingw-w64-x86_64-wxWidgets mingw-w64-x86_64-lcms2 mingw-w64-x86_64-libraw mingw-w64-x86_64-lensfun mingw-w64-x86_64-exiv2 libcurl-devel libarchive 
@@ -223,3 +224,10 @@ librtprocess and libgmic are not currently available from the MSYS2 package repo
 - The cmake build system does not yet provide well-considered install targets.
 - There are other switches that support a mxe cross-compile build, but I'm not going to document their use.
 - wxWidgets isn't supported by the BUILD_ concept; you either have to install a distro package or clone/download,build,compile wxWidgets in a separate source tree.  If you do the latter, you can point to it in the cmake command line with -DWXDIR=/path/to/wxwidgets_build_directory_containing_wx-config and the cmake build system will do the rest.
+
+## Build Observations (6/4/2024)
+- Lensfun: I had problems with the published release, in MXE cross-compile it wanted regex.h, which didn't exist. Using -DEXIV2_BUILD=GITHUB (master branch) got a code version that eliminated that dependency.
+- G'MIC: Has a ton of library dependencies; go to the pkgconfig  (.pc) files for it <b>and</b> its dependencies to put together the library list.
+- wxWidgets: MSYS2 provides version 3.1.7, but I just observed a blank curve pane in the tone tool with it. Don't yet know what that's about; version 3.1.4 is the latest I've tested.
+- exiv2: rawproc currently only compiles with version 0.27, I need to change my calls to accommodate 0.28.  Most distros still only support 0.27, so there you go. 
+ For EXIV2_BUILD, use a downloaded source package.
