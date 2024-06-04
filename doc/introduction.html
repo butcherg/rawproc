@@ -21,13 +21,9 @@ they allow me to apply the same or approximate set of manipulations when I go to
 RawTherapee or GIMP.</p>
 
 <p>rawproc source code can be downloaded from GitHub, <a href=https://github.com/butcherg/rawproc>
-https://github.com/butcherg/rawproc</a>.  rawproc will compile to a Windows executable with the MinGW C++ compiler, or to a Linux/GTK executable 
-with the GNU g++ compiler.  You'll need the wxWidgets library; I was able to install it 
-from the Ubuntu repositories for Linux, but you'll have to download it from the source website and 
-probably compile it yourself for Windows.  There are two build paths for rawproc: 1) ../configure && make in 
-a build directory, and 2) make OBJDIR=xxx, which will include a xxx/localmake.txt for local stuff.  Don't just
-run ./configure in the source tree; it'll overwrite the OBJDIR-based Makefile.  See the Readme.md file
-in the source tree for more build information.</p>
+https://github.com/butcherg/rawproc</a>.  rawproc will compile to a Windows executable with the MinGW C++ compiler, 
+or to a Linux/GTK executable with the GNU g++ compiler. See the Readme.md file in the source tree (or displayed at
+the github repo page) for more build information.</p>
 
 <p>rawproc is by no means a tool you should use for serious image processing.  It does most of its
 manipulation on the entire RGB data, no luminance-specific processing.  But any image opened
