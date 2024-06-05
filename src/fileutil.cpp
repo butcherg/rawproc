@@ -6,6 +6,10 @@
 #include <fstream>
 #include <filesystem>
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 #ifdef _WIN32
 	#include <windows.h>
 	#include <shlobj.h>
