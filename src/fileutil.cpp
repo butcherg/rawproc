@@ -82,6 +82,11 @@ std::string getExeDir(std::string filename)
 	dir = std::string(exePath);
 	dir.erase(dir.find_last_of('\\'));
 	if (filename != "") dir.append("\\"+filename);
+#elif __APPLE__
+	char buf [PATH_MAX];
+	uint32_t bufsize = PATH_MAX;
+	if(!_NSGetExecutablePath(buf, &bufsize))
+	dir = std::string(buf);
 #else
 	char exePath[PATH_MAX];
 	size_t len = readlink("/proc/self/exe", exePath, sizeof(exePath));
