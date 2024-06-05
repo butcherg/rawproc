@@ -5854,7 +5854,7 @@ GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(float kr0, flo
 // definition by their numerical sequence in the definition.  The vector<vector<float>> contains the correction parameters 
 // for each of the red, green and blue planes
 
-GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(std::vector<std::vector<float>> kr, std::vector<std::vector<float>> kt, float cpx, float cpy, int threadcount)
+GIMAGE_ERROR gImage::ApplyDistortionCorrectionAdobeWarpRetilinear(std::vector<std::vector<float> > kr, std::vector<std::vector<float> > kt, float cpx, float cpy, int threadcount)
 {	
 	//the blank destination image:
 	std::vector<pix> src = image;

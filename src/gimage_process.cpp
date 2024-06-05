@@ -1029,12 +1029,12 @@ std::map<std::string,std::string> process_lensdistortion(gImage &dib, std::map<s
 			
 			//full three-pane lensdistortion:adobe
 			std::vector<float> k_r = {k0, k1, k2, k3};
-			std::vector<std::vector<float>> kr;
+			std::vector<std::vector<float> > kr;
 			kr.push_back(k_r);
 			kr.push_back(k_r);
 			kr.push_back(k_r);
 			std::vector<float> k_t = {0.0, 0.0}; //hard-code no tangential distortion correction
-			std::vector<std::vector<float>> kt;
+			std::vector<std::vector<float> > kt;
 			kt.push_back(k_t);
 			kt.push_back(k_t);
 			kt.push_back(k_t);
