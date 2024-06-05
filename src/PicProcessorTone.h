@@ -1,5 +1,5 @@
 #ifndef __PICPROCESSORTONE_H__
-#define __PICPROCESSORTone_H__
+#define __PICPROCESSORTONE_H__
 
 #include "PicProcessor.h"
 
