@@ -517,9 +517,9 @@ void rawprocFrm::SetBackground()
 	int pr, pg, pb;
 	int dr, dg, db;
 	wxString f;
-	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=(0,0,0)
-	wxString bk = wxString(myConfig::getConfig().getValueOrDefault("app.backgroundcolor","0,0,0"));
-	if (bk == "") bk = "119,119,119";
+	//parm app.backgroundcolor: r,g,b or t (0-255), set at startup. 'r,g,b' specifies a color, 't' specifies a gray tone.  Default=128
+	wxString bk = wxString(myConfig::getConfig().getValueOrDefault("app.backgroundcolor","128"));
+	if (bk == "") bk = "128";
 	wxArrayString bkgnd = split(bk,",");
 	pr = atoi(bkgnd[0].c_str());
 	if (bkgnd.GetCount() < 3) {
@@ -532,10 +532,10 @@ void rawprocFrm::SetBackground()
 	}
 	dr = pr; dg = pg; db = pb;
 	
-	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(0,0,0)
+	//parm app.picpanel.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the picture panel.  Default=(128)
 	if (myConfig::getConfig().exists("app.picpanel.backgroundcolor")) {
-		wxString pbk = wxString(myConfig::getConfig().getValueOrDefault("app.picpanel.backgroundcolor","0,0,0"));
-		if (pbk == "") pbk = "119,119,119";
+		wxString pbk = wxString(myConfig::getConfig().getValueOrDefault("app.picpanel.backgroundcolor","128"));
+		if (pbk == "") pbk = "128";
 		wxArrayString picbkgnd = split(pbk,",");
 		pr = atoi(picbkgnd[0].c_str());
 		if (picbkgnd.GetCount() < 3) {
@@ -548,10 +548,10 @@ void rawprocFrm::SetBackground()
 		}
 	}
 	
-	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(119,119,119)
+	//parm app.dock.backgroundcolor: r,g,b or t (0-255), set at startup. Same value rules as app.backgroundcolor, overrides it for the command/histogram/parameters dock.  Default=(128)
 	if (myConfig::getConfig().exists("app.dock.backgroundcolor")) {
-		wxString dbk = wxString(myConfig::getConfig().getValueOrDefault("app.dock.backgroundcolor","119,119,119"));
-		if (dbk == "") dbk = "119,119,119";
+		wxString dbk = wxString(myConfig::getConfig().getValueOrDefault("app.dock.backgroundcolor","128"));
+		if (dbk == "") dbk = "128";
 		wxArrayString dockbkgnd = split(dbk,",");
 		dr = atoi(dockbkgnd[0].c_str());
 		if (dockbkgnd.GetCount() < 3) {
