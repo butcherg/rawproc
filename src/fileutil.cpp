@@ -85,7 +85,6 @@ std::string getExeDir(std::string filename)
 	GetModuleFileName(NULL, exePath, MAX_PATH) ;
 	dir = std::string(exePath);
 	dir.erase(dir.find_last_of('\\'));
-	if (filename != "") dir.append("\\"+filename);
 #elif __APPLE__
 	char buf [PATH_MAX];
 	uint32_t bufsize = PATH_MAX;
@@ -99,9 +98,8 @@ std::string getExeDir(std::string filename)
 	exePath[len] = '\0';
 	dir = std::string(exePath);
 	dir.erase(dir.find_last_of('/'));
-	if (filename != "") dir.append("/"+filename);
 #endif
-
+	if (filename != "") dir.append("/"+filename);
 	return dir;
 }
 
