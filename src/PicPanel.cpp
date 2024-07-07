@@ -11,6 +11,128 @@
 #include <wx/frame.h>
 #include <wx/display.h>
 
+
+//https://stackoverflow.com/a/6930407, use for showing HSV pixel values in status bar
+typedef struct {
+    double r;       // a fraction between 0 and 1
+    double g;       // a fraction between 0 and 1
+    double b;       // a fraction between 0 and 1
+} rgb;
+
+typedef struct {
+    double h;       // angle in degrees
+    double s;       // a fraction between 0 and 1
+    double v;       // a fraction between 0 and 1
+} hsv;
+
+//static hsv   rgb2hsv(rgb in);
+//static rgb   hsv2rgb(hsv in);
+
+//hsv rgb2hsv(rgb in)
+hsv rgb2hsv(pix in)
+{
+    hsv         out;
+    double      min, max, delta;
+
+    min = in.r < in.g ? in.r : in.g;
+    min = min  < in.b ? min  : in.b;
+
+    max = in.r > in.g ? in.r : in.g;
+    max = max  > in.b ? max  : in.b;
+
+    out.v = max;                                // v
+    delta = max - min;
+    if (delta < 0.00001)
+    {
+        out.s = 0;
+        out.h = 0; // undefined, maybe nan?
+        return out;
+    }
+    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
+        out.s = (delta / max);                  // s
+    } else {
+        // if max is 0, then r = g = b = 0              
+        // s = 0, h is undefined
+        out.s = 0.0;
+        out.h = NAN;                            // its now undefined
+        return out;
+    }
+    if( in.r >= max )                           // > is bogus, just keeps compilor happy
+        out.h = ( in.g - in.b ) / delta;        // between yellow & magenta
+    else
+    if( in.g >= max )
+        out.h = 2.0 + ( in.b - in.r ) / delta;  // between cyan & yellow
+    else
+        out.h = 4.0 + ( in.r - in.g ) / delta;  // between magenta & cyan
+
+    out.h *= 60.0;                              // degrees
+
+    if( out.h < 0.0 )
+        out.h += 360.0;
+
+    return out;
+}
+
+
+rgb hsv2rgb(hsv in)
+{
+    double      hh, p, q, t, ff;
+    long        i;
+    rgb         out;
+
+    if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
+        out.r = in.v;
+        out.g = in.v;
+        out.b = in.v;
+        return out;
+    }
+    hh = in.h;
+    if(hh >= 360.0) hh = 0.0;
+    hh /= 60.0;
+    i = (long)hh;
+    ff = hh - i;
+    p = in.v * (1.0 - in.s);
+    q = in.v * (1.0 - (in.s * ff));
+    t = in.v * (1.0 - (in.s * (1.0 - ff)));
+
+    switch(i) {
+    case 0:
+        out.r = in.v;
+        out.g = t;
+        out.b = p;
+        break;
+    case 1:
+        out.r = q;
+        out.g = in.v;
+        out.b = p;
+        break;
+    case 2:
+        out.r = p;
+        out.g = in.v;
+        out.b = t;
+        break;
+
+    case 3:
+        out.r = p;
+        out.g = q;
+        out.b = in.v;
+        break;
+    case 4:
+        out.r = t;
+        out.g = p;
+        out.b = in.v;
+        break;
+    case 5:
+    default:
+        out.r = in.v;
+        out.g = p;
+        out.b = q;
+        break;
+    }
+    return out;     
+}
+
+
 class mySnapshotWindow: public wxFrame
 {
 public:
@@ -83,7 +205,7 @@ PicPanel::PicPanel(wxFrame *parent, wxTreeCtrl *tree, myHistogramPane *hgram): w
 	imgctrx = 0.5; imgctry = 0.5;
 	imageposx=0; imageposy = 0;
 	mousex = 0; mousey=0;
-	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = stopstatbar = bucket = false;
+	softproof = thumbdragging = dragging = modified = pixelbox = snapshot = stopstatbar = bucket = hsvstatus = false;
 
 	thumbvisible = true;
 	histogram = hgram;
@@ -640,17 +762,27 @@ void PicPanel::setStatusBar()
 
 	if (imagex > 0 & imagex <= imagew & imagey > 0 & imagey <= imageh) {
 		struct pix p = display_dib->getPixel(imagex, imagey);
-		//parm display.statusbar.luminance: redmult,greenmult,bluemult - Multipliers used to calculate pixel luminance. Default:0.21,0.72,0.07
-		wxArrayString lumstr = split(wxString(myConfig::getConfig().getValueOrDefault("display.statusbar.luminance","0.21,0.72,0.07")), ",");
-		float lum = p.r * atof(lumstr[0].ToStdString().c_str()) + p.g * atof(lumstr[1].ToStdString().c_str()) + p.b * atof(lumstr[2].ToStdString().c_str());
-		wxString stext = wxString::Format("xy:%d,%d rgb:%f,%f,%f lum:%f",imagex, imagey, p.r, p.g, p.b, lum);
-		if (pixelbox) {
-			struct pix sp = display_dib->getPixel(selectedx, selectedy);
-			stext.Append(wxString::Format("   selected: xy%d,%d rgb:%f,%f,%f, ",selectedx, selectedy, sp.r, sp.g, sp.b));
+		
+		if (hsvstatus) {
+			//hsv values:
+			hsv hsvp = rgb2hsv(p);
+			wxString stext = wxString::Format("xy: %d,%d h:%f s:%f v:%f", imagex, imagey, hsvp.h, hsvp.s, hsvp.v);
+			((wxFrame *) GetParent())->SetStatusText(stext);
 		}
-		((wxFrame *) GetParent())->SetStatusText(stext);
-		//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
-		//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+		else {
+			//normal rgb values:
+			//parm display.statusbar.luminance: redmult,greenmult,bluemult - Multipliers used to calculate pixel luminance. Default:0.21,0.72,0.07
+			wxArrayString lumstr = split(wxString(myConfig::getConfig().getValueOrDefault("display.statusbar.luminance","0.21,0.72,0.07")), ",");
+			float lum = p.r * atof(lumstr[0].ToStdString().c_str()) + p.g * atof(lumstr[1].ToStdString().c_str()) + p.b * atof(lumstr[2].ToStdString().c_str());
+			wxString stext = wxString::Format("xy:%d,%d rgb:%f,%f,%f lum:%f",imagex, imagey, p.r, p.g, p.b, lum);
+			if (pixelbox) {
+				struct pix sp = display_dib->getPixel(selectedx, selectedy);
+				stext.Append(wxString::Format("   selected: xy%d,%d rgb:%f,%f,%f, ",selectedx, selectedy, sp.r, sp.g, sp.b));
+			}
+			((wxFrame *) GetParent())->SetStatusText(stext);
+			//((wxFrame *) GetParent())->SetStatusText(wxString::Format("imagepos:%dx%d viewpos:%dx%d view:%dx%d xy:%d,%d",
+			//	imageposx,imageposy,  viewposx, viewposy, vieww, viewh, imagex, imagey));
+		}
 	}
 	else
 		((wxFrame *) GetParent())->SetStatusText("");
@@ -1332,6 +1464,19 @@ void PicPanel::OnKey(wxKeyEvent& event)
 							((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: on");
 						else
 							((wxFrame *) GetParent())->SetStatusText("PicPanel tooltip display: off");
+					break;
+					
+				//key v: toggle rgb/hsv values in status bar
+				case 118:
+				case 86:
+					if (hsvstatus) {
+						hsvstatus = false;
+						((wxFrame *) GetParent())->SetStatusText("hsv values: off");
+					}
+					else {
+						hsvstatus = true;
+						((wxFrame *) GetParent())->SetStatusText("hsv values: on");
+					}
 					break;
 			}
 		}
