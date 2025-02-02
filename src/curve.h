@@ -10,9 +10,13 @@
 #include <vector>
 #include <algorithm>
 
+#include "spline.h"
+
 typedef struct cp {
 	double x, y;
 }cp;
+
+/*
 
 // spline interpolation
 class spline {
@@ -27,7 +31,7 @@ class spline {
 		double operator() (double x) const;
 };
 
-
+*/
 
 class Curve
 {
@@ -53,7 +57,7 @@ class Curve
 
 		std::vector<cp> controlpts;
 		std::vector<double> X, Y;
-		spline s;
+		tk::spline s;
 		cp ctrlpoint;
 		double mn, mx, slope;
 
@@ -87,6 +91,8 @@ class Curve
  * ---------------------------------------------------------------------
  *
  */
+ 
+ /*
 
 class band_matrix {
 private:
@@ -118,6 +124,7 @@ public:
 
 };
 
+*/
 
 
 

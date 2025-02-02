@@ -4,6 +4,8 @@
 #include <cmath>
 
 #include "curve.h"
+#include "spline.h"
+
 
 
 Curve::Curve() {
@@ -156,10 +158,11 @@ void Curve::setpoints ()
 		X.push_back(controlpts[i].x);
 		Y.push_back(controlpts[i].y);
 	}
-	s.set_points(X,Y); 
+	s.set_points(X,Y, tk::spline::cspline); //linear, cspline_hermite
 }
 
 
+/*
 
 //spline methods
 
@@ -386,3 +389,4 @@ double spline::operator() (double x) const {
 
 
 
+*/
