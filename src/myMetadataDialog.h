@@ -7,7 +7,7 @@
 #include <wx/stattext.h>
 #include <string>
 #include <map>
-#include "gimage/gimage.h"
+#include "gimage.h"
 
 class MetadataDialog: public wxDialog
 {

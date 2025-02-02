@@ -1,5 +1,5 @@
 #include "CameraData.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "cJSON.h"
 #include <vector>

@@ -17,7 +17,7 @@
 #include "PicPanel.h"
 #include "PicProcPanel.h"
 //#include <deque>
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include <string>
 #include <map>
 

@@ -4,7 +4,7 @@
 #include "myRowSizer.h"
 #include "util.h"
 #include "gimage_cmd.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "gimage_parse.h"
 #include "gimage_process.h"
 #include <wx/textfile.h>

@@ -10,7 +10,7 @@
 #include <lensfun/lensfun.h>
 
 #if defined PIXhalf
-#include "gimage/half.hpp"
+#include "half.hpp"
 #endif
 
 #ifndef PIXTYPE

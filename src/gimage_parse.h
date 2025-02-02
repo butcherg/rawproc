@@ -2,7 +2,7 @@
 #define __GIMAGE_PARSE_H__
 
 #include <string>
-#include "gimage/gimage.h"
+#include "gimage.h"
 
 void paramprint(std::map<std::string,std::string> params);
 bool paramexists (std::map<std::string,std::string> m, std::string k);

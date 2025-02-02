@@ -1,7 +1,7 @@
 
 #include "PicProcessor.h"
 #include "util.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include <wx/event.h>
 #include <wx/clipbrd.h>
 #include <exception>

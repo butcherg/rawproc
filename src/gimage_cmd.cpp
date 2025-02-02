@@ -1,4 +1,4 @@
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include <string>
 
 #include <string.h>
@@ -9,7 +9,7 @@
 #include <math.h> 
 
 #include "elapsedtime.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "myConfig.h"
 #include "CameraData.h"

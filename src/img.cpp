@@ -15,9 +15,9 @@
 #include <dirent.h>
 #include <math.h> 
 
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include "elapsedtime.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "myConfig.h"
 #include "CameraData.h"

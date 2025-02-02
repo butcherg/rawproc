@@ -11,7 +11,7 @@
 	#include <wx/wxprec.h>
 #endif
 
-#include "gimage/gimage.h"
+#include "gimage.h"
 
 class myToneCurvePane : public wxWindow
 {

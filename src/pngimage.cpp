@@ -7,7 +7,7 @@
 #include <string>
 #include <map>
 
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "jpegexif.h"
 
 

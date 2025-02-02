@@ -1,6 +1,6 @@
 
 #include "gimage_parse.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "myConfig.h"
 #include "elapsedtime.h"
 #include "cJSON.h"
@@ -51,7 +51,7 @@ std::map<std::string,std::string> parse_add(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -136,7 +136,7 @@ std::map<std::string,std::string> parse_blackwhitepoint(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -251,7 +251,7 @@ std::map<std::string,std::string> parse_colorspace(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -336,7 +336,7 @@ std::map<std::string,std::string> parse_crop(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional
@@ -380,7 +380,7 @@ std::map<std::string,std::string> parse_cropspectrum(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -422,7 +422,7 @@ std::map<std::string,std::string> parse_curve(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -492,7 +492,7 @@ std::map<std::string,std::string> parse_demosaic(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -578,7 +578,7 @@ std::map<std::string,std::string> parse_denoise(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -632,7 +632,7 @@ std::map<std::string,std::string> parse_exposure(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -679,7 +679,7 @@ std::map<std::string,std::string> parse_gmic(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -718,7 +718,7 @@ std::map<std::string,std::string> parse_gray(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -786,7 +786,7 @@ std::map<std::string,std::string> parse_hlrecover(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -821,7 +821,7 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 		if (pmap.find("mode") == pmap.end()) pmap["mode"] = "lensfun";
 		pmap["cmdlabel"] = "lenscorrection:lensfun";
 	}
@@ -899,7 +899,7 @@ std::map<std::string,std::string> parse_lensdistortion(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -998,7 +998,7 @@ std::map<std::string,std::string> parse_lensvignetting(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -1105,7 +1105,7 @@ std::map<std::string,std::string> parse_redeye(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -1253,7 +1253,7 @@ std::map<std::string,std::string> parse_resize(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -1311,7 +1311,7 @@ std::map<std::string,std::string> parse_rotate(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);  
 	}
 
 	else { //positional
@@ -1356,7 +1356,7 @@ std::map<std::string,std::string> parse_saturation(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -1417,7 +1417,7 @@ std::map<std::string,std::string> parse_script(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring); 
 	}
 
 	else { //positional
@@ -1457,7 +1457,7 @@ std::map<std::string,std::string> parse_sharpen(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional
@@ -1542,7 +1542,7 @@ std::map<std::string,std::string> parse_spot(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional
@@ -1652,7 +1652,7 @@ std::map<std::string,std::string> parse_subtract(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional
@@ -1728,7 +1728,7 @@ std::map<std::string,std::string> parse_tone(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional
@@ -1914,7 +1914,7 @@ std::map<std::string,std::string> parse_whitebalance(std::string paramstring)
 
 	//if string has name=val;name=val.., pairs, just parse them into pmap:
 	else if (paramstring.find("=") != std::string::npos) {  //name=val pairs
-		pmap = parseparams(paramstring);  //from gimage/strutil.h
+		pmap = parseparams(paramstring);
 	}
 
 	else { //positional

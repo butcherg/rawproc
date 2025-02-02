@@ -3,7 +3,7 @@
 #include <string>
 #include <cmath>
 
-#include "gimage/curve.h"
+#include "curve.h"
 
 
 Curve::Curve() {

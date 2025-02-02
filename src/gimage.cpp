@@ -1,5 +1,5 @@
 ﻿
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +15,7 @@
 #include "jpegimage.h"
 #include "tiffimage.h"
 #include "pngimage.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "cJSON.h"
 #include "exiv2/exiv2.hpp"
@@ -25,7 +25,7 @@
 #ifdef USE_GMIC
 #include "gmic.h"
 #endif
-#include "gimage/half.hpp"
+#include "half.hpp"
 //#include <rtprocess/jaggedarray.h>  //maybe, later....
 #include "icc_profiles.h"
 

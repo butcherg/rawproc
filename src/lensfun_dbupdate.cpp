@@ -23,7 +23,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "lensfun_dbupdate.h"
 
 #if (defined(_WIN32) || defined(__WIN32__))

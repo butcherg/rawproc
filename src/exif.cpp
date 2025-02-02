@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
-#include "gimage/gimage.h"
+#include "gimage.h"
 
 void printtag(std::string name, std::string val, bool both=false)
 {

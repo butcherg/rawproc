@@ -49,7 +49,7 @@
 #include <wx/generic/statbmpg.h>
 #include <wx/dnd.h>
 
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include "PicPanel.h"
 #include "PicProcessor.h"
 #include "myPropertyDialog.h"

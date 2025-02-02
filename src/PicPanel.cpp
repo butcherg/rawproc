@@ -3,7 +3,7 @@
 #include "util.h"
 #include <vector>
 #include <cmath>
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include "PicProcessor.h"
 #include "myConfig.h"
 #include <wx/clipbrd.h>

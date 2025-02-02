@@ -6,7 +6,7 @@
 #include "gimage_parse.h"
 #include "gimage_process.h"
 #include "util.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 
 #define ADDENABLE 8500
 #define ADDVAL 8501

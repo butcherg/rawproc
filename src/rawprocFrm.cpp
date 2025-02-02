@@ -65,7 +65,7 @@
 #include "myListDialog.h"
 #include "myDataDialog.h"
 #include "util.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "lcms2.h"
 #ifdef USE_LCMS_FASTFLOAT

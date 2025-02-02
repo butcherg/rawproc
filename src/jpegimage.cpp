@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "jpegexif.h"
 
 #define ICC_MARKER  (JPEG_APP0 + 2)	/* JPEG marker code for ICC */

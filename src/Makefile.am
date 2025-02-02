@@ -5,7 +5,7 @@ AUTOMAKE_OPTIONS = -Wno-portability
 bdate="$(shell date)"
 AM_CPPFLAGS=-DBUILDDATE='$(bdate)'
 
-nobase_include_HEADERS = gimage/gimage.h gimage/curve.h gimage/half.hpp gimage/strutil.h
+nobase_include_HEADERS = gimage.h curve.h half.hpp strutil.h
 EXTRA_DIST = checked.xpm unchecked.xpm thumb_down.xpm thumb_up.xpm run.xpm undo.xpm folder.xpm copy.xpm paste.xpm icon.xpm listview.xpm 
 
 bin_PROGRAMS = rawproc img exif wxcmd

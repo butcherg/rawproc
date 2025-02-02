@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "gimage/strutil.h"
+#include "strutil.h"
 
 #ifndef USE_DCRAW
 #include <libraw/libraw.h>
@@ -14,7 +14,7 @@
 #endif
 
 #include <lcms2.h>
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include "nikonlensid.h"
 
 //use for reading rgb(a) from libraw

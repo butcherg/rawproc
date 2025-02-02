@@ -8,7 +8,7 @@
 #endif
 
 #include <vector>
-#include "gimage/gimage.h"
+#include "gimage.h"
 
 #ifdef WIN32
 #define TEXTCTRLHEIGHT 25

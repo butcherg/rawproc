@@ -18,7 +18,7 @@
 #include <wx/dir.h>
 #include <vector>
 
-#include "gimage/gimage.h"
+#include "gimage.h"
 #include "myConfig.h"
 
 wxString hstr="";

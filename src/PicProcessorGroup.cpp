@@ -4,7 +4,7 @@
 #include "myRowSizer.h"
 #include "util.h"
 #include "gimage_cmd.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include <wx/textfile.h>
 
 #define GROUPENABLE 8200

@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <vector>
-#include "gimage/strutil.h"
+#include "strutil.h"
 
 std::map<std::string, std::string> myConfig::defaultconfig;
 std::map<std::string, std::map<std::string,std::string> > myConfig::sectionconfig;

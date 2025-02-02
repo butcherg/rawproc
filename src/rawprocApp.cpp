@@ -17,8 +17,8 @@
 #include "wx/fs_zip.h"
 
 #include "util.h"
-#include "gimage/gimage.h"
-#include "gimage/strutil.h"
+#include "gimage.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "myConfig.h"
 #include "icon.xpm"

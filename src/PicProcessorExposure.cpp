@@ -5,7 +5,7 @@
 #include "myFloatCtrl.h"
 #include "myConfig.h"
 #include "util.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "gimage_parse.h"
 #include "gimage_process.h"
 #include "copy.xpm"

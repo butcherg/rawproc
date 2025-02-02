@@ -4,7 +4,7 @@
 #include "myListDialog.h"
 #include "myRowSizer.h"
 #include "util.h"
-#include "gimage/strutil.h"
+#include "strutil.h"
 #include "fileutil.h"
 #include "myConfig.h"
 #include "gimage_parse.h"
