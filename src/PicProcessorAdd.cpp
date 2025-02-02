@@ -7,7 +7,6 @@
 #include "gimage_process.h"
 #include "util.h"
 #include "gimage/strutil.h"
-#include "gimage/curve.h"
 
 #define ADDENABLE 8500
 #define ADDVAL 8501

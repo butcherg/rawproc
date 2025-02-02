@@ -7,7 +7,6 @@
 #include "gimage_process.h"
 #include "util.h"
 #include "gimage/strutil.h"
-#include "gimage/curve.h"
 
 #define SUBTRACTENABLE 8100
 #define SUBTRACTVAL 8101

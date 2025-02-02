@@ -2,8 +2,6 @@
 #include "PicProcPanel.h"
 #include "myConfig.h"
 #include "util.h"
-//#include "gimage/strutil.h"
-#include "gimage/curve.h"
 #include "myRowSizer.h"
 #include "myFloatCtrl.h"
 #include <wx/spinctrl.h>

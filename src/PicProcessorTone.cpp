@@ -7,7 +7,6 @@
 #include "gimage_process.h"
 #include "myConfig.h"
 #include "util.h"
-#include "gimage/curve.h"
 #include "fileutil.h"
 #include "copy.xpm"
 #include "paste.xpm"

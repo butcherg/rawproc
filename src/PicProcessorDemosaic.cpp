@@ -4,7 +4,6 @@
 #include "myIntegerCtrl.h"
 #include "myConfig.h"
 #include "util.h"
-#include "gimage/curve.h"
 #include "gimage_parse.h"
 #include "gimage_process.h"
 #include "copy.xpm"
