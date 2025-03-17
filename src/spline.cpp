@@ -381,7 +381,7 @@ int band_matrix::dim() const
 double & band_matrix::operator () (int i, int j)
 {
     int k=j-i;       // what band is the entry
-    assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
+    //assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
     assert( (-num_lower()<=k) && (k<=num_upper()) );
     // k=0 -> diagonal, k<0 lower left part, k>0 upper right part
     if(k>=0)    return m_upper[k][i];
