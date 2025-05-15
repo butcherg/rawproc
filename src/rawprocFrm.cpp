@@ -99,7 +99,8 @@ BEGIN_EVENT_TABLE(rawprocFrm,wxFrame)
 	EVT_MENU(ID_MNU_OPEN, rawprocFrm::Mnuopen1003Click)
 	EVT_MENU(ID_MNU_REOPEN, rawprocFrm::Mnureopen1033Click)
 	EVT_MENU(ID_MNU_OPENSOURCE, rawprocFrm::Mnuopensource1004Click)
-	EVT_MENU(ID_MNU_SAVE, rawprocFrm::Mnusave1009Click)
+	EVT_MENU(ID_MNU_SAVE, rawprocFrm::MnuSave)
+	EVT_MENU(ID_MNU_SAVEAS, rawprocFrm::MnusaveAs1009Click)
 	EVT_MENU(ID_MNU_EXIT, rawprocFrm::MnuexitClick)
 	EVT_MENU(ID_MNU_SATURATION, rawprocFrm::MnusaturateClick)
 	EVT_MENU(ID_MNU_EXPOSURE, rawprocFrm::MnuexposureClick)
@@ -296,7 +297,8 @@ void rawprocFrm::CreateGUIControls()
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPEN, _("Open..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_REOPEN, _("Re-open"), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_OPENSOURCE, _("Open Source..."), _(""), wxITEM_NORMAL);
-	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save..."), _(""), wxITEM_NORMAL);
+	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVE, _("Save\tCtrl+S"), _(""), wxITEM_NORMAL);
+	ID_MNU_FILEMnu_Obj->Append(ID_MNU_SAVEAS, _("Save As..."), _(""), wxITEM_NORMAL);
 	ID_MNU_FILEMnu_Obj->AppendSeparator();
 	ID_MNU_FILEMnu_Obj->Append(ID_MNU_EXIT, _("Exit"), _(""), wxITEM_NORMAL);
 	WxMenuBar1->Append(ID_MNU_FILEMnu_Obj, _("File"));
@@ -1279,8 +1281,195 @@ void rawprocFrm::OpenFileSource(wxString fname)
 	SetStatusText("");
 }
 
+void rawprocFrm::MnuSave(wxCommandEvent& event)
+{
+	wxString fname;
+	gImage * dib;
+	cmsHPROFILE profile;
 
-void rawprocFrm::Mnusave1009Click(wxCommandEvent& event)
+	wxFileName profilepath;
+	profilepath.AssignDir(wxString(myConfig::getConfig().getValueOrDefault("cms.profilepath","")));
+	std::string iccfile;
+
+	if (sourcefilename.IsOk()) {
+		fname = sourcefilename.GetFullPath();
+	}
+	else if (filename.IsOk()) {
+		if (filename.GetExt() == wxEmptyString)
+			filename.SetExt(wxString(myConfig::getConfig().getValueOrDefault("output.defaultfileextension","jpg")));
+		fname = filename.GetFullPath();
+	}
+	else {
+		WxStatusBar1->SetStatusText(wxString::Format(_("No file to save."),fname));
+		return;
+	}
+
+	if ( !fname.empty() )
+	{
+		//if (wxFileName::FileExists(fname)) 
+		//	if (wxMessageBox(_("File exists; overwrite?"), _("Confirm"), wxYES_NO, this) == wxNO)
+		//		return;
+			
+			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname);
+			
+			if (filetype == FILETYPE_UNKNOWN) {
+				wxMessageBox(_("Error: invalid file type"));
+				return;
+			}
+			if (commandtree->ItemHasChildren(commandtree->GetRootItem()))
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetLastChild(commandtree->GetRootItem())))->getProcessedPicPointer();
+			else
+				dib = ((PicProcessor *) commandtree->GetItemData( commandtree->GetRootItem()))->getProcessedPicPointer();
+
+			dib->setInfo("ImageDescription",(std::string) AssembleCommand().c_str());
+			wxString versionstr = _("(dev build)");
+			#ifdef VERSION
+				versionstr = VERSION;
+			#endif
+			dib->setInfo("Software",(std::string) wxString::Format("rawproc %s",versionstr).c_str());
+			
+			//parm output.orient: Rotate the image to represent the EXIF Orientation value originally inputted, then set the Orientation tag to 0.  Gets the image out of trying to tell other software how to orient it.  Default=0
+			if (myConfig::getConfig().getValueOrDefault("output.orient","0") == "1") {
+				WxStatusBar1->SetStatusText(wxString::Format(_("Orienting image for output...")));
+				dib->NormalizeRotation();
+			}
+
+			wxString configparams;
+			//parm output.*.thumbnails.directory: *=all|jpeg|tiff|png, specifies a directory subordinate to the image directory where a thumbnail depiction is to be stored.  Default="", which inhibits thumbnail creation.  "all" is trumped by presence of any of the others.
+			wxString thumbdir = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.directory","");
+			//parm output.*.thumbnails.parameters: *=all|jpeg|tiff|png, specifies space-separated list of rawproc tools to be applied to the image to make the thumbnail.  Default="resize:120 sharpen=1". "all" is trumped by presence of any of the others.
+			wxString thumbparams = myConfig::getConfig().getValueOrDefault("output.all.thumbnails.parameters","");
+			if (filetype == FILETYPE_JPEG) {
+				//parm output.jpeg.parameters: name=value list of parameters, separated by semicolons, to pass to the JPEG image writer.  Applicable parameters: <ul><li>quality=n, 0-100: Specifies the image compression in terms of a percent.</li></ul> Default:quality=95.
+				configparams = myConfig::getConfig().getValueOrDefault("output.jpeg.parameters","quality=95");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.jpeg.thumbnails.parameters",thumbparams.ToStdString());
+			}
+
+			if (filetype == FILETYPE_TIFF) {
+				//parm output.tiff.parameters: name=value list of parameters, separated by semicolons, to pass to the TIFF image writer. Applicable parameters: <ul><li>channelformat=8bit|16bit|float: Specifies the output numeric format.  For float TIFFs, the data is saved 'unbounded', that is, not clipped to 0.0-1.0 IF the output.tiff.cms.profile is set to a matrix profile.</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.tiff.parameters","");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.tiff.thumbnails.parameters",thumbparams.ToStdString());
+			}
+
+			if (filetype == FILETYPE_PNG) {
+				//parm output.png.parameters: name=value list of parameters, separated by semicolons, to pass to the PNG image writer.  Applicable parameters: <ul><li>channelformat=8bit|16bit:   Specifies the output numeric format.</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.png.parameters","");
+				thumbdir = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.directory",thumbdir.ToStdString());
+				thumbparams = myConfig::getConfig().getValueOrDefault("output.png.thumbnails.parameters",thumbparams.ToStdString());
+			}
+			if (filetype == FILETYPE_DATA) {
+				//parm output.data.parameters: name=value list of parameters, separated by semicolons, to pass to the data writer.   Applicable parameters: <ul><li>outputmode=rgb|split|channelsummary: Specifies the output format. Default: rgb</li></ul>
+				configparams =  myConfig::getConfig().getValueOrDefault("output.data.parameters","");
+			}
+
+			GIMAGE_ERROR result;
+			//parmdontuse output.embedprofile: Embed/don't embed ICC profile with image, 0|1. If an ouput.*.cms.profile is specified, the internal image is converted to that profile and that file is embedded with the profile, otherwise, if a profile is assigned in the internal image, that profile is embedded.   Default=1  (Note: use excludeicc in the output params property instead...)
+			//if (myConfig::getConfig().getValueOrDefault("output.embedprofile","1") == "1") {
+
+				wxString intentstr;
+				cmsUInt32Number intent = INTENT_PERCEPTUAL;
+
+				if (filetype == FILETYPE_JPEG) {
+					//parm output.jpeg.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=srgb
+					//template output.jpeg.cms.profile=iccfile
+					iccfile = myConfig::getConfig().getValueOrDefault("output.jpeg.cms.profile","");
+					
+					//parm output.jpeg.cms.renderingintent: Specify the rendering intent for the JPEG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.jpeg.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.jpeg.cms.renderingintent","relative_colorimetric"));
+
+				}
+				else if (filetype == FILETYPE_TIFF) {
+					//parm output.tiff.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					//template output.tiff.cms.profile=iccfile
+					iccfile = myConfig::getConfig().getValueOrDefault("output.tiff.cms.profile","");
+					
+					//parm output.tiff.cms.renderingintent: Specify the rendering intent for the TIFF output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.tiff.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.tiff.cms.renderingintent","relative_colorimetric"));
+				}
+				else if (filetype == FILETYPE_PNG) {
+					//parm output.png.cms.profile: If color management is enabled, the specified profile is used to transform the output image and the ICC is stored in the image file.  Can be one of the internal profiles or the path/file name of an ICC profile. Default=prophoto
+					//template output.png.cms.profile=iccfile
+					iccfile = myConfig::getConfig().getValueOrDefault("output.png.cms.profile","");
+					
+					//parm output.png.cms.renderingintent: Specify the rendering intent for the PNG output transform, perceptual|saturation|relative_colorimetric|absolute_colorimetric.  Default=relative_colorimetric
+					//template output.png.cms.renderingintent=relative_colorimetric|absolute_colorimetric|perceptual|saturation
+					intentstr = wxString(myConfig::getConfig().getValueOrDefault("output.png.cms.renderingintent","relative_colorimetric"));
+				}
+				
+				if (intentstr == "perceptual") intent = INTENT_PERCEPTUAL;
+				if (intentstr == "saturation") intent = INTENT_SATURATION;
+				if (intentstr == "relative_colorimetric") intent = INTENT_RELATIVE_COLORIMETRIC;
+				if (intentstr == "absolute_colorimetric") intent = INTENT_ABSOLUTE_COLORIMETRIC;
+
+				//profile = cmsOpenProfileFromFile(profilepath.GetFullPath().c_str(), "r");
+				
+				if (iccfile == "srgb" | iccfile == "wide" | iccfile == "adobe" | iccfile == "prophoto" | iccfile == "identity")
+					profile = gImage::makeLCMSProfile(iccfile, 1.0);
+				else if (iccfile == "aces2065-1-v4-g10" | iccfile == "adobergb-v4-g10" | iccfile == "bt709-v4-g10" | iccfile == "prophoto-v4-g10" | iccfile == "rec2020-v4-g10" | iccfile == "srgb-v4-g10" | iccfile == "srgb-v2-g22" | iccfile == "srgb-output")
+					profile = gImage::makeLCMSStoredProfile(iccfile);
+				else {
+					profilepath.SetFullName(wxString(iccfile));
+					profile = gImage::myCmsOpenProfileFromFile(profilepath.GetFullPath().ToStdString());
+				}
+				
+				if (dib->getProfile()) {
+					if (profile) {
+						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
+						result = dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+					}
+					else {
+						//wxMessageBox(wxString::Format(_("No CMS profile file found, saving with the assigned internal color profile...")));
+						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s with working profile..."),fname));
+						result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+					}
+				}
+				else {
+					//wxMessageBox(wxString::Format(_("No internal working profile found, saving without a color profile...")));
+					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
+					result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+				}
+			//}
+			//else {
+			//	WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s (no embedded profile)..."),fname));
+			//	dib->saveImageFileNoProfile(fname, std::string(configparams.c_str()));
+			//}
+			if (result == GIMAGE_UNSUPPORTED_FILEFORMAT) {
+				wxMessageBox("Error: Unsupported format.");
+				return;
+			}
+			if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
+				wxMessageBox("Image saved, but metadata insertion failed.");
+			}
+			
+			pic->SetModified(false);
+			
+			wxFileName tmpname(fname);
+			
+			if (thumbdir != "") {
+				wxFileName thumb(tmpname.GetPath(wxPATH_GET_SEPARATOR)+thumbdir, tmpname.GetFullName());
+				if (thumb.DirExists()) {
+					WxStatusBar1->SetStatusText(wxString::Format(_("Saving thumbnail %s..."),fname));
+					gImage thumbdib = *dib;
+					ApplyOps(thumbdib, thumbparams);
+					thumbdib.saveImageFile(thumb.GetFullPath());
+				}					
+			}
+
+			if (tmpname.GetFullName().compare(filename.GetFullName()) != 0) {
+				sourcefilename.Assign(fname);
+				SetTitle(wxString::Format("rawproc: %s (%s)",filename.GetFullName().c_str(), sourcefilename.GetFullName().c_str()));
+				SetTitle(wxString::Format("%s %s: %s (%s)",_("rawproc"), VERSION, filename.GetFullName(), sourcefilename.GetFullName()));
+			}
+			
+		WxStatusBar1->SetStatusText("");
+	}
+}
+
+void rawprocFrm::MnusaveAs1009Click(wxCommandEvent& event)
 {
 	wxString fname;
 	gImage * dib;

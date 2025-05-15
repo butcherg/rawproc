@@ -135,6 +135,7 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 			ID_MNU_SPOT = 1049,
 			ID_MNU_LENSDISTORTION = 1050,
 			ID_MNU_LENSVIGNETTING = 1051,
+			ID_MNU_SAVEAS = 1052,
 
 			ID_MNU_TOOLLIST = 1100,
 			////GUI Enum Control ID End
@@ -194,7 +195,8 @@ class rawprocFrm : public wxFrame //, wxFileDropTarget
 	void MnuScript(wxCommandEvent& event);
 	void MnuSpot(wxCommandEvent& event);
 
-	void Mnusave1009Click(wxCommandEvent& event);
+	void MnuSave(wxCommandEvent& event);
+	void MnusaveAs1009Click(wxCommandEvent& event);
 	void MnuexitClick(wxCommandEvent& event);
 	void MnuCut1201Click(wxCommandEvent& event);
 	void MnuCopy1202Click(wxCommandEvent& event);
