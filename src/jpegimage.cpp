@@ -451,6 +451,21 @@ bool _writeJPEG(const char *filename,
 	//$ <li><b>quality</b>=n, 0-100:  Applies to JPEG output, specifies the image compression in terms of a percent.  Default=95 </li><br>
 	if (p.find("quality") != p.end()) 
 		jpeg_set_quality(&cinfo, atoi(p["quality"].c_str()), TRUE);
+	
+	int quality = atoi(p["quality"].c_str());
+	
+	//copied from vkdt, which copied from darktable
+	if(quality > 90) cinfo.comp_info[0].v_samp_factor = 1;
+	if(quality > 92) cinfo.comp_info[0].h_samp_factor = 1;
+	if(quality > 95) cinfo.dct_method = JDCT_FLOAT;
+	if(quality < 50) cinfo.dct_method = JDCT_IFAST;
+	if(quality < 80) cinfo.smoothing_factor = 20;
+	if(quality < 60) cinfo.smoothing_factor = 40;
+	if(quality < 40) cinfo.smoothing_factor = 60;
+	cinfo.optimize_coding = 1;
+	cinfo.density_unit = 1;
+	cinfo.X_density = 300;
+	cinfo.Y_density = 300;
 
 	jpeg_start_compress(&cinfo, TRUE);
 
