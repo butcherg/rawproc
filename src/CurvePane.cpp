@@ -55,7 +55,7 @@ wxPanel(parent, wxID_ANY, wxPoint(0,0), wxSize(275,275) )
 	}
 
 	for (int i=ctstart; i<ctrlpts.GetCount()-1; i+=2) {
-		c.insertpoint(atof(ctrlpts[i]), atof(ctrlpts[i+1]));
+		c.insertpoint(atof(ctrlpts[i].ToStdString().c_str()), atof(ctrlpts[i+1].ToStdString().c_str()));
 	}
 	selectedCP.x = -1.0;
 	selectedCP.y = -1.0;
