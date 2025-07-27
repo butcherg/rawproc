@@ -110,7 +110,7 @@ class CurvePanel: public PicProcPanel
 					ctstart = 0;
 				}
 				for (int i=ctstart; i<cpts.GetCount()-1; i+=2) {
-					crv.insertpoint(atof(cpts[i]), atof(cpts[i+1]));
+					crv.insertpoint(atof(cpts[i].ToStdString().c_str()), atof(cpts[i+1].ToStdString().c_str()));
 				}
 				//ctrlpts = crv.getControlPoints();
 				((PicProcessorCurve *) q)->setControlPoints(crv.getControlPoints());
@@ -208,7 +208,7 @@ PicProcessorCurve::PicProcessorCurve(wxString name, wxString command, wxTreeCtrl
 		ctstart = 0;
 	}
 	for (int i=ctstart; i<cpts.GetCount()-1; i+=2) {
-		crv.insertpoint(atof(cpts[i]), atof(cpts[i+1]));
+		crv.insertpoint(atof(cpts[i].ToStdString().c_str()), atof(cpts[i+1].ToStdString().c_str()));
 	}
 	ctrlpts = crv.getControlPoints();
 	//showParams();
