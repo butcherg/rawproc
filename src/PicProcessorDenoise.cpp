@@ -136,9 +136,9 @@ class DenoisePanel: public PicProcPanel
 			wxArrayString cp = split(params,",");
 			if (cp[0] == "nlmeans") {
 				if (cp.GetCount() >= 4)  {
-					sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
-					local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
-					patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
+					sigma->SetValue(atoi(cp[1].ToStdString().c_str())); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+					local->SetValue(atoi(cp[2].ToStdString().c_str())); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+					patch->SetValue(atoi(cp[3].ToStdString().c_str())); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
 				}
 				if (cp.GetCount() >= 5) {
 					thresholdenable->SetValue(true);
@@ -150,7 +150,7 @@ class DenoisePanel: public PicProcPanel
 			}
 			if (cp[0] == "wavelet") {
 				if (cp.GetCount() == 2) {
-					thresh->SetFloatValue(atof(cp[1]));
+					thresh->SetFloatValue(atof(cp[1].ToStdString().c_str()));
 				}
 				nlb=false; wlb=true;
 				algorithm = DENOISEWAVELET;
@@ -213,15 +213,15 @@ class DenoisePanel: public PicProcPanel
 				bool nlb, wlb;
 				wxArrayString cp = split(q->getParams(),",");
 				if (cp.GetCount() == 4 && cp[0] == "nlmeans") {
-					sigma->SetValue(atoi(cp[1])); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
-					local->SetValue(atoi(cp[2])); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
-					patch->SetValue(atoi(cp[3])); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
+					sigma->SetValue(atoi(cp[1].ToStdString().c_str())); val->SetLabel(wxString::Format("%3d", sigma->GetValue()));
+					local->SetValue(atoi(cp[2].ToStdString().c_str())); val1->SetLabel(wxString::Format("%3d", local->GetValue()));
+					patch->SetValue(atoi(cp[3].ToStdString().c_str())); val2->SetLabel(wxString::Format("%3d", patch->GetValue()));
 					nlb=true; wlb=false;
 					algorithm = DENOISENLMEANS;
 					nl->SetValue(true);
 				}
 				if (cp.GetCount() == 2 && cp[0] == "wavelet") {
-					thresh->SetFloatValue(atof(cp[1]));
+					thresh->SetFloatValue(atof(cp[1].ToStdString().c_str()));
 					nlb=false; wlb=true;
 					algorithm = DENOISEWAVELET;
 					wl->SetValue(true);
