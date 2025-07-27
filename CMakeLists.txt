@@ -3,6 +3,7 @@
 cmake_minimum_required(VERSION 3.22)
 cmake_policy(SET CMP0017 NEW)
 cmake_policy(SET CMP0020 NEW)
+cmake_policy(SET CMP0135 NEW)
 
 #include(cmake/UniversalAppleBuild.cmake)
 
