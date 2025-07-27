@@ -30,9 +30,9 @@ class GrayPanel: public PicProcPanel
 			
 			wxArrayString p = split(params,",");
 
-			rd = atof(p[0]);
-			gr = atof(p[1]);
-			bl = atof(p[2]);
+			rd = atof(p[0].ToStdString().c_str());
+			gr = atof(p[1].ToStdString().c_str());
+			bl = atof(p[2].ToStdString().c_str());
 
 			enablebox = new wxCheckBox(this, GRAYENABLE, _("gray:"));
 			enablebox->SetValue(true);
@@ -120,9 +120,9 @@ class GrayPanel: public PicProcPanel
 			if (q->pasteParamsFromClipboard()) {
 				wxArrayString p = split(q->getParams(),",");
 	
-				rd = atof(p[0]);
-				gr = atof(p[1]);
-				bl = atof(p[2]);
+				rd = atof(p[0].ToStdString().c_str());
+				gr = atof(p[1].ToStdString().c_str());
+				bl = atof(p[2].ToStdString().c_str());
 				red->SetValue(rd*100.0);
 				green->SetValue(gr*100.0);
 				blue->SetValue(bl*100.0);
