@@ -191,7 +191,7 @@ void log(wxString msg)
 	if (f) {
 		fputs(wxNow().c_str(), f);
 		fputs(" - ",f);
-		fputs(msg,f);
+		fputs(msg.ToStdString().c_str(),f);
 		fputs("\n",f);
 		fclose(f);
 	}

@@ -169,28 +169,28 @@ class WhiteBalancePanel: public PicProcPanel
 				cb->SetValue(true);
 			}
 			else if (p[0] == "patch") {
-				patx = atoi(p[1]);
-				paty = atoi(p[2]);
-				patrad = atof(p[3]);
+				patx = atoi(p[1].ToStdString().c_str());
+				paty = atoi(p[2].ToStdString().c_str());
+				patrad = atof(p[3].ToStdString().c_str());
 				patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
 				pb->Enable(true);
 				pb->SetValue(true);
 			}
 			else if (p[0] == "bluethreshold") {
-				orgr = atof(p[1]);
-				orgg = atof(p[2]);
-				orgb = atof(p[3]);
+				orgr = atof(p[1].ToStdString().c_str());
+				orgg = atof(p[2].ToStdString().c_str());
+				orgb = atof(p[3].ToStdString().c_str());
 				origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
 				setMultipliers(orgr, orgg, orgb);
-				bthresh->SetFloatValue(atof(p[4]));
+				bthresh->SetFloatValue(atof(p[4].ToStdString().c_str()));
 				ob->Enable(true);
 				ob->SetValue(true);
 				bluethres->SetValue(true);
 			}
 			else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
-				orgr = atof(p[0]);
-				orgg = atof(p[1]);
-				orgb = atof(p[2]);
+				orgr = atof(p[0].ToStdString().c_str());
+				orgg = atof(p[1].ToStdString().c_str());
+				orgb = atof(p[2].ToStdString().c_str());
 				origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",orgr, orgg, orgb));
 				setMultipliers(orgr, orgg, orgb);
 				ob->Enable(true);
@@ -261,24 +261,24 @@ class WhiteBalancePanel: public PicProcPanel
 					cb->SetValue(true);
 				}
 				else if (p[0] == "patch") {
-					patx = atoi(p[1]);
-					paty = atoi(p[2]);
-					patrad = atof(p[3]);
+					patx = atoi(p[1].ToStdString().c_str());
+					paty = atoi(p[2].ToStdString().c_str());
+					patrad = atof(p[3].ToStdString().c_str());
 					patch->SetLabel(wxString::Format("x:%d y:%d r:%0.1f",patx, paty, patrad));
 					pb->Enable(true);
 					pb->SetValue(true);
 				}
 				else if (p[0] == "bluethreshold") {
-					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[1]), atof(p[2]), atof(p[3])));
-					setMultipliers(atof(p[1]), atof(p[2]), atof(p[3]));
-					bthresh->SetFloatValue(atof(p[4]));
+					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[1].ToStdString().c_str()), atof(p[2].ToStdString().c_str()), atof(p[3].ToStdString().c_str())));
+					setMultipliers(atof(p[1].ToStdString().c_str()), atof(p[2].ToStdString().c_str()), atof(p[3].ToStdString().c_str()));
+					bthresh->SetFloatValue(atof(p[4].ToStdString().c_str()));
 					ob->Enable(true);
 					ob->SetValue(true);
 					bluethres->SetValue(true);
 				}
 				else if (p[0].Find(".") != wxNOT_FOUND) { //float multipliers
-					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[0]), atof(p[1]), atof(p[2])));
-					setMultipliers(atof(p[0]), atof(p[1]), atof(p[2]));
+					origwb->SetLabel(wxString::Format("%0.3f,%0.3f,%0.3f",atof(p[0].ToStdString().c_str()), atof(p[1].ToStdString().c_str()), atof(p[2].ToStdString().c_str())));
+					setMultipliers(atof(p[0].ToStdString().c_str()), atof(p[1].ToStdString().c_str()), atof(p[2].ToStdString().c_str()));
 					ob->Enable(true);
 					ob->SetValue(true);
 				
@@ -487,9 +487,9 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 	wxArrayString p = split(c, ",");
 	if (p.GetCount() > 0) {
 		if (p[0] == "patch"){  //patch, with 'patch' parameter
-			patchx = atof(p[1]);
-			patchy = atof(p[2]);
-			patchrad =  atof(p[3]);
+			patchx = atof(p[1].ToStdString().c_str());
+			patchy = atof(p[2].ToStdString().c_str());
+			patchrad =  atof(p[3].ToStdString().c_str());
 			optype = imgpatch;
 		}
 		else if (p[0] == "auto") { //auto 
@@ -511,22 +511,22 @@ bool PicProcessorWhiteBalance::processPicture(gImage *processdib)
 			}
 		}
 		else if (p[0] == "bluethreshold") {
-			redmult = atof(p[1]);
-			greenmult = atof(p[2]);
-			bluemult = atof(p[3]);
-			bthreshold = atof(p[4]);
+			redmult = atof(p[1].ToStdString().c_str());
+			greenmult = atof(p[2].ToStdString().c_str());
+			bluemult = atof(p[3].ToStdString().c_str());
+			bthreshold = atof(p[4].ToStdString().c_str());
 			optype = bluethreshold;
 		}
 		else if (p[0].Find(".") != wxNOT_FOUND) {  //float multipliers
-			redmult = atof(p[0]);
-			greenmult = atof(p[1]);
-			bluemult = atof(p[2]);
+			redmult = atof(p[0].ToStdString().c_str());
+			greenmult = atof(p[1].ToStdString().c_str());
+			bluemult = atof(p[2].ToStdString().c_str());
 			optype = multipliers;
 		}
 		else if (p[0].IsNumber()) { //patch, without 'patch'
-			patchx = atoi(p[0]);
-			patchy = atoi(p[1]);
-			patchrad =  atof(p[2]);
+			patchx = atoi(p[0].ToStdString().c_str());
+			patchy = atoi(p[1].ToStdString().c_str());
+			patchrad =  atof(p[2].ToStdString().c_str());
 			optype = imgpatch;
 		}
 	}

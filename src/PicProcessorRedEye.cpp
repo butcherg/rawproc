@@ -208,8 +208,8 @@ wxString PicProcessorRedEye::buildCommand()
 void PicProcessorRedEye::setThresholdLimit(wxString params)
 {
 	wxArrayString nbrs = split(params,",");
-	threshold = atof(nbrs[0]);
-	radius = atoi(nbrs[1]);
+	threshold = atof(nbrs[0].ToStdString().c_str());
+	radius = atoi(nbrs[1].ToStdString().c_str());
 	wxString p = params;
 	p.Append(";");
 	p.Append(getPointList());
