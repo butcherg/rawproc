@@ -37,10 +37,10 @@ class CropPane: public wxPanel
 			int indent = atoi(myConfig::getConfig().getValueOrDefault("tool.crop.initialindent","0").c_str());
 
 			wxArrayString p = split(params,",");
-			left = atof(p[0]);
-			top = atof(p[1]);
-			right = atof(p[2]);
-			bottom = atof(p[3]);
+			left = atof(p[0].ToStdString().c_str());
+			top = atof(p[1].ToStdString().c_str());
+			right = atof(p[2].ToStdString().c_str());
+			bottom = atof(p[3].ToStdString().c_str());
 
 			GetSize(&ww, &wh);
 			iw = img->GetWidth();
@@ -106,10 +106,10 @@ class CropPane: public wxPanel
 		void setParams(wxString params)
 		{
 			wxArrayString p = split(params,",");
-			left = atof(p[0]);
-			top = atof(p[1]);
-			right = atof(p[2]);
-			bottom = atof(p[3]);
+			left = atof(p[0].ToStdString().c_str());
+			top = atof(p[1].ToStdString().c_str());
+			right = atof(p[2].ToStdString().c_str());
+			bottom = atof(p[3].ToStdString().c_str());
 			Refresh();
 		}
 
@@ -678,10 +678,10 @@ PicProcessorCrop::PicProcessorCrop(wxString name, wxString command, wxTreeCtrl *
 	}
 	else {
 		wxArrayString p = split(command, ",");
-		float l = atof(p[0]);
-		float t = atof(p[1]);
-		float r = atof(p[2]);
-		float b = atof(p[3]);
+		float l = atof(p[0].ToStdString().c_str());
+		float t = atof(p[1].ToStdString().c_str());
+		float r = atof(p[2].ToStdString().c_str());
+		float b = atof(p[3].ToStdString().c_str());
 
 		if (l > 1.0 | t > 1.0 | r > 1.0 | b > 1.0) {  // old image-sized based crop
 			int iw = getPreviousPicProcessor()->getProcessedPic().getWidth();
