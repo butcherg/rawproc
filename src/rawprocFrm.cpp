@@ -1310,7 +1310,7 @@ void rawprocFrm::MnuSave(wxCommandEvent& event)
 		//	if (wxMessageBox(_("File exists; overwrite?"), _("Confirm"), wxYES_NO, this) == wxNO)
 		//		return;
 			
-			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname);
+			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname.ToStdString().c_str());
 			
 			if (filetype == FILETYPE_UNKNOWN) {
 				wxMessageBox(_("Error: invalid file type"));
@@ -1419,18 +1419,18 @@ void rawprocFrm::MnuSave(wxCommandEvent& event)
 				if (dib->getProfile()) {
 					if (profile) {
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
-						result = dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+						result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()), profile, intent);
 					}
 					else {
 						//wxMessageBox(wxString::Format(_("No CMS profile file found, saving with the assigned internal color profile...")));
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s with working profile..."),fname));
-						result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+						result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()));
 					}
 				}
 				else {
 					//wxMessageBox(wxString::Format(_("No internal working profile found, saving without a color profile...")));
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
-					result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+					result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()));
 				}
 			//}
 			//else {
@@ -1455,7 +1455,7 @@ void rawprocFrm::MnuSave(wxCommandEvent& event)
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving thumbnail %s..."),fname));
 					gImage thumbdib = *dib;
 					ApplyOps(thumbdib, thumbparams);
-					thumbdib.saveImageFile(thumb.GetFullPath());
+					thumbdib.saveImageFile(thumb.GetFullPath().ToStdString().c_str());
 				}					
 			}
 
@@ -1494,7 +1494,7 @@ void rawprocFrm::MnusaveAs1009Click(wxCommandEvent& event)
 			if (wxMessageBox(_("File exists; overwrite?"), _("Confirm"), wxYES_NO, this) == wxNO)
 				return;
 			
-			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname);
+			GIMAGE_FILETYPE filetype = gImage::getFileNameType(fname.ToStdString().c_str());
 			
 			if (filetype == FILETYPE_UNKNOWN) {
 				wxMessageBox(_("Error: invalid file type"));
@@ -1603,18 +1603,18 @@ void rawprocFrm::MnusaveAs1009Click(wxCommandEvent& event)
 				if (dib->getProfile()) {
 					if (profile) {
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s converting to color profile %s, rendering intent %s..."),fname, profilepath.GetFullName(), intentstr));
-						result = dib->saveImageFile(fname, std::string(configparams.c_str()), profile, intent);
+						result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()), profile, intent);
 					}
 					else {
 						wxMessageBox(wxString::Format(_("No CMS profile file found, saving with the assigned internal color profile...")));
 						WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s with working profile..."),fname));
-						result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+						result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()));
 					}
 				}
 				else {
 					wxMessageBox(wxString::Format(_("No internal working profile found, saving without a color profile...")));
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving %s without a color profile..."),fname));
-					result = dib->saveImageFile(fname, std::string(configparams.c_str()));
+					result = dib->saveImageFile(fname.ToStdString().c_str(), std::string(configparams.c_str()));
 				}
 			//}
 			//else {
@@ -1639,7 +1639,7 @@ void rawprocFrm::MnusaveAs1009Click(wxCommandEvent& event)
 					WxStatusBar1->SetStatusText(wxString::Format(_("Saving thumbnail %s..."),fname));
 					gImage thumbdib = *dib;
 					ApplyOps(thumbdib, thumbparams);
-					thumbdib.saveImageFile(thumb.GetFullPath());
+					thumbdib.saveImageFile(thumb.GetFullPath().ToStdString().c_str());
 				}					
 			}
 
