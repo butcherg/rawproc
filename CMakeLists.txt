@@ -15,7 +15,6 @@ project(rawproc VERSION 1.4.0 LANGUAGES CXX C)
 string(TIMESTAMP BUILDDATE)
 
 add_compile_options(-ggdb -DVERSION="${CMAKE_PROJECT_VERSION}"  -DBUILDDATE="${BUILDDATE}")
-add_link_options(-mwindows)
 
 add_executable(rawproc src/rawprocApp.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
 add_executable(img src/img.cpp ) #$<TARGET_OBJECTS:gimage> $<TARGET_OBJECTS:gimage_proc> $<TARGET_OBJECTS:util>)
@@ -645,6 +644,7 @@ if(LENSFUN_DBUPDATE)
 endif(LENSFUN_DBUPDATE)
 
 if(WIN32)
+	add_link_options(-mwindows)
 	target_link_libraries(rawproc wsock32 ws2_32 psapi)
 	target_link_libraries(img wsock32 ws2_32 psapi)
 	target_link_libraries(exif wsock32 ws2_32 psapi)
