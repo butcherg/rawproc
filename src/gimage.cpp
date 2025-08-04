@@ -5536,7 +5536,7 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
-	printf("gImage::ApplyLensCorrection: %s\n", Stats().c_str());  fflush(stdout);
+	//printf("gImage::ApplyLensCorrection: %s\n", Stats().c_str());  fflush(stdout);
 	if (ldb == NULL) {
 		return GIMAGE_LF_NO_DATABASE;
 	}
