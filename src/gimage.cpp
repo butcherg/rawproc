@@ -152,6 +152,34 @@ using namespace half_float::literal;
 #define SCALE_CURVE 256.0
 #endif
 
+std::vector<std::string> gimage_error_str =
+{
+	"GIMAGE_OK",
+	"GIMAGE_EXCEPTION",
+	"GIMAGE_UNSUPPORTED_PIXELFORMAT",
+	"GIMAGE_UNSUPPORTED_FILEFORMAT",
+	
+	"GIMAGE_APPLYCOLORSPACE_BADPROFILE",
+	"GIMAGE_APPLYCOLORSPACE_BADINPUTPROFILE",
+	"GIMAGE_APPLYCOLORSPACE_BADOUTPUTPROFILE",
+	"GIMAGE_APPLYCOLORSPACE_BADINTENT_INPUT",
+	"GIMAGE_APPLYCOLORSPACE_BADINTENT_OUTPUT",
+	"GIMAGE_APPLYCOLORSPACE_BADTRANSFORM",
+	
+	"GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM",
+	
+	"GIMAGE_LF_NO_DATABASE",
+	"GIMAGE_LF_WRONG_FORMAT",
+	"GIMAGE_LF_CAMERA_NOT_FOUND",
+	"GIMAGE_LF_LENS_NOT_FOUND",
+	"GIMAGE_LF_BAD_DIB",
+	
+	"GIMAGE_EXIV2_METADATAWRITE_FAILED",
+	"GIMAGE_EXIFTOOL_METADATAREAD_FAILED",
+	
+	"GIMAGE_GMIC_ERROR"
+};
+
 inline int sqr(const int x) { return x*x; }
 
 const char * gImageVersion()
@@ -984,6 +1012,9 @@ GIMAGE_ERROR gImage::getLastError()
 
 std::string gImage::getLastErrorMessage()
 {
+	
+	return gimage_error_str[lasterror];
+/*	
 	if (lasterror == GIMAGE_OK) return "GIMAGE_OK";
 	if (lasterror == GIMAGE_EXCEPTION) return "GIMAGE_EXCEPTION";
 	if (lasterror == GIMAGE_UNSUPPORTED_PIXELFORMAT) return "GIMAGE_UNSUPPORTED_PIXELFORMAT";
@@ -999,6 +1030,7 @@ std::string gImage::getLastErrorMessage()
 	if (lasterror == GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM) return "GIMAGE_ASSIGNCOLORSPACE_BADTRANSFORM";
 	if (lasterror == GIMAGE_GMIC_ERROR) return lasterrormsg;
 	return "(none)";
+*/
 }
 
 
@@ -5035,6 +5067,7 @@ PIXTYPE gImage::getR(float x, float y)
 {
 	unsigned xi = unsigned (x);
 	unsigned yi = unsigned (y);
+	unsigned long l = image.size()-1;
 	if (xi >= w || yi >= h)
 			return (PIXTYPE) 0;
 		
@@ -5047,6 +5080,7 @@ PIXTYPE gImage::getR(float x, float y)
 		float norm = 0.0;
 		float sum = 0.0;
 		long p = (long (ys) * w + long (xs));
+		if (p >= l) p=l;
 		
 		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
 			for (; ys <= ye; ys += 1.0)
@@ -5098,9 +5132,12 @@ PIXTYPE gImage::getR(float x, float y)
 	else if (lensfun_interp_method == FILTER_BILINEAR) {
 		unsigned dx = unsigned (x - trunc (x));
 		unsigned dy = unsigned (y - trunc (y));
-
+		
 		long p0 = yi * w + xi;
 		long p1 = p0 + w;
+		
+		if (p0 >= l) p0=l-1;
+		if (p1 >= l) p1=l-1;
 		
 		float k1, k2;
 		k1 =  image[p0].r + dx * image[p0+1].r - image[p0].r; 
@@ -5109,6 +5146,7 @@ PIXTYPE gImage::getR(float x, float y)
 	}
 	else {  //default to nearest neighbor:
 		unsigned pos = yi * w + xi;
+		if (pos >= l) pos = l;
 		return image[pos].r;
 	}
 }
@@ -5117,6 +5155,7 @@ PIXTYPE gImage::getG(float x, float y)
 {
 	unsigned xi = unsigned (x);
 	unsigned yi = unsigned (y);
+	unsigned long l = image.size()-1;
 	if (xi >= w || yi >= h)
 			return (PIXTYPE) 0;
 		
@@ -5129,6 +5168,7 @@ PIXTYPE gImage::getG(float x, float y)
 		float norm = 0.0;
 		float sum = 0.0;
 		long p = (long (ys) * w + long (xs));
+		if (p >= l) p=l;
 		
 		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
 			for (; ys <= ye; ys += 1.0)
@@ -5182,6 +5222,9 @@ PIXTYPE gImage::getG(float x, float y)
 
 		long p0 = yi * w + xi;
 		long p1 = p0 + w;
+		
+		if (p0 >= l) p0=l-1;
+		if (p1 >= l) p1=l-1;
 		
 		float k1, k2;
 		k1 =  image[p0].g + dx * image[p0+1].g - image[p0].g; 
@@ -5190,6 +5233,7 @@ PIXTYPE gImage::getG(float x, float y)
 	}
 	else {  //default to nearest neighbor:
 		unsigned pos = yi * w + xi;
+		if (pos >= l) pos = l;
 		return image[pos].g;
 	}
 }
@@ -5198,6 +5242,7 @@ PIXTYPE gImage::getB(float x, float y)
 {
 	unsigned xi = unsigned (x);
 	unsigned yi = unsigned (y);
+	unsigned long l = image.size()-1;
 	if (xi >= w || yi >= h)
 			return (PIXTYPE) 0;
 
@@ -5210,6 +5255,7 @@ PIXTYPE gImage::getB(float x, float y)
 		float norm = 0.0;
 		float sum = 0.0;
 		long p = (long (ys) * w + long (xs));
+		if (p >= l) p=l;
 		
 		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
 			for (; ys <= ye; ys += 1.0)
@@ -5264,6 +5310,9 @@ PIXTYPE gImage::getB(float x, float y)
 		long p0 = yi * w + xi;
 		long p1 = p0 + w;
 		
+		if (p0 >= l) p0=l-1;
+		if (p1 >= l) p1=l-1;
+		
 		float k1, k2;
 		k1 =  image[p0].b + dx * image[p0+1].b - image[p0].b; 
 		k1 =  image[p1].b + dx * image[p1+1].b - image[p1].b;
@@ -5271,6 +5320,7 @@ PIXTYPE gImage::getB(float x, float y)
 	}
 	else {  //default to nearest neighbor:
 		unsigned pos = yi * w + xi;
+		if (pos >= l) pos = l;
 		return image[pos].b;
 	}
 }
@@ -5279,6 +5329,7 @@ pix gImage::getRGB(float x, float y)
 {
 	unsigned xi = unsigned (x);
 	unsigned yi = unsigned (y);
+	unsigned long l = image.size()-1;
 	if (xi >= w || yi >= h)
 			return nullpix;
 
@@ -5291,6 +5342,9 @@ pix gImage::getRGB(float x, float y)
 		float norm = 0.0;
 		pix sum; sum.r = 0.0; sum.g = 0.0; sum.b = 0.0;
 		long p = (long (ys) * w + long (xs));
+		
+		if (p >= w*h) p=w*h-1;
+		if (p >= l) p=l;
 		
 		if (xs >= 0 && ys >= 0 && xe < w && ye < h)
 			for (; ys <= ye; ys += 1.0)
@@ -5354,6 +5408,9 @@ pix gImage::getRGB(float x, float y)
 		long p0 = yi * w + xi;
 		long p1 = p0 + w;
 		
+		if (p0 >= l ) p0 = l-1;
+		if (p1 >= l) p1 = l-1;
+		
 		float k1, k2;
 		pix out;
 		
@@ -5373,6 +5430,7 @@ pix gImage::getRGB(float x, float y)
 	}
 	else {  //default to nearest neighbor:
 		unsigned pos = yi * w + xi;
+		if(pos >= w*h) pos=w*h;
 		return image[pos];
 	}
 }
@@ -5478,7 +5536,10 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
-	if (ldb == NULL) return GIMAGE_LF_NO_DATABASE;
+	printf("gImage::ApplyLensCorrection: %s\n", Stats().c_str());  fflush(stdout);
+	if (ldb == NULL) {
+		return GIMAGE_LF_NO_DATABASE;
+	}
 	int ModifyFlags = modops;
 	initInterpolation(algo);
 	
@@ -5558,6 +5619,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	//unsigned h = dib->getHeight();
 
 	if (ModifyFlags & LF_MODIFY_VIGNETTING) {  //#1
+		//printf("gImage::ApplyLensCorrection: VIG (%d,%d)\n", w, h);  fflush(stdout);
 		pix * newimg = getImageDataRaw();
 		bool ok = true;
 
@@ -5569,6 +5631,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	}
 
 	if ((ModifyFlags & LF_MODIFY_DISTORTION) & (ModifyFlags & LF_MODIFY_TCA)) { //both #2 and #3
+		//printf("gImage::ApplyLensCorrection: DIST+TCA (%d,%d)\n", w, h);  fflush(stdout);
 		gImage olddib(*this);
 		pix * newimg = getImageDataRaw();
 		bool ok = true;
@@ -5595,6 +5658,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 	else {  //#2, or #3
 	
 		if (ModifyFlags & LF_MODIFY_DISTORTION) {  //#2
+			//printf("gImage::ApplyLensCorrection: DIST (%d,%d)\n", w, h);  fflush(stdout);
 			gImage olddib(*this);
 			pix * newimg = getImageDataRaw();
 			bool ok = true;
@@ -5616,6 +5680,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 		}
 	
 		if (ModifyFlags & LF_MODIFY_TCA) {  //#3
+			printf("gImage::ApplyLensCorrection: TCA (%d,%d)\n", w, h);  fflush(stdout);
 			gImage olddib(*this);
 			pix * newimg = getImageDataRaw();
 			bool ok = true;
@@ -5643,7 +5708,6 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 #else
 	mod->Destroy();
 #endif
-
 	return GIMAGE_OK;
 }
 

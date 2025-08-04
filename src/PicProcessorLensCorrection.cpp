@@ -467,6 +467,8 @@ if (!processingenabled) return true;
 
 	std::map<std::string,std::string> params;
 	std::string pstr = getParams().ToStdString();
+	
+	//printf("PicProcessorLensCorrection::processPicture:params: %s\n",pstr.c_str()); fflush(stdout);
 
 	if (!pstr.empty())
 		params = parse_lenscorrection(std::string(pstr));
