@@ -128,7 +128,7 @@ void CurvePane::mouseMoved(wxMouseEvent& event)
 		pos = event.GetPosition();
 		pos.x = pos.x-m;
 		pos.y = h-m-pos.y;
-		if (selectedCP.x > -1.0) {
+		if (selectedCP.x > -1.0) {  //there's a selected point
 			c.deletepoint(selectedCP.x, selectedCP.y);
 			selectedCP.x -= mouseCP.x - (double) pos.x;
 			selectedCP.y -= mouseCP.y - (double) pos.y;

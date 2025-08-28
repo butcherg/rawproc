@@ -150,14 +150,25 @@ void Curve::sortpoints()
 	while (!done);
 }
 
+
 void Curve::setpoints ()
 {
 	X.clear(); Y.clear();
 	sortpoints();
+	
+	//shape the curve out of the lower endpoint, also keeps the point list size >=2
+	X.push_back(-255.0);
+	Y.push_back(-255.0);
+	
 	for (unsigned int i=0; i<controlpts.size(); i++) {
 		X.push_back(controlpts[i].x);
 		Y.push_back(controlpts[i].y);
 	}
+	
+	//shape the curve out of the upper endpoint, also keeps the point list size >=2
+	X.push_back(510.0);
+	Y.push_back(510.0);
+	
 	s.set_points(X,Y, tk::spline::cspline); //linear, cspline_hermite
 }
 
