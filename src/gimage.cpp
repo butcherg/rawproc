@@ -6913,14 +6913,14 @@ GIMAGE_ERROR gImage::insertMetadata(std::string filename, cmsHPROFILE profile, b
 		cmsUInt32Number iccprofilesize;
 		makeICCProfile(profile, iccprofile, iccprofilesize);
 		Exiv2::DataBuf iccprof((Exiv2::byte *) iccprofile, iccprofilesize);
-		image->setIccProfile(iccprof);
+		image->setIccProfile(std::move(iccprof));
 		delete [] iccprofile;
 	}
 	
 	try {
 		image->writeMetadata();
 	}
-	catch (Exiv2::AnyError& e) {
+	catch (Exiv2::Error& e) {
 		return GIMAGE_EXIV2_METADATAWRITE_FAILED;
 	}
 
@@ -6959,7 +6959,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 					case Exiv2::signedLong:
 					case Exiv2::unsignedLongLong:
 					case Exiv2::signedLongLong:
-						imgdata[name] = tostr((unsigned short) exifData[*it].toLong());
+						imgdata[name] = tostr((unsigned short) exifData[*it].toInt64());
 						break;
 					case Exiv2::asciiString:
 					case Exiv2::date:
@@ -6971,7 +6971,7 @@ std::map<std::string,std::string> gImage::loadMetadata(const char * filename)
 			}
 		}
 	}
-	catch (Exiv2::AnyError& e) {
+	catch (Exiv2::Error& e) {
 		imgdata["Error"] = "Metadata read failure.";
 		return imgdata;
 	}
@@ -7003,9 +7003,9 @@ GIMAGE_ERROR gImage::getMetadata(std::string filename)
 	 
 	char * prof;
 	if (image->iccProfileDefined()) {
-		prof = new char[image->iccProfile()->size_]; 
-		memcpy(prof, image->iccProfile()->pData_, image->iccProfile()->size_);
-		setProfile(prof, image->iccProfile()->size_);
+		prof = new char[image->iccProfile().size()]; 
+		memcpy(prof, (const void *) &image->iccProfile().c_data, image->iccProfile().size());
+		setProfile(prof, image->iccProfile().size());
 	}
 
 	return GIMAGE_OK;
