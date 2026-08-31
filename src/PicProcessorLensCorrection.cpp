@@ -52,7 +52,7 @@ class LensCorrectionPanel: public PicProcPanel
 
 			int uselenscorrection = atoi(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.camera.enable","0").c_str());
 
-			wxArrayString parms = split(params, ";");
+			
 
 			enablebox = new wxCheckBox(this, LENSCORRECTIONENABLE, _("lenscorrection:"));
 			enablebox->SetValue(true);
@@ -91,33 +91,48 @@ class LensCorrectionPanel: public PicProcPanel
 			
 			lcmode = LENSCORRECTIONLENSFUN;  // default if no mode
 
-			for (int i=0; i<parms.GetCount(); i++) {
-				wxArrayString nameval = split(parms[i], "=");
-				if (nameval[0] == "mode") {
-					if (nameval[1] == "camera") 
-						lcmode = LENSCORRECTIONCAMERA;
-				}
-				if (nameval[0] == "camera") {
-					cam->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
-				}
-				if (nameval[0] == "lens") {
-					lens->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
-				}
-				if (nameval[0] == "ops") {
-					wxArrayString ops = split(nameval[1],",");
-					for (int j=0; j<ops.GetCount(); j++) {
-						if (ops[j] == "ca") ca->SetValue(true);
-						if (ops[j] == "vig") vig->SetValue(true);
-						if (ops[j] == "dist") dist->SetValue(true);
-						if (ops[j] == "autocrop") crop->SetValue(true);
+			if(params.Contains("mode")) {
+				wxArrayString parms = split(params, ";");
+				for (int i=0; i<parms.GetCount(); i++) {
+					wxArrayString nameval = split(parms[i], "=");
+					if (nameval[0] == "mode") {
+						if (nameval[1] == "camera") 
+							lcmode = LENSCORRECTIONCAMERA;
 					}
+					if (nameval[0] == "camera") {
+						cam->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
+					}
+					if (nameval[0] == "lens") {
+						lens->SetValue(wxString(de_underscore(std::string(nameval[1].c_str())).c_str()));
+					}
+					if (nameval[0] == "ops") {
+						wxArrayString ops = split(nameval[1],",");
+						for (int j=0; j<ops.GetCount(); j++) {
+							if (ops[j] == "ca") ca->SetValue(true);
+							if (ops[j] == "vig") vig->SetValue(true);
+							if (ops[j] == "dist") dist->SetValue(true);
+							if (ops[j] == "autocrop") crop->SetValue(true);
+						}
+					}
+					if (nameval[0] == "algo") {
+						algo->SetStringSelection(nameval[1]);
+					}
+					//if (nameval[0] == "geometry") {
+					//	geom->SetStringSelection(nameval[1]);
+					//}
 				}
-				if (nameval[0] == "algo") {
-					algo->SetStringSelection(nameval[1]);
+			}
+			else {  //positional
+				wxArrayString parms = split(params, ",");
+				for (int i=0; i<parms.GetCount(); i++) {
+					if (parms[i] == "dist") dist->SetValue(true);
+					else if (parms[i] == "vig") vig->SetValue(true);
+					else if (parms[i] == "ca") ca->SetValue(true);
+					else if (parms[i] == "autocrop") crop->SetValue(true);
+					else if (parms[i] == "nearest") algo->SetStringSelection("nearest");
+					else if (parms[i] == "bilinear") algo->SetStringSelection("bilinear");
+					else if (parms[i] == "lanczos3") algo->SetStringSelection("lanczos3");
 				}
-				//if (nameval[0] == "geometry") {
-				//	geom->SetStringSelection(nameval[1]);
-				//}
 			}
 
 			wxString altcam = cam->GetValue();
@@ -204,6 +219,8 @@ class LensCorrectionPanel: public PicProcPanel
 			Bind(wxEVT_CHECKBOX, &LensCorrectionPanel::onEnable, this, LENSCORRECTIONENABLE);
 			Bind(wxEVT_CHAR_HOOK, &LensCorrectionPanel::OnKey,  this);
 			Thaw();
+			
+			processLC();
 		}
 
 		void onEnable(wxCommandEvent& event)
@@ -317,6 +334,8 @@ class LensCorrectionPanel: public PicProcPanel
 				q->setParams(cmd);
 				q->processPic();
 			}
+			
+			
 		}
 
 		void onButton(wxCommandEvent& event)
@@ -459,7 +478,7 @@ int PicProcessorLensCorrection::getModifications()
 
 bool PicProcessorLensCorrection::processPicture(gImage *processdib) 
 {
-if (!processingenabled) return true;
+	if (!processingenabled) return true;
 	
 	((wxFrame*) m_display->GetParent())->SetStatusText(_("lenscorrection..."));
 	bool ret = true;
@@ -468,10 +487,11 @@ if (!processingenabled) return true;
 	std::map<std::string,std::string> params;
 	std::string pstr = getParams().ToStdString();
 	
-	//printf("PicProcessorLensCorrection::processPicture:params: %s\n",pstr.c_str()); fflush(stdout);
+	//printf("PicProcessorLensCorrection::processPicture...(%s) ", pstr.c_str()); fflush(stdout);
 
 	if (!pstr.empty())
 		params = parse_lenscorrection(std::string(pstr));
+	//printf("parsed... "); fflush(stdout);
 
 	if (params.find("error") != params.end()) {
 		wxMessageBox(params["error"]);
@@ -483,7 +503,7 @@ if (!processingenabled) return true;
 	}
 	else { 
 		result = process_lenscorrection(*dib, params);
-		
+		//printf("processed... "); fflush(stdout);
 		if (result.find("error") != result.end()) {
 			wxMessageBox(wxString(result["error"]));
 			ret = false;
@@ -493,7 +513,7 @@ if (!processingenabled) return true;
 			m_display->SetModified(true);
 			if ((myConfig::getConfig().getValueOrDefault("tool.all.log","0") == "1") || 
 				(myConfig::getConfig().getValueOrDefault("tool.lenscorrection.log","0") == "1"))
-					log(wxString::Format(_("tool=resize,%s,imagesize=%dx%d,threads=%s,time=%s"),
+					log(wxString::Format(_("tool=lenscorrection,%s,imagesize=%dx%d,threads=%s,time=%s"),
 						params["mode"].c_str(),
 						dib->getWidth(), 
 						dib->getHeight(),
@@ -502,6 +522,7 @@ if (!processingenabled) return true;
 					);
 		}
 	}
+	//printf("done.\n"); fflush(stdout);
 
 	dirty=false;
 	((wxFrame*) m_display->GetParent())->SetStatusText("");

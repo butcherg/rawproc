@@ -5550,7 +5550,7 @@ int gImage::lensfunAvailableModifications(lfDatabase * ldb, std::string camera, 
 
 GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOMETRY geometry, RESIZE_FILTER algo,  int threadcount, std::string camera, std::string lens)
 {
-	//printf("gImage::ApplyLensCorrection: %s\n", Stats().c_str());  fflush(stdout);
+	Stats();  //????????  Seems to block something with enough delay to allow image to be processed the first time...
 	if (ldb == NULL) {
 		return GIMAGE_LF_NO_DATABASE;
 	}
@@ -5694,7 +5694,7 @@ GIMAGE_ERROR gImage::ApplyLensCorrection(lfDatabase * ldb, int modops, LENS_GEOM
 		}
 	
 		if (ModifyFlags & LF_MODIFY_TCA) {  //#3
-			printf("gImage::ApplyLensCorrection: TCA (%d,%d)\n", w, h);  fflush(stdout);
+			//printf("gImage::ApplyLensCorrection: TCA (%d,%d)\n", w, h);  fflush(stdout);
 			gImage olddib(*this);
 			pix * newimg = getImageDataRaw();
 			bool ok = true;
