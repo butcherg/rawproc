@@ -863,9 +863,9 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 				else if (p[i] == "dist") pmap["ops"] += "dist,";
 				else if (p[i] == "autocrop") pmap["ops"] += "autocrop,";
 			
-				else if (p[i] == "nearest") pmap["algo"] = "nearest,";
-				else if (p[i] == "bilinear") pmap["algo"] = "bilinear,";
-				else if (p[i] == "lanczos3") pmap["algo"] = "lanczos3,";
+				else if (p[i] == "nearest") pmap["algo"] = "nearest";
+				else if (p[i] == "bilinear") pmap["algo"] = "bilinear";
+				else if (p[i] == "lanczos3") pmap["algo"] = "lanczos3";
 			
 				else if (p[i] == "reticlinear") pmap["geometry"] = "reticlinear";
 				else if (p[i] == "fisheye") pmap["geometry"] = "fisheye";
@@ -874,7 +874,7 @@ std::map<std::string,std::string> parse_lenscorrection(std::string paramstring)
 				else if (p[i] == "orthographic") pmap["geometry"] = "orthographic";
 				else if (p[i] == "stereographic") pmap["geometry"] = "stereographic";
 				else if (p[i] == "equisolid") pmap["geometry"] = "equisolid";
-				else if (p[i] == "thoby") pmap["geometry"] = "thoby,";
+				else if (p[i] == "thoby") pmap["geometry"] = "thoby";
 				else {
 					pmap["error"] = string_format("lenscorrection:ParseError - unrecognized parameter: %s",p[i].c_str()); 
 					return pmap;
