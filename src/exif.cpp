@@ -58,7 +58,8 @@ int main(int argc, char * argv[])
 	}
 
 	for (i = optind; i < argc; i++) {
-		std::map<std::string,std::string> imgdata =  gImage::loadMetadata(argv[i]);
+		//std::map<std::string,std::string> imgdata =  gImage::loadMetadata(argv[i]);
+		std::map<std::string,std::string> imgdata =  gImage::getInfo(argv[i]);
 		if (showfilename) {
 			printf ("%s: ", argv[i]);
 			if (alltags) printf("\n");

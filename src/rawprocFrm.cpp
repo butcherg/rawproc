@@ -1441,9 +1441,9 @@ void rawprocFrm::MnuSave(wxCommandEvent& event)
 				wxMessageBox("Error: Unsupported format.");
 				return;
 			}
-			if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
-				wxMessageBox("Image saved, but metadata insertion failed.");
-			}
+			//if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
+			//	wxMessageBox("Image saved, but metadata insertion failed.");
+			//}
 			
 			pic->SetModified(false);
 			
@@ -1625,9 +1625,9 @@ void rawprocFrm::MnusaveAs1009Click(wxCommandEvent& event)
 				wxMessageBox("Error: Unsupported format.");
 				return;
 			}
-			if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
-				wxMessageBox("Image saved, but metadata insertion failed.");
-			}
+			//if (result == GIMAGE_EXIV2_METADATAWRITE_FAILED) {
+			//	wxMessageBox("Image saved, but metadata insertion failed.");
+			//}
 			
 			pic->SetModified(false);
 			

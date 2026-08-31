@@ -119,7 +119,7 @@ enum GIMAGE_ERROR {
 	GIMAGE_LF_LENS_NOT_FOUND,
 	GIMAGE_LF_BAD_DIB,
 	
-	GIMAGE_EXIV2_METADATAWRITE_FAILED,
+	//GIMAGE_EXIV2_METADATAWRITE_FAILED,
 	GIMAGE_EXIFTOOL_METADATAREAD_FAILED,
 	
 	GIMAGE_GMIC_ERROR
@@ -367,7 +367,7 @@ class gImage
 		static gImage loadTIFF(const char * filename, std::string params);
 		static gImage loadPNG(const char * filename, std::string params);
 		static gImage loadImageFile(const char * filename, std::string params);
-		static std::map<std::string,std::string> loadMetadata(const char * filename);
+		//static std::map<std::string,std::string> loadMetadata(const char * filename);
 		
 		//Used to find and load lens correction parameters for given camera models:
 		GIMAGE_ERROR loadLensCorrectionMetadata(std::string filename);
@@ -408,8 +408,8 @@ class gImage
 		
 		int doRedRing(unsigned px, unsigned py, unsigned offset, double threshold);
 
-		GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
-		GIMAGE_ERROR getMetadata(std::string filename);
+		//GIMAGE_ERROR insertMetadata(std::string filename, cmsHPROFILE profile=NULL, bool excludeexif=false);
+		//GIMAGE_ERROR getMetadata(std::string filename);
 		
 
 

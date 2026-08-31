@@ -253,15 +253,15 @@ bool _checkJPEG(const char *filename)
 	return false;
 }
 
-/*
+
 bool _loadJPEGInfo(const char *filename, 
 			unsigned *width, 
 			unsigned *height, 
 			unsigned *numcolors, 
-			std::map<std::string,std::string> &info)
-//			std::string params="",
-//			char ** iccprofile=NULL, 
-//			unsigned  *icclength=0)
+			std::map<std::string,std::string> &info,
+			std::string params="",
+			char ** iccprofile=NULL, 
+			unsigned  *icclength=0)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -292,7 +292,9 @@ bool _loadJPEGInfo(const char *filename,
 		if (marker->marker == JPEG_APP0+1) parse_APP1marker(marker->data-2, marker->data_length, info);
 		marker = marker->next;
 	}
-
+	
+//don't need for info...
+/*
 	if (read_icc_profile (&cinfo, &buffer, &len)) {
 		*iccprofile = new char[len];
 		memcpy(*iccprofile, buffer, len);
@@ -303,7 +305,7 @@ bool _loadJPEGInfo(const char *filename,
 		*iccprofile = NULL;
 		*icclength = 0;
 	}
-
+*/
 	*width = cinfo.image_width;
 	*height = cinfo.image_height;
 	*numcolors = cinfo.output_components;
@@ -312,7 +314,7 @@ bool _loadJPEGInfo(const char *filename,
 
 	return true;
 }
-*/
+
 
 char * _loadJPEG(const char *filename, 
 			unsigned *width, 
@@ -348,26 +350,25 @@ char * _loadJPEG(const char *filename,
 
 	jpeg_read_header(&cinfo, TRUE);
 
-//	jpeg_marker_struct * marker = cinfo.marker_list;
-//	std::map<std::string,std::string> imageinfo;
+	jpeg_marker_struct * marker = cinfo.marker_list;
+	std::map<std::string,std::string> imageinfo;
 
-/*
+
 	while (marker != NULL) {
 		parse_APP1marker(marker->data-2, marker->data_length, info);
 		marker = marker->next;
 	}
-
-	if (read_icc_profile (&cinfo, &buffer, &len)) {
+	
+	if (jpeg_read_icc_profile(&cinfo, &buffer, &len)) {
 		*iccprofile = new char[len];
 		memcpy(*iccprofile, buffer, len);
 		free(buffer);
 		*icclength = len;
 	}
 	else {
-*/
 		*iccprofile = NULL;
 		*icclength = 0;
-//	}
+	}
 
 	jpeg_start_decompress(&cinfo);
 
@@ -469,7 +470,7 @@ bool _writeJPEG(const char *filename,
 
 	jpeg_start_compress(&cinfo, TRUE);
 
-/*
+
 	//$ <li><b>excludeexif</b>: Applies to JPEG and PNG output, if present, output image doesn't include metadata</li><br>
 	if (p.find("excludeexif") == p.end()) {
 		marker =  construct_APP1marker(info, &markerlength);
@@ -481,7 +482,7 @@ bool _writeJPEG(const char *filename,
 	if (p.find("excludeicc") == p.end()) {
 		if (iccprofile) write_icc_profile (&cinfo, (const JOCTET *) iccprofile, iccprofilelength);
 	}
-*/
+
 
 	row_stride = cinfo.image_width * cinfo.input_components;
 	dst = (JSAMPROW) imagedata;
