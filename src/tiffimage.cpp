@@ -145,7 +145,6 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			dst += stride;
 		}
 		
-/*
 		uint32_t read_dir_offset; uint32_t count;
 		float fval;
 		uint16_t * sval;
@@ -158,9 +157,6 @@ char * _loadTIFF(const char *filename, unsigned *width, unsigned *height, unsign
 			}
 			else printf("TIFFReadEXIFDirectory failed\n"); fflush(stdout);
 		}
-		else printf("No EXIF metadata directory found in this TIFF.\n");
-		fflush(stdout);
-*/
 		
 		*width = w;
 		*height = h;
@@ -233,8 +229,17 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			img+=scanlinesize;
 		}
 
-/*
+		//Following code for writing the photo EXIF values comes from https://libtiff.gitlab.io/libtiff/functions/TIFFCustomDirectory.html
+
+		//Set the tag for the custom directory with a “dummy” value in order to get the tag reserved. 
 		uint64_t exif_offset = 0;
+		TIFFSetField(tif, TIFFTAG_GPSIFD, exif_offset);  //saves a place in the file for the exif_offset
+		
+		//Save current TIFF-directory to file. Otherwise, it will be lost. Remember also the number of the current directory:
+		TIFFWriteDirectory(tif);  //write what's already been added...
+		uint64_t dirNum = TIFFCurrentDirectory(tif);  //..and save the directory number for later
+		
+		//Create the EXIF TIFF-directory and set its fields.
 		if (TIFFCreateEXIFDirectory(tif) == 0) {
 			TIFFSetField(tif, EXIFTAG_EXPOSURETIME, atof(info["ExposureTime"].c_str()));
 			TIFFSetField(tif, EXIFTAG_FNUMBER, atof(info["FNumber"].c_str()));
@@ -243,16 +248,18 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 			TIFFSetField(tif, EXIFTAG_FOCALLENGTH, atof(info["FocalLength"].c_str()));
 		}
 		
+		//Write custom directory to file. The offset to that directory in the file is returned in exif_offset.
 		if (TIFFWriteCustomDirectory(tif, &exif_offset) != 1) {
 			printf("Failed to write EXIF directory data."); fflush(stdout);
 			TIFFClose(tif);
 			return 1;
 		}
 		
-		TIFFSetDirectory(tif, 0); 
+		//Reload the first directory (i.e. the original TIFF directory). Apparently, this reads the data back from file.
+		TIFFSetDirectory(tif, dirNum);
+		
+		//Set the correct offset value of the custom directory IFD tag and save that changes to file.
 		TIFFSetField(tif, TIFFTAG_EXIFIFD, exif_offset);
-*/
-
 		TIFFWriteDirectory( tif );
 
 		(void) TIFFClose(tif);
