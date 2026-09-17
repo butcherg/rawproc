@@ -4030,10 +4030,13 @@ bool gImage::ApplyHLRecover(int threadcount)
 	float ** blue = RT_malloc(w, h);
 
 	float chmax[3] = {0.0, 0.0, 0.0};
+	float rw = 0; float gw = 0; float bw = 0;
+	float rb = 65535.f; float gb = 65535.f; float bb = 65535.f;
 
 	#pragma omp parallel num_threads(threadcount)
 	{
 		float ra = 0; float ga = 0; float ba = 0;
+		
 	
 		#pragma omp for 
 		for (unsigned y=0; y<h; y++) {
@@ -4046,6 +4049,14 @@ bool gImage::ApplyHLRecover(int threadcount)
 				if (ra < red[y][x])   ra = red[y][x];
 				if (ga < green[y][x]) ga = green[y][x];
 				if (ba < blue[y][x])  ba = blue[y][x];
+				
+				if (rb < red[y][x]) rb = red[y][x];
+				if (gb < green[y][x]) gb = green[y][x];
+				if (bb < blue[y][x]) bb = blue[y][x];
+				
+				if (rw < red[y][x]) rw = red[y][x];
+				if (gw < green[y][x]) gw = green[y][x];
+				if (bw < blue[y][x]) bw = blue[y][x];
 			}
 		}
 
@@ -4062,11 +4073,12 @@ bool gImage::ApplyHLRecover(int threadcount)
 	//float clippoint = atof(getInfoValue("Libraw.Maximum").c_str()) / 65536.0;
 	float clippoint = 65535.0;
 	if (camwb.size() >= 3) {
-		clmax[0] = clippoint * atof(camwb[0].c_str());
-		clmax[1] = clippoint * atof(camwb[1].c_str());
-		clmax[2] = clippoint * atof(camwb[2].c_str());
+		clmax[0] = (rw - rb) * atof(camwb[0].c_str());
+		clmax[1] = (gw - gb) * atof(camwb[1].c_str());
+		clmax[2] = (bw - bb) * atof(camwb[2].c_str());
 	}
 	else return false;
+	
 
 	//printf("chmax[0]:%f chmax[1]:%f chmax[2]:%f\nclmax[0]:%f clmax[1]:%f clmax[2]:%f\n\n",chmax[0],chmax[1],chmax[2],clmax[0],clmax[1],clmax[2]); fflush(stdout);
 
