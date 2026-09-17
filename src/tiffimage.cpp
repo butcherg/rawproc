@@ -258,7 +258,7 @@ bool _writeTIFF(const char *filename, char *imagedata, unsigned width, unsigned 
 		//Reload the first directory (i.e. the original TIFF directory). Apparently, this reads the data back from file.
 		TIFFSetDirectory(tif, dirNum);
 		
-		//Set the correct offset value of the custom directory IFD tag and save that changes to file.
+		//Set the correct offset value of the custom directory IFD tag and save those changes to file.
 		TIFFSetField(tif, TIFFTAG_EXIFIFD, exif_offset);
 		TIFFWriteDirectory( tif );
 
